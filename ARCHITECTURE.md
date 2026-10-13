@@ -85,20 +85,20 @@ Each content type's card controls are declared in `app/components/canvas/element
 
 Supabase Postgres with row-level security. Queue workers use the service role.
 
-| Table             | Purpose                                                             |
-| ----------------- | ------------------------------------------------------------------- |
-| `projects`        | Canvas (as OSML), project store and generation snapshots            |
-| `canvas_versions` | Autosaved history of those columns                                  |
-| `jobs`            | Async generation jobs: `pending → processing → completed \| failed` |
-| `provider_keys`   | One row per user and provider: vault id, last four, status          |
-| `conversations`   | One Sloppy conversation per project                                 |
-| `messages`        | Its turns                                                           |
+| Table             | Purpose                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projects`        | Canvas (as OSML), project store and generation snapshots                                                                                           |
+| `canvas_versions` | Autosaved history of those columns                                                                                                                 |
+| `jobs`            | Async generation jobs: `pending → processing → completed \| failed`, with `cost_usd` once completed. A hosted LLM call books a `completed` row too |
+| `provider_keys`   | One row per user and provider: vault id, last four, status                                                                                         |
+| `conversations`   | One Sloppy conversation per project                                                                                                                |
+| `messages`        | Its turns                                                                                                                                          |
 
 Generated assets live in Vercel Blob as public CDN URLs.
 
 ## Auth
 
-`proxy.ts` refreshes the Supabase session on each request. `withApiAccess` guards `/api/v1/*` (a session plus the `api_access` grant). `withSession` guards every other signed-in route, including BYOK.
+`proxy.ts` refreshes the Supabase session on each request. `withApiAccess` guards `/api/v1/*` (a session plus the `api_access` grant); the hosted routes that spend use `withHostedBudget`, which also refuses a user over their monthly budget. `withSession` guards every other signed-in route, including BYOK.
 
 ## Adding things
 
