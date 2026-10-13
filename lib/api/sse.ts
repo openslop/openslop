@@ -15,22 +15,17 @@ export function createSSEStreamResponse<T>(
 	label: string,
 ): Response {
 	const encoder = new TextEncoder();
-	// A client that leaves stops the reading, not the generator, so its tail still runs.
-	let cancelled = false;
 	const stream = new ReadableStream({
 		async start(controller) {
 			try {
 				for await (const chunk of chunks) {
-					if (!cancelled) controller.enqueue(encoder.encode(formatSSE(chunk)));
+					controller.enqueue(encoder.encode(formatSSE(chunk)));
 				}
-				if (!cancelled) controller.close();
+				controller.close();
 			} catch (error) {
 				logger.error(error, `${label} stream error`);
 				controller.error(error);
 			}
-		},
-		cancel() {
-			cancelled = true;
 		},
 	});
 	return new Response(stream, { headers: SSE_HEADERS });
