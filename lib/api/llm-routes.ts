@@ -17,17 +17,16 @@ export const createLLMRouteHandler = <TPicked extends ModelRef>(
 		label: "LLM generation",
 		handle: async ({ user, input }) => {
 			const llm = await family.providerFor(user.id, "llm", input);
-			const recordSpend = family.recordSpend(user.id, input);
 			const params = vendorParams("llm", omit(input, "stream", "projectId"));
 			if (input.stream)
 				return createSSEStreamResponse(
 					(async function* () {
-						await recordSpend(yield* llm.stream(params));
+						await family.recordSpend(user.id, input, yield* llm.stream(params));
 					})(),
 					"LLM",
 				);
 			const { output, costUsd } = await llm.generate(params);
-			await recordSpend(costUsd);
+			await family.recordSpend(user.id, input, costUsd);
 			return NextResponse.json(output);
 		},
 	});
@@ -45,7 +44,7 @@ export const createAgentRouteHandler = <TPicked extends ModelRef>(
 				...input,
 				message,
 				userId: user.id,
-				recordSpend: family.recordSpend(user.id, input),
+				recordSpend: (costUsd) => family.recordSpend(user.id, input, costUsd),
 				llm: () => family.providerFor(user.id, "llm", input),
 				model: modelEntry("llm", input).id,
 			});

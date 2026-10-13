@@ -36,7 +36,8 @@ export type RouteFamily<TPicked extends ModelRef> = {
 	recordSpend: (
 		userId: string,
 		picked: TPicked,
-	) => (costUsd: number) => Promise<unknown>;
+		costUsd: number,
+	) => Promise<unknown>;
 };
 
 export const HOSTED: RouteFamily<ModelRef> = {
@@ -47,7 +48,7 @@ export const HOSTED: RouteFamily<ModelRef> = {
 	providerFor: async (_userId, type, picked) =>
 		hostedProviderFor(type, picked.model),
 	// LLM calls stream instead of queueing, so each is booked as a finished job.
-	recordSpend: (userId, picked) => (costUsd) =>
+	recordSpend: (userId, picked, costUsd) =>
 		createJob({
 			userId,
 			connectorType: "llm",
@@ -64,7 +65,7 @@ export const BYOK: RouteFamily<BYOKModelRef> = {
 	model: byokModel,
 	providerFor: (userId, type, picked) =>
 		byokProviderFor(userId, picked.provider, type),
-	recordSpend: () => async () => {},
+	recordSpend: async () => {},
 };
 
 const isByokPick = (picked: ModelRef): picked is BYOKModelRef =>
