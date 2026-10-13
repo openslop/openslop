@@ -6,7 +6,7 @@ import { createJobPollHandler } from "../asset-routes";
 import { HOSTED } from "../route-families";
 import { bodySchema, hostedModel } from "../generation-schema";
 import {
-	createApiRouteHandler,
+	createHostedRouteHandler,
 	createSessionFormRouteHandler,
 	createSessionRouteHandler,
 } from "../route-handler";
@@ -18,6 +18,7 @@ vi.mock("../jobs", () => ({
 	enqueueJob: vi.fn(),
 	getJob: (...args: unknown[]) => mockGetJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
+	spentSince: async () => 0,
 }));
 
 vi.mock("../logger", () => ({
@@ -50,9 +51,9 @@ function makeRequest(body: unknown) {
 const schema = bodySchema(hostedModel("image"), {});
 
 function makeHandler(
-	handle?: Parameters<typeof createApiRouteHandler>[0]["handle"],
+	handle?: Parameters<typeof createHostedRouteHandler>[0]["handle"],
 ) {
-	return createApiRouteHandler({
+	return createHostedRouteHandler({
 		schema,
 		label: "TestRoute",
 		handle:
@@ -62,7 +63,7 @@ function makeHandler(
 	});
 }
 
-describe("createApiRouteHandler", () => {
+describe("createHostedRouteHandler", () => {
 	it("returns 401 when the user is not authenticated", async () => {
 		mockGetUser.mockResolvedValue(null);
 		const handle = vi.fn(async () => NextResponse.json({}));

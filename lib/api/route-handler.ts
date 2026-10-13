@@ -54,7 +54,6 @@ function routeHandler(authTier: AuthTier, parse: ParseSource) {
 	};
 }
 
-export const createApiRouteHandler = routeHandler(withApiAccess, parseBody);
 export const createHostedRouteHandler = routeHandler(
 	withHostedBudget,
 	parseBody,

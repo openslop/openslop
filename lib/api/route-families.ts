@@ -10,7 +10,6 @@ import { hostedProviderFor } from "./providers/openslop";
 import {
 	createApiParamRouteHandler,
 	createApiQueryRouteHandler,
-	createApiRouteHandler,
 	createHostedRouteHandler,
 	createSessionParamRouteHandler,
 	createSessionQueryRouteHandler,
@@ -24,7 +23,7 @@ import {
  * connector type; nothing else about it varies.
  */
 export type RouteFamily<TPicked extends ModelRef> = {
-	createHandler: typeof createApiRouteHandler;
+	createHandler: typeof createHostedRouteHandler;
 	createQueryHandler: typeof createApiQueryRouteHandler;
 	createParamHandler: typeof createApiParamRouteHandler;
 	model: (type: ConnectorType) => z.ZodType<TPicked>;
