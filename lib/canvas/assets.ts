@@ -12,7 +12,7 @@ import type { AssetElement, AssetType, CanvasElement } from "./types";
 
 export const REFERENCE_URLS_ATTR = "images";
 
-// Plugins read assets on every edit, once per element; read each canvas once.
+// Slate replaces the children array on every edit, so the array keys one revision.
 export const getAssets = memoize((nodes: readonly unknown[]): AssetElement[] =>
 	nodes.filter(isAssetElement),
 );
