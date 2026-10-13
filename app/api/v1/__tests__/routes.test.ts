@@ -157,7 +157,7 @@ describe("API routes", () => {
 
 			expect(res.status).toBe(402);
 			expect((await res.json()).error).toMatch(
-				/^You've used your \$100\.00 generation budget\. Your credits refresh on November 14\.$/,
+				/^You've used your generation budget\. Your credits refresh on November 14\. Questions, or think this is a mistake\? Email hi@openslop\.ai or message us on Discord: https:\/\/discord\.gg\/zeP5482ced$/,
 			);
 			expect(mockCreateJob).not.toHaveBeenCalled();
 		});

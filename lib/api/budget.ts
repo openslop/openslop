@@ -36,7 +36,6 @@ export function monthlyBudget(user: User, now = new Date()) {
 	};
 }
 
-const USD = new Intl.NumberFormat("en", { style: "currency", currency: "USD" });
 const DAY = new Intl.DateTimeFormat("en", {
 	month: "long",
 	day: "numeric",
@@ -48,6 +47,6 @@ export async function refuseOverBudget(user: User): Promise<Response | null> {
 	const spent = await spentSince(user.id, MANAGED_PROVIDER, period.start);
 	if (spent < usd) return null;
 	return paymentRequired(
-		`You've used your ${USD.format(usd)} generation budget. Your credits refresh on ${DAY.format(period.end)}.`,
+		`You've used your generation budget. Your credits refresh on ${DAY.format(period.end)}. Questions, or think this is a mistake? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced`,
 	);
 }
