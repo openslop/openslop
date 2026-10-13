@@ -13,7 +13,7 @@ export function scrollTopFor(
 	return Math.max(0, node.top - container.top + scrollTop - slack);
 }
 
-export function scrollableAncestor(node: Element): Element | null {
+export function scrollableAncestor(node: Element): HTMLElement | null {
 	for (let el = node.parentElement; el; el = el.parentElement) {
 		const { overflowY } = getComputedStyle(el);
 		if (overflowY === "auto" || overflowY === "scroll") return el;

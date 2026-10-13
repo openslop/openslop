@@ -189,7 +189,10 @@ function EditorSidebarComponent() {
 							{current.label}
 						</h2>
 					</div>
-					<div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 [scrollbar-gutter:stable]">
+					<div
+						key={active}
+						className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 [scrollbar-gutter:stable]"
+					>
 						<current.Panel />
 					</div>
 					{current.Footer && (

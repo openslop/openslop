@@ -1,9 +1,10 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
+import { useStickToBottom } from "use-stick-to-bottom";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "@/components/ui/icon";
-import { useStickToBottom } from "@/lib/components/use-stick-to-bottom";
+import { scrollableAncestor } from "@/lib/components/scroll-into-container";
 import { cn } from "@/lib/utils";
 import { trailingAssistant } from "@/lib/agent/messages";
 import type { SloppyMessage } from "@/lib/agent/types";
@@ -85,7 +86,15 @@ function Transcript({
 export function SloppyPanel() {
 	const messages = useSloppyMessages();
 	const { loading } = useSloppy();
-	const { ref, stuck, follow } = useStickToBottom<HTMLDivElement>();
+	const { scrollRef, contentRef, isAtBottom, scrollToBottom } =
+		useStickToBottom({ initial: "instant" });
+	const ref = useCallback(
+		(element: HTMLDivElement | null) => {
+			contentRef(element);
+			scrollRef(element && scrollableAncestor(element));
+		},
+		[contentRef, scrollRef],
+	);
 
 	return (
 		<div
@@ -97,15 +106,19 @@ export function SloppyPanel() {
 			{messages === null ? (
 				<TranscriptSkeleton />
 			) : (
-				<Transcript messages={messages} working={loading} follow={follow} />
+				<Transcript
+					messages={messages}
+					working={loading}
+					follow={scrollToBottom}
+				/>
 			)}
 			<div className="sticky bottom-2 flex h-0 justify-center">
-				{!stuck && (
+				{!isAtBottom && (
 					<Button
 						variant="secondary"
 						size="xs"
 						className="absolute bottom-0 animate-fadeInUp shadow-elevation-3"
-						onClick={follow}
+						onClick={() => scrollToBottom()}
 					>
 						<ChevronDown />
 						Jump to latest
