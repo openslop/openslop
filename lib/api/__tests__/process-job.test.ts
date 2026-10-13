@@ -63,13 +63,15 @@ describe("processQueuedJob", () => {
 		expect(mockUpdateJob).not.toHaveBeenCalled();
 	});
 
-	it("marks the job processing then completed with the handler result", async () => {
+	it("marks the job processing then completed with the handler result and cost", async () => {
 		const job = pendingJob();
 		mockLoadJobForProcessing.mockResolvedValue(job);
 		const handler = {
-			process: vi
-				.fn()
-				.mockResolvedValue({ kind: "completed", result: { url: "u" } }),
+			process: vi.fn().mockResolvedValue({
+				kind: "completed",
+				result: { url: "u" },
+				costUsd: 0.18,
+			}),
 		};
 		mockGetJobHandler.mockReturnValue(handler);
 
@@ -82,6 +84,7 @@ describe("processQueuedJob", () => {
 		expect(mockUpdateJob).toHaveBeenNthCalledWith(2, "job-1", {
 			status: "completed",
 			result: { url: "u" },
+			cost_usd: 0.18,
 		});
 	});
 

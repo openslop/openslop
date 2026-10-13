@@ -7,7 +7,7 @@ import { BaseProvider, type WithMetadata } from "../base";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 
 type TestParams = { prompt: string; size?: number };
-type TestRawResult = { data: string } & WithMetadata;
+type TestRawResult = { data: string; costUsd: number } & WithMetadata;
 
 class TestProvider extends BaseProvider<TestParams, TestRawResult> {
 	protected readonly blobConfig = { type: "test", provider: "mock" };
@@ -42,7 +42,7 @@ describe("BaseProvider", () => {
 	});
 
 	it("calls _generate then store (upload)", async () => {
-		provider.generateFn.mockResolvedValue({ data: "abc" });
+		provider.generateFn.mockResolvedValue({ data: "abc", costUsd: 0.01 });
 
 		const result = await provider.generate({ prompt: "hello" });
 
@@ -60,14 +60,16 @@ describe("BaseProvider", () => {
 			],
 			undefined,
 		);
-		expect(result).toEqual(
+		expect(result.output).toEqual(
 			expect.objectContaining({ provider: "mock", result: { output: "url" } }),
 		);
+		expect(result.costUsd).toBe(0.01);
 	});
 
 	it("forwards metadata to upload", async () => {
 		provider.generateFn.mockResolvedValue({
 			data: "x",
+			costUsd: 0.01,
 			metadata: { durationSec: 5 },
 		});
 
@@ -91,7 +93,7 @@ describe("BaseProvider", () => {
 	});
 
 	it("propagates upload errors", async () => {
-		provider.generateFn.mockResolvedValue({ data: "ok" });
+		provider.generateFn.mockResolvedValue({ data: "ok", costUsd: 0.01 });
 		vi.mocked(AssetBundle.upload).mockRejectedValueOnce(
 			new Error("upload failed"),
 		);

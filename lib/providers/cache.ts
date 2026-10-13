@@ -8,6 +8,7 @@ import {
 import { z } from "zod";
 import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
+import type { Priced } from "./base";
 import { embedText } from "./embed";
 
 type AudioPrompt = { prompt: string; durationSeconds?: number };
@@ -17,8 +18,8 @@ type CacheMatch = { score?: number; metadata?: RecordMetadata };
 export type AudioPromptCache = {
 	readThrough(
 		params: AudioPrompt,
-		produce: () => Promise<BundleResponse>,
-	): Promise<BundleResponse>;
+		produce: () => Promise<Priced<BundleResponse>>,
+	): Promise<Priced<BundleResponse>>;
 };
 
 const SIMILARITY_THRESHOLD = 0.8;
@@ -88,8 +89,8 @@ class PineconeAudioCache implements AudioPromptCache {
 
 	async readThrough(
 		params: AudioPrompt,
-		produce: () => Promise<BundleResponse>,
-	): Promise<BundleResponse> {
+		produce: () => Promise<Priced<BundleResponse>>,
+	): Promise<Priced<BundleResponse>> {
 		const vector = await embedText(params.prompt).catch(
 			logged("[pinecone-cache] read failed; falling through"),
 		);
@@ -98,13 +99,13 @@ class PineconeAudioCache implements AudioPromptCache {
 		const cached = await this.lookup(vector, params.durationSeconds).catch(
 			logged("[pinecone-cache] read failed; falling through"),
 		);
-		if (cached) return cached;
+		if (cached) return { output: cached, costUsd: 0 };
 
-		const result = await produce();
-		await this.store(vector, result, params.prompt).catch(
+		const produced = await produce();
+		await this.store(vector, produced.output, params.prompt).catch(
 			logged("[pinecone-cache] write failed"),
 		);
-		return result;
+		return produced;
 	}
 
 	private async lookup(vector: number[], durationSeconds?: number) {

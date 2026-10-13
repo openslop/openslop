@@ -79,7 +79,7 @@ describe("AnthropicLLM", () => {
 			const provider = new AnthropicLLM("test-key");
 			const result = await provider.generate({ prompt: "hi", model: MODEL_ID });
 
-			expect(result).toEqual({
+			expect(result.output).toEqual({
 				text: "Hello world",
 				model: "claude-opus-5",
 				usage: { inputTokens: 10, outputTokens: 5 },
@@ -108,7 +108,7 @@ describe("AnthropicLLM", () => {
 
 			await new AnthropicLLM("test-key").generate({
 				prompt: "test",
-				model: "custom",
+				model: MODEL_ID,
 				systemPrompt: "You are helpful",
 				maxTokens: 100,
 				thinkingLevel: "low",
@@ -202,6 +202,61 @@ describe("AnthropicLLM", () => {
 				}),
 			).rejects.toThrow(/media type "image\/svg\+xml" is not supported/);
 			expect(calls).toHaveLength(0);
+		});
+	});
+
+	describe("cost", () => {
+		it("prices a generation from the model's token rates", async () => {
+			respondWith("Hello world");
+
+			const { costUsd } = await new AnthropicLLM("test-key").generate({
+				prompt: "hi",
+				model: MODEL_ID,
+			});
+
+			expect(costUsd).toBeCloseTo((10 * 5 + 5 * 25) / 1_000_000);
+		});
+
+		it("prices cache reads at a tenth and cache writes at a quarter more", () => {
+			const { costOf } = new AnthropicLLM("test-key").agentModel(MODEL_ID);
+
+			const costUsd = costOf({
+				inputTokens: 300,
+				inputTokenDetails: {
+					noCacheTokens: 100,
+					cacheReadTokens: 100,
+					cacheWriteTokens: 100,
+				},
+				outputTokens: 0,
+				outputTokenDetails: { textTokens: 0, reasoningTokens: 0 },
+				totalTokens: 300,
+			});
+
+			expect(costUsd).toBeCloseTo(((100 + 10 + 125) * 5) / 1_000_000);
+		});
+
+		it("fails loudly for a model it has no price for", async () => {
+			respondWith("ok");
+
+			await expect(
+				new AnthropicLLM("test-key").generate({
+					prompt: "hi",
+					model: "custom",
+				}),
+			).rejects.toThrow('No price for Anthropic model "custom"');
+		});
+
+		it("returns what a stream cost once it ends", async () => {
+			streamWith(["Hi"]);
+
+			const stream = new AnthropicLLM("test-key").stream({
+				prompt: "hi",
+				model: MODEL_ID,
+			});
+			let next = await stream.next();
+			while (!next.done) next = await stream.next();
+
+			expect(next.value).toBeCloseTo((10 * 5 + 5 * 25) / 1_000_000);
 		});
 	});
 

@@ -229,8 +229,8 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.result.audio).toBe("url");
-			expect(result.result.timestamps).toBe("url");
+			expect(result.output.result.audio).toBe("url");
+			expect(result.output.result.timestamps).toBe("url");
 			expect(mockConnect).toHaveBeenCalled();
 			expect(mockClose).toHaveBeenCalled();
 		});
@@ -282,7 +282,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(3);
+			expect(result.output.metadata?.durationSec).toBe(3);
 		});
 
 		it("reports duration even when the model returns no timestamps", async () => {
@@ -300,7 +300,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(4);
+			expect(result.output.metadata?.durationSec).toBe(4);
 		});
 
 		it("throws when the stream yields no audio", async () => {

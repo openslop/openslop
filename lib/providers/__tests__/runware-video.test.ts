@@ -68,6 +68,7 @@ describe("RunwareVideo", () => {
 				duration: 5,
 				outputType: "URL",
 				deliveryMethod: "async",
+				includeCost: true,
 				skipResponse: true,
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
@@ -724,6 +725,7 @@ describe("RunwareVideo", () => {
 				{
 					taskUUID: "job-arr",
 					status: "success",
+					cost: 0.18,
 					videoURL: "https://v.mp4",
 				},
 			]);
@@ -772,7 +774,12 @@ describe("RunwareVideo", () => {
 	describe("poll", () => {
 		it("stamps the completed asset with the duration that was requested", async () => {
 			mockGetResponse.mockResolvedValue([
-				{ taskUUID: "job-1", status: "success", videoURL: "https://r.mp4" },
+				{
+					taskUUID: "job-1",
+					status: "success",
+					cost: 0.18,
+					videoURL: "https://r.mp4",
+				},
 			]);
 
 			const provider = new RunwareVideo("test-key");
@@ -791,6 +798,7 @@ describe("RunwareVideo", () => {
 				{
 					taskUUID: "job-1",
 					status: "success",
+					cost: 0.18,
 					videoURL: "https://result.mp4",
 				},
 			]);
@@ -840,9 +848,40 @@ describe("RunwareVideo", () => {
 			expect(AssetBundle.upload).not.toHaveBeenCalled();
 		});
 
+		it("hands back what the vendor charged for the finished video", async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "success",
+					cost: 0.42,
+					videoURL: "https://r.mp4",
+				},
+			]);
+
+			const poll = await new RunwareVideo("test-key").poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
+
+			expect(poll.kind === "ready" && poll.costUsd).toBe(0.42);
+		});
+
+		it("fails loudly when a finished job reports no cost", async () => {
+			mockGetResponse.mockResolvedValue([
+				{ taskUUID: "job-1", status: "success", videoURL: "https://r.mp4" },
+			]);
+
+			await expect(
+				new RunwareVideo("test-key").poll("job-1", {
+					prompt: "test",
+					model: MODEL,
+				}),
+			).rejects.toThrow("Runware reported no cost for task job-1");
+		});
+
 		it("fails loudly when a job succeeded without a video", async () => {
 			mockGetResponse.mockResolvedValue([
-				{ taskUUID: "job-1", status: "success" },
+				{ taskUUID: "job-1", status: "success", cost: 0.18 },
 			]);
 
 			await expect(

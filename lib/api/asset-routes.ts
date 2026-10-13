@@ -2,14 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { JobPoll } from "@/lib/gateway/base";
 import type { ModelRef } from "@/lib/connectors/types";
-import { stringifyError } from "@/lib/errors";
-import {
-	createJob,
-	enqueueJob,
-	getJob,
-	updateJob,
-	type JobConnectorType,
-} from "./jobs";
+import { enqueueJob, getJob, type JobConnectorType } from "./jobs";
 import { failIfExpired } from "./job-deadline";
 import {
 	AUDIO_FIELDS,
@@ -18,8 +11,10 @@ import {
 	TTS_FIELDS,
 	VIDEO_FIELDS,
 } from "./generation-schema";
+import { admitJob } from "./budget";
 import { notFound } from "./response";
 import type { RouteFamily } from "./route-families";
+import { failJobOnThrow } from "./settle-job";
 
 type AssetBody = ModelRef & { projectId?: string } & Record<string, unknown>;
 
@@ -46,22 +41,14 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 		label,
 		handle: async ({ user, input }) => {
 			const { projectId, ...request } = input;
-			const { id } = await createJob({
-				userId: user.id,
+			const admitted = await admitJob(family, user, type, {
 				projectId,
-				connectorType: type,
 				request,
 			});
-			try {
-				await enqueueJob(id);
-			} catch (error) {
-				await updateJob(id, {
-					status: "failed",
-					error: `Failed to queue job: ${stringifyError(error)}`,
-				});
-				throw error;
-			}
-			return NextResponse.json({ jobId: id, status: "pending" });
+			if (!admitted.ok) return admitted.response;
+			const { jobId } = admitted;
+			await failJobOnThrow(jobId, () => enqueueJob(jobId));
+			return NextResponse.json({ jobId, status: "pending" });
 		},
 	});
 };

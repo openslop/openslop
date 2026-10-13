@@ -20,7 +20,7 @@ export const jobVendorParams = <TReq extends ModelRef>(job: JobRequest<TReq>) =>
 	vendorParams(job.connector_type, job.request);
 
 export type ProcessOutcome<TMeta = Record<string, unknown>> =
-	| { kind: "completed"; result: BundleResponse }
+	| { kind: "completed"; result: BundleResponse; costUsd: number }
 	| { kind: "pending"; metadata: TMeta };
 
 export type TypedJobRow<TReq, TMeta> = Omit<JobRow, "request" | "metadata"> & {

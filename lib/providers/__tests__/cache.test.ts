@@ -29,6 +29,8 @@ const bundle = (audio: string, durationSec?: number): BundleResponse => ({
 	metadata: durationSec == null ? undefined : { durationSec },
 });
 
+const priced = (output: BundleResponse) => ({ output, costUsd: 0.5 });
+
 const row = (url: string, duration: number) => ({
 	score: 0.95,
 	metadata: { url, duration, description: "d" },
@@ -45,14 +47,16 @@ describe("audioPromptCache", () => {
 	it("produces without touching Pinecone when PINECONE_API_KEY is unset", async () => {
 		delete process.env.PINECONE_API_KEY;
 		const { audioPromptCache } = await loadCache();
-		const produce = vi.fn().mockResolvedValue(bundle("https://blob/a.mp3"));
+		const produce = vi
+			.fn()
+			.mockResolvedValue(priced(bundle("https://blob/a.mp3")));
 
 		const result = await audioPromptCache("i", "music").readThrough(
 			{ prompt: "jazz" },
 			produce,
 		);
 
-		expect(result.result.audio).toBe("https://blob/a.mp3");
+		expect(result.output.result.audio).toBe("https://blob/a.mp3");
 		expect(produce).toHaveBeenCalledOnce();
 		expect(mockIndex).not.toHaveBeenCalled();
 		expect(mockEmbed).not.toHaveBeenCalled();
@@ -76,7 +80,8 @@ describe("audioPromptCache", () => {
 			produce,
 		);
 
-		expect(result).toEqual({
+		expect(result.costUsd).toBe(0);
+		expect(result.output).toEqual({
 			id: "https://blob/cached.mp3",
 			type: "music",
 			provider: "pinecone-cache",
@@ -99,7 +104,7 @@ describe("audioPromptCache", () => {
 
 		await audioPromptCache("i", "music").readThrough(
 			{ prompt: "jazz", durationSeconds: 30 },
-			vi.fn().mockResolvedValue(bundle("u")),
+			vi.fn().mockResolvedValue(priced(bundle("u"))),
 		);
 
 		expect(mockEmbed).toHaveBeenCalledWith("jazz");
@@ -110,14 +115,16 @@ describe("audioPromptCache", () => {
 		mockQuery.mockResolvedValue({
 			matches: [{ score: 0.95, metadata: { duration: 5 } }],
 		});
-		const produce = vi.fn().mockResolvedValue(bundle("https://blob/a.mp3", 7));
+		const produce = vi
+			.fn()
+			.mockResolvedValue(priced(bundle("https://blob/a.mp3", 7)));
 
 		const result = await audioPromptCache("i", "music").readThrough(
 			{ prompt: "jazz" },
 			produce,
 		);
 
-		expect(result.result.audio).toBe("https://blob/a.mp3");
+		expect(result.output.result.audio).toBe("https://blob/a.mp3");
 		expect(produce).toHaveBeenCalledOnce();
 		expect(mockUpsert).toHaveBeenCalledWith({
 			records: [
@@ -136,7 +143,7 @@ describe("audioPromptCache", () => {
 	it("produces and stores when nothing matches", async () => {
 		const { audioPromptCache } = await loadCache();
 		mockQuery.mockResolvedValue({ matches: [] });
-		const produce = vi.fn().mockResolvedValue(bundle("u"));
+		const produce = vi.fn().mockResolvedValue(priced(bundle("u")));
 
 		await audioPromptCache("i", "music").readThrough(
 			{ prompt: "jazz" },
@@ -150,28 +157,28 @@ describe("audioPromptCache", () => {
 	it("falls through a failed read and still stores the result", async () => {
 		const { audioPromptCache } = await loadCache();
 		mockQuery.mockRejectedValue(new Error("pinecone down"));
-		const produce = vi.fn().mockResolvedValue(bundle("u"));
+		const produce = vi.fn().mockResolvedValue(priced(bundle("u")));
 
 		const result = await audioPromptCache("i", "music").readThrough(
 			{ prompt: "jazz" },
 			produce,
 		);
 
-		expect(result.result.audio).toBe("u");
+		expect(result.output.result.audio).toBe("u");
 		expect(mockUpsert).toHaveBeenCalledOnce();
 	});
 
 	it("skips the read and the write when embedding fails", async () => {
 		const { audioPromptCache } = await loadCache();
 		mockEmbed.mockRejectedValue(new Error("openai down"));
-		const produce = vi.fn().mockResolvedValue(bundle("u"));
+		const produce = vi.fn().mockResolvedValue(priced(bundle("u")));
 
 		const result = await audioPromptCache("i", "music").readThrough(
 			{ prompt: "jazz" },
 			produce,
 		);
 
-		expect(result.result.audio).toBe("u");
+		expect(result.output.result.audio).toBe("u");
 		expect(mockQuery).not.toHaveBeenCalled();
 		expect(mockUpsert).not.toHaveBeenCalled();
 	});
@@ -183,10 +190,10 @@ describe("audioPromptCache", () => {
 
 		const result = await audioPromptCache("i", "music").readThrough(
 			{ prompt: "jazz" },
-			vi.fn().mockResolvedValue(bundle("u")),
+			vi.fn().mockResolvedValue(priced(bundle("u"))),
 		);
 
-		expect(result.result.audio).toBe("u");
+		expect(result.output.result.audio).toBe("u");
 	});
 });
 

@@ -22,7 +22,11 @@ export const videoHandler: JobHandler<
 		const upstream = await provider.poll(providerJobId, jobVendorParams(job));
 		switch (upstream.kind) {
 			case "ready":
-				return { kind: "completed", result: upstream.asset };
+				return {
+					kind: "completed",
+					result: upstream.asset,
+					costUsd: upstream.costUsd,
+				};
 			case "failed":
 				throw new Error("Video generation failed");
 			case "pending":

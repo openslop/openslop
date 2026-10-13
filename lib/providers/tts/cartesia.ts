@@ -13,7 +13,7 @@ import {
 } from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
-import { BaseProvider, type WithMetadata } from "../base";
+import { BaseProvider, type RawResult } from "../base";
 import { validateByProbe } from "../validate";
 import { pcmDurationSec, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
@@ -31,7 +31,10 @@ import type {
 type RawTTSResult = {
 	data: Buffer;
 	textTimestamps: TextTimestamp[];
-} & WithMetadata;
+} & RawResult;
+
+/** Cartesia reports no per-request cost, so speech is priced from its published rate. */
+const USD_PER_SECOND = 0.035 / 60;
 
 const SAMPLE_RATE = 44100;
 const ENCODING: RawEncoding = "pcm_f32le";
@@ -242,14 +245,13 @@ export class CartesiaTTS
 				);
 			}
 
+			const spokenSec = pcmDurationSec(pcm.length, STREAMED_FORMAT);
 			return {
 				data: wavFromPcm(pcm, STREAMED_FORMAT),
 				textTimestamps,
+				costUsd: spokenSec * USD_PER_SECOND,
 				// Word timestamps stop at the last word, and may be absent.
-				metadata: {
-					durationSec:
-						pcmDurationSec(pcm.length, STREAMED_FORMAT) + TRAILING_PAUSE_SEC,
-				},
+				metadata: { durationSec: spokenSec + TRAILING_PAUSE_SEC },
 			};
 		} finally {
 			socket.close();

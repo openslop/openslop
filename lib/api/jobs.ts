@@ -9,7 +9,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 const ASSET_QUEUE_TOPIC = "asset-generate";
 
-/** What an asset route queues. LLM turns stream. */
+/** What an asset route queues. */
 export const JOB_CONNECTOR_TYPES = [
 	"image",
 	"music",
@@ -19,6 +19,9 @@ export const JOB_CONNECTOR_TYPES = [
 ] as const;
 
 export type JobConnectorType = (typeof JOB_CONNECTOR_TYPES)[number];
+
+/** Every generation that keeps a job. LLM calls stream, so theirs are never queued. */
+export type MeteredType = JobConnectorType | "llm";
 
 const JobRowSchema = z.object({
 	id: z.string(),
@@ -39,7 +42,7 @@ export type JobRow = z.infer<typeof JobRowSchema>;
 export async function createJob(input: {
 	userId: string;
 	projectId?: string | null;
-	connectorType: JobConnectorType;
+	connectorType: MeteredType;
 	request: Record<string, unknown>;
 }): Promise<{ id: string }> {
 	const supabase = createServiceClient();
@@ -57,6 +60,20 @@ export async function createJob(input: {
 	return { id: data.id };
 }
 
+export async function spentSince(
+	userId: string,
+	provider: string,
+	since: Date,
+): Promise<number> {
+	const { data, error } = await createServiceClient().rpc("spend_since", {
+		p_user_id: userId,
+		p_provider: provider,
+		p_since: since.toISOString(),
+	});
+	if (error) throw new Error(`Failed to read spend: ${error.message}`);
+	return z.coerce.number().parse(data);
+}
+
 export async function getJob(
 	jobId: string,
 	userId: string,
@@ -67,6 +84,7 @@ export async function getJob(
 		.select("*")
 		.eq("id", jobId)
 		.eq("user_id", userId)
+		.in("connector_type", JOB_CONNECTOR_TYPES)
 		.maybeSingle();
 	if (error) throw new Error(`Failed to load job: ${error.message}`);
 	return data ? JobRowSchema.parse(data) : null;
@@ -92,6 +110,7 @@ export async function updateJob(
 		result?: BundleResponse;
 		error?: string;
 		metadata?: Record<string, unknown>;
+		cost_usd?: number;
 	},
 ): Promise<void> {
 	const update = omitBy(patch, isUndefined);

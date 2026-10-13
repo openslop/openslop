@@ -28,13 +28,13 @@ describe("RunwareImage", () => {
 
 	it("generates an image with defaults", async () => {
 		mockImageInference.mockResolvedValue([
-			{ imageBase64Data: "abc123", seed: 1 },
+			{ imageBase64Data: "abc123", cost: 0.02, seed: 1 },
 		]);
 
 		const provider = new RunwareImage("test-key");
 		const result = await provider.generate({ prompt: "a cat", model: MODEL });
 
-		expect(result.result.image).toBe("url");
+		expect(result.output.result.image).toBe("url");
 		expect(mockImageInference).toHaveBeenCalledWith({
 			positivePrompt: "a cat",
 			model: MODEL,
@@ -43,13 +43,16 @@ describe("RunwareImage", () => {
 			outputType: "base64Data",
 			outputFormat: "JPG",
 			numberResults: 1,
+			includeCost: true,
 			referenceImages: undefined,
 		});
 		expect(mockDisconnect).toHaveBeenCalled();
 	});
 
 	it("references the characters' avatars ahead of the other reference images", async () => {
-		mockImageInference.mockResolvedValue([{ imageBase64Data: "abc" }]);
+		mockImageInference.mockResolvedValue([
+			{ imageBase64Data: "abc", cost: 0.02 },
+		]);
 
 		await new RunwareImage("test-key").generate({
 			prompt: "a cat",
@@ -66,7 +69,9 @@ describe("RunwareImage", () => {
 	});
 
 	it("asks for the format it labels the bytes with", async () => {
-		mockImageInference.mockResolvedValue([{ imageBase64Data: "abc" }]);
+		mockImageInference.mockResolvedValue([
+			{ imageBase64Data: "abc", cost: 0.02 },
+		]);
 
 		await new RunwareImage("test-key").generate({
 			prompt: "a cat",
@@ -91,7 +96,9 @@ describe("RunwareImage", () => {
 	});
 
 	it("passes custom dimensions and model", async () => {
-		mockImageInference.mockResolvedValue([{ imageBase64Data: "data" }]);
+		mockImageInference.mockResolvedValue([
+			{ imageBase64Data: "data", cost: 0.02 },
+		]);
 
 		const provider = new RunwareImage("test-key");
 		await provider.generate({

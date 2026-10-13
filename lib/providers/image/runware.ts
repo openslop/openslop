@@ -5,13 +5,13 @@ import {
 	IMAGE_MIME_TYPES,
 	type ImageFormat,
 } from "@/lib/connectors/image/enums";
-import { BaseProvider, type WithMetadata } from "../base";
+import { BaseProvider, type RawResult } from "../base";
 import { characterAvatars } from "@/lib/connectors/characters";
-import { validateRunwareKey, withRunware } from "../runware";
+import { reportedCost, validateRunwareKey, withRunware } from "../runware";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ImageProvider } from "../types";
 
-type RawImageResult = { data: string; format: ImageFormat } & WithMetadata;
+type RawImageResult = { data: string; format: ImageFormat } & RawResult;
 
 const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
 
@@ -59,13 +59,18 @@ export class RunwareImage
 				outputType: "base64Data",
 				outputFormat: RUNWARE_FORMATS[format],
 				numberResults: 1,
+				includeCost: true,
 				...(referenceImages.length > 0 && { referenceImages }),
 			});
 
 			const image = results?.[0];
 			if (!image?.imageBase64Data) throw new Error("No image data returned");
 
-			return { data: image.imageBase64Data, format };
+			return {
+				data: image.imageBase64Data,
+				format,
+				costUsd: reportedCost(image),
+			};
 		});
 	}
 }

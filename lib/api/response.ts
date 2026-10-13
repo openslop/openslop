@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { ApiErrorEnvelope } from "./error-envelope";
 
-function errorResponse(error: string, status: number) {
-	return NextResponse.json<ApiErrorEnvelope>({ error }, { status });
+function errorResponse(error: string, status: number, headers?: HeadersInit) {
+	return NextResponse.json<ApiErrorEnvelope>({ error }, { status, headers });
 }
 
 export function badRequest(message: string) {
@@ -26,4 +26,10 @@ export function forbidden() {
 		"Forbidden, your API access has been revoked. Please contact hi@openslop.ai or post on our Discord server for help.",
 		403,
 	);
+}
+
+export function tooManyRequests(message: string, retryAfterSeconds: number) {
+	return errorResponse(message, 429, {
+		"Retry-After": String(retryAfterSeconds),
+	});
 }

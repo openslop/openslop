@@ -36,8 +36,8 @@ describe("ElevenLabsSFX", () => {
 		const provider = new ElevenLabsSFX("test-key");
 		const result = await provider.generate({ prompt: "boom", model: MODEL });
 
-		expect(result.result.audio).toBe("url");
-		expect(result.metadata?.durationSec).toBe(2);
+		expect(result.output.result.audio).toBe("url");
+		expect(result.output.metadata?.durationSec).toBe(2);
 		expect(mockConvert).toHaveBeenCalledWith({
 			text: "boom",
 			durationSeconds: undefined,

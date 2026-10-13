@@ -164,10 +164,13 @@ describe("voicePreview for a voice the vendor has no preview of", () => {
 		vi.stubGlobal("fetch", fetchMock);
 		getVoice.mockResolvedValue({ ...VOICE, previewUrl: undefined });
 		generate.mockResolvedValue({
-			id: "spoken",
-			type: "tts",
-			provider: "cartesia",
-			result: { audio: "output.wav" },
+			output: {
+				id: "spoken",
+				type: "tts",
+				provider: "cartesia",
+				result: { audio: "output.wav" },
+			},
+			costUsd: 0,
 		});
 		fetchMock.mockResolvedValue(upstream(2));
 	});

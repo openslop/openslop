@@ -7,7 +7,7 @@ import type {
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import type { SloppyMessage } from "@/lib/agent/types";
 
-const { conversations, provider } = vi.hoisted(() => ({
+const { conversations, provider, updateJob } = vi.hoisted(() => ({
 	conversations: {
 		findOrCreateConversation: vi.fn(
 			async (_projectId: string, _userId: string) => "conv-1",
@@ -20,9 +20,11 @@ const { conversations, provider } = vi.hoisted(() => ({
 		),
 	},
 	provider: { agentModel: vi.fn() },
+	updateJob: vi.fn(async (_id: string, _patch: unknown) => {}),
 }));
 
 vi.mock("../conversations", () => conversations);
+vi.mock("../jobs", () => ({ updateJob }));
 
 import type { LLMProvider } from "@/lib/providers/llm/base";
 import { streamAgentTurn } from "../agent-turn";
@@ -90,11 +92,13 @@ async function runTurn(
 		modelId: "test-model",
 		providerOptions: {},
 		cachedPrefix: options.cachedPrefix ?? {},
+		costOf: () => 0.42,
 	});
 
 	const response = await streamAgentTurn({
 		projectId: "p1",
 		userId: "u1",
+		jobId: "job-1",
 		message: options.message ?? asked("make it shorter"),
 		model: options.model ?? "claude-opus-5",
 		llm: async () => provider as unknown as LLMProvider,
@@ -133,6 +137,15 @@ describe("streamAgentTurn", () => {
 			expect.objectContaining({ type: "text-delta", delta: "on it" }),
 		);
 		expect(chunks.at(-1)).toMatchObject({ type: "finish" });
+	});
+
+	it("completes the turn's job with what the model says it cost", async () => {
+		await runTurn(TEXT_TURN);
+
+		expect(updateJob).toHaveBeenCalledWith("job-1", {
+			status: "completed",
+			cost_usd: 0.42,
+		});
 	});
 
 	it("stores the assistant message the step produced", async () => {
