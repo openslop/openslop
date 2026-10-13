@@ -150,12 +150,12 @@ describe("API routes", () => {
 			expect(since).toEqual(new Date("2026-10-14T09:30:00Z"));
 		});
 
-		it("returns 429 once the monthly budget is spent", async () => {
+		it("returns 402 once the monthly budget is spent", async () => {
 			mockSpentSince.mockResolvedValue(100.02);
 			const { POST } = await import("@/app/api/v1/image/route");
 			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
-			expect(res.status).toBe(429);
+			expect(res.status).toBe(402);
 			expect((await res.json()).error).toMatch(
 				/^You've used your \$100\.00 generation budget\. Your credits refresh on November 14\.$/,
 			);
@@ -514,12 +514,12 @@ describe("API routes", () => {
 			});
 		});
 
-		it("returns 429 without calling the model once the budget is spent", async () => {
+		it("returns 402 without calling the model once the budget is spent", async () => {
 			mockSpentSince.mockResolvedValue(100);
 			const { POST } = await import("@/app/api/v1/llm/route");
 			const res = await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
 
-			expect(res.status).toBe(429);
+			expect(res.status).toBe(402);
 			expect(mockLLMGenerate).not.toHaveBeenCalled();
 		});
 
@@ -548,7 +548,7 @@ describe("API routes", () => {
 	});
 
 	describe("POST /api/v1/agent", () => {
-		it("returns 429 before the turn starts once the budget is spent", async () => {
+		it("returns 402 before the turn starts once the budget is spent", async () => {
 			mockSpentSince.mockResolvedValue(120);
 			const { POST } = await import("@/app/api/v1/agent/route");
 			const res = await POST(
@@ -563,7 +563,7 @@ describe("API routes", () => {
 				}),
 			);
 
-			expect(res.status).toBe(429);
+			expect(res.status).toBe(402);
 		});
 	});
 

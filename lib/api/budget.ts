@@ -4,7 +4,7 @@ import { addMonths, differenceInCalendarMonths, isAfter } from "date-fns";
 import { z } from "zod";
 import { MANAGED_PROVIDER } from "@/lib/connectors/provider-catalog";
 import { spentSince } from "./jobs";
-import { tooManyRequests } from "./response";
+import { paymentRequired } from "./response";
 
 const DEFAULT_MONTHLY_BUDGET_USD = 100;
 
@@ -47,7 +47,7 @@ export async function refuseOverBudget(user: User): Promise<Response | null> {
 	const { usd, period } = monthlyBudget(user);
 	const spent = await spentSince(user.id, MANAGED_PROVIDER, period.start);
 	if (spent < usd) return null;
-	return tooManyRequests(
+	return paymentRequired(
 		`You've used your ${USD.format(usd)} generation budget. Your credits refresh on ${DAY.format(period.end)}.`,
 	);
 }

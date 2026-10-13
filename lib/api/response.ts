@@ -28,6 +28,6 @@ export function forbidden() {
 	);
 }
 
-export function tooManyRequests(message: string) {
-	return errorResponse(message, 429);
+export function paymentRequired(message: string) {
+	return errorResponse(message, 402);
 }
