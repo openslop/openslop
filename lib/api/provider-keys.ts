@@ -36,11 +36,10 @@ const ProviderKeyRowSchema = z.object({
 	verified_at: z.string().nullable(),
 	created_at: z.string(),
 });
-const ProviderKeyRowsSchema = z.array(ProviderKeyRowSchema);
 const PROVIDER_KEY_COLUMNS = selectColumns(ProviderKeyRowSchema);
 
 const toRecord = (
-	row: z.infer<typeof ProviderKeyRowsSchema>[number],
+	row: z.infer<typeof ProviderKeyRowSchema>,
 ): ProviderKeyRecord => ({
 	provider: row.provider,
 	last4: row.last4,
@@ -82,7 +81,10 @@ export async function listProviderKeys(
 		.eq("user_id", user.id)
 		.order("created_at", { ascending: true });
 	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);
-	return [hostedKey(user), ...ProviderKeyRowsSchema.parse(data).map(toRecord)];
+	return [
+		hostedKey(user),
+		...z.array(ProviderKeyRowSchema).parse(data).map(toRecord),
+	];
 }
 
 /**

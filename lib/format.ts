@@ -18,7 +18,6 @@ export function truncateMiddle(text: string, maxLength: number): string {
 	].join("…");
 }
 
-/** The noun for a count: "1 change", "2 changes". */
 export function plural(count: number, noun: string): string {
 	return count === 1 ? noun : `${noun}s`;
 }

@@ -7,7 +7,6 @@ import type { SavedProject } from "./saved-project";
 import { extractStoreSnapshot, type ProjectStore } from "./store";
 import { pickThumbnailUrl } from "./thumbnail";
 
-/** The name a project is saved and shown under until the user types one. */
 export const UNTITLED_PROJECT = "Untitled";
 
 /** What the project row stores beside the content, derived from it. */

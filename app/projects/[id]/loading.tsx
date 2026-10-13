@@ -17,7 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SCENES = [3, 2, 4];
 
-/** The lanes a video always has. */
 const LANES: { height: string; clips: [start: number, width: number][] }[] = [
 	{
 		height: LANE_HEIGHT.visual,
