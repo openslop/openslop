@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { RESOLUTIONS } from "./resolutions";
 
 /** Wire contract for `/api/render` and `/api/render/progress`. */
 export const RenderRequest = z.object({
 	inputProps: z.record(z.string(), z.unknown()),
-	scale: z.number().positive().optional(),
+	resolution: z.enum(RESOLUTIONS),
 });
 
 // Both fields are forwarded to AWS as the bucket and key prefix the render is

@@ -2,6 +2,7 @@ import { apiJson, UnreachableError } from "@/lib/clients/http";
 import { POLL_INTERVAL_MS } from "@/lib/providers/poll";
 import { sleep } from "@/lib/utils";
 import type { RenderHandle, RenderProgress } from "./render-api";
+import type { Resolution } from "./resolutions";
 import type { RenderLayout } from "./types";
 
 export type RenderUpdate =
@@ -14,11 +15,11 @@ export type RenderUpdate =
  */
 export async function* runRender(
 	layout: RenderLayout,
-	scale?: number,
+	resolution: Resolution,
 ): AsyncGenerator<RenderUpdate> {
 	const handle = await apiJson<RenderHandle>("/api/render", {
 		method: "POST",
-		body: { inputProps: layout, scale },
+		body: { inputProps: layout, resolution },
 	});
 	yield { status: "rendering", progress: 0 };
 

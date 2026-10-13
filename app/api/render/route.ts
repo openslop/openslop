@@ -7,6 +7,7 @@ import {
 	REGION,
 } from "@/lib/render/lambda-config";
 import { RenderRequest, type RenderHandle } from "@/lib/render/render-api";
+import { renderScale } from "@/lib/render/resolutions";
 import { COMPOSITION_ID } from "@/lib/render/types";
 
 export const POST = createSessionRouteHandler({
@@ -20,7 +21,7 @@ export const POST = createSessionRouteHandler({
 			functionName: getFunctionName(),
 			composition: COMPOSITION_ID,
 			inputProps: input.inputProps,
-			scale: input.scale,
+			scale: renderScale(input.resolution),
 			downloadBehavior: { type: "download", fileName: "video.mp4" },
 		});
 

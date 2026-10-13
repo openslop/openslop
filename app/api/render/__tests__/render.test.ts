@@ -45,13 +45,31 @@ describe("POST /api/render", () => {
 		expect(res.status).toBe(400);
 	});
 
-	it("kicks off a lambda render and returns its identifiers", async () => {
+	it("returns 400 for a resolution outside the presets", async () => {
+		const res = await POST(
+			makeRequest({ inputProps: { scenes: [] }, resolution: "8K" }),
+		);
+
+		expect(res.status).toBe(400);
+		expect(mockRenderMediaOnLambda).not.toHaveBeenCalled();
+	});
+
+	it("returns 400 without a resolution", async () => {
+		const res = await POST(makeRequest({ inputProps: { scenes: [] } }));
+
+		expect(res.status).toBe(400);
+		expect(mockRenderMediaOnLambda).not.toHaveBeenCalled();
+	});
+
+	it("kicks off a lambda render at the preset's scale and returns its identifiers", async () => {
 		mockRenderMediaOnLambda.mockResolvedValue({
 			renderId: "render-1",
 			bucketName: "bucket-1",
 		});
 
-		const res = await POST(makeRequest({ inputProps: { scenes: [] } }));
+		const res = await POST(
+			makeRequest({ inputProps: { scenes: [] }, resolution: "4K" }),
+		);
 
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
@@ -63,6 +81,7 @@ describe("POST /api/render", () => {
 				codec: "h264",
 				functionName: "remotion-render-fn",
 				inputProps: { scenes: [] },
+				scale: 2,
 			}),
 		);
 	});
