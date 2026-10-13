@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Editable, type RenderElementProps } from "slate-react";
 import { toast } from "sonner";
 import { isContentElement } from "@/lib/canvas/guards";
-import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
+import { ELEMENT_CONFIGS } from "../element-configs";
 import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
 import { ElementErrorBoundary } from "../element-error-boundary";
