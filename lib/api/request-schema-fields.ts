@@ -12,7 +12,6 @@ const positiveNumber = z
 	.number({ error: POSITIVE_NUMBER })
 	.positive({ error: POSITIVE_NUMBER });
 
-/** Canvas attributes arrive as strings, so a size may be spelled either way. */
 const optionalPositiveNumber = z
 	.union([z.number(), z.string()])
 	.transform((value) =>

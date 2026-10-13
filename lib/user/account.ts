@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { connectorModelsSchema } from "@/lib/connectors/models";
 
-/** The signed-in account as the app reads it; every sign-in method carries an email. */
 export const AccountSchema = z
 	.object({
 		email: z.string(),

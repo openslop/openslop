@@ -17,7 +17,7 @@ export function UserProvider({
 	children,
 }: {
 	account: Account;
-	/** Read on the server beside the account, so the pickers never open on a guess. */
+	/** Read on the server beside the user, so the pickers never open on a guess. */
 	providerKeys: ProviderKeyRecord[];
 	children: ReactNode;
 }) {
