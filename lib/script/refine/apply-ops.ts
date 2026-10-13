@@ -20,7 +20,6 @@ export type RefineOpResult = { ok: true } | { ok: false; reason: string };
 
 const OK: RefineOpResult = { ok: true };
 
-/** The assets that belong to one character, so they are nothing without its name. */
 const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
 
 export function applyRefineOp(
