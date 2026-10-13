@@ -18,7 +18,6 @@ import {
 	TTS_FIELDS,
 	VIDEO_FIELDS,
 } from "./generation-schema";
-import { refuseOverBudget } from "./budget";
 import { notFound } from "./response";
 import type { RouteFamily } from "./route-families";
 
@@ -46,7 +45,7 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 		schema: bodySchema(family.model(type), fields) as z.ZodType<AssetBody>,
 		label,
 		handle: async ({ user, input }) => {
-			const refused = await refuseOverBudget(family, user);
+			const refused = await family.refuseOverBudget(user);
 			if (refused) return refused;
 			const { projectId, ...request } = input;
 			const { id } = await createJob({

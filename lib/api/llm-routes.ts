@@ -5,7 +5,6 @@ import { parseSloppyMessage } from "@/lib/agent/messages";
 import { modelEntry, vendorParams } from "@/lib/connectors/models";
 import type { ModelRef } from "@/lib/connectors/types";
 import { agentTurnSchema, streamAgentTurn } from "./agent-turn";
-import { refuseOverBudget } from "./budget";
 import { bodySchema, LLM_FIELDS } from "./generation-schema";
 import { createJob } from "./jobs";
 import { badRequest } from "./response";
@@ -29,7 +28,7 @@ export const createLLMRouteHandler = <TPicked extends ModelRef>(
 		schema: bodySchema(family.model("llm"), LLM_FIELDS),
 		label: "LLM generation",
 		handle: async ({ user, input }) => {
-			const refused = await refuseOverBudget(family, user);
+			const refused = await family.refuseOverBudget(user);
 			if (refused) return refused;
 			const llm = await family.providerFor(user.id, "llm", input);
 			const params = vendorParams("llm", omit(input, "stream", "projectId"));
@@ -55,7 +54,7 @@ export const createAgentRouteHandler = <TPicked extends ModelRef>(
 		handle: async ({ user, input }) => {
 			const message = await parseSloppyMessage(input.message);
 			if (!message) return badRequest("message is not a Sloppy message");
-			const refused = await refuseOverBudget(family, user);
+			const refused = await family.refuseOverBudget(user);
 			if (refused) return refused;
 			return streamAgentTurn({
 				...input,

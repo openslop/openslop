@@ -110,6 +110,7 @@ describe("API routes", () => {
 		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({
 			id: "user-1",
+			created_at: "2026-06-14T09:30:00Z",
 			app_metadata: { api_access: true },
 		});
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
@@ -134,32 +135,33 @@ describe("API routes", () => {
 			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
-		it("reads the account's hosted spend since the start of the month", async () => {
+		it("reads the account's hosted spend since its cycle started", async () => {
 			const { POST } = await import("@/app/api/v1/image/route");
 			await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
 			const [userId, provider, since] = mockSpentSince.mock.calls[0] ?? [];
 			expect([userId, provider]).toEqual(["user-1", "openslop"]);
-			expect((since as Date).getUTCDate()).toBe(1);
+			expect(since).toEqual(new Date("2026-06-14T09:30:00Z"));
 		});
 
 		it("returns 429 once the monthly budget is spent", async () => {
-			mockSpentSince.mockResolvedValue(10.02);
+			mockSpentSince.mockResolvedValue(100.02);
 			const { POST } = await import("@/app/api/v1/image/route");
 			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
 			expect(res.status).toBe(429);
 			expect((await res.json()).error).toMatch(
-				/^You've used your \$10\.00 generation budget\. It resets on \w+ 1\.$/,
+				/^You've used your \$100\.00 generation budget\. Your credits refresh on July 14\.$/,
 			);
 			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 
 		it("admits a job on an account whose budget was raised", async () => {
-			mockSpentSince.mockResolvedValue(10.02);
+			mockSpentSince.mockResolvedValue(100.02);
 			mockGetUser.mockResolvedValue({
 				id: "user-1",
-				app_metadata: { api_access: true, monthly_budget_usd: 50 },
+				created_at: "2026-06-14T09:30:00Z",
+				app_metadata: { api_access: true, monthly_budget_usd: 500 },
 			});
 			const { POST } = await import("@/app/api/v1/image/route");
 			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
@@ -170,6 +172,7 @@ describe("API routes", () => {
 		it("returns 500 when the account's budget is malformed", async () => {
 			mockGetUser.mockResolvedValue({
 				id: "user-1",
+				created_at: "2026-06-14T09:30:00Z",
 				app_metadata: { api_access: true, monthly_budget_usd: "lots" },
 			});
 			const { POST } = await import("@/app/api/v1/image/route");
@@ -506,7 +509,7 @@ describe("API routes", () => {
 		});
 
 		it("returns 429 without calling the model once the budget is spent", async () => {
-			mockSpentSince.mockResolvedValue(10);
+			mockSpentSince.mockResolvedValue(100);
 			const { POST } = await import("@/app/api/v1/llm/route");
 			const res = await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
 
@@ -540,7 +543,7 @@ describe("API routes", () => {
 
 	describe("POST /api/v1/agent", () => {
 		it("returns 429 before the turn starts once the budget is spent", async () => {
-			mockSpentSince.mockResolvedValue(12);
+			mockSpentSince.mockResolvedValue(120);
 			const { POST } = await import("@/app/api/v1/agent/route");
 			const res = await POST(
 				makeRequest("/api/v1/agent", {

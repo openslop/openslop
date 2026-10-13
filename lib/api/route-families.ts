@@ -3,7 +3,7 @@ import type { z } from "zod";
 import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import type { ProviderType, Providers } from "@/lib/providers/types";
-import { monthlyBudget, type Budget } from "./budget";
+import { refuseOverBudget } from "./budget";
 import { byokModel, hostedModel, type BYOKModelRef } from "./generation-schema";
 import { byokProviderFor } from "./providers/byok";
 import { hostedProviderFor } from "./providers/openslop";
@@ -32,7 +32,7 @@ export type RouteFamily<TPicked extends ModelRef> = {
 		type: K,
 		picked: TPicked,
 	) => Promise<Providers[K]>;
-	budget: (user: User) => Budget | null;
+	refuseOverBudget: (user: User) => Promise<Response | null>;
 };
 
 export const HOSTED: RouteFamily<ModelRef> = {
@@ -42,7 +42,7 @@ export const HOSTED: RouteFamily<ModelRef> = {
 	model: hostedModel,
 	providerFor: async (_userId, type, picked) =>
 		hostedProviderFor(type, picked.model),
-	budget: monthlyBudget,
+	refuseOverBudget,
 };
 
 export const BYOK: RouteFamily<BYOKModelRef> = {
@@ -52,7 +52,7 @@ export const BYOK: RouteFamily<BYOKModelRef> = {
 	model: byokModel,
 	providerFor: (userId, type, picked) =>
 		byokProviderFor(userId, picked.provider, type),
-	budget: () => null,
+	refuseOverBudget: async () => null,
 };
 
 const isByokPick = (picked: ModelRef): picked is BYOKModelRef =>
