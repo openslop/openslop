@@ -10,7 +10,8 @@ import type { SFXProvider } from "../types";
 
 type SFXRequest = VendorParams<SFXGenerateParams>;
 
-const USD_PER_GENERATION = 0.12;
+/** The Scale plan is $299 for 9,000 generations. */
+const USD_PER_GENERATION = 299 / 9000;
 
 const cache = audioPromptCache(process.env.PINECONE_SFX_INDEX || "sfx", "sfx");
 

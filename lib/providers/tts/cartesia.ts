@@ -33,8 +33,8 @@ type RawTTSResult = {
 	textTimestamps: TextTimestamp[];
 } & RawResult;
 
-/** Cartesia reports no per-request cost, so speech is priced from its published rate. */
-const USD_PER_SECOND = 0.035 / 60;
+/** Cartesia reports no per-request cost; the Scale plan is $299 for 8M characters. */
+const USD_PER_CHARACTER = 299 / 8_000_000;
 
 const SAMPLE_RATE = 44100;
 const ENCODING: RawEncoding = "pcm_f32le";
@@ -245,13 +245,15 @@ export class CartesiaTTS
 				);
 			}
 
-			const spokenSec = pcmDurationSec(pcm.length, STREAMED_FORMAT);
 			return {
 				data: wavFromPcm(pcm, STREAMED_FORMAT),
 				textTimestamps,
-				costUsd: spokenSec * USD_PER_SECOND,
+				costUsd: params.prompt.length * USD_PER_CHARACTER,
 				// Word timestamps stop at the last word, and may be absent.
-				metadata: { durationSec: spokenSec + TRAILING_PAUSE_SEC },
+				metadata: {
+					durationSec:
+						pcmDurationSec(pcm.length, STREAMED_FORMAT) + TRAILING_PAUSE_SEC,
+				},
 			};
 		} finally {
 			socket.close();

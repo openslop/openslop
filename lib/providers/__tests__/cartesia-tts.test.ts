@@ -235,6 +235,23 @@ describe("CartesiaTTS", () => {
 			expect(mockClose).toHaveBeenCalled();
 		});
 
+		it("prices speech by the characters sent, as Cartesia bills it", async () => {
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: Buffer.from([1, 2, 3, 4]) },
+					{ type: "done", done: true },
+				]),
+			);
+
+			const { costUsd } = await new CartesiaTTS("test-key").generate({
+				prompt: "x".repeat(8000),
+				voiceId: "voice-1",
+				model: MODEL,
+			});
+
+			expect(costUsd).toBeCloseTo(0.299);
+		});
+
 		it("stores the streamed chunks as one WAV file", async () => {
 			mockGenerate.mockReturnValue(
 				streamOf([
