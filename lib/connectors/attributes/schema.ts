@@ -70,7 +70,7 @@ export class AttributeSchema {
 	}
 
 	get hidesModel(): boolean {
-		return this.options.hideModel === true;
+		return this.options.hideModel ?? false;
 	}
 
 	get keys(): string[] {
@@ -86,12 +86,12 @@ export class AttributeSchema {
 
 	/** The attributes shown on the element header, in def order. */
 	get badgeAttributes(): Record<string, AttributeSpec> {
-		return this.specsWhere((def) => def.badge === true);
+		return this.specsWhere((def) => def.badge ?? false);
 	}
 
 	/** The attributes shown in the settings popover, in def order. */
 	get settingsAttributes(): Record<string, AttributeSpec> {
-		return this.specsWhere((def) => def.badge !== true && def.hidden !== true);
+		return this.specsWhere((def) => !def.badge && !def.hidden);
 	}
 
 	get allAttributes(): Record<string, AttributeSpec> {

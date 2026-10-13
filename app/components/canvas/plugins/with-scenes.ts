@@ -83,12 +83,9 @@ export const withScenes = (editor: CanvasEditor): CanvasEditor => {
 	const { normalizeNode } = editor;
 
 	editor.normalizeNode = (entry) => {
-		if (entry[1].length === 1) {
-			for (const rule of SCENE_RULES) {
-				if (rule(editor, entry)) return;
-			}
-		}
-
+		const [, path] = entry;
+		if (path.length === 1 && SCENE_RULES.some((rule) => rule(editor, entry)))
+			return;
 		return normalizeNode(entry);
 	};
 

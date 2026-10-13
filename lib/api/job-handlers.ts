@@ -1,5 +1,6 @@
 import type { BundleResponse } from "./asset-bundle";
 import type { VendorParams } from "@/lib/connectors/models";
+import type { Priced } from "@/lib/providers/base";
 import type {
 	ImageGenerateParams,
 	ModelRef,
@@ -17,15 +18,16 @@ import { videoHandler } from "./handlers/video";
 import type { JobConnectorType } from "./jobs";
 
 function assetHandler<TReq extends ModelRef>(
-	providerFor: (
-		job: JobRequest,
-	) => Promise<{ generate(p: VendorParams<TReq>): Promise<BundleResponse> }>,
+	providerFor: (job: JobRequest) => Promise<{
+		generate(p: VendorParams<TReq>): Promise<Priced<BundleResponse>>;
+	}>,
 ): JobHandler<TReq> {
 	return {
-		process: async (job) => ({
-			kind: "completed",
-			result: await (await providerFor(job)).generate(jobVendorParams(job)),
-		}),
+		process: async (job) => {
+			const provider = await providerFor(job);
+			const { output, costUsd } = await provider.generate(jobVendorParams(job));
+			return { kind: "completed", result: output, costUsd };
+		},
 	};
 }
 

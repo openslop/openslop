@@ -18,15 +18,22 @@ vi.mock("@/lib/api/logger", () => ({
 const mockGetUser = vi.fn();
 vi.mock("@/lib/api/auth", () => ({ getUser: () => mockGetUser() }));
 
-const post = async (body: Record<string, unknown>) => {
-	const { POST } = await import("@/app/api/third-party/image/route");
+const mockLLMGenerate = vi.fn();
+vi.mock("@/lib/api/providers/byok", () => ({
+	byokProviderFor: async () => ({ generate: mockLLMGenerate }),
+}));
+
+const postTo = async (route: string, body: Record<string, unknown>) => {
+	const { POST } = await import(`@/app/api/third-party/${route}/route`);
 	return POST(
-		new NextRequest(new URL("http://localhost:3000/api/third-party/image"), {
+		new NextRequest(new URL(`http://localhost:3000/api/third-party/${route}`), {
 			method: "POST",
 			body: JSON.stringify(body),
 		}),
 	);
 };
+
+const post = (body: Record<string, unknown>) => postTo("image", body);
 
 describe("POST /api/third-party/image", () => {
 	beforeEach(() => {
@@ -80,6 +87,29 @@ describe("POST /api/third-party/image", () => {
 		const res = await post({ prompt: "cat", model: "Seedream 5 Lite" });
 
 		expect(res.status).toBe(400);
+		expect(mockCreateJob).not.toHaveBeenCalled();
+	});
+});
+
+describe("POST /api/third-party/llm", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
+	});
+
+	it("books no spend, since the caller pays the vendor directly", async () => {
+		mockLLMGenerate.mockResolvedValue({
+			output: { text: "Hello", model: "claude-sonnet-5" },
+			costUsd: 0.02,
+		});
+
+		const res = await postTo("llm", {
+			prompt: "hi",
+			provider: "anthropic",
+			model: "Claude Sonnet 5",
+		});
+
+		expect(res.status).toBe(200);
 		expect(mockCreateJob).not.toHaveBeenCalled();
 	});
 });

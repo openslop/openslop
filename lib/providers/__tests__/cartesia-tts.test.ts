@@ -229,10 +229,27 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.result.audio).toBe("url");
-			expect(result.result.timestamps).toBe("url");
+			expect(result.output.result.audio).toBe("url");
+			expect(result.output.result.timestamps).toBe("url");
 			expect(mockConnect).toHaveBeenCalled();
 			expect(mockClose).toHaveBeenCalled();
+		});
+
+		it("prices speech by the characters sent, as Cartesia bills it", async () => {
+			mockGenerate.mockReturnValue(
+				streamOf([
+					{ type: "chunk", audio: Buffer.from([1, 2, 3, 4]) },
+					{ type: "done", done: true },
+				]),
+			);
+
+			const { costUsd } = await new CartesiaTTS("test-key").generate({
+				prompt: "x".repeat(8000),
+				voiceId: "voice-1",
+				model: MODEL,
+			});
+
+			expect(costUsd).toBeCloseTo(0.299);
 		});
 
 		it("stores the streamed chunks as one WAV file", async () => {
@@ -282,7 +299,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(3);
+			expect(result.output.metadata?.durationSec).toBe(3);
 		});
 
 		it("reports duration even when the model returns no timestamps", async () => {
@@ -300,7 +317,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.metadata?.durationSec).toBe(4);
+			expect(result.output.metadata?.durationSec).toBe(4);
 		});
 
 		it("throws when the stream yields no audio", async () => {

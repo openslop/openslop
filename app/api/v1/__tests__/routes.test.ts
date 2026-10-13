@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockLLMGenerate = vi.fn();
@@ -16,7 +16,9 @@ const mockCreateJob = vi.fn();
 const mockEnqueueJob = vi.fn();
 const mockUpdateJob = vi.fn();
 const mockGetJob = vi.fn();
+const mockSpentSince = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
+	spentSince: (...args: unknown[]) => mockSpentSince(...args),
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
@@ -108,10 +110,18 @@ describe("API routes", () => {
 		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({
 			id: "user-1",
+			created_at: "2026-06-14T09:30:00Z",
 			app_metadata: { api_access: true },
 		});
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-10-20T00:00:00Z"));
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
+		mockSpentSince.mockResolvedValue(0);
 		mockEnqueueJob.mockResolvedValue(undefined);
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	describe("POST /api/v1/image", () => {
@@ -129,6 +139,53 @@ describe("API routes", () => {
 				request: expect.objectContaining({ prompt: "cat" }),
 			});
 			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
+		});
+
+		it("reads the account's hosted spend since its period started", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+
+			const [userId, provider, since] = mockSpentSince.mock.calls[0] ?? [];
+			expect([userId, provider]).toEqual(["user-1", "openslop"]);
+			expect(since).toEqual(new Date("2026-10-14T09:30:00Z"));
+		});
+
+		it("returns 402 once the monthly budget is spent", async () => {
+			mockSpentSince.mockResolvedValue(100.02);
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+
+			expect(res.status).toBe(402);
+			expect((await res.json()).error).toMatch(
+				/^You've used your generation budget\. Your credits refresh on November 14\. Questions, or think this is a mistake\? Email hi@openslop\.ai or message us on Discord: https:\/\/discord\.gg\/zeP5482ced$/,
+			);
+			expect(mockCreateJob).not.toHaveBeenCalled();
+		});
+
+		it("admits a job on an account whose budget was raised", async () => {
+			mockSpentSince.mockResolvedValue(100.02);
+			mockGetUser.mockResolvedValue({
+				id: "user-1",
+				created_at: "2026-06-14T09:30:00Z",
+				app_metadata: { api_access: true, monthly_budget_usd: 500 },
+			});
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+
+			expect(res.status).toBe(200);
+		});
+
+		it("returns 500 when the account's budget is malformed", async () => {
+			mockGetUser.mockResolvedValue({
+				id: "user-1",
+				created_at: "2026-06-14T09:30:00Z",
+				app_metadata: { api_access: true, monthly_budget_usd: "lots" },
+			});
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+
+			expect(res.status).toBe(500);
+			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 
 		it("persists projectId and strips it from the provider request", async () => {
@@ -381,9 +438,12 @@ describe("API routes", () => {
 		it("returns generate result", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
 			mockLLMGenerate.mockResolvedValue({
-				text: "Hello",
-				model: "claude-sonnet-4-5-20250929",
-				usage: { inputTokens: 5, outputTokens: 3 },
+				output: {
+					text: "Hello",
+					model: "claude-sonnet-4-5-20250929",
+					usage: { inputTokens: 5, outputTokens: 3 },
+				},
+				costUsd: 0.0001,
 			});
 
 			const res = await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
@@ -395,7 +455,10 @@ describe("API routes", () => {
 		// Anthropic's own API takes.
 		it("forwards the vendor's id for the model it was asked for", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
-			mockLLMGenerate.mockResolvedValue({ text: "Hello", model: "x" });
+			mockLLMGenerate.mockResolvedValue({
+				output: { text: "Hello", model: "x" },
+				costUsd: 0,
+			});
 
 			await POST(
 				makeRequest("/api/v1/llm", { prompt: "hi", model: "Slop LLM v1" }),
@@ -412,6 +475,7 @@ describe("API routes", () => {
 				(async function* () {
 					yield { text: "Hi", done: false };
 					yield { text: "", done: true };
+					return 0.003;
 				})(),
 			);
 
@@ -423,12 +487,83 @@ describe("API routes", () => {
 			const text = await res.text();
 			expect(text).toContain("data:");
 			expect(text).toContain('"text":"Hi"');
+			expect(mockCreateJob).toHaveBeenCalledExactlyOnceWith({
+				userId: "user-1",
+				connectorType: "llm",
+				request: { provider: "openslop", model: "Slop LLM v1" },
+				status: "completed",
+				costUsd: 0.003,
+			});
+		});
+
+		it("records what the call cost", async () => {
+			const { POST } = await import("@/app/api/v1/llm/route");
+			mockLLMGenerate.mockResolvedValue({
+				output: { text: "Hello", model: "x" },
+				costUsd: 0.02,
+			});
+
+			await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
+
+			expect(mockCreateJob).toHaveBeenCalledExactlyOnceWith({
+				userId: "user-1",
+				connectorType: "llm",
+				request: { provider: "openslop", model: "Slop LLM v1" },
+				status: "completed",
+				costUsd: 0.02,
+			});
+		});
+
+		it("returns 402 without calling the model once the budget is spent", async () => {
+			mockSpentSince.mockResolvedValue(100);
+			const { POST } = await import("@/app/api/v1/llm/route");
+			const res = await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
+
+			expect(res.status).toBe(402);
+			expect(mockLLMGenerate).not.toHaveBeenCalled();
+		});
+
+		it("records nothing when the stream breaks", async () => {
+			const { POST } = await import("@/app/api/v1/llm/route");
+			mockLLMStream.mockReturnValue(
+				(async function* () {
+					yield { text: "Hi", done: false };
+					throw new Error("overloaded");
+				})(),
+			);
+
+			const res = await POST(
+				makeRequest("/api/v1/llm", { prompt: "hi", stream: true }),
+			);
+			await res.text().catch(() => undefined);
+
+			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 
 		it("returns 400 for missing prompt", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
 			const res = await POST(makeRequest("/api/v1/llm", {}));
 			expect(res.status).toBe(400);
+		});
+	});
+
+	describe("POST /api/v1/agent", () => {
+		it("returns 402 before the turn starts once the budget is spent", async () => {
+			mockSpentSince.mockResolvedValue(120);
+			const { POST } = await import("@/app/api/v1/agent/route");
+			const res = await POST(
+				makeRequest("/api/v1/agent", {
+					model: "Slop LLM v1",
+					projectId: "00000000-0000-4000-8000-000000000000",
+					message: {
+						id: "m1",
+						role: "user",
+						parts: [{ type: "text", text: "hi" }],
+					},
+				}),
+			);
+
+			expect(res.status).toBe(402);
 		});
 	});
 

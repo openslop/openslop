@@ -5,12 +5,13 @@ import {
 	IMAGE_MIME_TYPES,
 	type ImageFormat,
 } from "@/lib/connectors/image/enums";
-import { BaseProvider, type WithMetadata } from "../base";
+import { BaseProvider, type RawResult } from "../base";
+import { characterAvatars } from "@/lib/connectors/characters";
 import { validateRunwareKey, withRunware } from "../runware";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ImageProvider } from "../types";
 
-type RawImageResult = { data: string; format: ImageFormat } & WithMetadata;
+type RawImageResult = { data: string; format: ImageFormat } & RawResult;
 
 const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
 
@@ -45,6 +46,10 @@ export class RunwareImage
 
 	protected async _generate(params: VendorParams<ImageGenerateParams>) {
 		const format = params.format ?? DEFAULT_IMAGE_FORMAT;
+		const referenceImages = [
+			...characterAvatars(params.characterAssets ?? []),
+			...(params.referenceImages ?? []),
+		];
 		return withRunware(this.apiKey, async (runware) => {
 			const results = await runware.imageInference({
 				positivePrompt: params.prompt,
@@ -54,13 +59,15 @@ export class RunwareImage
 				outputType: "base64Data",
 				outputFormat: RUNWARE_FORMATS[format],
 				numberResults: 1,
-				referenceImages: params.referenceImages,
+				includeCost: true,
+				...(referenceImages.length > 0 && { referenceImages }),
 			});
 
 			const image = results?.[0];
 			if (!image?.imageBase64Data) throw new Error("No image data returned");
+			if (image.cost === undefined) throw new Error("No image cost returned");
 
-			return { data: image.imageBase64Data, format };
+			return { data: image.imageBase64Data, format, costUsd: image.cost };
 		});
 	}
 }

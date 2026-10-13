@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/provider-catalog";
-import { ReferenceAudioSchema } from "@/lib/connectors/types";
+import { HostedVoicePreviewSchema } from "@/lib/connectors/types";
 import { VIDEO_RESOLUTIONS } from "@/lib/project/aspect-ratio";
 import { parseImageSource } from "./image-source";
 
@@ -38,7 +38,7 @@ export const optionalVideoResolution = {
 export const referenceImageUrlOrDataUri = z
 	.string()
 	.refine((value) => parseImageSource(value) !== null, {
-		message: "Each referenceImages entry must be a data URI or an HTTP(S) URL",
+		message: "An image must be a data URI or an HTTP(S) URL",
 	});
 
 export const optionalReferenceImages = {
@@ -49,8 +49,19 @@ export const optionalFrameImage = {
 	frameImage: referenceImageUrlOrDataUri.optional(),
 } as const;
 
-export const optionalReferenceAudios = {
-	referenceAudios: z.array(ReferenceAudioSchema).optional(),
+/** A character in the shot: the avatar it looks like and the voice it speaks in. */
+export const CharacterSchema = z.object({
+	name: z.string().min(1, { error: "A character must be named" }),
+	avatarUrl: referenceImageUrlOrDataUri.optional(),
+	voice: HostedVoicePreviewSchema.optional(),
+});
+
+export const optionalCharacterAssets = {
+	characterAssets: z.array(CharacterSchema).optional(),
+} as const;
+
+export const optionalContinuityFrames = {
+	continuityFrames: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;
 
 export const imageFile = (maxBytes: number) =>

@@ -1,4 +1,5 @@
 import {
+	consumeStream,
 	convertToModelMessages,
 	createUIMessageStreamResponse,
 	pruneMessages,
@@ -40,6 +41,7 @@ export const agentTurnSchema = <TModel extends ModelRef>(
 export type AgentTurnRequest = {
 	projectId: string;
 	userId: string;
+	recordSpend: (costUsd: number) => Promise<unknown>;
 	message: SloppyMessage;
 	model: string;
 	llm: () => Promise<LLMProvider>;
@@ -68,7 +70,7 @@ export async function streamAgentTurn(
 	await saveConversationMessage(conversationId, incoming);
 
 	const carried = stored?.metadata?.workSeconds ?? 0;
-	const { model, providerOptions, cachedPrefix } = llm.agentModel(
+	const { model, providerOptions, cachedPrefix, costOf } = llm.agentModel(
 		request.model,
 	);
 
@@ -89,7 +91,13 @@ export async function streamAgentTurn(
 		// left to call, so it answers the user instead of looping again.
 		toolChoice: toolCallsMade(messages) >= MAX_TOOL_CALLS ? "none" : "auto",
 		providerOptions,
-		onFinish: ({ usage }) => logger.info({ usage }, "Sloppy turn usage"),
+		onEnd: async ({ usage }) => {
+			logger.info({ usage }, "Sloppy turn usage");
+			// The SDK drops anything a callback throws, so a lost ledger row has to be logged here.
+			await request
+				.recordSpend(costOf(usage))
+				.catch((error) => logger.error(error, "Sloppy turn spend"));
+		},
 	});
 
 	return createUIMessageStreamResponse({
@@ -112,5 +120,6 @@ export async function streamAgentTurn(
 				return stringifyError(error);
 			},
 		}),
+		consumeSseStream: consumeStream,
 	});
 }

@@ -1,6 +1,4 @@
 import { previousVisual } from "@/lib/canvas/scenes";
-import mergeWith from "lodash/mergeWith";
-import { appendArrays } from "@/lib/connectors/plugins";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import type { Dependency } from "@/lib/generation/declare";
 import { captureFrames } from "@/lib/connectors/video/capture-frames";
@@ -17,7 +15,7 @@ import {
 export type ParamsWithPreviousVisual = {
 	prompt: string;
 	frameImage?: string;
-	referenceImages?: string[];
+	continuityFrames?: string[];
 	[START_FRAME_ATTR]?: string;
 	[CONTINUITY_ATTR]?: string;
 };
@@ -33,21 +31,21 @@ async function previousPictures(
 	throw new Error("The previous visual generated no picture to hand on");
 }
 
-const PREVIOUS = "the previous visual";
+const PREVIOUS_VISUAL_LABEL = "the previous visual";
 
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
 const previousWhenLinked: Dependency = (
 	{ id, generationAttributes: attrs = {} },
 	{ canvas },
 ) => ({
-	[PREVIOUS]:
+	[PREVIOUS_VISUAL_LABEL]:
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
 		attrs[CONTINUITY_ATTR] === "true"
 			? previousVisual(canvas, id)
 			: undefined,
 });
 
-/** Opening on the previous visual takes its end as the start frame; linking adds its beginning and middle as references. */
+/** Opening on the previous visual takes its end as the start frame; linking carries on from its beginning and middle. */
 export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPreviousVisual> {
 	return {
 		name: "previous-visual",
@@ -60,23 +58,18 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 			},
 			ctx,
 		) {
-			const source = ctx.dependencies?.[PREVIOUS];
+			const source = ctx.dependencies?.[PREVIOUS_VISUAL_LABEL];
 			const [frameImage] =
 				frame === PREVIOUS_VISUAL
 					? await previousPictures(source, [START_FRAME])
 					: URL.canParse(frame)
 						? [frame]
 						: [];
-			const references =
+			const continuityFrames =
 				continuity === "true"
 					? await previousPictures(source, CONTINUITY_FRAMES)
 					: [];
-			return mergeWith(
-				{},
-				params,
-				{ ...(frameImage && { frameImage }), referenceImages: references },
-				appendArrays,
-			);
+			return { ...params, ...(frameImage && { frameImage }), continuityFrames };
 		},
 	};
 }

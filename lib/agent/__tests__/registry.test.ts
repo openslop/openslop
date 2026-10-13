@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
 import {
-	SCRIPT_TOOLS,
+	DRAFTING_TOOLS,
 	SLOPPY_TOOLS,
 	SNAPSHOT_TOOLS,
 	executeToolCall,
@@ -805,7 +805,7 @@ describe("tool flags", () => {
 	});
 
 	it("collects the tools that write the script, reviewing it included", () => {
-		expect([...SCRIPT_TOOLS].sort()).toEqual([
+		expect([...DRAFTING_TOOLS].sort()).toEqual([
 			"adapt_script",
 			"edit_script",
 			"fit_durations",

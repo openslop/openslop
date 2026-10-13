@@ -13,7 +13,7 @@ export const VIDEO_FORMAT_NAMES = [
 	VIDEO_FORMAT.explainer,
 ] as const;
 
-export const VIDEO_FORMATS = dedent`
+export const VIDEO_FORMAT_RULES = dedent`
 	First pick the format closest to the request if not already picked by the user. The format decides which elements you write.
 
 	- ${VIDEO_FORMAT.cinematic}: visuals and music tell the story. Only <video> and <music> (with occasional <narration>). Characters speak inside the video prompts. Set trimToDialogue="false" on every video. For anime, drama, short films, trailers, music videos and ambient pieces.

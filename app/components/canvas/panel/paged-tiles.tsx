@@ -18,13 +18,13 @@ export function PagedTiles({
 	empty: string;
 	children: ReactNode[];
 }) {
-	const [requested, setPage] = useState(0);
+	const [requestedPage, setRequestedPage] = useState(0);
 
 	if (children.length === 0)
 		return <p className="text-label text-muted-foreground">{empty}</p>;
 
 	const pageCount = Math.ceil(children.length / PAGE_SIZE);
-	const page = Math.min(requested, pageCount - 1);
+	const page = Math.min(requestedPage, pageCount - 1);
 
 	return (
 		<div className="flex flex-col gap-3">
@@ -41,7 +41,7 @@ export function PagedTiles({
 						size="header"
 						variant="quiet"
 						disabled={page === 0}
-						onClick={() => setPage(page - 1)}
+						onClick={() => setRequestedPage(page - 1)}
 					>
 						<ChevronLeft size={14} />
 					</IconButton>
@@ -52,7 +52,7 @@ export function PagedTiles({
 								type="button"
 								aria-label={`Page ${index + 1}`}
 								aria-current={index === page ? "page" : undefined}
-								onClick={() => setPage(index)}
+								onClick={() => setRequestedPage(index)}
 								className="group/dot focus-ring flex size-6 items-center justify-center rounded-full"
 							>
 								<span
@@ -71,7 +71,7 @@ export function PagedTiles({
 						size="header"
 						variant="quiet"
 						disabled={page === pageCount - 1}
-						onClick={() => setPage(page + 1)}
+						onClick={() => setRequestedPage(page + 1)}
 					>
 						<ChevronRight size={14} />
 					</IconButton>

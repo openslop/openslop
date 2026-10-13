@@ -36,8 +36,8 @@ describe("ElevenLabsMusic", () => {
 		const provider = new ElevenLabsMusic("test-key");
 		const result = await provider.generate({ prompt: "jazz", model: MODEL });
 
-		expect(result.result.audio).toBe("url");
-		expect(result.metadata?.durationSec).toBe(1);
+		expect(result.output.result.audio).toBe("url");
+		expect(result.output.metadata?.durationSec).toBe(1);
 		expect(mockCompose).toHaveBeenCalledWith({
 			prompt: "jazz",
 			musicLengthMs: undefined,

@@ -49,6 +49,7 @@ const OPENSLOP_PROVIDERS: {
 		"Slop Image v1": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 	},
 	video: {
+		"Slop Video v2": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 		"Slop Video v1": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 		"Slop Video v1 Fast": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 	},

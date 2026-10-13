@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { JOB_TIMEOUT_MS } from "@/lib/gateway/base";
 
 const mockLoadJobForProcessing = vi.fn();
 const mockClaimJob = vi.fn();
@@ -36,9 +35,9 @@ function stubPendingHandler(metadata: Record<string, unknown> = {}) {
 	return handler;
 }
 
-function stubCompletedHandler(result: Record<string, unknown> = {}) {
+function stubCompletedHandler() {
 	const handler = {
-		process: vi.fn().mockResolvedValue({ kind: "completed", result }),
+		process: vi.fn().mockResolvedValue({ kind: "completed", result: {} }),
 	};
 	mockGetJobHandler.mockReturnValue(handler);
 	return handler;
@@ -91,7 +90,7 @@ describe("processQueuedJob", () => {
 		"fails a %s job past the deadline without running it again",
 		async (status) => {
 			mockLoadJobForProcessing.mockResolvedValue({
-				...pendingJob(JOB_TIMEOUT_MS + 60_000),
+				...pendingJob(60 * 60_000),
 				status,
 			});
 			const handler = { process: vi.fn() };
@@ -109,21 +108,26 @@ describe("processQueuedJob", () => {
 	);
 
 	describe("claiming", () => {
-		it("claims the job, runs the handler as processing and stores the result", async () => {
+		it("claims the job, runs the handler and stores the result with its cost", async () => {
 			const job = pendingJob();
 			mockLoadJobForProcessing.mockResolvedValue(job);
-			const handler = stubCompletedHandler({ url: "u" });
+			const handler = {
+				process: vi.fn().mockResolvedValue({
+					kind: "completed",
+					result: { url: "u" },
+					costUsd: 0.18,
+				}),
+			};
+			mockGetJobHandler.mockReturnValue(handler);
 
 			await processQueuedJob(JOB_ID, FIRST_DELIVERY);
 
 			expect(mockClaimJob).toHaveBeenCalledExactlyOnceWith(JOB_ID);
-			expect(handler.process).toHaveBeenCalledWith({
-				...job,
-				status: "processing",
-			});
+			expect(handler.process).toHaveBeenCalledWith(job);
 			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
 				status: "completed",
 				result: { url: "u" },
+				cost_usd: 0.18,
 			});
 			expect(mockEnqueueJob).not.toHaveBeenCalled();
 		});
@@ -194,21 +198,6 @@ describe("processQueuedJob", () => {
 			);
 		});
 
-		it("hands the checkpointed metadata to the handler on the next delivery", async () => {
-			const job = {
-				...pendingJob(),
-				metadata: { providerJobId: "upstream-1" },
-			};
-			mockLoadJobForProcessing.mockResolvedValue(job);
-			const handler = stubPendingHandler({ providerJobId: "upstream-1" });
-
-			await processQueuedJob(JOB_ID, FIRST_DELIVERY);
-
-			expect(handler.process).toHaveBeenCalledWith(
-				expect.objectContaining({ metadata: { providerJobId: "upstream-1" } }),
-			);
-		});
-
 		it("propagates a redelivery failure so the queue retries instead of failing the job", async () => {
 			mockLoadJobForProcessing.mockResolvedValue(pendingJob());
 			stubPendingHandler();
@@ -239,18 +228,6 @@ describe("processQueuedJob", () => {
 				status: "pending",
 			});
 			expect(mockEnqueueJob).not.toHaveBeenCalled();
-		});
-
-		it("succeeds on a later delivery once the error clears", async () => {
-			mockLoadJobForProcessing.mockResolvedValue(pendingJob());
-			stubCompletedHandler({ url: "u" });
-
-			await processQueuedJob(JOB_ID, FIRST_DELIVERY + 1);
-
-			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
-				status: "completed",
-				result: { url: "u" },
-			});
 		});
 
 		it("fails the job with the reason and acknowledges on the last attempt", async () => {

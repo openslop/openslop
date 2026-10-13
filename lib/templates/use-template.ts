@@ -19,10 +19,10 @@ export function useTemplate(): {
 	const store = useProjectStoreHandle();
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
-	const template = useProject((state) => state.scriptSettings.template);
+	const templateId = useProject((state) => state.scriptSettings.template);
 
 	return {
-		template: getTemplateById(template),
+		template: getTemplateById(templateId),
 		applyTemplate: useCallback(
 			(id: string) => applyTemplate(editor, store, queue, buildContext, id),
 			[editor, store, queue, buildContext],

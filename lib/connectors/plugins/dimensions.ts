@@ -1,12 +1,12 @@
-import type { ConnectorPlugin } from "@/lib/connectors/types";
+import type { ConnectorPlugin, ModelRef } from "@/lib/connectors/types";
+import { modelEntry } from "../models";
 import {
 	ASPECT_RATIO_DIMENSIONS,
 	AspectRatioSchema,
-	DEFAULT_VIDEO_RESOLUTION,
 	type VideoResolution,
 } from "@/lib/project/aspect-ratio";
 
-type Dimensioned = {
+type Dimensioned = ModelRef & {
 	prompt: string;
 	width?: number;
 	height?: number;
@@ -30,7 +30,8 @@ export function createDimensionsPlugin(
 					AspectRatioSchema.parse(ctx.reads?.[ASPECT_RATIO])
 				];
 			if (kind === "image") return { ...params, ...dims.image };
-			const resolution = params.resolution ?? DEFAULT_VIDEO_RESOLUTION;
+			const resolution =
+				params.resolution ?? modelEntry("video", params).resolutions[0];
 			return { ...params, resolution, ...dims.video[resolution] };
 		},
 	};

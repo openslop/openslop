@@ -12,7 +12,7 @@ import type { ModelRef } from "@/lib/connectors/types";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import { hasPendingToolCall } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
-import { SCRIPT_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
+import { DRAFTING_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/use-agent-tools";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import { useConfig } from "@/lib/config/config-provider";
@@ -114,7 +114,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 		status === "submitted" ||
 		status === "streaming" ||
 		hasPendingToolCall(messages);
-	const writingScript = hasPendingToolCall(messages, SCRIPT_TOOLS);
+	const writingScript = hasPendingToolCall(messages, DRAFTING_TOOLS);
 	const control = useMemo<SloppyControl>(
 		() => ({
 			send: (message) => {

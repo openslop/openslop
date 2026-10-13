@@ -10,6 +10,9 @@ import type { MusicProvider } from "../types";
 
 type MusicRequest = VendorParams<MusicGenerateParams>;
 
+/** The Scale plan is $299 for 1,993 minutes of music. */
+const USD_PER_SECOND = 0.15 / 60;
+
 const cache = audioPromptCache(
 	process.env.PINECONE_MUSIC_INDEX || "music",
 	"music",
@@ -21,6 +24,10 @@ export class ElevenLabsMusic
 {
 	protected readonly blobConfig = { type: "music", provider: "elevenlabs" };
 	protected readonly outputFormat = ELEVENLABS_AUDIO_FORMAT;
+
+	protected costUsd(durationSec: number) {
+		return durationSec * USD_PER_SECOND;
+	}
 
 	override generate(params: MusicRequest) {
 		return cache.readThrough(params, () => super.generate(params));

@@ -20,6 +20,7 @@ import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
 import { animateImageScene } from "@/lib/script/refine/animate-prompt";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { sleep } from "@/lib/utils";
+import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider } from "./base";
 
@@ -160,15 +161,22 @@ export class MockLLM implements LLMProvider {
 		return { ok: true };
 	}
 
-	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
+	async generate(
+		params: LLMGenerateParams,
+	): Promise<Priced<LLMGenerateResult>> {
 		return {
-			text: mockResponse(params),
-			model: "mock",
-			usage: { inputTokens: 0, outputTokens: 0 },
+			output: {
+				text: mockResponse(params),
+				model: "mock",
+				usage: { inputTokens: 0, outputTokens: 0 },
+			},
+			costUsd: 0,
 		};
 	}
 
-	async *stream(params: LLMGenerateParams): AsyncGenerator<LLMStreamChunk> {
+	async *stream(
+		params: LLMGenerateParams,
+	): AsyncGenerator<LLMStreamChunk, number> {
 		await sleep(500);
 		const text = mockResponse(params);
 		let offset = 0;
@@ -179,6 +187,7 @@ export class MockLLM implements LLMProvider {
 			offset += size;
 		}
 		yield { text: "", done: true };
+		return 0;
 	}
 
 	agentModel(modelId: string): AgentModel {
@@ -187,6 +196,7 @@ export class MockLLM implements LLMProvider {
 			modelId,
 			providerOptions: {},
 			cachedPrefix: {},
+			costOf: () => 0,
 		};
 	}
 }

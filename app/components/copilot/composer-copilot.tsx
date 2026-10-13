@@ -283,9 +283,7 @@ export default function ComposerCopilot({
 							icon={<Proportions className="mr-1 h-3 w-3" />}
 							value={aspectRatio}
 							options={ASPECT_RATIO_OPTIONS}
-							onChange={(next: AspectRatio) =>
-								updateVideoSettings({ aspectRatio: next })
-							}
+							onChange={(next) => updateVideoSettings({ aspectRatio: next })}
 						/>
 						<SettingPill
 							name="Format"
@@ -293,18 +291,14 @@ export default function ComposerCopilot({
 							value={videoFormat}
 							options={VIDEO_FORMAT_OPTIONS}
 							disabled={pasting}
-							onChange={(next: VideoFormat) =>
-								updateScriptSettings({ format: next })
-							}
+							onChange={(next) => updateScriptSettings({ format: next })}
 						/>
 						<SettingPill
 							name="Language"
 							icon={<Translate className="mr-1 h-3 w-3" />}
 							value={language}
 							options={LANGUAGE_OPTIONS}
-							onChange={(next: LanguageChoice) =>
-								updateScriptSettings({ language: next })
-							}
+							onChange={(next) => updateScriptSettings({ language: next })}
 						/>
 						<ModelSelect
 							type="llm"
@@ -326,9 +320,7 @@ export default function ComposerCopilot({
 							value={videoLength}
 							options={VIDEO_LENGTH_OPTIONS}
 							disabled={pasting}
-							onChange={(next: VideoLength) =>
-								updateScriptSettings({ length: next })
-							}
+							onChange={(next) => updateScriptSettings({ length: next })}
 						/>
 						{activeTemplate && (
 							<SettingPill

@@ -15,7 +15,7 @@ const [ScriptContext, useScriptSession] =
 	createRequiredContext<ScriptSession>("ScriptProvider");
 
 export const useShowWorkspace = () => useScriptSession().showWorkspace;
-export const useScriptInitial = () => useScriptSession().initialScript;
+export const useInitialScript = () => useScriptSession().initialScript;
 export const useOpenWorkspace = () => useScriptSession().openWorkspace;
 
 export function ScriptProvider({

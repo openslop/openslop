@@ -97,7 +97,7 @@ describe("previous-visual plugin", () => {
 		it("leaves an unlinked video with no start frame alone", async () => {
 			await expect(
 				before({ prompt: "slow pan", continuity: "false" }),
-			).resolves.toEqual({ prompt: "slow pan", referenceImages: [] });
+			).resolves.toEqual({ prompt: "slow pan", continuityFrames: [] });
 		});
 
 		it("opens on a picture by URL without a dependency", async () => {
@@ -106,7 +106,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/a.png",
-				referenceImages: [],
+				continuityFrames: [],
 			});
 		});
 
@@ -119,7 +119,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/sunset.png",
-				referenceImages: [],
+				continuityFrames: [],
 			});
 		});
 
@@ -131,7 +131,7 @@ describe("previous-visual plugin", () => {
 				),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				referenceImages: ["https://img/sunset.png"],
+				continuityFrames: ["https://img/sunset.png"],
 			});
 		});
 
@@ -142,7 +142,7 @@ describe("previous-visual plugin", () => {
 					startFrame: "previous",
 					continuity: "true",
 				}),
-			).resolves.toEqual({ prompt: "slow pan", referenceImages: [] });
+			).resolves.toEqual({ prompt: "slow pan", continuityFrames: [] });
 		});
 
 		it("opens on a previous video's end alone", async () => {
@@ -151,25 +151,20 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/last.png",
-				referenceImages: [],
+				continuityFrames: [],
 			});
 			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4", ["last"]);
 		});
 
-		it("adds a previous video's beginning and middle after the reference images when linked", async () => {
+		it("carries on from a previous video's beginning and middle when linked", async () => {
 			await expect(
 				afterVideo({
 					prompt: "slow pan",
 					continuity: "true",
-					referenceImages: ["https://img/avatar.png"],
 				}),
 			).resolves.toEqual({
 				prompt: "slow pan",
-				referenceImages: [
-					"https://img/avatar.png",
-					"https://img/first.png",
-					"https://img/middle.png",
-				],
+				continuityFrames: ["https://img/first.png", "https://img/middle.png"],
 			});
 		});
 
@@ -183,7 +178,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/last.png",
-				referenceImages: ["https://img/first.png", "https://img/middle.png"],
+				continuityFrames: ["https://img/first.png", "https://img/middle.png"],
 			});
 		});
 
@@ -197,7 +192,7 @@ describe("previous-visual plugin", () => {
 			).resolves.toEqual({
 				prompt: "slow pan",
 				frameImage: "https://img/a.png",
-				referenceImages: ["https://img/first.png", "https://img/middle.png"],
+				continuityFrames: ["https://img/first.png", "https://img/middle.png"],
 			});
 		});
 
