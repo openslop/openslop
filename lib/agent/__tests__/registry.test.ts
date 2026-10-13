@@ -608,14 +608,25 @@ describe("executeToolCall", () => {
 		[
 			"an avatar not drawn yet",
 			"asset_avatar",
-			{ kind: "generated", status: "idle", urls: [] },
+			{ kind: "generated", state: "ungenerated", urls: [] },
 			"has not been generated yet",
 		],
 		[
 			"an image still generating",
 			"image",
-			{ kind: "generated", status: "generating", urls: [] },
+			{ kind: "generated", state: "generating", urls: [] },
 			"is still generating",
+		],
+		[
+			"an image whose generation failed, with the failure's words",
+			"image",
+			{
+				kind: "generated",
+				state: "failed",
+				detail: "The provider rejected this key.",
+				urls: [],
+			},
+			"failed to generate: The provider rejected this key.",
 		],
 		[
 			"reference images never uploaded",

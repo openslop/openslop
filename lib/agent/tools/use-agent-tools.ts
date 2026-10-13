@@ -58,11 +58,13 @@ export function useAgentTools() {
 				if (element.type === "asset_references")
 					return { kind: "uploaded", urls: referenceUrls([element]) };
 				if (connectorOf(element.type) !== "image") return undefined;
-				const { status, result } = queue.getElementSnapshot(element.id);
+				const snapshot = queue.getElementSnapshot(element.id);
+				const { state, detail } = elementState(element.id, snapshot, null);
 				return {
 					kind: "generated",
-					status,
-					urls: compact([getPrimaryUrl(result, "image")]),
+					state,
+					detail,
+					urls: compact([getPrimaryUrl(snapshot.result, "image")]),
 				};
 			};
 			const ctx: AgentToolContext = {

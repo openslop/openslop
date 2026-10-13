@@ -1,13 +1,18 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
-import type { GenerationStatus } from "@/lib/generation/snapshots";
+import compact from "lodash/compact";
+import type { ElementState } from "../element-state";
 import { defineTool, imageOutput } from "./define-tool";
 
-const NOT_READY: Record<GenerationStatus, string> = {
-	idle: "has not been generated yet",
+const NO_PICTURE: Record<ElementState["state"], string> = {
+	ungenerated: "has not been generated yet",
 	queued: "is waiting to generate",
 	generating: "is still generating",
+	failed: "failed to generate",
+	generated: "generated no picture",
+	stale: "generated no picture",
+	pinned: "holds no picture",
 };
 
 export const viewImage = defineTool({
@@ -49,7 +54,7 @@ export const viewImage = defineTool({
 			);
 		const why =
 			pictures.kind === "generated"
-				? NOT_READY[pictures.status]
+				? compact([NO_PICTURE[pictures.state], pictures.detail]).join(": ")
 				: "has no reference images uploaded";
 		if (pictures.urls.length === 0)
 			throw new Error(`${id} ${why}, so there is nothing to look at.`);

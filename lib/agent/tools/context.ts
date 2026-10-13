@@ -1,5 +1,4 @@
 import type { AssetElement, ElementType } from "@/lib/canvas/types";
-import type { GenerationStatus } from "@/lib/generation/snapshots";
 import type { ElementState } from "../element-state";
 import type { ElementLength } from "@/lib/render/element-lengths";
 import type { RefineOp } from "@/lib/script/refine/types";
@@ -11,7 +10,10 @@ export type ElementImage = {
 	prompt: string;
 	/** Absent when the element's type holds no picture, so there is never one to wait for. */
 	pictures:
-		| { kind: "generated"; status: GenerationStatus; urls: string[] }
+		| ({ kind: "generated"; urls: string[] } & Pick<
+				ElementState,
+				"state" | "detail"
+		  >)
 		| { kind: "uploaded"; urls: string[] }
 		| undefined;
 };

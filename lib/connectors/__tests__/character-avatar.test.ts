@@ -15,4 +15,11 @@ describe("character-avatar plugin", () => {
 			model: "Slop Image v1",
 		});
 	});
+
+	it("refuses to draw a portrait of nobody rather than one of 'undefined'", () => {
+		const { beforeGenerate } = createCharacterAvatarPlugin();
+		expect(() =>
+			beforeGenerate?.({ prompt: "A young girl with red hair" }, {}),
+		).toThrow("needs the character's name");
+	});
 });

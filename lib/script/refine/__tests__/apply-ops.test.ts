@@ -585,6 +585,22 @@ describe("applyRefineOp — assets", () => {
 	const apply = (editor: Editor, ...ops: RefineOp[]) =>
 		applyRefineOps(editor, ops);
 
+	it("refuses a character's asset that names nobody", () => {
+		const editor = makeCanvas([]);
+
+		const result = apply(editor, {
+			op: "insert",
+			type: "asset_avatar",
+			text: "a girl in a yellow cardigan",
+		});
+
+		expect(result).toEqual({
+			applied: 0,
+			failures: ["insert: asset_avatar needs a name"],
+		});
+		expect(topLevelTypes(editor)).toEqual(["scene"]);
+	});
+
 	it("inserts a new asset at the top, ahead of the scenes", () => {
 		const editor = makeCanvas([asset("asset_style", { text: "noir" })]);
 
