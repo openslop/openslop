@@ -27,6 +27,7 @@ vi.mock("../conversations", () => conversations);
 
 import type { LLMProvider } from "@/lib/providers/llm/base";
 import { streamAgentTurn } from "../agent-turn";
+import { logger } from "../logger";
 
 const USAGE = {
 	inputTokens: { total: 12, noCache: 12, cacheRead: 0, cacheWrite: 0 },
@@ -67,7 +68,7 @@ async function chunksOf(response: Response) {
 
 let calls: LanguageModelV3CallOptions[] = [];
 
-async function runTurn(
+async function startTurn(
 	chunks: LanguageModelV3StreamPart[],
 	options: {
 		message?: SloppyMessage;
@@ -94,7 +95,7 @@ async function runTurn(
 		costOf: () => 0.42,
 	});
 
-	const response = await streamAgentTurn({
+	return streamAgentTurn({
 		projectId: "p1",
 		userId: "u1",
 		recordSpend,
@@ -102,7 +103,10 @@ async function runTurn(
 		model: options.model ?? "claude-opus-5",
 		llm: async () => provider as unknown as LLMProvider,
 	});
-	return chunksOf(response);
+}
+
+async function runTurn(...args: Parameters<typeof startTurn>) {
+	return chunksOf(await startTurn(...args));
 }
 
 const finishSeconds = (chunks: Record<string, unknown>[]) => {
@@ -142,6 +146,27 @@ describe("streamAgentTurn", () => {
 		await runTurn(TEXT_TURN);
 
 		expect(recordSpend).toHaveBeenCalledWith(0.42);
+	});
+
+	it("records the cost of a step the editor stopped reading", async () => {
+		const response = await startTurn(TEXT_TURN);
+		await response.body?.cancel();
+
+		await vi.waitFor(() => expect(recordSpend).toHaveBeenCalledWith(0.42));
+	});
+
+	it("logs a cost it could not record", async () => {
+		const error = vi.spyOn(logger, "error").mockImplementation(() => {});
+		recordSpend.mockRejectedValueOnce(new Error("insert failed"));
+
+		await runTurn(TEXT_TURN);
+
+		await vi.waitFor(() =>
+			expect(error).toHaveBeenCalledWith(
+				new Error("insert failed"),
+				"Sloppy turn spend",
+			),
+		);
 	});
 
 	it("stores the assistant message the step produced", async () => {

@@ -1,4 +1,5 @@
 import {
+	consumeStream,
 	convertToModelMessages,
 	createUIMessageStreamResponse,
 	pruneMessages,
@@ -92,7 +93,10 @@ export async function streamAgentTurn(
 		providerOptions,
 		onEnd: async ({ usage }) => {
 			logger.info({ usage }, "Sloppy turn usage");
-			await request.recordSpend(costOf(usage));
+			// The SDK drops anything a callback throws, so a lost ledger row has to be logged here.
+			await request
+				.recordSpend(costOf(usage))
+				.catch((error) => logger.error(error, "Sloppy turn spend"));
 		},
 	});
 
@@ -116,5 +120,6 @@ export async function streamAgentTurn(
 				return stringifyError(error);
 			},
 		}),
+		consumeSseStream: consumeStream,
 	});
 }
