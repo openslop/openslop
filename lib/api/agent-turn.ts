@@ -24,7 +24,6 @@ import {
 	saveConversationMessage,
 } from "./conversations";
 import { logger } from "./logger";
-import { recordLLMSpend } from "./jobs";
 
 const MAX_TOOL_CALLS = 30;
 
@@ -41,7 +40,7 @@ export const agentTurnSchema = <TModel extends ModelRef>(
 export type AgentTurnRequest = {
 	projectId: string;
 	userId: string;
-	provider: ModelRef["provider"];
+	recordSpend: (costUsd: number) => Promise<unknown>;
 	message: SloppyMessage;
 	model: string;
 	llm: () => Promise<LLMProvider>;
@@ -93,7 +92,7 @@ export async function streamAgentTurn(
 		providerOptions,
 		onEnd: async ({ totalUsage }) => {
 			logger.info({ usage: totalUsage }, "Sloppy turn usage");
-			await recordLLMSpend(request.userId, request, costOf(totalUsage));
+			await request.recordSpend(costOf(totalUsage));
 		},
 	});
 

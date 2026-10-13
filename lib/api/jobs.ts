@@ -1,10 +1,9 @@
 import { send } from "@vercel/queue";
 import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
-import pick from "lodash/pick";
 import { z } from "zod";
 import { BundleResponseSchema, type BundleResponse } from "./asset-bundle";
-import type { ModelRef } from "@/lib/connectors/types";
+import type { ConnectorType } from "@/lib/connectors/types";
 import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -41,8 +40,10 @@ export type JobRow = z.infer<typeof JobRowSchema>;
 export async function createJob(input: {
 	userId: string;
 	projectId?: string | null;
-	connectorType: JobConnectorType;
+	connectorType: ConnectorType;
 	request: Record<string, unknown>;
+	status?: JobStatus;
+	costUsd?: number;
 }): Promise<{ id: string }> {
 	const supabase = createServiceClient();
 	const { data, error } = await supabase
@@ -52,29 +53,13 @@ export async function createJob(input: {
 			project_id: input.projectId ?? null,
 			connector_type: input.connectorType,
 			request: input.request,
+			status: input.status,
+			cost_usd: input.costUsd,
 		})
 		.select("id")
 		.single();
 	if (error) throw new Error(`Failed to create job: ${error.message}`);
 	return { id: data.id };
-}
-
-/** LLM calls stream instead of queueing, so each one is booked as a finished job. */
-export async function recordLLMSpend(
-	userId: string,
-	model: ModelRef,
-	costUsd: number,
-): Promise<void> {
-	const { error } = await createServiceClient()
-		.from("jobs")
-		.insert({
-			user_id: userId,
-			connector_type: "llm",
-			status: "completed",
-			request: pick(model, "provider", "model"),
-			cost_usd: costUsd,
-		});
-	if (error) throw new Error(`Failed to record spend: ${error.message}`);
 }
 
 export async function spentSince(

@@ -7,7 +7,7 @@ import type {
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import type { SloppyMessage } from "@/lib/agent/types";
 
-const { conversations, provider, recordLLMSpend } = vi.hoisted(() => ({
+const { conversations, provider, recordSpend } = vi.hoisted(() => ({
 	conversations: {
 		findOrCreateConversation: vi.fn(
 			async (_projectId: string, _userId: string) => "conv-1",
@@ -20,11 +20,10 @@ const { conversations, provider, recordLLMSpend } = vi.hoisted(() => ({
 		),
 	},
 	provider: { agentModel: vi.fn() },
-	recordLLMSpend: vi.fn(async () => {}),
+	recordSpend: vi.fn(async (_costUsd: number) => {}),
 }));
 
 vi.mock("../conversations", () => conversations);
-vi.mock("../jobs", () => ({ recordLLMSpend }));
 
 import type { LLMProvider } from "@/lib/providers/llm/base";
 import { streamAgentTurn } from "../agent-turn";
@@ -98,7 +97,7 @@ async function runTurn(
 	const response = await streamAgentTurn({
 		projectId: "p1",
 		userId: "u1",
-		provider: "openslop",
+		recordSpend,
 		message: options.message ?? asked("make it shorter"),
 		model: options.model ?? "claude-opus-5",
 		llm: async () => provider as unknown as LLMProvider,
@@ -142,11 +141,7 @@ describe("streamAgentTurn", () => {
 	it("records what the model says the turn cost", async () => {
 		await runTurn(TEXT_TURN);
 
-		expect(recordLLMSpend).toHaveBeenCalledWith(
-			"u1",
-			expect.objectContaining({ provider: "openslop" }),
-			0.42,
-		);
+		expect(recordSpend).toHaveBeenCalledWith(0.42);
 	});
 
 	it("stores the assistant message the step produced", async () => {

@@ -17,9 +17,7 @@ const mockEnqueueJob = vi.fn();
 const mockUpdateJob = vi.fn();
 const mockGetJob = vi.fn();
 const mockSpentSince = vi.fn();
-const mockRecordLLMSpend = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
-	recordLLMSpend: (...args: unknown[]) => mockRecordLLMSpend(...args),
 	spentSince: (...args: unknown[]) => mockSpentSince(...args),
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
@@ -480,11 +478,13 @@ describe("API routes", () => {
 			const text = await res.text();
 			expect(text).toContain("data:");
 			expect(text).toContain('"text":"Hi"');
-			expect(mockRecordLLMSpend).toHaveBeenCalledExactlyOnceWith(
-				"user-1",
-				expect.objectContaining({ provider: "openslop" }),
-				0.003,
-			);
+			expect(mockCreateJob).toHaveBeenCalledExactlyOnceWith({
+				userId: "user-1",
+				connectorType: "llm",
+				request: { provider: "openslop", model: "Slop LLM v1" },
+				status: "completed",
+				costUsd: 0.003,
+			});
 		});
 
 		it("records what the call cost", async () => {
@@ -496,11 +496,13 @@ describe("API routes", () => {
 
 			await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
 
-			expect(mockRecordLLMSpend).toHaveBeenCalledExactlyOnceWith(
-				"user-1",
-				expect.objectContaining({ provider: "openslop", model: "Slop LLM v1" }),
-				0.02,
-			);
+			expect(mockCreateJob).toHaveBeenCalledExactlyOnceWith({
+				userId: "user-1",
+				connectorType: "llm",
+				request: { provider: "openslop", model: "Slop LLM v1" },
+				status: "completed",
+				costUsd: 0.02,
+			});
 		});
 
 		it("returns 429 without calling the model once the budget is spent", async () => {
@@ -526,7 +528,7 @@ describe("API routes", () => {
 			);
 			await res.text().catch(() => undefined);
 
-			expect(mockRecordLLMSpend).not.toHaveBeenCalled();
+			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 
 		it("returns 400 for missing prompt", async () => {
