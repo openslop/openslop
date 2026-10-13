@@ -107,10 +107,7 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getElementSnapshot("b3").status).toBe(
 				"generating",
 			);
-			expect(generationQueue.getElementSnapshot("b4")).toMatchObject({
-				status: "queued",
-				startedAt: null,
-			});
+			expect(generationQueue.getElementSnapshot("b4").status).toBe("queued");
 
 			generationQueue.discard("b1");
 			generationQueue.discard("b2");

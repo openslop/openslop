@@ -20,10 +20,7 @@ const SavedSnapshotSchema = z.object({
 
 export type SavedSnapshot = z.infer<typeof SavedSnapshotSchema>;
 
-export type ElementSnapshot = SavedSnapshot & {
-	/** When its running job started, on this session's clock. */
-	startedAt: number | null;
-};
+export type ElementSnapshot = SavedSnapshot & { startedAt: number | null };
 
 /** The `generation` column is untyped JSON; parse it once at the boundary. */
 export const GenerationSnapshotSchema = z.record(
