@@ -1,8 +1,8 @@
+import { isElementType } from "./guards";
+import { parseXmlTag } from "./parse-xml-tag";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import { createCanvasElement } from "./create-canvas-element";
-import { isElementType } from "./guards";
 import { makeNodeId } from "./node-utils";
-import { parseXmlTag } from "./parse-xml-tag";
 import type { CanvasElement, ElementType } from "./types";
 import { unescapeXml } from "./xml-escape";
 
