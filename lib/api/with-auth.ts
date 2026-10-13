@@ -27,8 +27,7 @@ async function runGuarded(
 async function guard(
 	label: string,
 	run: RouteBody,
-	authorize: (user: User) => Promise<Response | null> | Response | null = () =>
-		null,
+	authorize: (user: User) => Promise<Response | null> = async () => null,
 ): Promise<Response> {
 	return runGuarded(label, async () => {
 		const user = await getUser();
@@ -40,10 +39,10 @@ async function guard(
 }
 
 export const withApiAccess = (label: string, run: RouteBody) =>
-	guard(label, run, (user) => (hasApiAccess(user) ? null : forbidden()));
+	guard(label, run, async (user) => (hasApiAccess(user) ? null : forbidden()));
 
 export const withHostedBudget = (label: string, run: RouteBody) =>
-	guard(label, run, (user) =>
+	guard(label, run, async (user) =>
 		hasApiAccess(user) ? refuseOverBudget(user) : forbidden(),
 	);
 

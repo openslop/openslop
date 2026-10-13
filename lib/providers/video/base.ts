@@ -23,7 +23,7 @@ export type VideoJob = {
 	metadata: VideoJobMetadata;
 };
 
-export type FinishedVideo = Required<Omit<VideoJob, "costUsd">>;
+export type FinishedVideo = { url: string; metadata: VideoJobMetadata };
 
 export type VideoProviderResponse = BundleResponse & {
 	metadata: VideoJobMetadata;
