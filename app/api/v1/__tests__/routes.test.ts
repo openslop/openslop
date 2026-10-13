@@ -17,7 +17,9 @@ const mockEnqueueJob = vi.fn();
 const mockUpdateJob = vi.fn();
 const mockGetJob = vi.fn();
 const mockSpentSince = vi.fn();
+const mockRecordLLMSpend = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
+	recordLLMSpend: (...args: unknown[]) => mockRecordLLMSpend(...args),
 	spentSince: (...args: unknown[]) => mockSpentSince(...args),
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
@@ -143,13 +145,12 @@ describe("API routes", () => {
 			expect((since as Date).getUTCDate()).toBe(1);
 		});
 
-		it("returns 429 with Retry-After once the monthly budget is spent", async () => {
+		it("returns 429 once the monthly budget is spent", async () => {
 			mockSpentSince.mockResolvedValue(10.02);
 			const { POST } = await import("@/app/api/v1/image/route");
 			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
 			expect(res.status).toBe(429);
-			expect(Number(res.headers.get("Retry-After"))).toBeGreaterThan(0);
 			expect((await res.json()).error).toMatch(
 				/^You've used your \$10\.00 generation budget\. It resets on \w+ 1\.$/,
 			);
@@ -479,13 +480,14 @@ describe("API routes", () => {
 			const text = await res.text();
 			expect(text).toContain("data:");
 			expect(text).toContain('"text":"Hi"');
-			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith("job-abc", {
-				status: "completed",
-				cost_usd: 0.003,
-			});
+			expect(mockRecordLLMSpend).toHaveBeenCalledExactlyOnceWith(
+				"user-1",
+				expect.objectContaining({ provider: "openslop" }),
+				0.003,
+			);
 		});
 
-		it("records the call as a job and completes it with what it cost", async () => {
+		it("records what the call cost", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
 			mockLLMGenerate.mockResolvedValue({
 				output: { text: "Hello", model: "x" },
@@ -494,16 +496,11 @@ describe("API routes", () => {
 
 			await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
 
-			expect(mockCreateJob).toHaveBeenCalledWith({
-				userId: "user-1",
-				projectId: undefined,
-				connectorType: "llm",
-				request: { provider: "openslop", model: "Slop LLM v1" },
-			});
-			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith("job-abc", {
-				status: "completed",
-				cost_usd: 0.02,
-			});
+			expect(mockRecordLLMSpend).toHaveBeenCalledExactlyOnceWith(
+				"user-1",
+				expect.objectContaining({ provider: "openslop", model: "Slop LLM v1" }),
+				0.02,
+			);
 		});
 
 		it("returns 429 without calling the model once the budget is spent", async () => {
@@ -515,7 +512,7 @@ describe("API routes", () => {
 			expect(mockLLMGenerate).not.toHaveBeenCalled();
 		});
 
-		it("fails the job when the stream breaks", async () => {
+		it("records nothing when the stream breaks", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
 			mockLLMStream.mockReturnValue(
 				(async function* () {
@@ -529,10 +526,7 @@ describe("API routes", () => {
 			);
 			await res.text().catch(() => undefined);
 
-			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith("job-abc", {
-				status: "failed",
-				error: expect.stringContaining("overloaded"),
-			});
+			expect(mockRecordLLMSpend).not.toHaveBeenCalled();
 		});
 
 		it("returns 400 for missing prompt", async () => {
@@ -559,7 +553,6 @@ describe("API routes", () => {
 			);
 
 			expect(res.status).toBe(429);
-			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 	});
 

@@ -1,6 +1,6 @@
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
 import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
-import { reportedCost, validateRunwareKey, withRunware } from "../runware";
+import { validateRunwareKey, withRunware } from "../runware";
 import type { Conditioner } from "./conditioning";
 import { klingOmni, klingTurbo } from "./kling";
 import { seedance } from "./seedance";
@@ -23,11 +23,13 @@ type RunwareVideoTask = {
 };
 
 function toVideoJob(video: RunwareVideoTask): VideoJob {
-	const status = FINISHED[video.status] ?? "processing";
 	return {
 		url: video.videoURL,
-		...(status === "completed" && { costUsd: reportedCost(video) }),
-		metadata: { jobId: video.taskUUID, status },
+		costUsd: video.cost,
+		metadata: {
+			jobId: video.taskUUID,
+			status: FINISHED[video.status] ?? "processing",
+		},
 	};
 }
 

@@ -19,16 +19,6 @@ export async function withRunware<T>(
 	}
 }
 
-/** Runware reports the USD it charged on any task sent with `includeCost`. */
-export function reportedCost(task: {
-	taskUUID?: string;
-	cost?: number;
-}): number {
-	if (task.cost === undefined)
-		throw new Error(`Runware reported no cost for task ${task.taskUUID}`);
-	return task.cost;
-}
-
 /**
  * Runware authenticates over the same endpoint every generation uses, and
  * reports a bad key in the body rather than the status.

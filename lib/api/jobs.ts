@@ -1,8 +1,10 @@
 import { send } from "@vercel/queue";
 import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
+import pick from "lodash/pick";
 import { z } from "zod";
 import { BundleResponseSchema, type BundleResponse } from "./asset-bundle";
+import type { ModelRef } from "@/lib/connectors/types";
 import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -19,9 +21,6 @@ export const JOB_CONNECTOR_TYPES = [
 ] as const;
 
 export type JobConnectorType = (typeof JOB_CONNECTOR_TYPES)[number];
-
-/** Every generation that keeps a job. LLM calls stream, so theirs are never queued. */
-export type MeteredType = JobConnectorType | "llm";
 
 const JobRowSchema = z.object({
 	id: z.string(),
@@ -42,7 +41,7 @@ export type JobRow = z.infer<typeof JobRowSchema>;
 export async function createJob(input: {
 	userId: string;
 	projectId?: string | null;
-	connectorType: MeteredType;
+	connectorType: JobConnectorType;
 	request: Record<string, unknown>;
 }): Promise<{ id: string }> {
 	const supabase = createServiceClient();
@@ -58,6 +57,24 @@ export async function createJob(input: {
 		.single();
 	if (error) throw new Error(`Failed to create job: ${error.message}`);
 	return { id: data.id };
+}
+
+/** LLM calls stream instead of queueing, so each one is booked as a finished job. */
+export async function recordLLMSpend(
+	userId: string,
+	model: ModelRef,
+	costUsd: number,
+): Promise<void> {
+	const { error } = await createServiceClient()
+		.from("jobs")
+		.insert({
+			user_id: userId,
+			connector_type: "llm",
+			status: "completed",
+			request: pick(model, "provider", "model"),
+			cost_usd: costUsd,
+		});
+	if (error) throw new Error(`Failed to record spend: ${error.message}`);
 }
 
 export async function spentSince(
@@ -84,7 +101,6 @@ export async function getJob(
 		.select("*")
 		.eq("id", jobId)
 		.eq("user_id", userId)
-		.in("connector_type", JOB_CONNECTOR_TYPES)
 		.maybeSingle();
 	if (error) throw new Error(`Failed to load job: ${error.message}`);
 	return data ? JobRowSchema.parse(data) : null;

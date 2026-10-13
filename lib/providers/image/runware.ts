@@ -7,7 +7,7 @@ import {
 } from "@/lib/connectors/image/enums";
 import { BaseProvider, type RawResult } from "../base";
 import { characterAvatars } from "@/lib/connectors/characters";
-import { reportedCost, validateRunwareKey, withRunware } from "../runware";
+import { validateRunwareKey, withRunware } from "../runware";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ImageProvider } from "../types";
 
@@ -65,12 +65,9 @@ export class RunwareImage
 
 			const image = results?.[0];
 			if (!image?.imageBase64Data) throw new Error("No image data returned");
+			if (image.cost === undefined) throw new Error("No image cost returned");
 
-			return {
-				data: image.imageBase64Data,
-				format,
-				costUsd: reportedCost(image),
-			};
+			return { data: image.imageBase64Data, format, costUsd: image.cost };
 		});
 	}
 }

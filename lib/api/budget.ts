@@ -2,7 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import { MANAGED_PROVIDER } from "@/lib/connectors/provider-catalog";
 import type { ModelRef } from "@/lib/connectors/types";
-import { createJob, spentSince, type MeteredType } from "./jobs";
+import { spentSince } from "./jobs";
 import { tooManyRequests } from "./response";
 import type { RouteFamily } from "./route-families";
 
@@ -32,38 +32,18 @@ const DAY = new Intl.DateTimeFormat("en", {
 	timeZone: "UTC",
 });
 
-function budgetSpent(budget: Budget): Response {
-	const retryAfterSeconds = Math.max(
-		1,
-		Math.ceil((budget.until.getTime() - Date.now()) / 1000),
-	);
-	return tooManyRequests(
-		`You've used your ${USD.format(budget.usd)} generation budget. It resets on ${DAY.format(budget.until)}.`,
-		retryAfterSeconds,
-	);
-}
-
-type Admission =
-	| { ok: true; jobId: string }
-	| { ok: false; response: Response };
-
-/** Opens a job while the account has budget left, or answers the 429 that says when it renews. */
-export async function admitJob<TPicked extends ModelRef>(
+/** The 429 that says when the budget renews, or null while the account has budget left. */
+export async function refuseOverBudget<TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,
 	user: User,
-	type: MeteredType,
-	job: { projectId?: string; request: Record<string, unknown> },
-): Promise<Admission> {
+): Promise<Response | null> {
 	const budget = family.budget(user);
 	if (
-		budget &&
-		(await spentSince(user.id, MANAGED_PROVIDER, budget.since)) >= budget.usd
+		!budget ||
+		(await spentSince(user.id, MANAGED_PROVIDER, budget.since)) < budget.usd
 	)
-		return { ok: false, response: budgetSpent(budget) };
-	const { id } = await createJob({
-		...job,
-		userId: user.id,
-		connectorType: type,
-	});
-	return { ok: true, jobId: id };
+		return null;
+	return tooManyRequests(
+		`You've used your ${USD.format(budget.usd)} generation budget. It resets on ${DAY.format(budget.until)}.`,
+	);
 }

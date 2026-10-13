@@ -24,7 +24,7 @@ import {
 	saveConversationMessage,
 } from "./conversations";
 import { logger } from "./logger";
-import { completeJob, failJob } from "./settle-job";
+import { recordLLMSpend } from "./jobs";
 
 const MAX_TOOL_CALLS = 30;
 
@@ -41,7 +41,7 @@ export const agentTurnSchema = <TModel extends ModelRef>(
 export type AgentTurnRequest = {
 	projectId: string;
 	userId: string;
-	jobId: string;
+	provider: ModelRef["provider"];
 	message: SloppyMessage;
 	model: string;
 	llm: () => Promise<LLMProvider>;
@@ -93,9 +93,8 @@ export async function streamAgentTurn(
 		providerOptions,
 		onEnd: async ({ totalUsage }) => {
 			logger.info({ usage: totalUsage }, "Sloppy turn usage");
-			await completeJob(request.jobId, costOf(totalUsage));
+			await recordLLMSpend(request.userId, request, costOf(totalUsage));
 		},
-		onError: ({ error }) => failJob(request.jobId, error),
 	});
 
 	return createUIMessageStreamResponse({

@@ -876,7 +876,7 @@ describe("RunwareVideo", () => {
 					prompt: "test",
 					model: MODEL,
 				}),
-			).rejects.toThrow("Runware reported no cost for task job-1");
+			).rejects.toThrow("Video job completed without a cost");
 		});
 
 		it("fails loudly when a job succeeded without a video", async () => {

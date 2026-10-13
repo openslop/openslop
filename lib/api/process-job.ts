@@ -1,10 +1,10 @@
 import isEqual from "lodash/isEqual";
+import { stringifyError } from "@/lib/errors";
 import { isTerminal } from "@/lib/gateway/base";
 import { failIfExpired } from "./job-deadline";
 import { getJobHandler } from "./job-handlers";
 import { enqueueJob, loadJobForProcessing, updateJob } from "./jobs";
 import { logger } from "./logger";
-import { failJob } from "./settle-job";
 
 const PENDING_RETRY_SECONDS = 5;
 
@@ -33,7 +33,7 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 		outcome = await handler.process(job);
 	} catch (error) {
 		logger.error(error, `Job ${jobId} failed`);
-		await failJob(jobId, error);
+		await updateJob(jobId, { status: "failed", error: stringifyError(error) });
 		throw error;
 	}
 

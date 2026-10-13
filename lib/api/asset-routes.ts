@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { JobPoll } from "@/lib/gateway/base";
 import type { ModelRef } from "@/lib/connectors/types";
-import { enqueueJob, getJob, type JobConnectorType } from "./jobs";
+import { stringifyError } from "@/lib/errors";
+import {
+	createJob,
+	enqueueJob,
+	getJob,
+	updateJob,
+	type JobConnectorType,
+} from "./jobs";
 import { failIfExpired } from "./job-deadline";
 import {
 	AUDIO_FIELDS,
@@ -11,10 +18,9 @@ import {
 	TTS_FIELDS,
 	VIDEO_FIELDS,
 } from "./generation-schema";
-import { admitJob } from "./budget";
+import { refuseOverBudget } from "./budget";
 import { notFound } from "./response";
 import type { RouteFamily } from "./route-families";
-import { failJobOnThrow } from "./settle-job";
 
 type AssetBody = ModelRef & { projectId?: string } & Record<string, unknown>;
 
@@ -40,15 +46,25 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 		schema: bodySchema(family.model(type), fields) as z.ZodType<AssetBody>,
 		label,
 		handle: async ({ user, input }) => {
+			const refused = await refuseOverBudget(family, user);
+			if (refused) return refused;
 			const { projectId, ...request } = input;
-			const admitted = await admitJob(family, user, type, {
+			const { id } = await createJob({
+				userId: user.id,
 				projectId,
+				connectorType: type,
 				request,
 			});
-			if (!admitted.ok) return admitted.response;
-			const { jobId } = admitted;
-			await failJobOnThrow(jobId, () => enqueueJob(jobId));
-			return NextResponse.json({ jobId, status: "pending" });
+			try {
+				await enqueueJob(id);
+			} catch (error) {
+				await updateJob(id, {
+					status: "failed",
+					error: `Failed to queue job: ${stringifyError(error)}`,
+				});
+				throw error;
+			}
+			return NextResponse.json({ jobId: id, status: "pending" });
 		},
 	});
 };

@@ -1,27 +1,15 @@
-import type { User } from "@supabase/supabase-js";
 import omit from "lodash/omit";
-import pick from "lodash/pick";
 import { NextResponse } from "next/server";
 import { parseSloppyMessage } from "@/lib/agent/messages";
 import { modelEntry, vendorParams } from "@/lib/connectors/models";
 import type { ModelRef } from "@/lib/connectors/types";
 import { agentTurnSchema, streamAgentTurn } from "./agent-turn";
-import { admitJob } from "./budget";
+import { refuseOverBudget } from "./budget";
 import { bodySchema, LLM_FIELDS } from "./generation-schema";
+import { recordLLMSpend } from "./jobs";
 import { badRequest } from "./response";
-import { failJobOnThrow, settleJob, settleJobWith } from "./settle-job";
 import { createSSEStreamResponse } from "./sse";
 import type { RouteFamily } from "./route-families";
-
-const admitLLMCall = <TPicked extends ModelRef>(
-	family: RouteFamily<TPicked>,
-	user: User,
-	input: ModelRef & { projectId?: string },
-) =>
-	admitJob(family, user, "llm", {
-		projectId: input.projectId,
-		request: pick(input, "provider", "model"),
-	});
 
 export const createLLMRouteHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,
@@ -30,19 +18,21 @@ export const createLLMRouteHandler = <TPicked extends ModelRef>(
 		schema: bodySchema(family.model("llm"), LLM_FIELDS),
 		label: "LLM generation",
 		handle: async ({ user, input }) => {
+			const refused = await refuseOverBudget(family, user);
+			if (refused) return refused;
 			const llm = await family.providerFor(user.id, "llm", input);
-			const admitted = await admitLLMCall(family, user, input);
-			if (!admitted.ok) return admitted.response;
-			const { jobId } = admitted;
 			const params = vendorParams("llm", omit(input, "stream", "projectId"));
 			if (input.stream)
 				return createSSEStreamResponse(
-					settleJobWith(jobId, llm.stream(params)),
+					(async function* () {
+						const costUsd = yield* llm.stream(params);
+						await recordLLMSpend(user.id, input, costUsd);
+					})(),
 					"LLM",
 				);
-			return NextResponse.json(
-				await settleJob(jobId, () => llm.generate(params)),
-			);
+			const { output, costUsd } = await llm.generate(params);
+			await recordLLMSpend(user.id, input, costUsd);
+			return NextResponse.json(output);
 		},
 	});
 
@@ -55,18 +45,14 @@ export const createAgentRouteHandler = <TPicked extends ModelRef>(
 		handle: async ({ user, input }) => {
 			const message = await parseSloppyMessage(input.message);
 			if (!message) return badRequest("message is not a Sloppy message");
-			const admitted = await admitLLMCall(family, user, input);
-			if (!admitted.ok) return admitted.response;
-			const { jobId } = admitted;
-			return failJobOnThrow(jobId, () =>
-				streamAgentTurn({
-					...input,
-					message,
-					userId: user.id,
-					jobId,
-					llm: () => family.providerFor(user.id, "llm", input),
-					model: modelEntry("llm", input).id,
-				}),
-			);
+			const refused = await refuseOverBudget(family, user);
+			if (refused) return refused;
+			return streamAgentTurn({
+				...input,
+				message,
+				userId: user.id,
+				llm: () => family.providerFor(user.id, "llm", input),
+				model: modelEntry("llm", input).id,
+			});
 		},
 	});

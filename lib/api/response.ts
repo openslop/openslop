@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { ApiErrorEnvelope } from "./error-envelope";
 
-function errorResponse(error: string, status: number, headers?: HeadersInit) {
-	return NextResponse.json<ApiErrorEnvelope>({ error }, { status, headers });
+function errorResponse(error: string, status: number) {
+	return NextResponse.json<ApiErrorEnvelope>({ error }, { status });
 }
 
 export function badRequest(message: string) {
@@ -28,8 +28,6 @@ export function forbidden() {
 	);
 }
 
-export function tooManyRequests(message: string, retryAfterSeconds: number) {
-	return errorResponse(message, 429, {
-		"Retry-After": String(retryAfterSeconds),
-	});
+export function tooManyRequests(message: string) {
+	return errorResponse(message, 429);
 }
