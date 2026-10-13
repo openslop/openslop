@@ -1,7 +1,7 @@
 import type { SharedV3ProviderOptions } from "@ai-sdk/provider";
 import type { SystemModelMessage } from "ai";
 import { dedent } from "@/lib/dedent";
-import { VIDEO_FORMATS } from "@/lib/script/prompt/formats";
+import { VIDEO_FORMAT_RULES } from "@/lib/script/prompt/formats";
 
 const ROLE = dedent`
   You are Sloppy, the agent inside OpenSlop, a studio for making high-quality, production-ready finished videos.
@@ -81,7 +81,7 @@ const LIMITS = dedent`
 const FORMATS = dedent`
   # Formats of the finished video
 
-  ${VIDEO_FORMATS}
+  ${VIDEO_FORMAT_RULES}
 
   Name the format in the brief you hand write_script.
 `;

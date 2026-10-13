@@ -45,7 +45,7 @@ export function createAutosaver({
 	onError,
 }: AutosaverOptions): Autosaver {
 	const queue = new PQueue({ concurrency: 1 });
-	const saved = createEmitter<SaveProjectInput>();
+	const projectSaved = createEmitter<SaveProjectInput>();
 
 	const buildInput = (): SaveProjectInput => ({
 		...document.read(),
@@ -61,7 +61,7 @@ export function createAutosaver({
 			await saveProject(projectId, input);
 			lastSaved = input;
 			onSaved();
-			saved.notify(input);
+			projectSaved.notify(input);
 		} catch (error) {
 			console.error("Autosave failed", error);
 			onError(error);
@@ -81,9 +81,7 @@ export function createAutosaver({
 
 	return {
 		schedule,
-		flush: () => {
-			schedule.flush();
-		},
+		flush: schedule.flush,
 		suspend: () => {
 			schedule.flush();
 			suspended = true;
@@ -92,6 +90,6 @@ export function createAutosaver({
 			suspended = false;
 			schedule();
 		},
-		onProjectSaved: saved.subscribe,
+		onProjectSaved: projectSaved.subscribe,
 	};
 }

@@ -19,10 +19,11 @@ export type VideoJobMetadata = {
 
 export type VideoJob = {
 	url?: string;
+	costUsd?: number;
 	metadata: VideoJobMetadata;
 };
 
-export type FinishedVideo = Required<VideoJob>;
+export type FinishedVideo = { url: string; metadata: VideoJobMetadata };
 
 export type VideoProviderResponse = BundleResponse & {
 	metadata: VideoJobMetadata;
@@ -32,7 +33,7 @@ export type VideoProviderResponse = BundleResponse & {
 export type VideoPoll =
 	| { kind: "pending" }
 	| { kind: "failed" }
-	| { kind: "ready"; asset: VideoProviderResponse };
+	| { kind: "ready"; asset: VideoProviderResponse; costUsd: number };
 
 export interface VideoProvider extends ProviderContract {
 	/** Resolves to the vendor's id for the job, which `poll` takes. */
@@ -74,6 +75,8 @@ export abstract class BaseVideoProvider implements VideoProvider {
 		if (job.metadata.status === "failed") return { kind: "failed" };
 		if (job.metadata.status !== "completed") return { kind: "pending" };
 		if (!job.url) throw new Error("Video job completed without a video");
+		if (job.costUsd === undefined)
+			throw new Error("Video job completed without a cost");
 		const metadata = {
 			...job.metadata,
 			durationSec:
@@ -84,6 +87,7 @@ export abstract class BaseVideoProvider implements VideoProvider {
 		return {
 			kind: "ready",
 			asset: await this.store({ url: job.url, metadata }),
+			costUsd: job.costUsd,
 		};
 	}
 }

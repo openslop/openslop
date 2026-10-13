@@ -49,6 +49,7 @@ export class MockVideo extends BaseVideoProvider {
 		const variant = pickRandom(MOCK_VARIANTS);
 		return {
 			url: variant.url,
+			costUsd: 0,
 			metadata: {
 				jobId,
 				status: "completed",

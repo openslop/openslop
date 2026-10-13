@@ -13,11 +13,11 @@ export function artStyleReferences(
 	assets: AssetElement[],
 	queue: GenerationQueue,
 ): string[] {
-	const uploadedAvatars = getAvatars(assets).map(({ id }) => {
+	const uploadedAvatarUrls = getAvatars(assets).map(({ id }) => {
 		const { result, pinned } = queue.getElementSnapshot(id);
 		return pinned ? getPrimaryUrl(result, "image") : undefined;
 	});
-	return [...referenceUrls(assets), ...compact(uploadedAvatars)];
+	return [...referenceUrls(assets), ...compact(uploadedAvatarUrls)];
 }
 
 export async function deriveArtStyle(

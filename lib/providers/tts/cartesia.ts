@@ -13,7 +13,7 @@ import {
 } from "@/lib/connectors/tts/enums";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
-import { BaseProvider, type WithMetadata } from "../base";
+import { BaseProvider, type RawResult } from "../base";
 import { validateByProbe } from "../validate";
 import { pcmDurationSec, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
@@ -31,7 +31,10 @@ import type {
 type RawTTSResult = {
 	data: Buffer;
 	textTimestamps: TextTimestamp[];
-} & WithMetadata;
+} & RawResult;
+
+/** Cartesia reports no per-request cost; the Scale plan is $299 for 8M characters. */
+const USD_PER_CHARACTER = 299 / 8_000_000;
 
 const SAMPLE_RATE = 44100;
 const ENCODING: RawEncoding = "pcm_f32le";
@@ -245,6 +248,7 @@ export class CartesiaTTS
 			return {
 				data: wavFromPcm(pcm, STREAMED_FORMAT),
 				textTimestamps,
+				costUsd: params.prompt.length * USD_PER_CHARACTER,
 				// Word timestamps stop at the last word, and may be absent.
 				metadata: {
 					durationSec:

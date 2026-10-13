@@ -63,9 +63,9 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 			model: MUSIC_MODEL,
 		});
 
-		expect(result.result.audio).toBe("https://blob/cached.mp3");
-		expect(result.metadata?.cached).toBe(true);
-		expect(result.metadata?.durationSec).toBe(30);
+		expect(result.output.result.audio).toBe("https://blob/cached.mp3");
+		expect(result.output.metadata?.cached).toBe(true);
+		expect(result.output.metadata?.durationSec).toBe(30);
 		expect(mockCompose).not.toHaveBeenCalled();
 		expect(mockEmbedText).toHaveBeenCalledWith("jazz");
 	});
@@ -88,7 +88,7 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 			model: MUSIC_MODEL,
 		});
 
-		expect(result.result.audio).toBe("url"); // mocked AssetBundle.upload
+		expect(result.output.result.audio).toBe("url"); // mocked AssetBundle.upload
 		expect(mockCompose).toHaveBeenCalled();
 		expect(mockEmbedText).toHaveBeenCalledWith("jazz"); // prompt only — duration excluded
 		expect(mockUpsert).toHaveBeenCalledWith({

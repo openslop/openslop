@@ -55,7 +55,7 @@ async function spokenPreview(
 	voice: VoiceInfo,
 ): Promise<AudioBytes> {
 	const language = languageSchema.parse(voice.language) ?? DEFAULT_TTS_LANGUAGE;
-	const bundle = await tts.generate(
+	const { output: bundle } = await tts.generate(
 		vendorParams("tts", {
 			...request,
 			prompt: PREVIEW_LINES[language],

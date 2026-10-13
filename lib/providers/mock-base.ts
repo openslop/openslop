@@ -1,5 +1,6 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
+import type { Priced } from "./base";
 import { mockDelay, pickRandom } from "./mock-utils";
 
 type MockVariant = Omit<BundleResponse, "provider" | "type">;
@@ -14,8 +15,11 @@ export abstract class MockProvider<TParams> {
 		return { ok: true };
 	}
 
-	async generate(_params: TParams): Promise<BundleResponse> {
+	async generate(_params: TParams): Promise<Priced<BundleResponse>> {
 		await mockDelay(this.delayMs);
-		return { ...pickRandom(this.variants), type: "mock", provider: "mock" };
+		return {
+			output: { ...pickRandom(this.variants), type: "mock", provider: "mock" },
+			costUsd: 0,
+		};
 	}
 }

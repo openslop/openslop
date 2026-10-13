@@ -1,14 +1,16 @@
+import pick from "lodash/pick";
 import type { z } from "zod";
 import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import type { ProviderType, Providers } from "@/lib/providers/types";
 import { byokModel, hostedModel, type BYOKModelRef } from "./generation-schema";
+import { createJob } from "./jobs";
 import { byokProviderFor } from "./providers/byok";
 import { hostedProviderFor } from "./providers/openslop";
 import {
 	createApiParamRouteHandler,
 	createApiQueryRouteHandler,
-	createApiRouteHandler,
+	createHostedRouteHandler,
 	createSessionParamRouteHandler,
 	createSessionQueryRouteHandler,
 	createSessionRouteHandler,
@@ -16,11 +18,12 @@ import {
 
 /**
  * Everything that differs between the two route families, in one place: who a
- * route lets in, how it names its models, and whose key a picked model runs
- * on. A route picks a family and a connector type; nothing else about it varies.
+ * route lets in, how it names its models, whose key a picked model runs on,
+ * and whether its streamed LLM spend is booked. A route picks a family and a
+ * connector type; nothing else about it varies.
  */
 export type RouteFamily<TPicked extends ModelRef> = {
-	createHandler: typeof createApiRouteHandler;
+	createHandler: typeof createHostedRouteHandler;
 	createQueryHandler: typeof createApiQueryRouteHandler;
 	createParamHandler: typeof createApiParamRouteHandler;
 	model: (type: ConnectorType) => z.ZodType<TPicked>;
@@ -29,15 +32,29 @@ export type RouteFamily<TPicked extends ModelRef> = {
 		type: K,
 		picked: TPicked,
 	) => Promise<Providers[K]>;
+	recordSpend: (
+		userId: string,
+		picked: TPicked,
+		costUsd: number,
+	) => Promise<unknown>;
 };
 
 export const HOSTED: RouteFamily<ModelRef> = {
-	createHandler: createApiRouteHandler,
+	createHandler: createHostedRouteHandler,
 	createQueryHandler: createApiQueryRouteHandler,
 	createParamHandler: createApiParamRouteHandler,
 	model: hostedModel,
 	providerFor: async (_userId, type, picked) =>
 		hostedProviderFor(type, picked.model),
+	// LLM calls stream instead of queueing, so each is booked as a finished job.
+	recordSpend: (userId, picked, costUsd) =>
+		createJob({
+			userId,
+			connectorType: "llm",
+			request: pick(picked, "provider", "model"),
+			status: "completed",
+			costUsd,
+		}),
 };
 
 export const BYOK: RouteFamily<BYOKModelRef> = {
@@ -47,6 +64,7 @@ export const BYOK: RouteFamily<BYOKModelRef> = {
 	model: byokModel,
 	providerFor: (userId, type, picked) =>
 		byokProviderFor(userId, picked.provider, type),
+	recordSpend: async () => {},
 };
 
 const isByokPick = (picked: ModelRef): picked is BYOKModelRef =>

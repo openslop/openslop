@@ -27,3 +27,7 @@ export function forbidden() {
 		403,
 	);
 }
+
+export function paymentRequired(message: string) {
+	return errorResponse(message, 402);
+}

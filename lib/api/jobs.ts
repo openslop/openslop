@@ -3,13 +3,14 @@ import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
 import { z } from "zod";
 import { BundleResponseSchema, type BundleResponse } from "./asset-bundle";
+import type { ConnectorType } from "@/lib/connectors/types";
 import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
 const ASSET_QUEUE_TOPIC = "asset-generate";
 
-/** What an asset route queues. LLM turns stream. */
+/** What an asset route queues. */
 export const JOB_CONNECTOR_TYPES = [
 	"image",
 	"music",
@@ -39,8 +40,10 @@ export type JobRow = z.infer<typeof JobRowSchema>;
 export async function createJob(input: {
 	userId: string;
 	projectId?: string | null;
-	connectorType: JobConnectorType;
+	connectorType: ConnectorType;
 	request: Record<string, unknown>;
+	status?: JobStatus;
+	costUsd?: number;
 }): Promise<{ id: string }> {
 	const supabase = createServiceClient();
 	const { data, error } = await supabase
@@ -50,11 +53,27 @@ export async function createJob(input: {
 			project_id: input.projectId ?? null,
 			connector_type: input.connectorType,
 			request: input.request,
+			status: input.status,
+			cost_usd: input.costUsd,
 		})
 		.select("id")
 		.single();
 	if (error) throw new Error(`Failed to create job: ${error.message}`);
 	return { id: data.id };
+}
+
+export async function spentSince(
+	userId: string,
+	provider: string,
+	since: Date,
+): Promise<number> {
+	const { data, error } = await createServiceClient().rpc("spend_since", {
+		p_user_id: userId,
+		p_provider: provider,
+		p_since: since.toISOString(),
+	});
+	if (error) throw new Error(`Failed to read spend: ${error.message}`);
+	return z.coerce.number().parse(data);
 }
 
 export async function getJob(
@@ -92,6 +111,7 @@ export async function updateJob(
 		result?: BundleResponse;
 		error?: string;
 		metadata?: Record<string, unknown>;
+		cost_usd?: number;
 	},
 ): Promise<void> {
 	const update = omitBy(patch, isUndefined);

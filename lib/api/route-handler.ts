@@ -2,7 +2,12 @@ import { NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import { notFound } from "./response";
-import { withApiAccess, withPublic, withSession } from "./with-auth";
+import {
+	withApiAccess,
+	withHostedBudget,
+	withPublic,
+	withSession,
+} from "./with-auth";
 import {
 	parseBody,
 	parseFormData,
@@ -49,7 +54,10 @@ function routeHandler(authTier: AuthTier, parse: ParseSource) {
 	};
 }
 
-export const createApiRouteHandler = routeHandler(withApiAccess, parseBody);
+export const createHostedRouteHandler = routeHandler(
+	withHostedBudget,
+	parseBody,
+);
 export const createSessionRouteHandler = routeHandler(withSession, parseBody);
 export const createApiQueryRouteHandler = routeHandler(
 	withApiAccess,

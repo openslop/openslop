@@ -6,16 +6,19 @@ import { createJobPollHandler } from "../asset-routes";
 import { HOSTED } from "../route-families";
 import { bodySchema, hostedModel } from "../generation-schema";
 import {
-	createApiRouteHandler,
+	createHostedRouteHandler,
 	createSessionFormRouteHandler,
 	createSessionRouteHandler,
 } from "../route-handler";
 
 const mockGetJob = vi.fn();
+const mockUpdateJob = vi.fn();
 vi.mock("../jobs", () => ({
 	createJob: vi.fn(),
 	enqueueJob: vi.fn(),
 	getJob: (...args: unknown[]) => mockGetJob(...args),
+	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
+	spentSince: async () => 0,
 }));
 
 vi.mock("../logger", () => ({
@@ -48,9 +51,9 @@ function makeRequest(body: unknown) {
 const schema = bodySchema(hostedModel("image"), {});
 
 function makeHandler(
-	handle?: Parameters<typeof createApiRouteHandler>[0]["handle"],
+	handle?: Parameters<typeof createHostedRouteHandler>[0]["handle"],
 ) {
-	return createApiRouteHandler({
+	return createHostedRouteHandler({
 		schema,
 		label: "TestRoute",
 		handle:
@@ -60,7 +63,7 @@ function makeHandler(
 	});
 }
 
-describe("createApiRouteHandler", () => {
+describe("createHostedRouteHandler", () => {
 	it("returns 401 when the user is not authenticated", async () => {
 		mockGetUser.mockResolvedValue(null);
 		const handle = vi.fn(async () => NextResponse.json({}));
@@ -274,13 +277,19 @@ describe("createJobPollHandler", () => {
 		expect(res.status).toBe(404);
 	});
 
-	it("returns the job view when the job exists", async () => {
-		mockGetJob.mockResolvedValue({
+	function storedJob(ageMs: number) {
+		return {
 			id: "00000000-0000-0000-0000-000000000000",
+			connector_type: "image",
 			status: "pending",
 			result: null,
 			error: null,
-		});
+			created_at: new Date(Date.now() - ageMs).toISOString(),
+		};
+	}
+
+	it("returns the job view when the job exists", async () => {
+		mockGetJob.mockResolvedValue(storedJob(0));
 		const res = await poll("00000000-0000-0000-0000-000000000000");
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
@@ -289,5 +298,16 @@ describe("createJobPollHandler", () => {
 			result: null,
 			error: null,
 		});
+	});
+
+	it("fails a job past its deadline before reporting it", async () => {
+		mockGetJob.mockResolvedValue(storedJob(60 * 60_000));
+		mockUpdateJob.mockResolvedValue(undefined);
+		const res = await poll("00000000-0000-0000-0000-000000000000");
+		expect(await res.json()).toMatchObject({
+			status: "failed",
+			error: "Job timed out after 15 minutes",
+		});
+		expect(mockUpdateJob).toHaveBeenCalledOnce();
 	});
 });

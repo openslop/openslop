@@ -6,7 +6,7 @@ import {
 	LOOPS_OPTIONS,
 } from "@/lib/canvas/types";
 import { MOTION_EFFECTS } from "@/lib/render/motion-effect-names";
-import { VIDEO_FORMATS } from "./formats";
+import { VIDEO_FORMAT_RULES } from "./formats";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import { TTS_EMOTIONS, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
@@ -18,7 +18,7 @@ export function osmlSpec(language: string): string {
 		The story script must be written in the XML format below. Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >. Never nest tags.
 
 		## Format
-		${VIDEO_FORMATS}
+		${VIDEO_FORMAT_RULES}
 
 		${languagePrompt(language)}
 

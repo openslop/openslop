@@ -33,13 +33,11 @@ const CanvasScopedProviders = composeProviders(
 );
 
 /**
- * Opens the editor session and composes every canvas-scoped provider (document,
- * version history, video layout, player placement and control, bottom
- * view, scene selection, auto-scroll, collapse state) into a single boundary,
- * so the top-level view stays a flat orchestrator. The document lives
- * in `<Slate>`, so consumers subscribe to the slices they need and a keystroke
- * never re-renders the shell, and they reach the editor itself with
- * `useSlateStatic()` rather than a drilled prop.
+ * Opens the editor session and composes every canvas-scoped provider into a
+ * single boundary, so the top-level view stays a flat orchestrator. The
+ * document lives in `<Slate>`, so consumers subscribe to the slices they need
+ * and a keystroke never re-renders the shell, and they reach the editor itself
+ * with `useSlateStatic()` rather than a drilled prop.
  */
 export function CanvasProviders({ children }: { children: ReactNode }) {
 	const { editor, onDocumentChange, history } = useEditorSession();

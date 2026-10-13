@@ -12,8 +12,6 @@ export const VIDEO_RESOLUTIONS = ["720p", "1080p"] as const;
 
 export type VideoResolution = (typeof VIDEO_RESOLUTIONS)[number];
 
-export const DEFAULT_VIDEO_RESOLUTION: VideoResolution = "720p";
-
 export type Dimensions = { width: number; height: number };
 
 export const ASPECT_RATIO_DIMENSIONS: Record<

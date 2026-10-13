@@ -5,10 +5,12 @@ import {
 	streamText,
 	type FilePart,
 	type LanguageModel,
+	type LanguageModelUsage,
 	type SystemModelMessage,
 	type TextPart,
 } from "ai";
 import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
+import { ANTHROPIC_LLM_MODELS } from "@/lib/connectors/llm/anthropic/models";
 import { parseImageSource } from "@/lib/api/image-source";
 import { logger } from "@/lib/api/logger";
 import { stringifyError } from "@/lib/errors";
@@ -17,6 +19,7 @@ import {
 	type ThinkingLevel,
 } from "@/lib/connectors/llm/enums";
 import { validateByProbe } from "../validate";
+import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
 
@@ -50,6 +53,33 @@ function toImagePart(image: string): FilePart {
 }
 
 const DEFAULT_MAX_TOKENS = 65536;
+
+type ModelId =
+	(typeof ANTHROPIC_LLM_MODELS)[keyof typeof ANTHROPIC_LLM_MODELS]["id"];
+
+const USD_PER_MTOK: Record<ModelId, { input: number; output: number }> = {
+	"claude-opus-5": { input: 5, output: 25 },
+	"claude-sonnet-5": { input: 2, output: 10 },
+	"claude-haiku-4-5-20251001": { input: 1, output: 5 },
+};
+
+const CACHE_READ_RATE = 0.1;
+const CACHE_WRITE_RATE = 1.25;
+
+function costOf(modelId: string, usage: LanguageModelUsage): number {
+	const price = USD_PER_MTOK[modelId as ModelId];
+	if (!price) throw new Error(`No price for Anthropic model "${modelId}"`);
+	const { noCacheTokens, cacheReadTokens, cacheWriteTokens } =
+		usage.inputTokenDetails;
+	const inputTokens =
+		(noCacheTokens ?? 0) +
+		(cacheReadTokens ?? 0) * CACHE_READ_RATE +
+		(cacheWriteTokens ?? 0) * CACHE_WRITE_RATE;
+	return (
+		(inputTokens * price.input + (usage.outputTokens ?? 0) * price.output) /
+		1_000_000
+	);
+}
 
 /** A prefix the API keeps between requests and serves at a tenth of the price. */
 const CACHED = { cacheControl: { type: "ephemeral" } };
@@ -94,6 +124,7 @@ export class AnthropicLLM implements LLMProvider {
 				anthropic: { ...thinking(DEFAULT_THINKING_LEVEL), ...CACHED },
 			},
 			cachedPrefix: CACHED_PREFIX,
+			costOf: (usage) => costOf(modelId, usage),
 		};
 	}
 
@@ -123,22 +154,25 @@ export class AnthropicLLM implements LLMProvider {
 		};
 	}
 
-	async generate(params: LLMRequest): Promise<LLMGenerateResult> {
+	async generate(params: LLMRequest): Promise<Priced<LLMGenerateResult>> {
 		const result = await generateText(this.buildRequest(params));
 		logger.info({ usage: result.usage }, "LLM usage");
 		return {
-			text: result.text,
-			model: result.response.modelId,
-			usage: {
-				inputTokens: result.usage.inputTokens ?? 0,
-				outputTokens: result.usage.outputTokens ?? 0,
+			output: {
+				text: result.text,
+				model: result.finalStep.response.modelId,
+				usage: {
+					inputTokens: result.usage.inputTokens ?? 0,
+					outputTokens: result.usage.outputTokens ?? 0,
+				},
 			},
+			costUsd: costOf(params.model, result.usage),
 		};
 	}
 
 	// fullStream, not textStream: textStream filters error parts out, which
 	// would end a failed generation as a clean, empty success.
-	async *stream(params: LLMRequest): AsyncGenerator<LLMStreamChunk> {
+	async *stream(params: LLMRequest): AsyncGenerator<LLMStreamChunk, number> {
 		const result = streamText(this.buildRequest(params));
 		for await (const part of result.fullStream) {
 			if (part.type === "text-delta") yield { text: part.text, done: false };
@@ -147,7 +181,9 @@ export class AnthropicLLM implements LLMProvider {
 					? part.error
 					: new Error(stringifyError(part.error));
 		}
-		logger.info({ usage: await result.usage }, "LLM usage");
+		const usage = await result.usage;
+		logger.info({ usage }, "LLM usage");
 		yield { text: "", done: true };
+		return costOf(params.model, usage);
 	}
 }

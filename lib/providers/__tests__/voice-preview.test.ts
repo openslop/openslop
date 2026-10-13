@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { VoiceInfo } from "@/lib/connectors/types";
 import type { TTSProvider } from "../tts/base";
+import { PREVIEW_LINES } from "../tts/preview-lines";
 import { fetchAllowedVoicePreview, voicePreview } from "../tts/voice-preview";
 import { spyAssetBundle } from "./_asset-bundle";
 import { wav } from "./_wav";
@@ -163,10 +164,13 @@ describe("voicePreview for a voice the vendor has no preview of", () => {
 		vi.stubGlobal("fetch", fetchMock);
 		getVoice.mockResolvedValue({ ...VOICE, previewUrl: undefined });
 		generate.mockResolvedValue({
-			id: "spoken",
-			type: "tts",
-			provider: "cartesia",
-			result: { audio: "output.wav" },
+			output: {
+				id: "spoken",
+				type: "tts",
+				provider: "cartesia",
+				result: { audio: "output.wav" },
+			},
+			costUsd: 0,
 		});
 		fetchMock.mockResolvedValue(upstream(2));
 	});
@@ -176,16 +180,8 @@ describe("voicePreview for a voice the vendor has no preview of", () => {
 	});
 
 	it.each([
-		[
-			"its own language",
-			"fr",
-			"Bonjour ! Voici à quoi ressemble ma voix. J'espère qu'elle conviendra à votre histoire.",
-		],
-		[
-			"English when it names none",
-			undefined,
-			"Hello! This is how my voice sounds. I hope it suits your story.",
-		],
+		["its own language", "fr", PREVIEW_LINES.fr],
+		["English when it names none", undefined, PREVIEW_LINES.en],
 	])(
 		"has the voice speak a preview line in %s",
 		async (_, language, prompt) => {
@@ -204,8 +200,7 @@ describe("voicePreview for a voice the vendor has no preview of", () => {
 		expect(generate).toHaveBeenCalledWith(
 			expect.objectContaining({
 				voiceId: "v-sol",
-				prompt:
-					"Hello! This is how my voice sounds. I hope it suits your story.",
+				prompt: PREVIEW_LINES.en,
 			}),
 		);
 		expect(fetchMock).toHaveBeenCalledWith(

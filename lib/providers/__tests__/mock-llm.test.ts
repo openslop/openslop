@@ -10,7 +10,9 @@ import { MockLLM } from "../llm/mock";
 
 describe("MockLLM", () => {
 	it("answers an outline prompt with an outline, not a script", async () => {
-		const { text } = await new MockLLM().generate({
+		const {
+			output: { text },
+		} = await new MockLLM().generate({
 			prompt: outlinePrompt("two friends in a forest", "English"),
 		});
 
@@ -19,7 +21,9 @@ describe("MockLLM", () => {
 	});
 
 	it("answers a review with no findings, so a mock run ends the loop", async () => {
-		const { text } = await new MockLLM().generate({
+		const {
+			output: { text },
+		} = await new MockLLM().generate({
 			prompt: reviewPrompt('<video id="v1">Shot 1: a rabbit.</video>'),
 		});
 
@@ -27,7 +31,9 @@ describe("MockLLM", () => {
 	});
 
 	it("falls back to a script for anything else", async () => {
-		const { text } = await new MockLLM().generate({
+		const {
+			output: { text },
+		} = await new MockLLM().generate({
 			prompt: "write me a video",
 		});
 

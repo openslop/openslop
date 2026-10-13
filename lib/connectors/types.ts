@@ -3,6 +3,7 @@ import type { CanvasElement } from "@/lib/canvas/types";
 import type { Dependency, Read } from "@/lib/generation/declare";
 import type { WithMetadata } from "@/lib/providers/base";
 import type { VideoResolution } from "@/lib/project/aspect-ratio";
+import type { CharacterSchema } from "@/lib/api/request-schema-fields";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";
@@ -48,10 +49,9 @@ export type ModelEntry = ModelMeta & {
 	id: string;
 };
 
-/** A video model also says which output resolutions the vendor renders it at, and whether it listens to reference audio. */
+/** A video model also says which output resolutions the vendor renders it at, its default first. */
 export type VideoModelEntry = ModelEntry & {
-	resolutions: readonly VideoResolution[];
-	referenceAudios?: true;
+	resolutions: readonly [VideoResolution, ...VideoResolution[]];
 };
 
 /** What each connector type's catalog entries carry. */
@@ -188,10 +188,13 @@ export type SFXGenerateParams = ConnectorGenerateParams & {
 	durationSeconds?: number;
 };
 
+export type Character = z.infer<typeof CharacterSchema>;
+
 export type ImageGenerateParams = ConnectorGenerateParams & {
 	format?: ImageFormat;
 	width?: number;
 	height?: number;
+	characterAssets?: Character[];
 	referenceImages?: string[];
 };
 
@@ -240,19 +243,12 @@ export interface TTSConnector extends Connector {
 	voicePreview(voiceId: string): Promise<HostedVoicePreview>;
 }
 
-/** Audio a video's speech should sound like, and whose voice it is. */
-export const ReferenceAudioSchema = HostedVoicePreviewSchema.extend({
-	speaker: z
-		.string()
-		.min(1, { error: "A reference audio must name its speaker" }),
-});
-
-export type ReferenceAudio = z.infer<typeof ReferenceAudioSchema>;
-
 export type VideoGenerateParams = ConnectorGenerateParams & {
+	characterAssets?: Character[];
 	referenceImages?: string[];
+	/** The previous scene's opening and middle, which this one carries on from. */
+	continuityFrames?: string[];
 	frameImage?: string;
-	referenceAudios?: ReferenceAudio[];
 	duration?: number;
 	resolution?: VideoResolution;
 	width?: number;

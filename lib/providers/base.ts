@@ -8,6 +8,8 @@ export type WithMetadata<
 	metadata?: T;
 };
 
+export type Priced<T> = { output: T; costUsd: number };
+
 /**
  * Every provider can be asked whether the key it was built with works. The
  * check is the vendor's own to define: only it knows which call is cheapest and
@@ -17,14 +19,17 @@ export interface ProviderContract {
 	validate(): Promise<ValidationResult>;
 }
 
+/** What a vendor call hands back before it is stored. */
+export type RawResult = WithMetadata & { costUsd: number };
+
 /** A provider that turns a request into a stored asset bundle. */
 export interface AssetProvider<TParams> extends ProviderContract {
-	generate(params: TParams): Promise<BundleResponse>;
+	generate(params: TParams): Promise<Priced<BundleResponse>>;
 }
 
 export abstract class BaseProvider<
 	TParams = unknown,
-	TRawResult extends WithMetadata = WithMetadata,
+	TRawResult extends RawResult = RawResult,
 > implements ProviderContract {
 	protected abstract readonly blobConfig: { type: string; provider: string };
 
@@ -44,8 +49,8 @@ export abstract class BaseProvider<
 		);
 	}
 
-	async generate(params: TParams): Promise<BundleResponse> {
-		const result = await this._generate(params);
-		return this.store(result);
+	async generate(params: TParams): Promise<Priced<BundleResponse>> {
+		const raw = await this._generate(params);
+		return { output: await this.store(raw), costUsd: raw.costUsd };
 	}
 }

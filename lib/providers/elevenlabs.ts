@@ -1,13 +1,11 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { AllowedOutputFormats } from "@elevenlabs/elevenlabs-js/api";
 import type { BundleFile } from "@/lib/api/asset-bundle";
-import { BaseProvider, type WithMetadata } from "./base";
+import { BaseProvider, type RawResult } from "./base";
 import { validateByProbe } from "./validate";
 import { streamToBuffer } from "./stream";
 
-type AudioResult = {
-	data: ArrayBuffer;
-} & WithMetadata;
+type AudioResult = { data: ArrayBuffer } & RawResult;
 
 export type AudioFormat = {
 	sampleRate: number;
@@ -51,6 +49,9 @@ export abstract class BaseElevenLabsAudio<
 
 	protected abstract readonly outputFormat: AudioFormat;
 
+	/** ElevenLabs reports no per-request cost, so each provider prices from its published rate. */
+	protected abstract costUsd(durationSec: number): number;
+
 	protected abstract requestStream(
 		params: TParams,
 	): Promise<ReadableStream<Uint8Array>>;
@@ -70,6 +71,10 @@ export abstract class BaseElevenLabsAudio<
 		const stream = await this.requestStream(params);
 		const data = await streamToBuffer(stream);
 		const durationSec = cbrDurationSec(this.outputFormat, data);
-		return { data, metadata: { durationSec } };
+		return {
+			data,
+			costUsd: this.costUsd(durationSec),
+			metadata: { durationSec },
+		};
 	}
 }

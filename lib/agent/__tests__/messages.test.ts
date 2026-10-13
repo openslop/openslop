@@ -5,7 +5,7 @@ import {
 	upsertMessage,
 	pruneTranscript,
 } from "../messages";
-import { SCRIPT_TOOLS, SNAPSHOT_TOOLS } from "../tools/registry";
+import { DRAFTING_TOOLS, SNAPSHOT_TOOLS } from "../tools/registry";
 import type { SloppyMessage } from "../types";
 
 const asked: SloppyMessage = {
@@ -68,7 +68,7 @@ describe("hasPendingToolCall", () => {
 
 	it("sees only the tools it is asked about", () => {
 		const pending = [asked, turn("input-available")];
-		expect(hasPendingToolCall(pending, SCRIPT_TOOLS)).toBe(false);
+		expect(hasPendingToolCall(pending, DRAFTING_TOOLS)).toBe(false);
 		expect(hasPendingToolCall(pending, SNAPSHOT_TOOLS)).toBe(true);
 	});
 });
