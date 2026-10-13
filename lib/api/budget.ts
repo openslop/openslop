@@ -1,6 +1,6 @@
 import { utc } from "@date-fns/utc";
 import type { User } from "@supabase/supabase-js";
-import { addMonths, differenceInCalendarMonths } from "date-fns";
+import { addMonths, differenceInCalendarMonths, isAfter } from "date-fns";
 import { z } from "zod";
 import { MANAGED_PROVIDER } from "@/lib/connectors/provider-catalog";
 import { spentSince } from "./jobs";
@@ -20,11 +20,10 @@ type BillingPeriod = { start: Date; end: Date };
 
 /** The monthly period, counted from the anchor, that `now` falls in. */
 export function billingPeriod(anchor: Date, now: Date): BillingPeriod {
-	const monthsAfter = (months: number) =>
-		addMonths(anchor, months, { in: utc });
-	let months = differenceInCalendarMonths(now, anchor, { in: utc });
-	if (monthsAfter(months) > now) months -= 1;
-	return { start: monthsAfter(months), end: monthsAfter(months + 1) };
+	const nthStart = (n: number) => addMonths(anchor, n, { in: utc });
+	const months = differenceInCalendarMonths(now, anchor, { in: utc });
+	const elapsed = isAfter(nthStart(months), now) ? months - 1 : months;
+	return { start: nthStart(elapsed), end: nthStart(elapsed + 1) };
 }
 
 /** Anchored at signup until billing records an anchor. */
@@ -46,8 +45,8 @@ const DAY = new Intl.DateTimeFormat("en", {
 
 export async function refuseOverBudget(user: User): Promise<Response | null> {
 	const { usd, period } = monthlyBudget(user);
-	if ((await spentSince(user.id, MANAGED_PROVIDER, period.start)) < usd)
-		return null;
+	const spent = await spentSince(user.id, MANAGED_PROVIDER, period.start);
+	if (spent < usd) return null;
 	return tooManyRequests(
 		`You've used your ${USD.format(usd)} generation budget. Your credits refresh on ${DAY.format(period.end)}.`,
 	);
