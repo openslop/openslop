@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { stringifyError } from "../errors";
 import { getUser } from "./auth";
+import { refuseOverBudget } from "./budget";
 import { hasApiAccess, MissingProviderKeyError } from "./provider-keys";
 import { logger } from "./logger";
 import { badRequest, forbidden, serverError, unauthorized } from "./response";
@@ -26,12 +27,13 @@ async function runGuarded(
 async function guard(
 	label: string,
 	run: RouteBody,
-	authorize: (user: User) => Response | null = () => null,
+	authorize: (user: User) => Promise<Response | null> | Response | null = () =>
+		null,
 ): Promise<Response> {
 	return runGuarded(label, async () => {
 		const user = await getUser();
 		if (!user) return unauthorized();
-		const denied = authorize(user);
+		const denied = await authorize(user);
 		if (denied) return denied;
 		return run(user);
 	});
@@ -39,6 +41,11 @@ async function guard(
 
 export const withApiAccess = (label: string, run: RouteBody) =>
 	guard(label, run, (user) => (hasApiAccess(user) ? null : forbidden()));
+
+export const withHostedBudget = (label: string, run: RouteBody) =>
+	guard(label, run, (user) =>
+		hasApiAccess(user) ? refuseOverBudget(user) : forbidden(),
+	);
 
 export const withSession = (label: string, run: RouteBody) => guard(label, run);
 

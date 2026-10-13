@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockLLMGenerate = vi.fn();
@@ -113,9 +113,15 @@ describe("API routes", () => {
 			created_at: "2026-06-14T09:30:00Z",
 			app_metadata: { api_access: true },
 		});
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-10-20T00:00:00Z"));
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
 		mockSpentSince.mockResolvedValue(0);
 		mockEnqueueJob.mockResolvedValue(undefined);
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	describe("POST /api/v1/image", () => {
@@ -135,13 +141,13 @@ describe("API routes", () => {
 			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
-		it("reads the account's hosted spend since its cycle started", async () => {
+		it("reads the account's hosted spend since its period started", async () => {
 			const { POST } = await import("@/app/api/v1/image/route");
 			await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
 			const [userId, provider, since] = mockSpentSince.mock.calls[0] ?? [];
 			expect([userId, provider]).toEqual(["user-1", "openslop"]);
-			expect(since).toEqual(new Date("2026-06-14T09:30:00Z"));
+			expect(since).toEqual(new Date("2026-10-14T09:30:00Z"));
 		});
 
 		it("returns 429 once the monthly budget is spent", async () => {
@@ -151,7 +157,7 @@ describe("API routes", () => {
 
 			expect(res.status).toBe(429);
 			expect((await res.json()).error).toMatch(
-				/^You've used your \$100\.00 generation budget\. Your credits refresh on July 14\.$/,
+				/^You've used your \$100\.00 generation budget\. Your credits refresh on November 14\.$/,
 			);
 			expect(mockCreateJob).not.toHaveBeenCalled();
 		});

@@ -11,8 +11,8 @@ import { badRequest } from "./response";
 import { createSSEStreamResponse } from "./sse";
 import type { RouteFamily } from "./route-families";
 
-/** LLM calls stream instead of queueing, so each one is booked as a finished job. */
-const recordSpend = (userId: string, model: ModelRef) => (costUsd: number) =>
+/** LLM calls stream instead of queueing, so each is booked as a finished job. */
+const spendRecorder = (userId: string, model: ModelRef) => (costUsd: number) =>
 	createJob({
 		userId,
 		connectorType: "llm",
@@ -28,19 +28,18 @@ export const createLLMRouteHandler = <TPicked extends ModelRef>(
 		schema: bodySchema(family.model("llm"), LLM_FIELDS),
 		label: "LLM generation",
 		handle: async ({ user, input }) => {
-			const refused = await family.refuseOverBudget(user);
-			if (refused) return refused;
 			const llm = await family.providerFor(user.id, "llm", input);
+			const recordSpend = spendRecorder(user.id, input);
 			const params = vendorParams("llm", omit(input, "stream", "projectId"));
 			if (input.stream)
 				return createSSEStreamResponse(
 					(async function* () {
-						await recordSpend(user.id, input)(yield* llm.stream(params));
+						await recordSpend(yield* llm.stream(params));
 					})(),
 					"LLM",
 				);
 			const { output, costUsd } = await llm.generate(params);
-			await recordSpend(user.id, input)(costUsd);
+			await recordSpend(costUsd);
 			return NextResponse.json(output);
 		},
 	});
@@ -54,13 +53,11 @@ export const createAgentRouteHandler = <TPicked extends ModelRef>(
 		handle: async ({ user, input }) => {
 			const message = await parseSloppyMessage(input.message);
 			if (!message) return badRequest("message is not a Sloppy message");
-			const refused = await family.refuseOverBudget(user);
-			if (refused) return refused;
 			return streamAgentTurn({
 				...input,
 				message,
 				userId: user.id,
-				recordSpend: recordSpend(user.id, input),
+				recordSpend: spendRecorder(user.id, input),
 				llm: () => family.providerFor(user.id, "llm", input),
 				model: modelEntry("llm", input).id,
 			});

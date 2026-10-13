@@ -1,9 +1,7 @@
-import type { User } from "@supabase/supabase-js";
 import type { z } from "zod";
 import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import type { ProviderType, Providers } from "@/lib/providers/types";
-import { refuseOverBudget } from "./budget";
 import { byokModel, hostedModel, type BYOKModelRef } from "./generation-schema";
 import { byokProviderFor } from "./providers/byok";
 import { hostedProviderFor } from "./providers/openslop";
@@ -11,6 +9,7 @@ import {
 	createApiParamRouteHandler,
 	createApiQueryRouteHandler,
 	createApiRouteHandler,
+	createHostedRouteHandler,
 	createSessionParamRouteHandler,
 	createSessionQueryRouteHandler,
 	createSessionRouteHandler,
@@ -18,9 +17,8 @@ import {
 
 /**
  * Everything that differs between the two route families, in one place: who a
- * route lets in, how it names its models, whose key a picked model runs on,
- * and what the account may spend on it. A route picks a family and a
- * connector type; nothing else about it varies.
+ * route lets in, how it names its models, and whose key a picked model runs
+ * on. A route picks a family and a connector type; nothing else about it varies.
  */
 export type RouteFamily<TPicked extends ModelRef> = {
 	createHandler: typeof createApiRouteHandler;
@@ -32,17 +30,15 @@ export type RouteFamily<TPicked extends ModelRef> = {
 		type: K,
 		picked: TPicked,
 	) => Promise<Providers[K]>;
-	refuseOverBudget: (user: User) => Promise<Response | null>;
 };
 
 export const HOSTED: RouteFamily<ModelRef> = {
-	createHandler: createApiRouteHandler,
+	createHandler: createHostedRouteHandler,
 	createQueryHandler: createApiQueryRouteHandler,
 	createParamHandler: createApiParamRouteHandler,
 	model: hostedModel,
 	providerFor: async (_userId, type, picked) =>
 		hostedProviderFor(type, picked.model),
-	refuseOverBudget,
 };
 
 export const BYOK: RouteFamily<BYOKModelRef> = {
@@ -52,7 +48,6 @@ export const BYOK: RouteFamily<BYOKModelRef> = {
 	model: byokModel,
 	providerFor: (userId, type, picked) =>
 		byokProviderFor(userId, picked.provider, type),
-	refuseOverBudget: async () => null,
 };
 
 const isByokPick = (picked: ModelRef): picked is BYOKModelRef =>

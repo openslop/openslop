@@ -23,7 +23,7 @@ export type VideoJob = {
 	metadata: VideoJobMetadata;
 };
 
-export type FinishedVideo = Required<VideoJob>;
+export type FinishedVideo = Required<Omit<VideoJob, "costUsd">>;
 
 export type VideoProviderResponse = BundleResponse & {
 	metadata: VideoJobMetadata;
@@ -86,7 +86,7 @@ export abstract class BaseVideoProvider implements VideoProvider {
 		};
 		return {
 			kind: "ready",
-			asset: await this.store({ url: job.url, costUsd: job.costUsd, metadata }),
+			asset: await this.store({ url: job.url, metadata }),
 			costUsd: job.costUsd,
 		};
 	}

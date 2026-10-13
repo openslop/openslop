@@ -45,8 +45,6 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 		schema: bodySchema(family.model(type), fields) as z.ZodType<AssetBody>,
 		label,
 		handle: async ({ user, input }) => {
-			const refused = await family.refuseOverBudget(user);
-			if (refused) return refused;
 			const { projectId, ...request } = input;
 			const { id } = await createJob({
 				userId: user.id,

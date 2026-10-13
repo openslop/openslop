@@ -8,7 +8,6 @@ export type WithMetadata<
 	metadata?: T;
 };
 
-/** What a generation produced, and what the vendor charged for it in USD. */
 export type Priced<T> = { output: T; costUsd: number };
 
 /**
