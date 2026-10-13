@@ -160,7 +160,7 @@ export class AnthropicLLM implements LLMProvider {
 		return {
 			output: {
 				text: result.text,
-				model: result.response.modelId,
+				model: result.finalStep.response.modelId,
 				usage: {
 					inputTokens: result.usage.inputTokens ?? 0,
 					outputTokens: result.usage.outputTokens ?? 0,

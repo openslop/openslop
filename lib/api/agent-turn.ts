@@ -90,9 +90,9 @@ export async function streamAgentTurn(
 		// left to call, so it answers the user instead of looping again.
 		toolChoice: toolCallsMade(messages) >= MAX_TOOL_CALLS ? "none" : "auto",
 		providerOptions,
-		onEnd: async ({ totalUsage }) => {
-			logger.info({ usage: totalUsage }, "Sloppy turn usage");
-			await request.recordSpend(costOf(totalUsage));
+		onEnd: async ({ usage }) => {
+			logger.info({ usage }, "Sloppy turn usage");
+			await request.recordSpend(costOf(usage));
 		},
 	});
 
