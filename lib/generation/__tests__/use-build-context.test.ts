@@ -92,7 +92,9 @@ describe("useBuildContext", () => {
 
 		children = document(video("vid-1", "shot one, rewritten"));
 
-		expect(context().canvas[0]?.children[0]?.text).toBe("shot one, rewritten");
+		expect(context().canvas[0]?.children[0]).toMatchObject({
+			text: "shot one, rewritten",
+		});
 	});
 
 	it("keeps its identity while the settings change", () => {

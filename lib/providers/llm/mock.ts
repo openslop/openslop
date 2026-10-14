@@ -58,13 +58,13 @@ const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the ed
 
 <narration emotion="cheerful">Once upon a time, in a village at the edge of a great forest, there lived a kind girl named Red.</narration>
 
-<image motion="pushIn" characters="Red,Mother">Inside a sunlit kitchen with copper pots hanging on the wall, Red (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands beside her Mother (a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron). Mother gently places a wicker basket of fresh vegetables in Red's hands.</image>
+<image motion="pushIn">Inside a sunlit kitchen with copper pots hanging on the wall, {{Red}} (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands beside her {{Mother}} (a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron). {{Mother}} gently places a wicker basket of fresh vegetables in {{Red}}'s hands.</image>
 
 <character name="Mother" emotion="gentle">"Take these straight to Granny, sweetheart. And please don't dawdle along the way."</character>
 
 <character name="Red" emotion="excited">"I won't, Mama! I'll be back before sundown!"</character>
 
-<image motion="tiltDown" characters="Red">Red stands at her cottage door holding a wicker basket filled with fresh vegetables including carrots, lettuce, and tomatoes. She smiles warmly. Morning sunlight streams through nearby trees.</image>
+<image motion="tiltDown">{{Red}} stands at her cottage door holding a wicker basket filled with fresh vegetables including carrots, lettuce, and tomatoes. She smiles warmly. Morning sunlight streams through nearby trees.</image>
 
 <narration emotion="happy">Red got her name from the beautiful red cloak she wore everywhere. Today, she was taking a basket of fresh vegetables to her grandmother, who lived deep in the woods.</narration>
 
@@ -74,13 +74,13 @@ const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the ed
 
 <sound>footsteps on dirt path</sound>
 
-<video characters="Owl">Shot 1: Gentle upward pan through the forest canopy, sunlight filtering through the leaves, ending on Owl perched high in the branches of an ancient oak as she slowly turns her head toward the path below. Sound: leaves rustling high above.</video>
+<video>Shot 1: Gentle upward pan through the forest canopy, sunlight filtering through the leaves, ending on {{Owl}} perched high in the branches of an ancient oak as she slowly turns her head toward the path below. Sound: leaves rustling high above.</video>
 
 <narration emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</narration>
 
 <character name="Owl" emotion="calm">"A child enters the forest today. The wind tells me she will not walk alone."</character>
 
-<video duration="4" motion="handheldDrift" characters="Wolf">Shot 1: Medium shot of Wolf carefully picking ripe red berries from thick bushes and dropping them into a wicker basket at his feet, dappled sunlight through the canopy. Sound: branches rustling.</video>
+<video duration="4" motion="handheldDrift">Shot 1: Medium shot of {{Wolf}} carefully picking ripe red berries from thick bushes and dropping them into a wicker basket at his feet, dappled sunlight through the canopy. Sound: branches rustling.</video>
 
 <narration emotion="mysterious">Not far away, someone else was in the forest that morning. Wolf was gathering wild berries near the path.</narration>
 
@@ -92,7 +92,7 @@ const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the ed
 
 <narration emotion="calm">Wolf's mother had a terrible cold, and he wanted to bring her something special.</narration>
 
-<image characters="Red,Wolf">Red and Wolf meet face to face on a sunlit forest path. Red holds her vegetable basket; Wolf holds his berry basket. Both look surprised but unafraid. A shaft of golden light falls between them. Wildflowers grow along the path.</image>
+<image>{{Red}} and {{Wolf}} meet face to face on a sunlit forest path. {{Red}} holds her vegetable basket; {{Wolf}} holds his berry basket. Both look surprised but unafraid. A shaft of golden light falls between them. Wildflowers grow along the path.</image>
 
 <character name="Red" emotion="curious">"Oh! Hello, Mr. Wolf. Are those berries for someone special?"</character>
 
@@ -104,7 +104,7 @@ const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the ed
 
 <sound loops="6">forest stream burbling</sound>
 
-<video duration="5" motion="panRight" characters="Red,Wolf">Shot 1: Tracking shot of Red and Wolf walking side by side along a winding fern-lined path, a small stream in the background. Sound: footsteps on soft dirt, a stream burbling nearby. Shot 2: Red gestures as she talks while Wolf listens with a gentle smile.</video>
+<video duration="5" motion="panRight">Shot 1: Tracking shot of {{Red}} and {{Wolf}} walking side by side along a winding fern-lined path, a small stream in the background. Sound: footsteps on soft dirt, a stream burbling nearby. Shot 2: {{Red}} gestures as she talks while {{Wolf}} listens with a gentle smile.</video>
 
 <music length="short">Light, twinkling music with playful pizzicato strings</music>
 
@@ -112,7 +112,7 @@ const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the ed
 
 <character name="Red" emotion="proud">"She tells the best stories! And she knits the warmest mittens. And she always has cookies."</character>
 
-<image motion="panLeft" characters="Red,Wolf,Hunter">A clearing where the forest path meets a sturdy bridge over a stream. Hunter (a broad-shouldered woodsman with a thick brown beard, blue eyes, wearing a green cloak with a hatchet at his belt) stands by the bridge waving warmly at Red and Wolf as they approach. His sturdy brown boots crunch on the gravel.</image>
+<image motion="panLeft">A clearing where the forest path meets a sturdy bridge over a stream. {{Hunter}} (a broad-shouldered woodsman with a thick brown beard, blue eyes, wearing a green cloak with a hatchet at his belt) stands by the bridge waving warmly at {{Red}} and {{Wolf}} as they approach. His sturdy brown boots crunch on the gravel.</image>
 
 <character name="Hunter" emotion="hearty">"Well now! Little Red and her woodland friend! You two heading to the old oak cottage?"</character>
 
@@ -124,7 +124,7 @@ const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the ed
 
 <narration emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</narration>
 
-<video characters="Granny">Shot 1: Slow push-in toward the open door of a small thatched cottage among ancient oaks, smoke curling from the chimney above a window box of marigolds. Sound: birdsong, a fire crackling inside. Shot 2: Medium shot of Granny stepping into the doorway leaning on a wooden cane, smiling warmly. Shot 3: Close-up of Granny's face as her eyes crinkle with delight. Sound: the cane tapping on the stone step.</video>
+<video>Shot 1: Slow push-in toward the open door of a small thatched cottage among ancient oaks, smoke curling from the chimney above a window box of marigolds. Sound: birdsong, a fire crackling inside. Shot 2: Medium shot of {{Granny}} stepping into the doorway leaning on a wooden cane, smiling warmly. Shot 3: Close-up of {{Granny}}'s face as her eyes crinkle with delight. Sound: the cane tapping on the stone step.</video>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
 `;

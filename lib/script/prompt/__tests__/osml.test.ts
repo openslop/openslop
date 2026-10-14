@@ -35,7 +35,7 @@ describe("osmlSpec", () => {
 		);
 		expect(spec).toContain("<image> prompt must stand alone");
 		expect(spec).toContain(
-			"Reference characters by their names in the image prompt",
+			"Write each character in an <image> or <video> prompt as {{Name}}",
 		);
 	});
 

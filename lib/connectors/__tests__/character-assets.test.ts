@@ -12,14 +12,10 @@ const RED = "https://img/red.png";
 const GRANNY = "https://img/granny.png";
 const redVoice = { url: "https://audio/red.mp3", durationSec: 6 };
 
-const element = (
-	type: "image" | "video",
-	characters: string,
-): ContentElement => ({
+const element = (type: "image" | "video", prompt: string): ContentElement => ({
 	id: type,
 	type,
-	generationAttributes: { characters },
-	children: [],
+	children: [{ id: "text", type, text: prompt }],
 });
 
 const avatar = (imageUrl: string): AssetResult => ({
@@ -51,7 +47,7 @@ describe("character asset dependencies", () => {
 		expect(
 			dependenciesOf(
 				createCharacterAssetsPlugin({ voices: true }),
-				element("video", "Wolf, Ghost, Red"),
+				element("video", "{{Wolf}} and {{Ghost}} meet {{Red}}"),
 				canvas,
 			),
 		).toEqual({
@@ -65,7 +61,7 @@ describe("character asset dependencies", () => {
 		expect(
 			dependenciesOf(
 				createCharacterAssetsPlugin({ voices: false }),
-				element("image", "Red"),
+				element("image", "{{Red}} waves"),
 				canvas,
 			),
 		).toEqual({ "Red's avatar": red.id });
@@ -76,7 +72,7 @@ describe("character-assets plugin", () => {
 	it("gives each character its avatar and voice, in the order they are named", () => {
 		expect(
 			before(
-				{ prompt: "Hello", characters: " Granny , Red " },
+				{ prompt: "{{Granny}} hugs {{Red}}, and {{Granny}} smiles" },
 				{
 					"Red's avatar": avatar(RED),
 					"Red's voice": voice(redVoice),
@@ -84,7 +80,7 @@ describe("character-assets plugin", () => {
 				},
 			),
 		).toEqual({
-			prompt: "Hello. No nameplates",
+			prompt: "{{Granny}} hugs {{Red}}, and {{Granny}} smiles. No nameplates",
 			characterAssets: [
 				{ name: "Granny", avatarUrl: GRANNY },
 				{ name: "Red", avatarUrl: RED, voice: redVoice },
@@ -94,22 +90,20 @@ describe("character-assets plugin", () => {
 
 	it("keeps a voice for a character with no avatar, without asking for no nameplates", () => {
 		expect(
-			before(
-				{ prompt: "Hello", characters: "Red" },
-				{ "Red's voice": voice(redVoice) },
-			),
+			before({ prompt: "{{Red}} sings" }, { "Red's voice": voice(redVoice) }),
 		).toEqual({
-			prompt: "Hello",
+			prompt: "{{Red}} sings",
 			characterAssets: [{ name: "Red", voice: redVoice }],
 		});
 	});
 
 	it.each([
-		["characters with neither an avatar nor a voice", "Wolf,Ghost"],
-		["no characters", undefined],
-	])("strips the characters from a prompt with %s", (_, characters) => {
-		expect(before({ prompt: "Hello", characters }, {})).toEqual({
-			prompt: "Hello",
-		});
+		[
+			"characters with neither an avatar nor a voice",
+			"{{Wolf}} meets {{Ghost}}",
+		],
+		["no characters", "An empty road"],
+	])("leaves a prompt naming %s alone", (_, prompt) => {
+		expect(before({ prompt }, {})).toEqual({ prompt });
 	});
 });

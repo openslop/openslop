@@ -103,9 +103,8 @@ describe("buildNode", () => {
 
 	it("keys each edge by the label its plugin declared", () => {
 		const img = element("img", "image");
-		const video = element("vid", "video", {
+		const video = elementWithText("vid", "video", "{{Alice}} at sunset", {
 			startFrame: "previous",
-			characters: "Alice",
 		});
 
 		const node = resolveOn(video, [img, video]);
@@ -127,19 +126,20 @@ describe("buildNode", () => {
 	});
 
 	it.each([
-		["a character with no avatar", "image", { characters: "Nobody" }],
-		["a video with nothing before it", "video", { startFrame: "previous" }],
-	] as const)("declares no edge for %s", (_, type, attrs) => {
-		const el = element("el", type, attrs);
-
+		[
+			"a character with no avatar",
+			elementWithText("el", "image", "{{Nobody}}"),
+		],
+		[
+			"a video with nothing before it",
+			element("el", "video", { startFrame: "previous" }),
+		],
+	])("declares no edge for %s", (_, el) => {
 		expect(resolveOn(el, [el]).dependsOn).toEqual({});
 	});
 
 	it("builds an avatar showing itself without depending on it", () => {
-		const red = make("asset_avatar", "red hood", {
-			name: "Red",
-			characters: "Red",
-		});
+		const red = make("asset_avatar", "{{Red}} in a red hood", { name: "Red" });
 
 		const node = resolveOn(red, [red]);
 
@@ -152,7 +152,7 @@ describe("buildNode", () => {
 
 	it("depends on the avatar of each character it shows, and no other", () => {
 		assets = [...assets, avatar("Bob", "tall")];
-		const ids = idsOf(element("img", "image", { characters: "Alice" }));
+		const ids = idsOf(elementWithText("img", "image", "{{Alice}} at sunset"));
 
 		expect(ids).toEqual(["avatar-Alice", "img"]);
 	});
@@ -160,7 +160,7 @@ describe("buildNode", () => {
 	it.each([
 		[
 			"a character it shows is given an avatar",
-			{ characters: "Bob" },
+			"{{Bob}} at sunset",
 			() => {
 				assets = [...assets, avatar("Bob", "tall")];
 			},
@@ -168,7 +168,7 @@ describe("buildNode", () => {
 		],
 		[
 			"a character's avatar is removed",
-			{ characters: "Alice" },
+			"{{Alice}} at sunset",
 			() => {
 				assets = assets.filter(({ type }) => type !== "asset_avatar");
 			},
@@ -176,21 +176,21 @@ describe("buildNode", () => {
 		],
 		[
 			"the aspect ratio it read changes",
-			{},
+			"a sunset",
 			() => store.getState().updateVideoSettings({ aspectRatio: "9:16" }),
 			"The aspect ratio",
 		],
 		[
 			"the art style is edited",
-			{},
+			"a sunset",
 			() => {
 				assets = [make("asset_style", "watercolor"), ...assets.slice(1)];
 			},
 			"The art style",
 		],
-	])("stales an image once %s", (_, attrs, change, what) => {
+	])("stales an image once %s", (_, text, change, what) => {
 		const queue = new GenerationQueue();
-		const img = element("img", "image", attrs);
+		const img = elementWithText("img", "image", text);
 		generateAll(queue, resolve(img));
 		expect(isNodeStale(resolve(img), queue)).toBe(false);
 
@@ -203,7 +203,7 @@ describe("buildNode", () => {
 
 	it("leaves a character's portrait fresh when their voice changes", () => {
 		const queue = new GenerationQueue();
-		const img = element("img", "image", { characters: "Alice" });
+		const img = elementWithText("img", "image", "{{Alice}} at sunset");
 		generateAll(queue, resolve(img));
 
 		assets = [

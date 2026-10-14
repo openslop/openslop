@@ -1,24 +1,17 @@
 import isNil from "lodash/isNil";
 import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
-import without from "lodash/without";
-import xor from "lodash/xor";
 import { Editor, Transforms } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/reference-images";
 import { findAsset, isAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
 import { createCanvasElement } from "./create-canvas-element";
-import {
-	CHARACTERS_ATTR,
-	formatCharacterNames,
-	shownCharacters,
-} from "./character-names";
 import {
 	mergeAttrs,
 	updateElementText,
 	type AttributeChanges,
 } from "./editor-ops";
 import { isAssetElement } from "./guards";
-import type { AssetType, CanvasElement } from "./types";
+import type { AssetType } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
@@ -62,27 +55,6 @@ export function setReferenceImages(editor: Editor, urls: string[]): void {
 export function removeAssets(editor: Editor): void {
 	Transforms.removeNodes(editor, { at: [], match: isAssetElement });
 }
-
-const editShown = (
-	editor: Editor,
-	element: CanvasElement,
-	edit: (names: string[]) => string[],
-): void =>
-	mergeAttrs(editor, element.id, {
-		[CHARACTERS_ATTR]: formatCharacterNames(edit(shownCharacters(element))),
-	});
-
-export const toggleShownCharacter = (
-	editor: Editor,
-	element: CanvasElement,
-	name: string,
-): void => editShown(editor, element, (names) => xor(names, [name]));
-
-export const removeShownCharacter = (
-	editor: Editor,
-	element: CanvasElement,
-	name: string,
-): void => editShown(editor, element, (names) => without(names, name));
 
 export function removeAsset(
 	editor: Editor,

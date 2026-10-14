@@ -175,9 +175,7 @@ describe("deserializeWithScenes", () => {
 
 		const firstNarration = scenes[0].children[1];
 		expect(firstNarration.type).toBe("narration");
-		expect(firstNarration.children.map((c) => c.text).join("")).toContain(
-			"hello",
-		);
+		expect(getPromptText(firstNarration)).toContain("hello");
 
 		const secondVideo = scenes[1].children[0];
 		expect(secondVideo.type).toBe("video");

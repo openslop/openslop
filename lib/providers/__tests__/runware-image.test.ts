@@ -49,13 +49,13 @@ describe("RunwareImage", () => {
 		expect(mockDisconnect).toHaveBeenCalled();
 	});
 
-	it("references the characters' avatars ahead of the other reference images", async () => {
+	it("names the characters plainly, their avatars ahead of the other reference images", async () => {
 		mockImageInference.mockResolvedValue([
 			{ imageBase64Data: "abc", cost: 0.02 },
 		]);
 
 		await new RunwareImage("test-key").generate({
-			prompt: "a cat",
+			prompt: "{{Red}} pets a cat",
 			model: MODEL,
 			characterAssets: [{ name: "Red", avatarUrl: "https://img/red.png" }],
 			referenceImages: ["https://img/style.png"],
@@ -63,6 +63,7 @@ describe("RunwareImage", () => {
 
 		expect(mockImageInference).toHaveBeenCalledWith(
 			expect.objectContaining({
+				positivePrompt: "Red pets a cat",
 				referenceImages: ["https://img/red.png", "https://img/style.png"],
 			}),
 		);

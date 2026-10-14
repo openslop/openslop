@@ -11,6 +11,7 @@ import type { ProjectStore } from "@/lib/project/store";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
 import type { AccountStore } from "@/lib/user/account-store";
 import { withAssets } from "../plugins/with-assets";
+import { withCharacterRefs } from "../plugins/with-character-refs";
 import { withLayout } from "../plugins/with-layout";
 import { withNodeId } from "../plugins/with-node-id";
 import { withScenes } from "../plugins/with-scenes";
@@ -27,6 +28,7 @@ function createCanvasEditor(
 		withReact,
 		withLayout,
 		withAssets,
+		withCharacterRefs,
 		withScenes,
 		withFlatPaste,
 		withNodeId,

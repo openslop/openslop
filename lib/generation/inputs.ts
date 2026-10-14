@@ -1,6 +1,5 @@
-import { Node } from "slate";
 import { z } from "zod";
-import { withoutCaretMarker } from "@/lib/canvas/constants";
+import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import type { CanvasElement } from "@/lib/canvas/types";
 
 const NodeInputsSchema = z.object({
@@ -32,5 +31,5 @@ export function serializeInputs(inputs: GenerationInputs): string {
 }
 
 export function getPromptText(element: CanvasElement): string {
-	return withoutCaretMarker(Node.string(element)).trim();
+	return getElementBodyText(element).trim();
 }

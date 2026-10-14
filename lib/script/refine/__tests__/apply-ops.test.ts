@@ -100,12 +100,7 @@ function getContentTexts(editor: Editor): string[] {
 		match: (n) => Element.isElement(n) && n.type !== "scene",
 	})) {
 		const el = node as ContentElement;
-		texts.push(
-			el.children
-				.map((c) => c.text)
-				.join("")
-				.replaceAll(ZWSP, ""),
-		);
+		texts.push(getPromptText(el));
 	}
 	return texts;
 }
@@ -329,7 +324,7 @@ describe("applyRefineOp — set", () => {
 
 		const el = getNode(editor, "n1");
 		expect(flatAttributes(el)).toEqual({ name: "Alice", emotion: "happy" });
-		expect(el.children.map((c) => c.text).join("")).toBe(`${ZWSP}Hello!`);
+		expect(getPromptText(el)).toBe("Hello!");
 	});
 
 	it("keeps the caret marker when text is replaced or cleared", () => {

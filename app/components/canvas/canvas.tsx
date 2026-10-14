@@ -10,11 +10,17 @@ import {
 import { useDragAndDrop } from "./dnd/use-drag-and-drop";
 import { DragTransferContext } from "./dnd/drag-transfer-context";
 import { findBlockById } from "@/lib/canvas/editor-ops";
-import { isAssetElement } from "@/lib/canvas/guards";
+import { isAssetElement, isCharacterRef } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/sortable-scene";
 import { SortableContent } from "./dnd/sortable-content";
 import { DragOverlayPreview } from "./dnd/drag-overlay";
+import {
+	CharacterMentionMenu,
+	optionId,
+} from "./elements/character-mention-menu";
+import { CharacterRef } from "./elements/character-ref";
+import { useCharacterMention } from "./hooks/use-character-mention";
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -28,9 +34,13 @@ export default function Canvas() {
 		handleDragEnd,
 		handleDragCancel,
 	} = useDragAndDrop(editor);
+	const { mention, options, active, listboxId, select, dismiss, onKeyDown } =
+		useCharacterMention();
 
 	const renderElement = useCallback((props: RenderElementProps) => {
 		const { element } = props;
+		if (isCharacterRef(element))
+			return <CharacterRef {...props} element={element} />;
 		if (isAssetElement(element))
 			return (
 				<div {...props.attributes} hidden>
@@ -69,9 +79,22 @@ export default function Canvas() {
 					<Editable
 						placeholder="Start typing your story…"
 						renderElement={renderElement}
+						onKeyDown={onKeyDown}
+						aria-controls={mention && listboxId}
+						aria-activedescendant={mention && optionId(listboxId, active)}
 						className="font-body text-body leading-relaxed focus-ring"
 					/>
 				</SortableContext>
+				{mention && (
+					<CharacterMentionMenu
+						mention={mention}
+						options={options}
+						active={active}
+						listboxId={listboxId}
+						onSelect={select}
+						onDismiss={dismiss}
+					/>
+				)}
 				<DragOverlay>
 					{activeBlock && <DragOverlayPreview block={activeBlock} />}
 				</DragOverlay>

@@ -156,10 +156,19 @@ export type SplitAttributes = {
 	layoutAttributes?: Record<string, string>;
 };
 
+export const CHARACTER_REF_TYPE = "character_ref" as const;
+
+export type CharacterRefElement = {
+	id: string;
+	type: typeof CHARACTER_REF_TYPE;
+	name: string;
+	children: CanvasText[];
+};
+
 export type ElementOf<T extends ElementType> = SplitAttributes & {
 	id: string;
 	type: T;
-	children: CanvasText[];
+	children: (CanvasText | CharacterRefElement)[];
 };
 
 export type ContentElement = ElementOf<ContentType>;
@@ -180,14 +189,14 @@ export type CanvasBlock = Scene | CanvasElement;
 
 export type CanvasText = {
 	id: string;
-	type: ElementType;
+	type?: ElementType;
 	text: string;
 };
 
 declare module "slate" {
 	interface CustomTypes {
 		Editor: CanvasEditor;
-		Element: CanvasBlock;
+		Element: CanvasBlock | CharacterRefElement;
 		Text: CanvasText;
 	}
 }

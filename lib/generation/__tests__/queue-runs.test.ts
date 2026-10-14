@@ -49,8 +49,7 @@ describe("running a graph", () => {
 			}),
 			createCanvasElement("image", {
 				id: "img",
-				attrs: { characters: "Red" },
-				text: "a lighthouse",
+				text: "{{Red}} at a lighthouse",
 			}),
 		];
 		const queue = new GenerationQueue();
@@ -79,8 +78,7 @@ describe("running a graph", () => {
 			asset("asset_avatar", { name: "Red", text: "red hood" }),
 			createCanvasElement("image", {
 				id: "img",
-				attrs: { characters: "Red" },
-				text: "a lighthouse",
+				text: "{{Red}} at a lighthouse",
 			}),
 		];
 		const queue = new GenerationQueue();

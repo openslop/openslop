@@ -117,14 +117,12 @@ describe("createCanvasElement", () => {
 		const node = createCanvasElement("narration", {
 			text: "  hello  ",
 		});
-		expect(node.children).toHaveLength(2);
-		expect(node.children[0].text).toBe(ZWSP);
-		expect(node.children[1].text).toBe("hello");
+		expect(node.children).toMatchObject([{ text: ZWSP }, { text: "hello" }]);
 	});
 
 	it("defaults text child to empty string", () => {
 		const node = createCanvasElement("narration");
-		expect(node.children[1].text).toBe("");
+		expect(node.children[1]).toMatchObject({ text: "" });
 	});
 
 	it.each([

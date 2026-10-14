@@ -10,6 +10,7 @@ import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { createCanvasElement } from "./create-canvas-element";
 import { attributeSchemaFor } from "./element-connector";
 import { isCanvasElement } from "./guards";
+import { getElementText } from "./osml-serializer";
 import { makeNodeId } from "./node-utils";
 import { preservedAttributes } from "./preserved-attributes";
 
@@ -74,9 +75,9 @@ export function updateElementText(
 	id: string,
 	newText: string,
 ): void {
-	const [, path] = requireElement(editor, id);
+	const [element, path] = requireElement(editor, id);
 	const voids = true;
-	const currentText = Editor.string(editor, path, { voids });
+	const currentText = getElementText(element);
 	const nextText = ZERO_WIDTH_SPACE + withoutCaretMarker(newText);
 	if (currentText === nextText) return;
 

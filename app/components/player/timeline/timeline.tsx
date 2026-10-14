@@ -1,5 +1,6 @@
 "use client";
 
+import { renderCharacterRefs } from "@/lib/connectors/character-refs";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
 	Timeline as TimelineIcon,
@@ -91,7 +92,7 @@ function Track({
 								<TimelineClip
 									clip={clip}
 									width={width}
-									label={clip.element.prompt}
+									label={renderCharacterRefs(clip.element.prompt)}
 									selected={selected}
 									sceneNumber={
 										row.numbered ? clip.element.sceneNumber : undefined

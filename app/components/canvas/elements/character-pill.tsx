@@ -4,38 +4,36 @@ import { getImageProps } from "next/image";
 import { User } from "@/components/ui/icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCharacterAvatar } from "../hooks/use-character-avatar";
-import { RemoveCrossButton } from "./remove-cross-button";
 
-/** `size-6` in CSS pixels. */
-const AVATAR_PX = 24;
+const AVATAR_PX = { sm: 24, xs: 18 };
 
-function CharacterAvatar({
+export function CharacterAvatar({
 	name,
-	avatarUrl,
+	size = "sm",
 	className,
 }: {
 	name?: string;
-	avatarUrl?: string;
+	size?: keyof typeof AVATAR_PX;
 	className?: string;
 }) {
+	const { url: avatarUrl } = useCharacterAvatar(name);
 	const initial = name?.trim().charAt(0).toUpperCase();
 	return (
-		<Avatar size="sm" className={className}>
-			{/* Radix preloads whatever `src` it is handed, so it gets the optimizer's
-			    candidates for a 24px box rather than the full-size generated original. */}
+		<Avatar size={size} className={className}>
+			{/* Radix preloads whatever `src` it gets, so hand it the optimizer's size, not the original. */}
 			{avatarUrl && (
 				<AvatarImage
 					{...getImageProps({
 						src: avatarUrl,
 						alt: name ?? "Character",
-						width: AVATAR_PX,
-						height: AVATAR_PX,
+						width: AVATAR_PX[size],
+						height: AVATAR_PX[size],
 					}).props}
 					className="object-cover object-center"
 				/>
 			)}
 			<AvatarFallback>
-				{initial || <User className="h-3 w-3" aria-hidden="true" />}
+				{initial || <User className="size-3" aria-hidden="true" />}
 			</AvatarFallback>
 		</Avatar>
 	);
@@ -49,33 +47,15 @@ function CharacterName({ name }: { name: string }) {
 	);
 }
 
-export function CharacterPill({
-	name,
-	onRemove,
-}: {
-	name?: string;
-	onRemove?: () => void;
-}) {
-	const { url: avatarUrl } = useCharacterAvatar(name);
+export function CharacterPill({ name }: { name?: string }) {
 	return (
 		<div
-			className={`group/pill relative inline-flex h-6 max-w-[140px] shrink-0 items-center rounded-md transition-colors hover:bg-button-hover ${
+			className={`inline-flex h-6 max-w-[140px] shrink-0 items-center rounded-md transition-colors hover:bg-button-hover ${
 				name ? "gap-1.5 pl-1 pr-2" : "px-0.5"
 			}`}
 		>
-			<CharacterAvatar
-				name={name}
-				avatarUrl={avatarUrl}
-				className="rounded-md"
-			/>
+			<CharacterAvatar name={name} className="rounded-md" />
 			{name && <CharacterName name={name} />}
-			{onRemove && (
-				<RemoveCrossButton
-					label={`Remove ${name}`}
-					onClick={onRemove}
-					className="opacity-0 group-hover/pill:opacity-100"
-				/>
-			)}
 		</div>
 	);
 }

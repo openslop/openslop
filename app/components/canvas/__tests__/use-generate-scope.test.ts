@@ -289,7 +289,7 @@ describe("scope description", () => {
 			makeElement("b", "image", "sunrise"),
 		];
 		elements.forEach(commitCurrent);
-		elements[1].children[0].text = "moonrise";
+		elements[1].children = makeElement("b", "image", "moonrise").children;
 
 		expect(useDescription(elements, "scene")).toBe(
 			"Regenerate 1 stale element in this scene",
@@ -299,7 +299,7 @@ describe("scope description", () => {
 	it("splits a mixed scope into what is new and what is stale", () => {
 		const drifted = makeElement("a", "image", "sunset");
 		commitCurrent(drifted);
-		drifted.children[0].text = "moonrise";
+		drifted.children = makeElement("a", "image", "moonrise").children;
 
 		const elements = [
 			drifted,

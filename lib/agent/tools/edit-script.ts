@@ -9,6 +9,7 @@ import {
 } from "@/lib/connectors/attributes/schema";
 import { EffectType } from "@/lib/connectors/image/enums";
 import { MusicLength } from "@/lib/connectors/music/enums";
+import { CHARACTER_REFS_RULE } from "@/lib/script/prompt/character-refs";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
@@ -17,7 +18,6 @@ import { defineTool } from "./define-tool";
 const enumeration = (values: readonly string[]) => `(${values.join(" | ")})`;
 
 const PICTURE_ATTRIBUTES = [
-	"characters",
 	`overlays ${enumeration(Object.values(EffectType))}`,
 ];
 
@@ -63,9 +63,9 @@ const ASSETS = dedent`
 	asset already exists changes that one instead. The title is not an asset: change it with
 	set_title.
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
-	lines and every \`characters\` list use, which never changes. A character has either or both.
+	lines and every {{Name}} in a prompt use, which never changes. A character has either or both.
 	- asset_avatar: what a character looks like, as its text, written like an image
-	  prompt. Their avatar is drawn from it, and every visual that lists them is drawn from that
+	  prompt. Their avatar is drawn from it, and every visual that names them is drawn from that
 	  avatar.
 	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described,
 	  never picked; always set its language to the one its lines are in. The narrator is the asset_voice named ${NARRATOR}: it speaks every line no
@@ -97,6 +97,8 @@ export const editScript = defineTool({
 
 	  Attributes by type, all string values:
 	  ${attributesByType(ElementTypeSchema.options)}
+
+	  ${CHARACTER_REFS_RULE}
 
 	  ${VIDEO_PROMPT_FORMAT}
 

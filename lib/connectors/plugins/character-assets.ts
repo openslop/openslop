@@ -1,10 +1,7 @@
 import pickBy from "lodash/pickBy";
 import { findAsset } from "@/lib/canvas/assets";
-import {
-	CHARACTERS_ATTR,
-	parseCharacterNames,
-	shownCharacters,
-} from "@/lib/canvas/character-names";
+import type { CanvasElement } from "@/lib/canvas/types";
+import { referencedNames } from "@/lib/connectors/character-refs";
 import type {
 	Character,
 	ConnectorPlugin,
@@ -12,12 +9,15 @@ import type {
 } from "@/lib/connectors/types";
 import { foundVoice, speakerVoices } from "@/lib/connectors/voice/voices";
 import type { Dependency } from "@/lib/generation/declare";
+import { getPromptText } from "@/lib/generation/inputs";
 
 export type ParamsWithCharacters = {
 	prompt: string;
 	characterAssets?: Character[];
-	[CHARACTERS_ATTR]?: string;
 };
+
+const shownCharacters = (element: CanvasElement): string[] =>
+	referencedNames(getPromptText(element));
 
 const avatarLabel = (name: string) => `${name}'s avatar`;
 
@@ -54,17 +54,16 @@ export function createCharacterAssetsPlugin({
 			? [shownAvatars, speakerVoices(shownCharacters)]
 			: [shownAvatars],
 		beforeGenerate(params, ctx) {
-			const { [CHARACTERS_ATTR]: names, ...rest } = params;
-			const characters = parseCharacterNames(names)
+			const characters = referencedNames(params.prompt)
 				.map((name) => characterOf(ctx, name))
 				.filter(({ avatarUrl, voice }) => avatarUrl || voice);
-			if (characters.length === 0) return rest;
+			if (characters.length === 0) return params;
 
 			return {
-				...rest,
+				...params,
 				prompt: characters.some(({ avatarUrl }) => avatarUrl)
-					? `${rest.prompt}. No nameplates`
-					: rest.prompt,
+					? `${params.prompt}. No nameplates`
+					: params.prompt,
 				characterAssets: characters,
 			};
 		},

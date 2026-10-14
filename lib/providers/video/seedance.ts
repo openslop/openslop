@@ -1,5 +1,6 @@
 import compact from "lodash/compact";
-import { type Pictured, pictured } from "@/lib/connectors/characters";
+import { renderCharacterRefs, seats } from "@/lib/connectors/character-refs";
+import { pictured } from "@/lib/connectors/characters";
 import type { Character } from "@/lib/connectors/types";
 import { cutVoice, secondsCap } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";
@@ -38,13 +39,14 @@ const audibleSpeakers = async (
 	);
 };
 
-const avatarCue = ({ name }: Pictured, index: number) =>
-	`@Image${index + 1} is ${name}.`;
+const imageRef = (number: number) => `@Image ${number}`;
 
-const frameCue = (number: number) => `@Image${number} as the first frame.`;
+const frameCue = (number: number) => `${imageRef(number)} as the first frame.`;
 
-const voiceCue = ({ name }: Voiced, index: number) =>
-	`@Audio${index + 1} defines ${name}'s vocal timbre, pitch, and speech cadence.`;
+const voiceCue =
+	(refOf: (name: string) => string) =>
+	({ name }: Voiced, index: number) =>
+		`@Audio${index + 1} defines ${refOf(name)}'s vocal timbre, pitch, and speech cadence.`;
 
 export const seedance =
 	(limits: Limits): Conditioner =>
@@ -69,13 +71,13 @@ export const seedance =
 				? []
 				: voiced(characters);
 		const heard = await audibleSpeakers(speakers, limits);
+		const refOf = seats(cast, imageRef);
 		const cues = compact([
-			...cast.map(avatarCue),
 			startFrame && frameCue(referenceImages.length),
-			...heard.map(voiceCue),
+			...heard.map(voiceCue(refOf)),
 		]);
 		return {
-			positivePrompt: [...cues, prompt].join(" "),
+			positivePrompt: [...cues, renderCharacterRefs(prompt, refOf)].join(" "),
 			...inputsOf({
 				referenceImages,
 				referenceAudios: heard.map(({ voice }) => voice.url),

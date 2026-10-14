@@ -61,6 +61,12 @@ const namesOf = (assets: AssetElement[]): string[] =>
 export const characterNames = (nodes: readonly unknown[]): string[] =>
 	uniq(namesOf([...getAvatars(nodes), ...getVoices(nodes)]));
 
+export const isCharacter = (nodes: readonly unknown[], name: string): boolean =>
+	nodes.some(
+		(node) =>
+			isAsset(node, "asset_avatar", name) || isAsset(node, "asset_voice", name),
+	);
+
 export const avatarNames = (nodes: readonly unknown[]): string[] =>
 	namesOf(getAvatars(nodes));
 

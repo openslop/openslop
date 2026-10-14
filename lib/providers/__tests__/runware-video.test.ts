@@ -113,7 +113,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "@Image2 as the first frame. animate this",
+					positivePrompt: "@Image 2 as the first frame. animate this",
 					inputs: {
 						frameImages: undefined,
 						referenceImages: ["https://img/avatar.png", "https://img/last.png"],
@@ -136,7 +136,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "@Image1 as the first frame. animate this",
+					positivePrompt: "@Image 1 as the first frame. animate this",
 					inputs: {
 						frameImages: undefined,
 						referenceImages: ["https://img/last.png"],
@@ -158,7 +158,7 @@ describe("RunwareVideo", () => {
 			},
 			{
 				frameImage: "https://img/last.png",
-				positivePrompt: "@Image9 as the first frame. animate this",
+				positivePrompt: "@Image 9 as the first frame. animate this",
 				sent: [...references.slice(0, 8), "https://img/last.png"],
 			},
 		])(
@@ -232,7 +232,7 @@ describe("RunwareVideo", () => {
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
 					positivePrompt:
-						"@Image2 as the first frame. @Audio1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
+						"@Image 2 as the first frame. @Audio1 defines Sol's vocal timbre, pitch, and speech cadence. @Audio2 defines Mira's vocal timbre, pitch, and speech cadence. they talk",
 					inputs: {
 						referenceImages: ["https://img/avatar.png", "https://img/last.png"],
 						referenceAudios: [
@@ -435,14 +435,14 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		it("gives Seedance the characters' avatars by name, then the references, then the previous scene", async () => {
+		it("puts each character Seedance sees as their avatar's image, then the references, then the previous scene", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-s5",
 				status: "processing",
 			});
 
 			await new RunwareVideo("test-key").submit({
-				prompt: "they talk",
+				prompt: "{{Sol}} talks to {{Mira}} and {{Kai}}",
 				model: MODEL,
 				characterAssets: [
 					{ name: "Sol", avatarUrl: "https://img/sol.png" },
@@ -454,7 +454,7 @@ describe("RunwareVideo", () => {
 
 			expect(mockVideoInference).toHaveBeenCalledWith(
 				expect.objectContaining({
-					positivePrompt: "@Image1 is Sol. @Image2 is Mira. they talk",
+					positivePrompt: "@Image 1 talks to @Image 2 and Kai",
 					inputs: {
 						referenceImages: [
 							"https://img/sol.png",
@@ -464,6 +464,23 @@ describe("RunwareVideo", () => {
 						],
 					},
 				}),
+			);
+		});
+
+		it("ties a pictured speaker's voice to their image", async () => {
+			mockVideoInference.mockResolvedValue({
+				taskUUID: "job-s6",
+				status: "processing",
+			});
+
+			await new RunwareVideo("test-key").submit({
+				prompt: "{{Sol}} waves",
+				model: MODEL,
+				characterAssets: [{ ...SOL, avatarUrl: "https://img/sol.png" }],
+			});
+
+			expect(mockVideoInference.mock.calls[0]?.[0].positivePrompt).toBe(
+				"@Audio1 defines @Image 1's vocal timbre, pitch, and speech cadence. @Image 1 waves",
 			);
 		});
 
@@ -494,7 +511,7 @@ describe("RunwareVideo", () => {
 
 			it("casts each character as an element speaking in its voice, named by its token, with sound on", async () => {
 				const request = await omniRequest({
-					prompt: "they talk",
+					prompt: "{{Sol}} talks to {{Mira}}",
 					characterAssets: [
 						{
 							name: "Sol",
@@ -509,8 +526,7 @@ describe("RunwareVideo", () => {
 
 				expect(request).toEqual(
 					expect.objectContaining({
-						positivePrompt:
-							"Sol is <<<element_1>>>. Mira is <<<element_2>>>. they talk",
+						positivePrompt: "<<<element_1>>> talks to <<<element_2>>>",
 						inputs: {
 							elements: [
 								{ ...asElement("Sol"), voices: [SOL.voice.url] },
@@ -531,7 +547,7 @@ describe("RunwareVideo", () => {
 				});
 
 				await new RunwareVideo("test-key").submit({
-					prompt: "they talk",
+					prompt: "{{Sol}} talks",
 					model: "klingai:kling-video@o3-pro",
 					characterAssets: [
 						{ name: "Sol", avatarUrl: avatar("Sol"), voice: SOL.voice },
@@ -541,7 +557,7 @@ describe("RunwareVideo", () => {
 				const request = mockVideoInference.mock.calls[0]?.[0];
 				expect(request).toEqual(
 					expect.objectContaining({
-						positivePrompt: "Sol is <<<element_1>>>. they talk",
+						positivePrompt: "<<<element_1>>> talks",
 						inputs: {
 							elements: [{ ...asElement("Sol"), voices: [SOL.voice.url] }],
 						},
@@ -574,9 +590,9 @@ describe("RunwareVideo", () => {
 				]);
 			});
 
-			it("leaves a character with no avatar out of the elements", async () => {
+			it("leaves a character with no avatar out of the elements, naming them plainly", async () => {
 				const request = await omniRequest({
-					prompt: "they talk",
+					prompt: "{{Sol}} talks to {{Mira}}",
 					characterAssets: [
 						{ name: "Sol", voice: SOL.voice },
 						...pictured("Mira"),
@@ -584,7 +600,7 @@ describe("RunwareVideo", () => {
 				});
 
 				expect(request).toMatchObject({
-					positivePrompt: "Mira is <<<element_1>>>. they talk",
+					positivePrompt: "Sol talks to <<<element_1>>>",
 					inputs: { elements: [asElement("Mira")] },
 				});
 			});

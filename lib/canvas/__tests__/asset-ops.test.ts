@@ -7,10 +7,8 @@ import {
 	removeAsset,
 	removeAssets,
 	removeCharacter,
-	removeShownCharacter,
 	setAsset,
 	setReferenceImages,
-	toggleShownCharacter,
 } from "../asset-ops";
 import {
 	avatarNames,
@@ -22,8 +20,6 @@ import {
 } from "../assets";
 import { createCanvasElement } from "../create-canvas-element";
 import { flatAttributes } from "../element-attributes";
-import { shownCharacters } from "../character-names";
-import { findElementById } from "../editor-ops";
 import { getContentElements } from "../scenes";
 import type { AssetType, ContentElement, Scene } from "../types";
 import { asset, labels, makeEditor, references } from "./_assets";
@@ -40,9 +36,7 @@ const scene = (id: string, ...children: ContentElement[]): Scene => ({
 });
 
 const shownBy = (editor: ReturnType<typeof makeEditor>) =>
-	getContentElements(editor.children).map(
-		(element) => element.generationAttributes?.characters,
-	);
+	getContentElements(editor.children).map(getPromptText);
 
 describe("setAsset", () => {
 	it("adds a new asset at the top, ahead of the script", () => {
@@ -191,8 +185,8 @@ describe("removeAsset and removeCharacter", () => {
 	const showing = (
 		type: "image" | "video",
 		id: string,
-		characters: string,
-	): ContentElement => createCanvasElement(type, { id, attrs: { characters } });
+		text: string,
+	): ContentElement => createCanvasElement(type, { id, text });
 	const makeCharacters = () =>
 		makeEditor([
 			asset("asset_style", { text: "ink wash" }),
@@ -202,13 +196,13 @@ describe("removeAsset and removeCharacter", () => {
 			asset("asset_voice", { name: NARRATOR }),
 			scene(
 				"s1",
-				showing("image", "i1", "Mia, Bob"),
-				showing("video", "v1", "Mia"),
+				showing("image", "i1", "{{Mia}} and {{Bob}}"),
+				showing("video", "v1", "{{Mia}}"),
 			),
-			scene("s2", showing("image", "i2", "Bob")),
+			scene("s2", showing("image", "i2", "{{Bob}}")),
 		]);
 
-	it("removes a character's avatar and voice, leaving every list that names it", () => {
+	it("removes a character's avatar and voice, leaving every prompt that names it", () => {
 		const editor = makeCharacters();
 		const shown = shownBy(editor);
 
@@ -256,35 +250,11 @@ describe("removeAsset and removeCharacter", () => {
 			"asset_avatar:Bob",
 			"asset_voice:Narrator",
 		]);
-		expect(shownBy(editor)).toEqual(["Mia, Bob", "Mia", "Bob"]);
-	});
-});
-
-describe("the characters a visual shows", () => {
-	const shot = () =>
-		createCanvasElement("image", { id: "img1", attrs: { characters: "Mia" } });
-	const live = (editor: ReturnType<typeof makeEditor>) => {
-		const found = findElementById(editor, "img1");
-		if (!found) throw new Error("img1 is gone");
-		return found[0];
-	};
-
-	it("toggles a name on and back off", () => {
-		const editor = makeEditor([scene("s1", shot())]);
-
-		toggleShownCharacter(editor, live(editor), "Leo");
-		expect(shownCharacters(live(editor))).toEqual(["Mia", "Leo"]);
-
-		toggleShownCharacter(editor, live(editor), "Mia");
-		expect(shownCharacters(live(editor))).toEqual(["Leo"]);
-	});
-
-	it("removes a name, clearing the attribute once none are left", () => {
-		const editor = makeEditor([scene("s1", shot())]);
-
-		removeShownCharacter(editor, shot(), "Mia");
-
-		expect(live(editor).generationAttributes?.characters).toBeUndefined();
+		expect(shownBy(editor)).toEqual([
+			"{{Mia}} and {{Bob}}",
+			"{{Mia}}",
+			"{{Bob}}",
+		]);
 	});
 });
 

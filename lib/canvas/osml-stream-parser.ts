@@ -1,3 +1,4 @@
+import { Text } from "slate";
 import { isElementType } from "./guards";
 import { parseXmlTag } from "./parse-xml-tag";
 import type { ConnectorModels } from "@/lib/connectors/models";
@@ -65,7 +66,7 @@ export class OSMLStreamParser {
 
 	private updateCurrent(text: string): void {
 		const lastChild = this.current?.children.at(-1);
-		if (!lastChild) return;
+		if (!Text.isText(lastChild)) return;
 		lastChild.text += unescapeXml(text);
 	}
 

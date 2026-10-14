@@ -15,25 +15,20 @@ function element(
 }
 
 describe("preservedAttributes", () => {
-	it("carries shared attributes between types in the same group", () => {
-		const source = element("image", { characters: "Red,Granny" });
-		expect(preservedAttributes(source, "video")).toEqual({
-			characters: "Red,Granny",
-		});
-	});
-
 	it("drops attributes when the target type is outside the group", () => {
-		const source = element("image", { characters: "Red,Granny" });
+		const source = element("image", {
+			referenceImagesOverride: "https://img/a.png",
+		});
 		expect(preservedAttributes(source, "narration")).toEqual({});
 	});
 
 	it("never carries attributes that are not declared shared", () => {
 		const source = element("image", {
-			characters: "Red",
+			referenceImagesOverride: "https://img/a.png",
 			url: "https://example.com/old.png",
 		});
 		expect(preservedAttributes(source, "video")).toEqual({
-			characters: "Red",
+			referenceImagesOverride: "https://img/a.png",
 		});
 	});
 

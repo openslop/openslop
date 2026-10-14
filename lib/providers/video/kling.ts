@@ -1,7 +1,7 @@
 import compact from "lodash/compact";
 import { nanoid } from "nanoid";
+import { renderCharacterRefs, seats } from "@/lib/connectors/character-refs";
 import { type Pictured, pictured } from "@/lib/connectors/characters";
-import type { Character } from "@/lib/connectors/types";
 import { cutVoice } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";
 
@@ -11,7 +11,7 @@ export const klingTurbo: Conditioner = ({
 	size,
 	resolution,
 }) => ({
-	positivePrompt: prompt,
+	positivePrompt: renderCharacterRefs(prompt),
 	...inputsOf({ frameImages: compact([startFrame]) }),
 	...(startFrame && resolution ? { resolution } : size),
 });
@@ -43,8 +43,7 @@ const element = async (
 	};
 };
 
-const elementCue = ({ name }: Character, index: number) =>
-	`${name} is <<<element_${index + 1}>>>.`;
+const elementRef = (seat: number) => `<<<element_${seat}>>>`;
 
 const budgetOf = (startFrame: string | undefined, limits: OmniLimits) =>
 	startFrame
@@ -68,7 +67,7 @@ export const klingOmni =
 			.slice(seated.length)
 			.map(({ avatarUrl }) => avatarUrl);
 		return {
-			positivePrompt: [...seated.map(elementCue), prompt].join(" "),
+			positivePrompt: renderCharacterRefs(prompt, seats(seated, elementRef)),
 			...inputsOf({
 				frameImages: compact([startFrame]),
 				elements: await Promise.all(

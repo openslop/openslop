@@ -1,7 +1,7 @@
 import { RenderElementProps } from "slate-react";
-import { Node } from "slate";
 import type { ContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
+import { getElementText } from "@/lib/canvas/osml-serializer";
 import {
 	elementModelPick,
 	elementSchema,
@@ -98,7 +98,7 @@ export function ElementContainer({
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
 	const schema = elementSchema(element);
-	const isEmpty = Node.string(element) === ZERO_WIDTH_SPACE;
+	const isEmpty = getElementText(element) === ZERO_WIDTH_SPACE;
 	const { dir, nodeAttributes } = splitTextDirection(attributes);
 
 	return (
