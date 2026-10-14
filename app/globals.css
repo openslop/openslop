@@ -550,7 +550,8 @@
 .scene-active {
 	position: relative;
 	isolation: isolate;
-	overflow: hidden;
+	/* hidden is still a scroll container, so caret scroll-into-view shifts the content */
+	overflow: clip;
 	border-radius: calc(var(--radius) - 2px);
 	background-color: var(--scene-active-border);
 	box-shadow:
