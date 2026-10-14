@@ -31,9 +31,9 @@ const audibleSpeakers = async (
 	);
 };
 
-const imageRef = (number: number) => `@Image ${number}`;
+const imageRef = (seat: number) => `@Image ${seat}`;
 
-const frameCue = (number: number) => `${imageRef(number)} as the first frame.`;
+const frameCue = (seat: number) => `${imageRef(seat)} as the first frame.`;
 
 const voiceCue =
 	(refOf: (name: string) => string) =>
