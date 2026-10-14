@@ -6,17 +6,13 @@ import { claimJob, enqueueJob, loadJobForProcessing, updateJob } from "./jobs";
 import { logger } from "./logger";
 
 const PENDING_RETRY_SECONDS = 5;
-export const MAX_ATTEMPTS = 3;
 
 /**
  * Drives one delivery of a queued job. Handlers whose provider is still
  * working return `pending`, and the job is redelivered to this same function
  * until it completes or outlives the deadline.
  */
-export async function processQueuedJob(
-	jobId: string,
-	deliveryCount: number,
-): Promise<void> {
+export async function processQueuedJob(jobId: string): Promise<void> {
 	const loaded = await loadJobForProcessing(jobId);
 	if (!loaded) {
 		logger.error({ jobId }, "Dropped a queue message for an unknown job");
@@ -35,14 +31,9 @@ export async function processQueuedJob(
 	try {
 		outcome = await handler.process(job);
 	} catch (error) {
-		if (deliveryCount < MAX_ATTEMPTS) {
-			logger.warn(error, `Job ${jobId} attempt ${deliveryCount} failed`);
-			await updateJob(jobId, { status: "pending" });
-			throw error;
-		}
 		logger.error(error, `Job ${jobId} failed`);
 		await updateJob(jobId, { status: "failed", error: stringifyError(error) });
-		return;
+		throw error;
 	}
 
 	if (outcome.kind === "completed") {

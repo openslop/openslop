@@ -21,11 +21,9 @@ vi.mock("@/lib/api/logger", () => ({
 	logger: { error: vi.fn(), warn: vi.fn() },
 }));
 
-const { MAX_ATTEMPTS, processQueuedJob } =
-	await import("@/lib/api/process-job");
+const { processQueuedJob } = await import("@/lib/api/process-job");
 
 const JOB_ID = "job-1";
-const FIRST_DELIVERY = 1;
 
 function stubPendingHandler(metadata: Record<string, unknown> = {}) {
 	const handler = {
@@ -66,7 +64,7 @@ describe("processQueuedJob", () => {
 		async (status) => {
 			mockLoadJobForProcessing.mockResolvedValue({ status });
 
-			await processQueuedJob(JOB_ID, FIRST_DELIVERY);
+			await processQueuedJob(JOB_ID);
 
 			expect(mockClaimJob).not.toHaveBeenCalled();
 			expect(mockGetJobHandler).not.toHaveBeenCalled();
@@ -77,9 +75,7 @@ describe("processQueuedJob", () => {
 	it("acknowledges a message whose job does not exist", async () => {
 		mockLoadJobForProcessing.mockResolvedValue(null);
 
-		await expect(
-			processQueuedJob(JOB_ID, FIRST_DELIVERY),
-		).resolves.toBeUndefined();
+		await expect(processQueuedJob(JOB_ID)).resolves.toBeUndefined();
 
 		expect(mockClaimJob).not.toHaveBeenCalled();
 		expect(mockGetJobHandler).not.toHaveBeenCalled();
@@ -96,7 +92,7 @@ describe("processQueuedJob", () => {
 			const handler = { process: vi.fn() };
 			mockGetJobHandler.mockReturnValue(handler);
 
-			await processQueuedJob(JOB_ID, FIRST_DELIVERY);
+			await processQueuedJob(JOB_ID);
 
 			expect(handler.process).not.toHaveBeenCalled();
 			expect(mockEnqueueJob).not.toHaveBeenCalled();
@@ -120,7 +116,7 @@ describe("processQueuedJob", () => {
 			};
 			mockGetJobHandler.mockReturnValue(handler);
 
-			await processQueuedJob(JOB_ID, FIRST_DELIVERY);
+			await processQueuedJob(JOB_ID);
 
 			expect(mockClaimJob).toHaveBeenCalledExactlyOnceWith(JOB_ID);
 			expect(handler.process).toHaveBeenCalledWith(job);
@@ -138,8 +134,8 @@ describe("processQueuedJob", () => {
 			const handler = stubCompletedHandler();
 
 			const outcomes = await Promise.allSettled([
-				processQueuedJob(JOB_ID, FIRST_DELIVERY),
-				processQueuedJob(JOB_ID, FIRST_DELIVERY),
+				processQueuedJob(JOB_ID),
+				processQueuedJob(JOB_ID),
 			]);
 
 			expect(handler.process).toHaveBeenCalledTimes(1);
@@ -156,7 +152,7 @@ describe("processQueuedJob", () => {
 			});
 			const handler = stubCompletedHandler();
 
-			await expect(processQueuedJob(JOB_ID, FIRST_DELIVERY)).rejects.toThrow(
+			await expect(processQueuedJob(JOB_ID)).rejects.toThrow(
 				"held by another delivery",
 			);
 
@@ -170,7 +166,7 @@ describe("processQueuedJob", () => {
 			mockClaimJob.mockResolvedValue(false);
 			const handler = stubCompletedHandler();
 
-			await expect(processQueuedJob(JOB_ID, FIRST_DELIVERY)).rejects.toThrow(
+			await expect(processQueuedJob(JOB_ID)).rejects.toThrow(
 				"held by another delivery",
 			);
 
@@ -184,7 +180,7 @@ describe("processQueuedJob", () => {
 			mockLoadJobForProcessing.mockResolvedValue(pendingJob());
 			stubPendingHandler({ providerJobId: "upstream-1" });
 
-			await processQueuedJob(JOB_ID, FIRST_DELIVERY);
+			await processQueuedJob(JOB_ID);
 
 			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
 				status: "pending",
@@ -203,7 +199,7 @@ describe("processQueuedJob", () => {
 			stubPendingHandler();
 			mockEnqueueJob.mockRejectedValue(new Error("queue unavailable"));
 
-			await expect(processQueuedJob(JOB_ID, FIRST_DELIVERY)).rejects.toThrow(
+			await expect(processQueuedJob(JOB_ID)).rejects.toThrow(
 				"queue unavailable",
 			);
 			expect(mockUpdateJob).not.toHaveBeenCalledWith(
@@ -213,39 +209,19 @@ describe("processQueuedJob", () => {
 		});
 	});
 
-	describe("handler errors", () => {
-		it("releases the job and rethrows so the queue retries a transient error", async () => {
-			mockLoadJobForProcessing.mockResolvedValue(pendingJob());
-			mockGetJobHandler.mockReturnValue({
-				process: vi.fn().mockRejectedValue(new Error("provider down")),
-			});
-
-			await expect(processQueuedJob(JOB_ID, FIRST_DELIVERY)).rejects.toThrow(
-				"provider down",
-			);
-
-			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
-				status: "pending",
-			});
-			expect(mockEnqueueJob).not.toHaveBeenCalled();
+	it("fails the job with the provider's reason on the first error", async () => {
+		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
+		mockGetJobHandler.mockReturnValue({
+			process: vi.fn().mockRejectedValue(new Error("provider down")),
 		});
 
-		it("fails the job with the reason and acknowledges on the last attempt", async () => {
-			mockLoadJobForProcessing.mockResolvedValue(pendingJob());
-			mockGetJobHandler.mockReturnValue({
-				process: vi.fn().mockRejectedValue(new Error("provider down")),
-			});
+		await expect(processQueuedJob(JOB_ID)).rejects.toThrow("provider down");
 
-			await expect(
-				processQueuedJob(JOB_ID, MAX_ATTEMPTS),
-			).resolves.toBeUndefined();
-
-			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
-				status: "failed",
-				error: expect.stringContaining("provider down"),
-			});
-			expect(mockEnqueueJob).not.toHaveBeenCalled();
+		expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
+			status: "failed",
+			error: expect.stringContaining("provider down"),
 		});
+		expect(mockEnqueueJob).not.toHaveBeenCalled();
 	});
 
 	it("picks the handler from the job row's connector type", async () => {
@@ -255,7 +231,7 @@ describe("processQueuedJob", () => {
 		});
 		stubPendingHandler();
 
-		await processQueuedJob(JOB_ID, FIRST_DELIVERY);
+		await processQueuedJob(JOB_ID);
 
 		expect(mockGetJobHandler).toHaveBeenCalledWith("tts");
 	});
