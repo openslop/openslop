@@ -18,6 +18,7 @@ import {
 	TTS_FIELDS,
 	VIDEO_FIELDS,
 } from "./generation-schema";
+import { ownsProject } from "./projects";
 import { notFound } from "./response";
 import type { RouteFamily } from "./route-families";
 
@@ -46,6 +47,7 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 		label,
 		handle: async ({ user, input }) => {
 			const { projectId, ...request } = input;
+			if (projectId && !(await ownsProject(projectId))) return notFound();
 			const { id } = await createJob({
 				userId: user.id,
 				projectId,
