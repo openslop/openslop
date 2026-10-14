@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 import {
 	DefaultChatTransport,
 	lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { agentPathFor, loadAgentTranscript } from "@/lib/agent/client";
+import { agentPathFor } from "@/lib/agent/client";
 import type { ModelRef } from "@/lib/connectors/types";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import { hasPendingToolCall } from "@/lib/agent/messages";
@@ -15,7 +15,10 @@ import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { DRAFTING_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/use-agent-tools";
 import { createRequiredContext } from "@/lib/components/create-required-context";
-import { useConfig } from "@/lib/config/config-provider";
+import {
+	useProjectId,
+	useInitialTranscript,
+} from "@/lib/project/project-provider";
 import { toastError } from "@/lib/toast-error";
 
 type SloppyControl = {
@@ -26,38 +29,12 @@ type SloppyControl = {
 };
 
 // Split by update frequency: only the transcript changes per streamed token.
-const [SloppyMessagesContext, useSloppyMessages] = createRequiredContext<
-	SloppyMessage[] | null
->("SloppyProvider");
+const [SloppyMessagesContext, useSloppyMessages] =
+	createRequiredContext<SloppyMessage[]>("SloppyProvider");
 const [SloppyControlContext, useSloppy] =
 	createRequiredContext<SloppyControl>("SloppyProvider");
 
 export { useSloppyMessages, useSloppy };
-
-/**
- * The stored transcript. Null until it is known, which is what draws the
- * skeleton. One project per mount: the route keys the editor on its id.
- */
-function useTranscript(projectId: string): SloppyMessage[] | null {
-	const [restored, setRestored] = useState<SloppyMessage[] | null>(null);
-
-	useEffect(() => {
-		let cancelled = false;
-		loadAgentTranscript(projectId)
-			.then((messages) => {
-				if (!cancelled) setRestored(messages);
-			})
-			.catch((error) => {
-				toastError(error, "Could not load Sloppy");
-				if (!cancelled) setRestored([]);
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [projectId]);
-
-	return restored;
-}
 
 /**
  * The ReAct loop. A step ends at a tool call, the editor runs it against the
@@ -65,9 +42,9 @@ function useTranscript(projectId: string): SloppyMessage[] | null {
  * answers with text instead of another call.
  */
 export function SloppyProvider({ children }: { children: ReactNode }) {
-	const { projectId } = useConfig();
+	const projectId = useProjectId();
+	const initialTranscript = useInitialTranscript();
 	const runTool = useAgentTools();
-	const restored = useTranscript(projectId);
 	const model = useDefaultModels().llm;
 	const turnModel = useRef<ModelRef>(undefined);
 	// Stopping should also cancel the tool call in flight
@@ -75,6 +52,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 
 	const { messages, sendMessage, stop, status, addToolOutput } =
 		useChat<SloppyMessage>({
+			messages: initialTranscript,
 			messageMetadataSchema: sloppyMetadataSchema,
 			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
 			transport: new DefaultChatTransport<SloppyMessage>({
@@ -132,18 +110,9 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 		[sendMessage, stop, working, writingScript, model],
 	);
 
-	// History sits in front of the chat's own turns rather than being written
-	// into it, so a brief sent while it was still loading keeps its place.
-	const transcript = useMemo(
-		() => (restored ? [...restored, ...messages] : null),
-		[restored, messages],
-	);
-
 	return (
 		<SloppyControlContext value={control}>
-			<SloppyMessagesContext value={transcript}>
-				{children}
-			</SloppyMessagesContext>
+			<SloppyMessagesContext value={messages}>{children}</SloppyMessagesContext>
 		</SloppyControlContext>
 	);
 }

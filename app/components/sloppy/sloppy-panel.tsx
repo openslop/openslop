@@ -10,7 +10,6 @@ import { trailingAssistant } from "@/lib/agent/messages";
 import type { SloppyMessage } from "@/lib/agent/types";
 import { AgentTurn, UserMessage } from "./sloppy-message";
 import { useSloppy, useSloppyMessages } from "./sloppy-provider";
-import { TranscriptSkeleton } from "./transcript-skeleton";
 import { turnStatus } from "./turn-display";
 import { WorkingStatus } from "./turn-status";
 
@@ -100,18 +99,14 @@ export function SloppyPanel() {
 		<div
 			ref={ref}
 			role="log"
-			aria-busy={messages === null || loading}
+			aria-busy={loading}
 			className="flex flex-col gap-3"
 		>
-			{messages === null ? (
-				<TranscriptSkeleton />
-			) : (
-				<Transcript
-					messages={messages}
-					working={loading}
-					follow={scrollToBottom}
-				/>
-			)}
+			<Transcript
+				messages={messages}
+				working={loading}
+				follow={scrollToBottom}
+			/>
 			<div className="sticky bottom-2 flex h-0 justify-center">
 				{!isAtBottom && (
 					<Button
