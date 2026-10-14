@@ -852,7 +852,12 @@ describe("RunwareVideo", () => {
 
 		it("keeps waiting while a finished video is still served empty", async () => {
 			mockGetResponse.mockResolvedValue([
-				{ taskUUID: "job-1", status: "success", videoURL: "https://r.mp4" },
+				{
+					taskUUID: "job-1",
+					status: "success",
+					cost: 0.18,
+					videoURL: "https://r.mp4",
+				},
 			]);
 			vi.mocked(AssetBundle.upload).mockRejectedValueOnce(
 				new EmptyRemoteFileError("video", "runware"),
