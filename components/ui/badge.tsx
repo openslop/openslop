@@ -19,6 +19,9 @@ const badgeVariants = cva(
 				new: "border-transparent bg-accent-soft text-accent",
 				tertiary: "border-transparent bg-tertiary text-tertiary-foreground",
 				subtle: "border-transparent bg-foreground/10 text-foreground",
+				muted: "border-transparent bg-muted text-muted-foreground",
+				onMedia:
+					"border-transparent bg-on-media/70 text-on-media-foreground shadow-elevation-1",
 			},
 			size: {
 				default: "px-2 py-0.5 text-label [&_svg:not([class*='size-'])]:size-3",
@@ -26,6 +29,7 @@ const badgeVariants = cva(
 				icon: "size-6 rounded-md p-0 [&_svg:not([class*='size-'])]:size-4",
 				inline:
 					"h-4.5 max-w-48 rounded border-0 px-1 text-label leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3",
+				attribute: "max-w-35 rounded-md px-1.5 py-0.5 text-label font-book",
 			},
 		},
 		defaultVariants: {

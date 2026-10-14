@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { ChevronDown } from "@/components/ui/icon";
 import { PopoverTrigger } from "@/components/ui/popover";
 
@@ -13,16 +14,18 @@ export function AttributeTrigger({
 }) {
 	return (
 		<PopoverTrigger asChild>
-			<button
+			<Button
 				type="button"
+				variant="secondary"
+				size="xs"
 				aria-label={tooltip}
 				title={tooltip}
 				onMouseDown={(e) => e.preventDefault()}
-				className="bg-secondary text-secondary-foreground text-label px-2 py-1 rounded-md max-w-[140px] inline-flex items-center gap-1.5 cursor-pointer ring-1 ring-inset ring-border hover:bg-button-hover hover:text-foreground transition-colors"
+				className="max-w-[140px]"
 			>
-				<span className="truncate min-w-0">{children}</span>
-				<ChevronDown className="w-3 h-3 shrink-0 text-foreground" />
-			</button>
+				<span className="min-w-0 truncate">{children}</span>
+				<ChevronDown className="h-3 w-3 shrink-0 text-foreground" />
+			</Button>
 		</PopoverTrigger>
 	);
 }
