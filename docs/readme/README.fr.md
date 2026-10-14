@@ -96,7 +96,7 @@ Chaque scène est une pile de cartes : narration, personnage, image, vidéo, son
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="Survoler une ligne ouvre le menu d'insertion avec les sept types d'éléments et une nouvelle carte Sound apparaît" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="Survoler une ligne ouvre le menu d'insertion avec les six types d'éléments et une nouvelle carte Sound apparaît" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -216,7 +216,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000) et vous devriez voir l'app
 | Auth + BDD | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | Vidéo      | [Remotion 4](https://remotion.dev) (composition, rendu, lecteur)                                             |
 | Stockage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (stockage des ressources générées)                |
-| Icônes     | Jeu maison de SVG masqués (`components/ui/icon.tsx` + `icons/`), aucune dépendance d'icônes                  |
+| Icônes     | Jeu maison de SVG masqués (`components/ui/icon.tsx` + `components/ui/icons/`), aucune dépendance d'icônes    |
 
 ## Structure du projet
 

@@ -96,7 +96,7 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="鼠标悬停在一行上打开插入菜单，列出七种元素类型，一张新的 Sound 卡片出现" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -216,7 +216,7 @@ npm run dev
 | 认证 + 数据库 | [Supabase](https://supabase.com)（Auth、Postgres、RLS）                                                      |
 | 视频          | [Remotion 4](https://remotion.dev)（合成、渲染、播放器）                                                     |
 | 存储          | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob)（生成资源的存储）                                 |
-| 图标          | 自研的遮罩 SVG 图标集（`components/ui/icon.tsx` + `icons/`），无图标依赖                                     |
+| 图标          | 自研的遮罩 SVG 图标集（`components/ui/icon.tsx` + `components/ui/icons/`），无图标依赖                       |
 
 ## 项目结构
 
