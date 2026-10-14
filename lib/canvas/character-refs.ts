@@ -1,4 +1,5 @@
 import { Editor, Range, Transforms } from "slate";
+import { ZERO_WIDTH_SPACE } from "./constants";
 import { castsCharacters } from "./guards";
 import { makeNodeId } from "./node-utils";
 import { CHARACTER_REF_TYPE, type CharacterRefElement } from "./types";
@@ -12,8 +13,9 @@ export const createCharacterRef = (name: string): CharacterRefElement => ({
 
 export type Mention = { range: Range; query: string };
 
-const MENTION = /(?:^|\s)@([^\s@]*)$/;
-const WORD_END = /^(\s|$)/;
+const BREAK = `\\s${ZERO_WIDTH_SPACE}`;
+const MENTION = new RegExp(`(?:^|[${BREAK}])@([^${BREAK}@]*)$`);
+const WORD_END = new RegExp(`^([${BREAK}]|$)`);
 
 export function mentionAt(editor: Editor): Mention | undefined {
 	const { selection } = editor;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Editor, Transforms } from "slate";
 import { mentionAt } from "../character-refs";
+import { ZERO_WIDTH_SPACE } from "../constants";
 import { SCENE_TYPE, type ContentElement } from "../types";
 import { element, makeEditor } from "./_assets";
 
@@ -27,6 +28,19 @@ describe("mentionAt", () => {
 
 	it("finds a bare @, before anything is typed after it", () => {
 		const editor = caretAtEnd(element("i", "image", "A field with @"));
+
+		expect(mentionAt(editor)?.query).toBe("");
+	});
+
+	it.each([
+		["after the caret marker", `${ZERO_WIDTH_SPACE}@`],
+		["before the caret marker", `@${ZERO_WIDTH_SPACE}`],
+	])("finds an @ typed first in a prompt, %s", (_, marker) => {
+		const editor = caretAtEnd(element("i", "image", marker));
+		Transforms.select(editor, {
+			path: [0, 0, 0],
+			offset: marker.indexOf("@") + 1,
+		});
 
 		expect(mentionAt(editor)?.query).toBe("");
 	});
