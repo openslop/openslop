@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
+import { selectColumns } from "@/lib/supabase/select-columns";
 import type { CanvasVersion, CanvasVersionStorage } from "./canvas-history";
 import { SAVED_PROJECT_COLUMNS, parseSavedProject } from "./saved-project";
 
@@ -7,9 +8,9 @@ const TABLE = "canvas_versions";
 
 const LIST_LIMIT = 100;
 
-const META_COLUMNS = "id, updated_at";
-
 const MetaSchema = z.object({ id: z.string(), updated_at: z.string() });
+
+const META_COLUMNS = selectColumns(MetaSchema);
 
 const toVersion = (row: z.infer<typeof MetaSchema>): CanvasVersion => ({
 	id: row.id,

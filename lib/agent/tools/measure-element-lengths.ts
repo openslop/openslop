@@ -1,3 +1,4 @@
+import { sceneLabel } from "@/lib/canvas/constants";
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import type { ElementLength } from "@/lib/render/element-lengths";
@@ -28,7 +29,7 @@ const REASONS: Record<
 };
 
 const line = (length: ElementLength) =>
-	`Scene ${length.sceneNumber} ${length.type} ${length.id}: ${seconds(length.seconds)}, ${REASONS[length.decidedBy](length)}.`;
+	`${sceneLabel(length.sceneNumber)} ${length.type} ${length.id}: ${seconds(length.seconds)}, ${REASONS[length.decidedBy](length)}.`;
 
 export const measureElementLengths = defineTool({
 	description: dedent`

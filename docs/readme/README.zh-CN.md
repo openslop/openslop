@@ -107,11 +107,11 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 Generate all（全部生成）会把每个元素排进队列，并先处理依赖：先出一个场景所接续的视频卡片再出该场景，先出头像再出它所在的图片。之后改了提示词，卡片会标上 **Stale**（已过期）并说明原因。
 
-[生成图 →](../../ARCHITECTURE.md#generation-graph)
+[生成图 →](../../ARCHITECTURE.md#canvas-and-generation)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#generation-graph"><picture>
+  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
     <img src="../../assets/features/generate-light.svg" alt="Generate all 跑完队列，预览逐个填上，一条改过的提示词被标为 Stale 并附上原因" width="100%">
   </picture></a>
@@ -141,11 +141,11 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 托管模型随账号附带。粘贴一个 Anthropic、Runware、Cartesia 或 ElevenLabs 的密钥，它们的模型就会出现在每个选择器里。密钥存放在 Supabase Vault 中，永远不会到达浏览器。
 
-[模型和提供商密钥 →](../../ARCHITECTURE.md#models-and-provider-keys)
+[模型和提供商密钥 →](../../ARCHITECTURE.md#models-and-keys)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-provider-keys"><picture>
+  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
     <img src="../../assets/features/providers-light.svg" alt="粘贴并验证一个 Cartesia 密钥，状态从 Unverified 变为 Connected" width="100%">
   </picture></a>
@@ -158,7 +158,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 - **[字幕](../../app/components/canvas/panel/captions-panel.tsx)** — 六种预设、十二种字体、逐词或逐行显示，每种颜色、描边和位置都随你改。
 - **[导出最高 4K](../../app/components/player/export-button.tsx)** — 在 Remotion Lambda 上分块并行渲染，交给你一个 MP4。
 - **[版本历史](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 边做边自动保存，合并成检查点。查看任意版本并恢复。
-- **[角色和画风](../../app/components/canvas/elements/AssetsSection.tsx)** — 给角色起一次名，每张图片、每句配音和每个头像都保持一致。
+- **[角色和画风](../../app/components/canvas/elements/asset-strip.tsx)** — 给角色起一次名，每张图片、每句配音和每个头像都保持一致。
 - **[模板](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime 等等。每个模板都预设了一种风格、一位旁白和一个时长。
 - **[开发用的 mock](../../.env.example)** — 不填某个提供商的密钥，它的调用就会回退到预置结果，让你不花钱也能开发。
 

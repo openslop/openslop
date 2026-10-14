@@ -13,6 +13,7 @@ import {
 	type ElementVersion,
 } from "@/lib/generation/versions";
 import { createClient } from "@/lib/supabase/client";
+import { selectColumns } from "@/lib/supabase/select-columns";
 
 const TABLE = "element_history";
 
@@ -47,8 +48,7 @@ const toRow = (projectId: string, version: CommittedVersion) => ({
 	pinned: version.pinned,
 });
 
-const COLUMNS =
-	"element_id, created_at, connector_type, element_type, inputs, result, pinned";
+const COLUMNS = selectColumns(RowSchema);
 
 /** Changing this re-keys every row, so it is fixed for the table's lifetime. */
 const ROW_ID_NAMESPACE = "5673ca03-e04d-4279-b92d-df493e2b9150";

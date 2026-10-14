@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "@/components/ui/icon";
+import { plural } from "@/lib/format";
 import { toastError } from "@/lib/toast-error";
 import { createProject, deleteProject } from "@/lib/project/api";
 import type { ProjectRow } from "@/lib/project/api";
@@ -59,7 +60,7 @@ export default function ProjectsList({
 							<p className="mt-1 text-body text-muted-foreground">
 								{projects.length === 0
 									? "No projects yet — start your first slop."
-									: `${projects.length} project${projects.length === 1 ? "" : "s"}`}
+									: `${projects.length} ${plural(projects.length, "project")}`}
 							</p>
 						</div>
 						<Button type="button" onClick={handleCreate} disabled={pending}>

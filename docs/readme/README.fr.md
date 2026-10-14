@@ -107,11 +107,11 @@ Chaque scène est une pile de cartes : narration, personnage, image, vidéo, son
 
 Generate all (tout générer) met chaque élément en file d'attente et lance d'abord les dépendances : la carte vidéo dont une scène continue avant la scène elle-même, un avatar avant l'image où il apparaît. Changez un prompt plus tard et la carte affiche **Stale** (obsolète) et pourquoi.
 
-[Le graphe de génération →](../../ARCHITECTURE.md#generation-graph)
+[Le graphe de génération →](../../ARCHITECTURE.md#canvas-and-generation)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#generation-graph"><picture>
+  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
     <img src="../../assets/features/generate-light.svg" alt="Generate all lance la file, les aperçus se remplissent, et un prompt modifié est marqué Stale avec une raison" width="100%">
   </picture></a>
@@ -141,11 +141,11 @@ Regardez le montage se remplir, sous-titres mot par mot. Quatre pistes en dessou
 
 Les modèles hébergés viennent avec votre compte. Collez une clé Anthropic, Runware, Cartesia ou ElevenLabs et leurs modèles apparaissent dans chaque sélecteur. Les clés vivent dans Supabase Vault et n'atteignent jamais le navigateur.
 
-[Modèles et clés de fournisseurs →](../../ARCHITECTURE.md#models-and-provider-keys)
+[Modèles et clés de fournisseurs →](../../ARCHITECTURE.md#models-and-keys)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-provider-keys"><picture>
+  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
     <img src="../../assets/features/providers-light.svg" alt="Une clé Cartesia est collée et validée, passant de Unverified à Connected" width="100%">
   </picture></a>
@@ -158,7 +158,7 @@ Les modèles hébergés viennent avec votre compte. Collez une clé Anthropic, R
 - **[Sous-titres](../../app/components/canvas/panel/captions-panel.tsx)** — Six préréglages, douze polices, apparition mot par mot ou ligne par ligne, et chaque couleur, bordure et placement est à vous de changer.
 - **[Export jusqu'en 4K](../../app/components/player/export-button.tsx)** — Rend sur Remotion Lambda en morceaux parallèles et vous livre un MP4.
 - **[Historique des versions](../../app/components/canvas/panel/canvas-history-panel.tsx)** — Sauvegarde automatique pendant que vous travaillez, regroupée en points de contrôle. Consultez n'importe quelle version et restaurez-la.
-- **[Personnages et style graphique](../../app/components/canvas/elements/AssetsSection.tsx)** — Nommez un personnage une fois et chaque image, réplique et avatar reste cohérent.
+- **[Personnages et style graphique](../../app/components/canvas/elements/asset-strip.tsx)** — Nommez un personnage une fois et chaque image, réplique et avatar reste cohérent.
 - **[Modèles](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, et plus. Chacun amorce un style, un narrateur et une durée.
 - **[Mocks pour le développement](../../.env.example)** — Laissez une clé de fournisseur vide et ses appels retombent sur des résultats préenregistrés, pour que vous puissiez développer sans payer.
 

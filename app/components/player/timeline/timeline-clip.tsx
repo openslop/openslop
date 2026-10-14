@@ -2,6 +2,7 @@ import type { IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
+import { sceneLabel } from "@/lib/canvas/constants";
 import { TRIM_TO_DIALOGUE_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { formatTimeRange } from "@/lib/render/timestamps";
@@ -69,7 +70,7 @@ export function TimelineClip({
 			? TRIM_TO_DIALOGUE_FACES[element.trimToDialogue ? "on" : "off"]
 			: undefined;
 	const accessibleLabel = [
-		sceneNumber && `Scene ${sceneNumber}`,
+		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
 		range,
 		timing?.label,
@@ -113,7 +114,7 @@ export function TimelineClip({
 			</div>
 			{sceneNumber ? (
 				<span className="absolute bottom-0.5 left-0.5 max-w-full truncate rounded-tr-sm rounded-bl-sm bg-on-media/65 px-1 font-numeric text-badge-xs text-on-media-foreground">
-					{fit(`Scene ${sceneNumber}`, width)}
+					{fit(sceneLabel(sceneNumber), width)}
 				</span>
 			) : null}
 			{timing ? (

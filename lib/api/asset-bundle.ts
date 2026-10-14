@@ -85,9 +85,9 @@ export class AssetBundle {
 		return `${this.url}/${value}`;
 	}
 
-	async fetchJson<T>(key: string): Promise<T> {
+	async fetchJson<T>(key: string, schema: z.ZodType<T>): Promise<T> {
 		const res = await fetchOk(this.resolve(key), `Failed to fetch "${key}"`);
-		return res.json() as Promise<T>;
+		return schema.parse(await res.json());
 	}
 
 	static buildUrl(type: string, provider: string, id: string): string {

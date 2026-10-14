@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
+import { selectColumns } from "@/lib/supabase/select-columns";
 import type { ProjectMeta } from "./project-document";
 import type { SavedProject } from "./saved-project";
 
@@ -12,10 +13,7 @@ export const ProjectRowSchema = z.object({
 
 export type ProjectRow = z.infer<typeof ProjectRowSchema>;
 
-/** Selected wherever a project row is read, so the query cannot drift from the schema. */
-export const PROJECT_ROW_COLUMNS = Object.keys(ProjectRowSchema.shape).join(
-	", ",
-);
+export const PROJECT_ROW_COLUMNS = selectColumns(ProjectRowSchema);
 
 export type SaveProjectInput = SavedProject & ProjectMeta;
 

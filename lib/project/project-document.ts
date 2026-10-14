@@ -7,6 +7,8 @@ import type { SavedProject } from "./saved-project";
 import { extractStoreSnapshot, type ProjectStore } from "./store";
 import { pickThumbnailUrl } from "./thumbnail";
 
+export const UNTITLED_PROJECT = "Untitled";
+
 /** What the project row stores beside the content, derived from it. */
 export type ProjectMeta = { name: string; thumbnail_url: string | null };
 
@@ -41,7 +43,7 @@ export function createProjectDocument({
 		},
 
 		meta: () => ({
-			name: store.getState().title.trim() || "Untitled",
+			name: store.getState().title.trim() || UNTITLED_PROJECT,
 			thumbnail_url: pickThumbnailUrl(
 				getContentElements(editor.children),
 				queue,

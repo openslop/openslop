@@ -54,6 +54,19 @@ describe("setAsset", () => {
 		]);
 	});
 
+	it("trims the text a new asset is given", () => {
+		const editor = makeEditor();
+
+		setAsset(editor, "asset_style", undefined, { text: "  ink wash  " });
+
+		const style = findAsset(editor.children, "asset_style");
+		expect(style && getPromptText(style)).toBe("ink wash");
+		expect(style?.children).toMatchObject([
+			{ text: "\u200B" },
+			{ text: "ink wash" },
+		]);
+	});
+
 	it("adds an asset, then updates it in place", () => {
 		const editor = makeEditor();
 

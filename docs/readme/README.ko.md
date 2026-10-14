@@ -107,11 +107,11 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 
 Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것부터 먼저 돌립니다: 장면이 이어받는 동영상 카드를 그 장면보다 먼저, 아바타가 들어갈 이미지보다 아바타를 먼저. 나중에 프롬프트를 바꾸면 카드에 **Stale**(오래됨)과 그 이유가 표시됩니다.
 
-[생성 그래프 →](../../ARCHITECTURE.md#generation-graph)
+[생성 그래프 →](../../ARCHITECTURE.md#canvas-and-generation)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#generation-graph"><picture>
+  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
     <img src="../../assets/features/generate-light.svg" alt="Generate all이 큐를 돌리고, 미리보기가 채워지고, 고친 프롬프트는 이유와 함께 Stale로 표시됩니다" width="100%">
   </picture></a>
@@ -141,11 +141,11 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 호스팅 모델은 계정에 딸려 옵니다. Anthropic, Runware, Cartesia, ElevenLabs 키를 붙여 넣으면 그 모델들이 모든 선택 메뉴에 나타납니다. 키는 Supabase Vault에 보관되고 브라우저에는 절대 닿지 않습니다.
 
-[모델과 공급자 키 →](../../ARCHITECTURE.md#models-and-provider-keys)
+[모델과 공급자 키 →](../../ARCHITECTURE.md#models-and-keys)
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-provider-keys"><picture>
+  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
     <img src="../../assets/features/providers-light.svg" alt="Cartesia 키를 붙여 넣고 검증하면 Unverified(미확인)에서 Connected(연결됨)로 바뀝니다" width="100%">
   </picture></a>
@@ -158,7 +158,7 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 - **[자막](../../app/components/canvas/panel/captions-panel.tsx)** — 프리셋 여섯 개, 글꼴 열두 개, 단어 단위 또는 줄 단위로 나타나기, 그리고 색, 테두리, 위치 전부를 마음대로 바꿀 수 있습니다.
 - **[최대 4K로 내보내기](../../app/components/player/export-button.tsx)** — Remotion Lambda에서 여러 조각을 동시에 렌더링해 MP4를 건네줍니다.
 - **[버전 기록](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 작업하는 동안 자동 저장되고, 체크포인트로 묶입니다. 어떤 버전이든 보고 되돌릴 수 있습니다.
-- **[캐릭터와 화풍](../../app/components/canvas/elements/AssetsSection.tsx)** — 캐릭터 이름을 한 번만 정하면 모든 이미지, 음성 대사, 아바타가 일관되게 유지됩니다.
+- **[캐릭터와 화풍](../../app/components/canvas/elements/asset-strip.tsx)** — 캐릭터 이름을 한 번만 정하면 모든 이미지, 음성 대사, 아바타가 일관되게 유지됩니다.
 - **[템플릿](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime 등. 각각 스타일, 내레이터, 길이를 미리 채워 줍니다.
 - **[개발용 목(mock)](../../.env.example)** — 공급자 키를 비워 두면 그 호출은 미리 준비된 결과로 대체되어, 돈을 내지 않고도 개발할 수 있습니다.
 

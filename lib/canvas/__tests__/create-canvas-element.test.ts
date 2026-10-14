@@ -113,11 +113,14 @@ describe("createCanvasElement", () => {
 		expect(typeof node.id).toBe("string");
 	});
 
-	it("creates [ZWSP, text] children with trimmed text", () => {
+	it("creates [ZWSP, text] children with the text as given", () => {
 		const node = createCanvasElement("narration", {
 			text: "  hello  ",
 		});
-		expect(node.children).toMatchObject([{ text: ZWSP }, { text: "hello" }]);
+		expect(node.children).toMatchObject([
+			{ text: ZWSP },
+			{ text: "  hello  " },
+		]);
 	});
 
 	it("defaults text child to empty string", () => {

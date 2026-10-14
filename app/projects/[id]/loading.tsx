@@ -2,6 +2,14 @@ import {
 	PINNED_PANEL_KEYS,
 	RAIL_PANEL_GROUPS,
 } from "@/app/components/canvas/panel/panel-keys";
+import {
+	DOCK_DEFAULT_HEIGHT,
+	GUTTER_PX,
+	LANE_HEIGHT,
+	RULER_HEIGHT,
+	RULER_LABEL_OFFSET,
+	SIDE_PLAYER_DEFAULT_WIDTH,
+} from "@/app/components/player/dock-layout";
 import { Fragment } from "react";
 import { DotGrid } from "@/components/ui/dot-grid";
 import { Separator } from "@/components/ui/separator";
@@ -9,11 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SCENES = [3, 2, 4];
 
-/** Mirrors the dock's default height and the lanes a video always has. */
-const DOCK_HEIGHT = 260;
 const LANES: { height: string; clips: [start: number, width: number][] }[] = [
 	{
-		height: "h-20",
+		height: LANE_HEIGHT.visual,
 		clips: [
 			[0, 0.34],
 			[0.35, 0.28],
@@ -21,28 +27,31 @@ const LANES: { height: string; clips: [start: number, width: number][] }[] = [
 		],
 	},
 	{
-		height: "h-16",
+		height: LANE_HEIGHT.audio,
 		clips: [
 			[0, 0.61],
 			[0.62, 0.38],
 		],
 	},
 	{
-		height: "h-16",
+		height: LANE_HEIGHT.audio,
 		clips: [
 			[0.06, 0.22],
 			[0.4, 0.16],
 			[0.71, 0.24],
 		],
 	},
-	{ height: "h-16", clips: [[0, 1]] },
+	{ height: LANE_HEIGHT.audio, clips: [[0, 1]] },
 ];
 
 function TimelineSkeleton() {
 	return (
 		<div className="flex min-h-0 flex-1 overflow-hidden">
-			<div className="flex w-10 shrink-0 flex-col border-r border-border">
-				<div className="h-7 shrink-0 border-b border-border" />
+			<div
+				className="flex shrink-0 flex-col border-r border-border"
+				style={{ width: GUTTER_PX }}
+			>
+				<div className={`shrink-0 border-b border-border ${RULER_HEIGHT}`} />
 				{LANES.map(({ height }, lane) => (
 					<div
 						key={lane}
@@ -54,11 +63,11 @@ function TimelineSkeleton() {
 			</div>
 
 			<div className="flex min-w-0 flex-1 flex-col">
-				<div className="relative h-7 shrink-0">
+				<div className={`relative shrink-0 ${RULER_HEIGHT}`}>
 					{[0, 0.2, 0.4, 0.6, 0.8].map((at) => (
 						<Skeleton
 							key={at}
-							className="absolute top-3.5 h-2 w-8 -translate-y-1/2 rounded-xs"
+							className={`absolute h-2 w-8 rounded-xs ${RULER_LABEL_OFFSET}`}
 							style={{ left: `${at * 100}%` }}
 						/>
 					))}
@@ -174,7 +183,10 @@ export default function Loading() {
 						</div>
 
 						{/* Side player panel */}
-						<div className="hidden w-[42%] max-w-[560px] shrink-0 flex-col justify-center border-l border-border p-4 lg:flex">
+						<div
+							className="hidden w-[42%] shrink-0 flex-col justify-center border-l border-border p-4 lg:flex"
+							style={{ maxWidth: SIDE_PLAYER_DEFAULT_WIDTH }}
+						>
 							<Skeleton className="aspect-video w-full rounded-lg" />
 						</div>
 					</div>
@@ -182,7 +194,7 @@ export default function Loading() {
 					{/* Transport bar and the timeline below it */}
 					<div
 						className="flex shrink-0 flex-col overflow-hidden"
-						style={{ height: DOCK_HEIGHT }}
+						style={{ height: DOCK_DEFAULT_HEIGHT }}
 					>
 						<div className="h-2 shrink-0" />
 						<div className="flex w-full shrink-0 flex-col gap-1.5 border-t border-border px-4 py-2">

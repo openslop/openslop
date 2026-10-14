@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import type { User } from "@supabase/supabase-js";
 import type { ProviderKeyRecord } from "@/lib/connectors/provider-key";
 import { ConfigProvider } from "@/lib/config/config-provider";
 import { ScriptProvider } from "@/lib/script/script-provider";
+import type { Account } from "@/lib/user/account";
 import { UserProvider } from "@/lib/user/user-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createProjectStore } from "@/lib/project/store";
@@ -18,19 +18,19 @@ import Editor from "@/app/components/editor";
 export default function ProjectEditor({
 	projectId,
 	initial,
-	user,
+	account,
 	providerKeys,
 }: {
 	projectId: string;
 	initial: SavedProject;
-	user: User;
+	account: Account;
 	providerKeys: ProviderKeyRecord[];
 }): ReactNode {
 	const [store] = useState(() => createProjectStore(initial.store));
 
 	return (
 		<TooltipProvider>
-			<UserProvider user={user} providerKeys={providerKeys}>
+			<UserProvider account={account} providerKeys={providerKeys}>
 				<GenerationQueueProvider initialState={initial.generation}>
 					<ElementHistoryProvider storage={elementHistoryStorage(projectId)}>
 						<ProjectStoreProvider store={store}>

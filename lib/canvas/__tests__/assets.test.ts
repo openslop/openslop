@@ -31,6 +31,13 @@ describe("getAssets and getCanvasElements", () => {
 			narration,
 		]);
 	});
+
+	it("read a document once, and an edited document afresh", () => {
+		const nodes = [asset("asset_style"), scene];
+
+		expect(getAssets(nodes)).toBe(getAssets(nodes));
+		expect(getAssets([...nodes])).not.toBe(getAssets(nodes));
+	});
 });
 
 describe("findAsset", () => {

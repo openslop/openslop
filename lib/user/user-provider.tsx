@@ -1,36 +1,30 @@
 "use client";
 
 import { type ReactNode } from "react";
-import type { User } from "@supabase/supabase-js";
 import { createRequiredContext } from "@/lib/components/create-required-context";
-import { connectorModelsSchema } from "@/lib/connectors/models";
 import type { ProviderKeyRecord } from "@/lib/connectors/provider-key";
+import type { Account } from "./account";
 import { AccountStoreProvider } from "./account-store-provider";
+
+export type User = Omit<Account, "models">;
 
 const [UserContext, useUser] = createRequiredContext<User>("UserProvider");
 export { useUser };
 
-/** Whatever the account last saved, ignored if it is not a model map. */
-const accountModelsSchema = connectorModelsSchema.catch({});
-
 export function UserProvider({
-	user,
+	account,
 	providerKeys,
 	children,
 }: {
-	user: User;
+	account: Account;
 	/** Read on the server beside the user, so the pickers never open on a guess. */
 	providerKeys: ProviderKeyRecord[];
 	children: ReactNode;
 }) {
+	const { models, ...user } = account;
 	return (
 		<UserContext value={user}>
-			<AccountStoreProvider
-				account={{
-					models: accountModelsSchema.parse(user.user_metadata.models),
-					providerKeys,
-				}}
-			>
+			<AccountStoreProvider account={{ models, providerKeys }}>
 				{children}
 			</AccountStoreProvider>
 		</UserContext>

@@ -18,6 +18,10 @@ export function truncateMiddle(text: string, maxLength: number): string {
 	].join("…");
 }
 
+export function plural(count: number, noun: string): string {
+	return count === 1 ? noun : `${noun}s`;
+}
+
 export function formatBytes(bytes: number): string {
 	if (bytes < 1024) return `${bytes} B`;
 	const kb = bytes / 1024;

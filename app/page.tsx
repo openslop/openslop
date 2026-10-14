@@ -8,6 +8,7 @@ import AccessCodeInput from "./components/access-code-input";
 import ProjectsList from "./components/projects/projects-list";
 import { listProviderKeys } from "@/lib/api/provider-keys";
 import { PROJECT_ROW_COLUMNS, ProjectRowSchema } from "@/lib/project/api";
+import { AccountSchema } from "@/lib/user/account";
 import { UserProvider } from "@/lib/user/user-provider";
 
 const icons = fs
@@ -31,7 +32,10 @@ export default async function Home() {
 		]);
 		if (error) throw error;
 		return (
-			<UserProvider user={user} providerKeys={providerKeys}>
+			<UserProvider
+				account={AccountSchema.parse(user)}
+				providerKeys={providerKeys}
+			>
 				<ProjectsList
 					initialProjects={ProjectRowSchema.array().parse(projects)}
 				/>

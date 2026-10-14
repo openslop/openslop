@@ -12,7 +12,8 @@ export function insertElement(
 	overrides?: Pick<CreateElementOptions, "attrs" | "text">,
 ): string {
 	const node = createCanvasElement(type, {
-		...overrides,
+		attrs: overrides?.attrs,
+		text: overrides?.text?.trim(),
 		defaultModels: editor.defaultModels(),
 	});
 	Transforms.insertNodes(editor, node, { at });

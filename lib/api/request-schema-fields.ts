@@ -8,14 +8,16 @@ export const byokProviderField = z.enum(BYOK_PROVIDERS);
 
 const POSITIVE_NUMBER = "must be a positive number";
 
+const positiveNumber = z
+	.number({ error: POSITIVE_NUMBER })
+	.positive({ error: POSITIVE_NUMBER });
+
 const optionalPositiveNumber = z
 	.union([z.number(), z.string()])
 	.transform((value) =>
 		typeof value === "string" && value.trim() === "" ? NaN : Number(value),
 	)
-	.pipe(
-		z.number({ error: POSITIVE_NUMBER }).positive({ error: POSITIVE_NUMBER }),
-	)
+	.pipe(positiveNumber)
 	.optional();
 
 export const optionalImageDimensions = {
@@ -24,7 +26,7 @@ export const optionalImageDimensions = {
 } as const;
 
 export const optionalDurationSeconds = {
-	durationSeconds: z.number().optional(),
+	durationSeconds: positiveNumber.optional(),
 } as const;
 
 export const optionalVideoDuration = {
