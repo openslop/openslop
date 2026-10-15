@@ -1,15 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BYOK_PROVIDERS } from "@/lib/connectors/provider-catalog";
-import { validateKey } from "../providers/byok";
+import { setKeyStatus } from "../provider-keys";
+import { validateKey, verifyProviderKey } from "../providers/byok";
+
+vi.mock("../provider-keys", () => ({ setKeyStatus: vi.fn() }));
+vi.mock("../logger", () => ({ logger: { warn: vi.fn() } }));
+
+let fetchMock: ReturnType<typeof vi.fn>;
+
+beforeEach(() => {
+	fetchMock = vi.fn();
+	vi.stubGlobal("fetch", fetchMock);
+	vi.mocked(setKeyStatus).mockClear();
+});
 
 describe("validateKey", () => {
-	let fetchMock: ReturnType<typeof vi.fn>;
-
-	beforeEach(() => {
-		fetchMock = vi.fn();
-		vi.stubGlobal("fetch", fetchMock);
-	});
-
 	it("sends the key in the header the vendor expects", async () => {
 		fetchMock.mockResolvedValue(new Response("{}", { status: 200 }));
 
@@ -23,7 +28,7 @@ describe("validateKey", () => {
 		fetchMock.mockResolvedValue(new Response("{}", { status: 401 }));
 
 		expect(await validateKey("elevenlabs", "bad")).toEqual({
-			ok: false,
+			verdict: "invalid",
 			error: "The provider rejected this key.",
 		});
 	});
@@ -38,18 +43,20 @@ describe("validateKey", () => {
 		);
 
 		expect(await validateKey("runware", "bad")).toEqual({
-			ok: false,
+			verdict: "invalid",
 			error: "The provider rejected this key.",
 		});
 	});
 
 	// The user asked whether the key works; "we could not tell" is an answer.
-	it("reports unreachable providers instead of throwing", async () => {
+	it("reports a provider that gave no answer in words", async () => {
 		fetchMock.mockRejectedValue(new Error("network down"));
 
-		const result = await validateKey("cartesia", "key");
-
-		expect(result.ok).toBe(false);
+		expect(await validateKey("cartesia", "key")).toEqual({
+			verdict: "unknown",
+			error:
+				"Could not reach the provider to check this key. Test it again in a moment.",
+		});
 	});
 
 	// Every vendor a user can bring a key for has a class that can answer for it.
@@ -59,7 +66,30 @@ describe("validateKey", () => {
 		);
 
 		for (const provider of BYOK_PROVIDERS) {
-			expect(await validateKey(provider, "key")).toEqual({ ok: true });
+			expect(await validateKey(provider, "key")).toEqual({ verdict: "valid" });
 		}
+	});
+});
+
+describe("verifyProviderKey", () => {
+	it.each([
+		[200, "valid"],
+		[401, "invalid"],
+	])("records a %i from the vendor as %s", async (status, verdict) => {
+		fetchMock.mockResolvedValue(new Response("{}", { status }));
+
+		await verifyProviderKey("u1", "cartesia", "key");
+
+		expect(setKeyStatus).toHaveBeenCalledWith("u1", "cartesia", verdict);
+	});
+
+	// No answer is no evidence, so a key that worked yesterday keeps its status.
+	it("leaves the status alone when the provider gave no answer", async () => {
+		fetchMock.mockRejectedValue(new Error("network down"));
+
+		const result = await verifyProviderKey("u1", "cartesia", "key");
+
+		expect(result).toMatchObject({ verdict: "unknown" });
+		expect(setKeyStatus).not.toHaveBeenCalled();
 	});
 });

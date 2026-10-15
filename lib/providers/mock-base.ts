@@ -12,7 +12,7 @@ export abstract class MockProvider<TParams> {
 	protected readonly delayMs: number = 0;
 
 	async validate(): Promise<ValidationResult> {
-		return { ok: true };
+		return { verdict: "valid" };
 	}
 
 	async generate(_params: TParams): Promise<Priced<BundleResponse>> {

@@ -6,10 +6,12 @@ import { createRoot, type Root } from "react-dom/client";
 import { ProviderKeyForm } from "../provider-key-form";
 
 const saveKey = vi.fn();
+const warn = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/user/use-account", () => ({
 	useAccount: () => saveKey,
 }));
+vi.mock("sonner", () => ({ toast: { warning: warn } }));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -51,7 +53,10 @@ describe("ProviderKeyForm", () => {
 	});
 
 	it("marks the field invalid and ties it to the announced rejection", async () => {
-		saveKey.mockResolvedValue({ ok: false, error: "The vendor refused it" });
+		saveKey.mockResolvedValue({
+			verdict: "invalid",
+			error: "The vendor refused it",
+		});
 
 		await submit();
 
@@ -63,8 +68,24 @@ describe("ProviderKeyForm", () => {
 		expect(onSaved).not.toHaveBeenCalled();
 	});
 
+	// Not a rejection: the key is stored and unverified, so the form is done.
+	it("closes on a key the vendor could not be asked about, and says so", async () => {
+		saveKey.mockResolvedValue({ verdict: "unknown", error: "No answer" });
+
+		await submit();
+
+		expect(warn).toHaveBeenCalledWith("No answer");
+		expect(onSaved).toHaveBeenCalled();
+		expect(container.querySelector("input")?.getAttribute("aria-invalid")).toBe(
+			"false",
+		);
+	});
+
 	it("clears the rejection once the key is edited", async () => {
-		saveKey.mockResolvedValue({ ok: false, error: "The vendor refused it" });
+		saveKey.mockResolvedValue({
+			verdict: "invalid",
+			error: "The vendor refused it",
+		});
 		await submit();
 
 		const input = container.querySelector("input");

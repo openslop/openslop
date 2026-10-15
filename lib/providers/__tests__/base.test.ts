@@ -14,7 +14,7 @@ class TestProvider extends BaseProvider<TestParams, TestRawResult> {
 	generateFn = vi.fn<(params: TestParams) => Promise<TestRawResult>>();
 
 	async validate() {
-		return { ok: true as const };
+		return { verdict: "valid" as const };
 	}
 
 	protected toFiles(r: TestRawResult): BundleFile[] {

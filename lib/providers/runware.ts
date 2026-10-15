@@ -34,6 +34,6 @@ export async function validateRunwareKey(
 	if (!response.ok) return rejected(response.status);
 	const body = (await response.json()) as { errors?: unknown[] };
 	return body.errors?.length
-		? { ok: false, error: "The provider rejected this key." }
-		: { ok: true };
+		? { verdict: "invalid", error: "The provider rejected this key." }
+		: { verdict: "valid" };
 }
