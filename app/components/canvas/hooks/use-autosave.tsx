@@ -6,14 +6,9 @@ import { createAutosaver, type Autosaver } from "@/lib/project/autosave";
 import type { ProjectDocument } from "@/lib/project/project-document";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
+import { SavedToast } from "../saved-toast";
 
-const TOAST_OPTIONS = {
-	id: "autosave",
-	position: "bottom-right" as const,
-	className:
-		"!bg-muted !border !border-border !text-muted-foreground !text-label !shadow-none !rounded-md !py-1.5 !px-2.5 !min-h-0 !w-auto",
-	duration: 1500,
-};
+const AUTOSAVE_TOAST = { id: "autosave", position: "bottom-right" as const };
 
 export function useAutosave(
 	projectId: string,
@@ -26,12 +21,12 @@ export function useAutosave(
 		createAutosaver({
 			projectId,
 			document,
-			onSaved: () => toast("Saved", TOAST_OPTIONS),
-			onError: (error) =>
-				toastError(error, "Save failed", {
-					...TOAST_OPTIONS,
-					duration: 4000,
+			onSaved: () =>
+				toast.custom(() => <SavedToast />, {
+					...AUTOSAVE_TOAST,
+					duration: 1500,
 				}),
+			onError: (error) => toastError(error, "Save failed", AUTOSAVE_TOAST),
 		}),
 	);
 
