@@ -7,7 +7,7 @@ import {
 } from "mediabunny";
 import zipObject from "lodash/zipObject";
 import { memoAsync } from "@/lib/memo-async";
-import { uploadImage } from "@/lib/upload/upload-image";
+import { uploadFile } from "@/lib/upload/upload-file";
 import { FRAMES, type FrameKey } from "./start-frame";
 
 const JPEG_QUALITY = 0.92;
@@ -64,7 +64,8 @@ export const previewFrames = memoAsync(decodeFrames, (videoUrl) => videoUrl, {
 const uploadFrame = memoAsync(
 	async (videoUrl: string, key: FrameKey): Promise<string> => {
 		const jpeg = (await previewFrames(videoUrl))[key];
-		return uploadImage(
+		return uploadFile(
+			"image",
 			new File([jpeg], `frame-${key}.jpg`, { type: jpeg.type }),
 		);
 	},

@@ -16,7 +16,7 @@ import {
 } from "@/lib/canvas/types";
 import { AnimateButton } from "./animate-button";
 import { CharacterSwitcher } from "./character-switcher";
-import { ElementUploadButton } from "./element-upload-button";
+import { ImageUploadButton, VideoUploadButton } from "./element-upload-button";
 import { ElementVoiceButton } from "./element-voice-button";
 
 type ElementControl = ComponentType<{
@@ -68,7 +68,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		iconBgClass: "bg-media-image/15",
 		colorClass: "text-media-image",
 		placeholder: "Describe the image...",
-		actions: [ElementUploadButton, AnimateButton],
+		actions: [ImageUploadButton, AnimateButton],
 	},
 	video: {
 		label: "Video",
@@ -76,6 +76,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		iconBgClass: "bg-media-video/15",
 		colorClass: "text-media-video",
 		placeholder: "Describe the video...",
+		actions: [VideoUploadButton],
 	},
 	sound: {
 		label: "Sound",

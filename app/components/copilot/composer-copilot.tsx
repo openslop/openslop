@@ -47,7 +47,7 @@ import {
 	videoFormatSummary,
 	type VideoFormat,
 } from "@/lib/project/video-format";
-import { useImageUpload } from "@/lib/upload/use-image-upload";
+import { useFileUpload } from "@/lib/upload/use-file-upload";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./action-button";
 import { AssetStrip } from "@/app/components/canvas/elements/asset-strip";
@@ -216,7 +216,11 @@ export default function ComposerCopilot({
 		inputElement,
 		dropZoneProps,
 		isDraggingOver,
-	} = useImageUpload({ multiple: true, onUpload: addReferenceImages });
+	} = useFileUpload({
+		kind: "image",
+		multiple: true,
+		onUpload: addReferenceImages,
+	});
 	const hasText = value.trim().length > 0;
 	const pasting = intent === "script";
 	const activeTemplate = pasting ? undefined : template;

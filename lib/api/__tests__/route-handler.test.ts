@@ -1,7 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { imageFile } from "../request-schema-fields";
+import { UPLOAD_KINDS } from "@/lib/upload/upload-files";
+import { uploadedFile } from "../request-schema-fields";
 import { createJobPollHandler } from "../asset-routes";
 import { HOSTED } from "../route-families";
 import { bodySchema, hostedModel } from "../generation-schema";
@@ -206,9 +207,8 @@ describe("createSessionRouteHandler", () => {
 });
 
 describe("createSessionFormRouteHandler", () => {
-	const MAX_BYTES = 8;
 	const handler = createSessionFormRouteHandler({
-		schema: z.object({ file: imageFile(MAX_BYTES) }, { error: "No file" }),
+		schema: z.object({ file: uploadedFile("image") }, { error: "No file" }),
 		label: "TestFormRoute",
 		handle: async ({ input }) => NextResponse.json({ name: input.file.name }),
 	});
@@ -241,13 +241,15 @@ describe("createSessionFormRouteHandler", () => {
 		const notes = new File(["hi"], "notes.txt", { type: "text/plain" });
 		const res = await handler(makeFormRequest({ file: notes }));
 		expect(res.status).toBe(400);
-		expect((await res.json()).error).toBe("File must be an image");
+		expect((await res.json()).error).toBe("File is not an image");
 	});
 
 	it("returns 400 when the file exceeds the size limit", async () => {
-		const res = await handler(makeFormRequest({ file: imageOfSize(64) }));
+		const res = await handler(
+			makeFormRequest({ file: imageOfSize(UPLOAD_KINDS.image.maxBytes + 1) }),
+		);
 		expect(res.status).toBe(400);
-		expect((await res.json()).error).toContain("File must be under");
+		expect((await res.json()).error).toBe("File is over 10 MB");
 	});
 
 	it("returns 401 when the user is not authenticated", async () => {

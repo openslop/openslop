@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UnreachableError } from "@/lib/clients/http";
-import { uploadImage } from "../upload-image";
+import { uploadFile } from "../upload-file";
 
 const file = new File(["x"], "x.png", { type: "image/png" });
 
-describe("uploadImage", () => {
+describe("uploadFile", () => {
 	const fetchMock = vi.fn();
 
 	beforeEach(() => {
@@ -22,7 +22,20 @@ describe("uploadImage", () => {
 			status: 200,
 			json: async () => ({ url: "https://blob/x.png" }),
 		});
-		await expect(uploadImage(file)).resolves.toBe("https://blob/x.png");
+		await expect(uploadFile("image", file)).resolves.toBe("https://blob/x.png");
+	});
+
+	it("posts to the route for its kind", async () => {
+		fetchMock.mockResolvedValue({
+			ok: true,
+			status: 200,
+			json: async () => ({ url: "https://blob/x.mp4" }),
+		});
+		await uploadFile("video", file);
+		expect(fetchMock).toHaveBeenCalledWith(
+			"/api/upload/video",
+			expect.objectContaining({ method: "POST" }),
+		);
 	});
 
 	it("throws the route's error message when the response is not ok", async () => {
@@ -32,7 +45,9 @@ describe("uploadImage", () => {
 			statusText: "Bad Request",
 			json: async () => ({ error: "File must be under 10 MB" }),
 		});
-		await expect(uploadImage(file)).rejects.toThrow("File must be under 10 MB");
+		await expect(uploadFile("image", file)).rejects.toThrow(
+			"File must be under 10 MB",
+		);
 	});
 
 	it("falls back to the status line when the body has no error", async () => {
@@ -42,11 +57,13 @@ describe("uploadImage", () => {
 			statusText: "Bad Gateway",
 			json: async () => ({}),
 		});
-		await expect(uploadImage(file)).rejects.toThrow("502 Bad Gateway");
+		await expect(uploadFile("image", file)).rejects.toThrow("502 Bad Gateway");
 	});
 
 	it("propagates network failures", async () => {
 		fetchMock.mockRejectedValue(new TypeError("network down"));
-		await expect(uploadImage(file)).rejects.toBeInstanceOf(UnreachableError);
+		await expect(uploadFile("image", file)).rejects.toBeInstanceOf(
+			UnreachableError,
+		);
 	});
 });

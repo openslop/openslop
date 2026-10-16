@@ -2,6 +2,7 @@ import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/provider-catalog";
 import { HostedVoicePreviewSchema } from "@/lib/connectors/types";
 import { VIDEO_RESOLUTIONS } from "@/lib/project/aspect-ratio";
+import { fileRejection, type UploadKind } from "@/lib/upload/upload-files";
 import { parseImageSource } from "./image-source";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
@@ -66,15 +67,11 @@ export const optionalContinuityFrames = {
 	continuityFrames: z.array(referenceImageUrlOrDataUri).optional(),
 } as const;
 
-export const imageFile = (maxBytes: number) =>
-	z
-		.instanceof(File, { error: "No file provided" })
-		.refine((file) => file.type.startsWith("image/"), {
-			message: "File must be an image",
-		})
-		.refine((file) => file.size <= maxBytes, {
-			message: `File must be under ${maxBytes / 1024 / 1024} MB`,
-		});
+export const uploadedFile = (kind: UploadKind) =>
+	z.instanceof(File, { error: "No file provided" }).superRefine((file, ctx) => {
+		const reason = fileRejection(file, kind);
+		if (reason) ctx.addIssue({ code: "custom", message: `File ${reason}` });
+	});
 
 export const requiredVoiceId = z
 	.string({ error: "voiceId is required" })
