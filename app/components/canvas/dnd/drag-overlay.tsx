@@ -1,52 +1,45 @@
 import { GripVertical, Plus } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { createEditor, Descendant } from "slate";
-import { Editable, RenderElementProps, Slate, withReact } from "slate-react";
+import { Editable, Slate } from "slate-react";
 import type { CanvasBlock } from "@/lib/canvas/types";
-import { isContentElement } from "@/lib/canvas/guards";
-import { isScene } from "@/lib/canvas/scenes";
+import { useAssets } from "@/lib/canvas/use-assets";
 import { CompactElement } from "../elements/compact-element";
 import { ElementContainer } from "../elements/element-container";
 import { SceneContainer } from "../elements/scene-container";
 import { useSceneIndex } from "../hooks/use-scene-index";
+import { withCanvas } from "../plugins/with-canvas";
+import { renderCanvasElement } from "../render-canvas-element";
 import { useSceneCollapsed } from "../view-mode-context";
 import styles from "../styles/sortable.module.css";
 
-/**
- * Previews the dragged node in a scratch editor holding only that node. What a
- * node would otherwise read off its own document (scene number, collapsed
- * state, its generation graph) is resolved against the real canvas, which
- * this renders inside of.
- */
+/** Previews the dragged node in a scratch canvas holding it and the assets its chips resolve against. */
 export function DragOverlayPreview({ block }: { block: CanvasBlock }) {
-	const editor = useMemo(() => withReact(createEditor()), []);
-	const value = useMemo<Descendant[]>(() => [structuredClone(block)], [block]);
+	const assets = useAssets();
+	const editor = useMemo(() => withCanvas(createEditor()), []);
+	const value = useMemo<Descendant[]>(
+		() => structuredClone([...assets, block]),
+		[assets, block],
+	);
 
 	const sceneIndex = useSceneIndex(block.id);
 	const collapsed = useSceneCollapsed(block.id);
 
-	const renderElement = useCallback(
-		({ attributes, children, element: node }: RenderElementProps) => {
-			if (isScene(node))
-				return (
+	const renderElement = useMemo(
+		() =>
+			renderCanvasElement({
+				Scene: ({ attributes, scene, children }) => (
 					<SceneContainer
 						attributes={attributes}
-						scene={node}
+						scene={scene}
 						sceneIndex={sceneIndex}
 					>
 						{children}
 					</SceneContainer>
-				);
-			if (!isContentElement(node))
-				throw new Error(`A ${node.type} element is never dragged`);
-			const Content = collapsed ? CompactElement : ElementContainer;
-			return (
-				<Content attributes={attributes} element={node}>
-					{children}
-				</Content>
-			);
-		},
+				),
+				Content: collapsed ? CompactElement : ElementContainer,
+			}),
 		[collapsed, sceneIndex],
 	);
 
