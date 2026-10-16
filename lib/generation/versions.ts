@@ -1,6 +1,7 @@
 import keyBy from "lodash/keyBy";
 import sortBy from "lodash/sortBy";
 import type { ElementType } from "@/lib/canvas/types";
+import { resultIdentity } from "../connectors/asset-url";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { serializeInputs, type GenerationInputs } from "./inputs";
 import type { ElementSnapshot } from "./snapshots";
@@ -21,11 +22,13 @@ export type CommittedVersion = Omit<ElementVersion, "createdAt">;
 
 const NO_VERSIONS: readonly ElementVersion[] = [];
 
+/** One version is these inputs and this result: a retake from unchanged inputs is its own version. */
 export const versionKey = ({
 	inputs,
+	result,
 	pinned,
-}: Pick<CommittedVersion, "inputs" | "pinned">): string =>
-	`${pinned ? "supplied" : "generated"}:${serializeInputs(inputs)}`;
+}: Pick<CommittedVersion, "inputs" | "result" | "pinned">): string =>
+	`${pinned ? "supplied" : "generated"}:${resultIdentity(result)}:${serializeInputs(inputs)}`;
 
 /** A failed regeneration nulls `result` but leaves `resultInputs`, so gate on both. */
 export const activeVersionIndex = (
@@ -37,7 +40,7 @@ export const activeVersionIndex = (
 	}: Pick<ElementSnapshot, "result" | "resultInputs" | "pinned">,
 ): number => {
 	if (!result || !resultInputs) return -1;
-	const key = versionKey({ inputs: resultInputs, pinned });
+	const key = versionKey({ inputs: resultInputs, result, pinned });
 	return versions.findIndex((version) => versionKey(version) === key);
 };
 

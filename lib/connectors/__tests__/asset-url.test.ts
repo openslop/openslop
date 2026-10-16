@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assetUrlField, getPrimaryUrl } from "../asset-url";
+import { assetUrlField, getPrimaryUrl, resultIdentity } from "../asset-url";
 import type { AssetResult } from "../types";
 
 const result: AssetResult = {
@@ -34,5 +34,22 @@ describe("getPrimaryUrl", () => {
 		expect(
 			getPrimaryUrl({ durationSec: 0, imageUrl: result.imageUrl }, "video"),
 		).toBeUndefined();
+	});
+});
+
+describe("resultIdentity", () => {
+	it("joins the urls and voice a result carries, skipping what it lacks", () => {
+		expect(resultIdentity(result)).toBe(
+			[result.imageUrl, result.audioUrl, result.videoUrl].join("|"),
+		);
+		expect(
+			resultIdentity({ durationSec: 0, audioUrl: "a.mp3", voiceId: "v1" }),
+		).toBe("a.mp3|v1");
+	});
+
+	it("ignores what does not tell one result from another", () => {
+		expect(
+			resultIdentity({ durationSec: 5, imageUrl: "a.png", textTimestamps: [] }),
+		).toBe(resultIdentity({ durationSec: 9, imageUrl: "a.png" }));
 	});
 });

@@ -54,8 +54,8 @@ const COLUMNS = selectColumns(RowSchema);
 const ROW_ID_NAMESPACE = "5673ca03-e04d-4279-b92d-df493e2b9150";
 
 /**
- * A version's row is identified by what made it, so the same version always
- * lands on the same row however little the client happens to have read back.
+ * A version's row is identified by what made it and what it made, so the same
+ * version always lands on the same row however little the client has read back.
  */
 const versionRowId = (projectId: string, version: CommittedVersion): string =>
 	uuidv5(
@@ -85,8 +85,8 @@ export async function fetchElementVersions(
 }
 
 /**
- * A remake overwrites the row its version already has and keeps that row's
- * `created_at`, so the returned date is the version's first, not this run's.
+ * Recording a version again lands on the row it already has and keeps that
+ * row's `created_at`, so the returned date is the version's first, not this run's.
  */
 export async function saveElementVersion(
 	projectId: string,
