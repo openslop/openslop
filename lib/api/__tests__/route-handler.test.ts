@@ -82,6 +82,18 @@ describe("createHostedRouteHandler", () => {
 		expect(handle).not.toHaveBeenCalled();
 	});
 
+	it("returns 500 when the api_access flag is not a boolean", async () => {
+		mockGetUser.mockResolvedValue({
+			id: "user-1",
+			app_metadata: { api_access: "true" },
+		});
+		const handle = vi.fn(async () => NextResponse.json({}));
+		const handler = makeHandler(handle);
+		const res = await handler(makeRequest({ prompt: "hello" }));
+		expect(res.status).toBe(500);
+		expect(handle).not.toHaveBeenCalled();
+	});
+
 	it("returns 400 when prompt is missing", async () => {
 		const handler = makeHandler();
 		const res = await handler(makeRequest({}));

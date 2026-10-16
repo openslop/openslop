@@ -1,14 +1,15 @@
 import { apiFetch, apiJson } from "@/lib/clients/http";
 import { readSSE } from "@/lib/api/sse";
-import type {
-	HostedVoicePreview,
-	LLMGenerateParams,
-	LLMGenerateResult,
-	LLMStreamChunk,
-	ModelRef,
-	TTSGenerateParams,
-	VoiceInfo,
-	VoiceSearchParams,
+import {
+	LLMStreamChunkSchema,
+	type HostedVoicePreview,
+	type LLMGenerateParams,
+	type LLMGenerateResult,
+	type LLMStreamChunk,
+	type ModelRef,
+	type TTSGenerateParams,
+	type VoiceInfo,
+	type VoiceSearchParams,
 } from "@/lib/connectors/types";
 import { AssetGateway, GatewayClient } from "./base";
 import type { JobPoll, JobSubmission } from "./base";
@@ -66,7 +67,7 @@ export class HttpLLMGateway extends GatewayClient<
 			signal,
 		});
 		if (!response.body) throw new Error("No response body");
-		yield* readSSE<LLMStreamChunk>(response.body);
+		yield* readSSE(response.body, LLMStreamChunkSchema);
 	}
 }
 
