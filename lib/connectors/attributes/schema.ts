@@ -1,5 +1,6 @@
 import type { IconComponent } from "@/components/ui/icon";
 import { TOGGLE_OFF, TOGGLE_ON } from "@/lib/canvas/types";
+import { parseSeconds } from "@/lib/canvas/element-attributes";
 import { resolveModel, type ConnectorModels } from "../models";
 import type { ConnectorType } from "../types";
 
@@ -19,6 +20,8 @@ export type AttributeEdit =
 	 */
 	| { kind: "model"; type: ConnectorType; providerAttr: string }
 	| { kind: "text"; placeholder?: string; rows?: number }
+	/** A count of seconds typed in, at least `min`. Empty leaves it unset. */
+	| { kind: "seconds"; min: number }
 	/**
 	 * A list of image URLs, edited as tiles. With `continuity`, the previous
 	 * visual's pictures and the toggle that links them show beneath.
@@ -44,6 +47,8 @@ export interface AttributeDef extends AttributeSpec {
 	badge?: boolean;
 	/** Carried on the element but shown nowhere: another attribute's control sets it. */
 	hidden?: boolean;
+	/** Offered in the settings only while the element's attributes pass this. */
+	shownWhen?: (attrs: Record<string, string>) => boolean;
 }
 
 export type ModelPick = { key: string } & Extract<
@@ -91,8 +96,12 @@ export class AttributeSchema {
 	}
 
 	/** The attributes shown in the settings popover, in def order. */
-	get settingsAttributes(): Record<string, AttributeSpec> {
-		return this.specsWhere((def) => !def.badge && !def.hidden);
+	settingsAttributesFor(
+		attrs: Record<string, string>,
+	): Record<string, AttributeSpec> {
+		return this.specsWhere(
+			(def) => !def.badge && !def.hidden && (def.shownWhen?.(attrs) ?? true),
+		);
 	}
 
 	get allAttributes(): Record<string, AttributeSpec> {
@@ -117,6 +126,8 @@ export class AttributeSchema {
 		const edit = this.defs.find((def) => def.key === key)?.edit;
 		if (edit?.kind === "enum") return edit.options.includes(value);
 		if (edit?.kind === "toggle") return TOGGLE_VALUES.includes(value);
+		if (edit?.kind === "seconds")
+			return parseSeconds(value, edit.min) !== undefined;
 		return true;
 	}
 

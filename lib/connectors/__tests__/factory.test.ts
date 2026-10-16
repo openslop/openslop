@@ -34,6 +34,8 @@ describe("resolveAttributeSchema", () => {
 			"emotion",
 			"speed",
 			"volume",
+			"trimStart",
+			"timelineDuration",
 		]);
 	});
 
@@ -54,6 +56,8 @@ describe("resolveAttributeSchema", () => {
 			"loop",
 			"volume",
 			"motion",
+			"trimStart",
+			"timelineDuration",
 		]);
 	});
 

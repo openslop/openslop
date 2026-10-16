@@ -212,6 +212,8 @@ describe("against buildRenderLayout", () => {
 			prompt: "",
 			url: `https://example.com/${node.id}`,
 			durationSec,
+			mediaDurationSec: 0,
+			trimStartSec: 0,
 			loops: 1,
 			loop: false,
 			trimToDialogue: getTrimToDialogue(node),

@@ -32,6 +32,8 @@ function el(url: string): ResolvedElement {
 		prompt: "",
 		url,
 		durationSec: 1,
+		mediaDurationSec: 0,
+		trimStartSec: 0,
 		loops: 1,
 		loop: false,
 		trimToDialogue: true,

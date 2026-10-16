@@ -14,6 +14,8 @@ const videoElement = (trimToDialogue: boolean): ResolvedElement => ({
 	prompt: "slow pan",
 	url: "https://vid/a.mp4",
 	durationSec: 5,
+	mediaDurationSec: 5,
+	trimStartSec: 0,
 	loops: 1,
 	loop: false,
 	trimToDialogue,
@@ -37,9 +39,9 @@ const render = (element: ResolvedElement, sceneNumber?: number) =>
 describe("TimelineClip timing badge", () => {
 	const name = (html: string) => html.match(/aria-label="([^"]*)"/)?.[1];
 
-	it("names a scene's clip as trimmed to its dialogue", () => {
+	it("names a scene's clip trimmed to its dialogue as locked", () => {
 		expect(name(render(videoElement(true), 1))).toBe(
-			"Scene 1, Video, 0:00–0:05, Trim to dialogue",
+			"Scene 1, Video, 0:00–0:05, Length locked",
 		);
 	});
 

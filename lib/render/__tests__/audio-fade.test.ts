@@ -22,6 +22,8 @@ function el(overrides: Partial<ResolvedElement>): ResolvedElement {
 		prompt: "",
 		url: "https://example.com/e1",
 		durationSec: 4,
+		mediaDurationSec: 0,
+		trimStartSec: 0,
 		loops: 1,
 		loop: false,
 		trimToDialogue: true,

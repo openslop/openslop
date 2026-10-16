@@ -11,6 +11,7 @@ import {
 	getTrimToDialogue,
 	getVolume,
 } from "../canvas/element-attributes";
+import { elementTrim, trimTimestamps } from "./clip-trim";
 
 export function resolveElements(
 	blocks: CanvasBlock[],
@@ -32,9 +33,13 @@ export function resolveElements(
 			const url = getPrimaryUrl(snapshot.result, spec.outputKind);
 			if (!url) continue;
 
+			const mediaDurationSec = snapshot.result.durationSec;
+			const trim = elementTrim(element, mediaDurationSec);
 			const timestamps = snapshot.result.textTimestamps;
 			const captionTimestamps =
-				captionsEnabled && timestamps?.length ? timestamps : undefined;
+				captionsEnabled && timestamps?.length
+					? trimTimestamps(timestamps, trim.trimStartSec)
+					: undefined;
 
 			resolved.push({
 				id: element.id,
@@ -45,7 +50,8 @@ export function resolveElements(
 				sceneNumber,
 				prompt: getPromptText(element),
 				url,
-				durationSec: snapshot.result.durationSec,
+				...trim,
+				mediaDurationSec,
 				loops: getLoops(element),
 				loop: getLoop(element),
 				trimToDialogue: getTrimToDialogue(element),

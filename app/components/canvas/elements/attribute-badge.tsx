@@ -19,6 +19,7 @@ import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
 import { ModelAttribute } from "./attributes/model-attribute";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
+import { SecondsAttributeField } from "./attributes/seconds-attribute-field";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 
 const UNSET = "—";
@@ -127,6 +128,20 @@ export function AttributeBadge({
 				placeholder={spec.edit.placeholder}
 				rows={spec.edit.rows}
 				hideLabel={hideLabel}
+			/>
+		);
+	}
+
+	if (spec.edit.kind === "seconds") {
+		return (
+			// Keyed on the value so a trim dragged on the timeline replaces the draft.
+			<SecondsAttributeField
+				key={value}
+				element={element}
+				attrKey={attrKey}
+				value={value}
+				label={spec.label}
+				min={spec.edit.min}
 			/>
 		);
 	}

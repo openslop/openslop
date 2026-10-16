@@ -48,6 +48,8 @@ function el(
 		prompt: "",
 		url: `https://example.com/${overrides.id}`,
 		durationSec: 0,
+		mediaDurationSec: 0,
+		trimStartSec: 0,
 		loops: 1,
 		loop: false,
 		// Trimming makes a visual's own length moot, which most of these cases

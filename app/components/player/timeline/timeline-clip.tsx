@@ -1,10 +1,12 @@
-import type { IconComponent } from "@/components/ui/icon";
+import { Lock, type IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
 import { TRIM_TO_DIALOGUE_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
+import { isLengthLocked } from "@/lib/render/clip-trim";
+import type { ResolvedElement } from "@/lib/render/types";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import { cn } from "@/lib/utils";
 import { ClipWaveform } from "./clip-waveform";
@@ -21,6 +23,19 @@ const PREVIEW = "m-0.5 min-h-0 flex-1 overflow-hidden rounded-sm";
 
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
+
+function timingFace(element: ResolvedElement) {
+	const video = ELEMENT_CONFIGS[element.type].outputKind === "video";
+	if (isLengthLocked(element))
+		return {
+			icon: Lock,
+			label: "Length locked",
+			hint: video
+				? "Trimmed to the dialogue under it. Set Timing to Play in full to trim it."
+				: "Lasts as long as the dialogue under it.",
+		};
+	return video ? TRIM_TO_DIALOGUE_FACES.off : undefined;
+}
 
 /** A wash over the clip's own colour, so selection shifts it rather than replacing it. */
 function SelectedWash() {
@@ -65,10 +80,7 @@ export function TimelineClip({
 	const { element } = clip;
 	const config = ELEMENT_CONFIGS[element.type];
 	const range = formatTimeRange(clip.start, clip.duration);
-	const timing =
-		sceneNumber && config.outputKind === "video"
-			? TRIM_TO_DIALOGUE_FACES[element.trimToDialogue ? "on" : "off"]
-			: undefined;
+	const timing = sceneNumber ? timingFace(element) : undefined;
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
@@ -107,7 +119,8 @@ export function TimelineClip({
 					<ClipWaveform
 						src={element.url}
 						width={width}
-						played={clip.duration / element.durationSec}
+						from={element.trimStartSec / element.mediaDurationSec}
+						played={clip.duration / element.mediaDurationSec}
 						className="h-full"
 					/>
 				)}
