@@ -24,6 +24,8 @@ export function useRenderLayout(editor: Editor): {
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const captionsEnabled = useVideoSetting("captions");
 	const [captionStyle] = useCaptionStyle();
+	const filmGrain = useVideoSetting("filmGrain");
+	const rgbSplit = useVideoSetting("rgbSplit");
 
 	// Selecting the key rather than the document keeps every layout consumer off
 	// the per-keystroke render path: they update when the rendered video would.
@@ -44,6 +46,8 @@ export function useRenderLayout(editor: Editor): {
 				transitionType,
 				aspectRatio,
 				captionStyle,
+				filmGrain,
+				rgbSplit,
 			}),
 			scenes,
 		};
@@ -56,6 +60,8 @@ export function useRenderLayout(editor: Editor): {
 		aspectRatio,
 		captionsEnabled,
 		captionStyle,
+		filmGrain,
+		rgbSplit,
 		queue,
 	]);
 }

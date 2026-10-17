@@ -21,6 +21,8 @@ const defaultProps: RenderLayout = {
 	transitionType: DEFAULT_TRANSITION,
 	transitionDurationSec: transitionOverlapSec(DEFAULT_TRANSITION),
 	captionStyle: DEFAULT_CAPTION_STYLE,
+	filmGrain: false,
+	rgbSplit: false,
 };
 
 /**

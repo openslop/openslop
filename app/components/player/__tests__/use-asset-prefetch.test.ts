@@ -55,6 +55,8 @@ function layout(partial: Partial<RenderLayout>): RenderLayout {
 		totalFrames: 30,
 		captionStyle: DEFAULT_CAPTION_STYLE,
 		transitionType: "none",
+		filmGrain: false,
+		rgbSplit: false,
 		transitionDurationSec: 0,
 		...partial,
 	};

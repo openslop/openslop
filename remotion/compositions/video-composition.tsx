@@ -21,7 +21,9 @@ import { audioVolume } from "@/lib/render/audio-volume";
 import { volumeToGain } from "@/lib/canvas/element-attributes";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { CaptionStyleProvider, Captions } from "../components/captions";
+import { FilmGrain } from "../components/film-grain";
 import { MotionLayer } from "../components/motion-layer";
+import { RgbSplit } from "../components/rgb-split";
 
 const coverStyle: React.CSSProperties = {
 	width: "100%",
@@ -127,6 +129,8 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	transitionType,
 	transitionDurationSec,
 	captionStyle,
+	filmGrain,
+	rgbSplit,
 }) => {
 	const transitionFrames = toFrames(transitionDurationSec, fps);
 	const transitionTiming = useMemo(
@@ -190,8 +194,11 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	return (
 		<CaptionStyleProvider value={captionStyle}>
 			<AbsoluteFill style={blackBg}>
-				<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
-				{layeredSequenceNodes}
+				<RgbSplit enabled={rgbSplit}>
+					<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
+					{layeredSequenceNodes}
+				</RgbSplit>
+				{filmGrain && <FilmGrain />}
 			</AbsoluteFill>
 		</CaptionStyleProvider>
 	);

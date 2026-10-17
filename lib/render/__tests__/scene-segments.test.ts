@@ -137,6 +137,8 @@ const layout = (
 	totalFrames: 0,
 	captionStyle: DEFAULT_CAPTION_STYLE,
 	transitionType: "none",
+	filmGrain: false,
+	rgbSplit: false,
 	transitionDurationSec,
 });
 

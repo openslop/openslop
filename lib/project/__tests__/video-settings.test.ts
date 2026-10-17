@@ -11,6 +11,8 @@ describe("VideoSettingsSchema", () => {
 			aspectRatio: DEFAULT_ASPECT_RATIO,
 			captions: true,
 			captionStyle: DEFAULT_CAPTION_STYLE,
+			filmGrain: false,
+			rgbSplit: false,
 		};
 
 		expect(VideoSettingsSchema.parse({})).toEqual(defaults);
@@ -26,6 +28,8 @@ describe("VideoSettingsSchema", () => {
 			aspectRatio: "9:16" as const,
 			captions: false,
 			captionStyle: { ...DEFAULT_CAPTION_STYLE, casing: "upper" as const },
+			filmGrain: true,
+			rgbSplit: true,
 		};
 		expect(VideoSettingsSchema.parse(stored)).toEqual(stored);
 	});

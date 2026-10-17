@@ -26,6 +26,8 @@ export type BuildLayoutOptions = Partial<VideoConfig> & {
 	transitionType?: TransitionType;
 	aspectRatio?: AspectRatio;
 	captionStyle?: CaptionStyle;
+	filmGrain?: boolean;
+	rgbSplit?: boolean;
 };
 
 /**
@@ -175,5 +177,7 @@ export function buildRenderLayout(
 		transitionType,
 		transitionDurationSec,
 		captionStyle: options?.captionStyle ?? DEFAULT_CAPTION_STYLE,
+		filmGrain: options?.filmGrain ?? false,
+		rgbSplit: options?.rgbSplit ?? false,
 	};
 }

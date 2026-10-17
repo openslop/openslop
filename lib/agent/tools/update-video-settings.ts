@@ -36,12 +36,15 @@ const range = ({ min, max }: { min: number; max: number }) =>
 
 export const updateVideoSettings = defineTool({
 	description: dedent`
-	  Change how the video looks: its aspect ratio, the transition between scenes and the
-	  captions burned into it. Send only what changes. It applies to the preview and the export
-	  right away. To change how long the video runs, use update_script_settings.
+	  Change how the video looks: its aspect ratio, the transition between scenes, the
+	  captions burned into it and the film effects over the whole frame. Send only what
+	  changes. It applies to the preview and the export right away. To change how long the
+	  video runs, use update_script_settings.
 
 	  - aspectRatio: ${ASPECT_RATIOS.join(", ")}
 	  - transitionType: ${TRANSITION_TYPES.join(", ")}
+	  - filmGrain: real 35mm film grain over the whole frame
+	  - rgbSplit: a subtle red and blue fringe at every edge, like a vintage lens
 	  - captions: whether captions are drawn at all
 	  - captionPreset: ${CAPTION_PRESET_KEYS.join(", ")}. A preset resets the whole caption look;
 	    a captionStyle sent with it applies on top. Without one, captionStyle changes apply to
@@ -67,6 +70,8 @@ export const updateVideoSettings = defineTool({
 			captions: z.boolean().optional(),
 			captionPreset: z.enum(CAPTION_PRESET_KEYS).optional(),
 			captionStyle: stylePatch.optional(),
+			filmGrain: z.boolean().optional(),
+			rgbSplit: z.boolean().optional(),
 		})
 		.refine(...atLeastOne("video setting")),
 	output: z.string(),
