@@ -6,6 +6,9 @@ import {
 } from "@/lib/api/queue-callback";
 
 export const POST = handleCallback(
-	(message: unknown) => processQueuedJob(parseAssetQueueCallback(message)),
+	async (message: unknown) => {
+		const jobId = parseAssetQueueCallback(message);
+		if (jobId) await processQueuedJob(jobId);
+	},
 	{ retry: retryWithBackoff },
 );
