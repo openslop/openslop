@@ -13,6 +13,8 @@ export const VideoSettingsSchema = z.object({
 	captions: z.boolean().default(true),
 	/** A style stored by an older build may no longer parse; the default beats not opening. */
 	captionStyle: CaptionStyleSchema.catch(DEFAULT_CAPTION_STYLE),
+	filmGrain: z.boolean().default(false),
+	rgbSplit: z.boolean().default(false),
 });
 
 export type VideoSettings = z.infer<typeof VideoSettingsSchema>;

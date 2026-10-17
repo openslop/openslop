@@ -42,6 +42,8 @@ export type RenderLayout = {
 	transitionType: TransitionType;
 	transitionDurationSec: number;
 	captionStyle: CaptionStyle;
+	filmGrain: boolean;
+	rgbSplit: boolean;
 };
 
 export const COMPOSITION_ID = "VideoComposition";

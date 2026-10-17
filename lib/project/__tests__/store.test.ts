@@ -120,6 +120,8 @@ describe("ProjectDataSchema", () => {
 			transitionType: "fade",
 			captions: true,
 			captionStyle: DEFAULT_CAPTION_STYLE,
+			filmGrain: false,
+			rgbSplit: false,
 		});
 		expect(parsed.scriptSettings).toEqual(
 			ScriptSettingsSchema.parse({ length: "under-1m" }),

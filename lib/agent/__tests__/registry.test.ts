@@ -216,6 +216,7 @@ describe("executeToolCall", () => {
 			{ captionStyle: { fontSize: 120 } },
 		],
 		["captions off without disturbing their style", { captions: false }],
+		["the film effects", { filmGrain: true, rgbSplit: false }],
 	])("update_video_settings writes %s", async (_, input) => {
 		const patches: DeepPartial<VideoSettings>[] = [];
 		await executeToolCall(
