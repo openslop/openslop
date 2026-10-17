@@ -13,7 +13,17 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      statuses: write
     steps:
+      - name: Report to Vercel deployment checks
+        if: github.event_name == 'push'
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: "Vercel - openslop-app: ci"
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
