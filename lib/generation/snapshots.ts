@@ -8,8 +8,9 @@ const GenerationStatusSchema = z.enum(["idle", "queued", "generating"]);
 
 export type GenerationStatus = z.infer<typeof GenerationStatusSchema>;
 
-const SavedSnapshotSchema = z.object({
+const ElementSnapshotSchema = z.object({
 	status: GenerationStatusSchema,
+	startedAt: z.number().nullable().default(null),
 	result: AssetResultSchema.nullable(),
 	error: z.string().nullable(),
 	resultInputs: GenerationInputsSchema.nullable(),
@@ -18,14 +19,12 @@ const SavedSnapshotSchema = z.object({
 	pinned: z.boolean().default(false),
 });
 
-export type SavedSnapshot = z.infer<typeof SavedSnapshotSchema>;
-
-export type ElementSnapshot = SavedSnapshot & { startedAt: number | null };
+export type ElementSnapshot = z.infer<typeof ElementSnapshotSchema>;
 
 /** The `generation` column is untyped JSON; parse it once at the boundary. */
 export const GenerationSnapshotSchema = z.record(
 	z.string(),
-	SavedSnapshotSchema,
+	ElementSnapshotSchema,
 );
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
@@ -38,16 +37,13 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 	pinned: false,
 };
 
-const settled = (state: Record<string, SavedSnapshot>) =>
+const settled = (state: Record<string, ElementSnapshot>) =>
 	new Map(
 		Object.entries(state).map(([id, snap]) => [
 			id,
 			{ ...snap, status: "idle" as const, startedAt: null },
 		]),
 	);
-
-const saved = ({ startedAt: _, ...snapshot }: ElementSnapshot): SavedSnapshot =>
-	snapshot;
 
 const RESULT_FIELDS = ["result", "resultInputs", "pinned"] as const;
 
@@ -72,11 +68,11 @@ export class SnapshotStore {
 	private readonly emitter = createEmitter();
 	private resultVersion = 0;
 
-	constructor(initialState: Record<string, SavedSnapshot> = {}) {
+	constructor(initialState: Record<string, ElementSnapshot> = {}) {
 		this.state = settled(initialState);
 	}
 
-	replaceAll(state: Record<string, SavedSnapshot>) {
+	replaceAll(state: Record<string, ElementSnapshot>) {
 		this.state = settled(state);
 		this.resultVersion++;
 		this.notify();
@@ -91,10 +87,7 @@ export class SnapshotStore {
 	/** Bumps whenever any element's held result changes, so observers can rederive. */
 	getResultVersion = () => this.resultVersion;
 
-	all = (): Record<string, SavedSnapshot> =>
-		Object.fromEntries(
-			Array.from(this.state, ([id, snapshot]) => [id, saved(snapshot)]),
-		);
+	all = (): Record<string, ElementSnapshot> => Object.fromEntries(this.state);
 
 	ids = (): string[] => Array.from(this.state.keys());
 

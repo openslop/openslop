@@ -676,13 +676,12 @@ describe("GenerationQueue", () => {
 	});
 
 	describe("startedAt", () => {
-		it("is stamped when the job starts and left out of what is saved", () => {
+		it("is stamped when the job starts", () => {
 			vi.setSystemTime(1_000);
 			generateMock.mockReturnValue(new Promise(() => {}));
 			generationQueue.enqueueGraph([makeJob("t1")]);
 
 			expect(generationQueue.getElementSnapshot("t1").startedAt).toBe(1_000);
-			expect(generationQueue.snapshot().t1).not.toHaveProperty("startedAt");
 
 			generationQueue.discard("t1");
 		});
@@ -735,6 +734,7 @@ describe("GenerationQueue", () => {
 	describe("snapshot", () => {
 		const idleEntry = {
 			status: "idle" as const,
+			startedAt: null,
 			result: { imageUrl: "u", durationSec: 2 },
 			error: null,
 			resultInputs: inputsFor(),
@@ -757,6 +757,7 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.snapshot()).toEqual({
 				s2: {
 					status: "idle",
+					startedAt: null,
 					result: null,
 					error: "boom",
 					resultInputs: null,

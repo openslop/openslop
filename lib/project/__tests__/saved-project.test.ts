@@ -20,7 +20,7 @@ describe("parseSavedProject", () => {
 
 		expect(content.script).toBe("<scene />");
 		expect(content.store.videoSettings.aspectRatio).toBe("9:16");
-		expect(content.generation.el1).toEqual(snapshot);
+		expect(content.generation.el1).toEqual({ ...snapshot, startedAt: null });
 	});
 
 	it("throws on a structurally wrong row", () => {

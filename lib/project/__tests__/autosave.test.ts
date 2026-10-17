@@ -7,7 +7,7 @@ import {
 	type Mock,
 	vi,
 } from "vitest";
-import type { SavedSnapshot } from "@/lib/generation/snapshots";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { AUTOSAVE_DEBOUNCE_MS, createAutosaver } from "../autosave";
 import type { SavedProject } from "../saved-project";
 import {
@@ -20,8 +20,9 @@ import {
 const saveProject = vi.hoisted(() => vi.fn());
 vi.mock("../api", () => ({ saveProject }));
 
-const imageSnapshot = (imageUrl: string): SavedSnapshot => ({
+const imageSnapshot = (imageUrl: string): ElementSnapshot => ({
 	status: "idle",
+	startedAt: null,
 	result: { durationSec: 0, imageUrl },
 	error: null,
 	resultInputs: null,

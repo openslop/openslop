@@ -35,6 +35,7 @@ describe("SnapshotStore", () => {
 		const store = new SnapshotStore({
 			a: {
 				status: "generating",
+				startedAt: 1_000,
 				result: result("a.png"),
 				error: null,
 				resultInputs: inputsFor("a.png"),

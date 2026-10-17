@@ -6,11 +6,7 @@ import {
 	type ConcurrencyLimits,
 } from "./concurrency";
 import { generateForElement } from "./generate-for-element";
-import {
-	SnapshotStore,
-	type ElementSnapshot,
-	type SavedSnapshot,
-} from "./snapshots";
+import { SnapshotStore, type ElementSnapshot } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
 import { flattenGraph, type GenerationNode } from "./graph";
@@ -37,7 +33,7 @@ export class GenerationQueue {
 		initialState,
 	}: {
 		limits?: Partial<ConcurrencyLimits>;
-		initialState?: Record<string, SavedSnapshot>;
+		initialState?: Record<string, ElementSnapshot>;
 	} = {}) {
 		this.limits = resolveConcurrencyLimits(limits);
 		this.snapshots = new SnapshotStore(initialState);
@@ -82,7 +78,7 @@ export class GenerationQueue {
 		this.processQueue();
 	}
 
-	replaceSnapshots(state: Record<string, SavedSnapshot>) {
+	replaceSnapshots(state: Record<string, ElementSnapshot>) {
 		this.cancelAll();
 		this.snapshots.replaceAll(state);
 	}

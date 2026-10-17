@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createStoreContext } from "@/lib/store/create-store-context";
 import { GenerationQueue } from "./queue";
-import type { SavedSnapshot } from "./snapshots";
+import type { ElementSnapshot } from "./snapshots";
 
 const [GenerationQueueContext, useGenerationQueue, useQueueSelector] =
 	createStoreContext<GenerationQueue>("GenerationQueueContext");
@@ -13,7 +13,7 @@ export function GenerationQueueProvider({
 	initialState,
 	children,
 }: {
-	initialState: Record<string, SavedSnapshot>;
+	initialState: Record<string, ElementSnapshot>;
 	children: ReactNode;
 }) {
 	const [queue] = useState(() => new GenerationQueue({ initialState }));
