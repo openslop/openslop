@@ -1,7 +1,7 @@
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 
 export const rejected = (status: number): ValidationResult => ({
-	ok: false,
+	verdict: "invalid",
 	error:
 		status === 401 || status === 403
 			? "The provider rejected this key."
@@ -9,7 +9,13 @@ export const rejected = (status: number): ValidationResult => ({
 });
 
 export const fromStatus = (response: Response): ValidationResult =>
-	response.ok ? { ok: true } : rejected(response.status);
+	response.ok ? { verdict: "valid" } : rejected(response.status);
+
+export const unanswered: ValidationResult = {
+	verdict: "unknown",
+	error:
+		"Could not reach the provider to check this key. Test it again in a moment.",
+};
 
 /**
  * A check that hangs would hold the request open for the whole platform limit

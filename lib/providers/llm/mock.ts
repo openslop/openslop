@@ -160,7 +160,7 @@ function mockResponse({ prompt }: LLMGenerateParams): string {
 
 export class MockLLM implements LLMProvider {
 	async validate(): Promise<ValidationResult> {
-		return { ok: true };
+		return { verdict: "valid" };
 	}
 
 	async generate(

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { Pencil, RefreshCw, Trash2 } from "@/components/ui/icon";
@@ -84,7 +85,8 @@ export function ProviderCard({
 	const test = async () => {
 		setTesting(true);
 		try {
-			await testKey(provider);
+			const result = await testKey(provider);
+			if (result.verdict === "unknown") toast.warning(result.error);
 		} catch (cause) {
 			toastError(cause);
 		} finally {

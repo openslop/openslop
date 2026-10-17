@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Key } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
@@ -36,8 +37,12 @@ export function ProviderKeyForm({
 			const result = await saveKey(provider, apiKey.trim());
 			setApiKey("");
 			// The key is stored either way; a rejection is worth staying to read.
-			setError(result.ok ? null : result.error);
-			if (result.ok) onSaved();
+			if (result.verdict === "invalid") {
+				setError(result.error);
+				return;
+			}
+			if (result.verdict === "unknown") toast.warning(result.error);
+			onSaved();
 		} catch (cause) {
 			toastError(cause);
 		} finally {

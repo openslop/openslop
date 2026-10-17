@@ -1,13 +1,14 @@
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
-import { stringifyError } from "@/lib/errors";
 import { RunwareImage } from "@/lib/providers/image/runware";
 import { AnthropicLLM } from "@/lib/providers/llm/anthropic";
 import { ElevenLabsMusic } from "@/lib/providers/music/elevenlabs";
 import { ElevenLabsSFX } from "@/lib/providers/sfx/elevenlabs";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import type { ProviderType, Providers } from "@/lib/providers/types";
+import { unanswered } from "@/lib/providers/validate";
 import { RunwareVideo } from "@/lib/providers/video/runware";
+import { logger } from "../logger";
 import {
 	MissingProviderKeyError,
 	readProviderKey,
@@ -48,9 +49,6 @@ export async function byokProviderFor<K extends ProviderType>(
 /**
  * Whether a key works, asked of the vendor itself. Any of a vendor's classes
  * can answer: an account stores one key per provider, and they all hold it.
- * Network trouble comes back as a failed validation rather than thrown — the
- * user asked whether the key works, and "we could not tell" is an answer they
- * can act on.
  */
 export async function validateKey(
 	provider: BYOKProvider,
@@ -61,7 +59,8 @@ export async function validateKey(
 	try {
 		return await new Ctor(key).validate();
 	} catch (error) {
-		return { ok: false, error: stringifyError(error) };
+		logger.warn({ err: error, provider }, "Provider key check got no answer");
+		return unanswered;
 	}
 }
 
@@ -71,6 +70,7 @@ export async function verifyProviderKey(
 	key: string,
 ): Promise<ValidationResult> {
 	const result = await validateKey(provider, key);
-	await setKeyStatus(userId, provider, result.ok ? "valid" : "invalid");
+	if (result.verdict !== "unknown")
+		await setKeyStatus(userId, provider, result.verdict);
 	return result;
 }

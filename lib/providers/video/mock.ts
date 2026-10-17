@@ -16,7 +16,7 @@ export class MockVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "mock" };
 
 	async validate(): Promise<ValidationResult> {
-		return { ok: true };
+		return { verdict: "valid" };
 	}
 
 	protected async store({

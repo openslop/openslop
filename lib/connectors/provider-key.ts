@@ -18,7 +18,10 @@ export type ProviderKeyRecord = {
 	createdAt: string;
 };
 
-export type ValidationResult = { ok: true } | { ok: false; error: string };
+/** What asking the vendor established; "unknown" means the probe got no answer. */
+export type ValidationResult =
+	| { verdict: "valid" }
+	| { verdict: "invalid" | "unknown"; error: string };
 
 /** Shorter than any provider issues, so a paste that missed is caught before it is stored. */
 export const MIN_KEY_LENGTH = 8;
