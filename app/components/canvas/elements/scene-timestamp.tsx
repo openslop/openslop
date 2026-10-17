@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { formatRangeDuration, formatTimeRange } from "@/lib/render/timestamps";
 
 export function SceneTimestamp({
@@ -12,9 +13,9 @@ export function SceneTimestamp({
 			<span className="text-muted-foreground">
 				{formatTimeRange(start, duration)}
 			</span>
-			<span className="rounded bg-muted px-1.5 py-px text-muted-foreground">
+			<Badge variant="muted" size="inline">
 				{formatRangeDuration(start, duration)}
-			</span>
+			</Badge>
 		</span>
 	);
 }
