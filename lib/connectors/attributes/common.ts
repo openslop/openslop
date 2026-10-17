@@ -4,6 +4,7 @@ import {
 	DEFAULT_LOOPS,
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
+	TOGGLE_ON,
 	VOLUME_OPTIONS,
 } from "@/lib/canvas/types";
 import { DEFAULT_IMAGE_FORMAT, IMAGE_FORMATS } from "../image/enums";
@@ -68,7 +69,7 @@ export const loopDef: AttributeDef = {
 		off: { icon: Freeze, label: "Freeze on last frame" },
 		on: { icon: Repeat, label: "Loop" },
 	},
-	default: "true",
+	default: TOGGLE_ON,
 };
 
 /**
@@ -92,5 +93,5 @@ export const trimToDialogueDef: AttributeDef = {
 	key: "trimToDialogue",
 	label: "Timing",
 	edit: { kind: "toggle", ...TRIM_TO_DIALOGUE_FACES },
-	default: "true",
+	default: TOGGLE_ON,
 };

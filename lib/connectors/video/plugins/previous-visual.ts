@@ -1,4 +1,5 @@
 import { previousVisual } from "@/lib/canvas/scenes";
+import { isToggleOn } from "@/lib/canvas/types";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
 import type { Dependency } from "@/lib/generation/declare";
 import { captureFrames } from "@/lib/connectors/video/capture-frames";
@@ -40,7 +41,7 @@ const previousWhenLinked: Dependency = (
 ) => ({
 	[PREVIOUS_VISUAL_LABEL]:
 		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
-		attrs[CONTINUITY_ATTR] === "true"
+		isToggleOn(attrs[CONTINUITY_ATTR])
 			? previousVisual(canvas, id)
 			: undefined,
 });
@@ -65,10 +66,9 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 					: URL.canParse(frame)
 						? [frame]
 						: [];
-			const continuityFrames =
-				continuity === "true"
-					? await previousPictures(source, CONTINUITY_FRAMES)
-					: [];
+			const continuityFrames = isToggleOn(continuity)
+				? await previousPictures(source, CONTINUITY_FRAMES)
+				: [];
 			return { ...params, ...(frameImage && { frameImage }), continuityFrames };
 		},
 	};

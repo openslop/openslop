@@ -6,7 +6,10 @@ import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import type { LLMConnector } from "@/lib/connectors/types";
 import type { GenerationQueue } from "@/lib/generation/queue";
 
-const DERIVE_PROMPT = dedent`Describe the visual art style of the attached reference image(s) in 1–2 concise sentences: the medium, linework, shading, colors and lighting, with specific detail on how characters are drawn. Never mention a place, a setting, a time of day, the subjects or what is happening: the description is placed in front of the prompt for every scene, so it must fit all of them. Reply with only the description.`;
+/** The instruction the prompt opens with, so the mock LLM can recognise it. */
+export const DERIVE_INSTRUCTION = "Describe the visual art style";
+
+const DERIVE_PROMPT = dedent`${DERIVE_INSTRUCTION} of the attached reference image(s) in 1–2 concise sentences: the medium, linework, shading, colors and lighting, with specific detail on how characters are drawn. Never mention a place, a setting, a time of day, the subjects or what is happening: the description is placed in front of the prompt for every scene, so it must fit all of them. Reply with only the description.`;
 
 /** Generated avatars already carry the style, so only uploaded ones are read back. */
 export function artStyleReferences(

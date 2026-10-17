@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-import { Editable, RenderElementProps, useSlateStatic } from "slate-react";
+import { useMemo } from "react";
+import { Editable, useSlateStatic } from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -10,8 +10,6 @@ import {
 import { useDragAndDrop } from "./dnd/use-drag-and-drop";
 import { DragTransferContext } from "./dnd/drag-transfer-context";
 import { findBlockById } from "@/lib/canvas/editor-ops";
-import { isAssetElement, isCharacterRef } from "@/lib/canvas/guards";
-import { isScene } from "@/lib/canvas/scenes";
 import { SortableScene } from "./dnd/sortable-scene";
 import { SortableContent } from "./dnd/sortable-content";
 import { DragOverlayPreview } from "./dnd/drag-overlay";
@@ -19,10 +17,13 @@ import {
 	CharacterMentionMenu,
 	optionId,
 } from "./elements/character-mention-menu";
-import { CharacterRef } from "./elements/character-ref";
+import { renderCanvasElement } from "./render-canvas-element";
 import { useCharacterMention } from "./hooks/use-character-mention";
-import { ELEMENT_CONFIGS } from "./elements/element-configs";
-import { ElementErrorBoundary } from "./elements/element-error-boundary";
+
+const renderElement = renderCanvasElement({
+	Scene: SortableScene,
+	Content: SortableContent,
+});
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -38,33 +39,6 @@ export default function Canvas() {
 	} = useDragAndDrop(editor);
 	const { mention, options, active, listboxId, select, dismiss, onKeyDown } =
 		useCharacterMention();
-
-	const renderElement = useCallback((props: RenderElementProps) => {
-		const { element } = props;
-		if (isCharacterRef(element))
-			return <CharacterRef {...props} element={element} />;
-		if (isAssetElement(element))
-			return (
-				<div {...props.attributes} hidden>
-					{props.children}
-				</div>
-			);
-		if (isScene(element))
-			return (
-				<SortableScene attributes={props.attributes} scene={element}>
-					{props.children}
-				</SortableScene>
-			);
-		return (
-			<ElementErrorBoundary
-				label={ELEMENT_CONFIGS[element.type].label}
-				attributes={props.attributes}
-				leaves={props.children}
-			>
-				<SortableContent {...props} element={element} />
-			</ElementErrorBoundary>
-		);
-	}, []);
 
 	const activeBlock = useMemo(
 		() =>

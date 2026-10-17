@@ -1,16 +1,8 @@
 import compact from "lodash/compact";
 import { renderCharacterRefs, seats } from "@/lib/connectors/character-refs";
-import { pictured } from "@/lib/connectors/characters";
-import type { Character } from "@/lib/connectors/types";
+import { pictured, type Voiced, voiced } from "@/lib/connectors/characters";
 import { cutVoice, secondsCap } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";
-
-type Voiced = Character & { voice: NonNullable<Character["voice"]> };
-
-const voiced = (characters: Character[]): Voiced[] =>
-	characters.filter((character): character is Voiced =>
-		Boolean(character.voice),
-	);
 
 type Limits = {
 	maxReferences: number;

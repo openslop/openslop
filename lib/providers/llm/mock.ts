@@ -15,6 +15,8 @@ import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { isAssetElement } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { parseOSML } from "@/lib/canvas/osml-stream-parser";
+import type { AgentToolName } from "@/lib/agent/tools/registry";
+import { DERIVE_INSTRUCTION } from "@/lib/project/derive-art-style";
 import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
 import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
 import { animateImageScene } from "@/lib/script/refine/animate-prompt";
@@ -145,7 +147,7 @@ Twists: The "big bad wolf" is the kindest soul in the forest; Owl has been silen
 Resolution: Red and Wolf arrive together at Granny's cottage, share their baskets, and the village learns that friendship can grow in the most unlikely places.`;
 
 const MOCK_RESPONSES: [matches: (prompt: string) => boolean, text: string][] = [
-	[(prompt) => /describe the visual art style/i.test(prompt), MOCK_STYLE],
+	[(prompt) => prompt.startsWith(DERIVE_INSTRUCTION), MOCK_STYLE],
 	[(prompt) => prompt.startsWith(OUTLINE_INSTRUCTION), MOCK_OUTLINE],
 	[(prompt) => prompt.startsWith(REVIEW_INSTRUCTION), NO_FINDINGS],
 ];
@@ -261,7 +263,7 @@ const MOCK_THOUGHT =
 
 type ToolResult = { toolName: string; text: string };
 
-type MockStep = { say: string; toolName?: string; input?: unknown };
+type MockStep = { say: string; toolName?: AgentToolName; input?: unknown };
 
 const READ_SCRIPT: MockStep = {
 	say: "Reading the script. ",
@@ -317,7 +319,9 @@ function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 }
 
 /** A new project is named, given its assets, then written; a replaced script is read again. */
-const NEXT_STEP: Record<string, (results: ToolResult[]) => MockStep> = {
+type NextStep = (results: ToolResult[]) => MockStep;
+
+const NEXT_STEP: Record<string, NextStep> = {
 	write_script: () => READ_SCRIPT,
 	set_title: () => ({
 		say: "Setting up the characters and the art style. ",
@@ -332,7 +336,7 @@ const NEXT_STEP: Record<string, (results: ToolResult[]) => MockStep> = {
 					input: { brief: "A short mock story, written without an API key." },
 				}
 			: { say: "Done. That is as much as a mock can do without an API key." },
-};
+} satisfies Partial<Record<AgentToolName, NextStep>>;
 
 function mockCall(prompt: LanguageModelV3Prompt): MockStep {
 	const results = turnToolResults(prompt);

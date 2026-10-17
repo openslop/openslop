@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Image } from "@/components/ui/icon";
+import { isToggleOn } from "@/lib/canvas/types";
 import {
 	CONTINUITY_ATTR,
 	CONTINUITY_FRAMES,
@@ -28,8 +29,9 @@ export function ContinuityReferencesPopover({
 	toggle,
 	...popover
 }: ReferenceImagesPopoverProps & { toggle: ReactNode }) {
-	const linked =
-		popover.element.generationAttributes?.[CONTINUITY_ATTR] === "true";
+	const linked = isToggleOn(
+		popover.element.generationAttributes?.[CONTINUITY_ATTR],
+	);
 	const previous = usePreviousPictures(popover.element, CONTINUITY_FRAMES);
 	const pictures = previous.kind === "ready" ? previous.pictures : [];
 

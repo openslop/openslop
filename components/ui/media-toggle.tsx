@@ -17,13 +17,12 @@ const mediaChromePill =
 
 // The tooltip trigger owns `data-state` on the item, so the selected look comes
 // from the caller rather than from Radix's own attribute.
-const segment = (active: boolean, disabled: boolean) =>
+const segment = (active: boolean) =>
 	cn(
-		"flex h-6 min-w-6 flex-1 basis-0 items-center justify-center rounded-sm px-1 transition-colors focus-ring",
+		"flex h-6 min-w-6 flex-1 basis-0 items-center justify-center rounded-sm px-1 transition-colors focus-ring unavailable:cursor-not-allowed unavailable:opacity-40",
 		active
 			? "bg-media-toggle-active-bg text-media-toggle-active-fg"
 			: "text-media-toggle-fg hover:bg-media-toggle-hover-bg",
-		disabled && "cursor-not-allowed opacity-40",
 	);
 
 function Segment<T extends string>({
@@ -39,7 +38,7 @@ function Segment<T extends string>({
 				value={value}
 				aria-label={label}
 				disabled={disabled}
-				className={segment(active, disabled)}
+				className={segment(active)}
 			>
 				{Icon ? (
 					<Icon className="h-3.5 w-3.5" />

@@ -1,23 +1,38 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ImagePlus, Loader2 } from "@/components/ui/icon";
-import { useImageUpload } from "./use-image-upload";
+import {
+	ImagePlus,
+	Loader2,
+	Video,
+	type IconComponent,
+} from "@/components/ui/icon";
+import type { UploadKind } from "./upload-files";
+import { useFileUpload } from "./use-file-upload";
 
-export function UploadImageButton({
+const ICONS: Record<UploadKind, IconComponent> = {
+	image: ImagePlus,
+	video: Video,
+};
+
+export function UploadButton({
+	kind,
 	onUpload,
 	disabled = false,
 	className,
 }: {
-	onUpload: (url: string) => void;
+	kind: UploadKind;
+	onUpload: (url: string) => void | Promise<void>;
 	disabled?: boolean;
 	className?: string;
 }) {
-	const { openPicker, uploading, inputElement } = useImageUpload({
-		onUpload: ([url]) => {
-			if (url) onUpload(url);
+	const { openPicker, uploading, inputElement } = useFileUpload({
+		kind,
+		onUpload: async ([url]) => {
+			if (url) await onUpload(url);
 		},
 	});
+	const Icon = ICONS[kind];
 
 	return (
 		<>
@@ -28,7 +43,7 @@ export function UploadImageButton({
 				size="sm"
 				// tooltip doubles as aria-label — must change while uploading, since
 				// the label text is sm:hidden.
-				tooltip={uploading ? "Uploading image…" : "Upload your own image"}
+				tooltip={uploading ? `Uploading ${kind}…` : `Upload your own ${kind}`}
 				className={className}
 				disabled={uploading || disabled}
 				onMouseDown={(e) => e.preventDefault()}
@@ -37,7 +52,7 @@ export function UploadImageButton({
 				{uploading ? (
 					<Loader2 className="animate-spin" aria-hidden="true" />
 				) : (
-					<ImagePlus aria-hidden="true" />
+					<Icon aria-hidden="true" />
 				)}
 				<span className="hidden sm:inline">
 					{uploading ? "Uploading…" : "Upload"}

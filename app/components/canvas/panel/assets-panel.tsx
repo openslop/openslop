@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { Loader2, Plus } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
-import { useImageUpload } from "@/lib/upload/use-image-upload";
+import { useFileUpload } from "@/lib/upload/use-file-upload";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
 	ArtStyleAssetTile,
@@ -72,7 +72,8 @@ function CharactersCard() {
 
 function ReferencesCard() {
 	const { urls, add, remove } = useReferenceImages();
-	const { openPicker, uploading, inputElement } = useImageUpload({
+	const { openPicker, uploading, inputElement } = useFileUpload({
+		kind: "image",
 		multiple: true,
 		onUpload: add,
 	});

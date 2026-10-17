@@ -16,7 +16,7 @@ import {
 	ElementStaleIndicator,
 } from "../generate-button";
 import { ElementHistoryButton } from "../element-history-button";
-import { ElementUploadButton } from "../element-upload-button";
+import { ImageUploadButton } from "../element-upload-button";
 import { OutputPreview } from "../output-preview";
 import { AssetDialog } from "./asset-dialog";
 import { deleteCharacter } from "./delete-character";
@@ -91,7 +91,7 @@ export function CharacterEditModal({
 							/>
 							<div className="flex items-center justify-end gap-2">
 								<ElementStaleIndicator />
-								<ElementUploadButton />
+								<ImageUploadButton />
 								<ElementGenerateButton />
 							</div>
 						</div>

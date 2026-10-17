@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toastError } from "@/lib/toast-error";
-import { partitionImageFiles } from "./image-files";
-import { uploadImage } from "./upload-image";
+import { uploadFile } from "./upload-file";
+import { partitionFiles, type UploadKind } from "./upload-files";
 
 const carriesFiles = (data: DataTransfer) => data.types.includes("Files");
 
@@ -25,11 +25,13 @@ function useBlockStrayFileDrops() {
 	}, []);
 }
 
-export function useImageUpload({
+export function useFileUpload({
+	kind,
 	onUpload,
 	multiple = false,
 }: {
-	onUpload: (urls: string[]) => void;
+	kind: UploadKind;
+	onUpload: (urls: string[]) => void | Promise<void>;
 	multiple?: boolean;
 }) {
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +41,7 @@ export function useImageUpload({
 	useBlockStrayFileDrops();
 
 	const upload = async (candidates: File[]) => {
-		const { accepted, rejected } = partitionImageFiles(candidates);
+		const { accepted, rejected } = partitionFiles(candidates, kind);
 		for (const { name, reason } of rejected)
 			toastError(`${name} ${reason}`, "Not uploaded");
 
@@ -48,13 +50,17 @@ export function useImageUpload({
 
 		setUploadingCount((count) => count + files.length);
 		try {
-			const results = await Promise.allSettled(files.map(uploadImage));
+			const results = await Promise.allSettled(
+				files.map((file) => uploadFile(kind, file)),
+			);
 			const urls: string[] = [];
 			for (const result of results) {
 				if (result.status === "fulfilled") urls.push(result.value);
 				else toastError(result.reason);
 			}
-			if (urls.length > 0) onUpload(urls);
+			if (urls.length > 0) await onUpload(urls);
+		} catch (error) {
+			toastError(error);
 		} finally {
 			setUploadingCount((count) => count - files.length);
 		}
@@ -73,7 +79,7 @@ export function useImageUpload({
 		<input
 			ref={inputRef}
 			type="file"
-			accept="image/*"
+			accept={`${kind}/*`}
 			multiple={multiple}
 			className="hidden"
 			onChange={handleFileChange}

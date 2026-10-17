@@ -48,8 +48,8 @@ vi.mock("mediabunny", () => ({
 	},
 }));
 
-vi.mock("@/lib/upload/upload-image", () => ({
-	uploadImage: async (file: File) => {
+vi.mock("@/lib/upload/upload-file", () => ({
+	uploadFile: async (_kind: string, file: File) => {
 		media.uploads++;
 		return `https://img/${await file.text()}`;
 	},

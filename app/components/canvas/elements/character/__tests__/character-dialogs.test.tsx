@@ -30,7 +30,7 @@ vi.mock("../../element-history-button", () => ({
 	ElementHistoryButton: Nothing,
 }));
 vi.mock("../../element-upload-button", () => ({
-	ElementUploadButton: Nothing,
+	ImageUploadButton: Nothing,
 }));
 vi.mock("../../output-preview", () => ({ OutputPreview: Nothing }));
 vi.mock("../../attributes/model-attribute", () => ({

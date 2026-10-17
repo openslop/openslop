@@ -1,7 +1,6 @@
 "use client";
 
-import type { PointerDragProps } from "@/lib/components/use-pointer-drag";
-import type { ResizeAxis } from "./use-resize";
+import type { ResizeAxis, useResize } from "./use-resize";
 
 const fade = (direction: "to right" | "to bottom") =>
 	`linear-gradient(${direction}, transparent, black 20%, black 80%, transparent)`;
@@ -11,15 +10,23 @@ const fade = (direction: "to right" | "to bottom") =>
 // (shadow on its right).
 const LINES: Record<
 	ResizeAxis,
-	{ handle: string; line: string; bar: string; mask: string }
+	{
+		orientation: "horizontal" | "vertical";
+		handle: string;
+		line: string;
+		bar: string;
+		mask: string;
+	}
 > = {
 	vertical: {
+		orientation: "horizontal",
 		handle: "h-2 w-full cursor-row-resize",
 		line: "h-0.5 w-full flex-col",
 		bar: "h-px w-full",
 		mask: fade("to right"),
 	},
 	horizontal: {
+		orientation: "vertical",
 		handle: "h-full w-4 cursor-col-resize",
 		line: "h-full w-0.5",
 		bar: "h-full w-px",
@@ -30,7 +37,7 @@ const LINES: Record<
 type ResizeHandleProps = {
 	axis: ResizeAxis;
 	resizing: boolean;
-	handleProps: PointerDragProps;
+	handleProps: ReturnType<typeof useResize>["handleProps"];
 };
 
 export function ResizeHandle({
@@ -38,12 +45,16 @@ export function ResizeHandle({
 	resizing,
 	handleProps,
 }: ResizeHandleProps) {
-	const { handle, line, bar, mask } = LINES[axis];
+	const { orientation, handle, line, bar, mask } = LINES[axis];
 
 	return (
 		<div
 			{...handleProps}
-			className={`group relative flex shrink-0 touch-none items-center justify-center ${handle} ${resizing ? "select-none" : ""}`}
+			role="separator"
+			aria-orientation={orientation}
+			aria-label="Resize panel"
+			tabIndex={0}
+			className={`group relative flex shrink-0 touch-none items-center justify-center focus-ring ${handle} ${resizing ? "select-none" : ""}`}
 		>
 			<div
 				className={`flex ${line}`}
