@@ -85,7 +85,7 @@ export default function AuthForm({
 					placeholder="Email"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
-					className="h-11 rounded-xl"
+					size="cta"
 					required
 				/>
 				<Button

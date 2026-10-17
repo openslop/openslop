@@ -41,7 +41,7 @@ export function SelectMenuItem({
 				if (!closeOnSelect) event.preventDefault();
 				onSelect();
 			}}
-			className={cn("cursor-pointer py-1 text-label", className)}
+			className={cn("py-1", className)}
 		>
 			<span className="flex w-3.5 shrink-0 items-center justify-center">
 				{selected && (
@@ -55,7 +55,7 @@ export function SelectMenuItem({
 
 /** A control that sits inline with text: a badge on an element, a button in a composer. */
 export const inlineControlClassName =
-	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
+	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none unavailable:opacity-40";
 
 /** Mousedown is swallowed so opening a picker never moves the caret out of the text it sits in. */
 export function InlineMenuTrigger({

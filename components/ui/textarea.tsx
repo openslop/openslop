@@ -1,10 +1,11 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
+import { fieldClassName } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const textareaVariants = cva(
-	"flex w-full rounded-md border border-border bg-input font-body text-foreground shadow-xs transition-colors outline-none placeholder:text-muted-foreground hover:border-ring/50 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30",
+	`${fieldClassName} flex w-full font-body text-foreground placeholder:text-muted-foreground`,
 	{
 		variants: {
 			size: {

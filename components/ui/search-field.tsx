@@ -1,19 +1,21 @@
 import type { ComponentProps } from "react";
 import { Search } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-export function SearchField({ className, ...props }: ComponentProps<"input">) {
+export function SearchField({
+	className,
+	...props
+}: ComponentProps<typeof Input>) {
 	return (
-		<div
-			className={cn(
-				"flex h-9 items-center gap-2 rounded-md border border-border bg-input px-2.5 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/50",
-				className,
-			)}
-		>
-			<Search className="size-4 shrink-0 text-muted-foreground" />
-			<input
+		<div className="relative">
+			<Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+			<Input
 				type="search"
-				className="h-full w-full min-w-0 bg-transparent font-body text-label text-foreground outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
+				className={cn(
+					"pr-2.5 pl-8.5 text-label [&::-webkit-search-cancel-button]:hidden",
+					className,
+				)}
 				{...props}
 			/>
 		</div>

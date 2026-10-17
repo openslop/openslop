@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiJson } from "@/lib/clients/http";
 import { errorMessage } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
+import { fieldClassName } from "@/components/ui/input";
 import {
 	ACCESS_CODE_LENGTH,
 	type CodeEntry,
@@ -14,6 +15,7 @@ import {
 	pasteCode,
 	typeChar,
 } from "@/lib/auth/access-code";
+import { cn } from "@/lib/utils";
 
 const INCOMPLETE_CODE = `Enter all ${ACCESS_CODE_LENGTH} characters of your access code`;
 
@@ -122,7 +124,10 @@ export default function AccessCodeInput() {
 							aria-invalid={!!error}
 							spellCheck={false}
 							autoComplete="off"
-							className="h-11 w-9 rounded-md border border-border bg-input text-center text-body-lg font-semibold text-foreground outline-none transition-[border-color,box-shadow,opacity] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/30 sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm"
+							className={cn(
+								fieldClassName,
+								"h-11 w-9 text-center text-body-lg font-semibold text-foreground placeholder:text-muted-foreground sm:h-13 sm:w-11 sm:rounded-lg sm:text-heading-sm",
+							)}
 							autoFocus={index === 0}
 						/>
 					))}

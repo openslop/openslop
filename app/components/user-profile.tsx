@@ -68,7 +68,7 @@ function UserProfile() {
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuSub>
-						<DropdownMenuSubTrigger className="cursor-pointer">
+						<DropdownMenuSubTrigger>
 							<Contrast />
 							Appearance
 						</DropdownMenuSubTrigger>
@@ -80,7 +80,6 @@ function UserProfile() {
 								<DropdownMenuItem
 									key={mode.value}
 									onClick={() => setTheme(mode.value)}
-									className="cursor-pointer"
 								>
 									<span className="flex w-4 items-center justify-center">
 										{theme === mode.value && <Check className="size-3.5" />}
@@ -90,18 +89,12 @@ function UserProfile() {
 							))}
 						</DropdownMenuSubContent>
 					</DropdownMenuSub>
-					<DropdownMenuItem
-						onClick={() => settings.open("models")}
-						className="cursor-pointer"
-					>
+					<DropdownMenuItem onClick={() => settings.open("models")}>
 						<Settings />
 						Settings
 					</DropdownMenuItem>
 					{IS_DEV && (
-						<DropdownMenuItem
-							onClick={() => setImpersonateOpen(true)}
-							className="cursor-pointer"
-						>
+						<DropdownMenuItem onClick={() => setImpersonateOpen(true)}>
 							<User />
 							Impersonate user
 							<Badge variant="caution" className="ml-auto">
@@ -109,7 +102,7 @@ function UserProfile() {
 							</Badge>
 						</DropdownMenuItem>
 					)}
-					<DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+					<DropdownMenuItem onClick={handleLogout}>
 						<LogOut />
 						Log out
 					</DropdownMenuItem>
