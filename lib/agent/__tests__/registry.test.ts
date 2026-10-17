@@ -577,88 +577,34 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it.each([
-		["a generated image", "img-1", "image"],
-		[
-			"a character's avatar through their avatar asset",
-			"avatar",
-			"asset_avatar",
-		],
-		["every uploaded reference image", "references", "asset_references"],
-	] as const)("hands over %s with its prompt", async (_, id, type) => {
+	it("hands over an element's pictures with their prompt", async () => {
 		const urls = ["https://example.com/a.jpg", "https://example.com/b.jpg"];
 		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id } },
+			{ toolName: "view_image", input: { id: "img-1" } },
 			context({
-				elementImage: (asked) =>
-					asked === id
-						? { type, prompt: "a wolf", pictures: { kind: "uploaded", urls } }
-						: undefined,
+				elementImage: (id) =>
+					id === "img-1" ? { ok: true, prompt: "a wolf", urls } : undefined,
 			}),
 		);
 
 		expect(outcome.ok && outcome.output).toEqual({
-			id,
+			id: "img-1",
 			prompt: "a wolf",
 			urls,
 		});
 	});
 
-	it.each([
-		[
-			"an avatar not drawn yet",
-			"asset_avatar",
-			{ kind: "generated", state: "ungenerated", urls: [] },
-			"has not been generated yet",
-		],
-		[
-			"an image still generating",
-			"image",
-			{ kind: "generated", state: "generating", urls: [] },
-			"is still generating",
-		],
-		[
-			"an image whose generation failed, with the failure's words",
-			"image",
-			{
-				kind: "generated",
-				state: "failed",
-				detail: "The provider rejected this key.",
-				urls: [],
-			},
-			"failed to generate: The provider rejected this key.",
-		],
-		[
-			"reference images never uploaded",
-			"asset_references",
-			{ kind: "uploaded", urls: [] },
-			"has no reference images uploaded",
-		],
-		[
-			"an asset that holds no picture",
-			"asset_style",
-			undefined,
-			"is of type asset_style",
-		],
-		[
-			"an element that generates no picture",
-			"video",
-			undefined,
-			"is of type video",
-		],
-	] as const)("refuses %s", async (_, type, pictures, error) => {
+	it("refuses with the reason an element has no pictures", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "x" } },
+			{ toolName: "view_image", input: { id: "img-1" } },
 			context({
-				elementImage: () => ({
-					type,
-					prompt: "",
-					pictures: pictures && { ...pictures, urls: [] },
-				}),
+				elementImage: () => ({ ok: false, reason: "is still generating" }),
 			}),
 		);
 
-		expect(!outcome.ok && outcome.errorText).toContain(error);
+		expect(!outcome.ok && outcome.errorText).toBe(
+			"img-1 is still generating, so there is nothing to look at.",
+		);
 	});
 
 	it("says an element id is not on the canvas rather than inventing a result", async () => {

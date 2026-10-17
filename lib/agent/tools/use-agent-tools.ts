@@ -2,18 +2,13 @@
 
 import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
-import compact from "lodash/compact";
 import pick from "lodash/pick";
-import { getAssets, referenceUrls } from "@/lib/canvas/assets";
+import { getAssets } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { isScriptEmpty } from "@/lib/canvas/scenes";
 import { countSpokenWords } from "@/lib/canvas/spoken-words";
-import {
-	connectorOf,
-	isGenerated,
-	type CanvasElement,
-} from "@/lib/canvas/types";
+import { isGenerated } from "@/lib/canvas/types";
 import {
 	measureElementLengths,
 	measureRuntime,
@@ -22,19 +17,14 @@ import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
-import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { createConnector } from "@/lib/connectors/factory";
-import { getPromptText } from "@/lib/generation/inputs";
 import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
 import { streamScript } from "@/lib/script/stream-script";
+import { elementImage } from "../element-image";
 import { elementState } from "../element-state";
-import {
-	PROJECT_SETTERS,
-	type AgentToolContext,
-	type ElementImage,
-} from "./context";
+import { PROJECT_SETTERS, type AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
 
 export function useAgentTools() {
@@ -54,19 +44,6 @@ export function useAgentTools() {
 					source,
 					signal,
 				);
-			const picturesOf = (element: CanvasElement): ElementImage["pictures"] => {
-				if (element.type === "asset_references")
-					return { kind: "uploaded", urls: referenceUrls([element]) };
-				if (connectorOf(element.type) !== "image") return undefined;
-				const snapshot = queue.getElementSnapshot(element.id);
-				const { state, detail } = elementState(element.id, snapshot, null);
-				return {
-					kind: "generated",
-					state,
-					detail,
-					urls: compact([getPrimaryUrl(snapshot.result, "image")]),
-				};
-			};
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				isScriptEmpty: () => isScriptEmpty(editor.children),
@@ -75,13 +52,7 @@ export function useAgentTools() {
 				measureRuntime: () => measureRuntime(editor.children),
 				elementImage: (id) => {
 					const element = findElementById(editor, id)?.[0];
-					return (
-						element && {
-							type: element.type,
-							prompt: getPromptText(element),
-							pictures: picturesOf(element),
-						}
-					);
+					return element && elementImage(element, queue.getElementSnapshot(id));
 				},
 				elementStates: () => {
 					const context = buildContext();
