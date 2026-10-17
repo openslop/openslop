@@ -166,10 +166,12 @@ export type LLMGenerateResult = {
 	usage?: { inputTokens: number; outputTokens: number };
 } & WithMetadata;
 
-export type LLMStreamChunk = {
-	text: string;
-	done: boolean;
-};
+export const LLMStreamChunkSchema = z.object({
+	text: z.string(),
+	done: z.boolean(),
+});
+
+export type LLMStreamChunk = z.infer<typeof LLMStreamChunkSchema>;
 
 export interface LLMConnector extends Connector {
 	readonly type: "llm";
@@ -198,9 +200,11 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 };
 
-export type TTSResult = AssetResult & {
-	textTimestamps: TextTimestamp[];
-};
+export const TTSResultSchema = AssetResultSchema.extend({
+	textTimestamps: z.array(TextTimestampSchema),
+});
+
+export type TTSResult = z.infer<typeof TTSResultSchema>;
 
 export type TTSGenerateParams = ConnectorGenerateParams & {
 	voiceId?: string;

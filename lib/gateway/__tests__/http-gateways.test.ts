@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { ZodError } from "zod";
 import { HttpAssetGateway, HttpLLMGateway, HttpTTSGateway } from "../http";
 
 /** Routes are app-relative, so they parse against any origin. */
@@ -186,6 +187,15 @@ describe("HTTP gateways", () => {
 				fetchMock.mock.calls[0][1].body as string,
 			) as Record<string, unknown>;
 			expect(body.stream).toBe(true);
+		});
+
+		it("throws on a stream chunk of the wrong shape", async () => {
+			fetchMock.mockResolvedValue(sseResponse([{ text: 1, done: false }]));
+
+			const gateway = new HttpLLMGateway(HOSTED_LLM);
+			await expect(
+				Array.fromAsync(gateway.stream({ prompt: "hi" })),
+			).rejects.toThrow(ZodError);
 		});
 
 		it("throws when a stream response has no body", async () => {
