@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Select as SelectPrimitive } from "radix-ui";
 import { Check, ChevronDown, ChevronUp } from "@/components/ui/icon";
+import { fieldClassName } from "@/components/ui/input";
 
 import { cn } from "@/lib/utils";
 
@@ -22,8 +23,7 @@ function SelectValue(
 	return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 }
 
-export const selectTriggerClassName =
-	"flex w-fit items-center justify-between gap-2 rounded-md border border-border bg-input px-3 py-2 font-body whitespace-nowrap outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50 unavailable:cursor-not-allowed unavailable:opacity-50 data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=default]:text-body data-[size=sm]:h-8 data-[size=sm]:text-label [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0";
+export const selectTriggerClassName = `${fieldClassName} flex w-fit items-center justify-between gap-2 px-3 py-2 font-body whitespace-nowrap data-[placeholder]:text-muted-foreground data-[size=default]:h-9 data-[size=default]:text-body data-[size=sm]:h-8 data-[size=sm]:text-label [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0`;
 
 function SelectTrigger({
 	className,
@@ -105,7 +105,7 @@ function SelectItem({
 		<SelectPrimitive.Item
 			data-slot="select-item"
 			className={cn(
-				"relative flex w-full cursor-default items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-label outline-none select-none focus:bg-button-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+				"relative flex w-full cursor-pointer items-center gap-2 rounded-md py-1.5 pr-8 pl-2 text-label outline-none select-none focus:bg-button-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
 				className,
 			)}
 			{...props}

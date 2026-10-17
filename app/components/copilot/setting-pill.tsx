@@ -37,7 +37,7 @@ export function SettingPillButton({
 		<button
 			type="button"
 			className={cn(
-				"focus-ring inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label whitespace-nowrap text-foreground transition-colors hover:bg-button-hover disabled:pointer-events-none disabled:opacity-50",
+				"focus-ring inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 font-body text-label whitespace-nowrap text-foreground transition-colors hover:bg-button-hover disabled:pointer-events-none unavailable:opacity-50",
 				className,
 			)}
 			{...props}

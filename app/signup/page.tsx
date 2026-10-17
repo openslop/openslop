@@ -31,7 +31,7 @@ export default function SignupPage() {
 				placeholder="Full Name"
 				value={fullName}
 				onChange={(e) => setFullName(e.target.value)}
-				className="h-11 rounded-xl"
+				size="cta"
 				required
 			/>
 		</AuthForm>

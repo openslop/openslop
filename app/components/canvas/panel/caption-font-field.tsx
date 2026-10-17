@@ -60,7 +60,8 @@ export function CaptionFontField({
 					onChange={(event) => setQuery(event.target.value)}
 					placeholder="Search…"
 					aria-label="Search fonts"
-					className="h-8 border-transparent"
+					size="sm"
+					className="border-transparent"
 				/>
 				<ul className="mt-1 max-h-56 overflow-y-auto">
 					{matches.map((font) => (
