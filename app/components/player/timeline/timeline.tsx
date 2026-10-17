@@ -1,6 +1,5 @@
 "use client";
 
-import { renderCharacterRefs } from "@/lib/connectors/character-refs";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
 	Timeline as TimelineIcon,
@@ -9,6 +8,7 @@ import {
 } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
+import { renderCharacterRefs } from "@/lib/connectors/character-refs";
 import type { LayerType } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";

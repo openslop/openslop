@@ -33,13 +33,13 @@ describe("failIfExpired", () => {
 		mockUpdateJob.mockReset().mockResolvedValue(undefined);
 	});
 
-	it("leaves a job inside its budget alone", async () => {
+	it("leaves a job inside its deadline alone", async () => {
 		const live = job({ ageMs: 10 * MINUTE });
 		await expect(failIfExpired(live)).resolves.toBe(live);
 		expect(mockUpdateJob).not.toHaveBeenCalled();
 	});
 
-	it("fails a job past its budget", async () => {
+	it("fails a job past its deadline", async () => {
 		const result = await failIfExpired(job({ ageMs: 20 * MINUTE }));
 		expect(result).toMatchObject({
 			status: "failed",
@@ -51,7 +51,7 @@ describe("failIfExpired", () => {
 		});
 	});
 
-	it("gives video a longer budget", async () => {
+	it("gives video a longer deadline", async () => {
 		const video = job({ connector_type: "video", ageMs: 30 * MINUTE });
 		await expect(failIfExpired(video)).resolves.toBe(video);
 

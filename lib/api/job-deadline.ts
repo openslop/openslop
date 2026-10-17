@@ -9,7 +9,7 @@ const TIMEOUT_MINUTES: Record<JobConnectorType, number> = {
 	video: 45,
 };
 
-/** The one owner of job deadlines: a live job past its budget is failed. */
+/** The one owner of job deadlines: a live job past its deadline is failed. */
 export async function failIfExpired(job: JobRow): Promise<JobRow> {
 	const minutes = TIMEOUT_MINUTES[job.connector_type];
 	const ageMs = Date.now() - Date.parse(job.created_at);

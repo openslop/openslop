@@ -71,12 +71,12 @@ function costOf(modelId: string, usage: LanguageModelUsage): number {
 	if (!price) throw new Error(`No price for Anthropic model "${modelId}"`);
 	const { noCacheTokens, cacheReadTokens, cacheWriteTokens } =
 		usage.inputTokenDetails;
-	const inputTokens =
+	const billableInput =
 		(noCacheTokens ?? 0) +
 		(cacheReadTokens ?? 0) * CACHE_READ_RATE +
 		(cacheWriteTokens ?? 0) * CACHE_WRITE_RATE;
 	return (
-		(inputTokens * price.input + (usage.outputTokens ?? 0) * price.output) /
+		(billableInput * price.input + (usage.outputTokens ?? 0) * price.output) /
 		1_000_000
 	);
 }
