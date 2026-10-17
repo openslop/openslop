@@ -14,7 +14,10 @@ export type ResolvedElement = {
 	sceneNumber: number;
 	prompt: string;
 	url: string;
+	/** How long its media plays once trimmed. */
 	durationSec: number;
+	mediaDurationSec: number;
+	trimStartSec: number;
 	loops: number;
 	/** Whether a video restarts when it ends, instead of holding its last frame. */
 	loop: boolean;

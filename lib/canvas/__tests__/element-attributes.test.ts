@@ -10,6 +10,8 @@ import {
 	getDuration,
 	getLoops,
 	getMotion,
+	getTimelineDuration,
+	getTrimStart,
 	getTrimToDialogue,
 	getVolume,
 	flatAttributes,
@@ -191,6 +193,8 @@ describe("layoutAttributeSignature", () => {
 			"motion",
 			"trimToDialogue",
 			"uploadedFrame",
+			"trimStart",
+			"timelineDuration",
 		]);
 		expect(
 			layoutAttributeSignature(
@@ -201,18 +205,34 @@ describe("layoutAttributeSignature", () => {
 					trimToDialogue: "false",
 				}),
 			),
-		).toBe("2::5:kenBurnsIn:false:");
+		).toBe("2::5:kenBurnsIn:false:::");
 	});
 
 	it("uses empty segments for absent attributes (raw, uncoerced)", () => {
-		expect(layoutAttributeSignature(el())).toBe(":::::");
-		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:::::");
-		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10:::");
+		expect(layoutAttributeSignature(el())).toBe(":::::::");
+		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:::::::");
+		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10:::::");
 		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe(
-			":::shake::",
+			":::shake::::",
 		);
 		expect(layoutAttributeSignature(el({ trimToDialogue: "false" }))).toBe(
-			"::::false:",
+			"::::false:::",
 		);
+	});
+});
+
+describe("trim attributes", () => {
+	it("reads an unset or invalid trim as none", () => {
+		expect(getTrimStart(el())).toBe(0);
+		expect(getTrimStart(el({ trimStart: "-1" }))).toBe(0);
+		expect(getTimelineDuration(el())).toBeUndefined();
+		expect(
+			getTimelineDuration(el({ timelineDuration: "0.5" })),
+		).toBeUndefined();
+	});
+
+	it("reads valid seconds", () => {
+		expect(getTrimStart(el({ trimStart: "1.25" }))).toBe(1.25);
+		expect(getTimelineDuration(el({ timelineDuration: " 4 " }))).toBe(4);
 	});
 });

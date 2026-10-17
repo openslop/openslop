@@ -27,12 +27,30 @@ describe("AttributeSchema", () => {
 		]);
 
 		expect(Object.keys(schema.badgeAttributes)).toEqual(["model"]);
-		expect(Object.keys(schema.settingsAttributes)).toEqual(["loops", "volume"]);
+		expect(Object.keys(schema.settingsAttributesFor({}))).toEqual([
+			"loops",
+			"volume",
+		]);
 		expect(schema.defaultAttributes).toEqual({
 			model: "a",
 			loops: "1",
 			volume: "2",
 		});
+	});
+
+	it("offers a setting only while the attributes pass its shownWhen", () => {
+		const schema = AttributeSchema.from([
+			{
+				key: "trim",
+				label: "Trim",
+				edit: { kind: "seconds", min: 0 },
+				shownWhen: (attrs) => attrs.mode === "free",
+			},
+		]);
+		expect(Object.keys(schema.settingsAttributesFor({ mode: "free" }))).toEqual(
+			["trim"],
+		);
+		expect(schema.settingsAttributesFor({})).toEqual({});
 	});
 
 	it("omits defs with no default from defaultAttributes", () => {
@@ -41,7 +59,7 @@ describe("AttributeSchema", () => {
 		]);
 
 		expect(schema.defaultAttributes).toEqual({});
-		expect(schema.settingsAttributes.startFrame).toEqual({
+		expect(schema.settingsAttributesFor({}).startFrame).toEqual({
 			label: "Start frame",
 			icon: undefined,
 			edit: { kind: "frame" },
@@ -73,6 +91,16 @@ describe("AttributeSchema", () => {
 				default: "false",
 			},
 		]);
+
+		it("offers seconds only as a plain number at or above its minimum", () => {
+			const seconds = AttributeSchema.from([
+				{ key: "length", label: "Length", edit: { kind: "seconds", min: 1 } },
+			]);
+			expect(seconds.offers("length", "2.5")).toBe(true);
+			expect(seconds.offers("length", "0.5")).toBe(false);
+			expect(seconds.offers("length", "2s")).toBe(false);
+			expect(seconds.resolve({ length: "nope" })).toEqual({});
+		});
 
 		it("fills defaults for attributes the caller left unset", () => {
 			expect(schema.resolve({})).toEqual({ model: "a", loop: "false" });

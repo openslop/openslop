@@ -20,12 +20,15 @@ const SAMPLE_RANGE = { min: 8, max: PEAK_COUNT };
 export function ClipWaveform({
 	src,
 	width,
+	from,
 	played,
 	className,
 }: {
 	src: string;
 	width: number;
-	/** How much of the audio the clip plays, from its start. Past 1 the clip outlasts it. */
+	/** Where in the audio the clip opens, as a fraction of it. */
+	from: number;
+	/** How much of the audio the clip plays, from `from`. Past the end the clip outlasts it. */
 	played: number;
 	className?: string;
 }) {
@@ -40,9 +43,9 @@ export function ClipWaveform({
 	const style = useMemo(
 		() =>
 			peaks
-				? soundwaveMaskStyle(toBarHeights(peaks, sampleCount, played))
+				? soundwaveMaskStyle(toBarHeights(peaks, sampleCount, played, from))
 				: null,
-		[peaks, sampleCount, played],
+		[peaks, sampleCount, played, from],
 	);
 
 	// A failed decode stops shimmering: the clip is there, its audio is not.

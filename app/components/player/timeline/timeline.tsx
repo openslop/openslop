@@ -3,6 +3,7 @@
 import { renderCharacterRefs } from "@/lib/connectors/character-refs";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
+	RotateCcw,
 	Timeline as TimelineIcon,
 	ZoomIn,
 	ZoomOut,
@@ -27,6 +28,8 @@ import {
 	type TimelineRow,
 } from "./timeline-rows";
 import { useTimelineZoom } from "./use-timeline-zoom";
+import { TimelineTrimHandle } from "./timeline-trim-handle";
+import { useClipTrim } from "./use-clip-trim";
 
 /** Runway past the last tick, so its label isn't cut off by the end. */
 const RULER_TAIL_PX = 32;
@@ -54,6 +57,59 @@ function Lane({
 	);
 }
 
+function Clip({
+	clip,
+	pxPerSec,
+	numbered,
+	selected,
+	onSelect,
+}: {
+	clip: TimelineClipData;
+	pxPerSec: number;
+	numbered: boolean;
+	selected: boolean;
+	onSelect: (clip: TimelineClipData) => void;
+}) {
+	const trim = useClipTrim(clip, pxPerSec);
+	const width = Math.max(trim.durationSec * pxPerSec, MIN_CLIP_WIDTH_PX);
+	return (
+		<li
+			className="group/clip absolute inset-y-0.5"
+			style={{ left: clip.start * pxPerSec, width }}
+		>
+			<button
+				type="button"
+				aria-current={selected ? "true" : undefined}
+				onClick={() => onSelect(clip)}
+				// Inline buttons sit on the list item's text baseline, which
+				// drops the clip past its lane.
+				className="block h-full w-full rounded-md focus-ring"
+			>
+				<TimelineClip
+					clip={clip}
+					width={width}
+					label={renderCharacterRefs(clip.element.prompt)}
+					selected={selected}
+					sceneNumber={numbered ? clip.element.sceneNumber : undefined}
+				/>
+			</button>
+			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
+			<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
+			{trim.reset ? (
+				<TooltipIconButton
+					label="Reset trim"
+					size="sm"
+					variant="onMedia"
+					onClick={trim.reset}
+					className="absolute top-0.5 right-2 z-20 opacity-0 group-hover/clip:opacity-100 focus-visible:opacity-100"
+				>
+					<RotateCcw size={12} />
+				</TooltipIconButton>
+			) : null}
+		</li>
+	);
+}
+
 function Track({
 	row,
 	pxPerSec,
@@ -68,36 +124,16 @@ function Track({
 	return (
 		<Lane kind={row.kind} className="relative">
 			<ul aria-label={row.label} className="absolute inset-0">
-				{row.clips.map((clip) => {
-					const width = Math.max(clip.duration * pxPerSec, MIN_CLIP_WIDTH_PX);
-					const selected = selectedKey === clip.key;
-					return (
-						<li
-							key={clip.key}
-							className="absolute inset-y-0.5"
-							style={{ left: clip.start * pxPerSec, width }}
-						>
-							<button
-								type="button"
-								aria-current={selected ? "true" : undefined}
-								onClick={() => onSelect(clip)}
-								// Inline buttons sit on the list item's text baseline, which
-								// drops the clip past its lane.
-								className="block h-full w-full rounded-md focus-ring"
-							>
-								<TimelineClip
-									clip={clip}
-									width={width}
-									label={renderCharacterRefs(clip.element.prompt)}
-									selected={selected}
-									sceneNumber={
-										row.numbered ? clip.element.sceneNumber : undefined
-									}
-								/>
-							</button>
-						</li>
-					);
-				})}
+				{row.clips.map((clip) => (
+					<Clip
+						key={clip.key}
+						clip={clip}
+						pxPerSec={pxPerSec}
+						numbered={row.numbered}
+						selected={selectedKey === clip.key}
+						onSelect={onSelect}
+					/>
+				))}
 			</ul>
 		</Lane>
 	);

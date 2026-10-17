@@ -42,6 +42,19 @@
 	background-color: color-mix(in oklab, currentColor 6%, var(--element-card));
 }
 
+/* A clip edge on the timeline; the hotspot sits on the bracket. */
+@utility cursor-trim-start {
+	cursor:
+		url("/cursors/trim-start.svg") 14 12,
+		ew-resize;
+}
+
+@utility cursor-trim-end {
+	cursor:
+		url("/cursors/trim-end.svg") 14 12,
+		ew-resize;
+}
+
 @utility focus-ring {
 	@apply outline-none focus-visible:ring-2 focus-visible:ring-ring;
 }

@@ -77,6 +77,8 @@ describe("resolveElements", () => {
 			prompt: "test",
 			url: "https://example.com/img.png",
 			durationSec: 3,
+			mediaDurationSec: 3,
+			trimStartSec: 0,
 			loops: 1,
 			loop: false,
 			trimToDialogue: true,
@@ -93,6 +95,8 @@ describe("resolveElements", () => {
 			prompt: "test",
 			url: "https://example.com/nar.mp3",
 			durationSec: 8,
+			mediaDurationSec: 8,
+			trimStartSec: 0,
 			loops: 1,
 			loop: false,
 			trimToDialogue: true,
@@ -275,6 +279,30 @@ describe("resolveElements", () => {
 				captionsEnabled: false,
 			});
 			expect(resolved[0].captionTimestamps).toBeUndefined();
+		});
+	});
+
+	describe("trims", () => {
+		const trims = { trimStart: "1", timelineDuration: "3" };
+		const resolveVideo = (trimToDialogue: string) =>
+			resolveElements(
+				[wrap([makeElement("v1", "video", { ...trims, trimToDialogue })])],
+				() => makeSnapshot(),
+				{ captionsEnabled: false },
+			)[0];
+
+		it("applies a video's trims once it plays in full", () => {
+			expect(resolveVideo("false")).toMatchObject({
+				trimStartSec: 1,
+				durationSec: 3,
+			});
+		});
+
+		it("ignores them while the video is trimmed to its dialogue", () => {
+			expect(resolveVideo("true")).toMatchObject({
+				trimStartSec: 0,
+				durationSec: 5,
+			});
 		});
 	});
 });

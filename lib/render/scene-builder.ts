@@ -109,7 +109,11 @@ export function buildRenderLayout(
 	let cursor = 0;
 
 	for (const raw of elements) {
-		const element = { ...raw, durationSec: onGrid(raw.durationSec) };
+		const element = {
+			...raw,
+			durationSec: onGrid(raw.durationSec),
+			mediaDurationSec: onGrid(raw.mediaDurationSec),
+		};
 		const stride = onGrid(loopStrideSec(element));
 		const current = series.at(-1);
 		const foregroundCursor = getForegroundCursor(current, cursor);

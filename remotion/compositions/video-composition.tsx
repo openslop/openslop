@@ -49,6 +49,7 @@ function AudioSequence({
 		<>
 			<Audio
 				src={element.url}
+				trimBefore={toFrames(element.trimStartSec, fps)}
 				volume={volume}
 				fallbackHtml5AudioProps={fallbackHtml5AudioProps}
 			/>
@@ -72,6 +73,7 @@ function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	const video = (
 		<OffthreadVideo
 			src={element.url}
+			trimBefore={toFrames(element.trimStartSec, fps)}
 			style={coverStyle}
 			volume={volumeToGain(element.volume)}
 		/>

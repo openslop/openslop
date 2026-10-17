@@ -9,6 +9,7 @@ import {
 	type ContentType,
 } from "@/lib/canvas/types";
 import { getDuration, getTrimToDialogue } from "../canvas/element-attributes";
+import { elementTrim } from "./clip-trim";
 import { MIN_DURATION_SEC } from "./scene-builder";
 import { secondsForWords } from "../project/video-length";
 
@@ -69,7 +70,10 @@ const toLength = ({
 		dialogueIds,
 		durationSec,
 		trimToDialogue,
-		...decide(trimToDialogue ? 0 : (durationSec ?? 0), secondsForWords(words)),
+		...decide(
+			trimToDialogue ? 0 : elementTrim(element, durationSec ?? 0).durationSec,
+			secondsForWords(words),
+		),
 	};
 };
 

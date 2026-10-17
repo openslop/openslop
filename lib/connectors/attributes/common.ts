@@ -13,6 +13,7 @@ import {
 	DEFAULT_MOTION,
 	MOTION_EFFECTS,
 } from "@/lib/render/motion-effect-names";
+import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
 import type { AttributeDef } from "./schema";
 
 /** Attribute leaves shared across multiple connector types. */
@@ -94,4 +95,18 @@ export const trimToDialogueDef: AttributeDef = {
 	label: "Timing",
 	edit: { kind: "toggle", ...TRIM_TO_DIALOGUE_FACES },
 	default: TOGGLE_ON,
+};
+
+export const trimStartDef: AttributeDef = {
+	key: "trimStart",
+	label: "Trim start",
+	unit: "s",
+	edit: { kind: "seconds", min: 0 },
+};
+
+export const timelineDurationDef: AttributeDef = {
+	key: "timelineDuration",
+	label: "Timeline duration",
+	unit: "s",
+	edit: { kind: "seconds", min: MIN_DURATION_SEC },
 };
