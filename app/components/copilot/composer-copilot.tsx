@@ -218,6 +218,7 @@ export default function ComposerCopilot({
 		isDraggingOver,
 	} = useFileUpload({
 		kind: "image",
+		feeds: "project",
 		multiple: true,
 		onUpload: addReferenceImages,
 	});

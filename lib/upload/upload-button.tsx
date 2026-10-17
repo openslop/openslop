@@ -7,6 +7,7 @@ import {
 	Video,
 	type IconComponent,
 } from "@/components/ui/icon";
+import type { UploadTarget } from "./pending-uploads";
 import type { UploadKind } from "./upload-files";
 import { useFileUpload } from "./use-file-upload";
 
@@ -17,17 +18,20 @@ const ICONS: Record<UploadKind, IconComponent> = {
 
 export function UploadButton({
 	kind,
+	feeds,
 	onUpload,
 	disabled = false,
 	className,
 }: {
 	kind: UploadKind;
+	feeds: UploadTarget;
 	onUpload: (url: string) => void | Promise<void>;
 	disabled?: boolean;
 	className?: string;
 }) {
 	const { openPicker, uploading, inputElement } = useFileUpload({
 		kind,
+		feeds,
 		onUpload: async ([url]) => {
 			if (url) await onUpload(url);
 		},

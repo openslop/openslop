@@ -5,6 +5,7 @@ import {
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
 import { GenerationQueue } from "@/lib/generation/queue";
+import { PendingUploads } from "@/lib/upload/pending-uploads";
 import { buildCtx } from "@/lib/generation/__tests__/_context";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { buildNode, GenerationGraph } from "@/lib/generation/generation-graph";
@@ -34,6 +35,13 @@ let queue: GenerationQueue;
 vi.mock("@/lib/generation/generation-queue-provider", () => ({
 	useGenerationQueue: () => queue,
 	useQueueSelector: <T>(selector: (q: GenerationQueue) => T) => selector(queue),
+}));
+
+let uploads: PendingUploads;
+
+vi.mock("@/lib/upload/pending-uploads-provider", () => ({
+	usePendingUploadsSelector: <T>(selector: (u: PendingUploads) => T) =>
+		selector(uploads),
 }));
 
 // The hook under test is about which elements get queued, so bind a real
@@ -93,6 +101,7 @@ let enqueueGraphSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
 	vi.clearAllMocks();
 	queue = new GenerationQueue();
+	uploads = new PendingUploads();
 	enqueueGraphSpy = vi
 		.spyOn(queue, "enqueueGraph")
 		.mockImplementation(() => {});
@@ -155,9 +164,23 @@ describe("useGenerateAll", () => {
 		expect(useScopeForAll(elements)).toMatchObject({
 			empty: false,
 			active: false,
+			uploading: false,
 			pending: 0,
 			stale: 0,
 		});
+	});
+
+	it("waits while an upload for an element in scope is in flight", () => {
+		const release = uploads.begin({ element: "a" });
+
+		expect(useScopeForAll([makeElement("a", "image", "sunset")])).toMatchObject(
+			{ uploading: true },
+		);
+
+		release();
+		expect(useScopeForAll([makeElement("a", "image", "sunset")])).toMatchObject(
+			{ uploading: false },
+		);
 	});
 
 	it("counts the elements still to generate", async () => {
@@ -215,6 +238,14 @@ describe("useGenerateScope", () => {
 		expect(enqueuedIds()).toEqual([]);
 	});
 
+	it("ignores an upload for an element outside the scope", () => {
+		uploads.begin({ element: "c" });
+
+		expect(useGenerateScope(() => sceneOne, "scene")).toMatchObject({
+			uploading: false,
+		});
+	});
+
 	it("leaves out an element from another scene of the same document", async () => {
 		useGenerateAllFor([...sceneOne, ...sceneTwo]);
 		expect(enqueuedIds()).toEqual(["a", "b", "c"]);
@@ -234,6 +265,14 @@ describe("scope description", () => {
 	it("reports no work when nothing in scope has a prompt", () => {
 		expect(useDescription([makeElement("a", "image", "")], "scene")).toBe(
 			"Nothing to generate right now",
+		);
+	});
+
+	it("says it is waiting for an upload in scope", () => {
+		uploads.begin({ element: "a" });
+
+		expect(useDescription([makeElement("a", "image", "sunset")], "scene")).toBe(
+			"Waiting for an upload in this scene…",
 		);
 	});
 

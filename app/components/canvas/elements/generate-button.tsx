@@ -10,6 +10,7 @@ import {
 	isGenerationActive,
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
+import { usePendingUploadsSelector } from "@/lib/upload/pending-uploads-provider";
 import { useElementGeneration } from "./element-generation-context";
 
 export function StaleIndicator({ reason }: { reason: string }) {
@@ -35,24 +36,36 @@ const GENERATE_ICON: Record<GenerationStatus, ReactNode> = {
 	idle: <Sparkles aria-hidden="true" />,
 };
 
-function generateLabel(status: GenerationStatus, hasResult: boolean) {
+function generateLabel(
+	status: GenerationStatus,
+	hasResult: boolean,
+	uploading: boolean,
+) {
 	if (status === "generating") return "Generating…";
 	if (status === "queued") return "Queued";
+	if (uploading) return "Uploading…";
 	return hasResult ? "Regenerate" : "Generate";
+}
+
+function generateTooltip(hasResult: boolean, uploading: boolean) {
+	if (uploading) return "Waiting for an upload to finish";
+	return hasResult ? "Regenerate this element" : "Generate this element";
 }
 
 export function GenerateButton({
 	status,
 	hasResult,
+	uploading,
 	disabled,
 	onGenerate,
 }: {
 	status: GenerationStatus;
 	hasResult: boolean;
+	uploading: boolean;
 	disabled: boolean;
 	onGenerate: () => void;
 }) {
-	const label = generateLabel(status, hasResult);
+	const label = generateLabel(status, hasResult, uploading);
 	return (
 		<Button
 			type="button"
@@ -60,10 +73,11 @@ export function GenerateButton({
 			size="sm"
 			className="shrink-0"
 			disabled={disabled}
+			unavailable={uploading}
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={onGenerate}
 			aria-label={label}
-			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}
+			tooltip={generateTooltip(hasResult, uploading)}
 		>
 			{GENERATE_ICON[status]}
 			{label}
@@ -72,11 +86,16 @@ export function GenerateButton({
 }
 
 export function ElementGenerateButton() {
-	const { hasPrompt, hasResult, status, generate } = useElementGeneration();
+	const { node, hasPrompt, hasResult, status, generate } =
+		useElementGeneration();
+	const uploading = usePendingUploadsSelector((uploads) =>
+		uploads.blocks(node.id),
+	);
 	return (
 		<GenerateButton
 			status={status}
 			hasResult={hasResult}
+			uploading={uploading}
 			disabled={!hasPrompt || isGenerationActive(status)}
 			onGenerate={generate}
 		/>

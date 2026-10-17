@@ -90,6 +90,7 @@ export function StartFramePicker({
 		});
 	const { openPicker, uploading, inputElement } = useFileUpload({
 		kind: "image",
+		feeds: { element: element.id },
 		onUpload: ([url]) => {
 			if (url) setFrame(url, url);
 		},

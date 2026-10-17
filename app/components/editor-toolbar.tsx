@@ -70,6 +70,7 @@ function getGenerateLabel(
 ): string {
 	if (loading) return "Writing…";
 	if (generating) return "Generating…";
+	if (scope.uploading) return "Uploading…";
 	if (scope.empty) return "Generate all";
 	if (scope.pending === 0) return "All generated";
 	return countPhrase(scope);
@@ -83,7 +84,7 @@ function EditorToolbarComponent() {
 	const busy = loading || generating;
 	const generateLabel = getGenerateLabel(loading, generating, scope);
 	const current = !scope.empty && scope.pending === 0;
-	const unavailable = busy || scope.pending === 0;
+	const unavailable = busy || scope.uploading || scope.pending === 0;
 
 	return (
 		<div

@@ -22,6 +22,7 @@ function ElementUploadButton({
 	return (
 		<UploadButton
 			kind={kind}
+			feeds={{ element: node.id }}
 			className={cn("shrink-0", className)}
 			disabled={isGenerationActive(status)}
 			onUpload={async (url) =>
