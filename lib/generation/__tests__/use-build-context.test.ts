@@ -7,7 +7,6 @@ import {
 	type ContentElement,
 	type Scene,
 } from "@/lib/canvas/types";
-import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 
 // Real useCallback semantics: the value survives only while its deps are
@@ -46,10 +45,6 @@ Object.defineProperty(editor, "children", {
 });
 vi.mock("slate-react", () => ({
 	useSlateStatic: () => editor,
-}));
-
-vi.mock("@/lib/config/config-provider", () => ({
-	useConfig: () => ({ connectorConfig: DEFAULT_CONNECTOR_REGISTRY }),
 }));
 
 let store: ProjectStore;

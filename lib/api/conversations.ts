@@ -1,6 +1,9 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { parseSloppyMessages } from "@/lib/agent/messages";
+import {
+	parseSloppyMessages,
+	settleUnansweredCalls,
+} from "@/lib/agent/messages";
 import type { SloppyMessage } from "@/lib/agent/types";
 
 /** One client per request: `createClient` re-reads cookies and rebuilds an adapter each call. */
@@ -70,4 +73,23 @@ export async function saveConversationMessage(
 		message,
 	});
 	if (error) throw error;
+}
+
+/** The transcript as the panel opens it: a call the editor never answered is settled, since nothing will answer it now. */
+export async function loadTranscript(
+	projectId: string,
+	userId: string,
+): Promise<SloppyMessage[]> {
+	const supabase = await client();
+	const { data, error } = await supabase
+		.from("messages")
+		.select("message, conversations!inner()")
+		.eq("conversations.project_id", projectId)
+		.eq("conversations.user_id", userId)
+		.order("seq", { ascending: true });
+	if (error) throw error;
+
+	return settleUnansweredCalls(
+		await parseSloppyMessages(data.map((row) => row.message)),
+	);
 }

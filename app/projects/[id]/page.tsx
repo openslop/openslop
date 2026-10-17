@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
+import { loadTranscript } from "@/lib/api/conversations";
 import { listProviderKeys } from "@/lib/api/provider-keys";
 import {
 	SAVED_PROJECT_COLUMNS,
@@ -38,13 +39,19 @@ export default async function ProjectPage({
 	if (error) throw error;
 	if (!project) notFound();
 
+	const [providerKeys, transcript] = await Promise.all([
+		listProviderKeys(user),
+		loadTranscript(id, user.id),
+	]);
+
 	return (
 		<ProjectEditor
 			key={id}
 			projectId={id}
 			initial={parseSavedProject(project)}
+			initialTranscript={transcript}
 			account={AccountSchema.parse(user)}
-			providerKeys={await listProviderKeys(user)}
+			providerKeys={providerKeys}
 		/>
 	);
 }
