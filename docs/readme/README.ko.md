@@ -96,7 +96,7 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="줄에 마우스를 올리면 일곱 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -216,7 +216,7 @@ npm run dev
 | 인증 + DB  | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | 비디오     | [Remotion 4](https://remotion.dev) (합성, 렌더링, 플레이어)                                                  |
 | 스토리지   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (생성된 에셋 저장)                                |
-| 아이콘     | 자체 제작 마스크 SVG 세트 (`components/ui/icon.tsx` + `icons/`), 아이콘 의존성 없음                          |
+| 아이콘     | 자체 제작 마스크 SVG 세트 (`components/ui/icon.tsx` + `components/ui/icons/`), 아이콘 의존성 없음            |
 
 ## 프로젝트 구조
 
