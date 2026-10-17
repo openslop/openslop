@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Instrument_Serif } from "next/font/google";
 import "./globals.css";
@@ -39,6 +39,14 @@ export const metadata: Metadata = {
 	description: "OpenSlop Beta Access",
 };
 
+// Mirrors `--background` in globals.css; Viewport cannot read CSS variables.
+export const viewport: Viewport = {
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#f3f1f0" },
+		{ media: "(prefers-color-scheme: dark)", color: "#140e11" },
+	],
+};
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -46,9 +54,6 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head>
-				<meta name="theme-color" content="#fdfcfc" />
-			</head>
 			<body
 				className={`${slopella.variable} ${sentient.variable} ${inter.variable} ${instrumentSerif.variable} antialiased`}
 			>
