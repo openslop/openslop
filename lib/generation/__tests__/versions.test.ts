@@ -29,13 +29,21 @@ const version = (
 });
 
 describe("VersionLog", () => {
-	it("keeps one version per input set, overwriting what those inputs made before", () => {
+	it("keeps each take the same inputs made, newest last", () => {
 		const log = new VersionLog();
 		log.record(version("a"));
-		const again = version("a", AT, "redone.png");
+		const again = version("a", LATER, "redone.png");
 		log.record(again);
 
-		expect(log.get("a")).toEqual([again]);
+		expect(log.get("a")).toEqual([version("a"), again]);
+	});
+
+	it("keeps one version per result, overwriting the same result recorded again", () => {
+		const log = new VersionLog();
+		log.record(version("a"));
+		log.record(version("a"));
+
+		expect(log.get("a")).toEqual([version("a")]);
 	});
 
 	it("keeps versions from different inputs side by side, oldest first", () => {
@@ -70,9 +78,8 @@ describe("VersionLog", () => {
 
 	it("keeps versions recorded while the read was in flight, in date order", () => {
 		const log = new VersionLog();
-		const fresh = version("same", AT, "fresh.png");
 		log.record(version("new", LATER));
-		log.record(fresh);
+		log.record(version("same"));
 		log.hydrate("a", [
 			version("same"),
 			version("old", "2025-12-01T00:00:00.000Z"),
@@ -80,7 +87,7 @@ describe("VersionLog", () => {
 
 		expect(log.get("a")).toEqual([
 			version("old", "2025-12-01T00:00:00.000Z"),
-			fresh,
+			version("same"),
 			version("new", LATER),
 		]);
 	});
@@ -96,6 +103,16 @@ describe("activeVersionIndex", () => {
 			pinned: false,
 		};
 		expect(activeVersionIndex(versions, snapshot)).toBe(1);
+	});
+
+	it("tells takes from the same inputs apart by their result", () => {
+		const retaken = [version("a"), version("a", LATER, "redone.png")];
+		const snapshot = {
+			result: result("redone.png"),
+			resultInputs: inputsFor("a"),
+			pinned: false,
+		};
+		expect(activeVersionIndex(retaken, snapshot)).toBe(1);
 	});
 
 	it("highlights nothing when a failed regeneration left stale inputs behind", () => {
