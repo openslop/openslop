@@ -5,6 +5,7 @@ import type { ResultKind } from "@/lib/canvas/types";
 export const UPLOAD_KINDS = {
 	image: { noun: "an image", maxBytes: 10 * 1024 * 1024 },
 	video: { noun: "a video", maxBytes: 50 * 1024 * 1024 },
+	audio: { noun: "audio", maxBytes: 20 * 1024 * 1024 },
 } as const satisfies Partial<Record<ResultKind, unknown>>;
 
 export type UploadKind = keyof typeof UPLOAD_KINDS;

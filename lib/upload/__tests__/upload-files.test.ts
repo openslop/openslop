@@ -79,6 +79,29 @@ describe("partitionFiles", () => {
 			rejected: [{ name: "huge.mp4", reason: "is over 50 MB" }],
 		});
 	});
+
+	it("takes audio only as audio", () => {
+		const song = makeFile("song.mp3", "audio/mpeg");
+		const clip = makeFile("clip.mp4", "video/mp4");
+
+		expect(partitionFiles([song, clip], "audio")).toEqual({
+			accepted: [song],
+			rejected: [{ name: "clip.mp4", reason: "is not audio" }],
+		});
+	});
+
+	it("holds audio to its own size cap", () => {
+		const huge = makeFile(
+			"huge.mp3",
+			"audio/mpeg",
+			UPLOAD_KINDS.audio.maxBytes + 1,
+		);
+
+		expect(partitionFiles([huge], "audio")).toEqual({
+			accepted: [],
+			rejected: [{ name: "huge.mp3", reason: "is over 20 MB" }],
+		});
+	});
 });
 
 describe("uploadPathname", () => {

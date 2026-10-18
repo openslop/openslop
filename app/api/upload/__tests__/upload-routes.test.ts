@@ -13,6 +13,7 @@ vi.mock("@vercel/blob/client", () => ({
 
 const { POST } = await import("@/app/api/upload/image/route");
 const { POST: POST_VIDEO } = await import("@/app/api/upload/video/route");
+const { POST: POST_AUDIO } = await import("@/app/api/upload/audio/route");
 
 const tokenRequest = (pathname: string) => ({
 	type: "blob.generate-client-token",
@@ -103,6 +104,18 @@ describe("POST /api/upload/:kind", () => {
 		expect(await tokenOptions()).toEqual({
 			allowedContentTypes: ["video/*"],
 			maximumSizeInBytes: 50 * 1024 * 1024,
+			addRandomSuffix: false,
+		});
+	});
+
+	it("limits an audio token to audio up to 20 MB", async () => {
+		await POST_AUDIO(
+			makeRequest(tokenRequest("assets/upload/user/a1/song.mp3"), "audio"),
+		);
+
+		expect(await tokenOptions()).toEqual({
+			allowedContentTypes: ["audio/*"],
+			maximumSizeInBytes: 20 * 1024 * 1024,
 			addRandomSuffix: false,
 		});
 	});

@@ -903,17 +903,17 @@ describe("RunwareVideo", () => {
 			expect(poll.kind === "ready" && poll.costUsd).toBe(0.42);
 		});
 
-		it("fails loudly when a finished job reports no cost", async () => {
+		it("still hands back the video when a finished job reports no cost", async () => {
 			mockGetResponse.mockResolvedValue([
 				{ taskUUID: "job-1", status: "success", videoURL: "https://r.mp4" },
 			]);
 
-			await expect(
-				new RunwareVideo("test-key").poll("job-1", {
-					prompt: "test",
-					model: MODEL,
-				}),
-			).rejects.toThrow("Video job completed without a cost");
+			const poll = await new RunwareVideo("test-key").poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
+
+			expect(poll.kind === "ready" && poll.costUsd).toBe(0);
 		});
 
 		it("fails loudly when a job succeeded without a video", async () => {
