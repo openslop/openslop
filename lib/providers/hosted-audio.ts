@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { AssetBundle } from "@/lib/api/asset-bundle";
-import type { HostedAudio } from "@/lib/connectors/types";
+import type { HostedVoicePreview } from "@/lib/connectors/types";
 import { audioDurationSec } from "./audio-duration";
 
 export type AudioBytes = { data: ArrayBuffer; contentType: string };
@@ -43,7 +43,7 @@ export async function hostedAudio(
 	provider: string,
 	key: string,
 	produce: () => Promise<AudioBytes>,
-): Promise<HostedAudio> {
+): Promise<HostedVoicePreview> {
 	const id = createHash("sha256").update(key).digest("hex");
 	const response =
 		(await AssetBundle.load(BUNDLE_TYPE, provider, id)) ??

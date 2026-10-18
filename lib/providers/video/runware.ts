@@ -41,7 +41,6 @@ const omni = klingOmni({
 	maxElementsWithFrame: 3,
 	minVoiceSec: 5,
 	maxVoiceSec: 30,
-	voiceLanguages: ["en", "zh", "ja", "ko", "es"],
 	maxDescription: 100,
 	sound: true,
 });

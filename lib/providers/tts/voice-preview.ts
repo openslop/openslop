@@ -1,10 +1,11 @@
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import { vendorParams } from "@/lib/connectors/models";
-import type { HostedVoicePreview, ModelRef } from "@/lib/connectors/types";
-import {
-	DEFAULT_TTS_LANGUAGE,
-	type TTSLanguage,
-} from "@/lib/connectors/tts/enums";
+import type {
+	HostedVoicePreview,
+	ModelRef,
+	VoiceInfo,
+} from "@/lib/connectors/types";
+import { DEFAULT_TTS_LANGUAGE } from "@/lib/connectors/tts/enums";
 import { languageSchema } from "@/lib/project/types";
 import { audioOf, hostedAudio, type AudioBytes } from "../hosted-audio";
 import { PREVIEW_LINES } from "./preview-lines";
@@ -31,33 +32,29 @@ export function fetchAllowedVoicePreview(
 }
 
 /** The vendor's preview in our own store, or one the voice speaks in its own language when the vendor has none. */
-export async function voicePreview(
+export function voicePreview(
 	tts: TTSProvider,
 	request: ModelRef & { voiceId: string },
 ): Promise<HostedVoicePreview> {
 	const { voiceId } = request;
-	const voice = await tts.getVoice(voiceId);
-	if (!voice) throw new Error(`No voice "${voiceId}"`);
-	const language = languageSchema.parse(voice.language);
-	const audio = await hostedAudio(
-		"voice",
-		`${request.provider}/${voiceId}`,
-		async () =>
-			voice.previewUrl
-				? audioOf(
-						await tts.fetchVoicePreview(voice.previewUrl),
-						"Voice preview fetch failed",
-					)
-				: spokenPreview(tts, request, language ?? DEFAULT_TTS_LANGUAGE),
-	);
-	return { ...audio, language };
+	return hostedAudio("voice", `${request.provider}/${voiceId}`, async () => {
+		const voice = await tts.getVoice(voiceId);
+		if (!voice) throw new Error(`No voice "${voiceId}"`);
+		return voice.previewUrl
+			? audioOf(
+					await tts.fetchVoicePreview(voice.previewUrl),
+					"Voice preview fetch failed",
+				)
+			: spokenPreview(tts, request, voice);
+	});
 }
 
 async function spokenPreview(
 	tts: TTSProvider,
 	request: ModelRef & { voiceId: string },
-	language: TTSLanguage,
+	voice: VoiceInfo,
 ): Promise<AudioBytes> {
+	const language = languageSchema.parse(voice.language) ?? DEFAULT_TTS_LANGUAGE;
 	const { output: bundle } = await tts.generate(
 		vendorParams("tts", {
 			...request,

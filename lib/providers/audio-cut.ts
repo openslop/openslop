@@ -75,16 +75,11 @@ export async function cutVoice(
 	if (!AssetBundle.holds(voice.url))
 		throw new Error(`Voice preview is not in our store: ${voice.url}`);
 	if (seconds >= voice.durationSec - FRAME_SEC) return voice;
-	const cut = await hostedAudio(
-		"voice-cut",
-		`${voice.url}\n${seconds}`,
-		async () => {
-			const { data } = await audioOf(
-				await fetch(voice.url),
-				"Voice preview fetch failed",
-			);
-			return trimAudio(data, seconds);
-		},
-	);
-	return { ...voice, ...cut };
+	return hostedAudio("voice-cut", `${voice.url}\n${seconds}`, async () => {
+		const { data } = await audioOf(
+			await fetch(voice.url),
+			"Voice preview fetch failed",
+		);
+		return trimAudio(data, seconds);
+	});
 }

@@ -10,11 +10,7 @@ import { dependenciesOf, pluginCtx } from "./_state-ctx";
 
 const RED = "https://img/red.png";
 const GRANNY = "https://img/granny.png";
-const redVoice = {
-	url: "https://audio/red.mp3",
-	durationSec: 6,
-	language: "hi" as const,
-};
+const redVoice = { url: "https://audio/red.mp3", durationSec: 6 };
 
 const element = (type: "image" | "video", prompt: string): ContentElement => ({
 	id: type,
@@ -27,14 +23,9 @@ const avatar = (imageUrl: string): AssetResult => ({
 	durationSec: 0,
 });
 
-const voice = ({
-	url,
-	durationSec,
-	language,
-}: typeof redVoice): AssetResult => ({
+const voice = ({ url, durationSec }: typeof redVoice): AssetResult => ({
 	audioUrl: url,
 	durationSec,
-	language,
 });
 
 const before = (
@@ -78,7 +69,7 @@ describe("character asset dependencies", () => {
 });
 
 describe("character-assets plugin", () => {
-	it("gives each character its avatar and voice in its language, in the order they are named", () => {
+	it("gives each character its avatar and voice, in the order they are named", () => {
 		expect(
 			before(
 				{ prompt: "{{Granny}} hugs {{Red}}, and {{Granny}} smiles" },

@@ -7,11 +7,7 @@ const connector = () =>
 		model: { provider: "cartesia", model: "Sonic 3.6" },
 	});
 
-const PREVIEW = {
-	url: "https://assets/preview.wav",
-	durationSec: 3,
-	language: "ja",
-};
+const PREVIEW = { url: "https://assets/preview.wav", durationSec: 3 };
 
 const queryOf = (fetch: ReturnType<typeof mockGatewaySequence>, call: number) =>
 	new URL(String(fetch.mock.calls[call]?.[0]), "http://app").searchParams;
@@ -21,7 +17,7 @@ describe("HttpVoiceConnector", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("generates the first voice its traits find, heard through its preview in its language", async () => {
+	it("generates the first voice its traits find, heard through its preview", async () => {
 		const fetch = mockGatewaySequence([
 			{ payload: { voices: [{ id: "v-found" }, { id: "v-other" }] } },
 			{ payload: { preview: PREVIEW } },
@@ -37,7 +33,6 @@ describe("HttpVoiceConnector", () => {
 			voiceId: "v-found",
 			audioUrl: PREVIEW.url,
 			durationSec: PREVIEW.durationSec,
-			language: "ja",
 		});
 		expect(queryOf(fetch, 0).has("language")).toBe(false);
 		expect(Object.fromEntries(queryOf(fetch, 0))).toMatchObject({

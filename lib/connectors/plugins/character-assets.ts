@@ -36,11 +36,7 @@ const characterOf = (ctx: PluginContext, name: string): Character => {
 		...pickBy({
 			avatarUrl: ctx.dependencies?.[avatarLabel(name)]?.imageUrl,
 			voice: voice?.audioUrl
-				? {
-						url: voice.audioUrl,
-						durationSec: voice.durationSec,
-						language: voice.language,
-					}
+				? { url: voice.audioUrl, durationSec: voice.durationSec }
 				: undefined,
 		}),
 	};

@@ -9,5 +9,5 @@ export const VIDEO_MODELS = {
 
 export const DEFAULT_VIDEO_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Slop Video v1",
+	model: "Slop Video v2",
 };
