@@ -11,13 +11,12 @@ const { POST } = await import("@/app/api/upload/image/route");
 const { POST: POST_VIDEO } = await import("@/app/api/upload/video/route");
 const mockUpload = vi.spyOn(AssetBundle, "upload");
 
-function makeRequest(formData: FormData, kind: string) {
+function makeRequest(kind: string, file?: File) {
+	const formData = new FormData();
+	if (file) formData.set("file", file);
 	return new NextRequest(
 		new URL(`/api/upload/${kind}`, "http://localhost:3000"),
-		{
-			method: "POST",
-			body: formData,
-		},
+		{ method: "POST", body: formData },
 	);
 }
 
@@ -44,46 +43,41 @@ describe("POST /api/upload/image", () => {
 	it("returns 401 when unauthenticated", async () => {
 		mockGetUser.mockResolvedValue(null);
 
-		const res = await POST(makeRequest(new FormData(), "image"));
+		const res = await POST(makeRequest("image"));
 
 		expect(res.status).toBe(401);
 	});
 
 	it("returns 400 when no file is provided", async () => {
-		const res = await POST(makeRequest(new FormData(), "image"));
+		const res = await POST(makeRequest("image"));
 
 		expect(res.status).toBe(400);
 		expect(await res.json()).toEqual({ error: "No file provided" });
 	});
 
 	it("returns 400 for non-image files", async () => {
-		const formData = new FormData();
-		formData.set("file", makeFile("doc.pdf", "application/pdf"));
-
-		const res = await POST(makeRequest(formData, "image"));
+		const res = await POST(
+			makeRequest("image", makeFile("doc.pdf", "application/pdf")),
+		);
 
 		expect(res.status).toBe(400);
 		expect(await res.json()).toEqual({ error: "File is not an image" });
 	});
 
 	it("returns 400 for files over 10 MB", async () => {
-		const formData = new FormData();
-		formData.set(
-			"file",
-			makeFile("big.png", "image/png", 10 * 1024 * 1024 + 1),
+		const res = await POST(
+			makeRequest(
+				"image",
+				makeFile("big.png", "image/png", 10 * 1024 * 1024 + 1),
+			),
 		);
-
-		const res = await POST(makeRequest(formData, "image"));
 
 		expect(res.status).toBe(400);
 		expect(await res.json()).toEqual({ error: "File is over 10 MB" });
 	});
 
 	it("uploads the image and returns its URL", async () => {
-		const formData = new FormData();
-		formData.set("file", makeFile());
-
-		const res = await POST(makeRequest(formData, "image"));
+		const res = await POST(makeRequest("image", makeFile()));
 
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
@@ -99,10 +93,9 @@ describe("POST /api/upload/image", () => {
 	});
 
 	it("sanitizes unsafe filenames", async () => {
-		const formData = new FormData();
-		formData.set("file", makeFile("../we ird$.png", "image/png"));
-
-		const res = await POST(makeRequest(formData, "image"));
+		const res = await POST(
+			makeRequest("image", makeFile("../we ird$.png", "image/png")),
+		);
 
 		expect(res.status).toBe(200);
 		expect(mockUpload).toHaveBeenCalledWith("upload", "user", [
@@ -121,22 +114,19 @@ describe("POST /api/upload/video", () => {
 		});
 	});
 
-	const post = (file: File) => {
-		const formData = new FormData();
-		formData.set("file", file);
-		return POST_VIDEO(makeRequest(formData, "video"));
-	};
-
 	it("returns 400 for an image", async () => {
-		const res = await post(makeFile());
+		const res = await POST_VIDEO(makeRequest("video", makeFile()));
 
 		expect(res.status).toBe(400);
 		expect(await res.json()).toEqual({ error: "File is not a video" });
 	});
 
 	it("returns 400 for files over 50 MB", async () => {
-		const res = await post(
-			makeFile("big.mp4", "video/mp4", 50 * 1024 * 1024 + 1),
+		const res = await POST_VIDEO(
+			makeRequest(
+				"video",
+				makeFile("big.mp4", "video/mp4", 50 * 1024 * 1024 + 1),
+			),
 		);
 
 		expect(res.status).toBe(400);
@@ -144,7 +134,9 @@ describe("POST /api/upload/video", () => {
 	});
 
 	it("uploads the video and returns its URL", async () => {
-		const res = await post(makeFile("clip.mp4", "video/mp4"));
+		const res = await POST_VIDEO(
+			makeRequest("video", makeFile("clip.mp4", "video/mp4")),
+		);
 
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({

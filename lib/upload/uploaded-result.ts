@@ -17,7 +17,7 @@ async function videoDurationSec(videoUrl: string): Promise<number> {
 	}
 }
 
-const DURATION_SEC: Record<UploadKind, (url: string) => Promise<number>> = {
+const READ_DURATION: Record<UploadKind, (url: string) => Promise<number>> = {
 	image: async () => 0,
 	video: videoDurationSec,
 };
@@ -29,6 +29,6 @@ export async function uploadedResult(
 ): Promise<AssetResult> {
 	return {
 		[assetUrlField(kind)]: url,
-		durationSec: await DURATION_SEC[kind](url),
+		durationSec: await READ_DURATION[kind](url),
 	};
 }
