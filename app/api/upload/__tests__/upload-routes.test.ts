@@ -9,6 +9,7 @@ vi.mock("@/lib/api/auth", () => ({
 const { AssetBundle } = await import("@/lib/api/asset-bundle");
 const { POST } = await import("@/app/api/upload/image/route");
 const { POST: POST_VIDEO } = await import("@/app/api/upload/video/route");
+const { POST: POST_AUDIO } = await import("@/app/api/upload/audio/route");
 const mockUpload = vi.spyOn(AssetBundle, "upload");
 
 function makeRequest(formData: FormData, kind: string) {
@@ -155,6 +156,55 @@ describe("POST /api/upload/video", () => {
 				key: "video",
 				filename: "clip.mp4",
 				contentType: "video/mp4",
+			}),
+		]);
+	});
+});
+
+describe("POST /api/upload/audio", () => {
+	beforeEach(() => {
+		mockUpload.mockResolvedValue({
+			id: "bundle-3",
+			type: "upload",
+			provider: "user",
+			result: { audio: "song.mp3" },
+		});
+	});
+
+	const post = (file: File) => {
+		const formData = new FormData();
+		formData.set("file", file);
+		return POST_AUDIO(makeRequest(formData, "audio"));
+	};
+
+	it("returns 400 for a video", async () => {
+		const res = await post(makeFile("clip.mp4", "video/mp4"));
+
+		expect(res.status).toBe(400);
+		expect(await res.json()).toEqual({ error: "File is not audio" });
+	});
+
+	it("returns 400 for files over 20 MB", async () => {
+		const res = await post(
+			makeFile("big.mp3", "audio/mpeg", 20 * 1024 * 1024 + 1),
+		);
+
+		expect(res.status).toBe(400);
+		expect(await res.json()).toEqual({ error: "File is over 20 MB" });
+	});
+
+	it("uploads the audio and returns its URL", async () => {
+		const res = await post(makeFile("song.mp3", "audio/mpeg"));
+
+		expect(res.status).toBe(200);
+		expect(await res.json()).toEqual({
+			url: "https://assets.test/assets/upload/user/bundle-3/song.mp3",
+		});
+		expect(mockUpload).toHaveBeenCalledWith("upload", "user", [
+			expect.objectContaining({
+				key: "audio",
+				filename: "song.mp3",
+				contentType: "audio/mpeg",
 			}),
 		]);
 	});

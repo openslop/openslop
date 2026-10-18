@@ -16,7 +16,11 @@ import {
 } from "@/lib/canvas/types";
 import { AnimateButton } from "./animate-button";
 import { CharacterSwitcher } from "./character-switcher";
-import { ImageUploadButton, VideoUploadButton } from "./element-upload-button";
+import {
+	AudioUploadButton,
+	ImageUploadButton,
+	VideoUploadButton,
+} from "./element-upload-button";
 import { ElementVoiceButton } from "./element-voice-button";
 
 type ElementControl = ComponentType<{
@@ -91,6 +95,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		iconBgClass: "bg-media-music/15",
 		colorClass: "text-media-music",
 		placeholder: "Describe the music...",
+		actions: [AudioUploadButton],
 	},
 };
 
