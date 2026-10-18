@@ -110,7 +110,7 @@ describe("voicePreview", () => {
 		);
 	});
 
-	it("serves a preview it has stored without asking the vendor again", async () => {
+	it("serves a preview it has stored without fetching it from the vendor again", async () => {
 		load.mockResolvedValue({
 			id: "abc",
 			type: "preview",
@@ -125,14 +125,27 @@ describe("voicePreview", () => {
 			url: "https://assets.test/assets/preview/voice/abc/preview.mp3",
 			durationSec: 7,
 		});
+		expect(getVoice).toHaveBeenCalledWith("v-sol");
 		expect(load.mock.calls[0]).toEqual([
 			"preview",
 			"voice",
 			expect.stringMatching(/^[0-9a-f]{64}$/),
 		]);
-		expect(getVoice).not.toHaveBeenCalled();
 		expect(fetchVoicePreview).not.toHaveBeenCalled();
 		expect(upload).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		["the voice's language", "hi", "hi"],
+		["no language for one we do not know", "tlh", undefined],
+		["no language when the voice names none", undefined, undefined],
+	])("says the preview is spoken in %s", async (_, spoken, language) => {
+		getVoice.mockResolvedValue({ ...VOICE, language: spoken });
+		fetchVoicePreview.mockResolvedValue(upstream(5));
+
+		const preview = await voicePreview(tts, { ...CARTESIA, voiceId: "v-sol" });
+
+		expect(preview.language).toBe(language);
 	});
 
 	it("stores the same voice under the same name every time", async () => {

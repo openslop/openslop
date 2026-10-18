@@ -2,6 +2,8 @@ import compact from "lodash/compact";
 import { nanoid } from "nanoid";
 import { renderCharacterRefs, seats } from "@/lib/connectors/character-refs";
 import { type Pictured, pictured } from "@/lib/connectors/characters";
+import type { TTSLanguage } from "@/lib/connectors/tts/enums";
+import type { HostedVoicePreview } from "@/lib/connectors/types";
 import { cutVoice } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";
 
@@ -21,16 +23,26 @@ type OmniLimits = {
 	maxElementsWithFrame: number;
 	minVoiceSec: number;
 	maxVoiceSec: number;
+	voiceLanguages: readonly TTSLanguage[];
 	maxDescription: number;
 	sound: boolean;
 };
+
+// Omni fails the whole request on a voice outside the languages it speaks.
+const speakable = (
+	{ durationSec, language }: HostedVoicePreview,
+	limits: OmniLimits,
+) =>
+	durationSec >= limits.minVoiceSec &&
+	language !== undefined &&
+	limits.voiceLanguages.includes(language);
 
 const omniElement = async (
 	{ name, avatarUrl, voice }: Pictured,
 	limits: OmniLimits,
 ) => {
 	const heard =
-		voice && voice.durationSec >= limits.minVoiceSec
+		voice && speakable(voice, limits)
 			? await cutVoice(voice, limits.maxVoiceSec)
 			: undefined;
 	return {

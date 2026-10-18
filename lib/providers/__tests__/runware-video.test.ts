@@ -7,7 +7,7 @@ type Voice = { url: string; durationSec: number };
 const mockCutVoice = vi.hoisted(() =>
 	vi.fn(async (voice: Voice, seconds: number) =>
 		voice.durationSec > seconds
-			? { url: `${voice.url}#${seconds}s`, durationSec: seconds }
+			? { ...voice, url: `${voice.url}#${seconds}s`, durationSec: seconds }
 			: voice,
 	),
 );
@@ -210,7 +210,7 @@ describe("RunwareVideo", () => {
 
 		const speaking = (name: string, url: string, durationSec: number) => ({
 			name,
-			voice: { url, durationSec },
+			voice: { url, durationSec, language: "en" as const },
 		});
 		const SOL = speaking("Sol", "https://audio/sol.mp3", 6);
 		const VOICES = [SOL, speaking("Mira", "https://audio/mira.mp3", 8)];
@@ -575,11 +575,19 @@ describe("RunwareVideo", () => {
 					characterAssets: [
 						{
 							...pictured("Blip")[0],
-							voice: { url: "https://audio/blip.mp3", durationSec: 4 },
+							voice: {
+								url: "https://audio/blip.mp3",
+								durationSec: 4,
+								language: "en",
+							},
 						},
 						{
 							...pictured("Long")[0],
-							voice: { url: "https://audio/long.mp3", durationSec: 40 },
+							voice: {
+								url: "https://audio/long.mp3",
+								durationSec: 40,
+								language: "en",
+							},
 						},
 					],
 				});
@@ -589,6 +597,31 @@ describe("RunwareVideo", () => {
 					{ ...asElement("Long"), voices: ["https://audio/long.mp3#30s"] },
 				]);
 			});
+
+			it.each([
+				["English", "en", [SOL.voice.url]],
+				["Spanish", "es", [SOL.voice.url]],
+				["Hindi", "hi", undefined],
+				["an unknown language", undefined, undefined],
+			] as const)(
+				"hears a voice in %s only when Omni speaks it, keeping the avatar either way",
+				async (_, language, voices) => {
+					const request = await omniRequest({
+						prompt: "{{Sol}} talks",
+						characterAssets: [
+							{
+								name: "Sol",
+								avatarUrl: avatar("Sol"),
+								voice: { ...SOL.voice, language },
+							},
+						],
+					});
+
+					expect(request.inputs.elements).toEqual([
+						{ ...asElement("Sol"), ...(voices && { voices }) },
+					]);
+				},
+			);
 
 			it("leaves a character with no avatar out of the elements, naming them plainly", async () => {
 				const request = await omniRequest({

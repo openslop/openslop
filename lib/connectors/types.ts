@@ -7,7 +7,12 @@ import type { CharacterSchema } from "@/lib/api/request-schema-fields";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";
-import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
+import {
+	TTS_LANGUAGES,
+	type TTSEmotion,
+	type TTSGender,
+	type TTSSpeed,
+} from "./tts/enums";
 
 export const ASSET_CONNECTOR_TYPES = [
 	"music",
@@ -76,12 +81,21 @@ export type ModelRef = { provider: Provider; model: string };
 
 export type ModelPick = { provider?: string; model?: string };
 
-/** A voice's preview at a URL anyone can fetch, and how long it plays. */
-export const HostedVoicePreviewSchema = z.object({
+/** Audio at a URL anyone can fetch, and how long it plays. */
+const HostedAudioSchema = z.object({
 	url: z.url({ error: "A hosted preview needs an HTTP(S) URL" }),
 	durationSec: z
 		.number()
 		.positive({ error: "A hosted preview must say how long it plays" }),
+});
+
+export type HostedAudio = z.infer<typeof HostedAudioSchema>;
+
+const voiceLanguage = z.enum(TTS_LANGUAGES).optional();
+
+/** A voice's preview, spoken in the voice's own language when we know it. */
+export const HostedVoicePreviewSchema = HostedAudioSchema.extend({
+	language: voiceLanguage,
 });
 
 export type HostedVoicePreview = z.infer<typeof HostedVoicePreviewSchema>;
@@ -143,6 +157,7 @@ export const AssetResultSchema = z.object({
 	videoUrl: z.string().optional(),
 	textTimestamps: z.array(TextTimestampSchema).optional(),
 	voiceId: z.string().optional(),
+	language: voiceLanguage,
 });
 
 export type AssetResult = z.infer<typeof AssetResultSchema>;

@@ -26,8 +26,8 @@ export class HttpVoiceConnector extends BaseConnector<
 
 	protected async _generate(params: VoiceGenerateParams): Promise<AssetResult> {
 		const voiceId = params.pickedVoiceId ?? (await this.search(params));
-		const { url, durationSec } = await this.tts.voicePreview(voiceId);
-		return { voiceId, audioUrl: url, durationSec };
+		const { url, durationSec, language } = await this.tts.voicePreview(voiceId);
+		return { voiceId, audioUrl: url, durationSec, language };
 	}
 
 	private async search(params: VoiceGenerateParams): Promise<string> {
