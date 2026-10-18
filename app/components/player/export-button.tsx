@@ -119,7 +119,7 @@ export function ExportButton() {
 							/>
 						</div>
 						{state.status === "error" && (
-							<p className="mt-3 text-label text-destructive">
+							<p role="alert" className="mt-3 text-label text-destructive">
 								{state.message}
 							</p>
 						)}

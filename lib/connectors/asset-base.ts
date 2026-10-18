@@ -33,8 +33,7 @@ export abstract class BaseAssetConnector<
 	): Promise<TResult> {
 		const { jobId } = await this.gateway.generate(params);
 		const completed = await awaitCompletion(
-			(id) => this.gateway.poll(id, signal),
-			jobId,
+			() => this.gateway.poll(jobId, signal),
 			(job) => isTerminal(job.status),
 		);
 		if (completed.status === "failed") {
