@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import type { ResultKind } from "@/lib/canvas/types";
 
 /** What a user may upload, keyed by the MIME type each kind's files carry. */
@@ -7,6 +8,22 @@ export const UPLOAD_KINDS = {
 } as const satisfies Partial<Record<ResultKind, unknown>>;
 
 export type UploadKind = keyof typeof UPLOAD_KINDS;
+
+const UPLOAD_DIR = "assets/upload/user";
+
+/** The only blob paths a browser may upload to: a fresh folder per file, under our own store. */
+export const UPLOAD_PATHNAME = new RegExp(
+	`^${UPLOAD_DIR}/[A-Za-z0-9_-]+/[A-Za-z0-9._-]+$`,
+);
+
+function sanitizeFilename(name: string): string {
+	const base = name.split(/[\\/]/).pop() ?? "";
+	const cleaned = base.replace(/[^A-Za-z0-9._-]/g, "_").replace(/^\.+/, "");
+	return cleaned.slice(0, 200) || "upload";
+}
+
+export const uploadPathname = (filename: string) =>
+	`${UPLOAD_DIR}/${nanoid()}/${sanitizeFilename(filename)}`;
 
 /** Why the upload route would turn `file` away, if it would. */
 export function fileRejection(
