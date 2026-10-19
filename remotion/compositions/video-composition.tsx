@@ -2,10 +2,12 @@ import React, { Fragment, useMemo } from "react";
 import { Audio } from "@remotion/media";
 import {
 	AbsoluteFill,
+	Freeze,
 	Img,
 	Loop,
 	OffthreadVideo,
 	Sequence,
+	useCurrentFrame,
 	useVideoConfig,
 } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
@@ -67,25 +69,31 @@ function AudioSequence({
 	);
 }
 
-/** A looping video restarts each time it ends; a single pass holds its last frame for the rest of the scene. */
+/** A looping video restarts at its out-point; a single pass holds its last frame, silent, for the rest of the scene. */
 function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	const { fps } = useVideoConfig();
+	const frame = useCurrentFrame();
+	const playFrames = Math.max(1, toFrames(element.durationSec, fps));
+	const held = !element.loop && frame >= playFrames;
 	const video = (
 		<OffthreadVideo
 			src={element.url}
 			trimBefore={toFrames(element.trimStartSec, fps)}
 			style={coverStyle}
 			volume={volumeToGain(element.volume)}
+			muted={held}
 		/>
 	);
-	if (!element.loop) return video;
+	if (element.loop)
+		return (
+			<Loop durationInFrames={playFrames} layout="none">
+				{video}
+			</Loop>
+		);
 	return (
-		<Loop
-			durationInFrames={Math.max(1, toFrames(element.durationSec, fps))}
-			layout="none"
-		>
+		<Freeze frame={playFrames - 1} active={held}>
 			{video}
-		</Loop>
+		</Freeze>
 	);
 }
 
