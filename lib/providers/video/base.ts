@@ -79,8 +79,6 @@ export abstract class BaseVideoProvider implements VideoProvider {
 		if (job.metadata.status === "failed") return { kind: "failed" };
 		if (job.metadata.status !== "completed") return { kind: "pending" };
 		if (!job.url) throw new Error("Video job completed without a video");
-		if (job.costUsd === undefined)
-			throw new Error("Video job completed without a cost");
 		const metadata = {
 			...job.metadata,
 			durationSec:
@@ -92,7 +90,7 @@ export abstract class BaseVideoProvider implements VideoProvider {
 			return {
 				kind: "ready",
 				asset: await this.store({ url: job.url, metadata }),
-				costUsd: job.costUsd,
+				costUsd: job.costUsd ?? 0,
 			};
 		} catch (error) {
 			if (error instanceof EmptyRemoteFileError) return { kind: "pending" };

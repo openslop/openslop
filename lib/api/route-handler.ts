@@ -8,12 +8,7 @@ import {
 	withPublic,
 	withSession,
 } from "./with-auth";
-import {
-	parseBody,
-	parseFormData,
-	parseSearchParams,
-	type ParseResult,
-} from "./parse";
+import { parseBody, parseSearchParams, type ParseResult } from "./parse";
 
 type AuthTier = typeof withApiAccess;
 
@@ -66,10 +61,6 @@ export const createApiQueryRouteHandler = routeHandler(
 export const createSessionQueryRouteHandler = routeHandler(
 	withSession,
 	parseSearchParams,
-);
-export const createSessionFormRouteHandler = routeHandler(
-	withSession,
-	parseFormData,
 );
 
 /**

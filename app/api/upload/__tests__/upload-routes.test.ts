@@ -6,148 +6,117 @@ vi.mock("@/lib/api/auth", () => ({
 	getUser: () => mockGetUser(),
 }));
 
-const { AssetBundle } = await import("@/lib/api/asset-bundle");
+const mockHandleUpload = vi.fn();
+vi.mock("@vercel/blob/client", () => ({
+	handleUpload: (...args: unknown[]) => mockHandleUpload(...args),
+}));
+
 const { POST } = await import("@/app/api/upload/image/route");
 const { POST: POST_VIDEO } = await import("@/app/api/upload/video/route");
-const mockUpload = vi.spyOn(AssetBundle, "upload");
+const { POST: POST_AUDIO } = await import("@/app/api/upload/audio/route");
 
-function makeRequest(kind: string, file?: File) {
-	const formData = new FormData();
-	if (file) formData.set("file", file);
+const tokenRequest = (pathname: string) => ({
+	type: "blob.generate-client-token",
+	payload: { pathname, clientPayload: null, multipart: false },
+});
+
+function makeRequest(body: unknown, kind: string) {
 	return new NextRequest(
 		new URL(`/api/upload/${kind}`, "http://localhost:3000"),
-		{ method: "POST", body: formData },
+		{ method: "POST", body: JSON.stringify(body) },
 	);
 }
 
-function makeFile(name = "photo.png", type = "image/png", size = 1024): File {
-	return new File([new Uint8Array(size)], name, { type });
+async function tokenOptions() {
+	const [{ onBeforeGenerateToken }] = mockHandleUpload.mock.calls[0];
+	return onBeforeGenerateToken();
 }
 
 beforeEach(() => {
 	vi.clearAllMocks();
 	mockGetUser.mockResolvedValue({ id: "user-1" });
-	AssetBundle.baseUrl = "https://assets.test";
+	mockHandleUpload.mockResolvedValue({
+		type: "blob.generate-client-token",
+		clientToken: "token-1",
+	});
 });
 
-describe("POST /api/upload/image", () => {
-	beforeEach(() => {
-		mockUpload.mockResolvedValue({
-			id: "bundle-1",
-			type: "upload",
-			provider: "user",
-			result: { image: "photo.png" },
-		});
-	});
-
+describe("POST /api/upload/:kind", () => {
 	it("returns 401 when unauthenticated", async () => {
 		mockGetUser.mockResolvedValue(null);
 
-		const res = await POST(makeRequest("image"));
+		const res = await POST(
+			makeRequest(tokenRequest("assets/upload/user/a1/photo.png"), "image"),
+		);
 
 		expect(res.status).toBe(401);
+		expect(mockHandleUpload).not.toHaveBeenCalled();
 	});
 
-	it("returns 400 when no file is provided", async () => {
-		const res = await POST(makeRequest("image"));
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: "No file provided" });
-	});
-
-	it("returns 400 for non-image files", async () => {
+	it("hands back a client token for a path under the upload folder", async () => {
 		const res = await POST(
-			makeRequest("image", makeFile("doc.pdf", "application/pdf")),
-		);
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: "File is not an image" });
-	});
-
-	it("returns 400 for files over 10 MB", async () => {
-		const res = await POST(
-			makeRequest(
-				"image",
-				makeFile("big.png", "image/png", 10 * 1024 * 1024 + 1),
-			),
-		);
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: "File is over 10 MB" });
-	});
-
-	it("uploads the image and returns its URL", async () => {
-		const res = await POST(makeRequest("image", makeFile()));
-
-		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({
-			url: "https://assets.test/assets/upload/user/bundle-1/photo.png",
-		});
-		expect(mockUpload).toHaveBeenCalledWith("upload", "user", [
-			expect.objectContaining({
-				key: "image",
-				filename: "photo.png",
-				contentType: "image/png",
-			}),
-		]);
-	});
-
-	it("sanitizes unsafe filenames", async () => {
-		const res = await POST(
-			makeRequest("image", makeFile("../we ird$.png", "image/png")),
-		);
-
-		expect(res.status).toBe(200);
-		expect(mockUpload).toHaveBeenCalledWith("upload", "user", [
-			expect.objectContaining({ filename: "we_ird_.png" }),
-		]);
-	});
-});
-
-describe("POST /api/upload/video", () => {
-	beforeEach(() => {
-		mockUpload.mockResolvedValue({
-			id: "bundle-2",
-			type: "upload",
-			provider: "user",
-			result: { video: "clip.mp4" },
-		});
-	});
-
-	it("returns 400 for an image", async () => {
-		const res = await POST_VIDEO(makeRequest("video", makeFile()));
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: "File is not a video" });
-	});
-
-	it("returns 400 for files over 50 MB", async () => {
-		const res = await POST_VIDEO(
-			makeRequest(
-				"video",
-				makeFile("big.mp4", "video/mp4", 50 * 1024 * 1024 + 1),
-			),
-		);
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: "File is over 50 MB" });
-	});
-
-	it("uploads the video and returns its URL", async () => {
-		const res = await POST_VIDEO(
-			makeRequest("video", makeFile("clip.mp4", "video/mp4")),
+			makeRequest(tokenRequest("assets/upload/user/a1/photo.png"), "image"),
 		);
 
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({
-			url: "https://assets.test/assets/upload/user/bundle-2/clip.mp4",
+			type: "blob.generate-client-token",
+			clientToken: "token-1",
 		});
-		expect(mockUpload).toHaveBeenCalledWith("upload", "user", [
-			expect.objectContaining({
-				key: "video",
-				filename: "clip.mp4",
-				contentType: "video/mp4",
-			}),
-		]);
+	});
+
+	it.each([
+		"assets/image/runware/a1/photo.png",
+		"assets/upload/user/a1/../photo.png",
+		"assets/upload/user/photo.png",
+	])("returns 400 for the path %s", async (pathname) => {
+		const res = await POST(makeRequest(tokenRequest(pathname), "image"));
+
+		expect(res.status).toBe(400);
+		expect(mockHandleUpload).not.toHaveBeenCalled();
+	});
+
+	it("returns 400 for a completion callback", async () => {
+		const res = await POST(
+			makeRequest({ type: "blob.upload-completed", payload: {} }, "image"),
+		);
+
+		expect(res.status).toBe(400);
+	});
+
+	it("limits an image token to images up to 10 MB", async () => {
+		await POST(
+			makeRequest(tokenRequest("assets/upload/user/a1/photo.png"), "image"),
+		);
+
+		expect(await tokenOptions()).toEqual({
+			allowedContentTypes: ["image/*"],
+			maximumSizeInBytes: 10 * 1024 * 1024,
+			addRandomSuffix: false,
+		});
+	});
+
+	it("limits a video token to videos up to 50 MB", async () => {
+		await POST_VIDEO(
+			makeRequest(tokenRequest("assets/upload/user/a1/clip.mp4"), "video"),
+		);
+
+		expect(await tokenOptions()).toEqual({
+			allowedContentTypes: ["video/*"],
+			maximumSizeInBytes: 50 * 1024 * 1024,
+			addRandomSuffix: false,
+		});
+	});
+
+	it("limits an audio token to audio up to 20 MB", async () => {
+		await POST_AUDIO(
+			makeRequest(tokenRequest("assets/upload/user/a1/song.mp3"), "audio"),
+		);
+
+		expect(await tokenOptions()).toEqual({
+			allowedContentTypes: ["audio/*"],
+			maximumSizeInBytes: 20 * 1024 * 1024,
+			addRandomSuffix: false,
+		});
 	});
 });

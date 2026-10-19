@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	hasPendingToolCall,
+	settleUnansweredCalls,
 	toolCallsMade,
 	upsertMessage,
 	pruneTranscript,
@@ -70,6 +71,35 @@ describe("hasPendingToolCall", () => {
 		const pending = [asked, turn("input-available")];
 		expect(hasPendingToolCall(pending, DRAFTING_TOOLS)).toBe(false);
 		expect(hasPendingToolCall(pending, SNAPSHOT_TOOLS)).toBe(true);
+	});
+});
+
+describe("settleUnansweredCalls", () => {
+	it("settles a call the editor never answered, so nothing waits on it", () => {
+		const settled = settleUnansweredCalls([asked, turn("input-available")]);
+
+		expect(settled).toEqual([
+			asked,
+			{
+				...turn("input-available"),
+				parts: [
+					{
+						type: "tool-read_script",
+						toolCallId: "call-0",
+						input: {},
+						state: "output-error",
+						errorText: "Stopped before the editor ran it",
+					},
+				],
+			},
+		]);
+		expect(hasPendingToolCall(settled)).toBe(false);
+	});
+
+	it("leaves answered calls and what the user said alone", () => {
+		const transcript = [asked, turn("output-available")];
+
+		expect(settleUnansweredCalls(transcript)).toEqual(transcript);
 	});
 });
 
