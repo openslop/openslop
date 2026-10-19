@@ -54,7 +54,7 @@ function renderReports(updates: RenderUpdate[], fails?: Error) {
 
 const startExport = () =>
 	act(async () => {
-		void hook.exportVideo(LAYOUT, 2);
+		void hook.exportVideo(LAYOUT, "4K");
 	});
 
 /** Draws what the last `toast.custom` call would show and returns its card. */
@@ -93,7 +93,7 @@ describe("useExport", () => {
 
 		await startExport();
 
-		expect(runRender).toHaveBeenCalledWith(LAYOUT, 2);
+		expect(runRender).toHaveBeenCalledWith(LAYOUT, "4K");
 		expect(hook.state).toEqual({
 			status: "done",
 			url: "/out.mp4",

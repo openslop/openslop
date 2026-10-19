@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { z } from "zod";
-import { AssetBundle } from "../asset-bundle";
+import { AssetBundle, EmptyRemoteFileError } from "../asset-bundle";
 import type { BundleResponse } from "../asset-bundle";
 
 describe("AssetBundle", () => {
@@ -187,8 +187,10 @@ describe("AssetBundle", () => {
 		};
 
 		it("re-hosts remote files by streaming them into our own blob", async () => {
-			const res = new Response("fake-video");
-			vi.stubGlobal("fetch", vi.fn().mockResolvedValue(res));
+			vi.stubGlobal(
+				"fetch",
+				vi.fn().mockResolvedValue(new Response("fake-video")),
+			);
 
 			const result = await AssetBundle.upload("video", "runware", [
 				remoteVideo,
@@ -198,9 +200,11 @@ describe("AssetBundle", () => {
 			expect(result.result.video).toBe("output.mp4");
 			expect(putMock).toHaveBeenCalledWith(
 				expect.stringMatching(/^assets\/video\/runware\/.+\/output\.mp4$/),
-				res.body,
+				expect.any(ReadableStream),
 				expect.objectContaining({ contentType: "video/mp4", multipart: true }),
 			);
+			const [[, body]] = putMock.mock.calls;
+			await expect(new Response(body).text()).resolves.toBe("fake-video");
 
 			vi.unstubAllGlobals();
 		});
@@ -218,6 +222,24 @@ describe("AssetBundle", () => {
 			await expect(
 				AssetBundle.upload("video", "runware", [remoteVideo]),
 			).rejects.toThrow('Empty file for "video" from runware');
+			expect(putMock).not.toHaveBeenCalled();
+
+			vi.unstubAllGlobals();
+		});
+
+		it("knows a remote file is empty even when its host sends no length", async () => {
+			vi.stubGlobal(
+				"fetch",
+				vi
+					.fn()
+					.mockResolvedValue(
+						new Response(new ReadableStream({ start: (c) => c.close() })),
+					),
+			);
+
+			await expect(
+				AssetBundle.upload("video", "runware", [remoteVideo]),
+			).rejects.toBeInstanceOf(EmptyRemoteFileError);
 			expect(putMock).not.toHaveBeenCalled();
 
 			vi.unstubAllGlobals();

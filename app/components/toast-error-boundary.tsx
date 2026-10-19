@@ -5,10 +5,11 @@ import { catchError, type ErrorInfo } from "next/error";
 import { toastError } from "@/lib/toast-error";
 import { Button } from "@/components/ui/button";
 
-function ToastErrorFallback(
-	{ label }: { label?: string },
-	{ error, retry }: ErrorInfo,
-) {
+export function RenderErrorFallback({
+	label,
+	error,
+	retry,
+}: { label?: string } & ErrorInfo) {
 	useEffect(() => {
 		toastError(error, label);
 	}, [error, label]);
@@ -26,6 +27,10 @@ function ToastErrorFallback(
 			</Button>
 		</div>
 	);
+}
+
+function ToastErrorFallback({ label }: { label?: string }, info: ErrorInfo) {
+	return <RenderErrorFallback label={label} {...info} />;
 }
 
 /**

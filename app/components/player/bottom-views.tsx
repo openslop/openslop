@@ -5,6 +5,7 @@ import {
 	Timeline as TimelineIcon,
 	type IconComponent,
 } from "@/components/ui/icon";
+import { ToastErrorBoundary } from "../toast-error-boundary";
 import { Storyboard } from "./storyboard/storyboard";
 import { Timeline } from "./timeline/timeline";
 
@@ -22,13 +23,21 @@ export const BOTTOM_VIEWS = {
 		label: "Timeline view",
 		icon: TimelineIcon,
 		fillsDock: true,
-		panel: <Timeline />,
+		panel: (
+			<ToastErrorBoundary key="timeline" label="Timeline">
+				<Timeline />
+			</ToastErrorBoundary>
+		),
 	},
 	storyboard: {
 		label: "Storyboard view",
 		icon: ExpandTimeline,
 		fillsDock: false,
-		panel: <Storyboard />,
+		panel: (
+			<ToastErrorBoundary key="storyboard" label="Storyboard">
+				<Storyboard />
+			</ToastErrorBoundary>
+		),
 	},
 	hidden: {
 		label: "Hide bottom panel",

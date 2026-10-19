@@ -40,3 +40,7 @@ export const ImageUploadButton = ({ className }: { className?: string }) => (
 export const VideoUploadButton = ({ className }: { className?: string }) => (
 	<ElementUploadButton kind="video" className={className} />
 );
+
+export const AudioUploadButton = ({ className }: { className?: string }) => (
+	<ElementUploadButton kind="audio" className={className} />
+);

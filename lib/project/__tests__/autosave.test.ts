@@ -22,7 +22,7 @@ vi.mock("../api", () => ({ saveProject }));
 
 const imageSnapshot = (imageUrl: string): ElementSnapshot => ({
 	status: "idle",
-	seconds: 0,
+	startedAt: null,
 	result: { durationSec: 0, imageUrl },
 	error: null,
 	resultInputs: null,

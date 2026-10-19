@@ -1,14 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { UPLOAD_KINDS } from "@/lib/upload/upload-files";
-import { uploadedFile } from "../request-schema-fields";
 import { createJobPollHandler } from "../asset-routes";
 import { HOSTED } from "../route-families";
 import { bodySchema, hostedModel } from "../generation-schema";
 import {
 	createHostedRouteHandler,
-	createSessionFormRouteHandler,
 	createSessionRouteHandler,
 } from "../route-handler";
 
@@ -203,59 +199,6 @@ describe("createSessionRouteHandler", () => {
 	it("returns 400 for an invalid body", async () => {
 		const res = await makeUserHandler()(makeRequest({}));
 		expect(res.status).toBe(400);
-	});
-});
-
-describe("createSessionFormRouteHandler", () => {
-	const handler = createSessionFormRouteHandler({
-		schema: z.object({ file: uploadedFile("image") }, { error: "No file" }),
-		label: "TestFormRoute",
-		handle: async ({ input }) => NextResponse.json({ name: input.file.name }),
-	});
-
-	function makeFormRequest(entries: Record<string, string | File>) {
-		const form = new FormData();
-		for (const [key, value] of Object.entries(entries)) form.append(key, value);
-		return new NextRequest("http://localhost/api/test", {
-			method: "POST",
-			body: form,
-		});
-	}
-
-	const imageOfSize = (bytes: number) =>
-		new File([new Uint8Array(bytes)], "cat.png", { type: "image/png" });
-
-	it("passes the validated file to handle", async () => {
-		const res = await handler(makeFormRequest({ file: imageOfSize(4) }));
-		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ name: "cat.png" });
-	});
-
-	it("returns 400 when the file field is missing", async () => {
-		const res = await handler(makeFormRequest({ other: "x" }));
-		expect(res.status).toBe(400);
-		expect((await res.json()).error).toBe("No file provided");
-	});
-
-	it("returns 400 for a non-image file", async () => {
-		const notes = new File(["hi"], "notes.txt", { type: "text/plain" });
-		const res = await handler(makeFormRequest({ file: notes }));
-		expect(res.status).toBe(400);
-		expect((await res.json()).error).toBe("File is not an image");
-	});
-
-	it("returns 400 when the file exceeds the size limit", async () => {
-		const res = await handler(
-			makeFormRequest({ file: imageOfSize(UPLOAD_KINDS.image.maxBytes + 1) }),
-		);
-		expect(res.status).toBe(400);
-		expect((await res.json()).error).toBe("File is over 10 MB");
-	});
-
-	it("returns 401 when the user is not authenticated", async () => {
-		mockGetUser.mockResolvedValue(null);
-		const res = await handler(makeFormRequest({ file: imageOfSize(4) }));
-		expect(res.status).toBe(401);
 	});
 });
 

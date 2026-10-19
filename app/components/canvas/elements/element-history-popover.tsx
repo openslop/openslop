@@ -195,6 +195,7 @@ function ElementVersionList({
 	onClose: () => void;
 }) {
 	const { versions, status, activeIndex } = useElementHistory(elementId);
+	const loadHistory = useLoadElementHistory();
 	const queue = useGenerationQueue();
 	const restore = (version: ElementVersion) => {
 		queue.restoreResult(version);
@@ -204,10 +205,23 @@ function ElementVersionList({
 
 	if (status === "failed")
 		return (
-			<p className="flex items-center gap-1.5 px-2 py-1.5 text-label-xs text-destructive">
-				<AlertCircle className="h-3.5 w-3.5" />
-				Could not load history. Close and reopen to try again.
-			</p>
+			<div className="flex flex-col items-start gap-2 px-2 py-1.5">
+				<p
+					role="alert"
+					className="flex items-center gap-1.5 text-label-xs text-destructive"
+				>
+					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
+					Could not load history.
+				</p>
+				<Button
+					type="button"
+					variant="secondary"
+					size="sm"
+					onClick={() => loadHistory(elementId)}
+				>
+					Try again
+				</Button>
+			</div>
 		);
 
 	if (status === "loading") return <LoadingRows />;

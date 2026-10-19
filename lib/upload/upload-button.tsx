@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
 	ImagePlus,
 	Loader2,
+	Music,
 	Video,
 	type IconComponent,
 } from "@/components/ui/icon";
@@ -13,6 +14,7 @@ import { useFileUpload } from "./use-file-upload";
 const ICONS: Record<UploadKind, IconComponent> = {
 	image: ImagePlus,
 	video: Video,
+	audio: Music,
 };
 
 export function UploadButton({

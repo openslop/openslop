@@ -89,7 +89,10 @@ export function ProjectPreview({
 					controls={isFullscreen}
 				/>
 			</ToastErrorBoundary>
-			<div
+			<button
+				type="button"
+				tabIndex={-1}
+				aria-label="Play or pause"
 				className="absolute inset-0 cursor-pointer"
 				onClick={toggleAndFlash}
 			/>

@@ -10,7 +10,7 @@ export type GenerationStatus = z.infer<typeof GenerationStatusSchema>;
 
 const ElementSnapshotSchema = z.object({
 	status: GenerationStatusSchema,
-	seconds: z.number(),
+	startedAt: z.number().nullable().default(null),
 	result: AssetResultSchema.nullable(),
 	error: z.string().nullable(),
 	resultInputs: GenerationInputsSchema.nullable(),
@@ -29,7 +29,7 @@ export const GenerationSnapshotSchema = z.record(
 
 const EMPTY_SNAPSHOT: ElementSnapshot = {
 	status: "idle",
-	seconds: 0,
+	startedAt: null,
 	result: null,
 	error: null,
 	resultInputs: null,
@@ -41,7 +41,7 @@ const settled = (state: Record<string, ElementSnapshot>) =>
 	new Map(
 		Object.entries(state).map(([id, snap]) => [
 			id,
-			{ ...snap, status: "idle" as const, seconds: 0 },
+			{ ...snap, status: "idle" as const, startedAt: null },
 		]),
 	);
 
@@ -122,7 +122,7 @@ export class SnapshotStore {
 	/** Clears in-flight progress, keeping whatever the element already had. */
 	resetToIdle(id: string) {
 		const { result, error } = this.get(id);
-		if (result || error) this.update(id, { status: "idle", seconds: 0 });
+		if (result || error) this.update(id, { status: "idle", startedAt: null });
 		else this.state.delete(id);
 	}
 
@@ -130,7 +130,7 @@ export class SnapshotStore {
 		const { elementId, result, inputs, connectorType, pinned } = version;
 		this.update(elementId, {
 			status: "idle",
-			seconds: 0,
+			startedAt: null,
 			result,
 			error: null,
 			resultInputs: inputs,

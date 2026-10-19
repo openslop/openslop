@@ -33,7 +33,7 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
-import { AssetBundle } from "@/lib/api/asset-bundle";
+import { AssetBundle, EmptyRemoteFileError } from "@/lib/api/asset-bundle";
 import { RunwareVideo } from "../video/runware";
 
 const MODEL = "bytedance:seedance@2.0-fast";
@@ -850,6 +850,27 @@ describe("RunwareVideo", () => {
 			expect(AssetBundle.upload).not.toHaveBeenCalled();
 		});
 
+		it("keeps waiting while a finished video is still served empty", async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "success",
+					cost: 0.18,
+					videoURL: "https://r.mp4",
+				},
+			]);
+			vi.mocked(AssetBundle.upload).mockRejectedValueOnce(
+				new EmptyRemoteFileError("video", "runware"),
+			);
+
+			const result = await new RunwareVideo("test-key").poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
+
+			expect(result).toEqual({ kind: "pending" });
+		});
+
 		it("fails a job that errored even when it carries a url", async () => {
 			mockGetResponse.mockResolvedValue([
 				{ taskUUID: "job-1", status: "error", videoURL: "https://bad.mp4" },
@@ -882,17 +903,17 @@ describe("RunwareVideo", () => {
 			expect(poll.kind === "ready" && poll.costUsd).toBe(0.42);
 		});
 
-		it("fails loudly when a finished job reports no cost", async () => {
+		it("still hands back the video when a finished job reports no cost", async () => {
 			mockGetResponse.mockResolvedValue([
 				{ taskUUID: "job-1", status: "success", videoURL: "https://r.mp4" },
 			]);
 
-			await expect(
-				new RunwareVideo("test-key").poll("job-1", {
-					prompt: "test",
-					model: MODEL,
-				}),
-			).rejects.toThrow("Video job completed without a cost");
+			const poll = await new RunwareVideo("test-key").poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
+
+			expect(poll.kind === "ready" && poll.costUsd).toBe(0);
 		});
 
 		it("fails loudly when a job succeeded without a video", async () => {

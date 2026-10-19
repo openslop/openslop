@@ -29,6 +29,11 @@ vi.mock("@/lib/api/logger", () => ({
 	logger: { error: vi.fn(), warn: vi.fn() },
 }));
 
+const mockOwnsProject = vi.fn();
+vi.mock("@/lib/api/projects", () => ({
+	ownsProject: (...args: unknown[]) => mockOwnsProject(...args),
+}));
+
 const mockGetUser = vi.fn();
 vi.mock("@/lib/api/auth", () => ({
 	getUser: () => mockGetUser(),
@@ -104,6 +109,7 @@ function referenceImagesSuite(
 }
 
 const JOB_ID = "00000000-0000-0000-0000-000000000001";
+const PROJECT_ID = "00000000-0000-4000-8000-000000000000";
 
 describe("API routes", () => {
 	beforeEach(() => {
@@ -118,6 +124,7 @@ describe("API routes", () => {
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
 		mockSpentSince.mockResolvedValue(0);
 		mockEnqueueJob.mockResolvedValue(undefined);
+		mockOwnsProject.mockResolvedValue(true);
 	});
 
 	afterEach(() => {
@@ -190,14 +197,30 @@ describe("API routes", () => {
 
 		it("persists projectId and strips it from the provider request", async () => {
 			const { POST } = await import("@/app/api/v1/image/route");
-			const pid = "00000000-0000-4000-8000-000000000000";
 			const res = await POST(
-				makeRequest("/api/v1/image", { prompt: "cat", projectId: pid }),
+				makeRequest("/api/v1/image", { prompt: "cat", projectId: PROJECT_ID }),
 			);
 			expect(res.status).toBe(200);
+			expect(mockOwnsProject).toHaveBeenCalledExactlyOnceWith(PROJECT_ID);
 			const [[args]] = mockCreateJob.mock.calls;
-			expect(args.projectId).toBe(pid);
+			expect(args.projectId).toBe(PROJECT_ID);
 			expect(args.request).not.toHaveProperty("projectId");
+		});
+
+		it("returns 404 and queues nothing for a project the caller cannot see", async () => {
+			mockOwnsProject.mockResolvedValue(false);
+			const { POST } = await import("@/app/api/v1/image/route");
+			const res = await POST(
+				makeRequest("/api/v1/image", { prompt: "cat", projectId: PROJECT_ID }),
+			);
+			expect(res.status).toBe(404);
+			expect(mockCreateJob).not.toHaveBeenCalled();
+		});
+
+		it("skips the ownership lookup when the job names no project", async () => {
+			const { POST } = await import("@/app/api/v1/image/route");
+			await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+			expect(mockOwnsProject).not.toHaveBeenCalled();
 		});
 
 		it("returns 400 for invalid projectId", async () => {
@@ -548,22 +571,33 @@ describe("API routes", () => {
 	});
 
 	describe("POST /api/v1/agent", () => {
-		it("returns 402 before the turn starts once the budget is spent", async () => {
-			mockSpentSince.mockResolvedValue(120);
-			const { POST } = await import("@/app/api/v1/agent/route");
-			const res = await POST(
-				makeRequest("/api/v1/agent", {
-					model: "Slop LLM v1",
-					projectId: "00000000-0000-4000-8000-000000000000",
-					message: {
-						id: "m1",
-						role: "user",
-						parts: [{ type: "text", text: "hi" }],
-					},
-				}),
+		const turn = () =>
+			import("@/app/api/v1/agent/route").then(({ POST }) =>
+				POST(
+					makeRequest("/api/v1/agent", {
+						model: "Slop LLM v1",
+						projectId: PROJECT_ID,
+						message: {
+							id: "m1",
+							role: "user",
+							parts: [{ type: "text", text: "hi" }],
+						},
+					}),
+				),
 			);
 
-			expect(res.status).toBe(402);
+		it("returns 402 before the turn starts once the budget is spent", async () => {
+			mockSpentSince.mockResolvedValue(120);
+
+			expect((await turn()).status).toBe(402);
+		});
+
+		it("returns 404 before the turn starts for a project the caller cannot see", async () => {
+			mockOwnsProject.mockResolvedValue(false);
+
+			expect((await turn()).status).toBe(404);
+			expect(mockOwnsProject).toHaveBeenCalledExactlyOnceWith(PROJECT_ID);
+			expect(mockLLMStream).not.toHaveBeenCalled();
 		});
 	});
 

@@ -96,7 +96,7 @@ Every scene is a stack of cards: narration, character, image, video, sound, musi
 <td width="50%">
   <a href="lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/features/canvas-dark.svg">
-    <img src="./assets/features/canvas-light.svg" alt="Hovering a row opens the insert menu with the seven element types and a new Sound card appears" width="100%">
+    <img src="./assets/features/canvas-light.svg" alt="Hovering a row opens the insert menu with the six element types and a new Sound card appears" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -228,7 +228,7 @@ Open [http://localhost:3000](http://localhost:3000) and you should see the app.
 | Auth + DB | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | Video     | [Remotion 4](https://remotion.dev) (composition, rendering, player)                                          |
 | Storage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (generated asset storage)                         |
-| Icons     | In-house masked-SVG set (`components/ui/icon.tsx` + `icons/`), no icon dependency                            |
+| Icons     | In-house masked-SVG set (`components/ui/icon.tsx` + `components/ui/icons/`), no icon dependency              |
 
 ## Project structure
 

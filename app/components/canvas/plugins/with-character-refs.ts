@@ -16,34 +16,34 @@ export const withCharacterRefs = (editor: CanvasEditor): CanvasEditor => {
 	editor.isVoid = (element) => isCharacterRef(element) || isVoid(element);
 
 	const chip = ({ children }: ContentElement, path: Path) => {
-		const index = children.findIndex(
-			(child) => Text.isText(child) && findCharacterRef(child.text),
-		);
-		const child = children[index];
-		const found = Text.isText(child) && findCharacterRef(child.text);
-		if (!found) return false;
-		const at = { path: [...path, index], offset: found.start };
-		Transforms.delete(editor, {
-			at: { anchor: at, focus: { ...at, offset: found.end } },
-		});
-		Transforms.insertNodes(editor, createCharacterRef(found.name), { at });
-		return true;
+		for (const [index, child] of children.entries()) {
+			const found = Text.isText(child) && findCharacterRef(child.text);
+			if (!found) continue;
+			const at = { path: [...path, index], offset: found.start };
+			Transforms.delete(editor, {
+				at: { anchor: at, focus: { ...at, offset: found.end } },
+			});
+			Transforms.insertNodes(editor, createCharacterRef(found.name), { at });
+			return true;
+		}
+		return false;
 	};
 
 	const unchip = ({ type, children }: ContentElement, path: Path) => {
-		const index = children.findIndex(isCharacterRef);
-		const ref = children[index];
-		if (!isCharacterRef(ref)) return false;
-		const at = [...path, index];
-		Editor.withoutNormalizing(editor, () => {
-			Transforms.removeNodes(editor, { at });
-			Transforms.insertNodes(
-				editor,
-				{ id: makeNodeId(), type, text: ref.name },
-				{ at },
-			);
-		});
-		return true;
+		for (const [index, child] of children.entries()) {
+			if (!isCharacterRef(child)) continue;
+			const at = [...path, index];
+			Editor.withoutNormalizing(editor, () => {
+				Transforms.removeNodes(editor, { at });
+				Transforms.insertNodes(
+					editor,
+					{ id: makeNodeId(), type, text: child.name },
+					{ at },
+				);
+			});
+			return true;
+		}
+		return false;
 	};
 
 	editor.normalizeNode = (entry, options) => {

@@ -1,10 +1,7 @@
 import type { ReactNode } from "react";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
-export type GenerationState = {
-	status: ElementSnapshot["status"];
-	seconds: number;
-};
+export type GenerationState = Pick<ElementSnapshot, "status" | "startedAt">;
 
 export type PlaceholderProps = GenerationState & {
 	error: string | null;

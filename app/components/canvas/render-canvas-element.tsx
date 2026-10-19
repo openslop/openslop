@@ -4,6 +4,8 @@ import { isAssetElement, isCharacterRef } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { CharacterRef } from "./elements/character-ref";
+import { ELEMENT_CONFIGS } from "./elements/element-configs";
+import { ElementErrorBoundary } from "./elements/element-error-boundary";
 
 type BlockProps = {
 	attributes: RenderElementProps["attributes"];
@@ -41,9 +43,15 @@ export function renderCanvasElement({ Scene, Content }: Blocks) {
 				</Scene>
 			);
 		return (
-			<Content attributes={attributes} element={element}>
-				{children}
-			</Content>
+			<ElementErrorBoundary
+				label={ELEMENT_CONFIGS[element.type].label}
+				attributes={attributes}
+				leaves={children}
+			>
+				<Content attributes={attributes} element={element}>
+					{children}
+				</Content>
+			</ElementErrorBoundary>
 		);
 	};
 }
