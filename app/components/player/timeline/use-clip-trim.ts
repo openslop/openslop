@@ -66,7 +66,7 @@ export function useClipTrim(
 		// The drawn span can differ from the clip's own length (dialogue, cross-fades), so preview the change.
 		durationSec:
 			duration + (preview ? preview.durationSec - element.durationSec : 0),
-		trimStartSec: (preview ?? element).trimStartSec,
+		trim: preview ?? element,
 		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(element)
 			? () =>

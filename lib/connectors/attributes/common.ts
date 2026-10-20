@@ -62,14 +62,15 @@ export const formatDef: AttributeDef = {
 	default: DEFAULT_IMAGE_FORMAT,
 };
 
+export const LOOP_FACES = {
+	off: { icon: Freeze, label: "Freeze on last frame" },
+	on: { icon: Repeat, label: "Loop" },
+} as const;
+
 export const loopDef: AttributeDef = {
 	key: "loop",
 	label: "Loop",
-	edit: {
-		kind: "toggle",
-		off: { icon: Freeze, label: "Freeze on last frame" },
-		on: { icon: Repeat, label: "Loop" },
-	},
+	edit: { kind: "toggle", ...LOOP_FACES },
 	default: TOGGLE_ON,
 };
 
