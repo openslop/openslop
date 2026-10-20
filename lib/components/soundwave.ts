@@ -30,20 +30,11 @@ function smooth(values: number[]): number[] {
 /**
  * Resamples normalized peaks (0–1) to `count` smoothed heights (0–100). No
  * peaks draws as silence, so a waveform still has a shape before it decodes.
- *
- * `from` and `span` are fractions of the peaks; past their end runs on in silence.
  */
-export function toBarHeights(
-	peaks: number[],
-	count: number,
-	span = 1,
-	from = 0,
-): number[] {
+export function toBarHeights(peaks: number[], count: number): number[] {
 	const sampled = Array.from(
 		{ length: count },
-		(_, i) =>
-			(peaks[Math.floor(peaks.length * (from + (i * span) / count))] ?? 0) *
-			100,
+		(_, i) => (peaks[Math.floor((i * peaks.length) / count)] ?? 0) * 100,
 	);
 	return smooth(sampled).map((height) => Math.max(MIN_HEIGHT, height));
 }

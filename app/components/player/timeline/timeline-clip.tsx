@@ -52,6 +52,8 @@ export function TimelineClip({
 	label,
 	selected,
 	sceneNumber,
+	pxPerSec,
+	trimStartSec,
 }: {
 	clip: TimelineClipData;
 	width: number;
@@ -59,6 +61,9 @@ export function TimelineClip({
 	selected: boolean;
 	/** Set on foreground clips, which are the scenes of the video. */
 	sceneNumber?: number;
+	pxPerSec: number;
+	/** The in-point drawn, which leads the element's own while a trim is dragged. */
+	trimStartSec: number;
 }) {
 	const { element } = clip;
 	const config = ELEMENT_CONFIGS[element.type];
@@ -99,10 +104,8 @@ export function TimelineClip({
 				) : (
 					<ClipWaveform
 						src={element.url}
-						width={width}
-						from={element.trimStartSec / element.mediaDurationSec}
-						played={clip.duration / element.mediaDurationSec}
-						className="h-full"
+						width={element.mediaDurationSec * pxPerSec}
+						offset={trimStartSec * pxPerSec}
 					/>
 				)}
 			</div>

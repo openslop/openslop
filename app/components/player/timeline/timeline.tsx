@@ -91,6 +91,8 @@ function Clip({
 					label={renderCharacterRefs(clip.element.prompt)}
 					selected={selected}
 					sceneNumber={numbered ? clip.element.sceneNumber : undefined}
+					pxPerSec={pxPerSec}
+					trimStartSec={trim.trimStartSec}
 				/>
 			</button>
 			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
