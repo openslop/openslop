@@ -95,19 +95,19 @@ function Clip({
 					trim={trim.trim}
 				/>
 			</button>
-			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
-			<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
 			{trim.reset ? (
 				<TooltipIconButton
 					label="Reset trim"
 					size="sm"
 					variant="quiet"
 					onClick={trim.reset}
-					className="absolute top-0.5 right-2 z-20 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
+					className="absolute top-0.5 right-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 				>
 					<RotateCcw size={12} />
 				</TooltipIconButton>
 			) : null}
+			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
+			<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
 		</li>
 	);
 }
