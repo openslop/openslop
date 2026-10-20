@@ -1,6 +1,6 @@
 import { Runware } from "@runware/sdk-js";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
-import { probe, rejected } from "./validate";
+import { fromStatus, probe, rejected } from "./validate";
 
 export async function withRunware<T>(
 	apiKey: string,
@@ -31,9 +31,7 @@ export async function validateRunwareKey(
 		headers: { "content-type": "application/json" },
 		body: JSON.stringify([{ taskType: "authentication", apiKey }]),
 	});
-	if (!response.ok) return rejected(response.status);
+	if (!response.ok) return fromStatus(response);
 	const body = (await response.json()) as { errors?: unknown[] };
-	return body.errors?.length
-		? { ok: false, error: "The provider rejected this key." }
-		: { ok: true };
+	return body.errors?.length ? rejected : { ok: true };
 }

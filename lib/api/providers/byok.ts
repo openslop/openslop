@@ -1,6 +1,5 @@
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
-import { stringifyError } from "@/lib/errors";
 import { RunwareImage } from "@/lib/providers/image/runware";
 import { AnthropicLLM } from "@/lib/providers/llm/anthropic";
 import { ElevenLabsMusic } from "@/lib/providers/music/elevenlabs";
@@ -48,9 +47,7 @@ export async function byokProviderFor<K extends ProviderType>(
 /**
  * Whether a key works, asked of the vendor itself. Any of a vendor's classes
  * can answer: an account stores one key per provider, and they all hold it.
- * Network trouble comes back as a failed validation rather than thrown — the
- * user asked whether the key works, and "we could not tell" is an answer they
- * can act on.
+ * A vendor that gives no answer throws, so the stored status is left alone.
  */
 export async function validateKey(
 	provider: BYOKProvider,
@@ -58,11 +55,7 @@ export async function validateKey(
 ): Promise<ValidationResult> {
 	const [Ctor] = Object.values(VENDORS[provider]);
 	if (!Ctor) throw new Error(`No "${provider}" provider to check the key with`);
-	try {
-		return await new Ctor(key).validate();
-	} catch (error) {
-		return { ok: false, error: stringifyError(error) };
-	}
+	return new Ctor(key).validate();
 }
 
 export async function verifyProviderKey(
