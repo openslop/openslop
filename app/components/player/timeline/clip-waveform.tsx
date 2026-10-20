@@ -13,11 +13,7 @@ const SAMPLE_QUANTUM = 16;
 // Past the count `loadPeaks` extracts, more samples only repeat themselves.
 const SAMPLE_RANGE = { min: 8, max: PEAK_COUNT };
 
-/**
- * The clip's whole audio as a mask-painted envelope, so it takes its colour from the
- * surrounding text token rather than from a canvas fill. Shifted by `offset`, it
- * leaves the clip's frame to crop it to the trim.
- */
+/** Mask-painted so it takes the text colour; the clip's frame crops it to the trim. */
 export function ClipWaveform({
 	src,
 	width,

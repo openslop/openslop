@@ -29,6 +29,8 @@ function formatValue(value: string, unit?: string): string {
 	return unit ? `${value}${unit}` : value;
 }
 
+const SECONDS_FIELD = "w-20 font-numeric";
+
 const PILL =
 	"bg-secondary text-secondary-foreground text-label px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
 
@@ -145,7 +147,7 @@ export function AttributeBadge({
 				inputMode="decimal"
 				placeholder="Auto"
 				aria-label={`${spec.label} in seconds`}
-				className="w-20 font-numeric"
+				className={SECONDS_FIELD}
 			/>
 		);
 	}

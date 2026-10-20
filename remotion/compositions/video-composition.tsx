@@ -12,6 +12,7 @@ import {
 } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import type { RenderLayout, ResolvedElement } from "@/lib/render/types";
+import { playedSec } from "@/lib/render/clip-trim";
 import { toFrames } from "@/lib/render/frames";
 import {
 	LAYER_PREMOUNT_SEC,
@@ -73,7 +74,7 @@ function AudioSequence({
 function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	const { fps } = useVideoConfig();
 	const frame = useCurrentFrame();
-	const playFrames = Math.max(1, toFrames(element.durationSec, fps));
+	const playFrames = Math.max(1, toFrames(playedSec(element), fps));
 	const held = !element.loop && frame >= playFrames;
 	const video = (
 		<OffthreadVideo
