@@ -1,54 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { useSlateStatic } from "slate-react";
 import { Input } from "@/components/ui/input";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
-import { parseSeconds } from "@/lib/canvas/element-attributes";
 import type { ContentElement } from "@/lib/canvas/types";
 
-/** Seconds typed in and kept on blur or Enter. Empty clears it; anything else invalid is refused and reverts. */
-export function SecondsAttributeField({
+type InputProps = Omit<
+	ComponentProps<typeof Input>,
+	"value" | "onChange" | "onBlur" | "onKeyDown" | "aria-invalid"
+>;
+
+/** Kept on blur or Enter as `parse` normalizes it; empty clears it, and anything `parse` refuses reverts. */
+export function InputAttributeField({
 	element,
 	attrKey,
 	value,
-	label,
-	min,
-}: {
+	parse,
+	...inputProps
+}: InputProps & {
 	element: ContentElement;
 	attrKey: string;
 	value: string;
-	label: string;
-	min: number;
+	parse: (text: string) => string | undefined;
 }) {
 	const editor = useSlateStatic();
 	const [draft, setDraft] = useState(value);
 	const text = draft.trim();
-	const parsed = parseSeconds(text, min);
-	const invalid = text !== "" && parsed === undefined;
+	const parsed = text === "" ? null : parse(text);
+	const invalid = parsed === undefined;
 
 	const commit = () => {
 		if (invalid) return setDraft(value);
-		const next = parsed === undefined ? null : String(parsed);
-		if (next !== (value || null))
-			mergeAttrs(editor, element.id, { [attrKey]: next });
+		if (parsed !== (value || null))
+			mergeAttrs(editor, element.id, { [attrKey]: parsed });
 	};
 
 	return (
 		<Input
 			size="sm"
-			inputMode="decimal"
 			autoComplete="off"
-			aria-label={`${label} in seconds`}
+			{...inputProps}
 			aria-invalid={invalid || undefined}
-			placeholder="Auto"
 			value={draft}
 			onChange={(event) => setDraft(event.target.value)}
 			onBlur={commit}
 			onKeyDown={(event) => {
 				if (event.key === "Enter") event.currentTarget.blur();
 			}}
-			className="w-20 font-numeric"
 		/>
 	);
 }

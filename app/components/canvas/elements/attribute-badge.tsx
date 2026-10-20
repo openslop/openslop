@@ -19,8 +19,8 @@ import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
 import { ModelAttribute } from "./attributes/model-attribute";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
-import { SecondsAttributeField } from "./attributes/seconds-attribute-field";
-import { flatAttributes } from "@/lib/canvas/element-attributes";
+import { InputAttributeField } from "./attributes/input-attribute-field";
+import { flatAttributes, parseSeconds } from "@/lib/canvas/element-attributes";
 
 const UNSET = "—";
 
@@ -133,15 +133,19 @@ export function AttributeBadge({
 	}
 
 	if (spec.edit.kind === "seconds") {
+		const { min } = spec.edit;
 		return (
 			// Keyed on the value so a trim dragged on the timeline replaces the draft.
-			<SecondsAttributeField
+			<InputAttributeField
 				key={value}
 				element={element}
 				attrKey={attrKey}
 				value={value}
-				label={spec.label}
-				min={spec.edit.min}
+				parse={(text) => parseSeconds(text, min)?.toString()}
+				inputMode="decimal"
+				placeholder="Auto"
+				aria-label={`${spec.label} in seconds`}
+				className="w-20 font-numeric"
 			/>
 		);
 	}
