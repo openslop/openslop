@@ -12,6 +12,7 @@ import {
 	SlidersAlt,
 	SlidersAltFill,
 	Sparkles,
+	SparklesFill,
 	StockAlt,
 	StockAltFill,
 	InsertElement,
@@ -82,7 +83,7 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 	effects: {
 		label: "Effects",
 		icon: Sparkles,
-		iconActive: Sparkles,
+		iconActive: SparklesFill,
 		Panel: EffectsPanel,
 	},
 	models: {

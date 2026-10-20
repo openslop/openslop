@@ -145,6 +145,7 @@ export const Robot = icon("robot");
 export const RobotFill = icon("robot-fill");
 export const SlidersAltFill = icon("sliders-alt-fill");
 export const Sparkles = icon("magic");
+export const SparklesFill = icon("magic-fill");
 export const SquareFilled = icon("square-filled");
 export const StockAlt = icon("stock-alt");
 export const StockAltFill = icon("stock-alt-fill");
