@@ -92,7 +92,7 @@ function Clip({
 					selected={selected}
 					sceneNumber={numbered ? clip.element.sceneNumber : undefined}
 					pxPerSec={pxPerSec}
-					trimStartSec={trim.trimStartSec}
+					trim={trim.trim}
 				/>
 			</button>
 			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
@@ -101,9 +101,9 @@ function Clip({
 				<TooltipIconButton
 					label="Reset trim"
 					size="sm"
-					variant="onMedia"
+					variant="quiet"
 					onClick={trim.reset}
-					className="absolute top-0.5 right-2 z-20 opacity-0 group-hover/clip:opacity-100 focus-visible:opacity-100"
+					className="absolute top-0.5 right-2 z-20 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 				>
 					<RotateCcw size={12} />
 				</TooltipIconButton>

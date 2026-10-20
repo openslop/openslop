@@ -8,7 +8,6 @@ const SIZES = { sm: "h-5 w-5", header: "h-6 w-6", default: "h-7 w-7" } as const;
 const VARIANTS = {
 	default: "text-foreground",
 	quiet: "text-muted-foreground hover:text-foreground",
-	onMedia: "bg-on-media/65 text-on-media-foreground hover:bg-on-media/80",
 } as const;
 
 /**
