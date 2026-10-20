@@ -16,14 +16,13 @@ const length = (over: Partial<ElementLength> = {}): ElementLength => ({
 	words: 30,
 	dialogueIds: ["n1"],
 	durationSec: 10,
-	trimToDialogue: true,
 	decidedBy: "dialogue",
 	...over,
 });
 
 describe("durationFits", () => {
-	it("leaves out untrimmed videos, which play in full", () => {
-		expect(durationFits([length({ trimToDialogue: false })])).toEqual([]);
+	it("leaves out a video with no dialogue under it, which plays its own length", () => {
+		expect(durationFits([length({ words: 0, dialogueIds: [] })])).toEqual([]);
 	});
 
 	it("covers the dialogue under a video, plus the leeway", () => {
@@ -36,10 +35,6 @@ describe("durationFits", () => {
 
 	it("snaps up to a whole option rather than under-covering", () => {
 		expect(durationFits([length({ words: 20 })])[0].duration).toBe(8);
-	});
-
-	it("holds the shortest option when there is no dialogue at all", () => {
-		expect(durationFits([length({ words: 0 })])[0].duration).toBe(4);
 	});
 
 	it("holds the longest option and reports that it falls short", () => {

@@ -36,7 +36,6 @@ function el(url: string): ResolvedElement {
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,
-		trimToDialogue: true,
 		volume: 1,
 		motion: "none",
 	};

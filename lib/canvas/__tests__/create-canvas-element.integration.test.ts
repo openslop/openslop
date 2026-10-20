@@ -40,7 +40,6 @@ describe("createCanvasElement — schema defaults (integration)", () => {
 		const attributes = flatAttributes(node);
 		expect(attributes).toMatchObject({
 			duration: "10",
-			trimToDialogue: "true",
 			startFrame: "none",
 			motion: "none",
 			...DEFAULT_VIDEO_MODEL,

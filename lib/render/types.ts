@@ -21,8 +21,6 @@ export type ResolvedElement = {
 	loops: number;
 	/** Whether a video restarts when it ends, instead of holding its last frame. */
 	loop: boolean;
-	/** Whether a visual is on screen only for the dialogue after it, or plays out in full. */
-	trimToDialogue: boolean;
 	volume: number;
 	motion: MotionEffect;
 	captionTimestamps?: TextTimestamp[];

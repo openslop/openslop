@@ -1,4 +1,4 @@
-import { ArrowsStretch, Freeze, Repeat, Trim } from "@/components/ui/icon";
+import { Freeze, Repeat } from "@/components/ui/icon";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
@@ -70,30 +70,6 @@ export const loopDef: AttributeDef = {
 		off: { icon: Freeze, label: "Freeze on last frame" },
 		on: { icon: Repeat, label: "Loop" },
 	},
-	default: TOGGLE_ON,
-};
-
-/**
- * Trimmed, a visual is on screen for the dialogue that follows it and no
- * longer. Untrimmed, it plays out in full and the dialogue can only extend it.
- */
-export const TRIM_TO_DIALOGUE_FACES = {
-	on: {
-		icon: Trim,
-		label: "Trim to dialogue",
-		hint: "Trimmed to the dialogue under it",
-	},
-	off: {
-		icon: ArrowsStretch,
-		label: "Play in full",
-		hint: "Plays its full length",
-	},
-} as const;
-
-export const trimToDialogueDef: AttributeDef = {
-	key: "trimToDialogue",
-	label: "Timing",
-	edit: { kind: "toggle", ...TRIM_TO_DIALOGUE_FACES },
 	default: TOGGLE_ON,
 };
 

@@ -12,7 +12,6 @@ import {
 	getMotion,
 	getTimelineDuration,
 	getTrimStart,
-	getTrimToDialogue,
 	getVolume,
 	flatAttributes,
 	layoutAttributeSignature,
@@ -36,7 +35,6 @@ describe("splitAttributes", () => {
 				volume: "5",
 				motion: "pan",
 				loops: "2",
-				trimToDialogue: "false",
 			}),
 		).toEqual({
 			generationAttributes: { style: "ink" },
@@ -44,7 +42,6 @@ describe("splitAttributes", () => {
 				volume: "5",
 				motion: "pan",
 				loops: "2",
-				trimToDialogue: "false",
 			},
 		});
 	});
@@ -164,26 +161,6 @@ describe("getMotion", () => {
 	});
 });
 
-describe("getTrimToDialogue", () => {
-	it("trims when the attribute is absent, since that is the default", () => {
-		expect(getTrimToDialogue(el())).toBe(true);
-	});
-
-	it("plays in full only on an explicit 'false'", () => {
-		expect(getTrimToDialogue(el({ trimToDialogue: "false" }))).toBe(false);
-		expect(getTrimToDialogue(el({ trimToDialogue: "true" }))).toBe(true);
-		expect(getTrimToDialogue(el({ trimToDialogue: "" }))).toBe(true);
-		expect(getTrimToDialogue(el({ trimToDialogue: "no" }))).toBe(true);
-	});
-
-	it("is a layout attribute, so it never reaches the generator", () => {
-		expect(LAYOUT_ATTRIBUTE_KEYS).toContain("trimToDialogue");
-		expect(
-			splitAttributes({ trimToDialogue: "false" }).generationAttributes,
-		).toEqual({});
-	});
-});
-
 describe("layoutAttributeSignature", () => {
 	it("joins raw layout attribute values in LAYOUT_ATTRIBUTE_KEYS order", () => {
 		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual([
@@ -191,7 +168,6 @@ describe("layoutAttributeSignature", () => {
 			"loop",
 			"volume",
 			"motion",
-			"trimToDialogue",
 			"uploadedFrame",
 			"trimStart",
 			"timelineDuration",
@@ -202,21 +178,17 @@ describe("layoutAttributeSignature", () => {
 					loops: "2",
 					volume: "5",
 					motion: "kenBurnsIn",
-					trimToDialogue: "false",
 				}),
 			),
-		).toBe("2::5:kenBurnsIn:false:::");
+		).toBe("2::5:kenBurnsIn:::");
 	});
 
 	it("uses empty segments for absent attributes (raw, uncoerced)", () => {
-		expect(layoutAttributeSignature(el())).toBe(":::::::");
-		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:::::::");
-		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10:::::");
+		expect(layoutAttributeSignature(el())).toBe("::::::");
+		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0::::::");
+		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10::::");
 		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe(
-			":::shake::::",
-		);
-		expect(layoutAttributeSignature(el({ trimToDialogue: "false" }))).toBe(
-			"::::false:::",
+			":::shake:::",
 		);
 	});
 });

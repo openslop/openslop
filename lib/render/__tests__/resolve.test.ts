@@ -81,7 +81,6 @@ describe("resolveElements", () => {
 			trimStartSec: 0,
 			loops: 1,
 			loop: false,
-			trimToDialogue: true,
 			volume: 10,
 			motion: "none",
 		});
@@ -99,7 +98,6 @@ describe("resolveElements", () => {
 			trimStartSec: 0,
 			loops: 1,
 			loop: false,
-			trimToDialogue: true,
 			volume: 10,
 			motion: "none",
 		});
@@ -218,18 +216,6 @@ describe("resolveElements", () => {
 		expect(resolved[2].volume).toBe(10);
 	});
 
-	it("reads trimToDialogue from layout attributes, trimming unless told not to", () => {
-		const elements = [
-			makeElement("v1", "video"),
-			makeElement("v2", "video", { trimToDialogue: "false" }),
-			makeElement("v3", "video", { trimToDialogue: "true" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
-		expect(resolved.map((r) => r.trimToDialogue)).toEqual([true, false, true]);
-	});
-
 	it("keeps a blank volume attribute audible in the rendered layout", () => {
 		const elements = [
 			makeElement("s1", "music", { volume: "" }),
@@ -283,26 +269,20 @@ describe("resolveElements", () => {
 	});
 
 	describe("trims", () => {
-		const trims = { trimStart: "1", timelineDuration: "3" };
-		const resolveVideo = (trimToDialogue: string) =>
-			resolveElements(
-				[wrap([makeElement("v1", "video", { ...trims, trimToDialogue })])],
+		it("applies a video's trims", () => {
+			const [video] = resolveElements(
+				[
+					wrap([
+						makeElement("v1", "video", {
+							trimStart: "1",
+							timelineDuration: "3",
+						}),
+					]),
+				],
 				() => makeSnapshot(),
 				{ captionsEnabled: false },
-			)[0];
-
-		it("applies a video's trims once it plays in full", () => {
-			expect(resolveVideo("false")).toMatchObject({
-				trimStartSec: 1,
-				durationSec: 3,
-			});
-		});
-
-		it("ignores them while the video is trimmed to its dialogue", () => {
-			expect(resolveVideo("true")).toMatchObject({
-				trimStartSec: 0,
-				durationSec: 5,
-			});
+			);
+			expect(video).toMatchObject({ trimStartSec: 1, durationSec: 3 });
 		});
 	});
 });

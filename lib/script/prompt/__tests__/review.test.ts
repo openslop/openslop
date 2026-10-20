@@ -55,7 +55,7 @@ describe("reviewPrompt", () => {
 
 	it("shows a worked finding, so the shape is copied rather than guessed", () => {
 		expect(reviewPrompt(script)).toContain(
-			"- kM2pQ7rT9wXz4bNc | Format: trimToDialogue | ",
+			"- kM2pQ7rT9wXz4bNc | Format: startFrame | ",
 		);
 	});
 });

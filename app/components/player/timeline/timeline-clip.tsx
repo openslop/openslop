@@ -1,12 +1,8 @@
-import { Lock, type IconComponent } from "@/components/ui/icon";
-import { SimpleTooltip } from "@/components/ui/tooltip";
+import type { IconComponent } from "@/components/ui/icon";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
-import { TRIM_TO_DIALOGUE_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
-import { isLengthLocked } from "@/lib/render/clip-trim";
-import type { ResolvedElement } from "@/lib/render/types";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import { cn } from "@/lib/utils";
 import { ClipWaveform } from "./clip-waveform";
@@ -23,19 +19,6 @@ const PREVIEW = "m-0.5 min-h-0 flex-1 overflow-hidden rounded-sm";
 
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
-
-function timingFace(element: ResolvedElement) {
-	const video = ELEMENT_CONFIGS[element.type].outputKind === "video";
-	if (isLengthLocked(element))
-		return {
-			icon: Lock,
-			label: "Length locked",
-			hint: video
-				? "Trimmed to the dialogue under it. Set Timing to Play in full to trim it."
-				: "Lasts as long as the dialogue under it.",
-		};
-	return video ? TRIM_TO_DIALOGUE_FACES.off : undefined;
-}
 
 /** A wash over the clip's own colour, so selection shifts it rather than replacing it. */
 function SelectedWash() {
@@ -80,12 +63,10 @@ export function TimelineClip({
 	const { element } = clip;
 	const config = ELEMENT_CONFIGS[element.type];
 	const range = formatTimeRange(clip.start, clip.duration);
-	const timing = sceneNumber ? timingFace(element) : undefined;
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
 		range,
-		timing?.label,
 	]
 		.filter(Boolean)
 		.join(", ");
@@ -129,16 +110,6 @@ export function TimelineClip({
 				<span className="absolute bottom-0.5 left-0.5 max-w-full truncate rounded-tr-sm rounded-bl-sm bg-on-media/65 px-1 font-numeric text-badge-xs text-on-media-foreground">
 					{fit(sceneLabel(sceneNumber), width)}
 				</span>
-			) : null}
-			{timing ? (
-				<SimpleTooltip label={`${timing.label}: ${timing.hint}`}>
-					<span
-						aria-hidden="true"
-						className="absolute right-0.5 bottom-0.5 flex size-4 items-center justify-center rounded-sm bg-on-media/65 text-on-media-foreground"
-					>
-						<timing.icon size={HEADER_ICON_SIZE} />
-					</span>
-				</SimpleTooltip>
 			) : null}
 			{selected ? <SelectedWash /> : null}
 		</div>

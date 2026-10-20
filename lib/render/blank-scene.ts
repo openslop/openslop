@@ -20,7 +20,6 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,
-		trimToDialogue: true,
 		volume: 0,
 		motion: "none",
 	};

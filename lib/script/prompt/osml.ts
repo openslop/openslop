@@ -47,10 +47,10 @@ export function osmlSpec(language: string): string {
 		## <video>
 		- A short generated video whose sound is written into its shots. The body is a video prompt, written as the Video prompts section says.
 		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
-		- startFrame, continuity, trimToDialogue and loop: see Format.
+		- startFrame, continuity and loop: see Format.
 		- overlays: as for <image>.
 		- motion: normally set to "none". Only set one when the shots have no camera move of their own.
-		- Example: <video overlays="rain" startFrame="none" trimToDialogue="false">Shot 1: Wide shot of a moonlit forest clearing as {{Red}} and {{Wolf}} walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby.</video>
+		- Example: <video overlays="rain" startFrame="none">Shot 1: Wide shot of a moonlit forest clearing as {{Red}} and {{Wolf}} walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby.</video>
 
 		${VIDEO_PROMPT_FORMAT}
 

@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { useSlateStatic } from "slate-react";
 import { voiceFrom } from "@/lib/canvas/assets";
 import { elementSchema } from "@/lib/canvas/element-connector";
-import { flatAttributes } from "@/lib/canvas/element-attributes";
 import type { AssetElement } from "@/lib/canvas/types";
 import { resolveModel } from "@/lib/connectors/models";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -43,9 +42,7 @@ function VoiceFields({ element }: VoiceProps) {
 		>
 			<AttributeFields
 				element={element}
-				specs={elementSchema(element).settingsAttributesFor(
-					flatAttributes(element),
-				)}
+				specs={elementSchema(element).settingsAttributes}
 			/>
 			<VoicePicker
 				filters={filters}

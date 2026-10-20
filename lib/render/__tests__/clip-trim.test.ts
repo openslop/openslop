@@ -1,23 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-	isLengthLocked,
+	isTrimmable,
 	isTrimmed,
 	trimClip,
 	trimEdge,
 	trimTimestamps,
 } from "../clip-trim";
 
-describe("isLengthLocked", () => {
-	it("locks a visual trimmed to its dialogue, and nothing else", () => {
-		expect(isLengthLocked({ layer: "visual", trimToDialogue: true })).toBe(
-			true,
-		);
-		expect(isLengthLocked({ layer: "visual", trimToDialogue: false })).toBe(
-			false,
-		);
-		expect(isLengthLocked({ layer: "audio", trimToDialogue: true })).toBe(
-			false,
-		);
+describe("isTrimmable", () => {
+	it("trims only what has a media length", () => {
+		expect(isTrimmable({ mediaDurationSec: 5 })).toBe(true);
+		expect(isTrimmable({ mediaDurationSec: 0 })).toBe(false);
 	});
 });
 

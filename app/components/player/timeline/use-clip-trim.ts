@@ -5,7 +5,7 @@ import { useSlateStatic } from "slate-react";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
-	isLengthLocked,
+	isTrimmable,
 	isTrimmed,
 	trimEdge,
 	type Trim,
@@ -66,7 +66,7 @@ export function useClipTrim(
 		// The drawn span can differ from the clip's own length (dialogue, cross-fades), so preview the change.
 		durationSec:
 			duration + (preview ? preview.durationSec - element.durationSec : 0),
-		handleProps: isLengthLocked(element) ? null : handles,
+		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(element)
 			? () =>
 					mergeAttrs(editor, element.id, {

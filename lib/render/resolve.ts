@@ -8,7 +8,6 @@ import {
 	getLoop,
 	getLoops,
 	getMotion,
-	getTrimToDialogue,
 	getVolume,
 } from "../canvas/element-attributes";
 import { elementTrim, trimTimestamps } from "./clip-trim";
@@ -54,7 +53,6 @@ export function resolveElements(
 				mediaDurationSec,
 				loops: getLoops(element),
 				loop: getLoop(element),
-				trimToDialogue: getTrimToDialogue(element),
 				volume: getVolume(element),
 				motion: getMotion(element),
 				captionTimestamps,

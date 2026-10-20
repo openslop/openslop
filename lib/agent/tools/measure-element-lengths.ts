@@ -17,9 +17,9 @@ const REASONS: Record<
 	(length: ElementLength) => string
 > = {
 	duration: (length) =>
-		`its full duration, untrimmed; ${length.words === 0 ? "no dialogue" : dialogue(length)} after it`,
+		`its own length; ${length.words === 0 ? "no dialogue" : dialogue(length)} after it`,
 	dialogue: (length) =>
-		length.trimToDialogue || length.durationSec === undefined
+		length.durationSec === undefined
 			? `${dialogue(length)} after it`
 			: `${dialogue(length)} after it, longer than its ${seconds(length.durationSec)} duration`,
 	minimum: (length) =>
@@ -36,15 +36,15 @@ export const measureElementLengths = defineTool({
 	  Returns how long each image and video on the canvas is on screen, and what sets that
 	  length. For the total runtime, use measure_total_length.
 
-	  A visual with trimToDialogue="true" (the default) is on screen for the dialogue after
-	  it, up to the next visual, at about ${WORDS_PER_SECOND} words a second. A video with
-	  trimToDialogue="false" is on screen for its \`duration\` or its dialogue, whichever
-	  is longer. Every visual is on screen for at least ${seconds(MIN_DURATION_SEC)}.
+	  A visual is on screen for its own length or the dialogue after it, up to the next
+	  visual, whichever is longer. An image has no length of its own; a video's is its
+	  \`duration\`. Dialogue runs at about ${WORDS_PER_SECOND} words a second. Every visual
+	  is on screen for at least ${seconds(MIN_DURATION_SEC)}.
 
 	  Use this when the user asks how long something is shown or wants it changed. To
-	  shorten a trimmed visual, split the dialogue after it and insert a visual at the
-	  split. To lengthen it, add dialogue after it. For an untrimmed
-	  video, change \`duration\`, and shorten the dialogue if the dialogue is longer.
+	  shorten a visual set by its dialogue, split the dialogue after it and insert a visual
+	  at the split; to lengthen one, add dialogue after it. For a video set by its own
+	  length, change \`duration\`.
 	`,
 	input: z.object({}),
 	output: z.string(),

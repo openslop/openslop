@@ -1,9 +1,8 @@
 import {
 	getTimelineDuration,
 	getTrimStart,
-	getTrimToDialogue,
 } from "@/lib/canvas/element-attributes";
-import { CONTENT_TYPES, type ContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import type { TextTimestamp } from "@/lib/connectors/types";
 import { clamp } from "@/lib/utils";
 import { MIN_DURATION_SEC } from "./scene-builder";
@@ -16,12 +15,10 @@ export type Trim = Pick<ResolvedElement, "trimStartSec" | "durationSec">;
 
 type Trimmable = Trim & Pick<ResolvedElement, "mediaDurationSec">;
 
-/** Its length is the dialogue's. */
-export const isLengthLocked = ({
-	layer,
-	trimToDialogue,
-}: Pick<ResolvedElement, "layer" | "trimToDialogue">): boolean =>
-	layer === "visual" && trimToDialogue;
+/** A still has no media length to trim. */
+export const isTrimmable = ({
+	mediaDurationSec,
+}: Pick<ResolvedElement, "mediaDurationSec">): boolean => mediaDurationSec > 0;
 
 export const isTrimmed = ({
 	trimStartSec,
@@ -47,21 +44,15 @@ export function trimClip(
 	};
 }
 
-/** The trim an element's attributes ask for; a locked one plays untrimmed. */
 export const elementTrim = (
 	element: ContentElement,
 	mediaDurationSec: number,
 ): Trim =>
-	isLengthLocked({
-		layer: CONTENT_TYPES[element.type].layer,
-		trimToDialogue: getTrimToDialogue(element),
-	})
-		? trimClip(mediaDurationSec, 0)
-		: trimClip(
-				mediaDurationSec,
-				getTrimStart(element),
-				getTimelineDuration(element),
-			);
+	trimClip(
+		mediaDurationSec,
+		getTrimStart(element),
+		getTimelineDuration(element),
+	);
 
 /** Word timings counted from the trim start, without the words cut before it. */
 export const trimTimestamps = (

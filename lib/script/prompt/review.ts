@@ -12,8 +12,8 @@ export function reviewPrompt(script: string, format?: string): string {
 		Judge only the scenes of the script below. The asset elements ahead of the first scene are the project's assets, and outside the scope of this review.
 
 		Read it as if you're watching a video generated from these prompts, then check it against those rules:
-		- Format: only the elements that format allows, and the startFrame, continuity,
-		  trimToDialogue and loop rules stated with it.
+		- Format: only the elements that format allows, and the startFrame, continuity
+		  and loop rules stated with it.
 		- Each tag element, attribute and value as outlined by their rules.
 		- Video prompts: every requirement of that section, in every video prompt.
 		- Language: each part of the script in the language that section assigns it.
@@ -35,7 +35,7 @@ export function reviewPrompt(script: string, format?: string): string {
 		Copy the id from that element's id attribute exactly. Name the rule concisely based on the section it comes from.
 		Say what to change, not what is wrong, and keep the bullet to one line:
 
-		- kM2pQ7rT9wXz4bNc | Format: trimToDialogue | set trimToDialogue="false", because the next video continues from it
+		- kM2pQ7rT9wXz4bNc | Format: startFrame | set startFrame="previous", because it continues the shot before it
 		- V1StGXR8_Z5jdHi6 | Continuity: props | Red's basket is missing; put it back in her hands
 
 		When nothing breaks a rule, reply with exactly ${NO_FINDINGS} and nothing else.

@@ -26,7 +26,6 @@ function el(overrides: Partial<ResolvedElement>): ResolvedElement {
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,
-		trimToDialogue: true,
 		volume: 10,
 		motion: "none",
 		...overrides,

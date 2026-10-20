@@ -52,9 +52,6 @@ function el(
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,
-		// Trimming makes a visual's own length moot, which most of these cases
-		// are built on; the trimming cases opt back in per element.
-		trimToDialogue: false,
 		volume: 10,
 		motion: "none",
 		...overrides,
@@ -122,13 +119,10 @@ describe("buildRenderLayout", () => {
 				durationSec: 3,
 				loop: true,
 			});
-			const untrimmed = buildRenderLayout([looped]);
-			expect(untrimmed.series).toHaveLength(1);
-			expect(untrimmed.series[0].duration).toBe(3);
-			expect(untrimmed.sequences.video).toBeUndefined();
-
-			const trimmed = buildRenderLayout([{ ...looped, trimToDialogue: true }]);
-			expect(trimmed.series[0].duration).toBe(1);
+			const layout = buildRenderLayout([looped]);
+			expect(layout.series).toHaveLength(1);
+			expect(layout.series[0].duration).toBe(3);
+			expect(layout.sequences.video).toBeUndefined();
 		});
 
 		it("clamps a foreground shorter than the minimum duration", () => {
@@ -572,76 +566,21 @@ describe("buildRenderLayout", () => {
 		});
 	});
 
-	describe("trimming a visual to its dialogue", () => {
-		const trimmedVideo = (id: string, durationSec: number) =>
-			el({ id, type: "video", durationSec, trimToDialogue: true });
+	describe("a scene's length", () => {
+		const video = (durationSec: number) =>
+			el({ id: "video1", type: "video", durationSec });
+		const narration = (durationSec: number) =>
+			el({ id: "n1", type: "narration", durationSec });
 
-		it("cuts a foreground to the dialogue after it, ignoring its own length", () => {
-			const layout = buildRenderLayout([
-				trimmedVideo("video1", 10),
-				el({ id: "n1", type: "narration", durationSec: 3 }),
-			]);
-			expect(layout.series[0].duration).toBe(3);
-			expect(layout.totalDurationSec).toBe(3);
-		});
-
-		it("holds a foreground with no dialogue after it for the minimum duration", () => {
-			const layout = buildRenderLayout([trimmedVideo("video1", 10)]);
-			expect(layout.series[0].duration).toBe(1);
-		});
-
-		it("trims a background to the dialogue-driven span, not the video's own length", () => {
-			const layout = buildRenderLayout([
-				el({ id: "m1", type: "music", durationSec: 30 }),
-				trimmedVideo("video1", 10),
-				el({ id: "n1", type: "narration", durationSec: 4 }),
-			]);
-			expect(seqs(layout, "music")[0].duration).toBe(4);
-		});
-
-		it("plays a video out in full when it says not to trim", () => {
-			const layout = buildRenderLayout([
-				el({
-					id: "video1",
-					type: "video",
-					durationSec: 10,
-					trimToDialogue: false,
-				}),
-				el({ id: "n1", type: "narration", durationSec: 3 }),
-			]);
+		it("plays a video out in full past shorter dialogue", () => {
+			const layout = buildRenderLayout([video(10), narration(3)]);
 			expect(layout.series[0].duration).toBe(10);
 			expect(layout.totalDurationSec).toBe(10);
 		});
 
-		it("mixes a trimmed and an untrimmed video in one layout", () => {
-			const layout = crossfaded([
-				trimmedVideo("cut", 10),
-				el({ id: "n1", type: "narration", durationSec: 3 }),
-				el({
-					id: "held",
-					type: "video",
-					durationSec: 10,
-					trimToDialogue: false,
-				}),
-				el({ id: "n2", type: "narration", durationSec: 3 }),
-				trimmedVideo("cutAgain", 10),
-				el({ id: "n3", type: "narration", durationSec: 3 }),
-			]);
-			expect(layout.series.map((seq) => seq.element.id)).toEqual([
-				"cut",
-				"held",
-				"cutAgain",
-			]);
-			expect(layout.series.map((seq) => seq.duration)).toEqual([3, 10, 3]);
-			expect(layout.series[1].start).toBeCloseTo(3 - OVERLAP, 5);
-			expect(layout.series[2].start).toBeCloseTo(13 - 2 * OVERLAP, 5);
-			// The held video's narration still lines up under it, not after it.
-			expect(seqs(layout, "narration")[1].start).toBeCloseTo(3 - OVERLAP, 5);
-			expect(seqs(layout, "narration")[2].start).toBeCloseTo(
-				13 - 2 * OVERLAP,
-				5,
-			);
-			expect(layout.totalDurationSec).toBeCloseTo(16 - 2 * OVERLAP, 5);
+		it("runs past a video's own length for longer dialogue", () => {
+			const layout = buildRenderLayout([video(3), narration(10)]);
+			expect(layout.series[0].duration).toBe(10);
 		});
 	});
 

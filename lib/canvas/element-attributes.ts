@@ -5,7 +5,6 @@ import {
 	DEFAULT_LOOPS,
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
-	TOGGLE_OFF,
 	VOLUME_OPTIONS,
 	isToggleOn,
 	type ContentElement,
@@ -25,7 +24,6 @@ export const LAYOUT_ATTRIBUTE_KEYS = [
 	"loop",
 	"volume",
 	"motion",
-	"trimToDialogue",
 	"uploadedFrame",
 	"trimStart",
 	"timelineDuration",
@@ -96,13 +94,6 @@ export function getLoops(element: ContentElement): number {
 
 export const getLoop = (element: ContentElement): boolean =>
 	isToggleOn(element.layoutAttributes?.loop);
-
-/** Absent means trimmed: a visual yields to its dialogue unless it says otherwise. */
-export const trimsToDialogue = (attrs: Record<string, string> = {}): boolean =>
-	attrs.trimToDialogue !== TOGGLE_OFF;
-
-export const getTrimToDialogue = (element: ContentElement): boolean =>
-	trimsToDialogue(element.layoutAttributes);
 
 /** A plain count of seconds, at least `min`; anything else reads as unset. */
 export function parseSeconds(

@@ -47,8 +47,6 @@ export interface AttributeDef extends AttributeSpec {
 	badge?: boolean;
 	/** Carried on the element but shown nowhere: another attribute's control sets it. */
 	hidden?: boolean;
-	/** Offered in the settings only while the element's attributes pass this. */
-	shownWhen?: (attrs: Record<string, string>) => boolean;
 }
 
 export type ModelPick = { key: string } & Extract<
@@ -96,12 +94,8 @@ export class AttributeSchema {
 	}
 
 	/** The attributes shown in the settings popover, in def order. */
-	settingsAttributesFor(
-		attrs: Record<string, string>,
-	): Record<string, AttributeSpec> {
-		return this.specsWhere(
-			(def) => !def.badge && !def.hidden && (def.shownWhen?.(attrs) ?? true),
-		);
+	get settingsAttributes(): Record<string, AttributeSpec> {
+		return this.specsWhere((def) => !def.badge && !def.hidden);
 	}
 
 	get allAttributes(): Record<string, AttributeSpec> {

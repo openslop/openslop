@@ -7,7 +7,6 @@ import {
 	elementSchema,
 } from "@/lib/canvas/element-connector";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
-import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { splitTextDirection } from "../utils/text-direction";
 import { OutputPreview } from "./output-preview";
 import { DeleteButton } from "./delete-button";
@@ -138,7 +137,7 @@ export function ElementContainer({
 								/>
 								<ElementSettings
 									element={element}
-									specs={schema.settingsAttributesFor(flatAttributes(element))}
+									specs={schema.settingsAttributes}
 								/>
 								{config.tools?.map((Tool, index) => (
 									<Tool key={index} element={element} />
