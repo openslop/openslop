@@ -231,7 +231,7 @@ lib/
   providers/     Adaptadores de fornecedores no servidor (Runware, ElevenLabs, …)
   generation/    Fila de geração e orquestração de jobs
   canvas/        Modelo de documento Slate: tipos de elemento, guards, parse/serialização OSML
-  script/        Contexto e refinamento do roteiro
+  script/        Escrita e refinamento do roteiro
   project/       Store Zustand por projeto, salvamento automático, persistência
   render/        Layout de cenas e cliente de renderização
   templates/     Templates de prompt oferecidos no composer

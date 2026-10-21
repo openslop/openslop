@@ -231,7 +231,7 @@ lib/
   providers/     서버 측 벤더 어댑터 (Runware, ElevenLabs, …)
   generation/    생성 큐와 작업 오케스트레이션
   canvas/        Slate 문서 모델: 요소 유형, 가드, OSML 파싱/직렬화
-  script/        스크립트 컨텍스트와 다듬기
+  script/        스크립트 작성과 다듬기
   project/       프로젝트별 Zustand 스토어, 자동 저장, 영속화
   render/        장면 레이아웃과 렌더 클라이언트
   templates/     컴포저에서 제공하는 프롬프트 템플릿

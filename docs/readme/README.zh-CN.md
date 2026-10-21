@@ -231,7 +231,7 @@ lib/
   providers/     服务端的供应商适配器（Runware、ElevenLabs……）
   generation/    生成队列和任务编排
   canvas/        Slate 文档模型：元素类型、守卫、OSML 解析/序列化
-  script/        脚本上下文和润色
+  script/        脚本撰写和润色
   project/       每个项目的 Zustand store、自动保存、持久化
   render/        场景布局和渲染客户端
   templates/     编辑器里提供的提示词模板

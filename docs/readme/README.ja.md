@@ -231,7 +231,7 @@ lib/
   providers/     サーバー側のベンダーアダプター（Runware、ElevenLabs、…）
   generation/    生成キューとジョブのオーケストレーション
   canvas/        Slate ドキュメントモデル: 要素の型、ガード、OSML のパースとシリアライズ
-  script/        台本のコンテキストと推敲
+  script/        台本の執筆と推敲
   project/       プロジェクトごとの Zustand ストア、自動保存、永続化
   render/        シーンのレイアウトとレンダークライアント
   templates/     コンポーザーで提供するプロンプトテンプレート

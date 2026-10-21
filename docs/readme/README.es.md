@@ -231,7 +231,7 @@ lib/
   providers/     Server-side vendor adapters (Runware, ElevenLabs, …)
   generation/    Generation queue and job orchestration
   canvas/        Slate document model: element types, guards, OSML parse/serialize
-  script/        Script context and refinement
+  script/        Script writing and refinement
   project/       Per-project Zustand store, autosave, persistence
   render/        Scene layout and render client
   templates/     Prompt templates offered in the composer
