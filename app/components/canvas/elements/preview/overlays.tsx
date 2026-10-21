@@ -3,6 +3,7 @@ import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import { toastError } from "@/lib/toast-error";
 import { GenerationIndicator } from "../generation-indicator";
 import type {
 	GenerationState,
@@ -66,7 +67,7 @@ export function ErrorMessage({ message }: { message: string }) {
 		try {
 			await navigator.clipboard.writeText(message);
 		} catch (error) {
-			console.error("Failed to copy error message:", error);
+			toastError(error, "Couldn't copy the error");
 			return;
 		}
 		setCopied(true);
