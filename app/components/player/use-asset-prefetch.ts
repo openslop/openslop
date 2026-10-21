@@ -69,7 +69,10 @@ export function useAssetPrefetch(layout: RenderLayout): boolean {
 				if (!cancelled) setReady(true);
 			})
 			.catch((error: unknown) => {
-				if (!cancelled) toastError(error, "Couldn't load the player");
+				if (!cancelled)
+					toastError(error, "Couldn't load the player", {
+						id: "player-load",
+					});
 			});
 
 		return () => {

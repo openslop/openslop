@@ -238,6 +238,7 @@ describe("useAssetPrefetch", () => {
 		expect(toastError).toHaveBeenCalledWith(
 			expect.any(Error),
 			"Couldn't load the player",
+			{ id: "player-load" },
 		);
 	});
 
