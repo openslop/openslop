@@ -3,7 +3,6 @@ import { Audio } from "@remotion/media";
 import {
 	AbsoluteFill,
 	Freeze,
-	Img,
 	Loop,
 	OffthreadVideo,
 	Sequence,
@@ -25,6 +24,7 @@ import { volumeToGain } from "@/lib/canvas/element-attributes";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { CaptionStyleProvider, Captions } from "../components/captions";
 import { FilmGrain } from "../components/film-grain";
+import { FrameImage } from "../components/frame-image";
 import { MotionLayer } from "../components/motion-layer";
 import { RgbSplit } from "../components/rgb-split";
 
@@ -115,7 +115,7 @@ function SequenceContent({
 			return (
 				<MotionLayer effect={element.motion}>
 					{CONTENT_TYPES[element.type].outputKind === "image" ? (
-						<Img src={element.url} crossOrigin="anonymous" style={coverStyle} />
+						<FrameImage src={element.url} style={coverStyle} />
 					) : (
 						<VideoElementPlayer element={element} />
 					)}
