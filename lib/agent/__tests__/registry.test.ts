@@ -61,7 +61,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	modelChain: () => ({}),
 	isConnected: () => true,
-	setElementModels: () => {},
 	...over,
 });
 
@@ -745,8 +744,16 @@ describe("model tools", () => {
 			/not connected Runware/,
 		],
 		[
-			"set_element_model",
-			{ ids: ["v1"], provider: "runware", model: "Kling 3 Omni" },
+			"edit_script",
+			{
+				ops: [
+					{
+						op: "set",
+						id: "v1",
+						attrs: { provider: "runware", model: "Kling 3 Omni" },
+					},
+				],
+			},
 			/not connected Runware/,
 		],
 	])(
@@ -756,27 +763,16 @@ describe("model tools", () => {
 			const outcome = await run(toolName, input, {
 				isConnected: (provider: string) => provider === "openslop",
 				updateModels: (models: unknown) => void writes.push(models),
-				setElementModels: (...args: unknown[]) => void writes.push(args),
+				editScript: (ops: unknown) => {
+					writes.push(ops);
+					return { applied: 0, failures: [] };
+				},
 			});
 
 			expect(outcome.ok || outcome.errorText).toMatch(error);
 			expect(writes).toEqual([]);
 		},
 	);
-
-	it("moves the named elements onto the model", async () => {
-		const moves: unknown[] = [];
-		const outcome = await run(
-			"set_element_model",
-			{ ids: ["v1", "v2"], provider: "openslop", model: "Slop Video v1" },
-			{ setElementModels: (...args: unknown[]) => void moves.push(args) },
-		);
-
-		expect(outcome.ok && outcome.output).toContain("Moved 2 elements");
-		expect(moves).toEqual([
-			[["v1", "v2"], { provider: "openslop", model: "Slop Video v1" }],
-		]);
-	});
 });
 
 describe("SLOPPY_TOOLS", () => {
@@ -797,7 +793,6 @@ describe("SLOPPY_TOOLS", () => {
 			"set_title",
 			"list_models",
 			"set_default_model",
-			"set_element_model",
 		]);
 	});
 

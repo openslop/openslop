@@ -19,7 +19,6 @@ import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { createConnector } from "@/lib/connectors/factory";
 import { applyRefineOps } from "@/lib/script/refine/apply-ops";
-import { setElementModels } from "@/lib/canvas/element-models";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
@@ -90,7 +89,6 @@ export function useAgentTools() {
 					account
 						.getState()
 						.providerKeys.some((key) => key.provider === provider),
-				setElementModels: (ids, model) => setElementModels(editor, ids, model),
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);

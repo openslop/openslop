@@ -36,6 +36,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 				...attrs,
 			}),
 			offers: () => true,
+			hidesModel: type === "tts",
 		};
 	},
 }));
@@ -388,6 +389,61 @@ describe("applyRefineOp — set", () => {
 
 		expect(flatAttributes(getNode(editor, "n1"))).toMatchObject(pinned);
 	});
+});
+
+describe("applyRefineOp — models", () => {
+	const SEEDANCE = { provider: "runware", model: "Seedance 2 Fast" } as const;
+	const canvas = () =>
+		makeEditor([
+			scene([
+				content("video", "v1", "a cat"),
+				content("narration", "n1", "hi"),
+			]),
+		]);
+
+	it("moves an element onto a model", () => {
+		const editor = canvas();
+
+		const result = applyRefineOp(
+			editor,
+			{ op: "set", id: "v1", attrs: SEEDANCE },
+			{},
+		);
+
+		expect(result).toEqual({ ok: true });
+		expect(flatAttributes(getNode(editor, "v1"))).toMatchObject(SEEDANCE);
+	});
+
+	it.each([
+		[
+			{ op: "set", id: "v1", attrs: { model: "Slop Image v1" } },
+			/no video model "Slop Image v1"/,
+		],
+		[
+			{
+				op: "insert",
+				type: "video",
+				text: "a dog",
+				attrs: { provider: "nobody", model: "x" },
+			},
+			/"nobody" has no video model "x"/,
+		],
+		[
+			{ op: "set", id: "n1", attrs: SEEDANCE },
+			/a narration has no model of its own/,
+		],
+	] as const)(
+		"refuses a model the element cannot take, writing nothing",
+		(op, reason) => {
+			const editor = canvas();
+			const before = JSON.stringify(editor.children);
+
+			const result = applyRefineOp(editor, op, {});
+
+			expect(result.ok || result.reason).toMatch(reason);
+			expect(JSON.stringify(editor.children)).toBe(before);
+		},
+	);
 });
 
 describe("applyRefineOp — insert positioning edge cases", () => {

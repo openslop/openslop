@@ -5,7 +5,7 @@ import type { ElementLength } from "@/lib/render/element-lengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
 import type { ModelDefaults } from "@/lib/connectors/models";
-import type { ModelRef, Provider } from "@/lib/connectors/types";
+import type { Provider } from "@/lib/connectors/types";
 
 export const PROJECT_SETTERS = [
 	"setTitle",
@@ -39,5 +39,4 @@ export type AgentToolContext = Pick<
 	modelChain: () => ModelDefaults;
 	/** Whether the user can generate with the provider: the hosted one, or one whose key they stored. */
 	isConnected: (provider: Provider) => boolean;
-	setElementModels: (ids: string[], model: ModelRef) => void;
 };

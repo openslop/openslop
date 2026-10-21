@@ -8,6 +8,7 @@ import {
 	type ConnectorModels,
 	type ModelDefaults,
 } from "@/lib/connectors/models";
+import { groupModels } from "@/lib/connectors/model-groups";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { cn } from "@/lib/utils";
 import { ModelSelect } from "./model-select";
@@ -45,9 +46,7 @@ export function ModelDefaultControl({
 					? undefined
 					: MODEL_PROVENANCE[modelSourceFor(type, model, chain)]
 			}
-			onChange={(picked) =>
-				onChange(Object.fromEntries(types.map((each) => [each, picked])))
-			}
+			onChange={(picked) => onChange(groupModels(types, picked))}
 		>
 			<SelectMenuTrigger
 				aria-label={`${label} model`}

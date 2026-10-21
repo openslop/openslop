@@ -12,7 +12,6 @@ import { outlineStory } from "./outline-story";
 import { readScript } from "./read-script";
 import { reviewScript } from "./review-script";
 import { setDefaultModel } from "./set-default-model";
-import { setElementModel } from "./set-element-model";
 import { setTitle } from "./set-title";
 import { updateScriptSettings } from "./update-script-settings";
 import { updateVideoSettings } from "./update-video-settings";
@@ -36,7 +35,6 @@ const TOOLS = {
 	set_title: setTitle,
 	list_models: listModels,
 	set_default_model: setDefaultModel,
-	set_element_model: setElementModel,
 };
 
 export type AgentToolName = keyof typeof TOOLS;

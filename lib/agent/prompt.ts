@@ -13,10 +13,8 @@ const ROLE = dedent`
   - Make changes with a tool call.
   - Read the canvas before your first change and again whenever a tool reports it changed.
     It is not given to you any other way.
-  - Elements take the project's default model when they are created. So on a new project,
-    before anything goes on the canvas, call list_models and, for each type the video will use,
-    set_default_model to the connected model whose description best fits the story. A project or
-    account default stands unless the user asks to change it.
+  - On a new project, pick default models with list_models and set_default_model before adding
+    anything. Keep any default the user set.
   - The writer writes the script and nothing else, against the assets already on the canvas.
     So before write_script or adapt_script, name the project with set_title and put what the
     script needs there with edit_script: an asset_voice for every speaker and for the narrator, an

@@ -2,18 +2,14 @@ import compact from "lodash/compact";
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { InsertElement } from "@/components/ui/icon";
-import { MODEL_GROUPS } from "@/lib/connectors/model-groups";
+import { MODEL_GROUPS, type ModelGroup } from "@/lib/connectors/model-groups";
 import {
 	defaultModelFor,
 	listModels as catalogModels,
 	modelSourceFor,
 	type ModelDefaults,
 } from "@/lib/connectors/models";
-import type {
-	ConnectorType,
-	ModelEntry,
-	ModelRef,
-} from "@/lib/connectors/types";
+import type { ModelEntry, ModelRef } from "@/lib/connectors/types";
 import type { AgentToolContext } from "./context";
 import { defineTool } from "./define-tool";
 
@@ -28,24 +24,23 @@ const modelLine = (
 	]).join(". ")}`;
 
 const groupSection = (
-	{ label, types: [type] }: { label: string; types: ConnectorType[] },
+	{ label, types: [type] }: ModelGroup,
 	chain: ModelDefaults,
-	ctx: AgentToolContext,
+	isConnected: AgentToolContext["isConnected"],
 ) => {
 	const fallback = defaultModelFor(type, chain);
 	return [
 		`${label} (type ${type}). New elements get ${fallback.model} from ${fallback.provider}, the ${modelSourceFor(type, fallback, chain)} default.`,
 		...catalogModels(type).map((entry) =>
-			modelLine(entry, ctx.isConnected(entry.provider)),
+			modelLine(entry, isConnected(entry.provider)),
 		),
 	].join("\n");
 };
 
 export const listModels = defineTool({
 	description: dedent`
-	  List the models each kind of element generates with: each model's provider, its cost
-	  and speed against the others of its type, what it does best, and whether the user has
-	  connected its provider. Also the model new elements of each type get.
+	  List the models for each kind of element: cost, speed, what each is best at, whether
+	  the user can use it, and which one new elements get.
 	`,
 	input: z.object({}),
 	output: z.string(),
@@ -53,8 +48,8 @@ export const listModels = defineTool({
 	label: "Reading the models",
 	execute: async (_, ctx) => {
 		const chain = ctx.modelChain();
-		return MODEL_GROUPS.map((group) => groupSection(group, chain, ctx)).join(
-			"\n\n",
-		);
+		return MODEL_GROUPS.map((group) =>
+			groupSection(group, chain, ctx.isConnected),
+		).join("\n\n");
 	},
 });

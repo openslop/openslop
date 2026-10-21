@@ -7,7 +7,8 @@ import {
 	Waveform,
 	type IconComponent,
 } from "@/components/ui/icon";
-import type { ConnectorType } from "./types";
+import type { ConnectorModels } from "./models";
+import type { ConnectorType, ModelRef } from "./types";
 
 /** What a person picks a model for. */
 export interface ModelGroup {
@@ -63,3 +64,9 @@ export function groupFor(type: ConnectorType): ModelGroup {
 	if (!group) throw new Error(`No model group covers "${type}"`);
 	return group;
 }
+
+/** One pick for every type a group sets. */
+export const groupModels = (
+	types: ConnectorType[],
+	model: ModelRef,
+): ConnectorModels => Object.fromEntries(types.map((type) => [type, model]));
