@@ -1,6 +1,6 @@
 import type { IconComponent } from "@/components/ui/icon";
 import { TOGGLE_OFF, TOGGLE_ON } from "@/lib/canvas/types";
-import { parseSeconds } from "@/lib/canvas/element-attributes";
+import { clampedNumber } from "@/lib/canvas/element-attributes";
 import { resolveModel, type ConnectorModels } from "../models";
 import type { ConnectorType } from "../types";
 
@@ -121,7 +121,7 @@ export class AttributeSchema {
 		if (edit?.kind === "enum") return edit.options.includes(value);
 		if (edit?.kind === "toggle") return TOGGLE_VALUES.includes(value);
 		if (edit?.kind === "seconds")
-			return parseSeconds(value, edit.min) !== undefined;
+			return clampedNumber(value, edit) !== undefined;
 		return true;
 	}
 

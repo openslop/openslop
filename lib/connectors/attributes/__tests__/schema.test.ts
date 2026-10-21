@@ -74,12 +74,12 @@ describe("AttributeSchema", () => {
 			},
 		]);
 
-		it("offers seconds only as a plain number at or above its minimum", () => {
+		it("offers seconds as any plain number, since reading clamps it", () => {
 			const seconds = AttributeSchema.from([
 				{ key: "length", label: "Length", edit: { kind: "seconds", min: 1 } },
 			]);
 			expect(seconds.offers("length", "2.5")).toBe(true);
-			expect(seconds.offers("length", "0.5")).toBe(false);
+			expect(seconds.offers("length", "0.5")).toBe(true);
 			expect(seconds.offers("length", "2s")).toBe(false);
 			expect(seconds.resolve({ length: "nope" })).toEqual({});
 		});

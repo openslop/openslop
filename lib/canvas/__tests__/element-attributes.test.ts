@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
 import {
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
@@ -199,8 +200,14 @@ describe("trim attributes", () => {
 		expect(getTrimStart(el({ trimStart: "-1" }))).toBe(0);
 		expect(getTimelineDuration(el())).toBeUndefined();
 		expect(
-			getTimelineDuration(el({ timelineDuration: "0.5" })),
+			getTimelineDuration(el({ timelineDuration: "nope" })),
 		).toBeUndefined();
+	});
+
+	it("raises a timeline duration below the minimum to it", () => {
+		expect(getTimelineDuration(el({ timelineDuration: "0.5" }))).toBe(
+			MIN_DURATION_SEC,
+		);
 	});
 
 	it("reads valid seconds", () => {

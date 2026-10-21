@@ -1,4 +1,6 @@
 import { useSlateStatic } from "slate-react";
+import { RotateCcw } from "@/components/ui/icon";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -20,7 +22,7 @@ import { StartFramePicker } from "./attributes/start-frame-picker";
 import { ModelAttribute } from "./attributes/model-attribute";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
 import { InputAttributeField } from "./attributes/input-attribute-field";
-import { flatAttributes, parseSeconds } from "@/lib/canvas/element-attributes";
+import { clampedNumber, flatAttributes } from "@/lib/canvas/element-attributes";
 
 const UNSET = "—";
 
@@ -137,18 +139,29 @@ export function AttributeBadge({
 	if (spec.edit.kind === "seconds") {
 		const { min } = spec.edit;
 		return (
-			// Keyed on the value so a trim dragged on the timeline replaces the draft.
-			<InputAttributeField
-				key={value}
-				element={element}
-				attrKey={attrKey}
-				value={value}
-				parse={(text) => parseSeconds(text, min)?.toString()}
-				inputMode="decimal"
-				placeholder="Auto"
-				aria-label={`${spec.label} in seconds`}
-				className={SECONDS_FIELD}
-			/>
+			<div className="flex items-center gap-1">
+				{/* Keyed on the value so a trim dragged on the timeline replaces the draft. */}
+				<InputAttributeField
+					key={value}
+					element={element}
+					attrKey={attrKey}
+					value={value}
+					parse={(text) => clampedNumber(text, { min })?.toString()}
+					inputMode="decimal"
+					placeholder="Auto"
+					aria-label={`${spec.label} in seconds`}
+					className={SECONDS_FIELD}
+				/>
+				<TooltipIconButton
+					label={`Reset ${spec.label.toLowerCase()}`}
+					size="sm"
+					variant="quiet"
+					unavailable={!value}
+					onClick={() => mergeAttrs(editor, element.id, { [attrKey]: null })}
+				>
+					<RotateCcw size={12} />
+				</TooltipIconButton>
+			</div>
 		);
 	}
 

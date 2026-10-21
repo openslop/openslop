@@ -63,10 +63,20 @@ const parseNumber = (raw: string | undefined): number | undefined => {
 	return Number.isFinite(value) ? value : undefined;
 };
 
-function clampedNumber(
+type Bounds = { min: number; max?: number };
+
+export function clampedNumber(
 	raw: string | undefined,
-	{ min, max, fallback }: { min: number; max: number; fallback: number },
-): number {
+	bounds: Bounds & { fallback: number },
+): number;
+export function clampedNumber(
+	raw: string | undefined,
+	bounds: Bounds,
+): number | undefined;
+export function clampedNumber(
+	raw: string | undefined,
+	{ min, max = Infinity, fallback }: Bounds & { fallback?: number },
+): number | undefined {
 	const value = parseNumber(raw);
 	return value === undefined ? fallback : clamp(value, min, max);
 }
@@ -95,22 +105,15 @@ export function getLoops(element: ContentElement): number {
 export const getLoop = (element: ContentElement): boolean =>
 	isToggleOn(element.layoutAttributes?.loop);
 
-/** A plain count of seconds, at least `min`; anything else reads as unset. */
-export function parseSeconds(
-	raw: string | undefined,
-	min: number,
-): number | undefined {
-	const value = parseNumber(raw);
-	return value !== undefined && value >= min ? value : undefined;
-}
-
 export const getTrimStart = (element: ContentElement): number =>
-	parseSeconds(element.layoutAttributes?.trimStart, 0) ?? 0;
+	clampedNumber(element.layoutAttributes?.trimStart, { min: 0, fallback: 0 });
 
 export const getTimelineDuration = (
 	element: ContentElement,
 ): number | undefined =>
-	parseSeconds(element.layoutAttributes?.timelineDuration, MIN_DURATION_SEC);
+	clampedNumber(element.layoutAttributes?.timelineDuration, {
+		min: MIN_DURATION_SEC,
+	});
 
 export function getMotion(element: ContentElement): MotionEffect {
 	const raw = element.layoutAttributes?.motion;
