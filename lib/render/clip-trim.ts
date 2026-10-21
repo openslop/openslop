@@ -85,29 +85,42 @@ export const trimTimestamps = (
 			end: word.end - startSec,
 		}));
 
-/** The clip's start stays put and what follows ripples. */
+/**
+ * The clip's start stays put and what follows ripples. The clip holds at least
+ * `floorSec` (the dialogue under a scene) before the drag and after it, so a
+ * zero drag is where it rests.
+ */
 export function trimEdge(
 	clip: Trimmable,
 	edge: TrimEdge,
 	deltaSec: number,
+	floorSec = 0,
 ): Trim {
-	const { trimStartSec, durationSec } = clip;
+	const { trimStartSec, mediaDurationSec } = clip;
+	const minSec = Math.max(MIN_DURATION_SEC, floorSec);
+	const heldSec = Math.max(clip.durationSec, minSec);
 	if (edge === "end")
 		return {
 			trimStartSec,
 			durationSec: clamp(
-				durationSec + deltaSec,
-				MIN_DURATION_SEC,
-				Math.max(MIN_DURATION_SEC, longestSec(clip)),
+				heldSec + deltaSec,
+				minSec,
+				Math.max(minSec, longestSec(clip)),
 			),
 		};
 	const shift = clamp(
 		deltaSec,
 		-trimStartSec,
-		Math.max(0, playedSec(clip) - MIN_DURATION_SEC),
+		Math.max(
+			0,
+			Math.min(
+				mediaDurationSec - trimStartSec - MIN_DURATION_SEC,
+				heldSec - minSec,
+			),
+		),
 	);
 	return {
 		trimStartSec: trimStartSec + shift,
-		durationSec: durationSec - shift,
+		durationSec: heldSec - shift,
 	};
 }

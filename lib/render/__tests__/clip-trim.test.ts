@@ -65,6 +65,7 @@ describe("trimClip", () => {
 
 describe("trimEdge", () => {
 	const clip = { ...audio, trimStartSec: 2, durationSec: 5 };
+	const extended = { ...video, trimStartSec: 2, durationSec: 30 };
 
 	it("lengthens and shortens from the end, keeping the start", () => {
 		expect(trimEdge(clip, "end", -2)).toEqual({
@@ -87,7 +88,6 @@ describe("trimEdge", () => {
 	});
 
 	it("keeps an extended visual's in-point inside its media", () => {
-		const extended = { ...video, trimStartSec: 2, durationSec: 30 };
 		expect(trimEdge(extended, "start", 50)).toEqual({
 			trimStartSec: 9,
 			durationSec: 23,
@@ -113,6 +113,49 @@ describe("trimEdge", () => {
 		expect(trimEdge(clip, "start", 50)).toEqual({
 			trimStartSec: 6,
 			durationSec: 1,
+		});
+	});
+
+	describe("with a floor, the dialogue under a scene", () => {
+		const scene = { ...video, trimStartSec: 2, durationSec: 8 };
+
+		it("stops the end at the floor instead of cutting the visual short", () => {
+			expect(trimEdge(scene, "end", -50, 4).durationSec).toBe(4);
+			expect(trimEdge(scene, "end", -3, 4).durationSec).toBe(5);
+		});
+
+		it("stops the start where the clip would dip under the floor", () => {
+			expect(trimEdge(scene, "start", 50, 4)).toEqual({
+				trimStartSec: 6,
+				durationSec: 4,
+			});
+			expect(trimEdge(scene, "start", 50, 6)).toEqual({
+				trimStartSec: 4,
+				durationSec: 6,
+			});
+		});
+
+		it("rests at the floor when the visual is shorter than the dialogue", () => {
+			const short = { ...video, trimStartSec: 0, durationSec: 5 };
+			expect(trimEdge(short, "end", 0, 8).durationSec).toBe(8);
+			expect(trimEdge(short, "end", -1, 8).durationSec).toBe(8);
+			expect(trimEdge(short, "end", 1, 8).durationSec).toBe(9);
+			expect(trimEdge(short, "start", 1, 8)).toEqual({
+				trimStartSec: 0,
+				durationSec: 8,
+			});
+		});
+
+		it("never goes under the minimum, however short the floor", () => {
+			expect(trimEdge(scene, "end", -50, 0.3).durationSec).toBe(1);
+			expect(trimEdge(scene, "start", 50, 0.3).durationSec).toBe(1);
+		});
+
+		it("still keeps the in-point inside the media", () => {
+			expect(trimEdge(extended, "start", 50, 4)).toEqual({
+				trimStartSec: 9,
+				durationSec: 23,
+			});
 		});
 	});
 });

@@ -30,6 +30,8 @@ export type Sequence = {
 	element: ResolvedElement;
 	start: number;
 	duration: number;
+	/** A scene says how long the dialogue under it runs; it holds at least that long. */
+	dialogueSec?: number;
 };
 
 export type RenderLayout = {
