@@ -16,9 +16,6 @@ import type { TimelineClip } from "./timeline-rows";
 // The layout snaps whatever is stored onto the frame grid.
 const toAttr = (sec: number) => String(Number(sec.toFixed(2)));
 
-const sameTrim = (a: Trim | null, b: Trim) =>
-	a?.trimStartSec === b.trimStartSec && a.durationSec === b.durationSec;
-
 function useEdgeDrag(
 	pxPerSec: number,
 	onTrim: (deltaSec: number) => void,
@@ -43,14 +40,17 @@ export function useClipTrim(
 	const editor = useSlateStatic();
 	const [preview, setPreview] = useState<Trim | null>(null);
 
-	const trimBy = (edge: TrimEdge) => (deltaSec: number) => {
-		const next = trimEdge(element, edge, deltaSec);
-		setPreview((prev) => (sameTrim(prev, next) ? prev : next));
-	};
+	const trimBy = (edge: TrimEdge) => (deltaSec: number) =>
+		setPreview(trimEdge(element, edge, deltaSec));
 
 	const commit = () => {
 		setPreview(null);
-		if (!preview || sameTrim(element, preview)) return;
+		if (
+			!preview ||
+			(preview.trimStartSec === element.trimStartSec &&
+				preview.durationSec === element.durationSec)
+		)
+			return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),
 			timelineDuration: toAttr(preview.durationSec),
