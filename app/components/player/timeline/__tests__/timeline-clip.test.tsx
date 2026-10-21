@@ -24,7 +24,7 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 	...over,
 });
 
-const name = (el: ResolvedElement, duration: number, trim = el) =>
+const markup = (el: ResolvedElement, duration: number, trim = el) =>
 	renderToStaticMarkup(
 		<TimelineClip
 			clip={{ key: "clip", element: el, start: 0, duration }}
@@ -34,7 +34,15 @@ const name = (el: ResolvedElement, duration: number, trim = el) =>
 			pxPerSec={PX_PER_SEC}
 			trim={trim}
 		/>,
-	).match(/aria-label="([^"]*)"/)?.[1];
+	);
+
+const name = (el: ResolvedElement, duration: number, trim = el) =>
+	markup(el, duration, trim).match(/aria-label="([^"]*)"/)?.[1];
+
+const footage = (el: ResolvedElement, duration: number) =>
+	[...markup(el, duration).matchAll(/<video src="([^"]*)"/g)].map(
+		([, src]) => src,
+	);
 
 describe("TimelineClip past its media", () => {
 	it("says nothing while the media covers the clip", () => {
@@ -62,5 +70,26 @@ describe("TimelineClip past its media", () => {
 			durationSec: 0,
 		});
 		expect(name(still, 8)).toBe("Image, 0:00–0:08");
+	});
+});
+
+describe("TimelineClip footage", () => {
+	it("draws the footage once while the media covers the clip", () => {
+		expect(footage(element(), 5)).toEqual(["https://vid/a.mp4"]);
+	});
+
+	it("holds the frame a frozen clip ends on", () => {
+		expect(footage(element({ trimStartSec: 1, durationSec: 4 }), 8)).toEqual([
+			"https://vid/a.mp4",
+			"https://vid/a.mp4#t=5",
+		]);
+	});
+
+	it("restarts the footage each time a looping clip does", () => {
+		expect(footage(element({ loop: true }), 12)).toHaveLength(3);
+	});
+
+	it("stops drawing restarts on a long loop", () => {
+		expect(footage(element({ loop: true }), 600)).toHaveLength(8);
 	});
 });

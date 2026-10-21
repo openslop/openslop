@@ -6,6 +6,7 @@ import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { isTrimmable, playedSec, type Trim } from "@/lib/render/clip-trim";
 import { formatTime, formatTimeRange } from "@/lib/render/timestamps";
+import type { ResolvedElement } from "@/lib/render/types";
 import { cn } from "@/lib/utils";
 import { ClipWaveform } from "./clip-waveform";
 import type { TimelineClip as TimelineClipData } from "./timeline-rows";
@@ -14,14 +15,55 @@ const HEADER_ICON_SIZE = 9;
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 const ROUNDING_SLACK_PX = 1;
+const MAX_LOOP_COPIES = 8;
 
 const FRAME =
 	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
 const SELECTED_EDGE = "border-current/60";
-const PREVIEW = "m-0.5 min-w-0 flex-1 overflow-hidden rounded-sm";
 
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
+
+type FootageBox = { src: string; width?: number };
+
+/** A loop restarts the footage; a freeze holds the frame it ends on. */
+function overdrawn(
+	{ url, loop }: Pick<ResolvedElement, "url" | "loop">,
+	outSec: number,
+	playedWidth: number,
+	width: number,
+): FootageBox[] {
+	if (!loop)
+		return [{ src: url, width: playedWidth }, { src: `${url}#t=${outSec}` }];
+	const copies = Math.min(Math.ceil(width / playedWidth), MAX_LOOP_COPIES);
+	return Array.from({ length: copies }, (_, i) => ({
+		src: url,
+		width: i < copies - 1 ? playedWidth : undefined,
+	}));
+}
+
+/** Laid end to end, each box spans exactly its own stretch of the clip. */
+function Footage({
+	width,
+	children,
+}: {
+	width?: number;
+	children: React.ReactNode;
+}) {
+	return (
+		<div
+			className={cn(
+				"min-w-0 p-0.5",
+				width === undefined ? "flex-1" : "flex-none",
+			)}
+			style={width === undefined ? undefined : { width }}
+		>
+			<div className="h-full overflow-hidden rounded-sm timeline-preview-surface">
+				{children}
+			</div>
+		</div>
+	);
+}
 
 /** A wash over the clip's own colour, so selection shifts it rather than replacing it. */
 function SelectedWash() {
@@ -79,6 +121,9 @@ export function TimelineClip({
 		playedWidth < width - ROUNDING_SLACK_PX
 			? LOOP_FACES[element.loop ? "on" : "off"]
 			: undefined;
+	const footage = fill
+		? overdrawn(element, trim.trimStartSec + played, playedWidth, width)
+		: [{ src: element.url }];
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
@@ -105,36 +150,27 @@ export function TimelineClip({
 				width={width}
 			/>
 			<div className="flex min-h-0 flex-1">
-				<div
-					className={cn(
-						PREVIEW,
-						"timeline-preview-surface",
-						fill && "flex-none",
-					)}
-					style={fill ? { width: playedWidth } : undefined}
-				>
-					{config.layer === "visual" ? (
-						<div className="relative aspect-square h-full overflow-hidden">
-							<MediaWithSkeleton
-								outputKind={config.outputKind}
-								src={element.url}
-								alt=""
-							/>
-						</div>
-					) : (
+				{config.layer === "audio" ? (
+					<Footage>
 						<ClipWaveform
 							src={element.url}
 							width={element.mediaDurationSec * pxPerSec}
 							offset={trim.trimStartSec * pxPerSec}
 						/>
-					)}
-				</div>
-				{fill ? (
-					<fill.icon
-						size={HEADER_ICON_SIZE}
-						className="mx-1 shrink-0 self-center"
-					/>
-				) : null}
+					</Footage>
+				) : (
+					footage.map((box, i) => (
+						<Footage key={i} width={box.width}>
+							<div className="relative aspect-square h-full overflow-hidden">
+								<MediaWithSkeleton
+									outputKind={config.outputKind}
+									src={box.src}
+									alt=""
+								/>
+							</div>
+						</Footage>
+					))
+				)}
 			</div>
 			{sceneNumber ? (
 				<span className="absolute bottom-0.5 left-0.5 max-w-full truncate rounded-tr-sm rounded-bl-sm bg-on-media/65 px-1 font-numeric text-badge-xs text-on-media-foreground">
