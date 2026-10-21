@@ -23,6 +23,12 @@ describe("isTrimmed", () => {
 		expect(isTrimmed({ ...full, durationSec: 4 })).toBe(true);
 		expect(isTrimmed({ ...full, durationSec: 12 })).toBe(true);
 	});
+
+	it("is never trimmed without media, like a still or the blank opener", () => {
+		expect(
+			isTrimmed({ trimStartSec: 0, durationSec: 4, mediaDurationSec: 0 }),
+		).toBe(false);
+	});
 });
 
 describe("playedSec", () => {

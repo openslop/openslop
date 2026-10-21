@@ -29,12 +29,9 @@ const longestSec = ({
 export const isTrimmable = ({ mediaDurationSec }: Media): boolean =>
 	mediaDurationSec > 0;
 
-export const isTrimmed = ({
-	trimStartSec,
-	durationSec,
-	mediaDurationSec,
-}: Trim & Media): boolean =>
-	trimStartSec > 0 || durationSec !== mediaDurationSec;
+export const isTrimmed = (clip: Trim & Media): boolean =>
+	isTrimmable(clip) &&
+	(clip.trimStartSec > 0 || clip.durationSec !== clip.mediaDurationSec);
 
 /** How long the media itself plays before the clip loops or freezes. */
 export const playedSec = ({
