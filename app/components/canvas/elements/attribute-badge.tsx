@@ -1,6 +1,4 @@
 import { useSlateStatic } from "slate-react";
-import { RotateCcw } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -139,29 +137,19 @@ export function AttributeBadge({
 	if (spec.edit.kind === "seconds") {
 		const { min } = spec.edit;
 		return (
-			<div className="flex items-center gap-1">
-				{/* Keyed on the value so a trim dragged on the timeline replaces the draft. */}
-				<InputAttributeField
-					key={value}
-					element={element}
-					attrKey={attrKey}
-					value={value}
-					parse={(text) => clampedNumber(text, { min })?.toString()}
-					inputMode="decimal"
-					placeholder="Auto"
-					aria-label={`${spec.label} in seconds`}
-					className={SECONDS_FIELD}
-				/>
-				<TooltipIconButton
-					label={`Reset ${spec.label.toLowerCase()}`}
-					size="sm"
-					variant="quiet"
-					unavailable={!value}
-					onClick={() => mergeAttrs(editor, element.id, { [attrKey]: null })}
-				>
-					<RotateCcw size={12} />
-				</TooltipIconButton>
-			</div>
+			// Keyed on the value so a trim dragged on the timeline replaces the draft.
+			<InputAttributeField
+				key={value}
+				element={element}
+				attrKey={attrKey}
+				value={value}
+				label={spec.label}
+				parse={(text) => clampedNumber(text, { min })?.toString()}
+				inputMode="decimal"
+				placeholder="Auto"
+				aria-label={`${spec.label} in seconds`}
+				className={SECONDS_FIELD}
+			/>
 		);
 	}
 

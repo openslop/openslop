@@ -57,56 +57,45 @@ export function volumeToGain(volume: number): number {
 	return volume / VOLUME.max;
 }
 
-const parseNumber = (raw: string | undefined): number | undefined => {
+export const parseNumber = (raw: string | undefined): number | undefined => {
 	const text = raw?.trim();
 	const value = text ? Number(text) : NaN;
 	return Number.isFinite(value) ? value : undefined;
 };
 
-type Bounds = { min: number; max?: number };
-
 export function clampedNumber(
 	raw: string | undefined,
-	bounds: Bounds & { fallback: number },
-): number;
-export function clampedNumber(
-	raw: string | undefined,
-	bounds: Bounds,
-): number | undefined;
-export function clampedNumber(
-	raw: string | undefined,
-	{ min, max = Infinity, fallback }: Bounds & { fallback?: number },
+	{ min, max = Infinity }: { min: number; max?: number },
 ): number | undefined {
 	const value = parseNumber(raw);
-	return value === undefined ? fallback : clamp(value, min, max);
+	return value === undefined ? undefined : clamp(value, min, max);
 }
 
 export function getVolume(element: ContentElement): number {
-	return clampedNumber(element.layoutAttributes?.volume, {
-		...VOLUME,
-		fallback: DEFAULT_VOLUME,
-	});
+	return (
+		clampedNumber(element.layoutAttributes?.volume, VOLUME) ?? DEFAULT_VOLUME
+	);
 }
 
 export function getDuration(element: ContentElement): number {
-	return clampedNumber(element.generationAttributes?.duration, {
-		...DURATION,
-		fallback: Number(DEFAULT_DURATION),
-	});
+	return (
+		clampedNumber(element.generationAttributes?.duration, DURATION) ??
+		Number(DEFAULT_DURATION)
+	);
 }
 
 export function getLoops(element: ContentElement): number {
-	return clampedNumber(element.layoutAttributes?.loops, {
-		...LOOPS,
-		fallback: Number(DEFAULT_LOOPS),
-	});
+	return (
+		clampedNumber(element.layoutAttributes?.loops, LOOPS) ??
+		Number(DEFAULT_LOOPS)
+	);
 }
 
 export const getLoop = (element: ContentElement): boolean =>
 	isToggleOn(element.layoutAttributes?.loop);
 
 export const getTrimStart = (element: ContentElement): number =>
-	clampedNumber(element.layoutAttributes?.trimStart, { min: 0, fallback: 0 });
+	clampedNumber(element.layoutAttributes?.trimStart, { min: 0 }) ?? 0;
 
 export const getTimelineDuration = (
 	element: ContentElement,

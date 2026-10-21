@@ -83,12 +83,12 @@ describe("AttributeBadge", () => {
 				secondsSpec,
 				"timelineDuration",
 			);
-			expect(reset(html)).not.toContain("aria-disabled");
+			expect(reset(html)).toBeDefined();
 		});
 
 		it("has nothing to reset while the field is on Auto", () => {
 			const html = render(elementWith({}), secondsSpec, "timelineDuration");
-			expect(reset(html)).toContain('aria-disabled="true"');
+			expect(reset(html)).toBeUndefined();
 		});
 	});
 });

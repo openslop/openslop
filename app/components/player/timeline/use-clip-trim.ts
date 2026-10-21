@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import isMatch from "lodash/isMatch";
 import round from "lodash/round";
 import { useSlateStatic } from "slate-react";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -46,12 +47,7 @@ export function useClipTrim(
 
 	const commit = () => {
 		setPreview(null);
-		if (
-			!preview ||
-			(preview.trimStartSec === element.trimStartSec &&
-				preview.durationSec === element.durationSec)
-		)
-			return;
+		if (!preview || isMatch(element, preview)) return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),
 			timelineDuration: toAttr(preview.durationSec),
