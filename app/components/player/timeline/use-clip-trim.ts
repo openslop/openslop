@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import round from "lodash/round";
 import { useSlateStatic } from "slate-react";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
@@ -14,7 +15,7 @@ import {
 import type { TimelineClip } from "./timeline-rows";
 
 // The layout snaps whatever is stored onto the frame grid.
-const toAttr = (sec: number) => String(Number(sec.toFixed(2)));
+const toAttr = (sec: number) => String(round(sec, 2));
 
 function useEdgeDrag(
 	pxPerSec: number,
