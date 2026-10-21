@@ -1,4 +1,5 @@
 import { useSlateStatic } from "slate-react";
+import { Badge } from "@/components/ui/badge";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -13,7 +14,6 @@ import {
 	CONTINUITY_ATTR,
 	continuityDef,
 } from "@/lib/connectors/video/start-frame";
-import { cn } from "@/lib/utils";
 import { ContinuityReferencesPopover } from "./attributes/continuity-section";
 import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
@@ -30,9 +30,6 @@ function formatValue(value: string, unit?: string): string {
 }
 
 const SECONDS_FIELD = "w-20 font-numeric";
-
-const PILL =
-	"bg-secondary text-secondary-foreground text-label px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
 
 interface AttributeBadgeProps {
 	element: ContentElement;
@@ -73,9 +70,9 @@ export function AttributeBadge({
 
 	if (!spec.edit) {
 		return (
-			<span className={cn(PILL, className)} title={tooltip}>
-				{labeled}
-			</span>
+			<Badge size="attribute" className={className} title={tooltip}>
+				<span className="min-w-0 truncate">{labeled}</span>
+			</Badge>
 		);
 	}
 

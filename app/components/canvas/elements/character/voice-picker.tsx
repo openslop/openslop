@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -75,8 +76,6 @@ function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 }
 
 const SKELETON_ROWS = 5;
-const VOICE_TAG_CLASS =
-	"shrink-0 rounded border border-border px-1 py-px text-badge-xs uppercase text-muted-foreground";
 
 export function VoiceRow({
 	voice,
@@ -109,9 +108,9 @@ export function VoiceRow({
 						{voice.name}
 					</span>
 					{[voice.language, voice.gender].filter(Boolean).map((tag) => (
-						<span key={tag} className={VOICE_TAG_CLASS}>
+						<Badge key={tag} variant="muted" size="sm" className="uppercase">
 							{tag}
-						</span>
+						</Badge>
 					))}
 					{selected && <Check className="h-3 w-3 shrink-0 text-accent" />}
 				</span>

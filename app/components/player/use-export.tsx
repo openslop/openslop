@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { errorMessage } from "@/lib/errors";
 import { runRender, type RenderUpdate } from "@/lib/render/render-client";
+import type { Resolution } from "@/lib/render/resolutions";
 import type { RenderLayout } from "@/lib/render/types";
 import { ExportDoneToast, ExportProgressToast } from "./export-toast";
 
@@ -79,10 +80,11 @@ export function useExport() {
 		};
 	}, []);
 
-	const exportVideo = async (layout: RenderLayout, scale?: number) => {
+	const exportVideo = async (layout: RenderLayout, resolution: Resolution) => {
 		setState({ status: "starting" });
 		try {
-			for await (const update of runRender(layout, scale)) setState(update);
+			for await (const update of runRender(layout, resolution))
+				setState(update);
 		} catch (error) {
 			setState({ status: "error", message: errorMessage(error) });
 		}

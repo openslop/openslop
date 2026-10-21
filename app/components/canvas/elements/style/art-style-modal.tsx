@@ -77,7 +77,8 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 						type="button"
 						variant="outline"
 						size="sm"
-						disabled={!hasReferences || deriving}
+						unavailable={!hasReferences}
+						disabled={deriving}
 						onClick={deriveFromReferences}
 						tooltip={
 							hasReferences

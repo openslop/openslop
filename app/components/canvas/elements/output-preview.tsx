@@ -5,13 +5,13 @@ import { UploadedBadge } from "./preview/uploaded-badge";
 import { useElementGeneration } from "./element-generation-context";
 
 function OutputPreviewComponent({ outputKind }: { outputKind: ResultKind }) {
-	const { status, seconds, result, error, discard } = useElementGeneration();
+	const { status, startedAt, result, error, discard } = useElementGeneration();
 	const Preview = PREVIEWS_BY_KIND[outputKind];
 
 	return (
 		<Preview
 			status={status}
-			seconds={seconds}
+			startedAt={startedAt}
 			result={result}
 			error={error}
 			onDiscard={discard}

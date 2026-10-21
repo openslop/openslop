@@ -97,17 +97,24 @@ describe("saveElementVersion", () => {
 
 	it("gives a version the same row whatever the client has read back", async () => {
 		const first = await savedRow("p1", makeVersion());
-		const remade = await savedRow(
+		const again = await savedRow("p1", makeVersion());
+
+		expect(again.id).toBe(first.id);
+		expect(String(first.id)).toMatch(
+			/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/,
+		);
+	});
+
+	it("gives a retake from unchanged inputs a row of its own", async () => {
+		const first = await savedRow("p1", makeVersion());
+		const retaken = await savedRow(
 			"p1",
 			makeVersion({
 				result: { durationSec: 0, imageUrl: "https://cdn/redone.png" },
 			}),
 		);
 
-		expect(remade.id).toBe(first.id);
-		expect(String(first.id)).toMatch(
-			/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/,
-		);
+		expect(retaken.id).not.toBe(first.id);
 	});
 
 	it("leaves the date to the row and hands back the row's", async () => {

@@ -211,8 +211,7 @@ export function ScrubBar({
 			aria-valuetext={ariaValueText}
 			aria-disabled={disabled || undefined}
 			className={cn(
-				"group relative flex touch-none items-center rounded-md focus-ring",
-				disabled ? "pointer-events-none opacity-50" : "cursor-pointer",
+				"group relative flex cursor-pointer touch-none items-center rounded-md focus-ring unavailable:pointer-events-none unavailable:opacity-50",
 				SCRUB_BAR_HEIGHT,
 				className,
 			)}

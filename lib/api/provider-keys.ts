@@ -48,8 +48,10 @@ const toRecord = (
 	createdAt: row.created_at,
 });
 
+const AccessMetadata = z.object({ api_access: z.boolean().default(false) });
+
 export const hasApiAccess = (user: User): boolean =>
-	Boolean(user.app_metadata.api_access);
+	AccessMetadata.parse(user.app_metadata).api_access;
 
 /**
  * The hosted provider has a key row like any other, so nothing downstream asks

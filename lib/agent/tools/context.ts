@@ -1,20 +1,9 @@
-import type { AssetElement, ElementType } from "@/lib/canvas/types";
-import type { GenerationStatus } from "@/lib/generation/snapshots";
+import type { AssetElement } from "@/lib/canvas/types";
+import type { ElementImage } from "../element-image";
 import type { ElementState } from "../element-state";
 import type { ElementLength } from "@/lib/render/element-lengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
-
-/** An element's pictures and the prompt behind them, never the rest of the result. */
-export type ElementImage = {
-	type: ElementType;
-	prompt: string;
-	/** Absent when the element's type holds no picture, so there is never one to wait for. */
-	pictures:
-		| { kind: "generated"; status: GenerationStatus; urls: string[] }
-		| { kind: "uploaded"; urls: string[] }
-		| undefined;
-};
 
 export const PROJECT_SETTERS = [
 	"setTitle",

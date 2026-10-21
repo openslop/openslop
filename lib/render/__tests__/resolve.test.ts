@@ -32,7 +32,7 @@ function makeSnapshot(
 ): ElementSnapshot {
 	return {
 		status: "idle",
-		seconds: 0,
+		startedAt: null,
 		pinned: false,
 		result: {
 			imageUrl: "https://example.com/asset.png",

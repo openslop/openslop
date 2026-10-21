@@ -2,6 +2,7 @@ import { Hourglass, Loader2, type IconComponent } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { ActiveGenerationStatus } from "@/lib/generation/snapshots";
+import { useElapsedSeconds } from "@/lib/components/use-elapsed-seconds";
 
 type Size = "sm" | "md";
 
@@ -32,17 +33,18 @@ const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
 
 export function GenerationIndicator({
 	status,
-	seconds = 0,
+	startedAt,
 	size = "md",
 	className,
 }: {
 	status: ActiveGenerationStatus;
-	seconds?: number;
+	startedAt: number | null;
 	size?: Size;
 	className?: string;
 }) {
 	const { icon: Icon, animation, label: labelFor } = STATUS[status];
 	const sizes = SIZE_CLASSES[size];
+	const seconds = useElapsedSeconds(startedAt);
 	const label = labelFor(seconds);
 
 	return (

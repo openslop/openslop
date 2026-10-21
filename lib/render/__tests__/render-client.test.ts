@@ -46,7 +46,7 @@ describe("runRender", () => {
 			.mockResolvedValueOnce({ type: "progress", progress: 0.4 })
 			.mockResolvedValueOnce({ type: "done", url: "/out.mp4", size: 1024 });
 
-		const seen = await collect(runRender(LAYOUT, 0.5));
+		const seen = await collect(runRender(LAYOUT, "720p"));
 
 		expect(seen).toEqual([
 			{ status: "rendering", progress: 0 },
@@ -55,7 +55,7 @@ describe("runRender", () => {
 		]);
 		expect(apiJsonMock).toHaveBeenNthCalledWith(1, "/api/render", {
 			method: "POST",
-			body: { inputProps: LAYOUT, scale: 0.5 },
+			body: { inputProps: LAYOUT, resolution: "720p" },
 		});
 		expect(apiJsonMock).toHaveBeenNthCalledWith(2, "/api/render/progress", {
 			method: "POST",
@@ -69,7 +69,7 @@ describe("runRender", () => {
 			.mockRejectedValueOnce(new UnreachableError(new TypeError()))
 			.mockResolvedValueOnce({ type: "done", url: "/out.mp4", size: 1024 });
 
-		const seen = await collect(runRender(LAYOUT));
+		const seen = await collect(runRender(LAYOUT, "1080p"));
 
 		expect(seen.at(-1)).toEqual({
 			status: "done",
@@ -84,7 +84,7 @@ describe("runRender", () => {
 			.mockResolvedValueOnce(HANDLE)
 			.mockResolvedValueOnce({ type: "done", url: "/out.mp4", size: 1 });
 
-		await collect(runRender(LAYOUT));
+		await collect(runRender(LAYOUT, "1080p"));
 
 		expect(apiJsonMock).toHaveBeenCalledTimes(2);
 	});
@@ -94,12 +94,16 @@ describe("runRender", () => {
 			.mockResolvedValueOnce(HANDLE)
 			.mockResolvedValueOnce({ type: "error", message: "Render failed" });
 
-		await expect(collect(runRender(LAYOUT))).rejects.toThrow("Render failed");
+		await expect(collect(runRender(LAYOUT, "1080p"))).rejects.toThrow(
+			"Render failed",
+		);
 	});
 
 	it("propagates a failure to start the render", async () => {
 		apiJsonMock.mockRejectedValueOnce(new Error("Unauthorized"));
 
-		await expect(collect(runRender(LAYOUT))).rejects.toThrow("Unauthorized");
+		await expect(collect(runRender(LAYOUT, "1080p"))).rejects.toThrow(
+			"Unauthorized",
+		);
 	});
 });

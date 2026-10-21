@@ -25,7 +25,7 @@ type OmniLimits = {
 	sound: boolean;
 };
 
-const element = async (
+const omniElement = async (
 	{ name, avatarUrl, voice }: Pictured,
 	limits: OmniLimits,
 ) => {
@@ -71,7 +71,7 @@ export const klingOmni =
 			...inputsOf({
 				frameImages: compact([startFrame]),
 				elements: await Promise.all(
-					seated.map((character) => element(character, limits)),
+					seated.map((character) => omniElement(character, limits)),
 				),
 				referenceImages: [
 					...continuityFrames,

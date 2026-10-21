@@ -63,6 +63,15 @@ describe("AttributeBadge", () => {
 		expect(html).not.toContain(">s<");
 	});
 
+	it("renders a read-only value as a badge, not a control", () => {
+		const html = render(elementWith({ motion: "zoom_in" }), {
+			label: "Motion",
+		});
+		expect(html).toContain('data-slot="badge"');
+		expect(html).toContain("zoom_in");
+		expect(html).not.toContain("<button");
+	});
+
 	it("renders nothing with no value and no edit affordance", () => {
 		expect(render(elementWith({}), { label: "Motion" })).not.toContain(
 			"Motion",

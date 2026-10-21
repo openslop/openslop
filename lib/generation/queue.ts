@@ -5,7 +5,6 @@ import {
 	resolveConcurrencyLimits,
 	type ConcurrencyLimits,
 } from "./concurrency";
-import { ElapsedTicker } from "./elapsed-ticker";
 import { generateForElement } from "./generate-for-element";
 import { SnapshotStore, type ElementSnapshot } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
@@ -24,9 +23,6 @@ type ActiveJob = {
  */
 export class GenerationQueue {
 	private readonly snapshots: SnapshotStore;
-	private readonly ticker = new ElapsedTicker((elapsed) =>
-		this.onTick(elapsed),
-	);
 	private pending: GenerationNode[] = [];
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
@@ -53,17 +49,6 @@ export class GenerationQueue {
 	isBusy = () => this.snapshots.isBusy();
 	snapshot = () => this.snapshots.all();
 
-	private onTick(elapsed: [string, number][]) {
-		let changed = false;
-		for (const [id, seconds] of elapsed) {
-			const snap = this.snapshots.get(id);
-			if (snap.status !== "generating" || snap.seconds === seconds) continue;
-			this.snapshots.update(id, { seconds });
-			changed = true;
-		}
-		if (changed) this.snapshots.notify();
-	}
-
 	/** Roots are always queued: asking to generate something means regenerating it. */
 	enqueueGraph(roots: GenerationNode[]) {
 		const rootIds = new Set(roots.map((root) => root.id));
@@ -73,7 +58,7 @@ export class GenerationQueue {
 			if (!rootIds.has(node.id) && !needsGeneration(node, this)) continue;
 			this.snapshots.update(node.id, {
 				status: "queued",
-				seconds: 0,
+				startedAt: null,
 				connectorType: node.job.connectorType,
 			});
 			this.pending.push(node);
@@ -99,10 +84,7 @@ export class GenerationQueue {
 	}
 
 	cancelAll() {
-		for (const [id, { controller }] of this.active) {
-			controller.abort();
-			this.ticker.stop(id);
-		}
+		for (const { controller } of this.active.values()) controller.abort();
 		this.active.clear();
 		this.pending = [];
 		for (const id of this.snapshots.ids()) {
@@ -171,7 +153,6 @@ export class GenerationQueue {
 	private abortJob(id: string) {
 		this.active.get(id)?.controller.abort();
 		this.active.delete(id);
-		this.ticker.stop(id);
 		this.pending = this.pending.filter((node) => node.id !== id);
 	}
 
@@ -242,9 +223,11 @@ export class GenerationQueue {
 		const { signal } = controller;
 		this.active.set(elementId, { controller, connectorType });
 
-		this.snapshots.update(elementId, { status: "generating", seconds: 0 });
+		this.snapshots.update(elementId, {
+			status: "generating",
+			startedAt: Date.now(),
+		});
 		this.snapshots.notify();
-		this.ticker.start(elementId);
 
 		try {
 			const inputs = generationInputs(node, this);
@@ -267,7 +250,7 @@ export class GenerationQueue {
 			console.error(`Generation failed for element ${elementId}:`, error);
 			this.snapshots.update(elementId, {
 				status: "idle",
-				seconds: 0,
+				startedAt: null,
 				result: null,
 				error: errorMessage(error),
 			});
@@ -278,7 +261,6 @@ export class GenerationQueue {
 	}
 
 	private finalizeJob(elementId: string) {
-		this.ticker.stop(elementId);
 		this.active.delete(elementId);
 		this.processQueue();
 	}

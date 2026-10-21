@@ -43,6 +43,27 @@ export type BundleFile = BundleFileData | BundleFileRemote;
 
 type PutBody = Parameters<typeof import("@vercel/blob").put>[1];
 
+/** A remote file served with no bytes yet, as a host may briefly do right after it reports the file done. */
+export class EmptyRemoteFileError extends Error {
+	constructor(key: string, provider: string) {
+		super(`Empty file for "${key}" from ${provider}`);
+		this.name = "EmptyRemoteFileError";
+	}
+}
+
+/** The stream itself, or null when it ends before its first byte. */
+async function withBytes(
+	body: ReadableStream<Uint8Array> | null,
+): Promise<ReadableStream<Uint8Array> | null> {
+	if (!body) return null;
+	const [probe, stream] = body.tee();
+	const reader = probe.getReader();
+	const { value } = await reader.read();
+	// A tee branch's cancel settles only once the other branch ends too
+	void reader.cancel();
+	return value?.byteLength ? stream : null;
+}
+
 /** Remote sources stream in at an unknown size, so they upload in chunks. */
 async function sourceOf(
 	file: BundleFile,
@@ -51,9 +72,9 @@ async function sourceOf(
 	if ("data" in file) return { body: file.data, multipart: false };
 	const res = await fetchOk(file.url, `Failed to fetch "${file.key}"`);
 	// Vercel rejects empty uploads as "Invalid body"
-	if (!res.body || res.headers.get("content-length") === "0")
-		throw new Error(`Empty file for "${file.key}" from ${provider}`);
-	return { body: res.body, multipart: true };
+	const body = await withBytes(res.body);
+	if (!body) throw new EmptyRemoteFileError(file.key, provider);
+	return { body, multipart: true };
 }
 
 export const BundleResponseSchema = BundleContentsSchema.extend({

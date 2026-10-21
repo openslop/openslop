@@ -42,12 +42,12 @@ export function PreviewChrome({ topRight }: PreviewOverlays) {
 	);
 }
 
-export function ResultOverlay({ status, seconds }: GenerationState) {
+export function ResultOverlay({ status, startedAt }: GenerationState) {
 	if (!isGenerationActive(status)) return null;
 	return (
 		<GenerationIndicator
 			status={status}
-			seconds={seconds}
+			startedAt={startedAt}
 			className="absolute top-2 left-2 z-10"
 		/>
 	);
@@ -99,7 +99,7 @@ export function ErrorMessage({ message }: { message: string }) {
 
 export function PlaceholderOverlay({
 	status,
-	seconds,
+	startedAt,
 	error,
 	onDiscard,
 }: PlaceholderProps) {
@@ -109,7 +109,7 @@ export function PlaceholderOverlay({
 			{isGenerationActive(status) && (
 				<>
 					<div className="absolute top-2 left-2 z-10">
-						<GenerationIndicator status={status} seconds={seconds} />
+						<GenerationIndicator status={status} startedAt={startedAt} />
 					</div>
 					<CancelButton onClick={onDiscard} />
 				</>

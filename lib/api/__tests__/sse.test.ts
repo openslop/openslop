@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { z, ZodError } from "zod";
 import { formatSSE, readSSE } from "../sse";
+
+const AnyEvent = z.record(z.string(), z.unknown());
 
 function makeSSEStream(chunks: string[]): ReadableStream {
 	const encoder = new TextEncoder();
@@ -28,38 +31,31 @@ describe("formatSSE", () => {
 describe("readSSE", () => {
 	it("parses single SSE event", async () => {
 		const stream = makeSSEStream(['data: {"msg":"hello"}\n\n']);
-		const results: unknown[] = [];
-		for await (const event of readSSE(stream)) {
-			results.push(event);
-		}
-		expect(results).toEqual([{ msg: "hello" }]);
+		expect(await Array.fromAsync(readSSE(stream, AnyEvent))).toEqual([
+			{ msg: "hello" },
+		]);
 	});
 
 	it("parses multiple SSE events in one chunk", async () => {
 		const stream = makeSSEStream(['data: {"a":1}\n\ndata: {"b":2}\n\n']);
-		const results: unknown[] = [];
-		for await (const event of readSSE(stream)) {
-			results.push(event);
-		}
-		expect(results).toEqual([{ a: 1 }, { b: 2 }]);
+		expect(await Array.fromAsync(readSSE(stream, AnyEvent))).toEqual([
+			{ a: 1 },
+			{ b: 2 },
+		]);
 	});
 
 	it("handles events split across chunks", async () => {
 		const stream = makeSSEStream(['data: {"spl', 'it":"yes"}\n\n']);
-		const results: unknown[] = [];
-		for await (const event of readSSE(stream)) {
-			results.push(event);
-		}
-		expect(results).toEqual([{ split: "yes" }]);
+		expect(await Array.fromAsync(readSSE(stream, AnyEvent))).toEqual([
+			{ split: "yes" },
+		]);
 	});
 
 	it("skips blocks that don't start with data:", async () => {
 		const stream = makeSSEStream(['event: update\n\ndata: {"x":1}\n\n']);
-		const results: unknown[] = [];
-		for await (const event of readSSE(stream)) {
-			results.push(event);
-		}
-		expect(results).toEqual([{ x: 1 }]);
+		expect(await Array.fromAsync(readSSE(stream, AnyEvent))).toEqual([
+			{ x: 1 },
+		]);
 	});
 
 	it("throws on a malformed event instead of dropping it", async () => {
@@ -67,32 +63,37 @@ describe("readSSE", () => {
 			"data: {bad json}\n\n",
 			'data: {"good":true}\n\n',
 		]);
-		await expect(Array.fromAsync(readSSE(stream))).rejects.toThrow(SyntaxError);
+		await expect(Array.fromAsync(readSSE(stream, AnyEvent))).rejects.toThrow(
+			SyntaxError,
+		);
+	});
+
+	it("throws on an event of the wrong shape instead of yielding it", async () => {
+		const stream = makeSSEStream(['data: {"text":1,"done":false}\n\n']);
+		await expect(
+			Array.fromAsync(
+				readSSE(stream, z.object({ text: z.string(), done: z.boolean() })),
+			),
+		).rejects.toThrow(ZodError);
 	});
 
 	it("returns empty for empty stream", async () => {
 		const stream = makeSSEStream([]);
-		const results: unknown[] = [];
-		for await (const event of readSSE(stream)) {
-			results.push(event);
-		}
-		expect(results).toEqual([]);
+		expect(await Array.fromAsync(readSSE(stream, AnyEvent))).toEqual([]);
 	});
 
 	it("handles trailing buffer without double newline", async () => {
 		const stream = makeSSEStream([
 			'data: {"a":1}\n\ndata: {"incomplete":true}',
 		]);
-		const results: unknown[] = [];
-		for await (const event of readSSE(stream)) {
-			results.push(event);
-		}
-		expect(results).toEqual([{ a: 1 }]);
+		expect(await Array.fromAsync(readSSE(stream, AnyEvent))).toEqual([
+			{ a: 1 },
+		]);
 	});
 
 	it("releases the underlying reader when the consumer breaks early", async () => {
 		const stream = makeSSEStream(['data: {"a":1}\n\n', 'data: {"b":2}\n\n']);
-		for await (const event of readSSE(stream)) {
+		for await (const event of readSSE(stream, AnyEvent)) {
 			expect(event).toEqual({ a: 1 });
 			break;
 		}

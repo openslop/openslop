@@ -13,11 +13,14 @@ import {
 } from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insert-element";
 import { isScene } from "@/lib/canvas/scenes";
+import type { AssetType } from "@/lib/canvas/types";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
 
 const OK: RefineOpResult = { ok: true };
+
+const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
 
 export function applyRefineOp(
 	editor: Editor,
@@ -85,6 +88,8 @@ function applyInsert(
 	anchorMap: Record<string, string>,
 ): RefineOpResult {
 	if (isAssetType(op.type)) {
+		if (CHARACTER_ASSETS.has(op.type) && !op.attrs?.name)
+			return { ok: false, reason: `insert: ${op.type} needs a name` };
 		setAsset(editor, op.type, op.attrs?.name, {
 			attrs: op.attrs,
 			text: op.text || undefined,

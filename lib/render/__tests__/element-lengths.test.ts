@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import type { ContentType } from "@/lib/canvas/types";
 import { measureElementLengths, measureRuntime } from "../element-lengths";
-import { buildRenderLayout } from "../scene-builder";
 import type { ResolvedElement } from "../types";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { secondsForWords } from "@/lib/project/video-length";
+import { layoutOf } from "./_layout";
 import { splitAttributes } from "@/lib/canvas/element-attributes";
 
 let nextId = 0;
@@ -199,7 +199,7 @@ describe("against buildRenderLayout", () => {
 			scene(second, shortLine, element("music", "Soft piano.")),
 			scene(third, lastLine),
 		]);
-		const { series } = buildRenderLayout([
+		const { series } = layoutOf([
 			resolved(first, 0),
 			resolved(line, secondsForWords(90)),
 			resolved(second, 8),

@@ -17,7 +17,7 @@ const cancelButtonClass = (html: string) => {
 
 const generating = {
 	status: "generating",
-	seconds: 1,
+	startedAt: 0,
 	error: null,
 	onDiscard: () => {},
 } as const;
@@ -36,7 +36,7 @@ describe("cancel button offset", () => {
 		const html = withTooltip(
 			<MediaResult
 				status="idle"
-				seconds={0}
+				startedAt={null}
 				error={null}
 				onDiscard={() => {}}
 				url="https://cdn.example.com/a.png"

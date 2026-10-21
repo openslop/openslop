@@ -133,6 +133,7 @@ function RailItem({
 			onClick={onClick}
 			className={className}
 			aria-label={label}
+			aria-pressed={selected}
 		>
 			{body}
 		</button>

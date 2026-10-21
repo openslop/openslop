@@ -5,28 +5,18 @@ import {
 	type VideoConfig,
 	type RenderLayout,
 } from "./types";
-import {
-	type AspectRatio,
-	ASPECT_RATIO_DIMENSIONS,
-} from "../project/aspect-ratio";
-import {
-	DEFAULT_CAPTION_STYLE,
-	type CaptionStyle,
-} from "../captions/caption-style";
+import { ASPECT_RATIO_DIMENSIONS } from "../project/aspect-ratio";
+import type { VideoSettings } from "../project/video-settings";
 import { blankScene } from "./blank-scene";
 import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
-import {
-	DEFAULT_TRANSITION,
-	transitionOverlapSec,
-	type TransitionType,
-} from "./transitions";
+import { transitionOverlapSec } from "./transitions";
 
-export type BuildLayoutOptions = Partial<VideoConfig> & {
-	transitionType?: TransitionType;
-	aspectRatio?: AspectRatio;
-	captionStyle?: CaptionStyle;
-};
+export type BuildLayoutOptions = Pick<
+	VideoSettings,
+	"transitionType" | "aspectRatio" | "captionStyle"
+> &
+	Partial<Pick<VideoConfig, "fps">>;
 
 /** No sequence is ever shorter than this, however little content it holds. */
 export const MIN_DURATION_SEC = 1;
@@ -84,13 +74,14 @@ function getForegroundCursor(current: Sequence | undefined, cursor: number) {
  */
 export function buildRenderLayout(
 	elements: ResolvedElement[],
-	options?: BuildLayoutOptions,
+	{
+		transitionType,
+		aspectRatio,
+		captionStyle,
+		fps = DEFAULT_CONFIG.fps,
+	}: BuildLayoutOptions,
 ): RenderLayout {
-	const dimensions = options?.aspectRatio
-		? ASPECT_RATIO_DIMENSIONS[options.aspectRatio].output
-		: undefined;
-	const config = { ...DEFAULT_CONFIG, ...dimensions, ...options };
-	const transitionType = options?.transitionType ?? DEFAULT_TRANSITION;
+	const config = { fps, ...ASPECT_RATIO_DIMENSIONS[aspectRatio].output };
 	// Scenes are laid down one rounded duration at a time while layers are
 	// positioned from the accumulated seconds; snapping here keeps them equal.
 	const onGrid = (sec: number) =>
@@ -170,6 +161,6 @@ export function buildRenderLayout(
 		),
 		transitionType,
 		transitionDurationSec,
-		captionStyle: options?.captionStyle ?? DEFAULT_CAPTION_STYLE,
+		captionStyle,
 	};
 }

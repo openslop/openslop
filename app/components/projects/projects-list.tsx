@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { startTransition, useOptimistic, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "@/components/ui/icon";
 import { plural } from "@/lib/format";
@@ -14,18 +14,25 @@ import { DotGrid } from "@/components/ui/dot-grid";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProjectCard } from "./project-card";
 
+const withoutProject = (list: ProjectRow[], id: string) =>
+	list.filter((project) => project.id !== id);
+
 export default function ProjectsList({
 	initialProjects,
 }: {
 	initialProjects: ProjectRow[];
 }) {
 	const [projects, setProjects] = useState(initialProjects);
+	const [visibleProjects, hideProject] = useOptimistic(
+		projects,
+		withoutProject,
+	);
 	const [deleting, setDeleting] = useState<ProjectRow>();
-	const [pending, startTransition] = useTransition();
+	const [creating, startCreate] = useTransition();
 	const router = useRouter();
 
 	const handleCreate = () => {
-		startTransition(async () => {
+		startCreate(async () => {
 			try {
 				const project = await createProject();
 				router.push(`/projects/${project.id}`);
@@ -35,15 +42,16 @@ export default function ProjectsList({
 		});
 	};
 
-	const handleDelete = async (id: string) => {
-		const previous = projects;
-		setProjects((list) => list.filter((project) => project.id !== id));
-		try {
-			await deleteProject(id);
-		} catch (cause) {
-			toastError(cause, "Could not delete project");
-			setProjects(previous);
-		}
+	const handleDelete = (id: string) => {
+		startTransition(async () => {
+			hideProject(id);
+			try {
+				await deleteProject(id);
+				setProjects((list) => withoutProject(list, id));
+			} catch (cause) {
+				toastError(cause, "Could not delete project");
+			}
+		});
 	};
 
 	return (
@@ -58,19 +66,19 @@ export default function ProjectsList({
 								My Slop
 							</h1>
 							<p className="mt-1 text-body text-muted-foreground">
-								{projects.length === 0
+								{visibleProjects.length === 0
 									? "No projects yet — start your first slop."
-									: `${projects.length} ${plural(projects.length, "project")}`}
+									: `${visibleProjects.length} ${plural(visibleProjects.length, "project")}`}
 							</p>
 						</div>
-						<Button type="button" onClick={handleCreate} disabled={pending}>
+						<Button type="button" onClick={handleCreate} disabled={creating}>
 							<Plus size={16} />
 							New slop
 						</Button>
 					</header>
 
 					<ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-						{projects.map((project) => (
+						{visibleProjects.map((project) => (
 							<ProjectCard
 								key={project.id}
 								project={project}
@@ -86,7 +94,7 @@ export default function ProjectsList({
 				title={(project) => `Delete ${project.name}?`}
 				description="This permanently deletes the project and everything generated in it. It can't be undone."
 				actionLabel="Delete project"
-				onConfirm={(project) => void handleDelete(project.id)}
+				onConfirm={(project) => handleDelete(project.id)}
 			/>
 		</TooltipProvider>
 	);

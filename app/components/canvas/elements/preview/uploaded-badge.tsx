@@ -10,10 +10,7 @@ export function UploadedBadge() {
 	if (!pinned || !hasResult) return null;
 	return (
 		<SimpleTooltip label="Uploaded, so it is never regenerated">
-			<Badge
-				variant="outline"
-				className="border-transparent bg-on-media/70 text-on-media-foreground shadow-elevation-1"
-			>
+			<Badge variant="onMedia">
 				<Pin className="h-3 w-3" />
 				Uploaded
 			</Badge>

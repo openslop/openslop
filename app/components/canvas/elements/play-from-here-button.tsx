@@ -15,13 +15,13 @@ export function PlayFromHereButton({ scene }: { scene: Scene }) {
 	const { playFromFrame } = usePlayerControl();
 	const seq = useSceneSequence(scene);
 	const startFrame = seq ? toFrames(seq.start, layout.fps) : null;
-	const disabled = startFrame == null;
+	const unavailable = startFrame == null;
 	return (
 		<TooltipIconButton
-			label={disabled ? "Generate scene to play" : "Play from here"}
+			label={unavailable ? "Generate scene to play" : "Play from here"}
 			ariaLabel="Play from here"
 			className="bg-muted"
-			disabled={disabled}
+			unavailable={unavailable}
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={() => {
 				if (startFrame != null) playFromFrame(startFrame);

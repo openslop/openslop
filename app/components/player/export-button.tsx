@@ -15,22 +15,21 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { formatBytes } from "@/lib/format";
-import { RESOLUTIONS, scaleForWidth } from "@/lib/project/resolutions";
-import { BASE_WIDTH } from "@/lib/render/types";
+import { RESOLUTIONS, type Resolution } from "@/lib/render/resolutions";
 import { useSloppy } from "../sloppy/sloppy-provider";
 import { useLayout } from "./render-layout-context";
 import { useExport } from "./use-export";
 
 const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
-	value: String(resolution.width),
-	label: resolution.label,
+	value: resolution,
+	label: resolution,
 }));
 
 export function ExportButton() {
 	const { layout, ready } = useLayout();
 	const { loading } = useSloppy();
 	const { state, exportVideo, reset, open, setOpen } = useExport();
-	const [width, setWidth] = useState(BASE_WIDTH);
+	const [resolution, setResolution] = useState<Resolution>("1080p");
 
 	const disabled = loading || !layout.series.length || !ready;
 	const isRendering = state.status === "rendering";
@@ -113,9 +112,9 @@ export function ExportButton() {
 						<div className="flex items-center justify-between gap-3">
 							<span className="text-label">Resolution</span>
 							<SelectField
-								value={String(width)}
+								value={resolution}
 								options={RESOLUTION_OPTIONS}
-								onChange={(value) => setWidth(Number(value))}
+								onChange={setResolution}
 								ariaLabel="Resolution"
 							/>
 						</div>
@@ -129,7 +128,7 @@ export function ExportButton() {
 							type="button"
 							variant="generate"
 							size="sm"
-							onClick={() => exportVideo(layout, scaleForWidth(width))}
+							onClick={() => exportVideo(layout, resolution)}
 							disabled={disabled}
 							className="w-full"
 						>
