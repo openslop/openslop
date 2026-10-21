@@ -2,10 +2,9 @@ import type { IconComponent } from "@/components/ui/icon";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
-import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { isTrimmable, playedSec, type Trim } from "@/lib/render/clip-trim";
-import { formatTime, formatTimeRange } from "@/lib/render/timestamps";
+import { formatTimeRange } from "@/lib/render/timestamps";
 import type { ResolvedElement } from "@/lib/render/types";
 import { cn } from "@/lib/utils";
 import { ClipWaveform } from "./clip-waveform";
@@ -27,20 +26,19 @@ type PreviewBox = { src: string; width?: number };
 
 const urlAt = (url: string, sec: number) => (sec > 0 ? `${url}#t=${sec}` : url);
 
-function previewsPastMedia(
-	{
-		url,
-		loop,
-		trimStartSec,
-		mediaDurationSec,
-	}: Pick<
+function visualPreviews(
+	element: Pick<
 		ResolvedElement,
 		"url" | "loop" | "trimStartSec" | "mediaDurationSec"
 	>,
 	playedWidth: number,
 	width: number,
 ): PreviewBox[] {
-	const playthrough = { src: urlAt(url, trimStartSec), width: playedWidth };
+	const { url, loop, trimStartSec, mediaDurationSec } = element;
+	const inPoint = urlAt(url, trimStartSec);
+	if (!isTrimmable(element) || playedWidth >= width - ROUNDING_SLACK_PX)
+		return [{ src: inPoint }];
+	const playthrough = { src: inPoint, width: playedWidth };
 	if (!loop) return [playthrough, { src: urlAt(url, mediaDurationSec) }];
 	return Array.from(
 		{ length: Math.ceil(width / playedWidth) },
@@ -118,21 +116,10 @@ export function TimelineClip({
 	const { element } = clip;
 	const config = ELEMENT_CONFIGS[element.type];
 	const range = formatTimeRange(clip.start, clip.duration);
-	const played = playedSec({ ...element, ...trim });
-	const playedWidth = played * pxPerSec;
-	const outlastsMedia =
-		config.layer === "visual" &&
-		isTrimmable(element) &&
-		playedWidth < width - ROUNDING_SLACK_PX;
-	const previews = outlastsMedia
-		? previewsPastMedia(element, playedWidth, width)
-		: [{ src: urlAt(element.url, element.trimStartSec) }];
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
 		range,
-		outlastsMedia &&
-			`${LOOP_FACES[element.loop ? "on" : "off"].label} after ${formatTime(clip.start + played)}`,
 	]
 		.filter(Boolean)
 		.join(", ");
@@ -163,7 +150,11 @@ export function TimelineClip({
 						/>
 					</Preview>
 				) : (
-					previews.map((box, i) => (
+					visualPreviews(
+						element,
+						playedSec({ ...element, ...trim }) * pxPerSec,
+						width,
+					).map((box, i) => (
 						<Preview key={i} width={box.width}>
 							<div className="relative aspect-square h-full overflow-hidden">
 								<MediaWithSkeleton

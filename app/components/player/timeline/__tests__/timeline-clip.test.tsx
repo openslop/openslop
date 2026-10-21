@@ -37,42 +37,10 @@ const markup = (el: ResolvedElement, duration: number, trim: Trim = el) =>
 		/>,
 	);
 
-const name = (el: ResolvedElement, duration: number, trim: Trim = el) =>
-	markup(el, duration, trim).match(/aria-label="([^"]*)"/)?.[1];
-
 const sources = (el: ResolvedElement, duration: number, trim: Trim = el) =>
 	[...markup(el, duration, trim).matchAll(/<video src="([^"]*)"/g)].map(
 		([, src]) => src,
 	);
-
-describe("TimelineClip past its media", () => {
-	it("says nothing while the media covers the clip", () => {
-		expect(name(element(), 5)).toBe("Video, 0:00–0:05");
-	});
-
-	it("names what fills a clip that outlasts its media", () => {
-		expect(name(element(), 8)).toBe(
-			"Video, 0:00–0:08, Freeze on last frame after 0:05",
-		);
-		expect(name(element({ loop: true }), 8)).toContain("Loop after 0:05");
-	});
-
-	it("marks a video dragged past its media", () => {
-		const video = element();
-		expect(name(video, 8, { ...video, durationSec: 8 })).toContain(
-			"Freeze on last frame",
-		);
-	});
-
-	it("never marks a still, which has no media length", () => {
-		const still = element({
-			type: "image",
-			mediaDurationSec: 0,
-			durationSec: 0,
-		});
-		expect(name(still, 8)).toBe("Image, 0:00–0:08");
-	});
-});
 
 describe("TimelineClip footage", () => {
 	it("draws the footage once while the media covers the clip", () => {
@@ -99,5 +67,14 @@ describe("TimelineClip footage", () => {
 				durationSec: 7.7,
 			}),
 		).toEqual(["https://vid/a.mp4", "https://vid/a.mp4#t=5"]);
+	});
+
+	it("draws a still once, since it has no media length", () => {
+		const still = element({
+			type: "image",
+			mediaDurationSec: 0,
+			durationSec: 0,
+		});
+		expect(markup(still, 8).match(/<img /g)).toHaveLength(1);
 	});
 });
