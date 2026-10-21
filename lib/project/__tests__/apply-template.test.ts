@@ -119,14 +119,17 @@ describe("applyTemplate", () => {
 		expect(() => apply("does-not-exist")).toThrow(/Unknown template id/);
 	});
 
-	it("resets the video settings the store holds", () => {
-		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
+	it("keeps the user's video settings", () => {
+		store.getState().updateVideoSettings({
+			aspectRatio: "9:16",
+			captions: false,
+			filmGrain: true,
+		});
+		const videoSettings = store.getState().videoSettings;
 
 		apply("pov-life");
 
-		expect(store.getState().videoSettings).toEqual(
-			createProjectStore().getState().videoSettings,
-		);
+		expect(store.getState().videoSettings).toEqual(videoSettings);
 	});
 
 	it("leaves the script's scenes where they are", () => {

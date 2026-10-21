@@ -588,7 +588,7 @@ Add motion to all images and videos. All narrations should have speed="slow".
 		color: "#8A0000",
 		style: {
 			description:
-				"Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, vertical 9:16 composition, Rockstar Games concept art style",
+				"Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, Rockstar Games concept art style",
 		},
 		referenceImages: [
 			templateAsset("true-crime-1"),
