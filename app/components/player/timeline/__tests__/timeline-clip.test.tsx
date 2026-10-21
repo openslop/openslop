@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import type { Trim } from "@/lib/render/clip-trim";
 import type { ResolvedElement } from "@/lib/render/types";
 import { TimelineClip } from "../timeline-clip";
 
@@ -24,7 +25,7 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 	...over,
 });
 
-const markup = (el: ResolvedElement, duration: number, trim = el) =>
+const markup = (el: ResolvedElement, duration: number, trim: Trim = el) =>
 	renderToStaticMarkup(
 		<TimelineClip
 			clip={{ key: "clip", element: el, start: 0, duration }}
@@ -36,11 +37,11 @@ const markup = (el: ResolvedElement, duration: number, trim = el) =>
 		/>,
 	);
 
-const name = (el: ResolvedElement, duration: number, trim = el) =>
+const name = (el: ResolvedElement, duration: number, trim: Trim = el) =>
 	markup(el, duration, trim).match(/aria-label="([^"]*)"/)?.[1];
 
-const footage = (el: ResolvedElement, duration: number) =>
-	[...markup(el, duration).matchAll(/<video src="([^"]*)"/g)].map(
+const sources = (el: ResolvedElement, duration: number, trim: Trim = el) =>
+	[...markup(el, duration, trim).matchAll(/<video src="([^"]*)"/g)].map(
 		([, src]) => src,
 	);
 
@@ -75,17 +76,28 @@ describe("TimelineClip past its media", () => {
 
 describe("TimelineClip footage", () => {
 	it("draws the footage once while the media covers the clip", () => {
-		expect(footage(element(), 5)).toEqual(["https://vid/a.mp4"]);
+		expect(sources(element(), 5)).toEqual(["https://vid/a.mp4"]);
 	});
 
 	it("holds the frame a frozen clip ends on", () => {
-		expect(footage(element({ trimStartSec: 1, durationSec: 4 }), 8)).toEqual([
-			"https://vid/a.mp4",
+		expect(sources(element({ trimStartSec: 1, durationSec: 4 }), 8)).toEqual([
+			"https://vid/a.mp4#t=1",
 			"https://vid/a.mp4#t=5",
 		]);
 	});
 
-	it("restarts the footage each time a looping clip does", () => {
-		expect(footage(element({ loop: true }), 12)).toHaveLength(3);
+	it("restarts the footage at its trim start each time a looping clip does", () => {
+		expect(
+			sources(element({ loop: true, trimStartSec: 1, durationSec: 4 }), 12),
+		).toEqual(Array(3).fill("https://vid/a.mp4#t=1"));
+	});
+
+	it("draws from the committed trim while a drag previews another", () => {
+		expect(
+			sources(element(), 8, {
+				trimStartSec: 0.30000000000000004,
+				durationSec: 7.7,
+			}),
+		).toEqual(["https://vid/a.mp4", "https://vid/a.mp4#t=5"]);
 	});
 });

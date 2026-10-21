@@ -23,25 +23,30 @@ const SELECTED_EDGE = "border-current/60";
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
 
-type FootageBox = { src: string; width?: number };
+type PreviewBox = { src: string; width?: number };
 
-/** A loop restarts the footage; a freeze holds the frame it ends on. */
+const frameAt = (url: string, sec: number) =>
+	sec > 0 ? `${url}#t=${sec}` : url;
+
 function overdrawn(
-	{ url, loop }: Pick<ResolvedElement, "url" | "loop">,
-	outSec: number,
+	{
+		url,
+		loop,
+		trimStartSec,
+		mediaDurationSec,
+	}: Pick<
+		ResolvedElement,
+		"url" | "loop" | "trimStartSec" | "mediaDurationSec"
+	>,
 	playedWidth: number,
 	width: number,
-): FootageBox[] {
-	if (!loop)
-		return [{ src: url, width: playedWidth }, { src: `${url}#t=${outSec}` }];
-	return Array.from({ length: Math.ceil(width / playedWidth) }, () => ({
-		src: url,
-		width: playedWidth,
-	}));
+): PreviewBox[] {
+	const pass = { src: frameAt(url, trimStartSec), width: playedWidth };
+	if (!loop) return [pass, { src: frameAt(url, mediaDurationSec) }];
+	return Array.from({ length: Math.ceil(width / playedWidth) }, () => pass);
 }
 
-/** Laid end to end, each box spans exactly its own stretch of the clip. */
-function Footage({
+function Preview({
 	width,
 	children,
 }: {
@@ -119,9 +124,9 @@ export function TimelineClip({
 		playedWidth < width - ROUNDING_SLACK_PX
 			? LOOP_FACES[element.loop ? "on" : "off"]
 			: undefined;
-	const footage = fill
-		? overdrawn(element, trim.trimStartSec + played, playedWidth, width)
-		: [{ src: element.url }];
+	const previews = fill
+		? overdrawn(element, playedWidth, width)
+		: [{ src: frameAt(element.url, element.trimStartSec) }];
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
@@ -149,16 +154,16 @@ export function TimelineClip({
 			/>
 			<div className="flex min-h-0 flex-1">
 				{config.layer === "audio" ? (
-					<Footage>
+					<Preview>
 						<ClipWaveform
 							src={element.url}
 							width={element.mediaDurationSec * pxPerSec}
 							offset={trim.trimStartSec * pxPerSec}
 						/>
-					</Footage>
+					</Preview>
 				) : (
-					footage.map((box, i) => (
-						<Footage key={i} width={box.width}>
+					previews.map((box, i) => (
+						<Preview key={i} width={box.width}>
 							<div className="relative aspect-square h-full overflow-hidden">
 								<MediaWithSkeleton
 									outputKind={config.outputKind}
@@ -166,7 +171,7 @@ export function TimelineClip({
 									alt=""
 								/>
 							</div>
-						</Footage>
+						</Preview>
 					))
 				)}
 			</div>
