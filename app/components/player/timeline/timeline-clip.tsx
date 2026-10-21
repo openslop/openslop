@@ -25,10 +25,9 @@ const fit = (text: string, width: number) =>
 
 type PreviewBox = { src: string; width?: number };
 
-const frameAt = (url: string, sec: number) =>
-	sec > 0 ? `${url}#t=${sec}` : url;
+const urlAt = (url: string, sec: number) => (sec > 0 ? `${url}#t=${sec}` : url);
 
-function overdrawn(
+function previewsPastMedia(
 	{
 		url,
 		loop,
@@ -41,9 +40,12 @@ function overdrawn(
 	playedWidth: number,
 	width: number,
 ): PreviewBox[] {
-	const pass = { src: frameAt(url, trimStartSec), width: playedWidth };
-	if (!loop) return [pass, { src: frameAt(url, mediaDurationSec) }];
-	return Array.from({ length: Math.ceil(width / playedWidth) }, () => pass);
+	const playthrough = { src: urlAt(url, trimStartSec), width: playedWidth };
+	if (!loop) return [playthrough, { src: urlAt(url, mediaDurationSec) }];
+	return Array.from(
+		{ length: Math.ceil(width / playedWidth) },
+		() => playthrough,
+	);
 }
 
 function Preview({
@@ -118,20 +120,19 @@ export function TimelineClip({
 	const range = formatTimeRange(clip.start, clip.duration);
 	const played = playedSec({ ...element, ...trim });
 	const playedWidth = played * pxPerSec;
-	const fill =
+	const outlastsMedia =
 		config.layer === "visual" &&
 		isTrimmable(element) &&
-		playedWidth < width - ROUNDING_SLACK_PX
-			? LOOP_FACES[element.loop ? "on" : "off"]
-			: undefined;
-	const previews = fill
-		? overdrawn(element, playedWidth, width)
-		: [{ src: frameAt(element.url, element.trimStartSec) }];
+		playedWidth < width - ROUNDING_SLACK_PX;
+	const previews = outlastsMedia
+		? previewsPastMedia(element, playedWidth, width)
+		: [{ src: urlAt(element.url, element.trimStartSec) }];
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
 		range,
-		fill && `${fill.label} after ${formatTime(clip.start + played)}`,
+		outlastsMedia &&
+			`${LOOP_FACES[element.loop ? "on" : "off"].label} after ${formatTime(clip.start + played)}`,
 	]
 		.filter(Boolean)
 		.join(", ");
