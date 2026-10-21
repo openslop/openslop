@@ -26,6 +26,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { SectionTitle } from "@/components/ui/section-title";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
 
@@ -66,7 +67,7 @@ function ElementSettings({
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64 border border-border">
-				<div className="mb-2 text-label font-semibold">Settings</div>
+				<SectionTitle className="mb-2">Settings</SectionTitle>
 				<div className="flex flex-col gap-2">
 					{entries.map(([key, spec]) => (
 						<div key={key} className="flex items-center justify-between gap-3">

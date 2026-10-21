@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
-import { CloseButton } from "@/components/ui/close-button";
 import {
 	Popover,
 	PopoverContent,
+	PopoverHeader,
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { SimpleTooltip } from "@/components/ui/tooltip";
@@ -95,10 +95,7 @@ export function ColorField({
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent align="end" className="w-60 p-3">
-				<div className="mb-3 flex items-center justify-between">
-					<h3 className="text-label font-semibold text-foreground">{label}</h3>
-					<CloseButton onClick={() => setOpen(false)} />
-				</div>
+				<PopoverHeader title={label} />
 
 				<HexAlphaColorPicker color={color} onChange={onChange} />
 

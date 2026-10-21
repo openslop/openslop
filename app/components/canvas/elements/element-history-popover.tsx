@@ -3,14 +3,13 @@
 import { renderCharacterRefs } from "@/lib/connectors/character-refs";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CloseButton } from "@/components/ui/close-button";
 import { AlertCircle, History, Pin, RotateCcw } from "@/components/ui/icon";
 import {
 	Popover,
 	PopoverContent,
+	PopoverHeader,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { truncateMiddle } from "@/lib/format";
@@ -165,11 +164,7 @@ export function ElementHistoryPopover({
 				aria-label="Generation history"
 				className="w-80 font-medium"
 			>
-				<div className="flex items-center justify-between">
-					<span className="text-label font-semibold">Generation history</span>
-					<CloseButton onClick={close} />
-				</div>
-				<Separator bleed />
+				<PopoverHeader title="Generation history" />
 				<div
 					aria-live="polite"
 					className="-mx-1 flex max-h-80 flex-col overflow-y-auto overscroll-contain"
