@@ -88,8 +88,4 @@ describe("TimelineClip footage", () => {
 	it("restarts the footage each time a looping clip does", () => {
 		expect(footage(element({ loop: true }), 12)).toHaveLength(3);
 	});
-
-	it("stops drawing restarts on a long loop", () => {
-		expect(footage(element({ loop: true }), 600)).toHaveLength(8);
-	});
 });

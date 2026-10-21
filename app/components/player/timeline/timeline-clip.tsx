@@ -15,7 +15,6 @@ const HEADER_ICON_SIZE = 9;
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 const ROUNDING_SLACK_PX = 1;
-const MAX_LOOP_COPIES = 8;
 
 const FRAME =
 	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
@@ -35,10 +34,9 @@ function overdrawn(
 ): FootageBox[] {
 	if (!loop)
 		return [{ src: url, width: playedWidth }, { src: `${url}#t=${outSec}` }];
-	const copies = Math.min(Math.ceil(width / playedWidth), MAX_LOOP_COPIES);
-	return Array.from({ length: copies }, (_, i) => ({
+	return Array.from({ length: Math.ceil(width / playedWidth) }, () => ({
 		src: url,
-		width: i < copies - 1 ? playedWidth : undefined,
+		width: playedWidth,
 	}));
 }
 
