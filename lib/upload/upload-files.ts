@@ -1,12 +1,35 @@
 import { nanoid } from "nanoid";
 import type { ResultKind } from "@/lib/canvas/types";
 
-/** What a user may upload, keyed by the MIME type each kind's files carry. */
+/** What a user may upload. Images are limited to what the export's `ImageDecoder` can decode. */
 export const UPLOAD_KINDS = {
-	image: { noun: "an image", maxBytes: 10 * 1024 * 1024 },
-	video: { noun: "a video", maxBytes: 50 * 1024 * 1024 },
-	audio: { noun: "audio", maxBytes: 20 * 1024 * 1024 },
-} as const satisfies Partial<Record<ResultKind, unknown>>;
+	image: {
+		noun: "an image",
+		maxBytes: 10 * 1024 * 1024,
+		contentTypes: [
+			"image/jpeg",
+			"image/png",
+			"image/gif",
+			"image/webp",
+			"image/avif",
+		],
+	},
+	video: {
+		noun: "a video",
+		maxBytes: 50 * 1024 * 1024,
+		contentTypes: ["video/*"],
+	},
+	audio: {
+		noun: "audio",
+		maxBytes: 20 * 1024 * 1024,
+		contentTypes: ["audio/*"],
+	},
+} as const satisfies Partial<
+	Record<
+		ResultKind,
+		{ noun: string; maxBytes: number; contentTypes: readonly string[] }
+	>
+>;
 
 export type UploadKind = keyof typeof UPLOAD_KINDS;
 
@@ -26,13 +49,19 @@ function sanitizeFilename(name: string): string {
 export const uploadPathname = (filename: string) =>
 	`${UPLOAD_DIR}/${nanoid()}/${sanitizeFilename(filename)}`;
 
+const matchesContentType = (type: string, pattern: string) =>
+	pattern.endsWith("/*")
+		? type.startsWith(pattern.slice(0, -1))
+		: type === pattern;
+
 /** Why the upload route would turn `file` away, if it would. */
 export function fileRejection(
 	file: File,
 	kind: UploadKind,
 ): string | undefined {
-	const { noun, maxBytes } = UPLOAD_KINDS[kind];
-	if (!file.type.startsWith(`${kind}/`)) return `is not ${noun}`;
+	const { noun, maxBytes, contentTypes } = UPLOAD_KINDS[kind];
+	if (!contentTypes.some((pattern) => matchesContentType(file.type, pattern)))
+		return `is not ${noun}`;
 	if (file.size > maxBytes) return `is over ${maxBytes / 1024 / 1024} MB`;
 	return undefined;
 }

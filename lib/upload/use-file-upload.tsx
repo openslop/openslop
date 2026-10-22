@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { toastError } from "@/lib/toast-error";
 import { uploadFile } from "./upload-file";
-import { partitionFiles, type UploadKind } from "./upload-files";
+import { partitionFiles, UPLOAD_KINDS, type UploadKind } from "./upload-files";
 
 const carriesFiles = (data: DataTransfer) => data.types.includes("Files");
 
@@ -79,7 +79,7 @@ export function useFileUpload({
 		<input
 			ref={inputRef}
 			type="file"
-			accept={`${kind}/*`}
+			accept={UPLOAD_KINDS[kind].contentTypes.join(",")}
 			multiple={multiple}
 			className="hidden"
 			onChange={handleFileChange}

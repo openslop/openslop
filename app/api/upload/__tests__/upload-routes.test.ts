@@ -90,7 +90,13 @@ describe("POST /api/upload/:kind", () => {
 		);
 
 		expect(await tokenOptions()).toEqual({
-			allowedContentTypes: ["image/*"],
+			allowedContentTypes: [
+				"image/jpeg",
+				"image/png",
+				"image/gif",
+				"image/webp",
+				"image/avif",
+			],
 			maximumSizeInBytes: 10 * 1024 * 1024,
 			addRandomSuffix: false,
 		});

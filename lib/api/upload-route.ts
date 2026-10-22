@@ -27,7 +27,7 @@ export const createUploadRoute = (kind: UploadKind) =>
 				body: input,
 				request,
 				onBeforeGenerateToken: async () => ({
-					allowedContentTypes: [`${kind}/*`],
+					allowedContentTypes: [...UPLOAD_KINDS[kind].contentTypes],
 					maximumSizeInBytes: UPLOAD_KINDS[kind].maxBytes,
 					addRandomSuffix: false,
 				}),

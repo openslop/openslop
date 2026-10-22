@@ -31,6 +31,15 @@ describe("partitionFiles", () => {
 		});
 	});
 
+	it("rejects image formats the export cannot decode", () => {
+		const svg = makeFile("logo.svg", "image/svg+xml");
+
+		expect(partitionFiles([svg], "image")).toEqual({
+			accepted: [],
+			rejected: [{ name: "logo.svg", reason: "is not an image" }],
+		});
+	});
+
 	it("rejects images over the size cap", () => {
 		const huge = makeFile("huge.png", "image/png", MAX_IMAGE_UPLOAD_BYTES + 1);
 

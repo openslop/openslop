@@ -1,6 +1,8 @@
-import { AnimatedImage, Img, useRemotionEnvironment } from "remotion";
+import { AnimatedImage, Img } from "remotion";
 
-/** Chrome plays an animated `<img>` on wall-clock time, so an export decodes each frame instead. */
+const canDecodeFrames = typeof ImageDecoder !== "undefined";
+
+/** Decodes each frame so an animated image follows the playhead, falling back to `<Img>` where WebCodecs has no `ImageDecoder`. */
 export function FrameImage({
 	src,
 	style,
@@ -8,8 +10,7 @@ export function FrameImage({
 	src: string;
 	style: React.CSSProperties;
 }) {
-	const { isRendering } = useRemotionEnvironment();
-	return isRendering ? (
+	return canDecodeFrames ? (
 		<AnimatedImage src={src} fit="cover" style={style} />
 	) : (
 		<Img src={src} crossOrigin="anonymous" style={style} />
