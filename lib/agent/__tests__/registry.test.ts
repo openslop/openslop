@@ -60,6 +60,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateScriptSettings: () => {},
 	updateModels: () => {},
 	modelChain: () => ({}),
+	isConnected: () => true,
 	...over,
 });
 
@@ -690,7 +691,7 @@ describe("model tools", () => {
 	const run = (toolName: string, input: unknown, over = {}) =>
 		executeToolCall({ toolName, input }, context(over));
 
-	it("lists each type's models with what they do best and the default new elements get", async () => {
+	it("lists each type's connected models with what they do best and the default new elements get", async () => {
 		const outcome = await run(
 			"list_models",
 			{},
@@ -698,6 +699,7 @@ describe("model tools", () => {
 				modelChain: () => ({
 					project: { video: { provider: "openslop", model: "Slop Video v1" } },
 				}),
+				isConnected: (provider: string) => provider === "openslop",
 			},
 		);
 		const output = String(outcome.ok && outcome.output);
@@ -708,9 +710,7 @@ describe("model tools", () => {
 		expect(output).toContain(
 			"- Slop Video v1 from openslop. cost high, speed medium. Best for animation and anything that isn't live action.",
 		);
-		expect(output).toContain(
-			"- Kling 3 Omni from runware. cost high, speed low. Best for live action.",
-		);
+		expect(output).not.toContain("from runware");
 	});
 
 	it("sets the default for every type the model's group covers, as the models panel does", async () => {
