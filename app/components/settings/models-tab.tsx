@@ -114,9 +114,7 @@ export function ModelsTab({
 									tier="account"
 									chain={{ account: models }}
 									label={label}
-									onChange={(models) =>
-										void setModels(models).catch(toastError)
-									}
+									onChange={(next) => void setModels(next).catch(toastError)}
 								/>
 							</SettingsRow>
 						);

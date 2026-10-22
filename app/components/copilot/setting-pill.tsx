@@ -65,15 +65,15 @@ export function SettingPill<T extends string>({
 		<SelectMenu
 			value={value}
 			onChange={onChange}
-			options={options.map(({ value, label, description }) => ({
-				value,
-				label: description ? (
+			options={options.map((option) => ({
+				value: option.value,
+				label: option.description ? (
 					<>
-						{label}
-						<InfoTip label={description} className="ml-auto pl-2" />
+						{option.label}
+						<InfoTip label={option.description} className="ml-auto pl-2" />
 					</>
 				) : (
-					label
+					option.label
 				),
 			}))}
 			itemClassName="rounded-lg text-label-xs"

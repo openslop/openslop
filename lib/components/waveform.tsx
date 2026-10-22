@@ -45,7 +45,7 @@ export interface WaveformHandle {
 	play(): void;
 	pause(): void;
 	toggle(): void;
-	seek(progress: number): void;
+	seek(target: number): void;
 }
 
 export function Waveform({
@@ -90,10 +90,10 @@ export function Waveform({
 				if (audio.paused) startPlayback(audio);
 				else audio.pause();
 			},
-			seek(progress: number) {
+			seek(target: number) {
 				const audio = audioRef.current;
 				if (!audio?.duration) return;
-				const ratio = clamp(progress, 0, 1);
+				const ratio = clamp(target, 0, 1);
 				audio.currentTime = ratio * audio.duration;
 				setProgress(ratio);
 			},
