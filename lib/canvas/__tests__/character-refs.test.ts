@@ -46,16 +46,38 @@ describe("mentionAt", () => {
 	});
 
 	it.each([
-		["speech", element("n", "narration", "Mail me @Gr")],
-		["an @ inside a word", element("i", "image", "me@Gr")],
-	])("finds nothing in %s", (_, content) => {
-		expect(mentionAt(caretAtEnd(content))).toBeUndefined();
+		["a closing bracket", "A field with (@)"],
+		["a possessive", "A field with @'s basket"],
+		["a comma", "A field with @, a road"],
+		["an existing word", "A field with @Granny"],
+	])("finds an @ followed by %s", (_, text) => {
+		const editor = caretAtEnd(element("i", "image", text));
+		Transforms.select(editor, {
+			path: [0, 0, 0],
+			offset: text.indexOf("@") + 1,
+		});
+
+		expect(mentionAt(editor)?.query).toBe("");
 	});
 
-	it("finds nothing with the caret inside a word", () => {
+	it("finds what is typed between the @ and a caret inside a word", () => {
 		const editor = caretAtEnd(element("i", "image", "A field with @Granny"));
-		Transforms.move(editor, { distance: 3, reverse: true });
+		Transforms.move(editor, { distance: 4, reverse: true });
 
-		expect(mentionAt(editor)).toBeUndefined();
+		expect(mentionAt(editor)).toEqual({
+			query: "Gr",
+			range: {
+				anchor: { path: [0, 0, 0], offset: 13 },
+				focus: { path: [0, 0, 0], offset: 16 },
+			},
+		});
+	});
+
+	it.each([
+		["speech", element("n", "narration", "Mail me @Gr")],
+		["an @ inside a word", element("i", "image", "me@Gr")],
+		["an @ right after another", element("i", "image", "A field with @@")],
+	])("finds nothing in %s", (_, content) => {
+		expect(mentionAt(caretAtEnd(content))).toBeUndefined();
 	});
 });
