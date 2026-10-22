@@ -8,6 +8,8 @@ import type { ModelEntry, ModelRef } from "@/lib/connectors/types";
 import type { AgentToolContext } from "./context";
 import { defineTool } from "./define-tool";
 
+const MODELS_PER_TYPE = 5;
+
 const modelLine = ({ provider, model, description }: ModelRef & ModelEntry) =>
 	`- ${compact([`${model} from ${provider}`, description]).join(". ")}`;
 
@@ -19,6 +21,7 @@ const groupSection = (
 		`${label} (type ${type})`,
 		...catalogModels(type)
 			.filter(({ provider }) => isConnected(provider))
+			.slice(0, MODELS_PER_TYPE)
 			.map(modelLine),
 	].join("\n");
 

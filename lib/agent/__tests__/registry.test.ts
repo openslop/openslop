@@ -695,6 +695,15 @@ describe("model tools", () => {
 		expect(output).not.toContain("from runware");
 	});
 
+	it("lists at most five models a type", async () => {
+		const outcome = await run("list_models", {});
+		const output = String(outcome.ok && outcome.output);
+
+		for (const section of output.split("\n\n"))
+			expect(section.split("\n- ").length - 1).toBeLessThanOrEqual(5);
+		expect(output).toMatch(/(\n- .*){5}/);
+	});
+
 	it("sets the default for every type the model's group covers, as the models panel does", async () => {
 		const updates: unknown[] = [];
 		const outcome = await run(
