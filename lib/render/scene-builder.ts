@@ -34,7 +34,7 @@ function createSequence(
 
 type SequenceMap = RenderLayout["sequences"];
 
-type SceneSequence = Sequence & { dialogueSec: number };
+type SceneSequence = Sequence & { overlaySec: number };
 
 /**
  * Lays down `element.loops` copies, each `stride` after the last. A stride
@@ -125,7 +125,7 @@ export function buildRenderLayout(
 				}
 				series.push({
 					...createSequence(element, cursor, element.durationSec),
-					dialogueSec: 0,
+					overlaySec: 0,
 				});
 				break;
 			}
@@ -133,11 +133,11 @@ export function buildRenderLayout(
 				if (!current) {
 					series.push({
 						...createSequence(blankScene(element), cursor, element.durationSec),
-						dialogueSec: element.durationSec,
+						overlaySec: element.durationSec,
 					});
 				} else {
-					current.dialogueSec += element.durationSec;
-					current.duration = Math.max(current.duration, current.dialogueSec);
+					current.overlaySec += element.durationSec;
+					current.duration = Math.max(current.duration, current.overlaySec);
 				}
 				pushSequence(sequences, element, cursor, stride);
 				cursor += element.durationSec;

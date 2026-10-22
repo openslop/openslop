@@ -116,7 +116,7 @@ describe("trimEdge", () => {
 		});
 	});
 
-	describe("with a floor, the dialogue under a scene", () => {
+	describe("with a floor", () => {
 		const scene = { ...video, trimStartSec: 2, durationSec: 8 };
 
 		it("stops the end at the floor instead of cutting the visual short", () => {

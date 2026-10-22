@@ -87,8 +87,7 @@ export const trimTimestamps = (
 
 /**
  * The clip's start stays put and what follows ripples. The clip holds at least
- * `floorSec` (the dialogue under a scene) before the drag and after it, so a
- * zero drag is where it rests.
+ * `floorSec` before the drag and after it, so a zero drag is where it rests.
  */
 export function trimEdge(
 	clip: Trimmable,

@@ -70,7 +70,7 @@ function Clip({
 	selected: boolean;
 	onSelect: (clip: TimelineClipData) => void;
 }) {
-	const trim = useClipTrim(clip, pxPerSec);
+	const trim = useClipTrim(clip, pxPerSec, clip.overlaySec ?? 0);
 	const width = Math.max(trim.durationSec * pxPerSec, MIN_CLIP_WIDTH_PX);
 	return (
 		<li

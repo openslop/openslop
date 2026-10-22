@@ -193,7 +193,7 @@ describe("buildRenderLayout", () => {
 			expect(layout.series).toHaveLength(1);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(7);
-			expect(layout.series[0].dialogueSec).toBe(7);
+			expect(layout.series[0].overlaySec).toBe(7);
 			expect(seqs(layout, "narration")).toHaveLength(2);
 			expect(seqs(layout, "narration")[0].start).toBe(0);
 			expect(seqs(layout, "narration")[1].start).toBe(3);
@@ -222,7 +222,7 @@ describe("buildRenderLayout", () => {
 			expect(seqs(layout, "character")[0].start).toBe(5);
 		});
 
-		it("records how long each scene's dialogue runs, whether or not it decides the scene", () => {
+		it("records how long each scene's overlays run, whether or not they decide the scene", () => {
 			const layout = layoutOf([
 				el({ id: "video1", type: "video", durationSec: 10 }),
 				el({ id: "n1", type: "narration", durationSec: 3 }),
@@ -231,9 +231,7 @@ describe("buildRenderLayout", () => {
 				el({ id: "n2", type: "narration", durationSec: 6 }),
 				el({ id: "img1", type: "image", durationSec: 4 }),
 			]);
-			expect(layout.series.map((scene) => scene.dialogueSec)).toEqual([
-				5, 6, 0,
-			]);
+			expect(layout.series.map((scene) => scene.overlaySec)).toEqual([5, 6, 0]);
 			expect(layout.series.map((scene) => scene.duration)).toEqual([10, 6, 4]);
 		});
 

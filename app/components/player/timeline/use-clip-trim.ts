@@ -36,15 +36,16 @@ function useEdgeDrag(
 
 /** A drag previews the new length and commits it on release: one layout rebuild, one undo step. */
 export function useClipTrim(
-	{ element, duration, dialogueSec = 0 }: TimelineClip,
+	{ element, duration }: TimelineClip,
 	pxPerSec: number,
+	floorSec: number,
 ) {
 	const editor = useSlateStatic();
 	const [preview, setPreview] = useState<Trim | null>(null);
-	const resting = trimEdge(element, "end", 0, dialogueSec);
+	const resting = trimEdge(element, "end", 0, floorSec);
 
 	const trimBy = (edge: TrimEdge) => (deltaSec: number) =>
-		setPreview(trimEdge(element, edge, deltaSec, dialogueSec));
+		setPreview(trimEdge(element, edge, deltaSec, floorSec));
 
 	const commit = () => {
 		setPreview(null);
@@ -61,7 +62,7 @@ export function useClipTrim(
 	};
 
 	return {
-		// The drawn span can differ from the clip's own length (dialogue, cross-fades), so preview the change.
+		// The drawn span can differ from the clip's own length (overlays, cross-fades), so preview the change.
 		durationSec:
 			duration + (preview ? preview.durationSec - resting.durationSec : 0),
 		trim: preview ?? resting,
