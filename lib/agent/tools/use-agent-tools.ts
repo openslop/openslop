@@ -85,10 +85,6 @@ export function useAgentTools() {
 					project: store.getState().models,
 					account: account.getState().models,
 				}),
-				isConnected: (provider) =>
-					account
-						.getState()
-						.providerKeys.some((key) => key.provider === provider),
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);

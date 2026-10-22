@@ -7,9 +7,7 @@ import {
 	type AttributeEdit,
 	TOGGLE_VALUES,
 } from "@/lib/connectors/attributes/schema";
-import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
 import { EffectType } from "@/lib/connectors/image/enums";
-import { isProvider } from "@/lib/connectors/provider-catalog";
 import { MusicLength } from "@/lib/connectors/music/enums";
 import {
 	CONTINUITY_ATTR,
@@ -19,11 +17,10 @@ import {
 } from "@/lib/connectors/video/start-frame";
 import { CHARACTER_REFS_RULE } from "@/lib/script/prompt/character-refs";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
-import { type RefineOp, refineOpSchema } from "@/lib/script/refine/types";
+import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
 import { plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
-import { requireConnected } from "./require-connected";
 
 const enumeration = (values: readonly string[]) => `(${values.join(" | ")})`;
 
@@ -66,15 +63,6 @@ const attributesByType = (types: readonly ElementType[]) =>
 		.filter(({ attributes }) => attributes.length > 0)
 		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
 		.join("\n");
-
-const providersIn = (ops: RefineOp[]) =>
-	ops
-		.map((op) =>
-			op.op === "remove"
-				? undefined
-				: (op.attrs?.[ELEMENT_MODEL.providerAttr] ?? undefined),
-		)
-		.filter(isProvider);
 
 const ASSETS = dedent`
 	Assets sit ahead of the first scene and are global to the project. They are edited the
@@ -140,7 +128,6 @@ export const editScript = defineTool({
 		return `Editing the script (${count} ${plural(count, "change")})`;
 	},
 	execute: async ({ ops }, ctx) => {
-		for (const provider of providersIn(ops)) requireConnected(provider, ctx);
 		const { applied, failures } = ctx.editScript(ops);
 		if (failures.length === 0) {
 			return `Applied ${applied} ${plural(applied, "operation")}. The script has changed; read it again before editing further.`;

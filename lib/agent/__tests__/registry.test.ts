@@ -60,7 +60,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateScriptSettings: () => {},
 	updateModels: () => {},
 	modelChain: () => ({}),
-	isConnected: () => true,
 	...over,
 });
 
@@ -691,7 +690,7 @@ describe("model tools", () => {
 	const run = (toolName: string, input: unknown, over = {}) =>
 		executeToolCall({ toolName, input }, context(over));
 
-	it("lists each type's models with what they do best, which are connected, and the default new elements get", async () => {
+	it("lists each type's models with what they do best and the default new elements get", async () => {
 		const outcome = await run(
 			"list_models",
 			{},
@@ -699,7 +698,6 @@ describe("model tools", () => {
 				modelChain: () => ({
 					project: { video: { provider: "openslop", model: "Slop Video v1" } },
 				}),
-				isConnected: (provider: string) => provider === "openslop",
 			},
 		);
 		const output = String(outcome.ok && outcome.output);
@@ -711,7 +709,7 @@ describe("model tools", () => {
 			"- Slop Video v1 from openslop. cost high, speed medium. Best for animation and anything that isn't live action.",
 		);
 		expect(output).toContain(
-			"- Kling 3 Omni from runware. not connected. Best for live action.",
+			"- Kling 3 Omni from runware. cost high, speed low. Best for live action.",
 		);
 	});
 
@@ -732,47 +730,17 @@ describe("model tools", () => {
 		]);
 	});
 
-	it.each([
-		[
+	it("refuses a default model the type does not have, writing nothing", async () => {
+		const writes: unknown[] = [];
+		const outcome = await run(
 			"set_default_model",
 			{ type: "video", provider: "openslop", model: "Slop Video v9" },
-			/"openslop" has no video model "Slop Video v9"/,
-		],
-		[
-			"set_default_model",
-			{ type: "video", provider: "runware", model: "Kling 3 Omni" },
-			/not connected Runware/,
-		],
-		[
-			"edit_script",
-			{
-				ops: [
-					{
-						op: "set",
-						id: "v1",
-						attrs: { provider: "runware", model: "Kling 3 Omni" },
-					},
-				],
-			},
-			/not connected Runware/,
-		],
-	])(
-		"%s refuses a model the user cannot generate with, writing nothing",
-		async (toolName, input, error) => {
-			const writes: unknown[] = [];
-			const outcome = await run(toolName, input, {
-				isConnected: (provider: string) => provider === "openslop",
-				updateModels: (models: unknown) => void writes.push(models),
-				editScript: (ops: unknown) => {
-					writes.push(ops);
-					return { applied: 0, failures: [] };
-				},
-			});
+			{ updateModels: (models: unknown) => void writes.push(models) },
+		);
 
-			expect(outcome.ok || outcome.errorText).toMatch(error);
-			expect(writes).toEqual([]);
-		},
-	);
+		expect(outcome.ok || outcome.errorText).toMatch(/Not a model of that type/);
+		expect(writes).toEqual([]);
+	});
 });
 
 describe("SLOPPY_TOOLS", () => {

@@ -65,7 +65,6 @@ export function groupFor(type: ConnectorType): ModelGroup {
 	return group;
 }
 
-/** One pick for every type a group sets. */
 export const groupModels = (
 	types: ConnectorType[],
 	model: ModelRef,

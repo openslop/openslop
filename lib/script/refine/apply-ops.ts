@@ -1,7 +1,6 @@
 import { Editor, Path, Transforms } from "slate";
 import { setAsset } from "@/lib/canvas/asset-ops";
 import {
-	type AttributeChanges,
 	findElementById,
 	mergeAttrs,
 	retypeElement,
@@ -12,17 +11,9 @@ import {
 	isAssetType,
 	isContentElement,
 } from "@/lib/canvas/guards";
-import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { insertElement } from "@/lib/canvas/insert-element";
 import { isScene } from "@/lib/canvas/scenes";
-import {
-	connectorOf,
-	type AssetType,
-	type ElementType,
-} from "@/lib/canvas/types";
-import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
-import { hasModel } from "@/lib/connectors/models";
+import type { AssetType } from "@/lib/canvas/types";
 import type { RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
@@ -30,26 +21,6 @@ export type RefineOpResult = { ok: true } | { ok: false; reason: string };
 const OK: RefineOpResult = { ok: true };
 
 const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
-
-/** Why an element of `type` cannot take the model `attrs` name, when they name one. */
-function modelRefusal(
-	type: ElementType,
-	attrs: AttributeChanges | null | undefined,
-	current: Record<string, string> = {},
-): string | undefined {
-	const { key, providerAttr } = ELEMENT_MODEL;
-	if (!attrs?.[key] && !attrs?.[providerAttr]) return undefined;
-	const connector = connectorOf(type);
-	if (!connector || attributeSchemaFor(type, {}).hidesModel)
-		return `a ${type} has no model of its own`;
-	const pick = {
-		provider: attrs[providerAttr] ?? current[providerAttr],
-		model: attrs[key] ?? current[key],
-	};
-	return hasModel(connector, pick)
-		? undefined
-		: `"${pick.provider}" has no ${connector} model "${pick.model}"`;
-}
 
 export function applyRefineOp(
 	editor: Editor,
@@ -116,9 +87,6 @@ function applyInsert(
 	op: Extract<RefineOp, { op: "insert" }>,
 	anchorMap: Record<string, string>,
 ): RefineOpResult {
-	const refusal = modelRefusal(op.type, op.attrs);
-	if (refusal) return { ok: false, reason: `insert: ${refusal}` };
-
 	if (isAssetType(op.type)) {
 		if (CHARACTER_ASSETS.has(op.type) && !op.attrs?.name)
 			return { ok: false, reason: `insert: ${op.type} needs a name` };
@@ -171,13 +139,6 @@ function applySet(
 			ok: false,
 			reason: `set: an asset's name never changes; remove "${op.id}" and insert it again`,
 		};
-
-	const refusal = modelRefusal(
-		op.type ?? found.type,
-		op.attrs,
-		flatAttributes(found),
-	);
-	if (refusal) return { ok: false, reason: `set: ${refusal}` };
 
 	if (op.type && op.type !== found.type) {
 		if (!isContentElement(found))
