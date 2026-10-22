@@ -59,7 +59,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateVideoSettings: () => {},
 	updateScriptSettings: () => {},
 	updateModels: () => {},
-	modelChain: () => ({}),
 	isConnected: () => true,
 	...over,
 });
@@ -681,24 +680,17 @@ describe("model tools", () => {
 	const run = (toolName: string, input: unknown, over = {}) =>
 		executeToolCall({ toolName, input }, context(over));
 
-	it("lists each type's connected models with what they do best and the default new elements get", async () => {
+	it("lists each type's connected models with what they do best", async () => {
 		const outcome = await run(
 			"list_models",
 			{},
-			{
-				modelChain: () => ({
-					project: { video: { provider: "openslop", model: "Slop Video v1" } },
-				}),
-				isConnected: (provider: string) => provider === "openslop",
-			},
+			{ isConnected: (provider: string) => provider === "openslop" },
 		);
 		const output = String(outcome.ok && outcome.output);
 
+		expect(output).toContain("Videos (type video)\n");
 		expect(output).toContain(
-			"Videos (type video). New elements get Slop Video v1 from openslop, the project default.",
-		);
-		expect(output).toContain(
-			"- Slop Video v1 from openslop. cost high, speed medium. Best for animation and anything that isn't live action.",
+			"- Slop Video v1 from openslop. Best for animation and anything that isn't live action.",
 		);
 		expect(output).not.toContain("from runware");
 	});

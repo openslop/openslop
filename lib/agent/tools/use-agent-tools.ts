@@ -82,10 +82,6 @@ export function useAgentTools() {
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),
-				modelChain: () => ({
-					project: store.getState().models,
-					account: account.getState().models,
-				}),
 				isConnected: (provider) =>
 					findProviderKey(account.getState().providerKeys, provider) !== null,
 				...pick(store.getState(), PROJECT_SETTERS),

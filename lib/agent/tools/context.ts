@@ -4,7 +4,6 @@ import type { ElementState } from "../element-state";
 import type { ElementLength } from "@/lib/render/element-lengths";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
-import type { ModelDefaults } from "@/lib/connectors/models";
 import type { Provider } from "@/lib/connectors/types";
 
 export const PROJECT_SETTERS = [
@@ -36,6 +35,5 @@ export type AgentToolContext = Pick<
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
-	modelChain: () => ModelDefaults;
 	isConnected: (provider: Provider) => boolean;
 };
