@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/create-required-context";
-import { useShowWorkspace } from "@/lib/script/script-provider";
+import { useShowWorkspace } from "../workspace-context";
 import type { PanelKey } from "./panel-keys";
 
 type EditorPanelValue = {

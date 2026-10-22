@@ -77,9 +77,10 @@ describe("resolveElements", () => {
 			prompt: "test",
 			url: "https://example.com/img.png",
 			durationSec: 3,
+			mediaDurationSec: 3,
+			trimStartSec: 0,
 			loops: 1,
 			loop: false,
-			trimToDialogue: true,
 			volume: 10,
 			motion: "none",
 		});
@@ -93,9 +94,10 @@ describe("resolveElements", () => {
 			prompt: "test",
 			url: "https://example.com/nar.mp3",
 			durationSec: 8,
+			mediaDurationSec: 8,
+			trimStartSec: 0,
 			loops: 1,
 			loop: false,
-			trimToDialogue: true,
 			volume: 10,
 			motion: "none",
 		});
@@ -214,18 +216,6 @@ describe("resolveElements", () => {
 		expect(resolved[2].volume).toBe(10);
 	});
 
-	it("reads trimToDialogue from layout attributes, trimming unless told not to", () => {
-		const elements = [
-			makeElement("v1", "video"),
-			makeElement("v2", "video", { trimToDialogue: "false" }),
-			makeElement("v3", "video", { trimToDialogue: "true" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
-		expect(resolved.map((r) => r.trimToDialogue)).toEqual([true, false, true]);
-	});
-
 	it("keeps a blank volume attribute audible in the rendered layout", () => {
 		const elements = [
 			makeElement("s1", "music", { volume: "" }),
@@ -275,6 +265,24 @@ describe("resolveElements", () => {
 				captionsEnabled: false,
 			});
 			expect(resolved[0].captionTimestamps).toBeUndefined();
+		});
+	});
+
+	describe("trims", () => {
+		it("applies a video's trims", () => {
+			const [video] = resolveElements(
+				[
+					wrap([
+						makeElement("v1", "video", {
+							trimStart: "1",
+							timelineDuration: "3",
+						}),
+					]),
+				],
+				() => makeSnapshot(),
+				{ captionsEnabled: false },
+			);
+			expect(video).toMatchObject({ trimStartSec: 1, durationSec: 3 });
 		});
 	});
 });

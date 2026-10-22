@@ -5,10 +5,8 @@ import type { Conditioner } from "./conditioning";
 import { klingOmni, klingTurbo } from "./kling";
 import { seedance } from "./seedance";
 import { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
-import {
-	ASPECT_RATIO_DIMENSIONS,
-	DEFAULT_ASPECT_RATIO,
-} from "@/lib/project/aspect-ratio";
+import { renderSize } from "@/lib/connectors/models";
+import { DEFAULT_ASPECT_RATIO } from "@/lib/project/aspect-ratio";
 
 const FINISHED: Record<string, VideoJobStatus> = {
 	success: "completed",
@@ -85,9 +83,11 @@ export class RunwareVideo extends BaseVideoProvider {
 	async submit(params: VideoRequest): Promise<string> {
 		const entry = runwareModel(params.model);
 		if (!entry) throw new Error(`Runware has no video model "${params.model}"`);
-		const resolution = params.resolution ?? entry.resolutions[0];
-		const size =
-			ASPECT_RATIO_DIMENSIONS[DEFAULT_ASPECT_RATIO].video[resolution];
+		const { resolution, ...size } = renderSize(
+			entry,
+			DEFAULT_ASPECT_RATIO,
+			params.resolution,
+		);
 		const conditioning = await CONDITIONERS[entry.id]({
 			prompt: params.prompt,
 			startFrame: params.frameImage,

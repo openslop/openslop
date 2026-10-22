@@ -45,15 +45,25 @@ describe("ElementHistory", () => {
 		expect(listener).toHaveBeenCalledTimes(1);
 	});
 
-	it("overwrites the version an unchanged regeneration remade", async () => {
+	it("keeps the take an unchanged regeneration remade beside the new one", async () => {
 		const history = new ElementHistory(storageOf());
 
 		await history.record(version("a"));
 		await history.record(version("a", "redone.png"));
 
 		expect(history.get("a")).toEqual([
+			{ ...version("a"), createdAt: AT },
 			{ ...version("a", "redone.png"), createdAt: AT },
 		]);
+	});
+
+	it("files the same result recorded twice as one version", async () => {
+		const history = new ElementHistory(storageOf());
+
+		await history.record(version("a"));
+		await history.record(version("a"));
+
+		expect(history.get("a")).toEqual([{ ...version("a"), createdAt: AT }]);
 	});
 
 	it("surfaces a failed write and files nothing", async () => {

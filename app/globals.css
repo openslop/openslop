@@ -19,6 +19,14 @@
 /* A control you cannot act on: either `disabled`, or `aria-disabled` when it
    has to stay hoverable for its tooltip. */
 @custom-variant unavailable (&:disabled, &[aria-disabled="true"]);
+@custom-variant hover {
+	@media (hover: hover) {
+		&:hover:where(:not(:disabled, [aria-disabled="true"])) {
+			@slot;
+		}
+	}
+}
+@custom-variant active (&:active:where(:not(:disabled, [aria-disabled="true"])));
 
 /* The negative margin gives back the room the padding makes for the bar. */
 @utility scrollbar-overlay {
@@ -40,6 +48,19 @@
 
 @utility timeline-preview-surface {
 	background-color: color-mix(in oklab, currentColor 6%, var(--element-card));
+}
+
+/* A clip edge on the timeline; the hotspot sits on the bracket. */
+@utility cursor-trim-start {
+	cursor:
+		url("/cursors/trim-start.svg") 14 12,
+		ew-resize;
+}
+
+@utility cursor-trim-end {
+	cursor:
+		url("/cursors/trim-end.svg") 14 12,
+		ew-resize;
 }
 
 @utility focus-ring {

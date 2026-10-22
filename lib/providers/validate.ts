@@ -1,19 +1,20 @@
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 
-export const rejected = (status: number): ValidationResult => ({
+export const rejected: ValidationResult = {
 	ok: false,
-	error:
-		status === 401 || status === 403
-			? "The provider rejected this key."
-			: `The provider answered ${status}.`,
-});
+	error: "The provider rejected this key.",
+};
 
-export const fromStatus = (response: Response): ValidationResult =>
-	response.ok ? { ok: true } : rejected(response.status);
+/** Only an auth status says the key is bad; any other failure is no answer. */
+export const fromStatus = (response: Response): ValidationResult => {
+	if (response.ok) return { ok: true };
+	if (response.status === 401 || response.status === 403) return rejected;
+	throw new Error(`The provider answered ${response.status}.`);
+};
 
 /**
  * A check that hangs would hold the request open for the whole platform limit
- * with the user watching a spinner. Aborting reads as "we could not tell".
+ * with the user watching a spinner.
  */
 const TIMEOUT_MS = 5_000;
 

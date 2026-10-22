@@ -50,6 +50,7 @@ function TopPlayerPanelComponent() {
 			</div>
 			<ResizeHandle
 				axis="vertical"
+				label="Resize player"
 				resizing={resizing}
 				handleProps={handleProps}
 			/>
@@ -71,6 +72,7 @@ function SidePlayerPanelComponent() {
 		<div className="flex shrink-0" style={{ width: size }}>
 			<ResizeHandle
 				axis="horizontal"
+				label="Resize player"
 				resizing={resizing}
 				handleProps={handleProps}
 			/>

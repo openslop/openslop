@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { JobPoll } from "@/lib/gateway/base";
 import type { ModelRef } from "@/lib/connectors/types";
-import { stringifyError } from "@/lib/errors";
+import { errorMessage } from "@/lib/errors";
 import {
 	createJob,
 	enqueueJob,
@@ -59,7 +59,7 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 			} catch (error) {
 				await updateJob(id, {
 					status: "failed",
-					error: `Failed to queue job: ${stringifyError(error)}`,
+					error: `Failed to queue job: ${errorMessage(error)}`,
 				});
 				throw error;
 			}

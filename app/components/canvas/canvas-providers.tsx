@@ -12,6 +12,7 @@ import { PlayerControlProvider } from "../player/player-control-context";
 import { ActiveSceneProvider } from "../scene-selection/active-scene-context";
 import { AutoScrollProvider } from "../scene-selection/auto-scroll-context";
 import { ViewModeProvider } from "./view-mode-context";
+import { WorkspaceProvider } from "./workspace-context";
 import { ActiveCaptionFont } from "./caption-fonts";
 import { SloppyProvider } from "../sloppy/sloppy-provider";
 import { EditorPanelProvider } from "./panel/editor-panel-context";
@@ -19,6 +20,7 @@ import { AssetEditProvider } from "./elements/character/asset-edit-provider";
 import { useEditorSession } from "./hooks/use-editor-session";
 
 const CanvasScopedProviders = composeProviders(
+	WorkspaceProvider,
 	LiveGraphProvider,
 	RenderLayoutProvider,
 	PlayerPlacementProvider,

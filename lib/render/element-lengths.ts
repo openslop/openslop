@@ -8,7 +8,8 @@ import {
 	type ContentElement,
 	type ContentType,
 } from "@/lib/canvas/types";
-import { getDuration, getTrimToDialogue } from "../canvas/element-attributes";
+import { getDuration } from "../canvas/element-attributes";
+import { elementTrim } from "./clip-trim";
 import { MIN_DURATION_SEC } from "./scene-builder";
 import { secondsForWords } from "../project/video-length";
 
@@ -23,8 +24,6 @@ export type ElementLength = {
 	dialogueIds: string[];
 	/** The length it is generated at, where its type has one at all. */
 	durationSec?: number;
-	/** Whether it yields to its dialogue, or plays its own length in full. */
-	trimToDialogue: boolean;
 	/** Which of its own duration, its dialogue or the minimum set `seconds`. */
 	decidedBy: "duration" | "dialogue" | "minimum";
 };
@@ -60,7 +59,6 @@ const toLength = ({
 	dialogueIds,
 }: Span): ElementLength => {
 	const durationSec = ownDuration(element);
-	const trimToDialogue = getTrimToDialogue(element);
 	return {
 		id: element.id,
 		type: element.type,
@@ -68,8 +66,10 @@ const toLength = ({
 		words,
 		dialogueIds,
 		durationSec,
-		trimToDialogue,
-		...decide(trimToDialogue ? 0 : (durationSec ?? 0), secondsForWords(words)),
+		...decide(
+			elementTrim(element, durationSec ?? 0).durationSec,
+			secondsForWords(words),
+		),
 	};
 };
 

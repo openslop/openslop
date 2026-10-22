@@ -4,6 +4,7 @@ import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
 import type { ContentElement } from "@/lib/canvas/types";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AttributeBadge } from "../attribute-badge";
 import { element } from "@/lib/canvas/__tests__/_assets";
 
@@ -22,10 +23,12 @@ function render(
 ) {
 	const editor = withReact(createEditor());
 	return renderToStaticMarkup(
-		<Slate editor={editor} initialValue={[element as never]}>
-			<Editable />
-			<AttributeBadge element={element} attrKey={attrKey} spec={spec} />
-		</Slate>,
+		<TooltipProvider>
+			<Slate editor={editor} initialValue={[element as never]}>
+				<Editable />
+				<AttributeBadge element={element} attrKey={attrKey} spec={spec} />
+			</Slate>
+		</TooltipProvider>,
 	);
 }
 
@@ -60,9 +63,41 @@ describe("AttributeBadge", () => {
 		expect(html).not.toContain(">s<");
 	});
 
+	it("renders a read-only value as a badge, not a control", () => {
+		const html = render(elementWith({ motion: "zoom_in" }), {
+			label: "Motion",
+		});
+		expect(html).toContain('data-slot="badge"');
+		expect(html).toContain("zoom_in");
+		expect(html).not.toContain("<button");
+	});
+
 	it("renders nothing with no value and no edit affordance", () => {
 		expect(render(elementWith({}), { label: "Motion" })).not.toContain(
 			"Motion",
 		);
+	});
+
+	describe("seconds", () => {
+		const secondsSpec: AttributeSpec = {
+			label: "Timeline duration",
+			edit: { kind: "seconds", min: 1 },
+		};
+		const reset = (html: string) =>
+			html.match(/<button[^>]*aria-label="Reset timeline duration"[^>]*>/)?.[0];
+
+		it("offers a reset once the field holds a value", () => {
+			const html = render(
+				elementWith({ timelineDuration: "4" }),
+				secondsSpec,
+				"timelineDuration",
+			);
+			expect(reset(html)).toBeDefined();
+		});
+
+		it("has nothing to reset while the field is on Auto", () => {
+			const html = render(elementWith({}), secondsSpec, "timelineDuration");
+			expect(reset(html)).toBeUndefined();
+		});
 	});
 });

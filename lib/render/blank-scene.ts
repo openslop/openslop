@@ -16,9 +16,10 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 		prompt: "",
 		url: BLACK_PIXEL,
 		durationSec: opener.durationSec,
+		mediaDurationSec: 0,
+		trimStartSec: 0,
 		loops: 1,
 		loop: false,
-		trimToDialogue: true,
 		volume: 0,
 		motion: "none",
 	};

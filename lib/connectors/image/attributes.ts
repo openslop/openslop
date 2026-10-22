@@ -1,9 +1,13 @@
 import { AttributeSchema } from "../attributes/schema";
-import { formatDef, motionDef } from "../attributes/common";
+import { formatDef, motionDef, resolutionDef } from "../attributes/common";
 import { referenceImagesDef } from "../attributes/reference-images";
+import { modelEntry } from "../models";
+import type { ModelRef } from "../types";
 
-export const IMAGE_ATTRIBUTES = AttributeSchema.from([
-	referenceImagesDef,
-	formatDef,
-	motionDef,
-]);
+export const imageAttributesFor = (model: ModelRef) =>
+	AttributeSchema.from([
+		referenceImagesDef,
+		resolutionDef(modelEntry("image", model).resolutions),
+		formatDef,
+		motionDef,
+	]);

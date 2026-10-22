@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useOpenWorkspace } from "@/lib/script/script-provider";
+import { useOpenWorkspace } from "./canvas/workspace-context";
 import { useTemplate } from "@/lib/templates/use-template";
 import { useSloppy } from "./sloppy/sloppy-provider";
 import BackToMySlopLink from "./back-to-my-slop-link";

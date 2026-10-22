@@ -169,6 +169,22 @@ describe("streamAgentTurn", () => {
 		);
 	});
 
+	it("hands the editor a model failure as its message, and logs the whole error", async () => {
+		const error = vi.spyOn(logger, "error").mockImplementation(() => {});
+		const failure = new Error("model overloaded");
+
+		const chunks = await runTurn([
+			{ type: "stream-start", warnings: [] },
+			{ type: "error", error: failure },
+		]);
+
+		expect(chunks).toContainEqual({
+			type: "error",
+			errorText: "model overloaded",
+		});
+		expect(error).toHaveBeenCalledWith(failure, "Sloppy turn");
+	});
+
 	it("stores the assistant message the step produced", async () => {
 		await runTurn(TEXT_TURN);
 

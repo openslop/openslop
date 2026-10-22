@@ -3,6 +3,7 @@ import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import { toastError } from "@/lib/toast-error";
 import { GenerationIndicator } from "../generation-indicator";
 import type {
 	GenerationState,
@@ -66,7 +67,7 @@ export function ErrorMessage({ message }: { message: string }) {
 		try {
 			await navigator.clipboard.writeText(message);
 		} catch (error) {
-			console.error("Failed to copy error message:", error);
+			toastError(error, "Couldn't copy the error");
 			return;
 		}
 		setCopied(true);
@@ -75,7 +76,7 @@ export function ErrorMessage({ message }: { message: string }) {
 	};
 	return (
 		<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-12 py-2">
-			<div className="pointer-events-auto flex max-h-full max-w-full items-start gap-1.5 overflow-auto rounded-lg bg-destructive px-3 py-1.5 shadow-md">
+			<div className="pointer-events-auto flex max-h-full max-w-full items-start gap-1.5 overflow-auto rounded-lg bg-destructive px-3 py-1.5 shadow-elevation-1">
 				<AlertCircle className="mt-px h-3.5 w-3.5 shrink-0 text-destructive-foreground" />
 				<p className="min-w-0 whitespace-pre-wrap break-words text-label leading-snug text-destructive-foreground">
 					{message}

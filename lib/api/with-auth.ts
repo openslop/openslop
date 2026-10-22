@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { stringifyError } from "../errors";
+import { errorMessage } from "../errors";
 import { getUser } from "./auth";
 import { refuseOverBudget } from "./budget";
 import { hasApiAccess, MissingProviderKeyError } from "./provider-keys";
@@ -7,6 +7,7 @@ import { logger } from "./logger";
 import { badRequest, forbidden, serverError, unauthorized } from "./response";
 
 type RouteBody = (user: User) => Promise<Response>;
+type Authorize = (user: User) => Promise<Response | null>;
 
 // Uniform error envelope: an unconnected provider is the caller's to fix, so it
 // comes back as a 400; anything else is logged and returned as 500.
@@ -20,31 +21,34 @@ async function runGuarded(
 		if (error instanceof MissingProviderKeyError)
 			return badRequest(error.message);
 		logger.error(error, `${label} failed`);
-		return serverError(`${label} failed: ${stringifyError(error)}`);
+		return serverError(`${label} failed: ${errorMessage(error)}`);
 	}
 }
 
 async function guard(
 	label: string,
 	run: RouteBody,
-	authorize: (user: User) => Promise<Response | null> = async () => null,
+	...tiers: Authorize[]
 ): Promise<Response> {
 	return runGuarded(label, async () => {
 		const user = await getUser();
 		if (!user) return unauthorized();
-		const denied = await authorize(user);
-		if (denied) return denied;
+		for (const tier of tiers) {
+			const denied = await tier(user);
+			if (denied) return denied;
+		}
 		return run(user);
 	});
 }
 
+const requireApiAccess: Authorize = async (user) =>
+	hasApiAccess(user) ? null : forbidden();
+
 export const withApiAccess = (label: string, run: RouteBody) =>
-	guard(label, run, async (user) => (hasApiAccess(user) ? null : forbidden()));
+	guard(label, run, requireApiAccess);
 
 export const withHostedBudget = (label: string, run: RouteBody) =>
-	guard(label, run, async (user) =>
-		hasApiAccess(user) ? refuseOverBudget(user) : forbidden(),
-	);
+	guard(label, run, requireApiAccess, refuseOverBudget);
 
 export const withSession = (label: string, run: RouteBody) => guard(label, run);
 

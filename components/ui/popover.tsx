@@ -3,6 +3,9 @@
 import * as React from "react";
 import { Popover as PopoverPrimitive } from "radix-ui";
 
+import { CloseButton } from "@/components/ui/close-button";
+import { SectionTitle } from "@/components/ui/section-title";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 function Popover({
@@ -45,4 +48,25 @@ function PopoverContent({
 	);
 }
 
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor };
+/** A titled popover's first row: the title, a Close button, and a rule under both. */
+function PopoverHeader({ title }: { title: string }) {
+	return (
+		<>
+			<div className="flex items-center justify-between">
+				<SectionTitle>{title}</SectionTitle>
+				<PopoverPrimitive.Close asChild>
+					<CloseButton />
+				</PopoverPrimitive.Close>
+			</div>
+			<Separator bleed />
+		</>
+	);
+}
+
+export {
+	Popover,
+	PopoverTrigger,
+	PopoverContent,
+	PopoverAnchor,
+	PopoverHeader,
+};

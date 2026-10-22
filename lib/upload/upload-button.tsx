@@ -43,8 +43,7 @@ export function UploadButton({
 				type="button"
 				variant="ghost"
 				size="sm"
-				// tooltip doubles as aria-label — must change while uploading, since
-				// the label text is sm:hidden.
+				// Also the aria-label, so it must change while uploading: the text is sm:hidden.
 				tooltip={uploading ? `Uploading ${kind}…` : `Upload your own ${kind}`}
 				className={className}
 				disabled={uploading || disabled}

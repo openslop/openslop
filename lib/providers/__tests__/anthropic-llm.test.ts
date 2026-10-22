@@ -297,6 +297,24 @@ describe("AnthropicLLM", () => {
 
 			await expect(read()).rejects.toThrow("overloaded");
 		});
+
+		it("names the API's reason when the stream carries its error object", async () => {
+			const refusal = { type: "overloaded_error", message: "Overloaded" };
+			streamWith([], [{ type: "error", error: refusal }]);
+
+			const provider = new AnthropicLLM("test-key");
+			const read = async () => {
+				for await (const chunk of provider.stream({
+					prompt: "hi",
+					model: MODEL_ID,
+				})) {
+					void chunk;
+				}
+			};
+
+			await expect(read()).rejects.toThrow("Anthropic: Overloaded");
+			await expect(read()).rejects.toHaveProperty("cause", refusal);
+		});
 	});
 });
 

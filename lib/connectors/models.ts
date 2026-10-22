@@ -15,8 +15,14 @@ import {
 	type ModelsByProvider,
 	type Provider,
 	PROVIDERS,
+	type VisualModelEntry,
 } from "./types";
 import { DEFAULT_VIDEO_MODEL, VIDEO_MODELS } from "./video/models";
+import {
+	ASPECT_RATIO_DIMENSIONS,
+	type AspectRatio,
+	type MediaResolution,
+} from "@/lib/project/aspect-ratio";
 
 /**
  * Every model each connector type offers, by the provider serving it.
@@ -72,6 +78,20 @@ export function vendorParams<TReq extends ModelRef>(
 ): VendorParams<TReq> {
 	const { provider, model, ...rest } = request;
 	return { ...rest, model: modelEntry(type, { provider, model }).id };
+}
+
+/** The size a visual model renders at, at its default resolution unless one is named. */
+export function renderSize(
+	entry: VisualModelEntry,
+	aspectRatio: AspectRatio,
+	resolution: MediaResolution = entry.resolutions[0],
+) {
+	if (!entry.resolutions.includes(resolution))
+		throw new Error(`${entry.id} cannot render ${resolution}`);
+	return {
+		resolution,
+		...ASPECT_RATIO_DIMENSIONS[aspectRatio].sizes[resolution],
+	};
 }
 
 export const sameModel = (a: ModelRef, b: ModelRef): boolean =>

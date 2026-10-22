@@ -34,12 +34,15 @@ describe("resolveAttributeSchema", () => {
 			"emotion",
 			"speed",
 			"volume",
+			"trimStart",
+			"timelineDuration",
 		]);
 	});
 
 	it("resolves distinct schemas for image vs video", () => {
 		expect(resolveAttributeSchema("image", DEFAULT_MODELS.image).keys).toEqual([
 			"referenceImagesOverride",
+			"resolution",
 			"format",
 			"motion",
 		]);
@@ -50,10 +53,11 @@ describe("resolveAttributeSchema", () => {
 			"referenceImagesOverride",
 			"resolution",
 			"duration",
-			"trimToDialogue",
 			"loop",
 			"volume",
 			"motion",
+			"trimStart",
+			"timelineDuration",
 		]);
 	});
 

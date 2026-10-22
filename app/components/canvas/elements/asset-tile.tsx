@@ -72,7 +72,7 @@ export function AssetTile({
 					/>
 				)}
 				{!isGenerationActive(status) && previewUrl && (
-					<div className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-card text-foreground shadow-sm ring-1 ring-border">
+					<div className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-card text-foreground shadow-elevation-1 ring-1 ring-border">
 						<Icon className="h-3 w-3" />
 					</div>
 				)}

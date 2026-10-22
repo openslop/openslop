@@ -8,7 +8,7 @@ import {
 } from "ai";
 import { nanoid } from "nanoid";
 import { z } from "zod";
-import { stringifyError } from "@/lib/errors";
+import { errorMessage } from "@/lib/errors";
 import { sloppyInstructions } from "@/lib/agent/prompt";
 import {
 	toolCallsMade,
@@ -117,7 +117,7 @@ export async function streamAgentTurn(
 				saveConversationMessage(conversationId, responseMessage),
 			onError: (error) => {
 				logger.error(error, "Sloppy turn");
-				return stringifyError(error);
+				return errorMessage(error);
 			},
 		}),
 		consumeSseStream: consumeStream,

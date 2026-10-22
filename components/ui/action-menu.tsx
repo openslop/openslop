@@ -7,7 +7,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 
 export interface ActionMenuItem {
 	key: string;
@@ -47,7 +46,7 @@ export function ActionMenu({
 						key={item.key}
 						onSelect={item.onSelect}
 						disabled={item.disabled}
-						className={cn("cursor-pointer", itemClassName)}
+						className={itemClassName}
 					>
 						{item.icon}
 						{item.label}

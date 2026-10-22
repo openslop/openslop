@@ -2,22 +2,7 @@
 
 import OnboardingCard from "./onboarding-card";
 import { Button } from "@/components/ui/button";
-
-const EnvelopeIcon = (
-	<svg
-		className="h-14 w-14 text-foreground"
-		fill="none"
-		viewBox="0 0 24 24"
-		strokeWidth={1}
-		stroke="currentColor"
-	>
-		<path
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-		/>
-	</svg>
-);
+import { Mail } from "@/components/ui/icon";
 
 interface EmailSentCardProps {
 	subtitle: string;
@@ -40,7 +25,7 @@ export default function EmailSentCard({
 		<OnboardingCard
 			heading="Email sent!"
 			subtitle={subtitle}
-			icon={EnvelopeIcon}
+			icon={<Mail size={56} className="text-foreground" />}
 			footer={
 				<button
 					type="button"

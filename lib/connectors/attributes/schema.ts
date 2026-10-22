@@ -1,5 +1,6 @@
 import type { IconComponent } from "@/components/ui/icon";
 import { TOGGLE_OFF, TOGGLE_ON } from "@/lib/canvas/types";
+import { parseNumber } from "@/lib/canvas/element-attributes";
 import { resolveModel, type ConnectorModels } from "../models";
 import type { ConnectorType } from "../types";
 
@@ -19,6 +20,8 @@ export type AttributeEdit =
 	 */
 	| { kind: "model"; type: ConnectorType; providerAttr: string }
 	| { kind: "text"; placeholder?: string; rows?: number }
+	/** A count of seconds typed in, at least `min`. Empty leaves it unset. */
+	| { kind: "seconds"; min: number }
 	/**
 	 * A list of image URLs, edited as tiles. With `continuity`, the previous
 	 * visual's pictures and the toggle that links them show beneath.
@@ -117,6 +120,7 @@ export class AttributeSchema {
 		const edit = this.defs.find((def) => def.key === key)?.edit;
 		if (edit?.kind === "enum") return edit.options.includes(value);
 		if (edit?.kind === "toggle") return TOGGLE_VALUES.includes(value);
+		if (edit?.kind === "seconds") return parseNumber(value) !== undefined;
 		return true;
 	}
 

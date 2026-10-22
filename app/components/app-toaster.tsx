@@ -1,7 +1,15 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { Toaster } from "sonner";
 import { useTheme } from "next-themes";
+
+const popoverSurface = {
+	"--normal-bg": "var(--popover)",
+	"--normal-border": "var(--border)",
+	"--normal-text": "var(--popover-foreground)",
+	"--border-radius": "var(--radius-xl)",
+} as CSSProperties;
 
 export function AppToaster() {
 	const { resolvedTheme } = useTheme();
@@ -10,8 +18,12 @@ export function AppToaster() {
 			theme={resolvedTheme === "dark" ? "dark" : "light"}
 			position="bottom-center"
 			richColors
+			style={popoverSurface}
 			toastOptions={{
-				classNames: { content: "max-h-[40vh] overflow-y-auto" },
+				classNames: {
+					toast: "data-[styled=true]:shadow-elevation-5!",
+					content: "max-h-[40vh] flex-1 overflow-y-auto",
+				},
 			}}
 		/>
 	);

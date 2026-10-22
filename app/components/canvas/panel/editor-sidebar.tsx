@@ -11,6 +11,8 @@ import {
 	type IconComponent,
 	SlidersAlt,
 	SlidersAltFill,
+	Sparkles,
+	SparklesFill,
 	StockAlt,
 	StockAltFill,
 	InsertElement,
@@ -35,6 +37,7 @@ import { CanvasHistoryPanel } from "./canvas-history-panel";
 import { ModelsPanel } from "./models-panel";
 import { ProjectPanel } from "./project-panel";
 import { CaptionsPanel } from "./captions-panel";
+import { EffectsPanel } from "./effects-panel";
 import { LayoutPanel } from "./layout-panel";
 import { PropertiesPanel } from "./properties-panel";
 
@@ -76,6 +79,12 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		icon: SlidersAlt,
 		iconActive: SlidersAltFill,
 		Panel: PropertiesPanel,
+	},
+	effects: {
+		label: "Effects",
+		icon: Sparkles,
+		iconActive: SparklesFill,
+		Panel: EffectsPanel,
 	},
 	models: {
 		label: "Models",

@@ -1,11 +1,10 @@
-import { z } from "zod";
 import type { AssetBundle } from "@/lib/api/asset-bundle";
 import { HttpTTSGateway } from "@/lib/gateway/http";
 import { BaseAssetConnector } from "../asset-base";
 import type { AttributeSchema } from "../attributes/schema";
 import { TTS_ATTRIBUTES } from "./attributes";
 import {
-	TextTimestampSchema,
+	TTSResultSchema,
 	type HostedVoicePreview,
 	type ResolvedConnectorConfig,
 	type TTSConnector,
@@ -45,7 +44,7 @@ export class HttpTTSConnector
 			...(await super.resolveBundle(bundle)),
 			textTimestamps: await bundle.fetchJson(
 				"timestamps",
-				z.array(TextTimestampSchema),
+				TTSResultSchema.shape.textTimestamps,
 			),
 		};
 	}

@@ -79,6 +79,16 @@ describe("runRender", () => {
 		expect(apiJsonMock).toHaveBeenCalledTimes(3);
 	});
 
+	it("gives up when the server stays unreachable", async () => {
+		apiJsonMock
+			.mockResolvedValueOnce(HANDLE)
+			.mockRejectedValue(new UnreachableError(new TypeError()));
+
+		await expect(collect(runRender(LAYOUT, "1080p"))).rejects.toThrow(
+			UnreachableError,
+		);
+	});
+
 	it("stops polling once the render is done", async () => {
 		apiJsonMock
 			.mockResolvedValueOnce(HANDLE)

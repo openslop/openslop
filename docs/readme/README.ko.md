@@ -96,7 +96,7 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="줄에 마우스를 올리면 일곱 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -216,7 +216,7 @@ npm run dev
 | 인증 + DB  | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | 비디오     | [Remotion 4](https://remotion.dev) (합성, 렌더링, 플레이어)                                                  |
 | 스토리지   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (생성된 에셋 저장)                                |
-| 아이콘     | 자체 제작 마스크 SVG 세트 (`components/ui/icon.tsx` + `icons/`), 아이콘 의존성 없음                          |
+| 아이콘     | 자체 제작 마스크 SVG 세트 (`components/ui/icon.tsx` + `components/ui/icons/`), 아이콘 의존성 없음            |
 
 ## 프로젝트 구조
 
@@ -231,11 +231,11 @@ lib/
   providers/     서버 측 벤더 어댑터 (Runware, ElevenLabs, …)
   generation/    생성 큐와 작업 오케스트레이션
   canvas/        Slate 문서 모델: 요소 유형, 가드, OSML 파싱/직렬화
-  script/        스크립트 컨텍스트와 다듬기
+  script/        스크립트 작성과 다듬기
   project/       프로젝트별 Zustand 스토어, 자동 저장, 영속화
   render/        장면 레이아웃과 렌더 클라이언트
   templates/     컴포저에서 제공하는 프롬프트 템플릿
-  upload/        클라이언트 측 이미지 업로드
+  upload/        클라이언트 측 파일 업로드 (이미지, 동영상, 오디오)
   supabase/      브라우저/서버 Supabase 클라이언트
 remotion/        Remotion 진입점과 컴포지션
 supabase/        데이터베이스 마이그레이션

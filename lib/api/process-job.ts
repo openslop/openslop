@@ -1,4 +1,4 @@
-import { stringifyError } from "@/lib/errors";
+import { errorMessage } from "@/lib/errors";
 import { isTerminal } from "@/lib/gateway/base";
 import { failIfExpired } from "./job-deadline";
 import { getJobHandler } from "./job-handlers";
@@ -32,7 +32,7 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 		outcome = await handler.process(job);
 	} catch (error) {
 		logger.error(error, `Job ${jobId} failed`);
-		await updateJob(jobId, { status: "failed", error: stringifyError(error) });
+		await updateJob(jobId, { status: "failed", error: errorMessage(error) });
 		throw error;
 	}
 

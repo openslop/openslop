@@ -96,7 +96,7 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="行にホバーすると7種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -216,7 +216,7 @@ npm run dev
 | 認証 + DB      | [Supabase](https://supabase.com)（Auth、Postgres、RLS）                                                      |
 | 動画           | [Remotion 4](https://remotion.dev)（コンポジション、レンダリング、プレイヤー）                               |
 | ストレージ     | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob)（生成したアセットの保存先）                       |
-| アイコン       | 自前のマスク SVG セット（`components/ui/icon.tsx` + `icons/`）。アイコンの依存なし                           |
+| アイコン       | 自前のマスク SVG セット（`components/ui/icon.tsx` + `components/ui/icons/`）。アイコンの依存なし             |
 
 ## プロジェクト構成
 
@@ -231,11 +231,11 @@ lib/
   providers/     サーバー側のベンダーアダプター（Runware、ElevenLabs、…）
   generation/    生成キューとジョブのオーケストレーション
   canvas/        Slate ドキュメントモデル: 要素の型、ガード、OSML のパースとシリアライズ
-  script/        台本のコンテキストと推敲
+  script/        台本の執筆と推敲
   project/       プロジェクトごとの Zustand ストア、自動保存、永続化
   render/        シーンのレイアウトとレンダークライアント
   templates/     コンポーザーで提供するプロンプトテンプレート
-  upload/        クライアント側の画像アップロード
+  upload/        クライアント側のファイルアップロード（画像、動画、音声）
   supabase/      ブラウザ用・サーバー用の Supabase クライアント
 remotion/        Remotion のエントリーポイントとコンポジション
 supabase/        データベースのマイグレーション

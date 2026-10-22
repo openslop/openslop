@@ -1,7 +1,6 @@
-import { useConfig } from "@/lib/config/config-provider";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import type { CanvasHistory } from "@/lib/project/canvas-history";
-import { useInitialScript } from "@/lib/script/script-provider";
+import { useInitialScript, useProjectId } from "@/lib/project/project-provider";
 import { useCanvasVersions } from "./use-canvas-versions";
 import { useEditorSetup } from "./use-editor-setup";
 
@@ -19,7 +18,7 @@ interface EditorSession {
 export function useEditorSession(): EditorSession {
 	const script = useInitialScript();
 	const editor = useEditorSetup(script);
-	const { projectId } = useConfig();
+	const projectId = useProjectId();
 	const { history, onDocumentChange } = useCanvasVersions(projectId, editor);
 
 	return { editor, onDocumentChange, history };

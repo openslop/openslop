@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/provider-catalog";
 import { HostedVoicePreviewSchema } from "@/lib/connectors/types";
-import { VIDEO_RESOLUTIONS } from "@/lib/project/aspect-ratio";
+import { MEDIA_RESOLUTIONS } from "@/lib/project/aspect-ratio";
 import { parseImageSource } from "./image-source";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
@@ -33,8 +33,8 @@ export const optionalVideoDuration = {
 	duration: optionalPositiveNumber,
 } as const;
 
-export const optionalVideoResolution = {
-	resolution: z.enum(VIDEO_RESOLUTIONS).optional(),
+export const optionalResolution = {
+	resolution: z.enum(MEDIA_RESOLUTIONS).optional(),
 } as const;
 
 export const referenceImageUrlOrDataUri = z

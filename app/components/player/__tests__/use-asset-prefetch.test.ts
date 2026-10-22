@@ -1,4 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+// @vitest-environment happy-dom
+
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, createElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
 import type { prefetch as PrefetchFn } from "remotion";
 import type {
 	ResolvedElement,
@@ -6,11 +10,20 @@ import type {
 	RenderLayout,
 } from "@/lib/render/types";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/caption-style";
+import { toastError } from "@/lib/toast-error";
 import {
 	awaitPrefetch,
 	collectUrls,
 	reconcilePrefetch,
+	useAssetPrefetch,
 } from "../use-asset-prefetch";
+
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+
+vi.mock("remotion", () => {
+	throw new Error("Loading chunk remotion failed");
+});
+vi.mock("@/lib/toast-error", () => ({ toastError: vi.fn() }));
 
 type PrefetchHandle = ReturnType<typeof PrefetchFn>;
 
@@ -32,9 +45,10 @@ function el(url: string): ResolvedElement {
 		prompt: "",
 		url,
 		durationSec: 1,
+		mediaDurationSec: 0,
+		trimStartSec: 0,
 		loops: 1,
 		loop: false,
-		trimToDialogue: true,
 		volume: 1,
 		motion: "none",
 	};
@@ -55,6 +69,8 @@ function layout(partial: Partial<RenderLayout>): RenderLayout {
 		totalFrames: 30,
 		captionStyle: DEFAULT_CAPTION_STYLE,
 		transitionType: "none",
+		filmGrain: false,
+		rgbSplit: false,
 		transitionDurationSec: 0,
 		...partial,
 	};
@@ -185,5 +201,52 @@ describe("awaitPrefetch", () => {
 
 	it("resolves immediately for an empty handle list", async () => {
 		await expect(awaitPrefetch([])).resolves.toBeUndefined();
+	});
+});
+
+describe("useAssetPrefetch", () => {
+	const container = document.body.appendChild(document.createElement("div"));
+	let root: Root;
+	let ready: boolean;
+
+	function Reader({ layout: current }: { layout: RenderLayout }) {
+		ready = useAssetPrefetch(current);
+		return null;
+	}
+
+	const mount = () =>
+		act(() =>
+			root.render(
+				createElement(Reader, { layout: layout({ series: [seq(el("a"))] }) }),
+			),
+		);
+
+	const settle = () => act(() => new Promise((resolve) => setTimeout(resolve)));
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		root = createRoot(container);
+	});
+
+	afterEach(() => act(() => root.unmount()));
+
+	it("stays not ready and tells the user when the player cannot load", async () => {
+		mount();
+		await settle();
+
+		expect(ready).toBe(false);
+		expect(toastError).toHaveBeenCalledWith(
+			expect.any(Error),
+			"Couldn't load the player",
+			{ id: "player-load" },
+		);
+	});
+
+	it("says nothing once the layout it was loading for is gone", async () => {
+		mount();
+		act(() => root.render(null));
+		await settle();
+
+		expect(toastError).not.toHaveBeenCalled();
 	});
 });

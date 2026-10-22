@@ -6,10 +6,7 @@ import type { ResolvedElement } from "../types";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { secondsForWords } from "@/lib/project/video-length";
 import { layoutOf } from "./_layout";
-import {
-	getTrimToDialogue,
-	splitAttributes,
-} from "@/lib/canvas/element-attributes";
+import { splitAttributes } from "@/lib/canvas/element-attributes";
 
 let nextId = 0;
 const element = (
@@ -61,8 +58,8 @@ describe("measureElementLengths", () => {
 		expect(only).toMatchObject({ seconds: 60, words: 180, sceneNumber: 1 });
 	});
 
-	it("cuts a video to the dialogue after it, whatever it was generated at", () => {
-		const [cut, extended] = measureElementLengths([
+	it("holds a video for its generated length, or longer for the dialogue after it", () => {
+		const [held, extended] = measureElementLengths([
 			scene(
 				element("video", "A pan.", { duration: "8" }),
 				element("narration", words(9)),
@@ -71,44 +68,18 @@ describe("measureElementLengths", () => {
 			),
 		]);
 
-		expect(cut.seconds).toBe(3);
+		expect(held.seconds).toBe(8);
 		expect(extended.seconds).toBe(30);
 	});
 
-	it("holds a video for its generated length when it says not to trim", () => {
-		const [held] = measureElementLengths([
+	it("holds a trimmed video for its trimmed length", () => {
+		const [trimmed] = measureElementLengths([
 			scene(
-				element("video", "A pan.", { duration: "8", trimToDialogue: "false" }),
-				element("narration", words(9)),
+				element("video", "A pan.", { duration: "8", timelineDuration: "5" }),
 			),
 		]);
 
-		expect(held.seconds).toBe(8);
-	});
-
-	it("measures a trimmed and an untrimmed video differently side by side", () => {
-		const [cut, held] = measureElementLengths([
-			scene(
-				element("video", "A pan.", { duration: "8" }),
-				element("narration", words(9)),
-				element("video", "A zoom.", { duration: "8", trimToDialogue: "false" }),
-				element("narration", words(9)),
-			),
-		]);
-
-		expect(cut.seconds).toBe(3);
-		expect(held.seconds).toBe(8);
-	});
-
-	it("lets dialogue extend an untrimmed video past its generated length", () => {
-		const [extended] = measureElementLengths([
-			scene(
-				element("video", "A pan.", { duration: "4", trimToDialogue: "false" }),
-				element("narration", words(90)),
-			),
-		]);
-
-		expect(extended.seconds).toBe(30);
+		expect(trimmed.seconds).toBe(5);
 	});
 
 	it("ignores silent elements and dialogue before the first visual", () => {
@@ -128,13 +99,13 @@ describe("measureElementLengths", () => {
 	});
 
 	it("names which of the duration, the dialogue and the minimum set each length", () => {
-		const untrimmed = { duration: "8", trimToDialogue: "false" };
+		const generated = { duration: "8" };
 
 		const lengths = measureElementLengths([
 			scene(
-				element("video", "A pan.", untrimmed),
+				element("video", "A pan.", generated),
 				element("narration", words(9)),
-				element("video", "A zoom.", untrimmed),
+				element("video", "A zoom.", generated),
 				element("narration", words(90)),
 				element("image", "A forest."),
 				element("narration", words(9)),
@@ -162,14 +133,8 @@ describe("measureRuntime", () => {
 	it("adds up every visual's time on screen, not just the speech over it", () => {
 		const runtime = measureRuntime([
 			scene(
-				element("video", "A fox runs.", {
-					duration: "10",
-					trimToDialogue: "false",
-				}),
-				element("video", "It stops.", {
-					duration: "8",
-					trimToDialogue: "false",
-				}),
+				element("video", "A fox runs.", { duration: "10" }),
+				element("video", "It stops.", { duration: "8" }),
 			),
 		]);
 
@@ -212,9 +177,10 @@ describe("against buildRenderLayout", () => {
 			prompt: "",
 			url: `https://example.com/${node.id}`,
 			durationSec,
+			mediaDurationSec: 0,
+			trimStartSec: 0,
 			loops: 1,
 			loop: false,
-			trimToDialogue: getTrimToDialogue(node),
 			volume: 10,
 			motion: "none",
 		};
@@ -225,10 +191,7 @@ describe("against buildRenderLayout", () => {
 		const line = element("narration", words(90));
 		const second = element("video", "A pan.", { duration: "8" });
 		const shortLine = element("character", words(15));
-		const third = element("video", "A zoom.", {
-			duration: "8",
-			trimToDialogue: "false",
-		});
+		const third = element("video", "A zoom.", { duration: "8" });
 		const lastLine = element("character", words(15));
 
 		const lengths = measureElementLengths([

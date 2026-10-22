@@ -34,6 +34,9 @@ describe("hostedProviderFor", () => {
 		process.env = { ...originalEnv };
 		delete process.env.RUNWARE_API_KEY;
 
+		expect(hostedProviderFor("image", "Slop Image v2")).toBeInstanceOf(
+			MockImage,
+		);
 		expect(hostedProviderFor("image", "Slop Image v1")).toBeInstanceOf(
 			MockImage,
 		);

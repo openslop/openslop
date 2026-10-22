@@ -1,7 +1,7 @@
 import { HttpAssetGateway } from "@/lib/gateway/http";
 import { BaseAssetConnector } from "../asset-base";
 import type { AttributeSchema } from "../attributes/schema";
-import { IMAGE_ATTRIBUTES } from "./attributes";
+import { imageAttributesFor } from "./attributes";
 import type {
 	AssetResult,
 	ImageGenerateParams,
@@ -20,7 +20,7 @@ export class HttpImageConnector extends BaseAssetConnector<
 		super(new HttpAssetGateway(config.model, "image"), config);
 	}
 
-	static attributesFor(_model: ModelRef): AttributeSchema {
-		return IMAGE_ATTRIBUTES;
+	static attributesFor(model: ModelRef): AttributeSchema {
+		return imageAttributesFor(model);
 	}
 }

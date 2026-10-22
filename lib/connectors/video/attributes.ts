@@ -4,7 +4,8 @@ import {
 	loopDef,
 	motionDef,
 	resolutionDef,
-	trimToDialogueDef,
+	timelineDurationDef,
+	trimStartDef,
 	volumeDef,
 } from "../attributes/common";
 import { referenceImagesDef } from "../attributes/reference-images";
@@ -20,8 +21,9 @@ export const videoAttributesFor = (model: ModelRef) =>
 		{ ...referenceImagesDef, edit: { kind: "images", continuity: true } },
 		resolutionDef(modelEntry("video", model).resolutions),
 		durationDef,
-		trimToDialogueDef,
 		loopDef,
 		volumeDef("5"),
 		motionDef,
+		trimStartDef,
+		timelineDurationDef,
 	]);

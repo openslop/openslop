@@ -2,6 +2,7 @@
 
 import type { IconComponent } from "@/components/ui/icon";
 import { Link } from "@/components/ui/icon";
+import { SectionTitle } from "@/components/ui/section-title";
 import type { SettingsTab } from "@/lib/settings/use-settings";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +26,7 @@ export function SettingsNav({
 		<nav aria-label="Settings" className="flex w-44 shrink-0 flex-col gap-3">
 			{GROUPS.map((group) => (
 				<div key={group.heading} className="flex flex-col gap-1">
-					<p className="px-2 py-1 text-label font-semibold text-foreground">
-						{group.heading}
-					</p>
+					<SectionTitle className="px-2 py-1">{group.heading}</SectionTitle>
 					{group.items.map(({ tab, label, icon: Icon }) => (
 						<button
 							key={tab}

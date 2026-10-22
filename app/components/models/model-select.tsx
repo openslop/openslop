@@ -133,7 +133,7 @@ export function ConfigureModelsItem() {
 			<DropdownMenuSeparator />
 			<DropdownMenuItem
 				onSelect={() => settings.open("models")}
-				className="cursor-pointer py-1"
+				className="py-1"
 			>
 				<Settings />
 				Configure models

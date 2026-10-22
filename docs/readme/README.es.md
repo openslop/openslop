@@ -96,7 +96,7 @@ Cada escena es una pila de tarjetas: narración, personaje, imagen, vídeo, soni
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="Al pasar el ratón por una fila se abre el menú de inserción con los siete tipos de elemento y aparece una tarjeta de Sound nueva" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="Al pasar el ratón por una fila se abre el menú de inserción con los seis tipos de elemento y aparece una tarjeta de Sound nueva" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -208,15 +208,15 @@ Abre [http://localhost:3000](http://localhost:3000) y deberías ver la app.
 
 ## Tecnologías
 
-| Capa           | Tecnología                                                                                                   |
-| -------------- | ------------------------------------------------------------------------------------------------------------ |
-| Framework      | [Next.js 16](https://nextjs.org) (App Router)                                                                |
-| Lenguaje       | [TypeScript 5](https://www.typescriptlang.org)                                                               |
-| UI             | [React 19](https://react.dev), [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) |
-| Auth + BD      | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
-| Vídeo          | [Remotion 4](https://remotion.dev) (composición, renderizado, reproductor)                                   |
-| Almacenamiento | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (almacenamiento de los recursos generados)        |
-| Iconos         | Conjunto propio de SVG enmascarados (`components/ui/icon.tsx` + `icons/`), sin dependencia de iconos         |
+| Capa           | Tecnología                                                                                                         |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Framework      | [Next.js 16](https://nextjs.org) (App Router)                                                                      |
+| Lenguaje       | [TypeScript 5](https://www.typescriptlang.org)                                                                     |
+| UI             | [React 19](https://react.dev), [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com)       |
+| Auth + BD      | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                             |
+| Vídeo          | [Remotion 4](https://remotion.dev) (composición, renderizado, reproductor)                                         |
+| Almacenamiento | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (almacenamiento de los recursos generados)              |
+| Iconos         | Conjunto propio de SVG enmascarados (`components/ui/icon.tsx` + `components/ui/icons/`), sin dependencia de iconos |
 
 ## Estructura del proyecto
 
@@ -231,11 +231,11 @@ lib/
   providers/     Server-side vendor adapters (Runware, ElevenLabs, …)
   generation/    Generation queue and job orchestration
   canvas/        Slate document model: element types, guards, OSML parse/serialize
-  script/        Script context and refinement
+  script/        Script writing and refinement
   project/       Per-project Zustand store, autosave, persistence
   render/        Scene layout and render client
   templates/     Prompt templates offered in the composer
-  upload/        Client-side image upload
+  upload/        Client-side file upload (image, video, audio)
   supabase/      Browser/server Supabase clients
 remotion/        Remotion entry point and compositions
 supabase/        Database migrations

@@ -8,33 +8,34 @@ export type AspectRatio = (typeof ASPECT_RATIOS)[number];
 
 export const DEFAULT_ASPECT_RATIO: AspectRatio = "16:9";
 
-export const VIDEO_RESOLUTIONS = ["720p", "1080p"] as const;
+export const MEDIA_RESOLUTIONS = ["720p", "1080p", "1152p", "1440p"] as const;
 
-export type VideoResolution = (typeof VIDEO_RESOLUTIONS)[number];
+export type MediaResolution = (typeof MEDIA_RESOLUTIONS)[number];
 
 export type Dimensions = { width: number; height: number };
 
 export const ASPECT_RATIO_DIMENSIONS: Record<
 	AspectRatio,
 	{
-		image: Dimensions;
-		video: Record<VideoResolution, Dimensions>;
+		sizes: Record<MediaResolution, Dimensions>;
 		output: Dimensions;
 	}
 > = {
 	"16:9": {
-		image: { width: 2560, height: 1440 },
-		video: {
+		sizes: {
 			"720p": { width: 1280, height: 720 },
 			"1080p": { width: 1920, height: 1080 },
+			"1152p": { width: 2048, height: 1152 },
+			"1440p": { width: 2560, height: 1440 },
 		},
 		output: { width: 1920, height: 1080 },
 	},
 	"9:16": {
-		image: { width: 1440, height: 2560 },
-		video: {
+		sizes: {
 			"720p": { width: 720, height: 1280 },
 			"1080p": { width: 1080, height: 1920 },
+			"1152p": { width: 1152, height: 2048 },
+			"1440p": { width: 1440, height: 2560 },
 		},
 		output: { width: 1080, height: 1920 },
 	},

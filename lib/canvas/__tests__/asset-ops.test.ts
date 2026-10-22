@@ -129,7 +129,7 @@ describe("setAsset", () => {
 			[
 				asset("asset_avatar", {
 					name: "Bob",
-					attrs: { model: "Slop Image v1" },
+					attrs: { provider: "openslop", model: "Slop Image v1" },
 				}),
 			],
 			{ image: PINNED, voice: CARTESIA },
@@ -145,6 +145,7 @@ describe("setAsset", () => {
 		expect(attrs("asset_avatar", "Mia")).toEqual({ name: "Mia", ...PINNED });
 		expect(attrs("asset_voice", "Mia")).toEqual({ name: "Mia", ...CARTESIA });
 		expect(attrs("asset_avatar", "Bob")).toMatchObject({
+			provider: "openslop",
 			model: "Slop Image v1",
 		});
 		expect(attrs("asset_style")).toEqual({});

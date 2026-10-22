@@ -28,6 +28,7 @@ export function BottomDock() {
 			{fillsDock ? (
 				<ResizeHandle
 					axis="vertical"
+					label="Resize bottom panel"
 					resizing={resizing}
 					handleProps={handleProps}
 				/>

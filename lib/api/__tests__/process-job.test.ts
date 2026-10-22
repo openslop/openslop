@@ -17,9 +17,8 @@ vi.mock("@/lib/api/job-handlers", () => ({
 	getJobHandler: (...args: unknown[]) => mockGetJobHandler(...args),
 }));
 
-vi.mock("@/lib/api/logger", () => ({
-	logger: { error: vi.fn(), warn: vi.fn() },
-}));
+const logger = vi.hoisted(() => ({ error: vi.fn(), warn: vi.fn() }));
+vi.mock("@/lib/api/logger", () => ({ logger }));
 
 const { processQueuedJob } = await import("@/lib/api/process-job");
 
@@ -209,17 +208,19 @@ describe("processQueuedJob", () => {
 		});
 	});
 
-	it("fails the job with the provider's reason on the first error", async () => {
+	it("fails the job with the provider's reason on the first error, and logs the whole error", async () => {
 		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
+		const failure = new Error("provider down");
 		mockGetJobHandler.mockReturnValue({
-			process: vi.fn().mockRejectedValue(new Error("provider down")),
+			process: vi.fn().mockRejectedValue(failure),
 		});
 
-		await expect(processQueuedJob(JOB_ID)).rejects.toThrow("provider down");
+		await expect(processQueuedJob(JOB_ID)).rejects.toBe(failure);
 
+		expect(logger.error).toHaveBeenCalledWith(failure, expect.any(String));
 		expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
 			status: "failed",
-			error: expect.stringContaining("provider down"),
+			error: "provider down",
 		});
 		expect(mockEnqueueJob).not.toHaveBeenCalled();
 	});

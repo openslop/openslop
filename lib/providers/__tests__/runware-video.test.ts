@@ -776,13 +776,14 @@ describe("RunwareVideo", () => {
 			).rejects.toThrow("returned no task");
 		});
 
-		it("disconnects on error", async () => {
-			mockVideoInference.mockRejectedValue(new Error("fail"));
+		it("disconnects on error, passing the SDK's Error through as it is", async () => {
+			const failure = new Error("fail");
+			mockVideoInference.mockRejectedValue(failure);
 
 			const provider = new RunwareVideo("test-key");
 			await expect(
 				provider.submit({ prompt: "test", model: MODEL }),
-			).rejects.toThrow("fail");
+			).rejects.toBe(failure);
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 	});
@@ -936,6 +937,22 @@ describe("RunwareVideo", () => {
 			await expect(
 				provider.poll("missing", { prompt: "test", model: MODEL }),
 			).rejects.toThrow("Job not found");
+			expect(mockDisconnect).toHaveBeenCalled();
+		});
+
+		it("throws an Error carrying Runware's reason when the SDK rejects with its error object", async () => {
+			const refusal = {
+				error: { code: "contentModeration", message: "Prompt was flagged" },
+			};
+			mockGetResponse.mockRejectedValue(refusal);
+
+			const outcome = new RunwareVideo("test-key").poll("job-1", {
+				prompt: "test",
+				model: MODEL,
+			});
+
+			await expect(outcome).rejects.toThrow("Runware: Prompt was flagged");
+			await expect(outcome).rejects.toHaveProperty("cause", refusal);
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
 	});

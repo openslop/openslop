@@ -9,11 +9,12 @@ import {
 	type SystemModelMessage,
 	type TextPart,
 } from "ai";
+import { z } from "zod";
 import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
 import { ANTHROPIC_LLM_MODELS } from "@/lib/connectors/llm/anthropic/models";
 import { parseImageSource } from "@/lib/api/image-source";
 import { logger } from "@/lib/api/logger";
-import { stringifyError } from "@/lib/errors";
+import { errorMessage } from "@/lib/errors";
 import {
 	DEFAULT_THINKING_LEVEL,
 	type ThinkingLevel,
@@ -22,6 +23,20 @@ import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
+
+/** A refusal mid-stream arrives as the API's error object, not an Error. */
+const StreamFailure = z.object({ message: z.string() });
+
+function failed(error: unknown): unknown {
+	if (error instanceof Error) return error;
+	const failure = StreamFailure.safeParse(error);
+	return new Error(
+		failure.success
+			? `Anthropic: ${failure.data.message}`
+			: errorMessage(error),
+		{ cause: error },
+	);
+}
 
 const SUPPORTED_IMAGE_MEDIA_TYPES = [
 	"image/jpeg",
@@ -176,10 +191,7 @@ export class AnthropicLLM implements LLMProvider {
 		const result = streamText(this.buildRequest(params));
 		for await (const part of result.fullStream) {
 			if (part.type === "text-delta") yield { text: part.text, done: false };
-			if (part.type === "error")
-				throw part.error instanceof Error
-					? part.error
-					: new Error(stringifyError(part.error));
+			if (part.type === "error") throw failed(part.error);
 		}
 		const usage = await result.usage;
 		logger.info({ usage }, "LLM usage");

@@ -1,7 +1,7 @@
 "use client";
 
 import { Play } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import { LOOKS, TooltipIconButton } from "@/components/ui/icon-button";
 import { usePlayerControl } from "@/app/components/player/player-control-context";
 import {
 	useLayout,
@@ -16,18 +16,19 @@ export function PlayFromHereButton({ scene }: { scene: Scene }) {
 	const seq = useSceneSequence(scene);
 	const startFrame = seq ? toFrames(seq.start, layout.fps) : null;
 	const unavailable = startFrame == null;
+	const { icon, chip } = LOOKS.default;
 	return (
 		<TooltipIconButton
 			label={unavailable ? "Generate scene to play" : "Play from here"}
 			ariaLabel="Play from here"
-			className="bg-muted"
+			className={chip}
 			unavailable={unavailable}
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={() => {
 				if (startFrame != null) playFromFrame(startFrame);
 			}}
 		>
-			<Play className="h-4 w-4" />
+			<Play size={icon} />
 		</TooltipIconButton>
 	);
 }

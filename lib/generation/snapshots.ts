@@ -102,6 +102,10 @@ export class SnapshotStore {
 	getActiveCount = (): number =>
 		this.count((s) => isGenerationActive(s.status));
 
+	/** Elements running right now; queued ones that haven't started are left out. */
+	getGeneratingCount = (): number =>
+		this.count((s) => s.status === "generating");
+
 	getGeneratedCount = (): number =>
 		this.count((s) => !isGenerationActive(s.status) && s.result != null);
 

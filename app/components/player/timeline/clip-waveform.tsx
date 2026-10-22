@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PEAK_COUNT } from "@/lib/components/peaks";
 import { soundwaveMaskStyle, toBarHeights } from "@/lib/components/soundwave";
 import { usePeaks } from "@/lib/components/use-peaks";
-import { clamp, cn } from "@/lib/utils";
+import { clamp } from "@/lib/utils";
 
 const SAMPLE_SPACING_PX = 2;
 /** Sample counts snap to this so a resize doesn't rebuild the mask per pixel. */
@@ -13,21 +13,15 @@ const SAMPLE_QUANTUM = 16;
 // Past the count `loadPeaks` extracts, more samples only repeat themselves.
 const SAMPLE_RANGE = { min: 8, max: PEAK_COUNT };
 
-/**
- * The clip's audio as a mask-painted envelope, so it takes its colour from the
- * surrounding text token rather than from a canvas fill.
- */
+/** Mask-painted so it takes the text colour; the clip's frame crops it to the trim. */
 export function ClipWaveform({
 	src,
 	width,
-	played,
-	className,
+	offset,
 }: {
 	src: string;
 	width: number;
-	/** How much of the audio the clip plays, from its start. Past 1 the clip outlasts it. */
-	played: number;
-	className?: string;
+	offset: number;
 }) {
 	const decode = usePeaks(src);
 	const sampleCount = clamp(
@@ -38,20 +32,22 @@ export function ClipWaveform({
 
 	const peaks = decode.status === "ready" ? decode.peaks : null;
 	const style = useMemo(
-		() =>
-			peaks
-				? soundwaveMaskStyle(toBarHeights(peaks, sampleCount, played))
-				: null,
-		[peaks, sampleCount, played],
+		() => (peaks ? soundwaveMaskStyle(toBarHeights(peaks, sampleCount)) : null),
+		[peaks, sampleCount],
 	);
 
-	// A failed decode stops shimmering: the clip is there, its audio is not.
-	if (decode.status === "failed")
-		return (
-			<div className={cn("flex items-center", className)}>
-				<div className="h-px w-full bg-current opacity-40" />
-			</div>
-		);
-	if (!style) return <Skeleton className={cn("rounded-xs", className)} />;
-	return <div className={cn("bg-current", className)} style={style} />;
+	return (
+		<div className="h-full" style={{ width, translate: `${-offset}px` }}>
+			{decode.status === "failed" ? (
+				// A failed decode stops shimmering: the clip is there, its audio is not.
+				<div className="flex h-full items-center">
+					<div className="h-px w-full bg-current opacity-40" />
+				</div>
+			) : style ? (
+				<div className="h-full bg-current" style={style} />
+			) : (
+				<Skeleton className="h-full rounded-xs" />
+			)}
+		</div>
+	);
 }

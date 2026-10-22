@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	type KeyboardEvent,
 	type MouseEvent,
 	type Ref,
 	useCallback,
@@ -14,6 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { toastError } from "@/lib/toast-error";
 import { clamp, cn } from "@/lib/utils";
+import { seekKeyStep, sliderKeyTarget } from "./slider-keys";
 import {
 	AUDIO_SAMPLE_COUNT,
 	soundwaveMaskStyle,
@@ -57,7 +59,7 @@ export function Waveform({
 }: WaveformProps & { ref?: Ref<WaveformHandle> }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-	const progressRef = useRef<HTMLDivElement>(null);
+	const [progress, setProgress] = useState(0);
 	const decode = usePeaks(src);
 	const audioSettled = useMediaSettled(audio);
 	const loading = decode.status === "loading" || !audioSettled;
@@ -72,12 +74,6 @@ export function Waveform({
 			),
 		[decode],
 	);
-
-	const setProgress = useCallback((progress: number) => {
-		const overlay = progressRef.current;
-		if (overlay)
-			overlay.style.clipPath = `inset(0 ${(1 - clamp(progress, 0, 1)) * 100}% 0 0)`;
-	}, []);
 
 	const handle = useMemo<WaveformHandle>(
 		() => ({
@@ -97,11 +93,12 @@ export function Waveform({
 			seek(progress: number) {
 				const audio = audioRef.current;
 				if (!audio?.duration) return;
-				audio.currentTime = clamp(progress, 0, 1) * audio.duration;
-				setProgress(progress);
+				const ratio = clamp(progress, 0, 1);
+				audio.currentTime = ratio * audio.duration;
+				setProgress(ratio);
 			},
 		}),
-		[setProgress],
+		[],
 	);
 	useImperativeHandle(ref, () => handle, [handle]);
 
@@ -111,7 +108,6 @@ export function Waveform({
 	}, []);
 
 	const reportLoaded = useEffectEvent((duration: number) => {
-		setProgress(0);
 		onTimeUpdate?.(0, duration);
 	});
 	useEffect(() => {
@@ -123,20 +119,42 @@ export function Waveform({
 		handle.seek((event.clientX - rect.left) / rect.width);
 	};
 
+	const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+		const duration = audioRef.current?.duration;
+		if (!duration) return;
+		const target = sliderKeyTarget(event.key, progress, seekKeyStep(duration));
+		if (target === null) return;
+		event.preventDefault();
+		handle.seek(target);
+	};
+
 	return (
 		<>
 			<div
-				className={cn("relative cursor-pointer", className)}
+				role="slider"
+				tabIndex={loading ? -1 : 0}
+				aria-label="Seek"
+				aria-valuemin={0}
+				aria-valuemax={100}
+				aria-valuenow={Math.round(progress * 100)}
+				aria-disabled={loading || undefined}
+				className={cn(
+					"relative cursor-pointer rounded-md focus-ring",
+					className,
+				)}
 				onClick={handleClick}
+				onKeyDown={loading ? undefined : handleKeyDown}
 			>
 				<div
 					className="absolute inset-0 bg-muted-foreground"
 					style={maskStyle}
 				/>
 				<div
-					ref={progressRef}
 					className="absolute inset-0 bg-foreground"
-					style={{ ...maskStyle, clipPath: "inset(0 100% 0 0)" }}
+					style={{
+						...maskStyle,
+						clipPath: `inset(0 ${(1 - progress) * 100}% 0 0)`,
+					}}
 				/>
 				{loading && <Skeleton className="absolute inset-0" />}
 			</div>

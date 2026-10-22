@@ -6,7 +6,6 @@ import {
 	FilmSlate,
 	Hourglass,
 	ImagePlus,
-	Loader2,
 	Mic,
 	Palette,
 	Plus,
@@ -16,6 +15,8 @@ import {
 	X,
 } from "@/components/ui/icon";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
+import { IconButton } from "@/components/ui/icon-button";
+import { Spinner } from "@/components/ui/spinner";
 import {
 	SegmentedControl,
 	type SegmentedControlOption,
@@ -141,18 +142,19 @@ function AttachMenu({
 			contentClassName="min-w-36 p-0.5"
 			itemClassName="rounded-lg text-label-xs"
 		>
-			<button
-				type="button"
-				aria-label="Attach"
+			<IconButton
+				ariaLabel="Attach"
+				size="header"
+				variant="quiet"
+				className="rounded-full"
 				disabled={uploading}
-				className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-button-hover disabled:pointer-events-none"
 			>
 				{uploading ? (
-					<Loader2 className="h-4 w-4 animate-spin" />
+					<Spinner className="h-4 w-4 text-current" />
 				) : (
 					<Plus className="h-4 w-4" />
 				)}
-			</button>
+			</IconButton>
 		</ActionMenu>
 	);
 }
@@ -169,14 +171,14 @@ function TemplatePill({
 			className="relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-body text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
-			<button
-				type="button"
-				aria-label="Remove template"
+			<IconButton
+				ariaLabel="Remove template"
+				size="sm"
+				className="rounded-full"
 				onClick={onRemove}
-				className="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-on-media/20"
 			>
 				<X className="h-3 w-3" />
-			</button>
+			</IconButton>
 			{template.promptPrefix}
 		</span>
 	);

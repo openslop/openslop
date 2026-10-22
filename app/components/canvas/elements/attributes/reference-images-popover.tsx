@@ -86,7 +86,7 @@ export function ReferenceImagesPopover({
 				<div className="flex flex-wrap gap-2">
 					<ReferenceImagePicker
 						urls={urls}
-						onAdd={(added) => setOverride([...urls, ...added])}
+						onAdd={(uploaded) => setOverride([...urls, ...uploaded])}
 						onRemove={(index) =>
 							setOverride(urls.filter((_, i) => i !== index))
 						}

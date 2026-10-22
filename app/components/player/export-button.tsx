@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "@/components/ui/icon";
-import { CloseButton } from "@/components/ui/close-button";
 import {
 	Popover,
 	PopoverAnchor,
 	PopoverContent,
+	PopoverHeader,
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { SelectField } from "@/components/ui/select-field";
@@ -57,11 +57,7 @@ export function ExportButton() {
 				sideOffset={8}
 				className="w-80 font-medium"
 			>
-				<div className="flex items-center justify-between">
-					<span className="text-label font-semibold">Export</span>
-					<CloseButton onClick={() => setOpen(false)} />
-				</div>
-				<Separator bleed />
+				<PopoverHeader title="Export" />
 
 				{(state.status === "starting" || state.status === "rendering") && (
 					<div className="animate-fadeInUp flex flex-col gap-2">
@@ -119,7 +115,7 @@ export function ExportButton() {
 							/>
 						</div>
 						{state.status === "error" && (
-							<p className="mt-3 text-label text-destructive">
+							<p role="alert" className="mt-3 text-label text-destructive">
 								{state.message}
 							</p>
 						)}

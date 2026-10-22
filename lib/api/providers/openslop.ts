@@ -46,6 +46,7 @@ const OPENSLOP_PROVIDERS: {
 	llm: { "Slop LLM v1": hosted("ANTHROPIC_API_KEY", AnthropicLLM, MockLLM) },
 	tts: { "Slop TTS v1": hosted("CARTESIA_API_KEY", CartesiaTTS, MockTTS) },
 	image: {
+		"Slop Image v2": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 		"Slop Image v1": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 	},
 	video: {

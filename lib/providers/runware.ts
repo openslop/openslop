@@ -1,6 +1,10 @@
 import { Runware } from "@runware/sdk-js";
+import { z } from "zod";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
-import { probe, rejected } from "./validate";
+import { fromStatus, probe, rejected } from "./validate";
+
+/** The SDK rejects a refused task with the API's error object. */
+const RefusedTask = z.object({ error: z.object({ message: z.string() }) });
 
 export async function withRunware<T>(
 	apiKey: string,
@@ -14,6 +18,13 @@ export async function withRunware<T>(
 	});
 	try {
 		return await fn(runware);
+	} catch (rejection) {
+		const refused = RefusedTask.safeParse(rejection);
+		if (refused.success)
+			throw new Error(`Runware: ${refused.data.error.message}`, {
+				cause: rejection,
+			});
+		throw rejection;
 	} finally {
 		runware.disconnect?.();
 	}
@@ -31,9 +42,7 @@ export async function validateRunwareKey(
 		headers: { "content-type": "application/json" },
 		body: JSON.stringify([{ taskType: "authentication", apiKey }]),
 	});
-	if (!response.ok) return rejected(response.status);
+	if (!response.ok) return fromStatus(response);
 	const body = (await response.json()) as { errors?: unknown[] };
-	return body.errors?.length
-		? { ok: false, error: "The provider rejected this key." }
-		: { ok: true };
+	return body.errors?.length ? rejected : { ok: true };
 }

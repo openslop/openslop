@@ -74,6 +74,16 @@ describe("AttributeSchema", () => {
 			},
 		]);
 
+		it("offers seconds as any plain number, since reading clamps it", () => {
+			const seconds = AttributeSchema.from([
+				{ key: "length", label: "Length", edit: { kind: "seconds", min: 1 } },
+			]);
+			expect(seconds.offers("length", "2.5")).toBe(true);
+			expect(seconds.offers("length", "0.5")).toBe(true);
+			expect(seconds.offers("length", "2s")).toBe(false);
+			expect(seconds.resolve({ length: "nope" })).toEqual({});
+		});
+
 		it("fills defaults for attributes the caller left unset", () => {
 			expect(schema.resolve({})).toEqual({ model: "a", loop: "false" });
 		});

@@ -9,6 +9,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { sliderKeyTarget } from "@/lib/components/slider-keys";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import { clamp, cn } from "@/lib/utils";
 
@@ -81,28 +82,6 @@ export function segmentStyle(segs: readonly ScrubSegment[]): CSSProperties[] {
 	});
 }
 
-/** Where a slider key moves the value, or null for a key the slider ignores. */
-export function scrubKeyTarget(
-	key: string,
-	value: number,
-	step: number,
-): number | null {
-	switch (key) {
-		case "ArrowRight":
-		case "ArrowUp":
-			return clamp(value + step, 0, 1);
-		case "ArrowLeft":
-		case "ArrowDown":
-			return clamp(value - step, 0, 1);
-		case "Home":
-			return 0;
-		case "End":
-			return 1;
-		default:
-			return null;
-	}
-}
-
 /**
  * Shared slider track used by both the seek bar (segmented) and the volume
  * bar (continuous). Renders a rest track, a hover preview fill, a progress
@@ -162,7 +141,7 @@ export function ScrubBar({
 	};
 
 	const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-		const target = scrubKeyTarget(event.key, value, keyStep);
+		const target = sliderKeyTarget(event.key, value, keyStep);
 		if (target === null) return;
 		event.preventDefault();
 		onScrubStart?.();

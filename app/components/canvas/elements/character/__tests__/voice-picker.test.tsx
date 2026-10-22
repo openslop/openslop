@@ -7,6 +7,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { VoiceInfo } from "@/lib/connectors/types";
 import { VoiceRow } from "../voice-picker";
 
+const toastError = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/toast-error", () => ({ toastError }));
+
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const VOICE: VoiceInfo = {
@@ -84,6 +87,20 @@ describe("VoiceRow", () => {
 		expect(selectButton().contains(previewButton())).toBe(false);
 		expect(loadPreview).toHaveBeenCalledOnce();
 		expect(onSelect).not.toHaveBeenCalled();
+	});
+
+	it("toasts the cause when the preview cannot load", async () => {
+		const failure = new Error("Cartesia 503: overloaded");
+		loadPreview.mockRejectedValueOnce(failure);
+		render(false);
+
+		await act(async () => previewButton().click());
+
+		expect(toastError).toHaveBeenCalledWith(
+			failure,
+			"Couldn't load the preview",
+		);
+		expect(previewButton().getAttribute("aria-disabled")).not.toBe("true");
 	});
 
 	it("ignores a second press while the preview loads", () => {

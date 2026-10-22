@@ -11,7 +11,7 @@ import {
 	resolveDefaultModels,
 	resolveModel,
 } from "../models";
-import { CONNECTOR_TYPES } from "../types";
+import { CONNECTOR_TYPES, type ModelRef } from "../types";
 
 const SEEDREAM = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const SLOP_IMAGE = DEFAULT_MODELS.image;
@@ -93,9 +93,15 @@ describe("resolveModel", () => {
 
 describe("listModels", () => {
 	it("flattens every provider's table, each row naming its provider", () => {
+		const row = (ref: ModelRef) => ({
+			...ref,
+			...modelEntry("image", ref),
+		});
 		expect(listModels("image")).toEqual([
-			{ ...SLOP_IMAGE, ...modelEntry("image", SLOP_IMAGE) },
-			{ ...SEEDREAM, ...modelEntry("image", SEEDREAM) },
+			row(SLOP_IMAGE),
+			row({ provider: "openslop", model: "Slop Image v1" }),
+			row({ provider: "runware", model: "Muse Image" }),
+			row(SEEDREAM),
 		]);
 	});
 });

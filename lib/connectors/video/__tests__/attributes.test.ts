@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { TOGGLE_OFF } from "@/lib/canvas/types";
 import { videoAttributesFor } from "../attributes";
 
 describe("videoAttributesFor", () => {
@@ -14,4 +15,11 @@ describe("videoAttributesFor", () => {
 			).toBe(resolution);
 		},
 	);
+
+	it("defaults continuity off for new videos", () => {
+		expect(
+			videoAttributesFor({ provider: "runware", model: "Kling 3 Turbo" })
+				.defaultAttributes.continuity,
+		).toBe(TOGGLE_OFF);
+	});
 });

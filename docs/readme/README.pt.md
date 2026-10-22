@@ -96,7 +96,7 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, vídeo, som,
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="Passar o mouse sobre uma linha abre o menu de inserção com os sete tipos de elemento e um novo cartão Sound aparece" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -208,15 +208,15 @@ Abra [http://localhost:3000](http://localhost:3000) e você deve ver o app.
 
 ## Stack
 
-| Camada        | Tecnologia                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------------ |
-| Framework     | [Next.js 16](https://nextjs.org) (App Router)                                                                |
-| Linguagem     | [TypeScript 5](https://www.typescriptlang.org)                                                               |
-| UI            | [React 19](https://react.dev), [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) |
-| Auth + BD     | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
-| Vídeo         | [Remotion 4](https://remotion.dev) (composição, renderização, player)                                        |
-| Armazenamento | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (armazenamento dos assets gerados)                |
-| Ícones        | Conjunto próprio de SVGs com máscara (`components/ui/icon.tsx` + `icons/`), sem dependência de ícones        |
+| Camada        | Tecnologia                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Framework     | [Next.js 16](https://nextjs.org) (App Router)                                                                       |
+| Linguagem     | [TypeScript 5](https://www.typescriptlang.org)                                                                      |
+| UI            | [React 19](https://react.dev), [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com)        |
+| Auth + BD     | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                              |
+| Vídeo         | [Remotion 4](https://remotion.dev) (composição, renderização, player)                                               |
+| Armazenamento | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (armazenamento dos assets gerados)                       |
+| Ícones        | Conjunto próprio de SVGs com máscara (`components/ui/icon.tsx` + `components/ui/icons/`), sem dependência de ícones |
 
 ## Estrutura do projeto
 
@@ -231,11 +231,11 @@ lib/
   providers/     Adaptadores de fornecedores no servidor (Runware, ElevenLabs, …)
   generation/    Fila de geração e orquestração de jobs
   canvas/        Modelo de documento Slate: tipos de elemento, guards, parse/serialização OSML
-  script/        Contexto e refinamento do roteiro
+  script/        Escrita e refinamento do roteiro
   project/       Store Zustand por projeto, salvamento automático, persistência
   render/        Layout de cenas e cliente de renderização
   templates/     Templates de prompt oferecidos no composer
-  upload/        Upload de imagens no cliente
+  upload/        Upload de arquivos no cliente (imagem, vídeo, áudio)
   supabase/      Clientes Supabase para navegador/servidor
 remotion/        Ponto de entrada e composições do Remotion
 supabase/        Migrações do banco de dados

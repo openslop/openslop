@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
+import { SectionTitle } from "@/components/ui/section-title";
 import type { Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/use-settings";
 import { AddProvidersView } from "./add-providers-view";
@@ -62,9 +63,7 @@ export function SettingsDialog() {
 									>
 										<ArrowLeft />
 									</IconButton>
-									<h3 className="text-label font-semibold text-foreground">
-										Add providers
-									</h3>
+									<SectionTitle>Add providers</SectionTitle>
 								</div>
 								<AddProvidersView onPick={pick} />
 							</div>

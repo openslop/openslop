@@ -16,7 +16,7 @@ import {
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const Nothing = () => null;
-const toast = vi.fn();
+const toast = Object.assign(vi.fn(), { dismiss: vi.fn() });
 vi.mock("sonner", () => ({ toast }));
 vi.mock("../../element-generation-context", () => ({
 	ElementGenerationProvider: ({ children }: { children: ReactNode }) =>
@@ -214,10 +214,11 @@ describe("CharacterEditModal", () => {
 		expect(onClose).toHaveBeenCalledOnce();
 
 		const [message, { action }] = toast.mock.lastCall ?? [];
-		act(() => action.onClick());
+		act(() => action.props.onClick());
 
 		expect(message).toBe("Deleted Mia");
 		expect(characterNames(canvas.editor.children)).toEqual(["Mia", NARRATOR]);
 		expect(appearanceOf("Mia")).toBe("a girl");
+		expect(toast.dismiss).toHaveBeenCalledOnce();
 	});
 });

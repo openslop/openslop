@@ -1,6 +1,5 @@
-import { apiJson, UnreachableError } from "@/lib/clients/http";
-import { POLL_INTERVAL_MS } from "@/lib/providers/poll";
-import { sleep } from "@/lib/utils";
+import { apiJson } from "@/lib/clients/http";
+import { pollUpdates } from "@/lib/providers/poll";
 import type { RenderHandle, RenderProgress } from "./render-api";
 import type { Resolution } from "./resolutions";
 import type { RenderLayout } from "./types";
@@ -23,21 +22,17 @@ export async function* runRender(
 	});
 	yield { status: "rendering", progress: 0 };
 
-	for (;;) {
-		try {
-			const result = await apiJson<RenderProgress>("/api/render/progress", {
-				method: "POST",
-				body: handle,
-			});
-			if (result.type === "error") throw new Error(result.message);
-			if (result.type === "done") {
-				yield { status: "done", url: result.url, size: result.size };
-				return;
-			}
-			yield { status: "rendering", progress: result.progress };
-		} catch (error) {
-			if (!(error instanceof UnreachableError)) throw error;
+	const progress = () =>
+		apiJson<RenderProgress>("/api/render/progress", {
+			method: "POST",
+			body: handle,
+		});
+	for await (const result of pollUpdates(progress)) {
+		if (result.type === "error") throw new Error(result.message);
+		if (result.type === "done") {
+			yield { status: "done", url: result.url, size: result.size };
+			return;
 		}
-		await sleep(POLL_INTERVAL_MS);
+		yield { status: "rendering", progress: result.progress };
 	}
 }

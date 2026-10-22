@@ -82,7 +82,7 @@ function EditorToolbarComponent() {
 	const generating = useQueueSelector((q) => q.isBusy());
 	const busy = loading || generating;
 	const generateLabel = getGenerateLabel(loading, generating, scope);
-	const current = !scope.empty && scope.pending === 0;
+	const allGenerated = !scope.empty && scope.pending === 0;
 	const unavailable = busy || scope.pending === 0;
 
 	return (
@@ -115,7 +115,7 @@ function EditorToolbarComponent() {
 					>
 						{busy ? (
 							<Spinner className="text-current" />
-						) : current ? (
+						) : allGenerated ? (
 							<Check aria-hidden="true" />
 						) : (
 							<Sparkles aria-hidden="true" />

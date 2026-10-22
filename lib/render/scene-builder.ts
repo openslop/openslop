@@ -14,17 +14,9 @@ import { transitionOverlapSec } from "./transitions";
 
 export type BuildLayoutOptions = Pick<
 	VideoSettings,
-	"transitionType" | "aspectRatio" | "captionStyle"
+	"transitionType" | "aspectRatio" | "captionStyle" | "filmGrain" | "rgbSplit"
 > &
 	Partial<Pick<VideoConfig, "fps">>;
-
-/**
- * Trimmed, a visual is on screen for the dialogue that follows it and no longer,
- * so a generated video's own length only decides what plays before it is cut.
- * Untrimmed, the video plays out in full and the dialogue can only extend it.
- */
-const visualDuration = (element: ResolvedElement): number =>
-	element.trimToDialogue ? 0 : element.durationSec;
 
 /** No sequence is ever shorter than this, however little content it holds. */
 export const MIN_DURATION_SEC = 1;
@@ -86,6 +78,8 @@ export function buildRenderLayout(
 		transitionType,
 		aspectRatio,
 		captionStyle,
+		filmGrain,
+		rgbSplit,
 		fps = DEFAULT_CONFIG.fps,
 	}: BuildLayoutOptions,
 ): RenderLayout {
@@ -100,7 +94,11 @@ export function buildRenderLayout(
 	let cursor = 0;
 
 	for (const raw of elements) {
-		const element = { ...raw, durationSec: onGrid(raw.durationSec) };
+		const element = {
+			...raw,
+			durationSec: onGrid(raw.durationSec),
+			mediaDurationSec: onGrid(raw.mediaDurationSec),
+		};
 		const stride = onGrid(loopStrideSec(element));
 		const current = series.at(-1);
 		const foregroundCursor = getForegroundCursor(current, cursor);
@@ -123,7 +121,7 @@ export function buildRenderLayout(
 					// subsequent overlay/background/effect lands on the rendered timeline.
 					cursor -= transitionDurationSec;
 				}
-				series.push(createSequence(element, cursor, visualDuration(element)));
+				series.push(createSequence(element, cursor, element.durationSec));
 				break;
 			}
 			case "overlay": {
@@ -166,5 +164,7 @@ export function buildRenderLayout(
 		transitionType,
 		transitionDurationSec,
 		captionStyle,
+		filmGrain,
+		rgbSplit,
 	};
 }

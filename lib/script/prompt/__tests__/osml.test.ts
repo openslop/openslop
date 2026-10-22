@@ -75,10 +75,10 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("Use both appropriately");
 	});
 
-	it("carries the look of the visual before a video unless it moves somewhere new", () => {
-		expect(spec).toContain('continuity="true" (the default)');
+	it("makes a fresh look the default and carries the previous visual only when requested", () => {
+		expect(spec).toContain('continuity="false" (the default)');
 		expect(spec).toContain(
-			'continuity="false" when the video moves somewhere new',
+			'continuity="true" to show the beginning and middle frames of the visual before it',
 		);
 	});
 

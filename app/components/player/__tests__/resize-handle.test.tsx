@@ -18,6 +18,7 @@ function Harness() {
 	return (
 		<ResizeHandle
 			axis="vertical"
+			label="Resize player"
 			resizing={resizing}
 			handleProps={handleProps}
 		/>
@@ -63,7 +64,7 @@ describe("ResizeHandle", () => {
 		const handle = render();
 
 		expect(handle.tabIndex).toBe(0);
-		expect(handle.getAttribute("aria-label")).toBe("Resize panel");
+		expect(handle.getAttribute("aria-label")).toBe("Resize player");
 		expect(handle.getAttribute("aria-orientation")).toBe("horizontal");
 		expect(handle.getAttribute("aria-valuenow")).toBe("200");
 		expect(handle.getAttribute("aria-valuemin")).toBe("100");

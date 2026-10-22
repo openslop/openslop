@@ -36,12 +36,14 @@ const LINES: Record<
 
 type ResizeHandleProps = {
 	axis: ResizeAxis;
+	label: string;
 	resizing: boolean;
 	handleProps: ReturnType<typeof useResize>["handleProps"];
 };
 
 export function ResizeHandle({
 	axis,
+	label,
 	resizing,
 	handleProps,
 }: ResizeHandleProps) {
@@ -52,7 +54,7 @@ export function ResizeHandle({
 			{...handleProps}
 			role="separator"
 			aria-orientation={orientation}
-			aria-label="Resize panel"
+			aria-label={label}
 			tabIndex={0}
 			className={`group relative flex shrink-0 touch-none items-center justify-center focus-ring ${handle} ${resizing ? "select-none" : ""}`}
 		>

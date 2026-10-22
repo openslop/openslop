@@ -1,9 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MessageMetadata } from "@vercel/queue";
 import {
 	parseAssetQueueCallback,
 	retryWithBackoff,
 } from "@/lib/api/queue-callback";
+
+const mockLogError = vi.fn();
+vi.mock("@/lib/api/logger", () => ({
+	logger: { error: (...args: unknown[]) => mockLogError(...args) },
+}));
 
 const JOB_ID = "1f5b0d1e-6c4a-4f0e-9a2b-8e7c3d5a1b90";
 
@@ -35,6 +40,10 @@ describe("parseAssetQueueCallback", () => {
 });
 
 describe("retryWithBackoff", () => {
+	beforeEach(() => {
+		mockLogError.mockReset();
+	});
+
 	const delivery = (deliveryCount: number) =>
 		({ deliveryCount }) as MessageMetadata;
 
@@ -43,10 +52,26 @@ describe("retryWithBackoff", () => {
 		[2, 20],
 		[5, 160],
 		[6, 300],
-		[40, 300],
+		[14, 300],
 	])("delivery %i is retried after %i seconds", (deliveryCount, seconds) => {
 		expect(
 			retryWithBackoff(new Error("db down"), delivery(deliveryCount)),
 		).toEqual({ afterSeconds: seconds });
+		expect(mockLogError).not.toHaveBeenCalled();
 	});
+
+	it.each([15, 16, 40])(
+		"delivery %i is acknowledged and its error logged",
+		(deliveryCount) => {
+			const error = new Error("db down");
+
+			expect(retryWithBackoff(error, delivery(deliveryCount))).toEqual({
+				acknowledge: true,
+			});
+			expect(mockLogError).toHaveBeenCalledWith(
+				error,
+				`Dropped a queue message after ${deliveryCount} deliveries`,
+			);
+		},
+	);
 });

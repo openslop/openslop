@@ -96,7 +96,7 @@ Chaque scène est une pile de cartes : narration, personnage, image, vidéo, son
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="Survoler une ligne ouvre le menu d'insertion avec les sept types d'éléments et une nouvelle carte Sound apparaît" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="Survoler une ligne ouvre le menu d'insertion avec les six types d'éléments et une nouvelle carte Sound apparaît" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -216,7 +216,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000) et vous devriez voir l'app
 | Auth + BDD | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | Vidéo      | [Remotion 4](https://remotion.dev) (composition, rendu, lecteur)                                             |
 | Stockage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (stockage des ressources générées)                |
-| Icônes     | Jeu maison de SVG masqués (`components/ui/icon.tsx` + `icons/`), aucune dépendance d'icônes                  |
+| Icônes     | Jeu maison de SVG masqués (`components/ui/icon.tsx` + `components/ui/icons/`), aucune dépendance d'icônes    |
 
 ## Structure du projet
 
@@ -231,11 +231,11 @@ lib/
   providers/     Adaptateurs fournisseurs côté serveur (Runware, ElevenLabs, …)
   generation/    File de génération et orchestration des jobs
   canvas/        Modèle de document Slate : types d'éléments, gardes, parse/sérialisation OSML
-  script/        Contexte et affinage du script
+  script/        Écriture et affinage du script
   project/       Store Zustand par projet, sauvegarde automatique, persistance
   render/        Mise en page des scènes et client de rendu
   templates/     Modèles de prompt proposés dans le composeur
-  upload/        Envoi d'images côté client
+  upload/        Envoi de fichiers côté client (image, vidéo, audio)
   supabase/      Clients Supabase navigateur/serveur
 remotion/        Point d'entrée Remotion et compositions
 supabase/        Migrations de la base de données

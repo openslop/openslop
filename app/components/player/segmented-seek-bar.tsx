@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { seekKeyStep } from "@/lib/components/slider-keys";
 import { clamp } from "@/lib/utils";
 import { toSeconds } from "@/lib/render/frames";
 import { findSegmentIndexAtFrame } from "@/lib/render/scene-segments";
@@ -13,7 +14,6 @@ import { usePlayerScrub } from "./use-player-scrub";
 import { useLayout } from "./render-layout-context";
 
 const HOVER_SETTLE_MS = 80;
-const KEY_SEEK_SEC = 5;
 
 export function SegmentedSeekBar() {
 	const { player } = usePlayerControl();
@@ -65,7 +65,7 @@ export function SegmentedSeekBar() {
 			value={progress}
 			segments={scrubSegments}
 			onScrub={(ratio) => scrub.seekTo(toScrubFrame(ratio))}
-			keyStep={KEY_SEEK_SEC / totalDurationSec}
+			keyStep={seekKeyStep(totalDurationSec)}
 			onScrubStart={scrub.start}
 			onScrubEnd={scrub.end}
 			onHoverChange={setHover}

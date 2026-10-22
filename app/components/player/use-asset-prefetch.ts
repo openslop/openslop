@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { prefetch as PrefetchFn } from "remotion";
 import type { RenderLayout } from "@/lib/render/types";
+import { toastError } from "@/lib/toast-error";
 
 type PrefetchHandle = ReturnType<typeof PrefetchFn>;
 
@@ -67,10 +68,11 @@ export function useAssetPrefetch(layout: RenderLayout): boolean {
 				await awaitPrefetch([...active.values()]);
 				if (!cancelled) setReady(true);
 			})
-			.catch((error) => {
-				if (cancelled) return;
-				console.error("Failed to load remotion for prefetch", error);
-				setReady(true);
+			.catch((error: unknown) => {
+				if (!cancelled)
+					toastError(error, "Couldn't load the player", {
+						id: "player-load",
+					});
 			});
 
 		return () => {

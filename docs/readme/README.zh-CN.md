@@ -96,7 +96,7 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 <td width="50%">
   <a href="../../lib/canvas"><picture>
     <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="鼠标悬停在一行上打开插入菜单，列出七种元素类型，一张新的 Sound 卡片出现" width="100%">
+    <img src="../../assets/features/canvas-light.svg" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
   </picture></a>
 </td>
 </tr>
@@ -216,7 +216,7 @@ npm run dev
 | 认证 + 数据库 | [Supabase](https://supabase.com)（Auth、Postgres、RLS）                                                      |
 | 视频          | [Remotion 4](https://remotion.dev)（合成、渲染、播放器）                                                     |
 | 存储          | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob)（生成资源的存储）                                 |
-| 图标          | 自研的遮罩 SVG 图标集（`components/ui/icon.tsx` + `icons/`），无图标依赖                                     |
+| 图标          | 自研的遮罩 SVG 图标集（`components/ui/icon.tsx` + `components/ui/icons/`），无图标依赖                       |
 
 ## 项目结构
 
@@ -231,11 +231,11 @@ lib/
   providers/     服务端的供应商适配器（Runware、ElevenLabs……）
   generation/    生成队列和任务编排
   canvas/        Slate 文档模型：元素类型、守卫、OSML 解析/序列化
-  script/        脚本上下文和润色
+  script/        脚本撰写和润色
   project/       每个项目的 Zustand store、自动保存、持久化
   render/        场景布局和渲染客户端
   templates/     编辑器里提供的提示词模板
-  upload/        客户端图片上传
+  upload/        客户端文件上传（图片、视频、音频）
   supabase/      浏览器端/服务端的 Supabase 客户端
 remotion/        Remotion 入口和合成
 supabase/        数据库迁移

@@ -79,6 +79,18 @@ describe("createHostedRouteHandler", () => {
 		expect(handle).not.toHaveBeenCalled();
 	});
 
+	it("returns 500 when the api_access flag is not a boolean", async () => {
+		mockGetUser.mockResolvedValue({
+			id: "user-1",
+			app_metadata: { api_access: "true" },
+		});
+		const handle = vi.fn(async () => NextResponse.json({}));
+		const handler = makeHandler(handle);
+		const res = await handler(makeRequest({ prompt: "hello" }));
+		expect(res.status).toBe(500);
+		expect(handle).not.toHaveBeenCalled();
+	});
+
 	it("returns 400 when prompt is missing", async () => {
 		const handler = makeHandler();
 		const res = await handler(makeRequest({}));
@@ -151,15 +163,13 @@ describe("createHostedRouteHandler", () => {
 		expect(await res.json()).toEqual({ ok: true, prompt: "hello" });
 	});
 
-	it("returns 500 with the error message when handle throws an Error", async () => {
+	it("returns 500 with the error's message, not its stack, when handle throws an Error", async () => {
 		const handler = makeHandler(async () => {
 			throw new Error("boom");
 		});
 		const res = await handler(makeRequest(VALID_BODY));
 		expect(res.status).toBe(500);
-		const json = await res.json();
-		expect(json.error).toContain("TestRoute failed: ");
-		expect(json.error).toContain("boom");
+		expect(await res.json()).toEqual({ error: "TestRoute failed: boom" });
 	});
 
 	it("stringifies non-Error throws", async () => {

@@ -18,7 +18,7 @@ import {
 	optionalImageDimensions,
 	optionalReferenceImages,
 	optionalVideoDuration,
-	optionalVideoResolution,
+	optionalResolution,
 	requiredVoiceId,
 } from "./request-schema-fields";
 
@@ -73,6 +73,7 @@ export const bodySchema = <
 
 export const IMAGE_FIELDS = {
 	format: z.enum(IMAGE_FORMATS).optional(),
+	...optionalResolution,
 	...optionalImageDimensions,
 	...optionalCharacterAssets,
 	...optionalReferenceImages,
@@ -84,7 +85,7 @@ export const VIDEO_FIELDS = {
 	...optionalContinuityFrames,
 	...optionalFrameImage,
 	...optionalVideoDuration,
-	...optionalVideoResolution,
+	...optionalResolution,
 	...optionalImageDimensions,
 } as const;
 

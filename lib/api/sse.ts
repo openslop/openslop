@@ -1,3 +1,4 @@
+import type { z } from "zod";
 import { logger } from "./logger";
 
 export function formatSSE(data: unknown): string {
@@ -31,7 +32,10 @@ export function createSSEStreamResponse<T>(
 	return new Response(stream, { headers: SSE_HEADERS });
 }
 
-export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
+export async function* readSSE<T>(
+	body: ReadableStream,
+	schema: z.ZodType<T>,
+): AsyncGenerator<T> {
 	const reader = body.getReader();
 	const decoder = new TextDecoder();
 	let buffer = "";
@@ -47,7 +51,7 @@ export async function* readSSE<T>(body: ReadableStream): AsyncGenerator<T> {
 
 			for (const part of parts) {
 				if (!part.startsWith("data: ")) continue;
-				yield JSON.parse(part.slice(6)) as T;
+				yield schema.parse(JSON.parse(part.slice(6)));
 			}
 		}
 	} finally {

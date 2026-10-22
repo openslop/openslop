@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Plus, RotateCcw } from "@/components/ui/icon";
+import { SectionTitle } from "@/components/ui/section-title";
 import { Separator } from "@/components/ui/separator";
 import { ModelChips } from "@/app/components/models/model-chips";
 import { ModelDefaultControl } from "@/app/components/models/model-default-control";
@@ -41,7 +42,7 @@ export function ModelsTab({
 
 	return (
 		<div className="flex flex-col gap-6">
-			<h3 className="text-label font-semibold text-foreground">Models</h3>
+			<SectionTitle>Models</SectionTitle>
 
 			<SettingsSection
 				title="Providers"

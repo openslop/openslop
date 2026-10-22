@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { Check, RotateCcw, Sparkles } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import { LOOKS, TooltipIconButton } from "@/components/ui/icon-button";
 import { Spinner } from "@/components/ui/spinner";
 import type { Scene } from "@/lib/canvas/types";
 import {
@@ -10,28 +10,35 @@ import {
 	type GenerateCounts,
 } from "../hooks/use-generate-scope";
 
-function SceneGenerateIcon({ empty, active, pending, stale }: GenerateCounts) {
+function SceneGenerateIcon({
+	empty,
+	active,
+	pending,
+	stale,
+	size,
+}: GenerateCounts & { size: number }) {
 	if (active) return <Spinner className="h-4 w-4 text-current" />;
-	if (empty) return <Sparkles className="h-4 w-4" />;
-	if (pending === 0) return <Check className="h-4 w-4" />;
-	if (stale === pending) return <RotateCcw className="h-4 w-4" />;
-	return <Sparkles className="h-4 w-4" />;
+	if (empty) return <Sparkles size={size} />;
+	if (pending === 0) return <Check size={size} />;
+	if (stale === pending) return <RotateCcw size={size} />;
+	return <Sparkles size={size} />;
 }
 
 export function SceneGenerateButton({ scene }: { scene: Scene }) {
 	const select = useCallback(() => scene.children, [scene.children]);
 	const scope = useGenerateScope(select, "scene");
 	const unavailable = scope.empty || scope.active || scope.pending === 0;
+	const { icon, chip } = LOOKS.default;
 
 	return (
 		<TooltipIconButton
 			label={scope.description}
-			className="bg-muted"
+			className={chip}
 			unavailable={unavailable}
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={scope.run}
 		>
-			<SceneGenerateIcon {...scope} />
+			<SceneGenerateIcon {...scope} size={icon} />
 		</TooltipIconButton>
 	);
 }

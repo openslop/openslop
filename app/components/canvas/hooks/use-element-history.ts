@@ -3,9 +3,9 @@
 import {
 	useElementHistoryStore,
 	useElementHistorySelector,
-} from "@/lib/generation/element-history-provider";
+	useQueueSelector,
+} from "@/lib/generation/generation-queue-provider";
 import type { ElementHistoryStatus } from "@/lib/generation/history";
-import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import {
 	activeVersionIndex,
 	type ElementVersion,

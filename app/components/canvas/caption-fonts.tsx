@@ -7,10 +7,11 @@ import {
 } from "@/lib/captions/caption-fonts";
 import { useCaptionStyle } from "@/lib/captions/use-caption-style";
 import { useVideoSetting } from "@/lib/project/use-video-setting";
+import { toastError } from "@/lib/toast-error";
 
 const register = (fonts?: readonly CaptionFont[]) =>
 	loadCaptionFonts((file) => `/fonts/${file}`, fonts).catch((error: unknown) =>
-		console.error("Failed to load caption fonts", error),
+		toastError(error, "Couldn't load caption fonts"),
 	);
 
 /** The one face the project captions with, so the preview draws what it exports. */

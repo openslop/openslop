@@ -1,4 +1,5 @@
 import { useSlateStatic } from "slate-react";
+import { Badge } from "@/components/ui/badge";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -13,13 +14,13 @@ import {
 	CONTINUITY_ATTR,
 	continuityDef,
 } from "@/lib/connectors/video/start-frame";
-import { cn } from "@/lib/utils";
 import { ContinuityReferencesPopover } from "./attributes/continuity-section";
 import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
 import { ModelAttribute } from "./attributes/model-attribute";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
-import { flatAttributes } from "@/lib/canvas/element-attributes";
+import { InputAttributeField } from "./attributes/input-attribute-field";
+import { clampedNumber, flatAttributes } from "@/lib/canvas/element-attributes";
 
 const UNSET = "—";
 
@@ -28,8 +29,7 @@ function formatValue(value: string, unit?: string): string {
 	return unit ? `${value}${unit}` : value;
 }
 
-const PILL =
-	"bg-secondary text-secondary-foreground text-label px-1.5 py-0.5 rounded-md max-w-[140px] truncate";
+const SECONDS_FIELD = "w-20 font-numeric";
 
 interface AttributeBadgeProps {
 	element: ContentElement;
@@ -70,9 +70,9 @@ export function AttributeBadge({
 
 	if (!spec.edit) {
 		return (
-			<span className={cn(PILL, className)} title={tooltip}>
-				{labeled}
-			</span>
+			<Badge size="attribute" className={className} title={tooltip}>
+				<span className="min-w-0 truncate">{labeled}</span>
+			</Badge>
 		);
 	}
 
@@ -127,6 +127,25 @@ export function AttributeBadge({
 				placeholder={spec.edit.placeholder}
 				rows={spec.edit.rows}
 				hideLabel={hideLabel}
+			/>
+		);
+	}
+
+	if (spec.edit.kind === "seconds") {
+		const { min } = spec.edit;
+		return (
+			// Keyed on the value so a trim dragged on the timeline replaces the draft.
+			<InputAttributeField
+				key={value}
+				element={element}
+				attrKey={attrKey}
+				value={value}
+				label={spec.label}
+				parse={(text) => clampedNumber(text, { min })?.toString()}
+				inputMode="decimal"
+				placeholder="Auto"
+				aria-label={`${spec.label} in seconds`}
+				className={SECONDS_FIELD}
 			/>
 		);
 	}

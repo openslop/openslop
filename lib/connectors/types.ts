@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { CanvasElement } from "@/lib/canvas/types";
 import type { Dependency, Read } from "@/lib/generation/declare";
 import type { WithMetadata } from "@/lib/providers/base";
-import type { VideoResolution } from "@/lib/project/aspect-ratio";
+import type { MediaResolution } from "@/lib/project/aspect-ratio";
 import type { CharacterSchema } from "@/lib/api/request-schema-fields";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
@@ -51,9 +51,9 @@ export type ModelEntry = ModelMeta & {
 	description?: string;
 };
 
-/** A video model also says which output resolutions the vendor renders it at, its default first. */
-export type VideoModelEntry = ModelEntry & {
-	resolutions: readonly [VideoResolution, ...VideoResolution[]];
+/** A visual model also says which resolutions the vendor renders it at, its default first. */
+export type VisualModelEntry = ModelEntry & {
+	resolutions: readonly [MediaResolution, ...MediaResolution[]];
 };
 
 /** What each connector type's catalog entries carry. */
@@ -61,8 +61,8 @@ export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
 	voice: ModelEntry;
-	image: ModelEntry;
-	video: VideoModelEntry;
+	image: VisualModelEntry;
+	video: VisualModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
 };
@@ -168,10 +168,12 @@ export type LLMGenerateResult = {
 	usage?: { inputTokens: number; outputTokens: number };
 } & WithMetadata;
 
-export type LLMStreamChunk = {
-	text: string;
-	done: boolean;
-};
+export const LLMStreamChunkSchema = z.object({
+	text: z.string(),
+	done: z.boolean(),
+});
+
+export type LLMStreamChunk = z.infer<typeof LLMStreamChunkSchema>;
 
 export interface LLMConnector extends Connector {
 	readonly type: "llm";
@@ -194,15 +196,18 @@ export type Character = z.infer<typeof CharacterSchema>;
 
 export type ImageGenerateParams = ConnectorGenerateParams & {
 	format?: ImageFormat;
+	resolution?: MediaResolution;
 	width?: number;
 	height?: number;
 	characterAssets?: Character[];
 	referenceImages?: string[];
 };
 
-export type TTSResult = AssetResult & {
-	textTimestamps: TextTimestamp[];
-};
+export const TTSResultSchema = AssetResultSchema.extend({
+	textTimestamps: z.array(TextTimestampSchema),
+});
+
+export type TTSResult = z.infer<typeof TTSResultSchema>;
 
 export type TTSGenerateParams = ConnectorGenerateParams & {
 	voiceId?: string;
@@ -252,7 +257,7 @@ export type VideoGenerateParams = ConnectorGenerateParams & {
 	continuityFrames?: string[];
 	frameImage?: string;
 	duration?: number;
-	resolution?: VideoResolution;
+	resolution?: MediaResolution;
 	width?: number;
 	height?: number;
 };

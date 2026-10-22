@@ -47,7 +47,7 @@ type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
 
 const headline = ({ fits, changes, short, applied }: Counts) => {
 	if (fits === 0)
-		return "No video elements trimmed to dialogue in scope. Images already stretch to the dialogue under them, and untrimmed videos play in full.";
+		return "No video elements with dialogue under them in scope. Images already stretch to the dialogue under them.";
 	if (changes > 0)
 		return `Fitted ${applied} of ${changes}. Those elements are stale now and need regenerating.`;
 	if (short > 0)
@@ -57,18 +57,18 @@ const headline = ({ fits, changes, short, applied }: Counts) => {
 
 export const fitDurations = defineTool({
 	description: dedent`
-	  Fit every video element trimmed to dialogue to the dialogue that runs under it: set each one's
+	  Fit every video element to the dialogue that runs under it: set each one's
 	  \`duration\` to just cover the speech that follows it, up to the next visual, plus
-	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter ones stop dead under long dialogue;
-	  longer ones are generated footage nobody sees.
+	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter ones freeze or loop under long dialogue;
+	  longer ones hold the next line back until they finish.
 
 	  The dialogue under a visual is every line between it and the next visual, whether or
 	  not a scene boundary falls between them, so this is scoped by element, never by scene.
 	  Send \`element_ids\` to fit only those, or nothing for the whole canvas.
 
-	  Images already stretch, and videos with trimToDialogue="false" play in full, so both
-	  are left alone. Changing a
-	  duration stales the element: tell the user to regenerate it afterwards.
+	  Images already stretch, and videos with no dialogue under them have nothing to fit,
+	  so both are left alone. Changing a duration stales the element: tell the user to
+	  regenerate it afterwards.
 	`,
 	input: z.object({
 		element_ids: z.array(z.string()).min(1).optional(),
@@ -100,7 +100,7 @@ export const fitDurations = defineTool({
 			...changes.map(changeLine),
 			...short.map(shortLine),
 			leftAlone > 0 &&
-				`${leftAlone} ${plural(leftAlone, "image")} or untrimmed ${plural(leftAlone, "video")} left alone.`,
+				`${leftAlone} ${plural(leftAlone, "image")} or ${plural(leftAlone, "video")} without dialogue left alone.`,
 			unknown.length > 0 &&
 				`Not a visual on the canvas: ${unknown.join(", ")}. Read the script again.`,
 			failures.length > 0 &&
