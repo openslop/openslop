@@ -96,7 +96,8 @@ function EditorToolbarComponent() {
 						<TooltipIconButton
 							label="Cancel generation"
 							variant="quiet"
-							className="self-center bg-muted"
+							chip
+							className="self-center"
 							onClick={() => queue.cancelAll()}
 						>
 							<X className="h-3 w-3" aria-hidden="true" />

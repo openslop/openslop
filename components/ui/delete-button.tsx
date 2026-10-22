@@ -1,33 +1,23 @@
 import * as React from "react";
 import { Trash2 } from "@/components/ui/icon";
-import { cn } from "@/lib/utils";
 import {
+	ICON_SIZES,
 	IconButton,
-	LOOKS,
 	TooltipIconButton,
 } from "@/components/ui/icon-button";
 
 export function DeleteButton({
-	className,
 	size = "default",
 	...props
-}: React.ComponentProps<typeof IconButton> & {
-	size?: keyof typeof LOOKS;
-}) {
-	const { icon, chip } = LOOKS[size];
-
+}: React.ComponentProps<typeof IconButton>) {
 	return (
 		<TooltipIconButton
 			label="Delete"
 			size={size}
-			className={cn(
-				chip,
-				"text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20",
-				className,
-			)}
+			variant="destructive"
 			{...props}
 		>
-			<Trash2 size={icon} />
+			<Trash2 size={ICON_SIZES[size]} />
 		</TooltipIconButton>
 	);
 }

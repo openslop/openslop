@@ -146,7 +146,7 @@ function AttachMenu({
 				ariaLabel="Attach"
 				size="header"
 				variant="quiet"
-				className="rounded-full"
+				shape="round"
 				disabled={uploading}
 			>
 				{uploading ? (
@@ -174,7 +174,7 @@ function TemplatePill({
 			<IconButton
 				ariaLabel="Remove template"
 				size="sm"
-				className="rounded-full"
+				shape="round"
 				onClick={onRemove}
 			>
 				<X className="h-3 w-3" />

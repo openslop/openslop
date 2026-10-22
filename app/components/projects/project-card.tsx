@@ -40,6 +40,7 @@ export function ProjectCard({
 				<div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
 					<DeleteButton
 						ariaLabel={`Delete ${project.name}`}
+						chip
 						onClick={onDelete}
 					/>
 				</div>

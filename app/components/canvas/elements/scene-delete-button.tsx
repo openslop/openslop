@@ -9,6 +9,7 @@ export function SceneDeleteButton({ scene }: { scene: Scene }) {
 	return (
 		<DeleteIconButton
 			ariaLabel="Delete scene"
+			chip
 			onMouseDown={(e) => e.preventDefault()}
 			onClick={() => removeBlock(editor, scene.id)}
 		/>

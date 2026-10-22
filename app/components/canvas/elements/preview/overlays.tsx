@@ -22,10 +22,12 @@ function CancelButton({ onClick }: { onClick: () => void }) {
 			<IconButton
 				ariaLabel="Cancel generation"
 				size="header"
-				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 rounded-full bg-muted opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100 focus-visible:opacity-100"
+				shape="round"
+				chip
+				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={onClick}
 			>
-				<XIcon className="w-3 h-3 text-foreground" aria-hidden="true" />
+				<XIcon className="w-3 h-3" aria-hidden="true" />
 			</IconButton>
 		</SimpleTooltip>
 	);
