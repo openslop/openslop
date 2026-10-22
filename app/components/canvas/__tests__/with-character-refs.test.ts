@@ -91,4 +91,23 @@ describe("an @ mention", () => {
 		);
 		expect(Editor.above(editor, { match: isCharacterRef })).toBeUndefined();
 	});
+
+	it.each([
+		["A field with (@)", "A field with ({{Granny}})"],
+		["@'s basket", "{{Granny}}'s basket"],
+	])(
+		"keeps the text after the caret next to the chip in %s",
+		(prompt, text) => {
+			const editor = editorWith(content("image", "i", prompt));
+			Transforms.select(editor, {
+				path: [0, 0, 0],
+				offset: prompt.indexOf("@") + 1,
+			});
+
+			insertCharacterRef(editor, mention(editor), "Granny");
+
+			expect(refNames(editor)).toEqual(["Granny"]);
+			expect(getElementBodyText(only(editor))).toBe(text);
+		},
+	);
 });
