@@ -3,5 +3,7 @@ export const ELEVENLABS_SFX_MODELS = {
 		id: "eleven_text_to_sound_v2",
 		cost: "low",
 		speed: "high",
+		description:
+			"Best for short sound effects and ambience described in words.",
 	},
 } as const;

@@ -1,9 +1,9 @@
 "use client";
 
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
-import { ChevronDown, Info } from "@/components/ui/icon";
+import { ChevronDown } from "@/components/ui/icon";
+import { InfoTip } from "@/components/ui/info-tip";
 import { SelectMenu } from "@/components/ui/select-menu";
-import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface SettingPillOption<T extends string> {
@@ -11,21 +11,6 @@ export interface SettingPillOption<T extends string> {
 	label: string;
 	/** Shown behind an info icon on the menu row, for a choice the label alone cannot explain. */
 	description?: string;
-}
-
-/** The icon carries the description for screen readers too, since a tooltip only shows on hover. */
-function OptionInfo({ description }: { description: string }) {
-	return (
-		<SimpleTooltip label={description} side="right">
-			<span
-				role="img"
-				aria-label={description}
-				className="ml-auto flex shrink-0 items-center pl-2 text-muted-foreground"
-			>
-				<Info className="h-3.5 w-3.5" />
-			</span>
-		</SimpleTooltip>
-	);
 }
 
 export function SettingPillButton({
@@ -85,7 +70,7 @@ export function SettingPill<T extends string>({
 				label: description ? (
 					<>
 						{label}
-						<OptionInfo description={description} />
+						<InfoTip label={description} className="ml-auto pl-2" />
 					</>
 				) : (
 					label

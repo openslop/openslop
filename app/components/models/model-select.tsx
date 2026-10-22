@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, Settings } from "@/components/ui/icon";
+import { InfoTip } from "@/components/ui/info-tip";
 import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
 import {
 	SimpleTooltip,
@@ -64,7 +65,7 @@ export function ModelSelect({
 				<DropdownMenuContent
 					side={side}
 					align={align}
-					className="max-h-80 min-w-72 max-w-80 overflow-y-auto bg-surface-elevated"
+					className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
 				>
 					<ModelMenuItems {...menu} />
 					{footer}
@@ -104,16 +105,15 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 						size={14}
 						className={cn(missing && "opacity-40")}
 					/>
-					<span className="flex min-w-0 flex-col">
-						<span
-							className={cn("truncate", missing && "text-muted-foreground")}
-						>
-							{model}
-						</span>
-						{description && (
-							<span className="text-muted-foreground">{description}</span>
+					<span
+						className={cn(
+							"min-w-0 truncate",
+							missing && "text-muted-foreground",
 						)}
+					>
+						{model}
 					</span>
+					{description && <InfoTip label={description} />}
 					{missing ? (
 						<ConnectHint provider={provider} />
 					) : (
