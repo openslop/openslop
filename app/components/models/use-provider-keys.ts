@@ -1,6 +1,9 @@
 "use client";
 
-import type { ProviderKeyRecord } from "@/lib/connectors/provider-key";
+import {
+	findProviderKey,
+	type ProviderKeyRecord,
+} from "@/lib/connectors/provider-key";
 import type { Provider } from "@/lib/connectors/types";
 import { useAccount } from "@/lib/user/use-account";
 
@@ -9,8 +12,7 @@ export function useProviderKeyLookup(): (
 	provider: Provider,
 ) => ProviderKeyRecord | null {
 	const providerKeys = useAccount((state) => state.providerKeys);
-	return (provider) =>
-		providerKeys.find((row) => row.provider === provider) ?? null;
+	return (provider) => findProviderKey(providerKeys, provider);
 }
 
 export function useProviderKey(provider: Provider): ProviderKeyRecord | null {

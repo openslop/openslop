@@ -47,7 +47,6 @@ export type ModelMeta = {
 export type ModelEntry = ModelMeta & {
 	/** The id the provider's own API takes. */
 	id: string;
-	/** What it does best, for a model that stands out from its siblings. */
 	description?: string;
 };
 

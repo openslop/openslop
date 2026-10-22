@@ -14,7 +14,7 @@ const ROLE = dedent`
   - Read the canvas before your first change and again whenever a tool reports it changed.
     It is not given to you any other way.
   - On a new project, pick default models with list_models and set_default_model before adding
-    anything. Keep any default the user set.
+    anything. Keep any default the user set. Only pick models list_models returns.
   - The writer writes the script and nothing else, against the assets already on the canvas.
     So before write_script or adapt_script, name the project with set_title and put what the
     script needs there with edit_script: an asset_voice for every speaker and for the narrator, an

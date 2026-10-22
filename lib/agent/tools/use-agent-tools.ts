@@ -18,6 +18,7 @@ import { buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { createConnector } from "@/lib/connectors/factory";
+import { findProviderKey } from "@/lib/connectors/provider-key";
 import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
@@ -86,9 +87,7 @@ export function useAgentTools() {
 					account: account.getState().models,
 				}),
 				isConnected: (provider) =>
-					account
-						.getState()
-						.providerKeys.some((key) => key.provider === provider),
+					findProviderKey(account.getState().providerKeys, provider) !== null,
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);

@@ -8,8 +8,8 @@ import { defineTool } from "./define-tool";
 
 export const setDefaultModel = defineTool({
 	description: dedent`
-	  Set the model new elements of a type get. Elements already on the canvas keep theirs;
-	  change those with edit_script.
+	  Set the model new elements of a type get. Pick a pair from list_models. Elements
+	  already on the canvas keep theirs; change those with edit_script.
 	`,
 	input: modelRefSchema
 		.extend({ type: z.enum(CONNECTOR_TYPES) })

@@ -85,44 +85,40 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 	const keyFor = useProviderKeyLookup();
 	const settings = useSettings();
 
-	return listModels(type).map(
-		({ provider, model, cost, speed, description }) => {
-			const missing = keyFor(provider) === null;
-			return (
-				<SelectMenuItem
-					key={`${provider}/${model}`}
-					aria-label={modelLabel({ provider, model })}
-					selected={sameModel({ provider, model }, value)}
-					onSelect={() =>
-						missing
-							? settings.open("models", provider)
-							: onChange({ provider, model })
-					}
-					className="gap-2"
+	return listModels(type).map((entry) => {
+		const { provider, model, description } = entry;
+		const missing = keyFor(provider) === null;
+		return (
+			<SelectMenuItem
+				key={`${provider}/${model}`}
+				aria-label={modelLabel({ provider, model })}
+				selected={sameModel({ provider, model }, value)}
+				onSelect={() =>
+					missing
+						? settings.open("models", provider)
+						: onChange({ provider, model })
+				}
+				className="gap-2"
+			>
+				<ProviderIcon
+					provider={provider}
+					size={14}
+					className={cn(missing && "opacity-40")}
+				/>
+				<span
+					className={cn("min-w-0 truncate", missing && "text-muted-foreground")}
 				>
-					<ProviderIcon
-						provider={provider}
-						size={14}
-						className={cn(missing && "opacity-40")}
-					/>
-					<span
-						className={cn(
-							"min-w-0 truncate",
-							missing && "text-muted-foreground",
-						)}
-					>
-						{model}
-					</span>
-					{description && <InfoTip label={description} />}
-					{missing ? (
-						<ConnectHint provider={provider} />
-					) : (
-						<ModelChips meta={{ cost, speed }} className="ml-auto" />
-					)}
-				</SelectMenuItem>
-			);
-		},
-	);
+					{model}
+				</span>
+				{description && <InfoTip label={description} />}
+				{missing ? (
+					<ConnectHint provider={provider} />
+				) : (
+					<ModelChips meta={entry} className="ml-auto" />
+				)}
+			</SelectMenuItem>
+		);
+	});
 }
 
 /** A way into the models settings from a picker that stands far from them. */

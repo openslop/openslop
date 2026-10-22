@@ -5,15 +5,13 @@ import { cn } from "@/lib/utils";
 /** The icon carries the text for screen readers too, since a tooltip only shows on hover. */
 export function InfoTip({
 	label,
-	side = "right",
 	className,
 }: {
 	label: string;
-	side?: "top" | "right" | "bottom" | "left";
 	className?: string;
 }) {
 	return (
-		<SimpleTooltip label={label} side={side}>
+		<SimpleTooltip label={label} side="right">
 			<span
 				role="img"
 				aria-label={label}
