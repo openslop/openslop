@@ -98,6 +98,7 @@ function Clip({
 			{trim.reset ? (
 				<TooltipIconButton
 					label="Reset trim"
+					side="bottom"
 					size="sm"
 					variant="quiet"
 					onClick={trim.reset}

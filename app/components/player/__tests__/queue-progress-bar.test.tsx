@@ -2,18 +2,17 @@ import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueueProgressBar } from "../queue-progress-bar";
 
-let counts = { active: 0, inFlight: 0, done: 0 };
+let counts = { active: 0, done: 0 };
 vi.mock("@/lib/generation/generation-queue-provider", () => ({
 	useQueueSelector: (select: (q: unknown) => unknown) =>
 		select({
 			getActiveCount: () => counts.active,
-			getGeneratingCount: () => counts.inFlight,
 			getGeneratedCount: () => counts.done,
 		}),
 }));
 
-const render = (active: number, done: number, inFlight = active) => {
-	counts = { active, inFlight, done };
+const render = (active: number, done: number) => {
+	counts = { active, done };
 	return renderToStaticMarkup(<QueueProgressBar />);
 };
 
@@ -33,9 +32,11 @@ describe("QueueProgressBar", () => {
 		expect(html).toContain("Generating 1 of 4 elements");
 	});
 
-	it("counts only in-flight elements in the label, not queued ones", () => {
-		const html = render(3, 1, 1);
+	it("counts queued elements in the label, not just running ones", () => {
+		// Three elements wait or run, one finished: the label counts all three
+		// that still have work ahead of them.
+		const html = render(3, 1);
 		expect(html).toContain('aria-valuenow="25"');
-		expect(html).toContain("Generating 1 of 4 elements");
+		expect(html).toContain("Generating 3 of 4 elements");
 	});
 });

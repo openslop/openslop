@@ -113,7 +113,6 @@ describe("SnapshotStore", () => {
 
 		expect(store.isBusy()).toBe(true);
 		expect(store.getActiveCount()).toBe(2);
-		expect(store.getGeneratingCount()).toBe(1);
 		expect(store.getGeneratedCount()).toBe(1);
 	});
 

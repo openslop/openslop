@@ -45,7 +45,6 @@ export class GenerationQueue {
 	getElementSnapshot = (id: string): ElementSnapshot => this.snapshots.get(id);
 	getResultVersion = () => this.snapshots.getResultVersion();
 	getActiveCount = () => this.snapshots.getActiveCount();
-	getGeneratingCount = () => this.snapshots.getGeneratingCount();
 	getGeneratedCount = () => this.snapshots.getGeneratedCount();
 	isBusy = () => this.snapshots.isBusy();
 	snapshot = () => this.snapshots.all();

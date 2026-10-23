@@ -153,9 +153,36 @@ describe("useExport", () => {
 			message: "Lambda timed out",
 		});
 		expect(toast.error).toHaveBeenCalledWith(
-			"Lambda timed out",
-			expect.objectContaining({ id: "export" }),
+			"Export failed: Lambda timed out",
+			expect.objectContaining({ id: "export-error" }),
 		);
+	});
+
+	it("swaps the progress toast for the error toast, leaving no card behind", async () => {
+		vi.mocked(runRender).mockImplementation(async function* () {
+			yield { status: "rendering", progress: 0.4 };
+			throw new Error("Lambda timed out");
+		});
+
+		await startExport();
+
+		expect(toast.dismiss).toHaveBeenCalledWith("export");
+		expect(toast.error).toHaveBeenCalledWith(
+			"Export failed: Lambda timed out",
+			expect.objectContaining({ id: "export-error" }),
+		);
+		expect(toast.custom).toHaveBeenCalledTimes(1);
+	});
+
+	it("clears the error toast when a new export starts", async () => {
+		renderReports([], new Error("Lambda timed out"));
+		await startExport();
+		vi.mocked(toast.dismiss).mockClear();
+		renderReports([{ status: "rendering", progress: 0.2 }]);
+
+		await startExport();
+
+		expect(toast.dismiss).toHaveBeenCalledWith("export-error");
 	});
 
 	it("returns to idle on reset and drops the toast", async () => {

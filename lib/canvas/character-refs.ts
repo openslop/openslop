@@ -1,5 +1,4 @@
 import { Editor, Range, Transforms } from "slate";
-import { ZERO_WIDTH_SPACE } from "./constants";
 import { castsCharacters } from "./guards";
 import { makeNodeId } from "./node-utils";
 import { CHARACTER_REF_TYPE, type CharacterRefElement } from "./types";
@@ -13,9 +12,7 @@ export const createCharacterRef = (name: string): CharacterRefElement => ({
 
 export type Mention = { range: Range; query: string };
 
-const BREAK = `\\s${ZERO_WIDTH_SPACE}`;
-const MENTION = new RegExp(`(?:^|[${BREAK}])@([^${BREAK}@]*)$`);
-const WORD_END = new RegExp(`^([${BREAK}]|$)`);
+const MENTION = /(?:^|[^\p{L}\p{N}_@])@([^\s@]*)$/u;
 
 export function mentionAt(editor: Editor): Mention | undefined {
 	const { selection } = editor;
@@ -27,12 +24,8 @@ export function mentionAt(editor: Editor): Mention | undefined {
 		anchor: Editor.start(editor, caret.path),
 		focus: caret,
 	});
-	const rest = Editor.string(editor, {
-		anchor: caret,
-		focus: Editor.end(editor, caret.path),
-	});
 	const query = MENTION.exec(typed)?.[1];
-	if (query === undefined || !WORD_END.test(rest)) return undefined;
+	if (query === undefined) return undefined;
 	const at = { path: caret.path, offset: caret.offset - query.length - 1 };
 	return { range: { anchor: at, focus: caret }, query };
 }

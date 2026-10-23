@@ -9,15 +9,10 @@ import {
 	useRef,
 	useState,
 } from "react";
+import chunk from "lodash/chunk";
 import { sliderKeyTarget } from "@/lib/components/slider-keys";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import { clamp, cn } from "@/lib/utils";
-
-/** A slice of a segmented track; `basis` is its fraction (0–1) of the whole. */
-export interface ScrubSegment {
-	id: string;
-	basis: number;
-}
 
 export interface ScrubHover {
 	/** Pointer x within the track, in px. */
@@ -42,8 +37,8 @@ interface ScrubBarProps {
 	onScrubEnd?: () => void;
 	/** Reports hover position (or null on leave) — e.g. to drive a tooltip. */
 	onHoverChange?: (hover: ScrubHover | null) => void;
-	/** Segmented layout; none is a single continuous track. */
-	segments?: ScrubSegment[];
+	/** Fractions (0–1) where the track breaks, such as scene boundaries. */
+	breaks?: readonly number[];
 	/** Dims the track and takes it out of the pointer and tab path. */
 	disabled?: boolean;
 	/** Sizing for the interactive container (width, optional height override). */
@@ -54,41 +49,50 @@ interface ScrubBarProps {
 /** Height of the interactive track; callers reserve this to avoid layout shift. */
 export const SCRUB_BAR_HEIGHT = "h-5";
 
-const SINGLE: ScrubSegment[] = [{ id: "_", basis: 1 }];
+const NO_BREAKS: readonly number[] = [];
+const BREAK_HALF_WIDTH_PX = 1;
+// Chrome misplaces hard stops in a gradient with more than ~128 stops (4 per break).
+const BREAKS_PER_MASK_LAYER = 30;
 
-/**
- * A segment's fill is the track-wide ratio mapped into the segment's own span:
- * `clamp((ratio - start) / basis, 0, 1)`, expressed so the browser recomputes it
- * from one variable write instead of a React render per value change.
- */
-const fillFrom = (ratio: string): CSSProperties => ({
-	width: `clamp(0%, calc((var(${ratio}) - var(--seg-start)) * var(--seg-scale) * 100%), 100%)`,
+const fillTo = (ratio: string): CSSProperties => ({
+	width: `calc(var(${ratio}) * 100%)`,
 });
 
-const previewFill = fillFrom("--scrub-preview");
-const progressFill = fillFrom("--scrub-pos");
+const previewFill = fillTo("--scrub-preview");
+const progressFill = fillTo("--scrub-pos");
 const thumbStyle: CSSProperties = { left: "calc(var(--scrub-pos) * 100%)" };
 
-export function segmentStyle(segs: readonly ScrubSegment[]): CSSProperties[] {
-	let start = 0;
-	return segs.map(({ basis }) => {
-		const style = {
-			flexBasis: `${basis * 100}%`,
-			"--seg-start": start,
-			"--seg-scale": basis > 0 ? 1 / basis : 0,
-		} as CSSProperties;
-		start += basis;
-		return style;
+function notchLayer(breaks: readonly number[]): string {
+	const notches = breaks.flatMap((at) => {
+		const before = `calc(${at * 100}% - ${BREAK_HALF_WIDTH_PX}px)`;
+		const after = `calc(${at * 100}% + ${BREAK_HALF_WIDTH_PX}px)`;
+		return [
+			`#000 ${before}`,
+			`transparent ${before}`,
+			`transparent ${after}`,
+			`#000 ${after}`,
+		];
 	});
+	return `linear-gradient(to right, ${["#000", ...notches, "#000"].join(", ")})`;
 }
 
 /**
- * Shared slider track used by both the seek bar (segmented) and the volume
- * bar (continuous). Renders a rest track, a hover preview fill, a progress
- * fill, and a thumb — all driven by the `--scrub-*` tokens.
+ * Cuts a transparent notch at each break without taking width from the track,
+ * as layers the track intersects.
+ */
+export function breakMask(breaks: readonly number[]): string {
+	return (
+		chunk(breaks, BREAKS_PER_MASK_LAYER).map(notchLayer).join(", ") || "none"
+	);
+}
+
+/**
+ * Shared slider track used by both the seek bar and the volume bar. Renders a
+ * rest track, a hover preview fill, a progress fill, and a thumb, all driven by
+ * the `--scrub-*` tokens on one linear scale; breaks only mask the track.
  *
  * `value` and the hover ratio reach the DOM as `--scrub-pos` / `--scrub-preview`
- * on the root, so the segment elements below stay referentially stable while the
+ * on the root, so the track below stays referentially stable while the
  * playhead moves.
  */
 export function ScrubBar({
@@ -100,15 +104,13 @@ export function ScrubBar({
 	onScrubStart,
 	onScrubEnd,
 	onHoverChange,
-	segments,
+	breaks = NO_BREAKS,
 	disabled,
 	className,
 	children,
 }: ScrubBarProps) {
 	const trackRef = useRef<HTMLDivElement>(null);
 	const [hoverRatio, setHoverRatio] = useState<number | null>(null);
-	const continuous = !segments?.length;
-	const parts = continuous ? SINGLE : segments;
 
 	const hoverFrom = (event: PointerEvent<HTMLElement>): ScrubHover | null => {
 		const rect = trackRef.current?.getBoundingClientRect();
@@ -150,33 +152,22 @@ export function ScrubBar({
 	};
 
 	const track = useMemo(() => {
-		const styles = segmentStyle(parts);
 		return (
 			<div
-				className={cn("flex h-1 w-full", continuous ? "gap-0" : "gap-[2px]")}
+				className="relative h-1 w-full overflow-hidden rounded-full bg-scrub-track mask-intersect"
+				style={{ maskImage: breakMask(breaks) }}
 			>
-				{parts.map(({ id }, index) => (
-					<div
-						key={id}
-						className={cn(
-							"relative h-full overflow-hidden bg-scrub-track",
-							continuous && "rounded-full",
-						)}
-						style={styles[index]}
-					>
-						<div
-							className="absolute inset-y-0 left-0 bg-scrub-hover"
-							style={previewFill}
-						/>
-						<div
-							className="absolute inset-y-0 left-0 bg-scrub-progress"
-							style={progressFill}
-						/>
-					</div>
-				))}
+				<div
+					className="absolute inset-y-0 left-0 bg-scrub-hover"
+					style={previewFill}
+				/>
+				<div
+					className="absolute inset-y-0 left-0 bg-scrub-progress"
+					style={progressFill}
+				/>
 			</div>
 		);
-	}, [parts, continuous]);
+	}, [breaks]);
 
 	return (
 		<div

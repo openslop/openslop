@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { seekKeyStep } from "@/lib/components/slider-keys";
 import { clamp } from "@/lib/utils";
-import { toSeconds } from "@/lib/render/frames";
+import { toFrames, toSeconds } from "@/lib/render/frames";
 import { findSegmentIndexAtFrame } from "@/lib/render/scene-segments";
 import { formatTime } from "@/lib/render/timestamps";
 import { usePlayerControl } from "./player-control-context";
@@ -19,9 +19,13 @@ export function SegmentedSeekBar() {
 	const { player } = usePlayerControl();
 	const { layout, segments } = useLayout();
 	const { totalDurationSec, totalFrames } = layout;
-	const toScrubFrame = (ratio: number) => Math.round(ratio * (totalFrames - 1));
+	const toScrubFrame = (ratio: number) =>
+		Math.min(toFrames(ratio * totalDurationSec, layout.fps), totalFrames - 1);
 	const frame = usePlayerFrame();
-	const progress = clamp(frame / Math.max(1, totalFrames - 1), 0, 1);
+	const progress =
+		totalDurationSec > 0
+			? clamp(toSeconds(frame, layout.fps) / totalDurationSec, 0, 1)
+			: 0;
 
 	const [hover, setHover] = useState<ScrubHover | null>(null);
 	// Pulling a frame per segment the pointer sweeps across is wasted work, so
@@ -37,12 +41,8 @@ export function SegmentedSeekBar() {
 		return () => clearTimeout(timer);
 	}, [hover]);
 
-	const scrubSegments = useMemo(
-		() =>
-			segments.map(({ id, duration }) => ({
-				id,
-				basis: duration / totalDurationSec,
-			})),
+	const breaks = useMemo(
+		() => segments.slice(1).map(({ start }) => start / totalDurationSec),
 		[segments, totalDurationSec],
 	);
 
@@ -63,7 +63,7 @@ export function SegmentedSeekBar() {
 			ariaValueText={`${formatTime(toSeconds(frame, layout.fps))} of ${formatTime(totalDurationSec)}`}
 			disabled={!player || segments.length === 0}
 			value={progress}
-			segments={scrubSegments}
+			breaks={breaks}
 			onScrub={(ratio) => scrub.seekTo(toScrubFrame(ratio))}
 			keyStep={seekKeyStep(totalDurationSec)}
 			onScrubStart={scrub.start}

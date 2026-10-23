@@ -3,29 +3,32 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { ScrubBar, segmentStyle } from "../scrub-bar";
-
-type Vars = Record<string, unknown>;
+import { breakMask, ScrubBar } from "../scrub-bar";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-describe("segmentStyle", () => {
-	it("lays segments end to end by their basis", () => {
-		const styles = segmentStyle([
-			{ id: "a", basis: 0.25 },
-			{ id: "b", basis: 0.5 },
-			{ id: "c", basis: 0.25 },
-		]) as Vars[];
-
-		expect(styles.map((s) => s.flexBasis)).toEqual(["25%", "50%", "25%"]);
-		expect(styles.map((s) => s["--seg-start"])).toEqual([0, 0.25, 0.75]);
-		expect(styles.map((s) => s["--seg-scale"])).toEqual([4, 2, 4]);
+describe("breakMask", () => {
+	it("cuts a 2px notch centred on each break", () => {
+		expect(breakMask([0.25, 0.75])).toBe(
+			"linear-gradient(to right, #000, " +
+				"#000 calc(25% - 1px), transparent calc(25% - 1px), " +
+				"transparent calc(25% + 1px), #000 calc(25% + 1px), " +
+				"#000 calc(75% - 1px), transparent calc(75% - 1px), " +
+				"transparent calc(75% + 1px), #000 calc(75% + 1px), #000)",
+		);
 	});
 
-	it("keeps a zero-width segment's scale finite", () => {
-		const [zero] = segmentStyle([{ id: "a", basis: 0 }]) as Vars[];
+	it("leaves a track without breaks unmasked", () => {
+		expect(breakMask([])).toBe("none");
+	});
 
-		expect(zero["--seg-scale"]).toBe(0);
+	it("splits many breaks across layers Chrome can draw exactly", () => {
+		const breaks = Array.from({ length: 94 }, (_, i) => (i + 1) / 95);
+		const layers = breakMask(breaks).split("linear-gradient").slice(1);
+
+		expect(
+			layers.map((layer) => layer.split("transparent").length - 1),
+		).toEqual([60, 60, 60, 8]);
 	});
 });
 
@@ -49,7 +52,11 @@ describe("ScrubBar", () => {
 	});
 
 	const render = (
-		props: { disabled?: boolean; segments?: []; ariaValueText?: string } = {},
+		props: {
+			disabled?: boolean;
+			breaks?: number[];
+			ariaValueText?: string;
+		} = {},
 	) => {
 		act(() =>
 			root.render(
@@ -116,9 +123,12 @@ describe("ScrubBar", () => {
 		expect(calls).toEqual([]);
 	});
 
-	it("draws an empty segment list as one continuous track", () => {
-		const slider = render({ segments: [] });
+	it("fills one linear track whatever its breaks", () => {
+		const slider = render({ breaks: [0.1, 0.2, 0.3] });
+		const fill = slider.querySelector<HTMLElement>(".bg-scrub-progress");
 
 		expect(slider.querySelectorAll(".bg-scrub-track")).toHaveLength(1);
+		expect(fill?.style.width).toBe("calc(var(--scrub-pos) * 100%)");
+		expect(slider.style.getPropertyValue("--scrub-pos")).toBe("0.5");
 	});
 });

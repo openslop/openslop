@@ -6,6 +6,7 @@ import { errorMessage } from "@/lib/errors";
 import { runRender, type RenderUpdate } from "@/lib/render/render-client";
 import type { Resolution } from "@/lib/render/resolutions";
 import type { RenderLayout } from "@/lib/render/types";
+import { toastError } from "@/lib/toast-error";
 import { ExportDoneToast, ExportProgressToast } from "./export-toast";
 
 type ExportState =
@@ -15,6 +16,7 @@ type ExportState =
 	| { status: "error"; message: string };
 
 const TOAST_ID = "export";
+const TOAST_ERROR_ID = "export-error";
 const TOAST_OPTIONS = {
 	id: TOAST_ID,
 	duration: Number.POSITIVE_INFINITY,
@@ -38,9 +40,11 @@ export function useExport() {
 	useEffect(() => {
 		if (open || state.status === "idle") {
 			toast.dismiss(TOAST_ID);
+			toast.dismiss(TOAST_ERROR_ID);
 			return;
 		}
 		if (state.status === "starting" || state.status === "rendering") {
+			toast.dismiss(TOAST_ERROR_ID);
 			const progress = state.status === "rendering" ? state.progress : 0;
 			toast.custom(
 				() => (
@@ -54,6 +58,7 @@ export function useExport() {
 			return;
 		}
 		if (state.status === "done") {
+			toast.dismiss(TOAST_ERROR_ID);
 			const { url, size } = state;
 			toast.custom(
 				(id) => (
@@ -68,8 +73,9 @@ export function useExport() {
 			);
 			return;
 		}
-		toast.error(state.message, {
-			id: TOAST_ID,
+		toast.dismiss(TOAST_ID);
+		toastError(state.message, "Export failed", {
+			id: TOAST_ERROR_ID,
 			position: "bottom-right",
 		});
 	}, [state, open, setOpen]);
@@ -77,6 +83,7 @@ export function useExport() {
 	useEffect(() => {
 		return () => {
 			toast.dismiss(TOAST_ID);
+			toast.dismiss(TOAST_ERROR_ID);
 		};
 	}, []);
 
