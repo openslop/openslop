@@ -3,6 +3,7 @@ import type { ProjectRow } from "@/lib/project/api";
 import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
 import { DeleteButton } from "@/components/ui/delete-button";
 import { relativeTime } from "@/lib/project/relative-time";
+import { isVideoThumbnailUrl } from "@/lib/project/thumbnail";
 
 export function ProjectCard({
 	project,
@@ -23,13 +24,24 @@ export function ProjectCard({
 				>
 					<div className="relative aspect-square">
 						{project.thumbnail_url ? (
-							<ImageWithShimmer
-								src={project.thumbnail_url}
-								alt={project.name}
-								fill
-								sizes="(min-width: 1280px) 200px, (min-width: 768px) 25vw, 50vw"
-								className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-							/>
+							isVideoThumbnailUrl(project.thumbnail_url) ? (
+								<video
+									src={project.thumbnail_url}
+									aria-label={project.name}
+									muted
+									playsInline
+									preload="metadata"
+									className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+								/>
+							) : (
+								<ImageWithShimmer
+									src={project.thumbnail_url}
+									alt={project.name}
+									fill
+									sizes="(min-width: 1280px) 200px, (min-width: 768px) 25vw, 50vw"
+									className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+								/>
+							)
 						) : (
 							<div className="absolute inset-0 flex items-center justify-center text-label text-muted-foreground">
 								No preview

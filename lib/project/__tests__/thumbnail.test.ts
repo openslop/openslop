@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ContentElement } from "@/lib/canvas/types";
-import { pickThumbnailUrl } from "../thumbnail";
+import { isVideoThumbnailUrl, pickThumbnailUrl } from "../thumbnail";
 import { resultQueue } from "./_canvas";
 
 const element = (
@@ -19,9 +19,27 @@ describe("pickThumbnailUrl", () => {
 		["an empty script", [], {}, null],
 		["no result yet", SCRIPT, {}, null],
 		[
-			"results without a picture",
+			"a video when no image has a still",
 			SCRIPT,
 			{ "1": { audioUrl: "n.mp3" }, "2": { videoUrl: "v.mp4" } },
+			"v.mp4",
+		],
+		[
+			"the first video in document order when no image has a still",
+			SCRIPT,
+			{ "2": { videoUrl: "v.mp4" }, "3": { videoUrl: "w.mp4" } },
+			"v.mp4",
+		],
+		[
+			"only a video the card can render",
+			SCRIPT,
+			{ "2": { videoUrl: "v.mkv" }, "3": { videoUrl: "w.mp4" } },
+			"w.mp4",
+		],
+		[
+			"null when the only video cannot be rendered by the card",
+			SCRIPT,
+			{ "2": { videoUrl: "v.mkv" } },
 			null,
 		],
 		[
@@ -44,5 +62,17 @@ describe("pickThumbnailUrl", () => {
 		],
 	])("picks from %s", (_, script, results, thumbnail) => {
 		expect(pickThumbnailUrl(script, resultQueue(results))).toBe(thumbnail);
+	});
+});
+
+describe("isVideoThumbnailUrl", () => {
+	it.each([
+		["https://cdn.example/v.mp4", true],
+		["https://cdn.example/v.webm?token=1", true],
+		["https://cdn.example/v.MOV#t=1", true],
+		["https://cdn.example/thumb.png", false],
+		["https://cdn.example/image/mp4-poster", false],
+	])("%s -> %s", (url, expected) => {
+		expect(isVideoThumbnailUrl(url)).toBe(expected);
 	});
 });
