@@ -1,81 +1,137 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/providers/image/runware", () => ({ RunwareImage: vi.fn() }));
-vi.mock("@/lib/providers/image/mock", () => ({ MockImage: vi.fn() }));
-vi.mock("@/lib/providers/video/runware", () => ({ RunwareVideo: vi.fn() }));
-vi.mock("@/lib/providers/video/mock", () => ({ MockVideo: vi.fn() }));
-vi.mock("@/lib/providers/music/elevenlabs", () => ({
+const classes = vi.hoisted(() => ({
+	RunwareImage: vi.fn(),
+	MockImage: vi.fn(),
+	RunwareVideo: vi.fn(),
+	MockVideo: vi.fn(),
 	ElevenLabsMusic: vi.fn(),
+	MockMusic: vi.fn(),
+	ElevenLabsSFX: vi.fn(),
+	MockSFX: vi.fn(),
+	AnthropicLLM: vi.fn(),
+	MockLLM: vi.fn(),
+	CartesiaTTS: vi.fn(),
+	MockTTS: vi.fn(),
 }));
-vi.mock("@/lib/providers/music/mock", () => ({ MockMusic: vi.fn() }));
-vi.mock("@/lib/providers/sfx/elevenlabs", () => ({ ElevenLabsSFX: vi.fn() }));
-vi.mock("@/lib/providers/sfx/mock", () => ({ MockSFX: vi.fn() }));
-vi.mock("@/lib/providers/llm/anthropic", () => ({ AnthropicLLM: vi.fn() }));
-vi.mock("@/lib/providers/llm/mock", () => ({ MockLLM: vi.fn() }));
-vi.mock("@/lib/providers/tts/cartesia", () => ({ CartesiaTTS: vi.fn() }));
-vi.mock("@/lib/providers/tts/mock", () => ({ MockTTS: vi.fn() }));
 
-import { MockImage } from "@/lib/providers/image/mock";
-import { MockVideo } from "@/lib/providers/video/mock";
-import { MockMusic } from "@/lib/providers/music/mock";
-import { MockSFX } from "@/lib/providers/sfx/mock";
-import { MockLLM } from "@/lib/providers/llm/mock";
-import { MockTTS } from "@/lib/providers/tts/mock";
-import { hostedProviderFor } from "../providers/openslop";
+vi.mock("@/lib/providers/image/runware", () => ({
+	RunwareImage: classes.RunwareImage,
+}));
+vi.mock("@/lib/providers/image/mock", () => ({ MockImage: classes.MockImage }));
+vi.mock("@/lib/providers/video/runware", () => ({
+	RunwareVideo: classes.RunwareVideo,
+}));
+vi.mock("@/lib/providers/video/mock", () => ({ MockVideo: classes.MockVideo }));
+vi.mock("@/lib/providers/music/elevenlabs", () => ({
+	ElevenLabsMusic: classes.ElevenLabsMusic,
+}));
+vi.mock("@/lib/providers/music/mock", () => ({ MockMusic: classes.MockMusic }));
+vi.mock("@/lib/providers/sfx/elevenlabs", () => ({
+	ElevenLabsSFX: classes.ElevenLabsSFX,
+}));
+vi.mock("@/lib/providers/sfx/mock", () => ({ MockSFX: classes.MockSFX }));
+vi.mock("@/lib/providers/llm/anthropic", () => ({
+	AnthropicLLM: classes.AnthropicLLM,
+}));
+vi.mock("@/lib/providers/llm/mock", () => ({ MockLLM: classes.MockLLM }));
+vi.mock("@/lib/providers/tts/cartesia", () => ({
+	CartesiaTTS: classes.CartesiaTTS,
+}));
+vi.mock("@/lib/providers/tts/mock", () => ({ MockTTS: classes.MockTTS }));
+
+/** The hosted table caches each provider for the life of its module, so every case loads a fresh one. */
+async function loadHostedProviderFor() {
+	vi.resetModules();
+	return (await import("../providers/openslop")).hostedProviderFor;
+}
+
+const HOSTED = [
+	{
+		type: "image",
+		model: "Slop Image v2",
+		envVar: "RUNWARE_API_KEY",
+		real: "RunwareImage",
+		mock: "MockImage",
+	},
+	{
+		type: "video",
+		model: "Slop Video v2",
+		envVar: "RUNWARE_API_KEY",
+		real: "RunwareVideo",
+		mock: "MockVideo",
+	},
+	{
+		type: "music",
+		model: "Slop Music v1",
+		envVar: "ELEVENLABS_API_KEY",
+		real: "ElevenLabsMusic",
+		mock: "MockMusic",
+	},
+	{
+		type: "sfx",
+		model: "Slop SFX v1",
+		envVar: "ELEVENLABS_API_KEY",
+		real: "ElevenLabsSFX",
+		mock: "MockSFX",
+	},
+	{
+		type: "llm",
+		model: "Slop LLM v1",
+		envVar: "ANTHROPIC_API_KEY",
+		real: "AnthropicLLM",
+		mock: "MockLLM",
+	},
+	{
+		type: "tts",
+		model: "Slop TTS v1",
+		envVar: "CARTESIA_API_KEY",
+		real: "CartesiaTTS",
+		mock: "MockTTS",
+	},
+] as const;
 
 describe("hostedProviderFor", () => {
-	const originalEnv = process.env;
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
 
 	afterEach(() => {
-		process.env = originalEnv;
+		vi.unstubAllEnvs();
 	});
 
-	it("returns MockImage/MockVideo when RUNWARE_API_KEY is missing", () => {
-		process.env = { ...originalEnv };
-		delete process.env.RUNWARE_API_KEY;
+	describe.each(HOSTED)(
+		"$type $model",
+		({ type, model, envVar, real, mock }) => {
+			it(`builds ${real} with ${envVar}`, async () => {
+				vi.stubEnv(envVar, "secret");
+				const hostedProviderFor = await loadHostedProviderFor();
 
-		expect(hostedProviderFor("image", "Slop Image v2")).toBeInstanceOf(
-			MockImage,
-		);
-		expect(hostedProviderFor("image", "Slop Image v1")).toBeInstanceOf(
-			MockImage,
-		);
-		expect(hostedProviderFor("video", "Slop Video v2")).toBeInstanceOf(
-			MockVideo,
-		);
-	});
+				expect(hostedProviderFor(type, model)).toBeInstanceOf(classes[real]);
+				expect(classes[real]).toHaveBeenCalledWith("secret");
+			});
 
-	it("returns MockMusic/MockSFX when ELEVENLABS_API_KEY is missing", () => {
-		process.env = { ...originalEnv };
-		delete process.env.ELEVENLABS_API_KEY;
+			it(`falls back to ${mock} without ${envVar}`, async () => {
+				vi.stubEnv(envVar, undefined);
+				const hostedProviderFor = await loadHostedProviderFor();
 
-		expect(hostedProviderFor("music", "Slop Music v1")).toBeInstanceOf(
-			MockMusic,
-		);
-		expect(hostedProviderFor("sfx", "Slop SFX v1")).toBeInstanceOf(MockSFX);
-	});
+				expect(hostedProviderFor(type, model)).toBeInstanceOf(classes[mock]);
+				expect(classes[real]).not.toHaveBeenCalled();
+			});
+		},
+	);
 
-	it("returns MockLLM when ANTHROPIC_API_KEY is missing", () => {
-		process.env = { ...originalEnv };
-		delete process.env.ANTHROPIC_API_KEY;
+	it("builds each hosted model once", async () => {
+		const hostedProviderFor = await loadHostedProviderFor();
 
-		expect(hostedProviderFor("llm", "Slop LLM v1")).toBeInstanceOf(MockLLM);
-	});
-
-	it("returns MockTTS when CARTESIA_API_KEY is missing", () => {
-		process.env = { ...originalEnv };
-		delete process.env.CARTESIA_API_KEY;
-
-		expect(hostedProviderFor("tts", "Slop TTS v1")).toBeInstanceOf(MockTTS);
-	});
-
-	it("builds each hosted model once", () => {
 		expect(hostedProviderFor("tts", "Slop TTS v1")).toBe(
 			hostedProviderFor("tts", "Slop TTS v1"),
 		);
 	});
 
-	it("throws for a model OpenSlop does not host", () => {
+	it("throws for a model OpenSlop does not host", async () => {
+		const hostedProviderFor = await loadHostedProviderFor();
+
 		expect(() => hostedProviderFor("image", "Seedream 5 Lite")).toThrow(
 			'OpenSlop hosts no image model "Seedream 5 Lite"',
 		);

@@ -1,7 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/api/asset-bundle");
-
 const mockConvert = vi.fn();
 
 vi.mock("@elevenlabs/elevenlabs-js", () => ({
@@ -11,6 +9,7 @@ vi.mock("@elevenlabs/elevenlabs-js", () => ({
 }));
 
 import { ElevenLabsSFX } from "../sfx/elevenlabs";
+import { spyAssetBundle } from "./_asset-bundle";
 
 function mockReadableStream(data: Uint8Array) {
 	return new ReadableStream<Uint8Array>({
@@ -24,6 +23,8 @@ function mockReadableStream(data: Uint8Array) {
 const MODEL = "eleven_text_to_sound_v2";
 
 describe("ElevenLabsSFX", () => {
+	spyAssetBundle();
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -36,7 +37,7 @@ describe("ElevenLabsSFX", () => {
 		const provider = new ElevenLabsSFX("test-key");
 		const result = await provider.generate({ prompt: "boom", model: MODEL });
 
-		expect(result.output.result.audio).toBe("url");
+		expect(result.output.result.audio).toBe("output.mp3");
 		expect(result.output.metadata?.durationSec).toBe(2);
 		expect(mockConvert).toHaveBeenCalledWith({
 			text: "boom",

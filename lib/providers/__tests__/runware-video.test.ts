@@ -1,7 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/api/asset-bundle");
-
 type Voice = { url: string; durationSec: number };
 
 const mockCutVoice = vi.hoisted(() =>
@@ -33,13 +31,16 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
-import { AssetBundle, EmptyRemoteFileError } from "@/lib/api/asset-bundle";
+import { EmptyRemoteFileError } from "@/lib/api/asset-bundle";
 import { RunwareVideo } from "../video/runware";
+import { spyAssetBundle } from "./_asset-bundle";
 
 const MODEL = "bytedance:seedance@2.0-fast";
 const SEEDANCE_25 = "bytedance:seedance@2.5";
 
 describe("RunwareVideo", () => {
+	const { upload } = spyAssetBundle();
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -59,7 +60,7 @@ describe("RunwareVideo", () => {
 			});
 
 			expect(result).toBe("job-1");
-			expect(AssetBundle.upload).not.toHaveBeenCalled();
+			expect(upload).not.toHaveBeenCalled();
 			expect(mockVideoInference).toHaveBeenCalledWith({
 				positivePrompt: "a sunset",
 				model: "bytedance:seedance@2.0-fast",
@@ -826,9 +827,15 @@ describe("RunwareVideo", () => {
 				model: MODEL,
 			});
 
+			expect(upload).toHaveBeenCalledWith(
+				"video",
+				"runware",
+				[expect.objectContaining({ key: "video", url: "https://result.mp4" })],
+				expect.any(Object),
+			);
 			expect(result).toMatchObject({
 				kind: "ready",
-				asset: { result: { video: "https://result.mp4" } },
+				asset: { result: { video: "output.mp4" } },
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
 		});
@@ -848,7 +855,7 @@ describe("RunwareVideo", () => {
 			});
 
 			expect(result).toEqual({ kind: "pending" });
-			expect(AssetBundle.upload).not.toHaveBeenCalled();
+			expect(upload).not.toHaveBeenCalled();
 		});
 
 		it("keeps waiting while a finished video is still served empty", async () => {
@@ -860,7 +867,7 @@ describe("RunwareVideo", () => {
 					videoURL: "https://r.mp4",
 				},
 			]);
-			vi.mocked(AssetBundle.upload).mockRejectedValueOnce(
+			upload.mockRejectedValueOnce(
 				new EmptyRemoteFileError("video", "runware"),
 			);
 
@@ -883,7 +890,7 @@ describe("RunwareVideo", () => {
 			});
 
 			expect(result).toEqual({ kind: "failed" });
-			expect(AssetBundle.upload).not.toHaveBeenCalled();
+			expect(upload).not.toHaveBeenCalled();
 		});
 
 		it("hands back what the vendor charged for the finished video", async () => {
