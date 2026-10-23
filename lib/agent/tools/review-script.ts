@@ -16,8 +16,8 @@ export const reviewScript = defineTool({
 	  smallest change that fixes it. Fix them with edit_script, read the script, then review
 	  again. Stop when it replies ${NO_FINDINGS}, or when three reviews have run.
 
-	  Leave a finding alone when acting on it would undo what the user asked for, and say
-	  which one you left and why.
+	  Leave a finding alone when acting on it would undo what the user asked for, or an edit
+	  the user made by hand, and say which one you left and why.
 
 	  Run it after write_script and adapt_script, and after an edit that rewrote several
 	  elements. A one-element tweak does not need it.

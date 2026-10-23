@@ -20,28 +20,26 @@ export function getElementBodyText(element: CanvasElement): string {
 	return withoutCaretMarker(getElementText(element));
 }
 
-function serializeElement(element: CanvasElement): string {
+/** One element as its OSML tag: the id first, then its attributes, around what the user typed. */
+export function serializeElement(element: CanvasElement): string {
 	const attrString = Object.entries({
 		id: element.id,
 		...flatAttributes(element),
 	})
 		.map(([key, value]) => ` ${key}="${escapeXml(value)}"`)
 		.join("");
-	return `<${element.type}${attrString}>${escapeXml(getElementBodyText(element))}</${element.type}>\n`;
+	return `<${element.type}${attrString}>${escapeXml(getElementBodyText(element))}</${element.type}>`;
 }
 
 /** The whole document: the assets, then each scene under its marker. */
 export function serializeOSMLWithScenes(descendants: Descendant[]): string {
+	const assets = descendants.filter(isAssetElement).map(serializeElement);
 	const scenes = descendants
 		.filter(isScene)
 		.map(
 			(scene, index) =>
-				sceneMarker(index + 1) + scene.children.map(serializeElement).join(""),
+				sceneMarker(index + 1) +
+				scene.children.map(serializeElement).join("\n"),
 		);
-	return [
-		...descendants.filter(isAssetElement).map(serializeElement),
-		...scenes,
-	]
-		.join("")
-		.trim();
+	return [...assets, ...scenes].join("\n").trim();
 }

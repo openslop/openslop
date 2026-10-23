@@ -5,7 +5,7 @@ import {
 	validateUIMessages,
 } from "ai";
 import { SLOPPY_TOOLS, SNAPSHOT_TOOLS } from "./tools/registry";
-import { sloppyMetadataSchema, type SloppyMessage } from "./types";
+import { SLOPPY_DATA, sloppyMetadataSchema, type SloppyMessage } from "./types";
 
 export function upsertMessage(
 	messages: SloppyMessage[],
@@ -75,6 +75,7 @@ export function pruneTranscript(messages: SloppyMessage[]): SloppyMessage[] {
 // validator checks the field whether or not it is there.
 const shape = {
 	metadataSchema: sloppyMetadataSchema.optional(),
+	dataSchemas: SLOPPY_DATA,
 	tools: SLOPPY_TOOLS,
 };
 

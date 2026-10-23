@@ -9,6 +9,7 @@ import {
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { errorMessage } from "@/lib/errors";
+import { describeHandEdits } from "@/lib/agent/hand-edits";
 import { sloppyInstructions } from "@/lib/agent/prompt";
 import {
 	toolCallsMade,
@@ -75,10 +76,17 @@ export async function streamAgentTurn(
 	);
 
 	const modelMessages = pruneMessages({
-		messages: await convertToModelMessages(pruneTranscript(messages), {
-			tools: SLOPPY_TOOLS,
-			ignoreIncompleteToolCalls: true,
-		}),
+		messages: await convertToModelMessages<SloppyMessage>(
+			pruneTranscript(messages),
+			{
+				tools: SLOPPY_TOOLS,
+				ignoreIncompleteToolCalls: true,
+				convertDataPart: (part) => ({
+					type: "text",
+					text: describeHandEdits(part.data),
+				}),
+			},
+		),
 	});
 
 	const startedAt = Date.now();

@@ -12,6 +12,34 @@ describe("parseSloppyMessage", () => {
 		expect(message).toMatchObject({ id: "m1", role: "user" });
 	});
 
+	it("reads the hand edits the editor attached to a message", async () => {
+		const edits = {
+			changed: [],
+			added: ['<image id="i1">a forest</image>'],
+			removed: [],
+		};
+		const message = await parseSloppyMessage({
+			id: "m1",
+			role: "user",
+			parts: [
+				{ type: "text", text: "now add music" },
+				{ type: "data-hand-edits", data: edits },
+			],
+		});
+
+		expect(message?.parts[1]).toEqual({ type: "data-hand-edits", data: edits });
+	});
+
+	it("refuses hand edits in a shape it cannot read", async () => {
+		const message = await parseSloppyMessage({
+			id: "m1",
+			role: "user",
+			parts: [{ type: "data-hand-edits", data: { added: "a forest" } }],
+		});
+
+		expect(message).toBeNull();
+	});
+
 	it("reads a step carrying what a tool returned", async () => {
 		const message = await parseSloppyMessage({
 			id: "m2",

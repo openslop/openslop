@@ -345,6 +345,40 @@ describe("a turn that takes more than one step", () => {
 		expect(sent).toContain("the script as it stands");
 	});
 
+	it("hands the model the user's hand edits as text in their message", async () => {
+		await runTurn(TEXT_TURN, {
+			message: {
+				id: "m-user-edited",
+				role: "user",
+				parts: [
+					{ type: "text", text: "now add music" },
+					{
+						type: "data-hand-edits",
+						data: {
+							changed: [],
+							added: ['<image id="i1">a forest</image>'],
+							removed: [],
+						},
+					},
+				],
+			},
+		});
+
+		const [, next] = calls[0].prompt;
+		expect(next).toMatchObject({
+			role: "user",
+			content: [
+				{ type: "text", text: "now add music" },
+				{
+					type: "text",
+					text: expect.stringContaining(
+						'- added: <image id="i1">a forest</image>',
+					),
+				},
+			],
+		});
+	});
+
 	it("drops the readings of turns that have already finished", async () => {
 		await runTurn(TEXT_TURN, {
 			message: asked("now make it longer"),

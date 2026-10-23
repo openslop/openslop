@@ -10,10 +10,11 @@ import { useChat } from "@ai-sdk/react";
 import { agentPathFor } from "@/lib/agent/client";
 import type { ModelRef } from "@/lib/connectors/types";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
-import { hasPendingToolCall } from "@/lib/agent/messages";
+import { hasPendingToolCall, trailingAssistant } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { DRAFTING_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/use-agent-tools";
+import { useHandEdits } from "@/lib/agent/use-hand-edits";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import {
 	useProjectId,
@@ -93,12 +94,24 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 		status === "streaming" ||
 		hasPendingToolCall(messages);
 	const writingScript = hasPendingToolCall(messages, DRAFTING_TOOLS);
+	const handEdits = useHandEdits(
+		!working && trailingAssistant(messages) !== null,
+	);
+
 	const control = useMemo<SloppyControl>(
 		() => ({
 			send: (message) => {
 				turnModel.current = model;
 				turn.current = new AbortController();
-				void sendMessage({ text: message });
+				const edits = handEdits();
+				void sendMessage({
+					parts: [
+						{ type: "text", text: message },
+						...(edits
+							? [{ type: "data-hand-edits" as const, data: edits }]
+							: []),
+					],
+				});
 			},
 			stop: () => {
 				turn.current?.abort();
@@ -107,7 +120,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			loading: working,
 			writingScript,
 		}),
-		[sendMessage, stop, working, writingScript, model],
+		[sendMessage, stop, working, writingScript, model, handEdits],
 	);
 
 	return (
