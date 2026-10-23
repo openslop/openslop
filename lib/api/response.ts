@@ -1,20 +1,23 @@
 import { NextResponse } from "next/server";
 import type { ApiErrorEnvelope } from "./error-envelope";
 
-function errorResponse(error: string, status: number) {
-	return NextResponse.json<ApiErrorEnvelope>({ error }, { status });
+function errorResponse(body: ApiErrorEnvelope, status: number) {
+	return NextResponse.json<ApiErrorEnvelope>(body, { status });
 }
 
 export function badRequest(message: string) {
-	return errorResponse(message, 400);
+	return errorResponse({ error: message }, 400);
 }
 
 export function notFound() {
-	return errorResponse("Not found", 404);
+	return errorResponse({ error: "Not found" }, 404);
 }
 
-export function serverError(message: string) {
-	return errorResponse(message, 500);
+export function serverError(message: string, requestId?: string) {
+	return errorResponse(
+		requestId ? { error: message, requestId } : { error: message },
+		500,
+	);
 }
 
 export function unauthorized(message = "Unauthorized") {

@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import type { User } from "@supabase/supabase-js";
-import { errorMessage } from "../errors";
 import { getUser } from "./auth";
 import { refuseOverBudget } from "./budget";
 import { hasApiAccess, MissingProviderKeyError } from "./provider-keys";
@@ -20,8 +20,11 @@ async function runGuarded(
 	} catch (error) {
 		if (error instanceof MissingProviderKeyError)
 			return badRequest(error.message);
-		logger.error(error, `${label} failed`);
-		return serverError(`${label} failed: ${errorMessage(error)}`);
+		// The internal message stays in the log; the client only gets the
+		// label and a request id shared with that log line.
+		const requestId = randomUUID().slice(0, 8);
+		logger.error(error, `${label} failed (${requestId})`);
+		return serverError(`${label} failed`, requestId);
 	}
 }
 
