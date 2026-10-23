@@ -26,7 +26,10 @@ export function unauthorized(message = "Unauthorized") {
 
 export function forbidden() {
 	return errorResponse(
-		{ error: "Forbidden, your API access has been revoked. Please contact hi@openslop.ai or post on our Discord server for help." },
+		{
+			error:
+				"Forbidden, your API access has been revoked. Please contact hi@openslop.ai or post on our Discord server for help.",
+		},
 		403,
 	);
 }
