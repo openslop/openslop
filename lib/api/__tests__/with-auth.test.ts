@@ -50,7 +50,9 @@ describe("unexpected route errors", () => {
 		});
 
 		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({ error: "No provider key connected" });
+		expect(await response.json()).toEqual({
+			error: "No provider key connected",
+		});
 		expect(logger.error).not.toHaveBeenCalled();
 	});
 });
