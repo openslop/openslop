@@ -20,8 +20,6 @@ async function runGuarded(
 	} catch (error) {
 		if (error instanceof MissingProviderKeyError)
 			return badRequest(error.message);
-		// The internal message stays in the log; the client only gets the
-		// label and a request id shared with that log line.
 		const requestId = randomUUID().slice(0, 8);
 		logger.error(error, `${label} failed (${requestId})`);
 		return serverError(`${label} failed`, requestId);

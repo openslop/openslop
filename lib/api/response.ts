@@ -21,16 +21,16 @@ export function serverError(message: string, requestId?: string) {
 }
 
 export function unauthorized(message = "Unauthorized") {
-	return errorResponse(message, 401);
+	return errorResponse({ error: message }, 401);
 }
 
 export function forbidden() {
 	return errorResponse(
-		"Forbidden, your API access has been revoked. Please contact hi@openslop.ai or post on our Discord server for help.",
+		{ error: "Forbidden, your API access has been revoked. Please contact hi@openslop.ai or post on our Discord server for help." },
 		403,
 	);
 }
 
 export function paymentRequired(message: string) {
-	return errorResponse(message, 402);
+	return errorResponse({ error: message }, 402);
 }
