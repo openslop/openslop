@@ -46,12 +46,12 @@ describe("unexpected route errors", () => {
 
 	it("keeps the typed provider-key message on the 400 path", async () => {
 		const response = await withPublic("TestRoute", async () => {
-			throw new MissingProviderKeyError("No provider key connected");
+			throw new MissingProviderKeyError("openslop");
 		});
 
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({
-			error: "No provider key connected",
+			error: "openslop",
 		});
 		expect(logger.error).not.toHaveBeenCalled();
 	});
