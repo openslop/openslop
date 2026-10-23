@@ -15,7 +15,7 @@ export function reviewPrompt(script: string, format?: string): string {
 		- Format: only the elements that format allows, and the startFrame, continuity
 		  and loop rules stated with it.
 		- Each tag element, attribute and value as outlined by their rules.
-		- Video prompts: every requirement of that section, in every video prompt.
+		- Video and music prompts: every requirement of their sections, in every prompt.
 		- Language: each part of the script in the language that section assigns it.
 
 		Then judge what those rules cannot state, reading the script whole:

@@ -42,7 +42,30 @@ describe("osmlSpec", () => {
 	it("names the loop counts an element keeps, for sound and for music", () => {
 		const allowed = "Allowed values: 1, 2, 3, 4, 5, 6, 7, 8.";
 		expect(spec).toContain(`${allowed} Use more for a sound`);
-		expect(spec).toContain(`${allowed} Use more for music`);
+		expect(spec).toContain(
+			`${allowed} A cue written to its runtime plays once`,
+		);
+	});
+
+	it("writes a Cinematic music cue for the scenes it scores, timed to the picture", () => {
+		expect(spec).toContain("## Music prompts");
+		expect(spec).toContain("In Cinematic the score carries the story");
+		expect(spec).toContain("Runtime, as m:ss");
+		expect(spec).toContain("each turn timestamped to what is on screen");
+		expect(spec).toContain(
+			"In Faceless and Explainer the music sits under speech",
+		);
+	});
+
+	it("takes a cue's runtime from the prompt, with no length attribute to disagree with it", () => {
+		expect(spec).toContain("takes its length from it");
+		expect(spec).toContain("3 words a second");
+		expect(spec).not.toMatch(/\blength: /);
+	});
+
+	it("starts a cue with the scene it scores and changes cues at the story's turns", () => {
+		expect(spec).toContain("Place it ahead of the first visual it plays under");
+		expect(spec).toContain("Change cues where the story turns");
 	});
 
 	it("sets the visual cadence without dictating what the script opens with", () => {

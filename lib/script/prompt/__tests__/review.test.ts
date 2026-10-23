@@ -16,7 +16,7 @@ describe("reviewPrompt", () => {
 		const prompt = reviewPrompt(script);
 
 		expect(prompt).toContain(
-			"Video prompts: every requirement of that section",
+			"Video and music prompts: every requirement of their sections",
 		);
 		expect(prompt).not.toContain("Shot 1");
 	});

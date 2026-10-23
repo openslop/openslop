@@ -54,9 +54,9 @@ const MOCK_ASSETS: RefineOp[] =
 			text: getElementBodyText(asset),
 		}));
 
-const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
+const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:40, warm and bright, under a narrator. Opens with a light flute melody over pizzicato strings and soft harp as the village wakes; at 0:25 a warm clarinet takes the tune for Mother and Red in the kitchen; at 0:50 the strings thin and slow as Owl watches from the oak; at 1:10 a low, kindly bassoon enters for Wolf picking berries. Ends on a held, curious string chord as Red and Wolf meet on the path. Mood: cheerful, cosy, a little mysterious. Key: G major. Tempo: 96 BPM, 4/4. Light orchestral film score, no lyrics.</music>
 
-<music length="medium">Gentle, playful orchestral music with flutes and strings, lighthearted and cheerful</music>
+<video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
 
 <narration emotion="cheerful">Once upon a time, in a village at the edge of a great forest, there lived a kind girl named Red.</narration>
 
@@ -106,9 +106,9 @@ const MOCK_SCRIPT = `<video>Shot 1: Slow pan across a peaceful village at the ed
 
 <sound loops="6">forest stream burbling</sound>
 
-<video duration="5" motion="panRight">Shot 1: Tracking shot of {{Red}} and {{Wolf}} walking side by side along a winding fern-lined path, a small stream in the background. Sound: footsteps on soft dirt, a stream burbling nearby. Shot 2: {{Red}} gestures as she talks while {{Wolf}} listens with a gentle smile.</video>
+<music>Light, twinkling chamber piece, 0:50, playful and warm, under dialogue. Opens with pizzicato strings and a skipping glockenspiel as Red and Wolf walk the fern path side by side; at 0:20 a hearty tuba phrase greets Hunter at the bridge; at 0:35 the strings swell gently as Granny's cottage comes into view. Ends on a soft, welcoming cadence as Granny opens the door. Mood: friendship, warmth, homecoming. Key: D major. Tempo: 108 BPM, 3/4. Chamber orchestra storybook score, no lyrics.</music>
 
-<music length="short">Light, twinkling music with playful pizzicato strings</music>
+<video duration="5" motion="panRight">Shot 1: Tracking shot of {{Red}} and {{Wolf}} walking side by side along a winding fern-lined path, a small stream in the background. Sound: footsteps on soft dirt, a stream burbling nearby. Shot 2: {{Red}} gestures as she talks while {{Wolf}} listens with a gentle smile.</video>
 
 <character name="Wolf" emotion="curious">"Tell me about your Granny. What is she like?"</character>
 
