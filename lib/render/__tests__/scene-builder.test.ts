@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
 import { isBlankScene } from "../blank-scene";
+import { captionableSequences } from "../caption-rule";
 import type { BuildLayoutOptions } from "../scene-builder";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import type { ContentType } from "@/lib/canvas/types";
@@ -692,5 +693,14 @@ describe("the caption rule", () => {
 			first.duration - layout.transitionDurationSec,
 		);
 		expect(last.element.captions?.untilSec).toBe(last.duration);
+	});
+
+	it("needs no captions on a video speech plays over", () => {
+		const bare = { ...video, captions: undefined };
+		const speech = { ...narration, captions: undefined };
+		const ids = (layout: RenderLayout) =>
+			captionableSequences(layout).map(({ element }) => element.id);
+		expect(ids(layoutOf([bare, speech]))).toEqual(["nar"]);
+		expect(ids(layoutOf([bare]))).toEqual(["vid"]);
 	});
 });

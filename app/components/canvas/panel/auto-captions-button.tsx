@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { MagicCaptions } from "@/components/ui/icon";
 import { captionsNodeId } from "@/lib/captions/captions-job";
-import { isCaptionable, type ElementRef } from "@/lib/canvas/types";
+import type { ElementRef } from "@/lib/canvas/types";
 import { plural } from "@/lib/format";
 import {
 	useGenerationQueue,
@@ -13,7 +13,7 @@ import {
 } from "@/lib/generation/generation-queue-provider";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { layoutSequences } from "@/lib/render/sequences";
+import { captionableSequences } from "@/lib/render/caption-rule";
 import { useLayout } from "@/app/components/player/render-layout-context";
 import { useGenerateSTT } from "../hooks/use-element-captions";
 
@@ -30,7 +30,7 @@ function describe(active: boolean, pending: number, captionable: number) {
 	return `Caption ${pending} ${plural(pending, "clip")}`;
 }
 
-/** Generates speech to text for every captionable element on the timeline that has no words yet. */
+/** Generates speech to text for every element on the timeline that would show captions and has no words yet. */
 export function AutoCaptionsButton() {
 	const queue = useGenerationQueue();
 	const { layout } = useLayout();
@@ -39,9 +39,7 @@ export function AutoCaptionsButton() {
 	const captionable = useMemo(
 		() =>
 			uniqBy(
-				layoutSequences(layout)
-					.map(({ element }) => element)
-					.filter(({ type }) => isCaptionable(type)),
+				captionableSequences(layout).map(({ element }) => element),
 				"id",
 			),
 		[layout],
