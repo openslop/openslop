@@ -4,17 +4,11 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
 import { addCharacter, ensureAsset } from "@/lib/canvas/asset-ops";
-import { createRequiredContext } from "@/lib/components/create-required-context";
 import type { AssetType } from "@/lib/canvas/types";
+import { AssetEditContext, type AssetEditors } from "../asset-edit-context";
 import { ArtStyleModal } from "../style/art-style-modal";
 import { CharacterEditModal } from "./character-edit-modal";
 import { NewCharacterDialog } from "./new-character-dialog";
-
-export type AssetEditors = {
-	/** Opens the asset's dialog, adding the asset first when there is none. */
-	editAsset: (type: AssetType, name?: string) => void;
-	openCreateCharacter: () => void;
-};
 
 /** The one asset dialog open at a time, so two can never stack. */
 type AssetEdit =
@@ -28,10 +22,6 @@ const DIALOG_OF: Record<AssetType, (name?: string) => AssetEdit> = {
 	asset_style: () => ({ kind: "artStyle" }),
 	asset_references: () => ({ kind: "artStyle" }),
 };
-
-const [AssetEditContext, useAssetEditors] =
-	createRequiredContext<AssetEditors>("AssetEditProvider");
-export { useAssetEditors };
 
 /** Mounts the asset dialogs once, so no view wires openers down to its tiles. */
 export function AssetEditProvider({ children }: { children: ReactNode }) {

@@ -44,6 +44,7 @@ const eslintConfig = defineConfig([
 		},
 	},
 	{
+		settings: { "import/ignore": ["node_modules"] },
 		rules: {
 			// External fonts (Fontshare, Google Sans Flex) can't use next/font
 			"@next/next/no-page-custom-font": "off",
@@ -53,6 +54,8 @@ const eslintConfig = defineConfig([
 				{ argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
 			],
 			"@typescript-eslint/no-non-null-assertion": "error",
+			// A runtime import cycle loads only by hoisting luck
+			"import/no-cycle": "error",
 		},
 	},
 ]);

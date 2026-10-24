@@ -11,7 +11,7 @@ import {
 	CharacterAssetTile,
 	ReferenceAssetTile,
 } from "../elements/asset-tiles";
-import { useAssetEditors } from "../elements/character/asset-edit-provider";
+import { useAssetEditors } from "../elements/asset-edit-context";
 import { PagedTiles } from "./paged-tiles";
 import { PanelCard } from "./panel-card";
 

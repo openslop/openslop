@@ -4,10 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { findAsset, NARRATOR } from "@/lib/canvas/assets";
 import {
-	AssetEditProvider,
 	useAssetEditors,
 	type AssetEditors,
-} from "../elements/character/asset-edit-provider";
+} from "../elements/asset-edit-context";
+import { AssetEditProvider } from "../elements/character/asset-edit-provider";
 import { mountOnCanvas } from "./_mount";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
