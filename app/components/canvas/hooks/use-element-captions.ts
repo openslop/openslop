@@ -37,16 +37,13 @@ export function useElementCaptions(
 	const { status, error } = useQueueSelector((q) =>
 		q.getElementSnapshot(captionsNodeId(element.id)),
 	);
-	const revise = (change: (result: AssetResult) => AssetResult) => () =>
-		queue.reviseResult(element, change);
-
 	return {
 		captioned: result?.textTimestamps !== undefined,
 		edited: Boolean(result?.generatedTextTimestamps),
 		status,
 		error,
 		generate: () => generateSTT([element]),
-		remove: revise(removeCaptions),
-		reset: revise(resetCaptions),
+		remove: () => queue.reviseResult(element, removeCaptions),
+		reset: () => queue.reviseResult(element, resetCaptions),
 	};
 }
