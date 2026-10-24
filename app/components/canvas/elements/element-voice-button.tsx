@@ -4,7 +4,7 @@ import { Mic } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { speakerOf } from "@/lib/canvas/assets";
 import type { ContentElement } from "@/lib/canvas/types";
-import { useAssetEditors } from "./character/asset-edit-provider";
+import { useAssetEditors } from "./asset-edit-context";
 import { HeaderIconButton } from "./header-icon-button";
 
 /** Opens the editor of the voice a speech element speaks with: its speaker's, or else the narrator's. */

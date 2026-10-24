@@ -4,7 +4,7 @@ import { Image, Mic, Palette, User } from "@/components/ui/icon";
 import { useHasAsset } from "@/lib/canvas/use-assets";
 import { useCharacterAvatar } from "../hooks/use-character-avatar";
 import { AssetTile } from "./asset-tile";
-import { useAssetEditors } from "./character/asset-edit-provider";
+import { useAssetEditors } from "./asset-edit-context";
 
 type TileProps = { fill?: boolean };
 
