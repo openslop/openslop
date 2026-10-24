@@ -17,7 +17,6 @@ export function CharacterAvatar({
 	className?: string;
 }) {
 	const { url: avatarUrl } = useCharacterAvatar(name);
-	const initial = name?.trim().charAt(0).toUpperCase();
 	return (
 		<Avatar size={size} className={className}>
 			{/* Radix preloads whatever `src` it gets, so hand it the optimizer's size, not the original. */}
@@ -32,8 +31,14 @@ export function CharacterAvatar({
 					className="object-cover object-center"
 				/>
 			)}
-			<AvatarFallback>
-				{initial || <User className="size-3" aria-hidden="true" />}
+			{/* One placeholder for every character slot: no character picked and an
+			    avatar-less character (the narrator) read the same, as "pick a
+			    character" in the element's own media tint. */}
+			<AvatarFallback className="bg-media-character/15 text-media-character">
+				<User
+					className={size === "sm" ? "size-3.5" : "size-3"}
+					aria-hidden="true"
+				/>
 			</AvatarFallback>
 		</Avatar>
 	);
