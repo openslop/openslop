@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSetActiveSceneId } from "@/app/components/scene-selection/active-scene-context";
 import { useAutoScroll } from "@/app/components/scene-selection/auto-scroll-context";
-import { scrollToScene } from "@/app/components/canvas/utils/scroll-to-scene";
+import { scrollToScene } from "@/app/components/canvas/utils/scroll-to";
 import { usePlayerPlaying } from "./use-player-state";
 import { useActiveSegmentIndex } from "./use-active-segment-index";
 import { useLayout } from "./render-layout-context";

@@ -14,6 +14,7 @@ const result = (imageUrl: string): AssetResult => ({
 
 const version = (prompt: string, url = `${prompt}.png`): CommittedVersion => ({
 	elementId: "a",
+	elementType: "image",
 	connectorType: "image",
 	inputs: inputsFor(prompt),
 	result: result(url),

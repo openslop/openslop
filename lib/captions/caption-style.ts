@@ -13,10 +13,6 @@ export type CaptionAlignY = (typeof CAPTION_ALIGN_Y)[number];
 /** Type emphasis toggles, applied per class of word. */
 export type CaptionEmphasis = "bold" | "italic" | "underline";
 
-/** `line` shows the whole line at once; `word` builds it up word by word. */
-export const CAPTION_REVEALS = ["line", "word"] as const;
-export type CaptionReveal = (typeof CAPTION_REVEALS)[number];
-
 /** The frame height caption sizes are authored against. */
 export const CAPTION_BASE_HEIGHT = 1080;
 
@@ -28,7 +24,7 @@ export const captionFontSizePx = (fontSize: number, frameHeight: number) =>
 export const CAPTION_RANGES = {
 	fontSize: { min: 24, max: 160, step: 2 },
 	borderWidth: { min: 5, max: 100, step: 5 },
-	maxWordsPerLine: { min: 1, max: 10, step: 1 },
+	lineMs: { min: 0, max: 3000, step: 100 },
 } as const;
 
 const range = ({ min, max }: { min: number; max: number }) =>
@@ -58,8 +54,7 @@ export const CaptionStyleSchema = z.object({
 	casing: z.enum(CAPTION_CASINGS),
 	alignX: z.enum(CAPTION_ALIGN_X),
 	alignY: z.enum(CAPTION_ALIGN_Y),
-	maxWordsPerLine: range(CAPTION_RANGES.maxWordsPerLine).int(),
-	reveal: z.enum(CAPTION_REVEALS),
+	lineMs: range(CAPTION_RANGES.lineMs),
 	base: captionTextStyleSchema,
 	/** How the word being spoken is drawn. */
 	activeWord: captionTextStyleSchema,
@@ -79,8 +74,7 @@ export const DEFAULT_CAPTION_STYLE: CaptionStyle = {
 	casing: "none",
 	alignX: "center",
 	alignY: "bottom",
-	maxWordsPerLine: 4,
-	reveal: "word",
+	lineMs: 1200,
 	base: {
 		fill: WHITE,
 		bold: true,

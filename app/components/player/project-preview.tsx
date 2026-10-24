@@ -3,9 +3,12 @@
 import type { CallbackListener, PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
 import { useEffect, useState, type MutableRefObject, type Ref } from "react";
+import { CaptionLineContext } from "@/components/captions/caption-line";
 import type { RenderLayout } from "@/lib/render/types";
+import { cn } from "@/lib/utils";
 import { ToastErrorBoundary } from "../toast-error-boundary";
 import { ActiveSceneSync } from "./active-scene-sync";
+import { renderEditableCaptionLine } from "./editable-caption-line";
 import { usePlayerControl } from "./player-control-context";
 import { PlayPauseFlash } from "./play-pause-flash";
 import { usePreservedPlayhead } from "./use-preserved-playhead";
@@ -80,15 +83,9 @@ export function ProjectPreview({
 		player.toggle();
 		setFlash((prev) => ({ key: (prev?.key ?? 0) + 1, playing: willPlay }));
 	};
+	// Clicks pass through the video to the play button, except on a caption line.
 	return (
 		<div className={`relative h-full w-full ${styles.player}`}>
-			<ToastErrorBoundary label="Player">
-				<RemotionPlayer
-					layout={layout}
-					playerRef={registerPlayer}
-					controls={isFullscreen}
-				/>
-			</ToastErrorBoundary>
 			<button
 				type="button"
 				tabIndex={-1}
@@ -96,6 +93,22 @@ export function ProjectPreview({
 				className="absolute inset-0 cursor-pointer"
 				onClick={toggleAndFlash}
 			/>
+			<div
+				className={cn(
+					"relative h-full w-full",
+					!isFullscreen && "pointer-events-none",
+				)}
+			>
+				<ToastErrorBoundary label="Player">
+					<CaptionLineContext value={renderEditableCaptionLine}>
+						<RemotionPlayer
+							layout={layout}
+							playerRef={registerPlayer}
+							controls={isFullscreen}
+						/>
+					</CaptionLineContext>
+				</ToastErrorBoundary>
+			</div>
 			<PlayPauseFlash flash={flash} />
 			<ActiveSceneSync />
 		</div>

@@ -106,6 +106,7 @@ export function ElementContainer({
 		<ElementGenerationProvider element={element}>
 			<div
 				className="flex items-stretch mb-1.5 animate-fadeInUp"
+				data-element-id={element.id}
 				{...nodeAttributes}
 			>
 				<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">

@@ -5,6 +5,7 @@ const TIMEOUT_MINUTES: Record<JobConnectorType, number> = {
 	image: 15,
 	music: 15,
 	sfx: 15,
+	stt: 15,
 	tts: 15,
 	video: 45,
 };

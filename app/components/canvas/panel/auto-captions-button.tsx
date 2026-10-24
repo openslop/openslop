@@ -1,0 +1,69 @@
+"use client";
+
+import uniqBy from "lodash/uniqBy";
+import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { MagicCaptions } from "@/components/ui/icon";
+import { captionsNodeId } from "@/lib/captions/captions-job";
+import { isCaptionable, type ElementRef } from "@/lib/canvas/types";
+import { plural } from "@/lib/format";
+import {
+	useGenerationQueue,
+	useQueueSelector,
+} from "@/lib/generation/generation-queue-provider";
+import type { GenerationQueue } from "@/lib/generation/queue";
+import { isGenerationActive } from "@/lib/generation/snapshots";
+import { layoutSequences } from "@/lib/render/sequences";
+import { useLayout } from "@/app/components/player/render-layout-context";
+import { useQueueSTT } from "../hooks/use-clip-captions";
+
+const uncaptioned = (queue: GenerationQueue, clips: ElementRef[]) =>
+	clips.filter(
+		({ id }) =>
+			queue.getElementSnapshot(id).result?.textTimestamps === undefined,
+	);
+
+function describe(active: boolean, pending: number, captionable: number) {
+	if (captionable === 0) return "No clips to caption";
+	if (active) return "Captioning…";
+	if (pending === 0) return "Every clip is captioned";
+	return `Caption ${pending} ${plural(pending, "clip")}`;
+}
+
+/** Runs speech to text on every clip on the timeline that has no words yet. */
+export function AutoCaptionsButton() {
+	const queue = useGenerationQueue();
+	const { layout } = useLayout();
+	const queueSTT = useQueueSTT();
+
+	const captionable = useMemo(
+		() =>
+			uniqBy(
+				layoutSequences(layout)
+					.map(({ element }) => element)
+					.filter(({ type }) => isCaptionable(type)),
+				"id",
+			),
+		[layout],
+	);
+	const pending = useQueueSelector((q) => uncaptioned(q, captionable).length);
+	const active = useQueueSelector((q) =>
+		captionable.some(({ id }) =>
+			isGenerationActive(q.getElementSnapshot(captionsNodeId(id)).status),
+		),
+	);
+
+	return (
+		<Button
+			size="sm"
+			variant="generate"
+			className="w-full"
+			tooltip={describe(active, pending, captionable.length)}
+			unavailable={active || pending === 0}
+			onClick={() => queueSTT(uncaptioned(queue, captionable))}
+		>
+			<MagicCaptions aria-hidden="true" />
+			Auto captions
+		</Button>
+	);
+}

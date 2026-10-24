@@ -62,9 +62,13 @@ describe("resolveElements", () => {
 			}),
 		};
 
-		const resolved = resolveElements([wrap(elements)], (id) => snapshots[id], {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements(
+			[wrap(elements)],
+			(id) => snapshots[id] ?? makeSnapshot({ result: null }),
+			{
+				captionsEnabled: true,
+			},
+		);
 
 		expect(resolved).toHaveLength(2);
 		expect(resolved[0]).toEqual({
@@ -115,9 +119,13 @@ describe("resolveElements", () => {
 			nar1: makeSnapshot({ status: "idle", result: null }),
 		};
 
-		const resolved = resolveElements([wrap(elements)], (id) => snapshots[id], {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements(
+			[wrap(elements)],
+			(id) => snapshots[id] ?? makeSnapshot({ result: null }),
+			{
+				captionsEnabled: true,
+			},
+		);
 		expect(resolved).toHaveLength(1);
 		expect(resolved[0].id).toBe("img1");
 	});
@@ -241,30 +249,50 @@ describe("resolveElements", () => {
 	});
 
 	describe("captions", () => {
-		const elements = [makeElement("nar1", "narration")];
-		const withTimestamps = () =>
-			makeSnapshot({
+		const heard = [
+			{ text: "one", start: 0, end: 1 },
+			{ text: "two", start: 2, end: 3 },
+		];
+		const snapshots: Record<string, ElementSnapshot> = {
+			vid: makeSnapshot({
 				result: {
-					audioUrl: "https://example.com/nar.mp3",
-					durationSec: 8,
-					textTimestamps: [{ text: "hello", start: 0, end: 1 }],
+					videoUrl: "https://example.com/v.mp4",
+					durationSec: 5,
+					textTimestamps: heard,
 				},
-			});
+			}),
+			img: makeSnapshot({
+				result: { imageUrl: "https://example.com/i.png", durationSec: 0 },
+			}),
+		};
+		const bySnapshot = (id: string) => snapshots[id] ?? makeSnapshot();
+		const resolveOne = (element: ContentElement, captionsEnabled = true) =>
+			resolveElements([wrap([element])], bySnapshot, { captionsEnabled })[0];
 
-		it("attaches caption timestamps when captions are enabled project-wide", () => {
-			const resolved = resolveElements([wrap(elements)], withTimestamps, {
-				captionsEnabled: true,
+		it("captions a clip with the words on its own result, until the clip ends", () => {
+			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
+				firstWord: 0,
+				words: heard,
+				untilSec: 5,
 			});
-			expect(resolved[0].captionTimestamps).toEqual([
-				{ text: "hello", start: 0, end: 1 },
-			]);
 		});
 
-		it("drops caption timestamps when captions are disabled project-wide", () => {
-			const resolved = resolveElements([wrap(elements)], withTimestamps, {
-				captionsEnabled: false,
-			});
-			expect(resolved[0].captionTimestamps).toBeUndefined();
+		it("drops captions when captions are disabled project-wide", () => {
+			expect(
+				resolveOne(makeElement("vid", "video"), false).captions,
+			).toBeUndefined();
+		});
+
+		it("counts the words a trim cuts, so an edit still lands on the clip's own", () => {
+			const { captions } = resolveOne(
+				makeElement("vid", "video", { trimStart: "1.5" }),
+			);
+			expect(captions?.firstWord).toBe(1);
+			expect(captions?.words).toEqual([{ text: "two", start: 0.5, end: 1.5 }]);
+		});
+
+		it("captions nothing a clip has no words for", () => {
+			expect(resolveOne(makeElement("img", "image")).captions).toBeUndefined();
 		});
 	});
 

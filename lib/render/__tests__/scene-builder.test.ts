@@ -649,3 +649,48 @@ describe("buildRenderLayout", () => {
 		});
 	});
 });
+
+describe("the caption rule", () => {
+	const captions = (untilSec: number) => ({
+		firstWord: 0,
+		words: [{ text: "hi", start: 0, end: 1 }],
+		untilSec,
+	});
+	const video = el({
+		id: "vid",
+		type: "video",
+		durationSec: 10,
+		captions: captions(10),
+	});
+	const narration = el({
+		id: "nar",
+		type: "narration",
+		durationSec: 3,
+		captions: captions(3),
+	});
+
+	it("drops a video's captions when speech plays over it, and keeps the speech's", () => {
+		const layout = layoutOf([video, narration]);
+		expect(layout.series[0].element.captions).toBeUndefined();
+		expect(layout.sequences.narration?.[0].element.captions?.untilSec).toBe(3);
+	});
+
+	it("keeps a video's captions when nothing is said over it", () => {
+		expect(layoutOf([video]).series[0].element.captions?.untilSec).toBe(10);
+	});
+
+	it("stops captions where the next scene begins, and holds the last scene's to its end", () => {
+		const next = el({
+			id: "vid2",
+			type: "video",
+			durationSec: 10,
+			captions: captions(10),
+		});
+		const layout = layoutOf([video, next], { transitionType: "fade" });
+		const [first, last] = layout.series;
+		expect(first.element.captions?.untilSec).toBeCloseTo(
+			first.duration - layout.transitionDurationSec,
+		);
+		expect(last.element.captions?.untilSec).toBe(last.duration);
+	});
+});

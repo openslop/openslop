@@ -1,4 +1,5 @@
 import {
+	Captions,
 	Image as ImageIcon,
 	Music,
 	TextBox,
@@ -34,9 +35,15 @@ export const MODEL_GROUPS: ModelGroup[] = [
 	},
 	{
 		key: "voice",
-		label: "Voice",
+		label: "Text to Speech",
 		Icon: Voice,
 		types: ["voice", "tts"],
+	},
+	{
+		key: "stt",
+		label: "Speech to Text",
+		Icon: Captions,
+		types: ["stt"],
 	},
 	{
 		key: "sound",

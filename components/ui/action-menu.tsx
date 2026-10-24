@@ -14,6 +14,7 @@ export interface ActionMenuItem {
 	icon?: ReactNode;
 	onSelect: () => void;
 	disabled?: boolean;
+	variant?: "destructive";
 }
 
 export function ActionMenu({
@@ -46,6 +47,7 @@ export function ActionMenu({
 						key={item.key}
 						onSelect={item.onSelect}
 						disabled={item.disabled}
+						variant={item.variant}
 						className={itemClassName}
 					>
 						{item.icon}

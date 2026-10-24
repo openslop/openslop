@@ -16,6 +16,7 @@ export const ASSET_CONNECTOR_TYPES = [
 	"tts",
 	"video",
 	"voice",
+	"stt",
 ] as const;
 
 export type AssetConnectorType = (typeof ASSET_CONNECTOR_TYPES)[number];
@@ -64,6 +65,7 @@ export type ModelEntries = {
 	video: VisualModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
+	stt: ModelEntry;
 };
 
 export type ModelTable = Record<string, ModelEntry>;
@@ -143,6 +145,8 @@ export const AssetResultSchema = z.object({
 	audioUrl: z.string().optional(),
 	videoUrl: z.string().optional(),
 	textTimestamps: z.array(TextTimestampSchema).optional(),
+	/** The words as generated, kept once the user edits them. */
+	generatedTextTimestamps: z.array(TextTimestampSchema).optional(),
 	voiceId: z.string().optional(),
 });
 
@@ -214,6 +218,20 @@ export type TTSGenerateParams = ConnectorGenerateParams & {
 	speed?: TTSSpeed;
 	emotion?: TTSEmotion;
 	format?: string;
+};
+
+/** The sound to turn into text, which the server requires. */
+export type STTGenerateParams = ConnectorGenerateParams & {
+	mediaUrl?: string;
+};
+
+export type SourcedSTTParams = STTGenerateParams & {
+	mediaUrl: string;
+};
+
+export type STTResult = {
+	durationSec: number;
+	textTimestamps: TextTimestamp[];
 };
 
 /** A TTS request after its speaker's voice is resolved. */

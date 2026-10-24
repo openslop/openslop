@@ -2,6 +2,7 @@ import { HttpImageConnector } from "./image/connector";
 import { HttpLLMConnector } from "./llm/connector";
 import { HttpMusicConnector } from "./music/connector";
 import { HttpSFXConnector } from "./sfx/connector";
+import { HttpSTTConnector } from "./stt/connector";
 import { HttpTTSConnector } from "./tts/connector";
 import { HttpVideoConnector } from "./video/connector";
 import { HttpVoiceConnector } from "./voice/connector";
@@ -23,6 +24,7 @@ type ConnectorTypeMap = {
 	tts: TTSConnector;
 	video: HttpVideoConnector;
 	voice: HttpVoiceConnector;
+	stt: HttpSTTConnector;
 };
 
 /**
@@ -38,6 +40,7 @@ const CONNECTORS: Record<ConnectorType, ProviderConstructor> = {
 	tts: HttpTTSConnector,
 	video: HttpVideoConnector,
 	voice: HttpVoiceConnector,
+	stt: HttpSTTConnector,
 };
 
 export function createConnector<T extends ConnectorType>(

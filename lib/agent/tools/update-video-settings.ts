@@ -13,7 +13,6 @@ import {
 	CAPTION_CASINGS,
 	CAPTION_PALETTE,
 	CAPTION_RANGES,
-	CAPTION_REVEALS,
 	CaptionStyleSchema,
 } from "@/lib/captions/caption-style";
 import { CAPTION_FONTS } from "@/lib/captions/caption-fonts";
@@ -54,8 +53,7 @@ export const updateVideoSettings = defineTool({
 	    - fontSize: ${range(CAPTION_RANGES.fontSize)}, authored against a ${CAPTION_BASE_HEIGHT}px-tall frame
 	    - casing: ${CAPTION_CASINGS.join(", ")}
 	    - alignX: ${CAPTION_ALIGN_X.join(", ")}; alignY: ${CAPTION_ALIGN_Y.join(", ")}
-	    - maxWordsPerLine: ${range(CAPTION_RANGES.maxWordsPerLine)}
-	    - reveal: ${CAPTION_REVEALS.join(", ")}. line shows the whole line at once; word builds it up word by word
+	    - lineMs: ${range(CAPTION_RANGES.lineMs)}, how long a line gathers words before the next starts; 0 shows one word at a time
 	    - base is every word; activeWord is the word being spoken. Each takes fill, bold,
 	      italic, underline, a border (width ${range(CAPTION_RANGES.borderWidth)} plus a color)
 	      or null for none, and a background color or null for none.

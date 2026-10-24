@@ -42,7 +42,7 @@ const toRow = (projectId: string, version: CommittedVersion) => ({
 	project_id: projectId,
 	element_id: version.elementId,
 	connector_type: version.connectorType,
-	element_type: version.elementType ?? null,
+	element_type: version.elementType,
 	inputs: version.inputs,
 	result: version.result,
 	pinned: version.pinned,

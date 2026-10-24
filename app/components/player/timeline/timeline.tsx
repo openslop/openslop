@@ -10,22 +10,22 @@ import {
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
 import { renderCharacterRefs } from "@/lib/connectors/character-refs";
-import type { LayerType } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
 import { usePlayerControl } from "../player-control-context";
 import { usePlayerScrub } from "../use-player-scrub";
 import { useSelectScene } from "../use-select-scene";
 import { useLayout } from "../render-layout-context";
-import { TimelineClip } from "./timeline-clip";
+import { TimelineCaptionClip, TimelineClip } from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
 import { GUTTER_PX, LANE_HEIGHT, RULER_HEIGHT } from "../dock-layout";
 import { TimelineRuler } from "./timeline-ruler";
 import {
+	buildCaptionRows,
 	buildTimelineRows,
+	type CaptionClip as CaptionClipData,
 	type TimelineClip as TimelineClipData,
-	type TimelineRow,
 } from "./timeline-rows";
 import { useTimelineZoom } from "./use-timeline-zoom";
 import { TimelineTrimHandle } from "./timeline-trim-handle";
@@ -44,7 +44,7 @@ function Lane({
 	className,
 	children,
 }: {
-	kind: LayerType;
+	kind: keyof typeof LANE_HEIGHT;
 	className?: string;
 	children: ReactNode;
 }) {
@@ -57,34 +57,67 @@ function Lane({
 	);
 }
 
+type ClipProps<T> = {
+	clip: T;
+	pxPerSec: number;
+	selected: boolean;
+	onSelect: (clip: TimelineClipData) => void;
+};
+
+function ClipSlot({
+	start,
+	width,
+	children,
+}: {
+	start: number;
+	width: number;
+	children: ReactNode;
+}) {
+	return (
+		<li
+			className="group/clip absolute inset-y-0.5"
+			style={{ left: start, width }}
+		>
+			{children}
+		</li>
+	);
+}
+
+function SelectButton({
+	selected,
+	onClick,
+	children,
+}: {
+	selected: boolean;
+	onClick: () => void;
+	children: ReactNode;
+}) {
+	return (
+		<button
+			type="button"
+			aria-current={selected ? "true" : undefined}
+			onClick={onClick}
+			// Inline buttons sit on the list item's text baseline, which
+			// drops the clip past its lane.
+			className="block h-full w-full rounded-md focus-ring"
+		>
+			{children}
+		</button>
+	);
+}
+
 function Clip({
 	clip,
 	pxPerSec,
 	numbered,
 	selected,
 	onSelect,
-}: {
-	clip: TimelineClipData;
-	pxPerSec: number;
-	numbered: boolean;
-	selected: boolean;
-	onSelect: (clip: TimelineClipData) => void;
-}) {
+}: ClipProps<TimelineClipData> & { numbered: boolean }) {
 	const trim = useClipTrim(clip, pxPerSec, clip.overlaySec ?? 0);
 	const width = Math.max(trim.durationSec * pxPerSec, MIN_CLIP_WIDTH_PX);
 	return (
-		<li
-			className="group/clip absolute inset-y-0.5"
-			style={{ left: clip.start * pxPerSec, width }}
-		>
-			<button
-				type="button"
-				aria-current={selected ? "true" : undefined}
-				onClick={() => onSelect(clip)}
-				// Inline buttons sit on the list item's text baseline, which
-				// drops the clip past its lane.
-				className="block h-full w-full rounded-md focus-ring"
-			>
+		<ClipSlot start={clip.start * pxPerSec} width={width}>
+			<SelectButton selected={selected} onClick={() => onSelect(clip)}>
 				<TimelineClip
 					clip={clip}
 					width={width}
@@ -94,7 +127,7 @@ function Clip({
 					pxPerSec={pxPerSec}
 					trim={trim.trim}
 				/>
-			</button>
+			</SelectButton>
 			{trim.reset ? (
 				<TooltipIconButton
 					label="Reset trim"
@@ -109,34 +142,37 @@ function Clip({
 			) : null}
 			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
 			<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
-		</li>
+		</ClipSlot>
+	);
+}
+
+function CaptionClip({
+	clip,
+	pxPerSec,
+	selected,
+	onSelect,
+}: ClipProps<CaptionClipData>) {
+	const width = Math.max(clip.duration * pxPerSec, MIN_CLIP_WIDTH_PX);
+	return (
+		<ClipSlot start={clip.start * pxPerSec} width={width}>
+			<SelectButton selected={selected} onClick={() => onSelect(clip)}>
+				<TimelineCaptionClip clip={clip} width={width} selected={selected} />
+			</SelectButton>
+		</ClipSlot>
 	);
 }
 
 function Track({
 	row,
-	pxPerSec,
-	selectedKey,
-	onSelect,
+	children,
 }: {
-	row: TimelineRow;
-	pxPerSec: number;
-	selectedKey: string | null;
-	onSelect: (clip: TimelineClipData) => void;
+	row: { kind: keyof typeof LANE_HEIGHT; label: string };
+	children: ReactNode;
 }) {
 	return (
 		<Lane kind={row.kind} className="relative">
 			<ul aria-label={row.label} className="absolute inset-0">
-				{row.clips.map((clip) => (
-					<Clip
-						key={clip.key}
-						clip={clip}
-						pxPerSec={pxPerSec}
-						numbered={row.numbered}
-						selected={selectedKey === clip.key}
-						onSelect={onSelect}
-					/>
-				))}
+				{children}
 			</ul>
 		</Lane>
 	);
@@ -165,6 +201,7 @@ export function Timeline() {
 		width: viewportWidth,
 	} = useElementWidth<HTMLDivElement>();
 	const rows = useMemo(() => buildTimelineRows(layout), [layout]);
+	const captionRows = useMemo(() => buildCaptionRows(layout), [layout]);
 	const { zoom, pxPerSec, zoomIn, zoomOut, canZoomIn, canZoomOut } =
 		useTimelineZoom(
 			layout.totalDurationSec,
@@ -257,14 +294,32 @@ export function Timeline() {
 					</div>
 
 					<div style={{ gridArea: "2 / 2" }}>
+						{captionRows.map((row) => (
+							<Track key={row.key} row={row}>
+								{row.clips.map((clip) => (
+									<CaptionClip
+										key={clip.key}
+										clip={clip}
+										pxPerSec={pxPerSec}
+										selected={selectedKey === clip.key}
+										onSelect={select}
+									/>
+								))}
+							</Track>
+						))}
 						{rows.map((row) => (
-							<Track
-								key={row.key}
-								row={row}
-								pxPerSec={pxPerSec}
-								selectedKey={selectedKey}
-								onSelect={select}
-							/>
+							<Track key={row.key} row={row}>
+								{row.clips.map((clip) => (
+									<Clip
+										key={clip.key}
+										clip={clip}
+										pxPerSec={pxPerSec}
+										numbered={row.numbered}
+										selected={selectedKey === clip.key}
+										onSelect={select}
+									/>
+								))}
+							</Track>
 						))}
 					</div>
 
@@ -287,7 +342,7 @@ export function Timeline() {
 						style={{ gridArea: "2 / 1" }}
 						className="sticky left-0 z-30 border-r border-border bg-element-card"
 					>
-						{rows.map((row) => (
+						{[...captionRows, ...rows].map((row) => (
 							<Lane
 								key={row.key}
 								kind={row.kind}

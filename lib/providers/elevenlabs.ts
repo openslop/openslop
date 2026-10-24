@@ -27,6 +27,12 @@ export function toElevenLabsOutputFormat(
 	return `mp3_${format.sampleRate}_${format.bitrateKbps}` as AllowedOutputFormats;
 }
 
+/** Reading the account behind the key is the cheapest authenticated call. */
+export const validateElevenLabsKey = (apiKey: string) =>
+	validateByProbe("https://api.elevenlabs.io/v1/user", {
+		headers: { "xi-api-key": apiKey },
+	});
+
 /** Shared base for ElevenLabs providers that emit a single audio asset. */
 export abstract class BaseElevenLabsAudio<
 	TParams extends { durationSeconds?: number },
@@ -40,11 +46,8 @@ export abstract class BaseElevenLabsAudio<
 		this.client = new ElevenLabsClient({ apiKey });
 	}
 
-	/** Reading the account behind the key is the cheapest authenticated call. */
 	async validate() {
-		return validateByProbe("https://api.elevenlabs.io/v1/user", {
-			headers: { "xi-api-key": this.apiKey },
-		});
+		return validateElevenLabsKey(this.apiKey);
 	}
 
 	protected abstract readonly outputFormat: AudioFormat;

@@ -155,7 +155,7 @@ Hosted models come with your account. Paste a key for Anthropic, Runware, Cartes
 
 **Also in the box:**
 
-- **[Captions](app/components/canvas/panel/captions-panel.tsx)** — Six presets, twelve fonts, word-by-word or line-by-line reveal, and every color, border, and placement is yours to change.
+- **[Captions](app/components/canvas/panel/captions-panel.tsx)** — Six presets, twelve fonts, an adjustable line length, and every color, border, and placement is yours to change.
 - **[Export up to 4K](app/components/player/export-button.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
 - **[Version history](app/components/canvas/panel/canvas-history-panel.tsx)** — Autosaves as you work, folded into checkpoints. View any version and restore it.
 - **[Characters and art style](app/components/canvas/elements/asset-strip.tsx)** — Name a character once and every image, voice line, and avatar stays consistent.

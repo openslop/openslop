@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { activeWordIndex, captionWordsAt } from "../caption-layout";
+import {
+	activeWordIndex,
+	captionLines,
+	groupIntoLines,
+	wordsOnLine,
+} from "../caption-layout";
 
 const WORDS = ["one", "two", "three", "four", "five"];
-const text = (words: { text: string }[]) => words.map((w) => w.text);
-const shown = (words: { text: string; hidden: boolean }[]) =>
-	words.filter((w) => !w.hidden).map((w) => w.text);
-const activeText = (words: { text: string; active: boolean }[]) =>
-	words.filter((w) => w.active).map((w) => w.text);
+/** A word a second, each spoken for most of it. */
+const timed = WORDS.map((text, at) => ({ text, start: at, end: at + 0.8 }));
+const spans = (lines: { from: number; to: number }[]) =>
+	lines.map(({ from, to }) => WORDS.slice(from, to));
 
 describe("activeWordIndex", () => {
 	const startTimes = [0, 1, 2];
@@ -23,49 +27,61 @@ describe("activeWordIndex", () => {
 	});
 });
 
-describe("captionWordsAt", () => {
-	const line = { maxWordsPerLine: 2, reveal: "line" } as const;
-	const word = { maxWordsPerLine: 2, reveal: "word" } as const;
-
-	it("is empty outside the word range", () => {
-		expect(captionWordsAt(WORDS, -1, line)).toEqual([]);
-		expect(captionWordsAt(WORDS, WORDS.length, line)).toEqual([]);
-	});
-
-	it("shows the whole line the word sits on", () => {
-		expect(text(captionWordsAt(WORDS, 2, line))).toEqual(["three", "four"]);
-	});
-
-	it("builds the line up to the current word", () => {
-		expect(shown(captionWordsAt(WORDS, 2, word))).toEqual(["three"]);
-		expect(shown(captionWordsAt(WORDS, 3, word))).toEqual(["three", "four"]);
-	});
-
-	it("keeps unspoken words in the line so it never reflows", () => {
-		expect(text(captionWordsAt(WORDS, 2, word))).toEqual(["three", "four"]);
-		expect(captionWordsAt(WORDS, 2, word).map((w) => w.hidden)).toEqual([
-			false,
-			true,
+describe("groupIntoLines", () => {
+	it("gathers words into a line until it has run the line length", () => {
+		expect(spans(groupIntoLines(timed, 1500))).toEqual([
+			["one", "two"],
+			["three", "four"],
+			["five"],
 		]);
 	});
 
-	it("shows the whole line under line reveal", () => {
-		expect(captionWordsAt(WORDS, 2, line).every((w) => !w.hidden)).toBe(true);
+	it("skips a blank word without shifting the words after it", () => {
+		const blank = [
+			timed[0],
+			{ text: " ", start: 1, end: 1.5 },
+			...timed.slice(1),
+		];
+		expect(
+			groupIntoLines(blank, 0).map(({ from, to }) =>
+				blank.slice(from, to).map((word) => word.text),
+			),
+		).toEqual(WORDS.map((w) => [w]));
 	});
 
-	it("marks only the current word active", () => {
-		expect(activeText(captionWordsAt(WORDS, 3, line))).toEqual(["four"]);
+	it("shows one word at a time at a line length of 0", () => {
+		expect(spans(groupIntoLines(timed, 0))).toEqual(WORDS.map((w) => [w]));
 	});
 
-	it("keeps a trailing partial line intact", () => {
-		expect(text(captionWordsAt(WORDS, 4, line))).toEqual(["five"]);
+	it("holds each line until the next one starts, the last until its last word ends", () => {
+		expect(
+			groupIntoLines(timed, 1500).map(({ start, end }) => [start, end]),
+		).toEqual([
+			[0, 2],
+			[2, 4],
+			[4, 4.8],
+		]);
 	});
+});
 
-	it("falls back to one word per line for degenerate limits", () => {
-		const words = captionWordsAt(WORDS, 3, {
-			maxWordsPerLine: 0,
-			reveal: "line",
-		});
-		expect(text(words)).toEqual(["four"]);
+describe("captionLines", () => {
+	it("holds the last line until the captions stop, and drops lines after", () => {
+		const lines = captionLines({ words: timed, untilSec: 3.5 }, 1500);
+		expect(lines.map(({ from, start, end }) => [from, start, end])).toEqual([
+			[0, 0, 2],
+			[2, 2, 3.5],
+		]);
+		expect(captionLines({ words: timed, untilSec: 10 }, 1500).at(-1)?.end).toBe(
+			10,
+		);
+	});
+});
+
+describe("wordsOnLine", () => {
+	it("marks only the word being spoken", () => {
+		expect(wordsOnLine(WORDS, 3, { from: 3, to: 5 })).toEqual([
+			{ text: "four", active: true },
+			{ text: "five", active: false },
+		]);
 	});
 });

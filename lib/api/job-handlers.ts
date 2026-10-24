@@ -6,6 +6,7 @@ import type {
 	ModelRef,
 	MusicGenerateParams,
 	SFXGenerateParams,
+	SourcedSTTParams,
 	VoicedTTSParams,
 } from "@/lib/connectors/types";
 import {
@@ -40,6 +41,9 @@ const HANDLERS: Record<JobConnectorType, JobHandler> = {
 	),
 	sfx: assetHandler<SFXGenerateParams & ModelRef>((job) =>
 		providerForJob("sfx", job),
+	),
+	stt: assetHandler<SourcedSTTParams & ModelRef>((job) =>
+		providerForJob("stt", job),
 	),
 	tts: assetHandler<VoicedTTSParams & ModelRef>((job) =>
 		providerForJob("tts", job),

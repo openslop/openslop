@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { InfoTip } from "@/components/ui/info-tip";
 
 export function PanelCard({
 	title,
@@ -28,15 +29,18 @@ export function PanelCard({
 
 export function PanelField({
 	label,
+	info,
 	children,
 }: {
 	label: string;
+	info?: string;
 	children: ReactNode;
 }) {
 	return (
 		<div className="flex items-center justify-between gap-3">
-			<span className="shrink-0 text-label font-medium text-panel-label">
+			<span className="flex shrink-0 items-center gap-1 text-label font-medium text-panel-label">
 				{label}
+				{info && <InfoTip label={info} />}
 			</span>
 			{children}
 		</div>

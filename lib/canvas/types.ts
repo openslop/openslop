@@ -17,6 +17,7 @@ export type ContentSpec = {
 	outputKind: ResultKind;
 	role: ElementRole;
 	layer: LayerType;
+	captionSource?: "speech" | "video";
 };
 
 export const CONTENT_TYPES = {
@@ -25,12 +26,14 @@ export const CONTENT_TYPES = {
 		outputKind: "audio",
 		role: "overlay",
 		layer: "audio",
+		captionSource: "speech",
 	},
 	character: {
 		connector: "tts",
 		outputKind: "audio",
 		role: "overlay",
 		layer: "audio",
+		captionSource: "speech",
 	},
 	image: {
 		connector: "image",
@@ -43,6 +46,7 @@ export const CONTENT_TYPES = {
 		outputKind: "video",
 		role: "foreground",
 		layer: "visual",
+		captionSource: "video",
 	},
 	sound: {
 		connector: "sfx",
@@ -59,6 +63,16 @@ export const CONTENT_TYPES = {
 } as const satisfies Record<string, ContentSpec>;
 
 export type ContentType = keyof typeof CONTENT_TYPES;
+
+export function captionSourceOf(
+	type: ContentType,
+): ContentSpec["captionSource"] {
+	const spec: ContentSpec = CONTENT_TYPES[type];
+	return spec.captionSource;
+}
+
+export const isCaptionable = (type: ContentType): boolean =>
+	captionSourceOf(type) !== undefined;
 
 const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
 
@@ -121,6 +135,9 @@ export const ASSET_TYPES = {
 export type AssetType = keyof typeof ASSET_TYPES;
 
 export type ElementType = ContentType | AssetType;
+
+/** Enough of an element to address its generation: which one, and what kind. */
+export type ElementRef = { id: string; type: ElementType };
 
 export const ELEMENT_TYPES: Record<ElementType, ElementSpec> = {
 	...CONTENT_TYPES,

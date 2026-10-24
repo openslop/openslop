@@ -21,22 +21,22 @@ import {
 	type CaptionAlignX,
 	type CaptionAlignY,
 	type CaptionCasing,
-	type CaptionReveal,
 } from "@/lib/captions/caption-style";
 import { useCaptionStyle } from "@/lib/captions/use-caption-style";
 import { useProject } from "@/lib/project/use-project";
 import { useVideoSetting } from "@/lib/project/use-video-setting";
+import { ModelDefaultControl } from "@/app/components/models/model-default-control";
+import { groupFor } from "@/lib/connectors/model-groups";
+import { useModelChain } from "@/lib/connectors/use-default-models";
 import { CaptionFontLibrary } from "../caption-fonts";
+import { AutoCaptionsButton } from "./auto-captions-button";
 import { CaptionFontField } from "./caption-font-field";
 import { CaptionPresetGrid } from "./caption-preset-grid";
 import { CaptionPreview } from "./caption-preview";
 import { CaptionTextStyleFields } from "./caption-text-style-fields";
 import { PanelCard, PanelField } from "./panel-card";
 
-const REVEAL_OPTIONS: MediaToggleOption<CaptionReveal>[] = [
-	{ value: "line", label: "Whole line at once", text: "Line" },
-	{ value: "word", label: "Word by word", text: "Word" },
-];
+const SPEECH_TO_TEXT = groupFor("stt");
 
 const CASE_OPTIONS: MediaToggleOption<CaptionCasing>[] = [
 	{ value: "none", label: "Standard case", text: "Ab" },
@@ -60,6 +60,8 @@ export function CaptionsPanel() {
 	const captionsEnabled = useVideoSetting("captions");
 	const updateVideoSettings = useProject((state) => state.updateVideoSettings);
 	const [style, setStyle] = useCaptionStyle();
+	const chain = useModelChain();
+	const updateModels = useProject((state) => state.updateModels);
 
 	return (
 		<>
@@ -76,7 +78,24 @@ export function CaptionsPanel() {
 						]}
 					/>
 				</PanelField>
-				{captionsEnabled && <CaptionPreview style={style} />}
+				{captionsEnabled && (
+					<>
+						<PanelField
+							label={SPEECH_TO_TEXT.label}
+							info="Existing captions are unaffected."
+						>
+							<ModelDefaultControl
+								types={SPEECH_TO_TEXT.types}
+								tier="project"
+								chain={chain}
+								label={SPEECH_TO_TEXT.label}
+								onChange={updateModels}
+							/>
+						</PanelField>
+						<AutoCaptionsButton />
+						<CaptionPreview style={style} />
+					</>
+				)}
 			</PanelCard>
 
 			{captionsEnabled && (
@@ -129,20 +148,14 @@ export function CaptionsPanel() {
 								onChange={(casing) => setStyle({ casing })}
 							/>
 						</PanelField>
-						<PanelField label="Reveal">
-							<MediaToggle
-								value={style.reveal}
-								options={REVEAL_OPTIONS}
-								onChange={(reveal) => setStyle({ reveal })}
-							/>
-						</PanelField>
-						<PanelField label="Words per line">
+						<PanelField label="Line length">
 							<NumberScrubber
-								label="Words per line"
-								tooltip="Maximum words on a caption line"
-								value={style.maxWordsPerLine}
-								{...CAPTION_RANGES.maxWordsPerLine}
-								onChange={(maxWordsPerLine) => setStyle({ maxWordsPerLine })}
+								label="Line length"
+								tooltip="How long a line gathers words before the next one starts; 0 shows one word at a time"
+								value={style.lineMs}
+								suffix="ms"
+								{...CAPTION_RANGES.lineMs}
+								onChange={(lineMs) => setStyle({ lineMs })}
 							/>
 						</PanelField>
 					</PanelCard>

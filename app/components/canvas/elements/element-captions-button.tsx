@@ -1,0 +1,158 @@
+"use client";
+
+import compact from "lodash/compact";
+import { useState, type ReactNode } from "react";
+import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import {
+	CaptionsReady,
+	CaptionsAlert,
+	Hourglass,
+	MagicCaptions,
+	RotateCcw,
+	Trash2,
+} from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
+import { Spinner } from "@/components/ui/spinner";
+import {
+	SimpleTooltip,
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { ContentElement } from "@/lib/canvas/types";
+import { isGenerationActive } from "@/lib/generation/snapshots";
+import { useClipCaptions } from "../hooks/use-clip-captions";
+import { ELEMENT_CONFIGS } from "./element-configs";
+import { useElementGeneration } from "./element-generation-context";
+import { HeaderIconButton } from "./header-icon-button";
+
+const SIZE = ICON_SIZES.header;
+
+type Captions = ReturnType<typeof useClipCaptions>;
+
+interface Face {
+	label: string;
+	icon: ReactNode;
+	variant?: "destructive";
+	onClick?: () => void;
+}
+
+const NO_CLIP: Face = {
+	label: "Generate the clip first to caption it",
+	icon: <MagicCaptions size={SIZE} />,
+};
+
+const CLIP_BUSY: Face = {
+	label: "Captions wait for the clip to finish generating",
+	icon: <Hourglass size={SIZE} />,
+};
+
+/** How the button looks before there are captions to act on; null once there are. */
+function faceOf(captions: Captions): Face | null {
+	if (captions.status === "queued")
+		return { label: "Captions queued", icon: <Hourglass size={SIZE} /> };
+	if (captions.status !== "idle")
+		return {
+			label: "Generating captions…",
+			icon: <Spinner className="text-current" />,
+		};
+	if (captions.error)
+		return {
+			label: `Captions failed: ${captions.error}. Try again`,
+			icon: <CaptionsAlert size={SIZE} />,
+			variant: "destructive",
+			onClick: captions.generate,
+		};
+	if (captions.captioned) return null;
+	return {
+		label: "Generate captions",
+		icon: <MagicCaptions size={SIZE} />,
+		onClick: captions.generate,
+	};
+}
+
+function FaceButton({ face }: { face: Face }) {
+	return (
+		<SimpleTooltip label={face.label}>
+			<HeaderIconButton
+				ariaLabel={face.label}
+				variant={face.variant ?? "quiet"}
+				unavailable={!face.onClick}
+				onClick={face.onClick}
+			>
+				{face.icon}
+			</HeaderIconButton>
+		</SimpleTooltip>
+	);
+}
+
+function menuOf(captions: Captions, onRemove: () => void): ActionMenuItem[] {
+	return compact([
+		{
+			key: "regenerate",
+			label: "Regenerate captions",
+			icon: <MagicCaptions />,
+			onSelect: captions.generate,
+		},
+		captions.edited && {
+			key: "reset",
+			label: "Reset edits",
+			icon: <RotateCcw />,
+			onSelect: captions.reset,
+		},
+		{
+			key: "remove",
+			label: "Remove captions",
+			icon: <Trash2 />,
+			variant: "destructive",
+			onSelect: onRemove,
+		},
+	]);
+}
+
+export function ElementCaptionsButton({
+	element,
+}: {
+	element: ContentElement;
+}) {
+	const { result: clip, status: clipStatus } = useElementGeneration();
+	const captions = useClipCaptions(element, clip);
+	const [removing, setRemoving] = useState(false);
+
+	if (!clip) return <FaceButton face={NO_CLIP} />;
+	if (isGenerationActive(clipStatus)) return <FaceButton face={CLIP_BUSY} />;
+	const face = faceOf(captions);
+	if (face) return <FaceButton face={face} />;
+
+	const label = captions.edited
+		? "Captions ready, edited in the player"
+		: "Captions ready";
+	return (
+		<>
+			<Tooltip>
+				<ActionMenu
+					items={menuOf(captions, () => setRemoving(true))}
+					align="end"
+				>
+					<TooltipTrigger asChild>
+						<HeaderIconButton ariaLabel={label}>
+							<CaptionsReady size={SIZE} />
+						</HeaderIconButton>
+					</TooltipTrigger>
+				</ActionMenu>
+				<TooltipContent>{label}</TooltipContent>
+			</Tooltip>
+			<ConfirmDeleteDialog
+				target={removing ? element : undefined}
+				onClose={() => setRemoving(false)}
+				title={({ type }) =>
+					`Remove this ${ELEMENT_CONFIGS[type].label.toLowerCase()}'s captions?`
+				}
+				description="Only this clip loses its captions and any edits to them. Getting them back means generating them again."
+				actionLabel="Remove captions"
+				onConfirm={captions.remove}
+			/>
+		</>
+	);
+}

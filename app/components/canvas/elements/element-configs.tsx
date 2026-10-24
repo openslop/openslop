@@ -21,6 +21,7 @@ import {
 	ImageUploadButton,
 	VideoUploadButton,
 } from "./element-upload-button";
+import { ElementCaptionsButton } from "./element-captions-button";
 import { ElementVoiceButton } from "./element-voice-button";
 
 type ElementControl = ComponentType<{
@@ -55,7 +56,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		iconBgClass: "bg-media-narration/15",
 		colorClass: "text-media-narration",
 		placeholder: "Write the narration...",
-		tools: [ElementVoiceButton],
+		tools: [ElementVoiceButton, ElementCaptionsButton],
 	},
 	character: {
 		label: "Character",
@@ -64,7 +65,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		colorClass: "text-media-character",
 		placeholder: "What does this character say?",
 		lead: CharacterSwitcher,
-		tools: [ElementVoiceButton],
+		tools: [ElementVoiceButton, ElementCaptionsButton],
 	},
 	image: {
 		label: "Image",
@@ -80,6 +81,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		iconBgClass: "bg-media-video/15",
 		colorClass: "text-media-video",
 		placeholder: "Describe the video...",
+		tools: [ElementCaptionsButton],
 		actions: [VideoUploadButton],
 	},
 	sound: {

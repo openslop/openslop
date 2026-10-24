@@ -1,7 +1,7 @@
 "use client";
 
 import { Maximize, Volume2, VolumeX } from "@/components/ui/icon";
-import { scrollToScene } from "@/app/components/canvas/utils/scroll-to-scene";
+import { scrollToScene } from "@/app/components/canvas/utils/scroll-to";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { toSeconds } from "@/lib/render/frames";

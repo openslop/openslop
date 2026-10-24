@@ -527,6 +527,72 @@ describe("GenerationQueue", () => {
 		});
 	});
 
+	describe("reviseResult", () => {
+		const spoken = {
+			audioUrl: "https://example.com/line.wav",
+			durationSec: 1,
+			textTimestamps: [{ text: "hi", start: 0, end: 1 }],
+		};
+		const edited = {
+			...spoken,
+			textTimestamps: [{ text: "hey", start: 0, end: 1 }],
+		};
+
+		it("swaps in the edit under the inputs the result was made from, so it is no fresher than it", async () => {
+			generateMock.mockResolvedValue(spoken);
+			const made = inputsFor("hi");
+			generationQueue.enqueueGraph([makeJob("rv1", [], made)]);
+			await vi.runAllTimersAsync();
+
+			generationQueue.reviseResult(
+				{ id: "rv1", type: "narration" },
+				() => edited,
+			);
+
+			expect(generationQueue.getElementSnapshot("rv1")).toMatchObject({
+				result: edited,
+				resultInputs: made,
+				pinned: false,
+			});
+			expect(isNodeStale(makeJob("rv1", [], made), generationQueue)).toBe(
+				false,
+			);
+			expect(committed).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					elementId: "rv1",
+					result: edited,
+					inputs: made,
+				}),
+			);
+			generationQueue.discard("rv1");
+		});
+
+		it("refuses an element while a run would land over the edit", async () => {
+			generateMock.mockResolvedValue(spoken);
+			generationQueue.enqueueGraph([makeJob("rv3", [], inputsFor("hi"))]);
+			await vi.runAllTimersAsync();
+			generateMock.mockReturnValue(new Promise(() => {}));
+			generationQueue.enqueueGraph([makeJob("rv3", [], inputsFor("hi"))]);
+
+			expect(() =>
+				generationQueue.reviseResult(
+					{ id: "rv3", type: "narration" },
+					() => edited,
+				),
+			).toThrow(/generating/);
+			generationQueue.discard("rv3");
+		});
+
+		it("refuses an element with no result to edit", () => {
+			expect(() =>
+				generationQueue.reviseResult(
+					{ id: "rv2", type: "narration" },
+					() => edited,
+				),
+			).toThrow(/no result/);
+		});
+	});
+
 	describe("restoreResult", () => {
 		it("shows a result supplied for inputs the element has drifted from", async () => {
 			const result = {

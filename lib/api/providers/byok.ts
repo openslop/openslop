@@ -4,6 +4,8 @@ import { RunwareImage } from "@/lib/providers/image/runware";
 import { AnthropicLLM } from "@/lib/providers/llm/anthropic";
 import { ElevenLabsMusic } from "@/lib/providers/music/elevenlabs";
 import { ElevenLabsSFX } from "@/lib/providers/sfx/elevenlabs";
+import { CartesiaSTT } from "@/lib/providers/stt/cartesia";
+import { ElevenLabsSTT } from "@/lib/providers/stt/elevenlabs";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import type { ProviderType, Providers } from "@/lib/providers/types";
 import { RunwareVideo } from "@/lib/providers/video/runware";
@@ -26,8 +28,12 @@ const VENDORS: Record<
 > = {
 	anthropic: { llm: AnthropicLLM },
 	runware: { image: RunwareImage, video: RunwareVideo },
-	cartesia: { tts: CartesiaTTS },
-	elevenlabs: { music: ElevenLabsMusic, sfx: ElevenLabsSFX },
+	cartesia: { tts: CartesiaTTS, stt: CartesiaSTT },
+	elevenlabs: {
+		music: ElevenLabsMusic,
+		sfx: ElevenLabsSFX,
+		stt: ElevenLabsSTT,
+	},
 };
 
 /** The only place a stored key is read, one generation at a time. */

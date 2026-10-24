@@ -1,14 +1,22 @@
-import { useMemo } from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import { CaptionOverlay } from "@/components/captions/caption-overlay";
+import { use, useMemo } from "react";
+import { Sequence, useCurrentFrame, useVideoConfig } from "remotion";
+import {
+	CaptionLineContext,
+	type CaptionLineProps,
+} from "@/components/captions/caption-line";
 import { createRequiredContext } from "@/lib/components/create-required-context";
-import type { TextTimestamp } from "@/lib/connectors/types";
-import { activeWordIndex, captionWordsAt } from "@/lib/captions/caption-layout";
+import {
+	activeWordIndex,
+	captionLines,
+	wordsOnLine,
+	type CaptionLine,
+} from "@/lib/captions/caption-layout";
 import {
 	captionFontSizePx,
 	type CaptionStyle,
 } from "@/lib/captions/caption-style";
-import { toSeconds } from "@/lib/render/frames";
+import { toFrames, toSeconds } from "@/lib/render/frames";
+import type { ResolvedCaptions } from "@/lib/render/types";
 
 // Caption styling applies to every caption in the composition, so it rides a
 // provider rather than threading through the sequence layers that never read it.
@@ -17,28 +25,82 @@ const [CaptionStyleContext, useCaptionStyle] =
 
 export const CaptionStyleProvider = CaptionStyleContext.Provider;
 
-export function Captions({ timestamps }: { timestamps: TextTimestamp[] }) {
-	const style = useCaptionStyle();
+type Words = { text: string[]; startTimes: number[] };
+
+type Clip = CaptionLineProps["clip"];
+
+function Line({
+	line,
+	startFrame,
+	words,
+	firstWord,
+	clip,
+	style,
+}: {
+	line: CaptionLine;
+	startFrame: number;
+	words: Words;
+	firstWord: number;
+	clip: Clip;
+	style: CaptionStyle;
+}) {
+	const renderLine = use(CaptionLineContext);
 	const frame = useCurrentFrame();
 	const { fps, height } = useVideoConfig();
+	const index = activeWordIndex(
+		words.startTimes,
+		toSeconds(startFrame + frame, fps),
+	);
+	return renderLine({
+		style,
+		words: wordsOnLine(words.text, index, line),
+		fontSizePx: captionFontSizePx(style.fontSize, height),
+		clip,
+		from: firstWord + line.from,
+		to: firstWord + line.to,
+	});
+}
 
-	const { words, startTimes } = useMemo(
+export function Captions({
+	captions,
+	clip,
+}: {
+	captions: ResolvedCaptions;
+	clip: Clip;
+}) {
+	const style = useCaptionStyle();
+	const { fps } = useVideoConfig();
+	const lines = useMemo(
+		() => captionLines(captions, style.lineMs),
+		[captions, style.lineMs],
+	);
+	const words = useMemo(
 		() => ({
-			words: timestamps.map(({ text }) => text),
-			startTimes: timestamps.map(({ start }) => start),
+			text: captions.words.map(({ text }) => text),
+			startTimes: captions.words.map(({ start }) => start),
 		}),
-		[timestamps],
+		[captions.words],
 	);
 
-	const index = activeWordIndex(startTimes, toSeconds(frame, fps));
-
-	return (
-		<AbsoluteFill>
-			<CaptionOverlay
-				style={style}
-				words={captionWordsAt(words, index, style)}
-				fontSizePx={captionFontSizePx(style.fontSize, height)}
-			/>
-		</AbsoluteFill>
-	);
+	return lines.flatMap((line) => {
+		const from = toFrames(line.start, fps);
+		const durationInFrames = toFrames(line.end, fps) - from;
+		if (durationInFrames <= 0) return [];
+		return (
+			<Sequence
+				key={`${line.from}-${line.start}`}
+				from={from}
+				durationInFrames={durationInFrames}
+			>
+				<Line
+					line={line}
+					startFrame={from}
+					words={words}
+					firstWord={captions.firstWord}
+					clip={clip}
+					style={style}
+				/>
+			</Sequence>
+		);
+	});
 }

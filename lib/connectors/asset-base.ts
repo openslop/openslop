@@ -6,13 +6,12 @@ import { assetUrlField } from "./asset-url";
 import { BaseConnector } from "./base";
 import type { ResolvedConnectorConfig } from "./types";
 
-export abstract class BaseAssetConnector<
+/** A generation queued as a job on our API, polled until it settles, and read from the bundle it stored. */
+export abstract class BaseJobConnector<
 	TParams extends { prompt: string },
 	TResult,
 	TGateway extends AssetGateway<TParams> = AssetGateway<TParams>,
 > extends BaseConnector<TParams, TResult> {
-	abstract readonly assetKey: ResultKind;
-
 	constructor(
 		protected gateway: TGateway,
 		config: ResolvedConnectorConfig,
@@ -20,12 +19,7 @@ export abstract class BaseAssetConnector<
 		super(config);
 	}
 
-	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
-		return {
-			[assetUrlField(this.assetKey)]: bundle.resolve(this.assetKey),
-			durationSec: bundle.durationSec,
-		} as TResult;
-	}
+	abstract resolveBundle(bundle: AssetBundle): Promise<TResult>;
 
 	protected async _generate(
 		params: TParams,
@@ -43,5 +37,21 @@ export abstract class BaseAssetConnector<
 			throw new Error("Generation completed without a result");
 		}
 		return this.resolveBundle(AssetBundle.fromResponse(completed.result));
+	}
+}
+
+/** A job whose bundle holds one media file. */
+export abstract class BaseAssetConnector<
+	TParams extends { prompt: string },
+	TResult,
+	TGateway extends AssetGateway<TParams> = AssetGateway<TParams>,
+> extends BaseJobConnector<TParams, TResult, TGateway> {
+	abstract readonly assetKey: ResultKind;
+
+	async resolveBundle(bundle: AssetBundle): Promise<TResult> {
+		return {
+			[assetUrlField(this.assetKey)]: bundle.resolve(this.assetKey),
+			durationSec: bundle.durationSec,
+		} as TResult;
 	}
 }

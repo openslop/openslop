@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { scrollToScene } from "@/app/components/canvas/utils/scroll-to-scene";
+import { scrollToScene } from "@/app/components/canvas/utils/scroll-to";
 import { useSetActiveSceneId } from "@/app/components/scene-selection/active-scene-context";
 import { clamp } from "@/lib/utils";
 import { toFrames } from "@/lib/render/frames";

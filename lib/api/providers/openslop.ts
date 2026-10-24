@@ -3,6 +3,7 @@ import { OPENSLOP_IMAGE_MODELS } from "@/lib/connectors/image/openslop/models";
 import { OPENSLOP_LLM_MODELS } from "@/lib/connectors/llm/openslop/models";
 import { OPENSLOP_MUSIC_MODELS } from "@/lib/connectors/music/openslop/models";
 import { OPENSLOP_SFX_MODELS } from "@/lib/connectors/sfx/openslop/models";
+import { OPENSLOP_STT_MODELS } from "@/lib/connectors/stt/openslop/models";
 import { OPENSLOP_TTS_MODELS } from "@/lib/connectors/tts/openslop/models";
 import { OPENSLOP_VIDEO_MODELS } from "@/lib/connectors/video/openslop/models";
 import { MockImage } from "@/lib/providers/image/mock";
@@ -13,6 +14,8 @@ import { ElevenLabsMusic } from "@/lib/providers/music/elevenlabs";
 import { MockMusic } from "@/lib/providers/music/mock";
 import { ElevenLabsSFX } from "@/lib/providers/sfx/elevenlabs";
 import { MockSFX } from "@/lib/providers/sfx/mock";
+import { ElevenLabsSTT } from "@/lib/providers/stt/elevenlabs";
+import { MockSTT } from "@/lib/providers/stt/mock";
 import { CartesiaTTS } from "@/lib/providers/tts/cartesia";
 import { MockTTS } from "@/lib/providers/tts/mock";
 import type { ProviderType, Providers } from "@/lib/providers/types";
@@ -42,6 +45,7 @@ const OPENSLOP_PROVIDERS: {
 	video: Sources<"video", typeof OPENSLOP_VIDEO_MODELS>;
 	sfx: Sources<"sfx", typeof OPENSLOP_SFX_MODELS>;
 	music: Sources<"music", typeof OPENSLOP_MUSIC_MODELS>;
+	stt: Sources<"stt", typeof OPENSLOP_STT_MODELS>;
 } = {
 	llm: { "Slop LLM v1": hosted("ANTHROPIC_API_KEY", AnthropicLLM, MockLLM) },
 	tts: { "Slop TTS v1": hosted("CARTESIA_API_KEY", CartesiaTTS, MockTTS) },
@@ -57,6 +61,9 @@ const OPENSLOP_PROVIDERS: {
 	sfx: { "Slop SFX v1": hosted("ELEVENLABS_API_KEY", ElevenLabsSFX, MockSFX) },
 	music: {
 		"Slop Music v1": hosted("ELEVENLABS_API_KEY", ElevenLabsMusic, MockMusic),
+	},
+	stt: {
+		"Slop STT v1": hosted("ELEVENLABS_API_KEY", ElevenLabsSTT, MockSTT),
 	},
 };
 

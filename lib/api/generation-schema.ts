@@ -99,6 +99,12 @@ export const TTS_FIELDS = {
 
 export const AUDIO_FIELDS = optionalDurationSeconds;
 
+/** Speech to text reads its media alone, so it takes no prompt. */
+export const STT_FIELDS = {
+	prompt: z.string().default(""),
+	mediaUrl: z.url({ error: "mediaUrl must be an HTTP(S) URL" }),
+} as const;
+
 const INVALID_MAX_TOKENS = "maxTokens must be a positive integer";
 
 export const LLM_FIELDS = {

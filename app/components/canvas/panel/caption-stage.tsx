@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CaptionOverlay } from "@/components/captions/caption-overlay";
-import { captionWordsAt } from "@/lib/captions/caption-layout";
+import { groupIntoLines, wordsOnLine } from "@/lib/captions/caption-layout";
 import type { CaptionStyle } from "@/lib/captions/caption-style";
 
 const WORD_MS = 420;
@@ -45,7 +45,7 @@ export function CaptionStage({
 	width,
 	height,
 	fontSizePx,
-	maxWordsPerLine = style.maxWordsPerLine,
+	lineMs = style.lineMs,
 }: {
 	style: CaptionStyle;
 	words: readonly string[];
@@ -53,8 +53,21 @@ export function CaptionStage({
 	width: number;
 	height: number;
 	fontSizePx: number;
-	maxWordsPerLine?: number;
+	lineMs?: number;
 }) {
+	const lines = useMemo(
+		() =>
+			groupIntoLines(
+				words.map((text, at) => ({
+					text,
+					start: (at * WORD_MS) / 1000,
+					end: ((at + 1) * WORD_MS) / 1000,
+				})),
+				lineMs,
+			),
+		[words, lineMs],
+	);
+	const line = lines.find(({ to }) => activeIndex < to);
 	return (
 		<div
 			className="relative shrink-0 overflow-hidden rounded-lg bg-on-media"
@@ -62,10 +75,7 @@ export function CaptionStage({
 		>
 			<CaptionOverlay
 				style={style}
-				words={captionWordsAt(words, activeIndex, {
-					maxWordsPerLine,
-					reveal: style.reveal,
-				})}
+				words={line ? wordsOnLine(words, activeIndex, line) : []}
 				fontSizePx={fontSizePx}
 			/>
 		</div>

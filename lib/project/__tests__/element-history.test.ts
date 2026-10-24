@@ -73,6 +73,7 @@ const makeVersion = (
 	overrides: Partial<CommittedVersion> = {},
 ): CommittedVersion => ({
 	elementId: "el-1",
+	elementType: "image",
 	connectorType: "image",
 	inputs: { prompt: "a fox", attributes: {}, reads: {}, dependencies: {} },
 	result: { durationSec: 0, imageUrl: "https://cdn/a.png" },

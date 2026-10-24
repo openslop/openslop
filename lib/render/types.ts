@@ -4,6 +4,15 @@ import type { CaptionStyle } from "../captions/caption-style";
 import type { MotionEffect } from "./motion-effect-names";
 import type { TransitionType } from "./transitions";
 
+/** The words a clip shows, from its trim start. */
+export type ResolvedCaptions = {
+	/** Where `words` start in the clip's own word list, past those the trim cut. */
+	firstWord: number;
+	words: TextTimestamp[];
+	/** When, from the clip's start, its captions stop. */
+	untilSec: number;
+};
+
 export type ResolvedElement = {
 	id: string;
 	type: ContentType;
@@ -23,7 +32,7 @@ export type ResolvedElement = {
 	loop: boolean;
 	volume: number;
 	motion: MotionEffect;
-	captionTimestamps?: TextTimestamp[];
+	captions?: ResolvedCaptions;
 };
 
 export type Sequence = {

@@ -4,7 +4,7 @@ import { MockProvider } from "../mock-base";
 import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voice-preview";
 
-const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
+export const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
 
 const PREVIEW_HOST = new URL(BLOB_BASE).hostname;
 

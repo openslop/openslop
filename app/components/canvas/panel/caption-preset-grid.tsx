@@ -50,7 +50,7 @@ function PresetCard({
 				width={WIDTH}
 				height={HEIGHT}
 				fontSizePx={FONT_PX}
-				maxWordsPerLine={SAMPLE.length}
+				lineMs={Infinity}
 			/>
 			<span className="text-label-xs text-panel-label">{preset.label}</span>
 		</button>

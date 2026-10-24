@@ -1,11 +1,14 @@
 import {
+	Captions,
 	Film,
 	Music,
 	Voice,
 	Waveform,
 	type IconComponent,
 } from "@/components/ui/icon";
+import { captionLines } from "@/lib/captions/caption-layout";
 import type { ElementRole, LayerType } from "@/lib/canvas/types";
+import { layoutSequences, secUntilNextScene } from "@/lib/render/sequences";
 import type { Sequence, RenderLayout } from "@/lib/render/types";
 
 export type TimelineClip = Sequence & { key: string };
@@ -32,22 +35,26 @@ const ROWS: Record<
 	background: { label: "Music", icon: Music, kind: "audio", numbered: false },
 };
 
+const CAPTION_ROW = {
+	label: "Captions",
+	icon: Captions,
+	kind: "captions",
+} as const;
+
 // Clips accumulated on the frame grid land a few ULPs apart, so a hair of
 // overlap still counts as a touch.
 const TOUCH_EPSILON = 1e-6;
 
-/** A scene's own span ends where the next begins, minus the cross-fade they share. */
-function trimOverlap(series: Sequence[], overlapSec: number): Sequence[] {
-	return series.map((sequence, index) =>
-		index === series.length - 1
-			? sequence
-			: { ...sequence, duration: Math.max(0, sequence.duration - overlapSec) },
-	);
+/** A scene's own span ends where the next begins. */
+function ownSpans(series: Sequence[]): Sequence[] {
+	return series.map((sequence) => ({
+		...sequence,
+		duration: secUntilNextScene(sequence, series),
+	}));
 }
 
 function sequencesForRole(layout: RenderLayout, role: ElementRole): Sequence[] {
-	if (role === "foreground")
-		return trimOverlap(layout.series, layout.transitionDurationSec);
+	if (role === "foreground") return ownSpans(layout.series);
 	return Object.values(layout.sequences)
 		.flat()
 		.filter((sequence) => sequence.element.role === role)
@@ -62,8 +69,11 @@ function sequencesForRole(layout: RenderLayout, role: ElementRole): Sequence[] {
  * a scene boundary runs into its neighbour by the cross-fade without ever
  * really playing over it.
  */
-export function packLanes(clips: Sequence[], toleranceSec = 0): Sequence[][] {
-	const lanes: Sequence[][] = [];
+export function packLanes<T extends Pick<Sequence, "start" | "duration">>(
+	clips: T[],
+	toleranceSec = 0,
+): T[][] {
+	const lanes: T[][] = [];
 	for (const clip of clips) {
 		const lane = lanes.find((candidate) => {
 			const last = candidate[candidate.length - 1];
@@ -105,4 +115,43 @@ export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
 			})),
 		}));
 	});
+}
+
+/** One caption line, placed like a clip of the element it captions. */
+export type CaptionClip = TimelineClip & { text: string };
+
+export type CaptionRow = {
+	key: string;
+	label: string;
+	icon: IconComponent;
+	kind: "captions";
+	clips: CaptionClip[];
+};
+
+/** One clip per caption line, as the player shows it. */
+function linesOf({ element, start }: Sequence, lineMs: number): CaptionClip[] {
+	const { captions } = element;
+	if (!captions) return [];
+	return captionLines(captions, lineMs).map((line) => ({
+		key: `${element.id}-${start}-${line.start}`,
+		element,
+		start: start + line.start,
+		duration: line.end - line.start,
+		text: captions.words
+			.slice(line.from, line.to)
+			.map((word) => word.text)
+			.join(" "),
+	}));
+}
+
+export function buildCaptionRows(layout: RenderLayout): CaptionRow[] {
+	const clips = layoutSequences(layout)
+		.flatMap((sequence) => linesOf(sequence, layout.captionStyle.lineMs))
+		.filter(({ start }) => start < layout.totalDurationSec)
+		.sort((a, b) => a.start - b.start);
+	return packLanes(clips).map((lane, index) => ({
+		key: `captions-${index}`,
+		...CAPTION_ROW,
+		clips: lane,
+	}));
 }

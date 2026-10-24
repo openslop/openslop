@@ -1,3 +1,4 @@
+import type { ElementRef } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
 import { createEmitter } from "../store/emitter";
@@ -127,13 +128,34 @@ export class GenerationQueue {
 		});
 	}
 
+	/** An edit keeps the inputs of the result it edits, so it goes stale with it. */
+	reviseResult(
+		{ id: elementId, type: elementType }: ElementRef,
+		revise: (result: AssetResult) => AssetResult,
+	): void {
+		const { result, resultInputs, connectorType, pinned } =
+			this.snapshots.get(elementId);
+		if (!result || !resultInputs || !connectorType)
+			throw new Error(`Element "${elementId}" holds no result to edit`);
+		if (this.snapshots.isActive(elementId))
+			throw new Error(`Element "${elementId}" is generating`);
+		this.commit({
+			elementId,
+			elementType,
+			connectorType,
+			inputs: resultInputs,
+			result: revise(result),
+			pinned,
+		});
+	}
+
 	restoreResult({
 		elementId,
 		inputs,
 		result,
 		connectorType,
 		pinned,
-	}: CommittedVersion): void {
+	}: Omit<CommittedVersion, "elementType">): void {
 		this.snapshots.update(elementId, {
 			result,
 			error: null,

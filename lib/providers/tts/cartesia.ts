@@ -14,7 +14,8 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type RawResult } from "../base";
-import { validateByProbe } from "../validate";
+import { timestampsFile } from "../timestamps-file";
+import { validateCartesiaKey } from "../cartesia";
 import { pcmDurationSec, pcmSilence, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voice-preview";
@@ -130,14 +131,8 @@ export class CartesiaTTS
 		this.client = new Cartesia({ apiKey });
 	}
 
-	/** Listing one voice is the cheapest call the API authenticates. */
 	async validate() {
-		return validateByProbe("https://api.cartesia.ai/voices/?limit=1", {
-			headers: {
-				"X-API-Key": this.apiKey,
-				"Cartesia-Version": "2024-11-13",
-			},
-		});
+		return validateCartesiaKey(this.apiKey);
 	}
 
 	async fetchVoicePreview(url: string): Promise<Response> {
@@ -154,12 +149,7 @@ export class CartesiaTTS
 				data: result.data,
 				contentType: "audio/wav",
 			},
-			{
-				key: "timestamps",
-				filename: "timestamps.json",
-				data: JSON.stringify(result.textTimestamps),
-				contentType: "application/json",
-			},
+			timestampsFile(result.textTimestamps),
 		];
 	}
 
