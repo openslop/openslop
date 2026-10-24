@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createEditor, Editor, Transforms } from "slate";
+import { createEditor, Editor, Text, Transforms } from "slate";
 import { withReact } from "slate-react";
 import { insertCharacterRef, mentionAt } from "@/lib/canvas/character-refs";
+import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { retypeElement, updateElementText } from "@/lib/canvas/editor-ops";
 import { isCharacterRef } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
@@ -110,4 +111,88 @@ describe("an @ mention", () => {
 			expect(getElementBodyText(only(editor))).toBe(text);
 		},
 	);
+});
+
+/** The text of the leaf right before the element's first chip. */
+const leafBeforeChip = (editor: CanvasEditor) => {
+	const { children } = only(editor);
+	const before = children[children.findIndex(isCharacterRef) - 1];
+	if (!before || !Text.isText(before)) throw new Error("no leaf before a chip");
+	return before.text;
+};
+
+const caretBeforeChip = (editor: CanvasEditor) => {
+	const index = only(editor).children.findIndex(isCharacterRef);
+	Transforms.select(editor, Editor.end(editor, [0, 0, index - 1]));
+};
+
+describe("a chip that starts a line", () => {
+	it("keeps a caret spot between the soft break and the chip", () => {
+		const editor = editorWith(content("image", "i", "foo\n{{Red}}"));
+
+		expect(leafBeforeChip(editor)).toBe(`foo\n${ZERO_WIDTH_SPACE}`);
+		expect(getElementBodyText(only(editor))).toBe("foo\n{{Red}}");
+	});
+
+	it("puts text typed before the chip on the chip's line", () => {
+		const editor = editorWith(content("image", "i", "foo\n{{Red}}"));
+
+		caretBeforeChip(editor);
+		Transforms.insertText(editor, "x");
+
+		expect(getElementBodyText(only(editor))).toBe("foo\nx{{Red}}");
+	});
+
+	it("gets the caret spot when a soft break is typed right before a chip", () => {
+		const editor = editorWith(content("image", "i", "foo {{Red}}"));
+
+		caretBeforeChip(editor);
+		Transforms.insertText(editor, "\n");
+
+		expect(leafBeforeChip(editor)).toBe(`foo \n${ZERO_WIDTH_SPACE}`);
+		expect(getElementBodyText(only(editor))).toBe("foo \n{{Red}}");
+	});
+
+	it("leaves a chip in the middle of a line alone", () => {
+		const editor = editorWith(content("image", "i", "foo {{Red}}"));
+
+		expect(leafBeforeChip(editor)).toBe("foo ");
+	});
+
+	it("joins the lines with one backspace at the start of the chip's line", () => {
+		const editor = editorWith(content("image", "i", "foo\n{{Red}}"));
+
+		caretBeforeChip(editor);
+		editor.deleteBackward("character");
+
+		expect(leafBeforeChip(editor)).toBe("foo");
+		expect(getElementBodyText(only(editor))).toBe("foo{{Red}}");
+	});
+
+	it("drops the caret spot once the soft break before the chip is deleted", () => {
+		const editor = editorWith(content("image", "i", "foo\n{{Red}}"));
+
+		Transforms.delete(editor, { at: { path: [0, 0, 0], offset: 3 } });
+
+		expect(leafBeforeChip(editor)).toBe("foo");
+	});
+
+	it("drops the caret spot between two chips once the break is deleted", () => {
+		const editor = editorWith(content("image", "i", "{{Red}}\n{{Wolf}}"));
+
+		const between = [0, 0, 2];
+		expect(Editor.string(editor, between)).toBe(`\n${ZERO_WIDTH_SPACE}`);
+		Transforms.delete(editor, { at: { path: between, offset: 0 } });
+
+		expect(Editor.string(editor, between)).toBe("");
+		expect(refNames(editor)).toEqual(["Red", "Wolf"]);
+	});
+
+	it("drops the caret spot once the chip after it is deleted", () => {
+		const editor = editorWith(content("image", "i", "foo\n{{Red}} bar"));
+
+		Transforms.removeNodes(editor, { at: [0, 0, 1] });
+
+		expect(Editor.string(editor, [0, 0])).toBe("foo\n bar");
+	});
 });
