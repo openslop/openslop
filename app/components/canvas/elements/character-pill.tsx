@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCharacterAvatar } from "../hooks/use-character-avatar";
 
 const AVATAR_PX = { sm: 24, xs: 18 };
+const PLACEHOLDER_ICON_PX = { sm: 16, xs: 12 };
 
 export function CharacterAvatar({
 	name,
@@ -17,7 +18,6 @@ export function CharacterAvatar({
 	className?: string;
 }) {
 	const { url: avatarUrl } = useCharacterAvatar(name);
-	const initial = name?.trim().charAt(0).toUpperCase();
 	return (
 		<Avatar size={size} className={className}>
 			{/* Radix preloads whatever `src` it gets, so hand it the optimizer's size, not the original. */}
@@ -32,8 +32,8 @@ export function CharacterAvatar({
 					className="object-cover object-center"
 				/>
 			)}
-			<AvatarFallback>
-				{initial || <User className="size-3" aria-hidden="true" />}
+			<AvatarFallback className="bg-media-character/15 text-media-character">
+				<User size={PLACEHOLDER_ICON_PX[size]} />
 			</AvatarFallback>
 		</Avatar>
 	);
