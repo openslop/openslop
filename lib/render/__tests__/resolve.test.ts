@@ -269,7 +269,7 @@ describe("resolveElements", () => {
 		const resolveOne = (element: ContentElement, captionsEnabled = true) =>
 			resolveElements([wrap([element])], bySnapshot, { captionsEnabled })[0];
 
-		it("captions a clip with the words on its own result, until the clip ends", () => {
+		it("captions an element with the words on its own result, until it ends", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
 				firstWord: 0,
 				words: heard,
@@ -283,7 +283,7 @@ describe("resolveElements", () => {
 			).toBeUndefined();
 		});
 
-		it("counts the words a trim cuts, so an edit still lands on the clip's own", () => {
+		it("counts the words a trim cuts, so an edit still lands on the element's own", () => {
 			const { captions } = resolveOne(
 				makeElement("vid", "video", { trimStart: "1.5" }),
 			);
@@ -291,7 +291,7 @@ describe("resolveElements", () => {
 			expect(captions?.words).toEqual([{ text: "two", start: 0.5, end: 1.5 }]);
 		});
 
-		it("captions nothing a clip has no words for", () => {
+		it("captions nothing an element has no words for", () => {
 			expect(resolveOne(makeElement("img", "image")).captions).toBeUndefined();
 		});
 	});

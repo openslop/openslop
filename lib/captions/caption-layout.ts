@@ -4,7 +4,7 @@ import type { TextTimestamp } from "@/lib/connectors/types";
 
 export type CaptionWord = { text: string; active: boolean };
 
-/** A run of words shown together, `[from, to)` into the clip's words, on screen over `[start, end)` seconds. */
+/** A run of words shown together, `[from, to)` into the element's words, on screen over `[start, end)` seconds. */
 export type CaptionLine = {
 	from: number;
 	to: number;
@@ -61,7 +61,7 @@ export function groupIntoLines(
 	});
 }
 
-/** The lines a clip shows, the last held until its captions stop. */
+/** The lines an element shows, the last held until its captions stop. */
 export function captionLines(
 	{ words, untilSec }: { words: readonly TextTimestamp[]; untilSec: number },
 	lineMs: number,

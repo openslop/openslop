@@ -8,8 +8,8 @@ export type CaptionLineProps = {
 	style: CaptionStyle;
 	words: CaptionWord[];
 	fontSizePx: number;
-	clip: Pick<ResolvedElement, "id" | "sceneId" | "type">;
-	/** The span of the clip's words the line shows, which an edit replaces. */
+	element: Pick<ResolvedElement, "id" | "sceneId" | "type">;
+	/** The span of the element's words the line shows, which an edit replaces. */
 	from: number;
 	to: number;
 };

@@ -46,14 +46,14 @@ export function resetCaptions({
 	return { ...result, textTimestamps: generatedTextTimestamps };
 }
 
-/** Speech to text's words replace the clip's, edits and all. */
+/** Speech to text's words replace the element's, edits and all. */
 export function withSTTResult(
-	{ generatedTextTimestamps: _edits, ...clip }: AssetResult,
+	{ generatedTextTimestamps: _edits, ...result }: AssetResult,
 	{ textTimestamps }: AssetResult,
 ): AssetResult {
 	if (!textTimestamps)
 		throw new Error("This speech to text result has no words");
-	return { ...clip, textTimestamps };
+	return { ...result, textTimestamps };
 }
 
 export function removeCaptions({

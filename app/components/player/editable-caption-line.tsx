@@ -20,12 +20,12 @@ import { usePlayerPlaying } from "./use-player-state";
 const OUTLINE =
 	"pointer-events-auto rounded-[0.12em] outline-solid outline-0 outline-offset-[0.1em] outline-ring";
 
-/** A paused line edits on a click and saves to its clip, but never while the clip regenerates. */
+/** A paused line edits on a click and saves to its element, but never while the element regenerates. */
 function EditableCaptionLine({
 	style,
 	words,
 	fontSizePx,
-	clip,
+	element,
 	from,
 	to,
 }: CaptionLineProps) {
@@ -33,7 +33,7 @@ function EditableCaptionLine({
 	const setActiveSceneId = useSetActiveSceneId();
 	const queue = useGenerationQueue();
 	const regenerating = useQueueSelector((q) =>
-		isGenerationActive(q.getElementSnapshot(clip.id).status),
+		isGenerationActive(q.getElementSnapshot(element.id).status),
 	);
 	const [draft, setDraft] = useState<string | null>(null);
 	const cancelled = useRef(false);
@@ -44,8 +44,8 @@ function EditableCaptionLine({
 	const text = words.map((word) => word.text).join(" ");
 
 	const open = () => {
-		setActiveSceneId(clip.sceneId);
-		scrollToElement(clip.id);
+		setActiveSceneId(element.sceneId);
+		scrollToElement(element.id);
 		cancelled.current = false;
 		setDraft(text);
 	};
@@ -53,7 +53,9 @@ function EditableCaptionLine({
 	const save = (value: string) => {
 		setDraft(null);
 		if (cancelled.current || value.trim() === text) return;
-		queue.reviseResult(clip, (result) => editCaptions(result, from, to, value));
+		queue.reviseResult(element, (result) =>
+			editCaptions(result, from, to, value),
+		);
 	};
 
 	if (draft === null)

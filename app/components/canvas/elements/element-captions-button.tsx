@@ -22,14 +22,14 @@ import {
 } from "@/components/ui/tooltip";
 import type { ContentElement } from "@/lib/canvas/types";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { useClipCaptions } from "../hooks/use-clip-captions";
+import { useElementCaptions } from "../hooks/use-element-captions";
 import { ELEMENT_CONFIGS } from "./element-configs";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
 
 const SIZE = ICON_SIZES.header;
 
-type Captions = ReturnType<typeof useClipCaptions>;
+type Captions = ReturnType<typeof useElementCaptions>;
 
 interface Face {
 	label: string;
@@ -38,12 +38,12 @@ interface Face {
 	onClick?: () => void;
 }
 
-const NO_CLIP: Face = {
+const NOT_GENERATED: Face = {
 	label: "Generate the clip first to caption it",
 	icon: <MagicCaptions size={SIZE} />,
 };
 
-const CLIP_BUSY: Face = {
+const GENERATING: Face = {
 	label: "Captions wait for the clip to finish generating",
 	icon: <Hourglass size={SIZE} />,
 };
@@ -116,12 +116,12 @@ export function ElementCaptionsButton({
 }: {
 	element: ContentElement;
 }) {
-	const { result: clip, status: clipStatus } = useElementGeneration();
-	const captions = useClipCaptions(element, clip);
+	const { result, status } = useElementGeneration();
+	const captions = useElementCaptions(element, result);
 	const [removing, setRemoving] = useState(false);
 
-	if (!clip) return <FaceButton face={NO_CLIP} />;
-	if (isGenerationActive(clipStatus)) return <FaceButton face={CLIP_BUSY} />;
+	if (!result) return <FaceButton face={NOT_GENERATED} />;
+	if (isGenerationActive(status)) return <FaceButton face={GENERATING} />;
 	const face = faceOf(captions);
 	if (face) return <FaceButton face={face} />;
 

@@ -26,11 +26,11 @@ vi.mock("@/lib/generation/generate-for-element", () => ({
 		generateMock(...args),
 }));
 
-const clip = { audioUrl: "https://example.com/a.wav", durationSec: 2 };
+const spoken = { audioUrl: "https://example.com/a.wav", durationSec: 2 };
 const heard = [{ text: "hi", start: 0, end: 1 }];
-const element = { id: "clip", type: "narration" } as const;
-const stt = (take: AssetResult = clip) =>
-	captionsNode(element, take, DEFAULT_MODELS.stt);
+const element = { id: "narration", type: "narration" } as const;
+const stt = (result: AssetResult = spoken) =>
+	captionsNode(element, result, DEFAULT_MODELS.stt);
 
 describe("captions jobs", () => {
 	let queue: GenerationQueue;
@@ -43,8 +43,8 @@ describe("captions jobs", () => {
 		queue = new GenerationQueue();
 		record = vi.fn();
 		stopLanding = queue.onCommitted(withCaptionsLanding(queue, record));
-		generateMock.mockResolvedValue(clip);
-		queue.enqueueGraph([jobNode("clip")]);
+		generateMock.mockResolvedValue(spoken);
+		queue.enqueueGraph([jobNode("narration")]);
 		await vi.runAllTimersAsync();
 	});
 
@@ -53,44 +53,46 @@ describe("captions jobs", () => {
 		vi.useRealTimers();
 	});
 
-	it("lands the words on the clip, under its inputs, and records no version of their own", async () => {
-		const made = queue.getElementSnapshot("clip").resultInputs;
+	it("lands the words on the element, under its inputs, and records no version of their own", async () => {
+		const made = queue.getElementSnapshot("narration").resultInputs;
 		generateMock.mockResolvedValue({ durationSec: 2, textTimestamps: heard });
 		queue.enqueueGraph([stt()]);
 		await vi.runAllTimersAsync();
 
-		expect(queue.getElementSnapshot("clip")).toMatchObject({
-			result: { ...clip, textTimestamps: heard },
+		expect(queue.getElementSnapshot("narration")).toMatchObject({
+			result: { ...spoken, textTimestamps: heard },
 			resultInputs: made,
 		});
-		expect(queue.getElementSnapshot(captionsNodeId("clip"))).toMatchObject({
-			result: null,
-			error: null,
-		});
+		expect(queue.getElementSnapshot(captionsNodeId("narration"))).toMatchObject(
+			{
+				result: null,
+				error: null,
+			},
+		);
 		expect(record.mock.calls.map(([version]) => version.elementId)).toEqual([
-			"clip",
-			"clip",
+			"narration",
+			"narration",
 		]);
 	});
 
-	it("fails, leaving the clip alone, when the clip was remade meanwhile", async () => {
+	it("fails, leaving the element alone, when it was regenerated meanwhile", async () => {
 		let land: (result: AssetResult) => void = () => {};
 		generateMock.mockReturnValue(new Promise((resolve) => (land = resolve)));
 		queue.enqueueGraph([stt()]);
 		await vi.advanceTimersByTimeAsync(0);
-		const remade = { ...clip, audioUrl: "https://example.com/b.wav" };
-		queue.commitResult(jobNode("clip"), remade);
+		const remade = { ...spoken, audioUrl: "https://example.com/b.wav" };
+		queue.commitResult(jobNode("narration"), remade);
 
 		land({ durationSec: 2, textTimestamps: heard });
 		await vi.runAllTimersAsync();
 
-		expect(queue.getElementSnapshot("clip").result).toEqual(remade);
-		expect(queue.getElementSnapshot(captionsNodeId("clip")).error).toMatch(
+		expect(queue.getElementSnapshot("narration").result).toEqual(remade);
+		expect(queue.getElementSnapshot(captionsNodeId("narration")).error).toMatch(
 			/changed/,
 		);
 	});
 
-	it("runs speech to text on the take the clip holds, and never remakes the clip", async () => {
+	it("runs speech to text on the result the element holds, and never regenerates it", async () => {
 		generateMock.mockClear();
 		generateMock.mockResolvedValue({ durationSec: 2, textTimestamps: heard });
 		queue.enqueueGraph([stt()]);
@@ -98,11 +100,11 @@ describe("captions jobs", () => {
 
 		expect(generateMock).toHaveBeenCalledTimes(1);
 		expect(generateMock.mock.calls[0][0].inputs.attributes).toEqual({
-			mediaUrl: clip.audioUrl,
+			mediaUrl: spoken.audioUrl,
 		});
 	});
 
-	it("refuses a take with no sound", () => {
+	it("refuses a result with no sound", () => {
 		expect(() => stt({ durationSec: 0 })).toThrow(/no sound/);
 	});
 });

@@ -27,21 +27,21 @@ export const CaptionStyleProvider = CaptionStyleContext.Provider;
 
 type Words = { text: string[]; startTimes: number[] };
 
-type Clip = CaptionLineProps["clip"];
+type Element = CaptionLineProps["element"];
 
 function Line({
 	line,
 	startFrame,
 	words,
 	firstWord,
-	clip,
+	element,
 	style,
 }: {
 	line: CaptionLine;
 	startFrame: number;
 	words: Words;
 	firstWord: number;
-	clip: Clip;
+	element: Element;
 	style: CaptionStyle;
 }) {
 	const renderLine = use(CaptionLineContext);
@@ -55,7 +55,7 @@ function Line({
 		style,
 		words: wordsOnLine(words.text, index, line),
 		fontSizePx: captionFontSizePx(style.fontSize, height),
-		clip,
+		element,
 		from: firstWord + line.from,
 		to: firstWord + line.to,
 	});
@@ -63,10 +63,10 @@ function Line({
 
 export function Captions({
 	captions,
-	clip,
+	element,
 }: {
 	captions: ResolvedCaptions;
-	clip: Clip;
+	element: Element;
 }) {
 	const style = useCaptionStyle();
 	const { fps } = useVideoConfig();
@@ -97,7 +97,7 @@ export function Captions({
 					startFrame={from}
 					words={words}
 					firstWord={captions.firstWord}
-					clip={clip}
+					element={element}
 					style={style}
 				/>
 			</Sequence>

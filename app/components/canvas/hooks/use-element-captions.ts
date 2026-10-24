@@ -10,17 +10,17 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 
-/** Queues speech to text on each clip's take, with the project's Speech to Text pick at the time. */
-export function useQueueSTT() {
+/** Generates speech to text on each element's result, with the project's Speech to Text pick at the time. */
+export function useGenerateSTT() {
 	const queue = useGenerationQueue();
 	const editor = useSlateStatic();
 	return useCallback(
-		(clips: ElementRef[]) => {
+		(elements: ElementRef[]) => {
 			const model = resolveModel("stt", editor.defaultModels().stt);
 			queue.enqueueGraph(
-				clips.flatMap((clip) => {
-					const take = queue.getElementSnapshot(clip.id).result;
-					return take ? [captionsNode(clip, take, model)] : [];
+				elements.flatMap((element) => {
+					const result = queue.getElementSnapshot(element.id).result;
+					return result ? [captionsNode(element, result, model)] : [];
 				}),
 			);
 		},
@@ -28,12 +28,12 @@ export function useQueueSTT() {
 	);
 }
 
-export function useClipCaptions(
+export function useElementCaptions(
 	element: GeneratedElement,
-	clip: AssetResult | null,
+	result: AssetResult | null,
 ) {
 	const queue = useGenerationQueue();
-	const queueSTT = useQueueSTT();
+	const generateSTT = useGenerateSTT();
 	const { status, error } = useQueueSelector((q) =>
 		q.getElementSnapshot(captionsNodeId(element.id)),
 	);
@@ -41,11 +41,11 @@ export function useClipCaptions(
 		queue.reviseResult(element, change);
 
 	return {
-		captioned: clip?.textTimestamps !== undefined,
-		edited: Boolean(clip?.generatedTextTimestamps),
+		captioned: result?.textTimestamps !== undefined,
+		edited: Boolean(result?.generatedTextTimestamps),
 		status,
 		error,
-		generate: () => queueSTT([element]),
+		generate: () => generateSTT([element]),
 		remove: revise(removeCaptions),
 		reset: revise(resetCaptions),
 	};
