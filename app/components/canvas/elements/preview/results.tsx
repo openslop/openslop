@@ -1,6 +1,8 @@
 import { useState, type CSSProperties } from "react";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { AudioPlayer } from "../audio-player";
+import { useElementGeneration } from "../element-generation-context";
+import { useVolumeGain } from "../../hooks/use-volume-gain";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { GenerationIndicator } from "../generation-indicator";
 import type {
@@ -29,6 +31,7 @@ export function AudioResult({
 	PreviewOverlays & {
 		src: string;
 	}) {
+	const volume = useVolumeGain(useElementGeneration().node.id);
 	return (
 		<div className="group relative flex w-full min-h-16 flex-col gap-1 overflow-hidden rounded-lg border border-border bg-element-card px-2 py-1.5">
 			<div className="flex flex-wrap items-center justify-end gap-1.5 empty:hidden">
@@ -42,7 +45,7 @@ export function AudioResult({
 						className="shrink-0"
 					/>
 				)}
-				<AudioPlayer key={src} src={src} />
+				<AudioPlayer key={src} src={src} volume={volume} />
 			</div>
 		</div>
 	);

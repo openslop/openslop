@@ -6,7 +6,8 @@ import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Waveform, type WaveformHandle } from "@/lib/components/waveform";
 import { formatTime } from "@/lib/render/timestamps";
 
-export function AudioPlayer({ src }: { src: string }) {
+/** `volume` is the playback gain, 0 to 1. */
+export function AudioPlayer({ src, volume }: { src: string; volume?: number }) {
 	const waveformRef = useRef<WaveformHandle>(null);
 	const [playing, setPlaying] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
@@ -24,6 +25,7 @@ export function AudioPlayer({ src }: { src: string }) {
 			<Waveform
 				ref={waveformRef}
 				src={src}
+				volume={volume}
 				className="flex-1 basis-[160px] min-w-0 h-10"
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}

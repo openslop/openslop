@@ -71,10 +71,15 @@ export function clampedNumber(
 	return value === undefined ? undefined : clamp(value, min, max);
 }
 
-export function getVolume(element: ContentElement): number {
+export function getVolume(element: SplitAttributes): number {
 	return (
 		clampedNumber(element.layoutAttributes?.volume, VOLUME) ?? DEFAULT_VOLUME
 	);
+}
+
+/** The gain an element's audio plays at, the same in its previews as in the player and render. */
+export function getVolumeGain(element: SplitAttributes): number {
+	return volumeToGain(getVolume(element));
 }
 
 export function getDuration(element: ContentElement): number {

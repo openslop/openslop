@@ -21,6 +21,7 @@ import {
 	useElementHistory,
 	useLoadElementHistory,
 } from "../hooks/use-element-history";
+import { useVolumeGain } from "../hooks/use-volume-gain";
 import { AudioPlayer } from "./audio-player";
 import { HeaderIconButton } from "./header-icon-button";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
@@ -65,6 +66,7 @@ function ElementVersionRow({
 	onRestore: () => void;
 }) {
 	const { audioUrl } = version.result;
+	const volume = useVolumeGain(version.elementId);
 	return (
 		<li
 			aria-current={active}
@@ -108,7 +110,7 @@ function ElementVersionRow({
 			</div>
 			{audioUrl && (
 				<div className="flex min-h-7 flex-wrap items-center gap-x-2 gap-y-1 [--waveform-height:1.25rem]">
-					<AudioPlayer src={audioUrl} />
+					<AudioPlayer src={audioUrl} volume={volume} />
 				</div>
 			)}
 		</li>

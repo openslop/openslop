@@ -26,6 +26,8 @@ import { usePeaks } from "./use-peaks";
 
 export interface WaveformProps {
 	src: string;
+	/** Playback gain, 0 to 1. */
+	volume?: number;
 	className?: string;
 	onPlay?: () => void;
 	onPause?: () => void;
@@ -50,6 +52,7 @@ export interface WaveformHandle {
 
 export function Waveform({
 	src,
+	volume = 1,
 	className,
 	ref,
 	onPlay,
@@ -106,6 +109,12 @@ export function Waveform({
 		audioRef.current = element;
 		setAudio(element);
 	}, []);
+
+	// `volume` is a media property, not an HTML attribute, so React can't set
+	// it. `audio` is a dependency so this also runs once the element attaches.
+	useEffect(() => {
+		if (audioRef.current) audioRef.current.volume = volume;
+	}, [audio, volume]);
 
 	const reportLoaded = useEffectEvent((duration: number) => {
 		onTimeUpdate?.(0, duration);

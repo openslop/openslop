@@ -14,6 +14,7 @@ import {
 	getTimelineDuration,
 	getTrimStart,
 	getVolume,
+	getVolumeGain,
 	flatAttributes,
 	layoutAttributeSignature,
 	splitAttributes,
@@ -72,6 +73,18 @@ describe("getVolume", () => {
 	it("clamps out-of-range values to [0, 10]", () => {
 		expect(getVolume(el({ volume: "-2" }))).toBe(0);
 		expect(getVolume(el({ volume: "42" }))).toBe(10);
+	});
+});
+
+describe("getVolumeGain", () => {
+	it("is the clamped volume on the 0-1 gain scale the player uses", () => {
+		expect(getVolumeGain(el({ volume: "3" }))).toBe(0.3);
+		expect(getVolumeGain(el({ volume: "0" }))).toBe(0);
+		expect(getVolumeGain(el({ volume: "42" }))).toBe(1);
+	});
+
+	it("is full gain when the element has no volume set", () => {
+		expect(getVolumeGain(el())).toBe(1);
 	});
 });
 

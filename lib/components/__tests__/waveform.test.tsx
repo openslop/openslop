@@ -24,8 +24,10 @@ afterEach(() => {
 	act(() => root.unmount());
 });
 
-function render() {
-	act(() => root.render(<Waveform src="https://audio/a.mp3" />));
+function render(volume?: number) {
+	act(() =>
+		root.render(<Waveform src="https://audio/a.mp3" volume={volume} />),
+	);
 	const slider = container.querySelector<HTMLElement>('[role="slider"]');
 	const audio = container.querySelector("audio");
 	if (!slider || !audio) throw new Error("no waveform rendered");
@@ -103,5 +105,27 @@ describe("Waveform", () => {
 		act(() => audio.dispatchEvent(new Event("timeupdate")));
 
 		expect(slider.getAttribute("aria-valuenow")).toBe("50");
+	});
+
+	it("plays at the gain it is given", () => {
+		const { audio } = render(0.3);
+
+		expect(audio.volume).toBe(0.3);
+	});
+
+	it("follows a gain change while it plays", () => {
+		const { audio } = render(0.3);
+		const playing = audio;
+
+		render(0.7);
+
+		expect(container.querySelector("audio")).toBe(playing);
+		expect(playing.volume).toBe(0.7);
+	});
+
+	it("plays at full gain when given none", () => {
+		const { audio } = render();
+
+		expect(audio.volume).toBe(1);
 	});
 });
