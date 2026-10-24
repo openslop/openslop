@@ -2,6 +2,7 @@
 
 import { type ComponentProps, type ReactNode } from "react";
 import { Check, ChevronDown } from "@/components/ui/icon";
+import { keepFocus } from "@/components/ui/keep-focus";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -57,7 +58,6 @@ export function SelectMenuItem({
 export const inlineControlClassName =
 	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none unavailable:opacity-40";
 
-/** Mousedown is swallowed so opening a picker never moves the caret out of the text it sits in. */
 export function InlineMenuTrigger({
 	className,
 	children,
@@ -66,7 +66,7 @@ export function InlineMenuTrigger({
 	return (
 		<button
 			type="button"
-			onMouseDown={(event) => event.preventDefault()}
+			onMouseDown={keepFocus}
 			className={cn(inlineControlClassName, "max-w-[140px]", className)}
 			{...props}
 		>

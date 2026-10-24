@@ -2,6 +2,7 @@
 
 import { Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { usePlayerControl } from "@/app/components/player/player-control-context";
 import {
 	useLayout,
@@ -22,7 +23,7 @@ export function PlayFromHereButton({ scene }: { scene: Scene }) {
 			ariaLabel="Play from here"
 			chip
 			unavailable={unavailable}
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={() => {
 				if (startFrame != null) playFromFrame(startFrame);
 			}}

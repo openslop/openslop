@@ -7,6 +7,7 @@ import {
 	PopoverAnchor,
 	PopoverContent,
 } from "@/components/ui/popover";
+import { keepFocus } from "@/components/ui/keep-focus";
 import type { Mention } from "@/lib/canvas/character-refs";
 import { cn } from "@/lib/utils";
 import { CharacterAvatar } from "./character-pill";
@@ -30,7 +31,7 @@ function CharacterOption({
 			id={id}
 			role="option"
 			aria-selected={active}
-			onPointerDown={(event) => event.preventDefault()}
+			onPointerDown={keepFocus}
 			onClick={onSelect}
 			className={cn(
 				"flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-label",

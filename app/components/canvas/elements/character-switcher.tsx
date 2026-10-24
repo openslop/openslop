@@ -1,6 +1,7 @@
 "use client";
 
 import { useSlateStatic } from "slate-react";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { ContentElement } from "@/lib/canvas/types";
@@ -26,7 +27,7 @@ export function CharacterSwitcher({ element }: { element: ContentElement }) {
 				type="button"
 				aria-label="Change character"
 				title="Change character"
-				onMouseDown={(e) => e.preventDefault()}
+				onMouseDown={keepFocus}
 				className="inline-flex cursor-pointer items-center rounded-md focus-ring"
 			>
 				<CharacterPill name={currentName} />

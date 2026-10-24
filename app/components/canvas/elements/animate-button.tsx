@@ -2,6 +2,7 @@
 
 import { ReactEditor, useSlateStatic } from "slate-react";
 import { Button } from "@/components/ui/button";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { MagicVideo } from "@/components/ui/icon";
 import { useSloppy } from "@/app/components/sloppy/sloppy-provider";
 import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
@@ -27,7 +28,7 @@ export function AnimateButton({ element }: { element: ContentElement }) {
 			tooltip={`Turn this into a video element${picture ? " that starts from this image" : ""}`}
 			className="shrink-0"
 			disabled={loading || isGenerationActive(status)}
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={() => {
 				const path = ReactEditor.findPath(editor, element);
 				setActive("sloppy");

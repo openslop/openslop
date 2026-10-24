@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "@/components/ui/icon";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { PopoverTrigger } from "@/components/ui/popover";
 
 /** The pill that opens an attribute's editor. */
@@ -20,7 +21,7 @@ export function AttributeTrigger({
 				size="xs"
 				aria-label={tooltip}
 				title={tooltip}
-				onMouseDown={(e) => e.preventDefault()}
+				onMouseDown={keepFocus}
 				className="max-w-[140px]"
 			>
 				<span className="min-w-0 truncate">{children}</span>
