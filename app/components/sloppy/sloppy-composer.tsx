@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { inlineControlClassName } from "@/components/ui/select-menu";
 import {
 	ModelSelect,
@@ -41,7 +42,7 @@ function SuggestionButton({
 			type="button"
 			aria-label="Suggest a prompt"
 			disabled={disabled}
-			onMouseDown={(event) => event.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={onPick}
 			className={inlineControlClassName}
 		>

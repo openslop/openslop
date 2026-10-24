@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { Check, RotateCcw, Sparkles } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { Spinner } from "@/components/ui/spinner";
 import type { Scene } from "@/lib/canvas/types";
 import {
@@ -28,7 +29,7 @@ export function SceneGenerateButton({ scene }: { scene: Scene }) {
 			label={scope.description}
 			chip
 			unavailable={unavailable}
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={scope.run}
 		>
 			<SceneGenerateIcon {...scope} />

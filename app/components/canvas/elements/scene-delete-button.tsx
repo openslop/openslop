@@ -1,5 +1,6 @@
 import { useSlateStatic } from "slate-react";
 import { DeleteButton as DeleteIconButton } from "@/components/ui/delete-button";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { removeBlock } from "@/lib/canvas/editor-ops";
 import type { Scene } from "@/lib/canvas/types";
 
@@ -10,7 +11,7 @@ export function SceneDeleteButton({ scene }: { scene: Scene }) {
 		<DeleteIconButton
 			ariaLabel="Delete scene"
 			chip
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={() => removeBlock(editor, scene.id)}
 		/>
 	);

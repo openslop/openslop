@@ -5,6 +5,7 @@ import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { Spinner } from "@/components/ui/spinner";
 import {
 	isGenerationActive,
@@ -60,7 +61,7 @@ export function GenerateButton({
 			size="sm"
 			className="shrink-0"
 			disabled={disabled}
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={onGenerate}
 			aria-label={label}
 			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}

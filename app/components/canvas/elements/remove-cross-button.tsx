@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "@/components/ui/icon";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,7 +22,7 @@ export function RemoveCrossButton({
 		<button
 			type="button"
 			aria-label={label}
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={onClick}
 			className={cn(
 				"focus-ring absolute -right-1 -top-1 flex cursor-pointer items-center justify-center rounded-full border border-border bg-popover p-0.5 transition-opacity hover:bg-muted focus-visible:opacity-100",
