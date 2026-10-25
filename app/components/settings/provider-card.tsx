@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+	useEffect,
+	useRef,
+	useState,
+	useTransition,
+	type ReactNode,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { Pencil, RefreshCw, Trash2 } from "@/components/ui/icon";
@@ -72,8 +78,8 @@ export function ProviderCard({
 	const removeKey = useAccount((state) => state.removeKey);
 
 	const [editing, setEditing] = useState(selected || !key);
-	const [testing, setTesting] = useState(false);
 	const [removing, setRemoving] = useState<BYOKProvider>();
+	const [testing, startTesting] = useTransition();
 	const card = useRef<HTMLDivElement>(null);
 
 	const done = () => {
@@ -81,16 +87,14 @@ export function ProviderCard({
 		onDismissed();
 	};
 
-	const test = async () => {
-		setTesting(true);
-		try {
-			await testKey(provider);
-		} catch (cause) {
-			toastError(cause);
-		} finally {
-			setTesting(false);
-		}
-	};
+	const test = () =>
+		startTesting(async () => {
+			try {
+				await testKey(provider);
+			} catch (cause) {
+				toastError(cause);
+			}
+		});
 
 	// A link that names a provider has to land on it, not at the top of a list
 	// it happens to be in.
@@ -122,7 +126,7 @@ export function ProviderCard({
 							size="sm"
 							variant="generate"
 							disabled={testing}
-							onClick={() => void test()}
+							onClick={test}
 						>
 							{testing ? <Spinner className="text-current" /> : <RefreshCw />}
 							{testing ? "Testing…" : "Test"}

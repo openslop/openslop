@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { sendMagicLink, signInWithGoogle } from "@/lib/auth/session";
 import { errorMessage } from "@/lib/errors";
 import OnboardingCard from "./onboarding-card";
@@ -32,23 +32,21 @@ export default function AuthForm({
 	children,
 }: AuthFormProps) {
 	const [email, setEmail] = useState("");
-	const [loading, setLoading] = useState(false);
 	const [sent, setSent] = useState(false);
 	const [error, setError] = useState("");
+	const [loading, startSending] = useTransition();
 
-	const handleMagicLink = async (e?: React.FormEvent) => {
+	const handleMagicLink = (e?: React.FormEvent) => {
 		e?.preventDefault();
-		setLoading(true);
 		setError("");
-
-		try {
-			await sendMagicLink({ email, shouldCreateUser, data: otpData });
-			setSent(true);
-		} catch (cause) {
-			setError(errorMessage(cause));
-		} finally {
-			setLoading(false);
-		}
+		startSending(async () => {
+			try {
+				await sendMagicLink({ email, shouldCreateUser, data: otpData });
+				setSent(true);
+			} catch (cause) {
+				setError(errorMessage(cause));
+			}
+		});
 	};
 
 	const handleGoogle = async () => {

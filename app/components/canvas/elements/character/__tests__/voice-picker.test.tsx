@@ -23,7 +23,7 @@ const VOICE: VoiceInfo = {
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 const onSelect = vi.fn();
-const loadPreview = vi.fn(() => new Promise<string>(() => {}));
+const loadPreview = vi.fn(async () => "blob:preview");
 
 beforeEach(() => {
 	root = createRoot(container);
@@ -54,7 +54,8 @@ const button = (name: string) => {
 	return found;
 };
 const selectButton = () => button("button[aria-pressed]");
-const previewButton = () => button('button[aria-label="Play"]');
+const previewButton = () =>
+	button('[role="group"] > button:not([aria-pressed])');
 
 describe("VoiceRow", () => {
 	it("says whether its voice is the selected one", () => {
@@ -68,7 +69,9 @@ describe("VoiceRow", () => {
 	it("offers no preview for a voice the vendor has none of", () => {
 		render(false, { ...VOICE, previewUrl: undefined });
 
-		expect(container.querySelector('button[aria-label="Play"]')).toBeNull();
+		expect(
+			container.querySelector('[role="group"] > button:not([aria-pressed])'),
+		).toBeNull();
 	});
 
 	it("selects the voice from the row's own button", () => {
@@ -79,11 +82,12 @@ describe("VoiceRow", () => {
 		expect(onSelect).toHaveBeenCalledOnce();
 	});
 
-	it("previews a voice without selecting it", () => {
+	it("previews a voice without selecting it", async () => {
 		render(false);
 
-		act(() => previewButton().click());
+		await act(async () => previewButton().click());
 
+		expect(previewButton().getAttribute("aria-label")).toBe("Pause");
 		expect(selectButton().contains(previewButton())).toBe(false);
 		expect(loadPreview).toHaveBeenCalledOnce();
 		expect(onSelect).not.toHaveBeenCalled();
@@ -103,7 +107,9 @@ describe("VoiceRow", () => {
 		expect(previewButton().getAttribute("aria-disabled")).not.toBe("true");
 	});
 
-	it("ignores a second press while the preview loads", () => {
+	it("ignores a second press while the preview loads", async () => {
+		const request = Promise.withResolvers<string>();
+		loadPreview.mockReturnValueOnce(request.promise);
 		render(false);
 
 		act(() => previewButton().click());
@@ -111,5 +117,8 @@ describe("VoiceRow", () => {
 
 		expect(previewButton().getAttribute("aria-disabled")).toBe("true");
 		expect(loadPreview).toHaveBeenCalledOnce();
+
+		await act(async () => request.resolve("blob:preview"));
+		expect(previewButton().getAttribute("aria-label")).toBe("Pause");
 	});
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useCallback } from "react";
+import { useId, useRef, useState, useCallback, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { apiJson } from "@/lib/clients/http";
 import { errorMessage } from "@/lib/errors";
@@ -24,7 +24,7 @@ export default function AccessCodeInput() {
 	const errorId = useId();
 	const [values, setValues] = useState<string[]>(emptyAccessCode);
 	const [error, setError] = useState("");
-	const [loading, setLoading] = useState(false);
+	const [loading, startValidating] = useTransition();
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
 	const resetWithError = useCallback((message: string) => {
@@ -34,21 +34,20 @@ export default function AccessCodeInput() {
 	}, []);
 
 	const submitCode = useCallback(
-		async (code: string) => {
-			setLoading(true);
+		(code: string) => {
 			setError("");
-			try {
-				const { redirect } = await apiJson<{ redirect: string }>(
-					"/api/validate-code",
-					{ method: "POST", body: { code } },
-				);
-				router.push(redirect);
-			} catch (cause) {
-				console.error("Access code validation failed", cause);
-				resetWithError(errorMessage(cause));
-			} finally {
-				setLoading(false);
-			}
+			startValidating(async () => {
+				try {
+					const { redirect } = await apiJson<{ redirect: string }>(
+						"/api/validate-code",
+						{ method: "POST", body: { code } },
+					);
+					router.push(redirect);
+				} catch (cause) {
+					console.error("Access code validation failed", cause);
+					resetWithError(errorMessage(cause));
+				}
+			});
 		},
 		[router, resetWithError],
 	);

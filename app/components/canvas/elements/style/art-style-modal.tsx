@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTransition } from "react";
 import { useSlateStatic } from "slate-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -32,28 +32,26 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 	const setStyle = (text: string) =>
 		setAsset(editor, "asset_style", undefined, { text });
 
-	const [deriving, setDeriving] = useState(false);
+	const [deriving, startDeriving] = useTransition();
 	const model = useDefaultModels().llm;
 
 	const hasReferences = useQueueSelector(
 		(q) => artStyleReferences(assets, q).length > 0,
 	);
 
-	const deriveFromReferences = async () => {
-		setDeriving(true);
-		try {
-			setStyle(
-				await deriveArtStyle(
-					createConnector("llm", model),
-					artStyleReferences(assets, queue),
-				),
-			);
-		} catch (error) {
-			toastError(error, "Deriving the art style failed");
-		} finally {
-			setDeriving(false);
-		}
-	};
+	const deriveFromReferences = () =>
+		startDeriving(async () => {
+			try {
+				setStyle(
+					await deriveArtStyle(
+						createConnector("llm", model),
+						artStyleReferences(assets, queue),
+					),
+				);
+			} catch (error) {
+				toastError(error, "Deriving the art style failed");
+			}
+		});
 
 	return (
 		<AssetDialog

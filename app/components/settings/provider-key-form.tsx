@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Key } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
@@ -27,30 +27,28 @@ export function ProviderKeyForm({
 	const fieldId = useId();
 	const errorId = useId();
 	const [apiKey, setApiKey] = useState("");
-	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [busy, startSaving] = useTransition();
 
-	const save = async () => {
-		setBusy(true);
-		try {
-			const result = await saveKey(provider, apiKey.trim());
-			setApiKey("");
-			// The key is stored either way; a rejection is worth staying to read.
-			setError(result.ok ? null : result.error);
-			if (result.ok) onSaved();
-		} catch (cause) {
-			toastError(cause);
-		} finally {
-			setBusy(false);
-		}
-	};
+	const save = () =>
+		startSaving(async () => {
+			try {
+				const result = await saveKey(provider, apiKey.trim());
+				setApiKey("");
+				// The key is stored either way; a rejection is worth staying to read.
+				setError(result.ok ? null : result.error);
+				if (result.ok) onSaved();
+			} catch (cause) {
+				toastError(cause);
+			}
+		});
 
 	return (
 		<form
 			className="flex flex-col gap-2"
 			onSubmit={(event) => {
 				event.preventDefault();
-				void save();
+				save();
 			}}
 		>
 			<Label htmlFor={fieldId} className="text-label">

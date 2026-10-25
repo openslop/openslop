@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Check, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
@@ -25,27 +25,30 @@ import { FieldLabel } from "./fields";
 function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const [playing, setPlaying] = useState(false);
-	const [loading, setLoading] = useState(false);
+	const [loading, startLoading] = useTransition();
 
-	const toggle = async () => {
+	const play = (audio: HTMLAudioElement) =>
+		void audio.play().catch(() => setPlaying(false));
+
+	const toggle = () => {
 		const audio = audioRef.current;
 		if (!audio) return;
 		if (!audio.paused) {
 			audio.pause();
 			return;
 		}
-		if (!audio.src) {
-			setLoading(true);
+		if (audio.src) {
+			play(audio);
+			return;
+		}
+		startLoading(async () => {
 			try {
 				audio.src = await load();
+				play(audio);
 			} catch (error) {
 				toastError(error, "Couldn't load the preview");
-				return;
-			} finally {
-				setLoading(false);
 			}
-		}
-		void audio.play().catch(() => setPlaying(false));
+		});
 	};
 
 	return (
