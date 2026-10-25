@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useState, type MutableRefObject, type Ref } from "react";
 import { CaptionLineContext } from "@/components/captions/caption-line";
 import type { RenderLayout } from "@/lib/render/types";
-import { cn } from "@/lib/utils";
 import { ToastErrorBoundary } from "../toast-error-boundary";
 import { ActiveSceneSync } from "./active-scene-sync";
 import { EditableCaptionLine } from "./editable-caption-line";
@@ -15,6 +14,11 @@ import { usePreservedPlayhead } from "./use-preserved-playhead";
 import styles from "./project-preview.module.css";
 
 const fullSizeStyle = { width: "100%", height: "100%" };
+
+const passThroughStyle = {
+	...fullSizeStyle,
+	pointerEvents: "none",
+} as const;
 
 const RemotionPlayer = dynamic(
 	async () => {
@@ -41,7 +45,7 @@ const RemotionPlayer = dynamic(
 					fps={layout.fps}
 					compositionWidth={layout.width}
 					compositionHeight={layout.height}
-					style={fullSizeStyle}
+					style={controls ? fullSizeStyle : passThroughStyle}
 					clickToPlay={false}
 					controls={controls}
 					acknowledgeRemotionLicense
@@ -93,22 +97,15 @@ export function ProjectPreview({
 				className="absolute inset-0 cursor-pointer"
 				onClick={toggleAndFlash}
 			/>
-			<div
-				className={cn(
-					"relative h-full w-full",
-					!isFullscreen && "pointer-events-none",
-				)}
-			>
-				<ToastErrorBoundary label="Player">
-					<CaptionLineContext value={EditableCaptionLine}>
-						<RemotionPlayer
-							layout={layout}
-							playerRef={registerPlayer}
-							controls={isFullscreen}
-						/>
-					</CaptionLineContext>
-				</ToastErrorBoundary>
-			</div>
+			<ToastErrorBoundary label="Player">
+				<CaptionLineContext value={EditableCaptionLine}>
+					<RemotionPlayer
+						layout={layout}
+						playerRef={registerPlayer}
+						controls={isFullscreen}
+					/>
+				</CaptionLineContext>
+			</ToastErrorBoundary>
 			<PlayPauseFlash flash={flash} />
 			<ActiveSceneSync />
 		</div>
