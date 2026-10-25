@@ -72,17 +72,14 @@ describe("groupIntoLines", () => {
 describe("captionLines", () => {
 	it("counts each line's first word from where the trim left the element's words", () => {
 		expect(
-			captionLines({ firstWord: 3, words: timed, untilSec: 10 }, 1500).map(
+			captionLines({ firstWord: 3, words: timed }, 10, 1500).map(
 				({ firstWord }) => firstWord,
 			),
 		).toEqual([3, 5, 7]);
 	});
 
 	it("holds the last line until the captions stop, and drops lines after", () => {
-		const lines = captionLines(
-			{ firstWord: 0, words: timed, untilSec: 3.5 },
-			1500,
-		);
+		const lines = captionLines({ firstWord: 0, words: timed }, 3.5, 1500);
 		expect(
 			lines.map(({ firstWord, start, end }) => [firstWord, start, end]),
 		).toEqual([
@@ -90,8 +87,7 @@ describe("captionLines", () => {
 			[2, 2, 3.5],
 		]);
 		expect(
-			captionLines({ firstWord: 0, words: timed, untilSec: 10 }, 1500).at(-1)
-				?.end,
+			captionLines({ firstWord: 0, words: timed }, 10, 1500).at(-1)?.end,
 		).toBe(10);
 	});
 });

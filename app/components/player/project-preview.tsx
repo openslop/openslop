@@ -8,7 +8,7 @@ import type { RenderLayout } from "@/lib/render/types";
 import { cn } from "@/lib/utils";
 import { ToastErrorBoundary } from "../toast-error-boundary";
 import { ActiveSceneSync } from "./active-scene-sync";
-import { renderEditableCaptionLine } from "./editable-caption-line";
+import { EditableCaptionLine } from "./editable-caption-line";
 import { usePlayerControl } from "./player-control-context";
 import { PlayPauseFlash } from "./play-pause-flash";
 import { usePreservedPlayhead } from "./use-preserved-playhead";
@@ -100,7 +100,7 @@ export function ProjectPreview({
 				)}
 			>
 				<ToastErrorBoundary label="Player">
-					<CaptionLineContext value={renderEditableCaptionLine}>
+					<CaptionLineContext value={EditableCaptionLine}>
 						<RemotionPlayer
 							layout={layout}
 							playerRef={registerPlayer}

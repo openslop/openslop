@@ -11,8 +11,8 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type RawResult } from "../base";
-import { timestampsFile } from "../timestamps-file";
-import { cartesiaCaptions, validateCartesiaKey } from "../cartesia";
+import { secondsCaption, timestampsFile } from "../timestamps-file";
+import { validateCartesiaKey } from "../cartesia";
 import { pcmDurationSec, pcmSilence, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voice-preview";
@@ -220,8 +220,8 @@ export class CartesiaTTS
 				if (response.type === "timestamps" && response.word_timestamps) {
 					const { words, start, end } = response.word_timestamps;
 					textTimestamps.push(
-						...cartesiaCaptions(
-							words.map((text, i) => ({ text, start: start[i], end: end[i] })),
+						...words.map((text, i) =>
+							secondsCaption(` ${text}`, start[i], end[i]),
 						),
 					);
 				}

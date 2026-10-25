@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import type { CaptionLineProps } from "@/components/captions/caption-line";
 import { CaptionOverlay } from "@/components/captions/caption-overlay";
 import { scrollToElement } from "@/app/components/canvas/utils/scroll-to";
-import { useSetActiveSceneId } from "@/app/components/scene-selection/active-scene-context";
 import { editCaptions } from "@/lib/captions/caption-edits";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import {
@@ -25,7 +24,7 @@ const FIELD = {
 type Draft = { index: number; text: string };
 
 /** A paused line edits one word at a click and saves to its element, but never while the element regenerates. */
-function EditableCaptionLine({
+export function EditableCaptionLine({
 	style,
 	words,
 	fontSizePx,
@@ -33,7 +32,6 @@ function EditableCaptionLine({
 	firstWord,
 }: CaptionLineProps) {
 	const playing = usePlayerPlaying();
-	const setActiveSceneId = useSetActiveSceneId();
 	const queue = useGenerationQueue();
 	const regenerating = useQueueSelector((q) =>
 		isGenerationActive(q.getElementSnapshot(element.id).status),
@@ -45,7 +43,6 @@ function EditableCaptionLine({
 	if (playing || regenerating) return <CaptionOverlay {...overlay} />;
 
 	const open = (index: number) => {
-		setActiveSceneId(element.sceneId);
 		scrollToElement(element.id);
 		cancelled.current = false;
 		setDraft({ index, text: words[index].text });
@@ -97,7 +94,3 @@ function EditableCaptionLine({
 		/>
 	);
 }
-
-export const renderEditableCaptionLine = (props: CaptionLineProps) => (
-	<EditableCaptionLine {...props} />
-);

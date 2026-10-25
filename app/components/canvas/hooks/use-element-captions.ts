@@ -18,9 +18,11 @@ export function useGenerateSTT() {
 		(elements: ElementRef[]) => {
 			const model = resolveModel("stt", editor.defaultModels().stt);
 			queue.enqueueGraph(
-				elements.flatMap((element) => {
-					const result = queue.getElementSnapshot(element.id).result;
-					return result ? [captionsNode(element, result, model)] : [];
+				elements.map((element) => {
+					const { result } = queue.getElementSnapshot(element.id);
+					if (!result)
+						throw new Error(`Element "${element.id}" has nothing to caption`);
+					return captionsNode(element, result, model);
 				}),
 			);
 		},

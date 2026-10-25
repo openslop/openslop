@@ -1,9 +1,4 @@
-import {
-	CONTENT_TYPES,
-	isCaptionable,
-	type CanvasBlock,
-	type ContentElement,
-} from "@/lib/canvas/types";
+import { CONTENT_TYPES, type CanvasBlock } from "@/lib/canvas/types";
 import { isScene } from "@/lib/canvas/scenes";
 import { getPromptText } from "@/lib/generation/inputs";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
@@ -19,17 +14,12 @@ import {
 import { elementTrim, trimTimestamps } from "./clip-trim";
 
 function resolveCaptions(
-	element: ContentElement,
 	{ textTimestamps }: AssetResult,
-	{ trimStartSec, durationSec }: { trimStartSec: number; durationSec: number },
+	trimStartSec: number,
 ): ResolvedCaptions | undefined {
-	if (!isCaptionable(element.type) || !textTimestamps?.length) return undefined;
+	if (!textTimestamps?.length) return undefined;
 	const words = trimTimestamps(textTimestamps, trimStartSec);
-	return {
-		firstWord: textTimestamps.length - words.length,
-		words,
-		untilSec: durationSec,
-	};
+	return { firstWord: textTimestamps.length - words.length, words };
 }
 
 export function resolveElements(
@@ -71,7 +61,7 @@ export function resolveElements(
 				volume: getVolume(element),
 				motion: getMotion(element),
 				captions: captionsEnabled
-					? resolveCaptions(element, snapshot.result, trim)
+					? resolveCaptions(snapshot.result, trim.trimStartSec)
 					: undefined,
 			});
 		}

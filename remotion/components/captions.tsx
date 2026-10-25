@@ -1,4 +1,4 @@
-import { Fragment, use } from "react";
+import { use } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { CaptionLineContext } from "@/components/captions/caption-line";
 import { wordsAt } from "@/lib/captions/caption-layout";
@@ -16,7 +16,7 @@ export function Captions({
 	captions: CaptionSequence[];
 	style: CaptionStyle;
 }) {
-	const renderLine = use(CaptionLineContext);
+	const Line = use(CaptionLineContext);
 	const frame = useCurrentFrame();
 	const { fps, height } = useVideoConfig();
 	const fontSizePx = captionFontSizePx(style.fontSize, height);
@@ -24,18 +24,14 @@ export function Captions({
 		const { from, durationInFrames } = frameSpan(start, duration, fps);
 		if (frame < from || frame >= from + durationInFrames) return null;
 		return (
-			<Fragment key={`${element.id}-${start}`}>
-				{renderLine({
-					style,
-					words: wordsAt(
-						line.tokens,
-						line.start + toSeconds(frame - from, fps),
-					),
-					fontSizePx,
-					element,
-					firstWord: line.firstWord,
-				})}
-			</Fragment>
+			<Line
+				key={`${element.id}-${start}`}
+				style={style}
+				words={wordsAt(line.tokens, line.start + toSeconds(frame - from, fps))}
+				fontSizePx={fontSizePx}
+				element={element}
+				firstWord={line.firstWord}
+			/>
 		);
 	});
 }

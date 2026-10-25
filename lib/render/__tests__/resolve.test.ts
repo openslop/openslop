@@ -271,7 +271,6 @@ describe("resolveElements", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
 				firstWord: 0,
 				words: heard,
-				untilSec: 5,
 			});
 		});
 

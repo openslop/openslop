@@ -54,11 +54,8 @@ export function groupIntoLines(
 
 /** The lines an element shows, the last held until its captions stop. */
 export function captionLines(
-	{
-		firstWord,
-		words,
-		untilSec,
-	}: { firstWord: number; words: Caption[]; untilSec: number },
+	{ firstWord, words }: { firstWord: number; words: Caption[] },
+	untilSec: number,
 	lineMs: number,
 ): CaptionLine[] {
 	const lines = groupIntoLines(words, lineMs, firstWord).filter(
@@ -66,6 +63,6 @@ export function captionLines(
 	);
 	return lines.map((line, index) => ({
 		...line,
-		end: index === lines.length - 1 ? untilSec : Math.min(line.end, untilSec),
+		end: index === lines.length - 1 ? untilSec : line.end,
 	}));
 }

@@ -4,9 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { CaptionOverlay } from "@/components/captions/caption-overlay";
 import { groupIntoLines, wordsAt } from "@/lib/captions/caption-layout";
 import type { Caption } from "@remotion/captions";
+import { SAMPLE_WORD_MS } from "@/lib/captions/caption-presets";
 import type { CaptionStyle } from "@/lib/captions/caption-style";
-
-const WORD_MS = 420;
 
 /** Advances through `wordCount` words on a loop while `playing`. */
 export function useCaptionCycle(wordCount: number, playing: boolean): number {
@@ -27,7 +26,7 @@ export function useCaptionCycle(wordCount: number, playing: boolean): number {
 
 		const id = setInterval(
 			() => setIndex((current) => (current + 1) % wordCount),
-			WORD_MS,
+			SAMPLE_WORD_MS,
 		);
 		return () => clearInterval(id);
 	}, [playing, wordCount]);

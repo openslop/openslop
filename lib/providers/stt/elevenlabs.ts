@@ -6,7 +6,7 @@ import type {
 import type { Caption } from "@remotion/captions";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
-import { timestampsFile } from "../timestamps-file";
+import { secondsCaption, timestampsFile } from "../timestamps-file";
 import type { RawSTT, STTRequest } from "./base";
 import { validateElevenLabsKey } from "../elevenlabs";
 import type { STTProvider } from "../types";
@@ -20,13 +20,11 @@ const toCaptions = (words: SpeechToTextWordResponseModel[]): Caption[] =>
 		const before = words[index - 1];
 		return type === "word" && start !== undefined && end !== undefined
 			? [
-					{
-						text: before?.type === "spacing" ? before.text + text : text,
-						startMs: start * 1000,
-						endMs: end * 1000,
-						timestampMs: null,
-						confidence: null,
-					},
+					secondsCaption(
+						before?.type === "spacing" ? before.text + text : text,
+						start,
+						end,
+					),
 				]
 			: [];
 	});

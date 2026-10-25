@@ -91,87 +91,21 @@ export const captionPresetStyle = (key: CaptionPresetKey): CaptionStyle =>
 export const captionPresetLabel = (key: CaptionPresetKey): string =>
 	PRESETS[key].label;
 
+export const SAMPLE_WORD_MS = 420;
+
+const sampleCaptions = (text: string): Caption[] =>
+	text.split(" ").map((word, index) => ({
+		text: index === 0 ? word : ` ${word}`,
+		startMs: index * SAMPLE_WORD_MS,
+		endMs: (index + 1) * SAMPLE_WORD_MS,
+		timestampMs: null,
+		confidence: null,
+	}));
+
 /** Stand-in narration for the panel preview. */
-export const CAPTION_SAMPLE: Caption[] = [
-	{
-		text: "Style",
-		startMs: 0,
-		endMs: 420,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " your",
-		startMs: 420,
-		endMs: 840,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " captions",
-		startMs: 840,
-		endMs: 1260,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " exactly",
-		startMs: 1260,
-		endMs: 1680,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " how",
-		startMs: 1680,
-		endMs: 2100,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " you",
-		startMs: 2100,
-		endMs: 2520,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " like",
-		startMs: 2520,
-		endMs: 2940,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " them",
-		startMs: 2940,
-		endMs: 3360,
-		timestampMs: null,
-		confidence: null,
-	},
-];
+export const CAPTION_SAMPLE = sampleCaptions(
+	"Style your captions exactly how you like them",
+);
 
 /** Stand-in narration for the preset thumbnails. */
-export const CAPTION_THUMBNAIL_SAMPLE: Caption[] = [
-	{
-		text: "Look",
-		startMs: 0,
-		endMs: 420,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " at",
-		startMs: 420,
-		endMs: 840,
-		timestampMs: null,
-		confidence: null,
-	},
-	{
-		text: " this",
-		startMs: 840,
-		endMs: 1260,
-		timestampMs: null,
-		confidence: null,
-	},
-];
+export const CAPTION_THUMBNAIL_SAMPLE = sampleCaptions("Look at this");

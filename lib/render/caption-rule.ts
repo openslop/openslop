@@ -45,17 +45,15 @@ function linesUntilNextScene(
 	const { element, start } = sequence;
 	if (!element.captions) return [];
 	const untilSec = Math.min(
-		element.captions.untilSec,
+		element.durationSec,
 		secUntilNextScene(sequence, series),
 	);
-	return captionLines({ ...element.captions, untilSec }, lineMs).map(
-		(line) => ({
-			element,
-			line,
-			start: start + line.start,
-			duration: line.end - line.start,
-		}),
-	);
+	return captionLines(element.captions, untilSec, lineMs).map((line) => ({
+		element,
+		line,
+		start: start + line.start,
+		duration: line.end - line.start,
+	}));
 }
 
 export function layoutCaptions(

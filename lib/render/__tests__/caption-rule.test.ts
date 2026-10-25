@@ -9,6 +9,7 @@ function el(
 	id: string,
 	type: ContentType,
 	captions?: ResolvedCaptions,
+	durationSec = 10,
 ): ResolvedElement {
 	const { role, layer } = CONTENT_TYPES[type];
 	return {
@@ -20,8 +21,8 @@ function el(
 		sceneNumber: 1,
 		prompt: "",
 		url: `https://example.com/${id}`,
-		durationSec: 10,
-		mediaDurationSec: 10,
+		durationSec,
+		mediaDurationSec: durationSec,
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,
@@ -31,11 +32,10 @@ function el(
 	};
 }
 
-const words = (untilSec: number): ResolvedCaptions => ({
+const heard: ResolvedCaptions = {
 	firstWord: 0,
 	words: [caption("hi", 0, 1)],
-	untilSec,
-});
+};
 
 describe("layoutCaptions", () => {
 	const spans = (layout: RenderLayout) =>
@@ -46,14 +46,14 @@ describe("layoutCaptions", () => {
 		}));
 
 	it("lays a line out where its element plays", () => {
-		expect(spans(layoutOf([el("vid", "video", words(10))]))).toEqual([
+		expect(spans(layoutOf([el("vid", "video", heard)]))).toEqual([
 			{ id: "vid", start: 0, duration: 10 },
 		]);
 	});
 
 	it("stops captions where the next scene begins, and holds the last scene's to its end", () => {
 		const layout = layoutOf(
-			[el("vid", "video", words(10)), el("vid2", "video", words(10))],
+			[el("vid", "video", heard), el("vid2", "video", heard)],
 			{ transitionType: "fade" },
 		);
 		const [first, last] = layout.series;
@@ -68,33 +68,28 @@ describe("layoutCaptions", () => {
 	it("captions the speech instead of a video when its scene's speech has words", () => {
 		expect(
 			spans(
-				layoutOf([
-					el("vid", "video", words(10)),
-					el("nar", "narration", words(3)),
-				]),
+				layoutOf([el("vid", "video", heard), el("nar", "narration", heard)]),
 			).map(({ id }) => id),
 		).toEqual(["nar"]);
 	});
 
 	it("keeps a video's captions while its scene's speech has no words", () => {
 		expect(
-			spans(
-				layoutOf([el("vid", "video", words(10)), el("nar", "narration")]),
-			).map(({ id }) => id),
+			spans(layoutOf([el("vid", "video", heard), el("nar", "narration")])).map(
+				({ id }) => id,
+			),
 		).toEqual(["vid"]);
 	});
 
 	it("keeps a video's captions when the speech is in another scene", () => {
-		const speech = { ...el("nar", "narration", words(3)), sceneId: "s2" };
+		const speech = { ...el("nar", "narration", heard), sceneId: "s2" };
 		expect(
-			spans(layoutOf([el("vid", "video", words(10)), speech])).map(
-				({ id }) => id,
-			),
+			spans(layoutOf([el("vid", "video", heard), speech])).map(({ id }) => id),
 		).toEqual(["vid", "nar"]);
 	});
 
 	it("drops a line too short to cover a frame", () => {
-		expect(layoutCaptions(layoutOf([el("vid", "video", words(0.01))]))).toEqual(
+		expect(layoutCaptions(layoutOf([el("vid", "video", heard, 0.01)]))).toEqual(
 			[],
 		);
 	});

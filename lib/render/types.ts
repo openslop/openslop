@@ -9,8 +9,6 @@ export type ResolvedCaptions = {
 	/** Where `words` start in the element's own word list, past those the trim cut. */
 	firstWord: number;
 	words: Caption[];
-	/** When, from the element's start, its captions stop. */
-	untilSec: number;
 };
 
 export type ResolvedElement = {

@@ -7,7 +7,11 @@ import {
 	type ConcurrencyLimits,
 } from "./concurrency";
 import { generateForElement } from "./generate-for-element";
-import { SnapshotStore, type ElementSnapshot } from "./snapshots";
+import {
+	isGenerationActive,
+	SnapshotStore,
+	type ElementSnapshot,
+} from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
 import { flattenGraph, type GenerationNode } from "./graph";
@@ -133,11 +137,11 @@ export class GenerationQueue {
 		{ id: elementId, type: elementType }: ElementRef,
 		revise: (result: AssetResult) => AssetResult,
 	): void {
-		const { result, resultInputs, connectorType, pinned } =
+		const { result, resultInputs, connectorType, pinned, status } =
 			this.snapshots.get(elementId);
 		if (!result || !resultInputs || !connectorType)
 			throw new Error(`Element "${elementId}" holds no result to edit`);
-		if (this.snapshots.isActive(elementId))
+		if (isGenerationActive(status))
 			throw new Error(`Element "${elementId}" is generating`);
 		this.commit({
 			elementId,

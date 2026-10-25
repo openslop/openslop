@@ -208,12 +208,6 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 };
 
-export const TTSResultSchema = AssetResultSchema.extend({
-	textTimestamps: z.array(CaptionSchema),
-});
-
-export type TTSResult = z.infer<typeof TTSResultSchema>;
-
 export type TTSGenerateParams = ConnectorGenerateParams & {
 	voiceId?: string;
 	name?: string;
@@ -231,10 +225,11 @@ export type SourcedSTTParams = STTGenerateParams & {
 	mediaUrl: string;
 };
 
-export type STTResult = {
-	durationSec: number;
+export type STTResult = Pick<AssetResult, "durationSec"> & {
 	textTimestamps: Caption[];
 };
+
+export type TTSResult = AssetResult & STTResult;
 
 /** A TTS request after its speaker's voice is resolved. */
 export type VoicedTTSParams = TTSGenerateParams & { voiceId: string };
