@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { toFrames } from "../frames";
 import { isBlankScene } from "../blank-scene";
-import { captionableSequences } from "../caption-rule";
 import type { BuildLayoutOptions } from "../scene-builder";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import type { ContentType } from "@/lib/canvas/types";
 import { layoutOf } from "./_layout";
-import { caption } from "@/lib/captions/__tests__/_captions";
 
 // The rendered transition overlap: TRANSITION_DURATION_SEC (0.4s) snapped to the
 // 24fps frame grid, which is what <TransitionSeries> actually lays down.
@@ -57,6 +55,7 @@ function el(
 		loop: false,
 		volume: 10,
 		motion: "none",
+		captioned: false,
 		...overrides,
 	};
 }
@@ -649,59 +648,5 @@ describe("buildRenderLayout", () => {
 				}
 			}
 		});
-	});
-});
-
-describe("the caption rule", () => {
-	const captions = (untilSec: number) => ({
-		firstWord: 0,
-		words: [caption("hi", 0, 1)],
-		untilSec,
-	});
-	const video = el({
-		id: "vid",
-		type: "video",
-		durationSec: 10,
-		captions: captions(10),
-	});
-	const narration = el({
-		id: "nar",
-		type: "narration",
-		durationSec: 3,
-		captions: captions(3),
-	});
-
-	it("drops a video's captions when speech plays over it, and keeps the speech's", () => {
-		const layout = layoutOf([video, narration]);
-		expect(layout.series[0].element.captions).toBeUndefined();
-		expect(layout.sequences.narration?.[0].element.captions?.untilSec).toBe(3);
-	});
-
-	it("keeps a video's captions when nothing is said over it", () => {
-		expect(layoutOf([video]).series[0].element.captions?.untilSec).toBe(10);
-	});
-
-	it("stops captions where the next scene begins, and holds the last scene's to its end", () => {
-		const next = el({
-			id: "vid2",
-			type: "video",
-			durationSec: 10,
-			captions: captions(10),
-		});
-		const layout = layoutOf([video, next], { transitionType: "fade" });
-		const [first, last] = layout.series;
-		expect(first.element.captions?.untilSec).toBeCloseTo(
-			first.duration - layout.transitionDurationSec,
-		);
-		expect(last.element.captions?.untilSec).toBe(last.duration);
-	});
-
-	it("needs no captions on a video speech plays over", () => {
-		const bare = { ...video, captions: undefined };
-		const speech = { ...narration, captions: undefined };
-		const ids = (layout: RenderLayout) =>
-			captionableSequences(layout).map(({ element }) => element.id);
-		expect(ids(layoutOf([bare, speech]))).toEqual(["nar"]);
-		expect(ids(layoutOf([bare]))).toEqual(["vid"]);
 	});
 });

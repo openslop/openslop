@@ -11,6 +11,7 @@ import {
 } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import type { RenderLayout, ResolvedElement } from "@/lib/render/types";
+import { layoutCaptions } from "@/lib/render/caption-rule";
 import { playedSec } from "@/lib/render/clip-trim";
 import { toFrames } from "@/lib/render/frames";
 import {
@@ -22,7 +23,7 @@ import { getPresentation } from "@/lib/render/transition-presentations";
 import { audioVolume } from "@/lib/render/audio-volume";
 import { volumeToGain } from "@/lib/canvas/element-attributes";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
-import { CaptionStyleProvider, Captions } from "../components/captions";
+import { Captions } from "../components/captions";
 import { FilmGrain } from "../components/film-grain";
 import { FrameImage } from "../components/frame-image";
 import { MotionLayer } from "../components/motion-layer";
@@ -85,7 +86,7 @@ function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	);
 }
 
-function ElementMedia({ element }: { element: ResolvedElement }) {
+function SequenceContent({ element }: { element: ResolvedElement }) {
 	switch (element.layer) {
 		case "visual":
 			return (
@@ -100,17 +101,6 @@ function ElementMedia({ element }: { element: ResolvedElement }) {
 		case "audio":
 			return <AudioSequence element={element} />;
 	}
-}
-
-function SequenceContent({ element }: { element: ResolvedElement }) {
-	return (
-		<>
-			<ElementMedia element={element} />
-			{element.captions && (
-				<Captions captions={element.captions} element={element} />
-			)}
-		</>
-	);
 }
 
 export const VideoComposition: React.FC<RenderLayout> = ({
@@ -171,15 +161,19 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 		[fps, sequences],
 	);
 
+	const captions = useMemo(
+		() => layoutCaptions({ series, sequences, captionStyle, fps }),
+		[series, sequences, captionStyle, fps],
+	);
+
 	return (
-		<CaptionStyleProvider value={captionStyle}>
-			<AbsoluteFill style={blackBg}>
-				<RgbSplit enabled={rgbSplit}>
-					<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
-					{layeredSequenceNodes}
-				</RgbSplit>
-				{filmGrain && <FilmGrain />}
-			</AbsoluteFill>
-		</CaptionStyleProvider>
+		<AbsoluteFill style={blackBg}>
+			<RgbSplit enabled={rgbSplit}>
+				<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
+				{layeredSequenceNodes}
+			</RgbSplit>
+			{filmGrain && <FilmGrain />}
+			<Captions captions={captions} style={captionStyle} />
+		</AbsoluteFill>
 	);
 };

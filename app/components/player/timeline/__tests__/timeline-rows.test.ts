@@ -9,6 +9,7 @@ import {
 	packLanes,
 } from "../timeline-rows";
 import { caption } from "@/lib/captions/__tests__/_captions";
+import { VideoSettingsSchema } from "@/lib/project/video-settings";
 
 function el(
 	id: string,
@@ -32,6 +33,7 @@ function el(
 		loop: false,
 		volume: 10,
 		motion: "none",
+		captioned: false,
 		...overrides,
 	};
 }
@@ -221,17 +223,20 @@ describe("buildCaptionRows", () => {
 		captions: { firstWord: 0, words, untilSec: 4 },
 	});
 	const twoPerLine = (...elements: ResolvedElement[]) => {
-		const layout = layoutOf(elements);
-		return buildCaptionRows({
-			...layout,
-			captionStyle: { ...layout.captionStyle, lineMs: 1500 },
+		const { captionStyle } = VideoSettingsSchema.parse({});
+		return layoutOf(elements, {
+			captionStyle: { ...captionStyle, lineMs: 1500 },
 		});
 	};
 
 	it("lays one clip per line, the last held until the clip's captions stop", () => {
-		const [row] = twoPerLine(el("a", "image"), narration);
+		const [row] = buildCaptionRows(twoPerLine(el("a", "image"), narration));
 		expect(
-			row.clips.map(({ start, duration, text }) => ({ start, duration, text })),
+			row.clips.map(({ start, duration, line }) => ({
+				start,
+				duration,
+				text: line.text,
+			})),
 		).toEqual([
 			{ start: 0, duration: 2, text: "one two" },
 			{ start: 2, duration: 2, text: "three" },

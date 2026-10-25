@@ -154,7 +154,7 @@ export function TimelineClip({
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
-		element.captions && "captioned",
+		element.captioned && "captioned",
 		range,
 	]
 		.filter(Boolean)
@@ -210,7 +210,7 @@ export function TimelineClip({
 					</span>
 				</CornerChip>
 			) : null}
-			{element.captions ? (
+			{element.captioned ? (
 				<CornerChip corner="right">
 					<CaptionsFill size={HEADER_ICON_SIZE} />
 				</CornerChip>
@@ -232,7 +232,7 @@ export function TimelineCaptionClip({
 	return (
 		<div
 			role="img"
-			aria-label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${clip.text}`}
+			aria-label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${clip.line.text}`}
 			className={cn(
 				FRAME,
 				"timeline-clip-surface justify-center",
@@ -240,7 +240,7 @@ export function TimelineCaptionClip({
 				selected ? SELECTED_EDGE : "border-border",
 			)}
 		>
-			<ClipHeader icon={Captions} label={clip.text} width={width} />
+			<ClipHeader icon={Captions} label={clip.line.text} width={width} />
 			{selected ? <SelectedWash /> : null}
 		</div>
 	);

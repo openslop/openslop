@@ -88,6 +88,7 @@ describe("resolveElements", () => {
 			loop: false,
 			volume: 10,
 			motion: "none",
+			captioned: false,
 		});
 		expect(resolved[1]).toEqual({
 			id: "nar1",
@@ -105,6 +106,7 @@ describe("resolveElements", () => {
 			loop: false,
 			volume: 10,
 			motion: "none",
+			captioned: false,
 		});
 	});
 
@@ -262,10 +264,56 @@ describe("resolveElements", () => {
 			img: makeSnapshot({
 				result: { imageUrl: "https://example.com/i.png", durationSec: 0 },
 			}),
+			nar: makeSnapshot({
+				result: {
+					audioUrl: "https://example.com/n.mp3",
+					durationSec: 3,
+					textTimestamps: heard,
+				},
+			}),
 		};
 		const bySnapshot = (id: string) => snapshots[id] ?? makeSnapshot();
 		const resolveOne = (element: ContentElement, captionsEnabled = true) =>
 			resolveElements([wrap([element])], bySnapshot, { captionsEnabled })[0];
+
+		const captionedIds = (...scenes: ContentElement[][]) =>
+			resolveElements(
+				scenes.map((children, index) => ({
+					...wrap(children),
+					id: `scene-${index}`,
+				})),
+				bySnapshot,
+				{ captionsEnabled: true },
+			)
+				.filter(({ captions }) => captions)
+				.map(({ id }) => id);
+
+		it("captions the speech instead of a video when its scene's speech has words", () => {
+			expect(
+				captionedIds([
+					makeElement("vid", "video"),
+					makeElement("nar", "narration"),
+				]),
+			).toEqual(["nar"]);
+		});
+
+		it("keeps a video's captions while its scene's speech has no words", () => {
+			expect(
+				captionedIds([
+					makeElement("vid", "video"),
+					makeElement("mute", "narration"),
+				]),
+			).toEqual(["vid"]);
+		});
+
+		it("keeps a video's captions when the speech is in another scene", () => {
+			expect(
+				captionedIds(
+					[makeElement("vid", "video")],
+					[makeElement("nar", "narration")],
+				),
+			).toEqual(["vid", "nar"]);
+		});
 
 		it("captions an element with the words on its own result, until it ends", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
@@ -273,6 +321,13 @@ describe("resolveElements", () => {
 				words: heard,
 				untilSec: 5,
 			});
+		});
+
+		it("marks an element captioned only while captions are on", () => {
+			expect(resolveOne(makeElement("vid", "video")).captioned).toBe(true);
+			expect(resolveOne(makeElement("vid", "video"), false).captioned).toBe(
+				false,
+			);
 		});
 
 		it("drops captions when captions are disabled project-wide", () => {
@@ -291,6 +346,7 @@ describe("resolveElements", () => {
 
 		it("captions nothing an element has no words for", () => {
 			expect(resolveOne(makeElement("img", "image")).captions).toBeUndefined();
+			expect(resolveOne(makeElement("img", "image")).captioned).toBe(false);
 		});
 	});
 

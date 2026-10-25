@@ -22,6 +22,7 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 	loop: false,
 	volume: 5,
 	motion: "none",
+	captioned: false,
 	...over,
 });
 

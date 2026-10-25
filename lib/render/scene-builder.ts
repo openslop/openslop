@@ -8,7 +8,6 @@ import {
 import { ASPECT_RATIO_DIMENSIONS } from "../project/aspect-ratio";
 import type { VideoSettings } from "../project/video-settings";
 import { blankScene } from "./blank-scene";
-import { withCaptionRule } from "./caption-rule";
 import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
 import { transitionOverlapSec } from "./transitions";
@@ -159,7 +158,8 @@ export function buildRenderLayout(
 
 	return {
 		...config,
-		...withCaptionRule({ series, sequences }),
+		series,
+		sequences,
 		totalDurationSec,
 		totalFrames: Math.max(
 			2,

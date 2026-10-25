@@ -6,9 +6,12 @@ import {
 	Waveform,
 	type IconComponent,
 } from "@/components/ui/icon";
-import { captionLines } from "@/lib/captions/caption-layout";
 import type { ElementRole, LayerType } from "@/lib/canvas/types";
-import { layoutSequences, secUntilNextScene } from "@/lib/render/sequences";
+import { secUntilNextScene } from "@/lib/render/sequences";
+import {
+	layoutCaptions,
+	type CaptionSequence,
+} from "@/lib/render/caption-rule";
 import type { Sequence, RenderLayout } from "@/lib/render/types";
 
 export type TimelineClip = Sequence & { key: string };
@@ -117,8 +120,7 @@ export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
 	});
 }
 
-/** One caption line, placed like a clip of the element it captions. */
-export type CaptionClip = TimelineClip & { text: string };
+export type CaptionClip = CaptionSequence & { key: string };
 
 export type CaptionRow = {
 	key: string;
@@ -128,24 +130,11 @@ export type CaptionRow = {
 	clips: CaptionClip[];
 };
 
-/** One clip per caption line, as the player shows it. */
-function linesOf({ element, start }: Sequence, lineMs: number): CaptionClip[] {
-	const { captions } = element;
-	if (!captions) return [];
-	return captionLines(captions, lineMs).map((line) => ({
-		key: `${element.id}-${start}-${line.start}`,
-		element,
-		start: start + line.start,
-		duration: line.end - line.start,
-		text: line.text,
-	}));
-}
-
 export function buildCaptionRows(layout: RenderLayout): CaptionRow[] {
-	const clips = layoutSequences(layout)
-		.flatMap((sequence) => linesOf(sequence, layout.captionStyle.lineMs))
-		.filter(({ start }) => start < layout.totalDurationSec)
-		.sort((a, b) => a.start - b.start);
+	const clips = layoutCaptions(layout).map((caption) => ({
+		...caption,
+		key: `${caption.element.id}-${caption.start}`,
+	}));
 	return packLanes(clips).map((lane, index) => ({
 		key: `captions-${index}`,
 		...CAPTION_ROW,

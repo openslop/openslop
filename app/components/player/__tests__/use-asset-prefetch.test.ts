@@ -51,6 +51,7 @@ function el(url: string): ResolvedElement {
 		loop: false,
 		volume: 1,
 		motion: "none",
+		captioned: false,
 	};
 }
 

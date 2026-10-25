@@ -32,6 +32,9 @@ export type ResolvedElement = {
 	loop: boolean;
 	volume: number;
 	motion: MotionEffect;
+	/** Whether the element has words, so the timeline can mark it. */
+	captioned: boolean;
+	/** The words the video shows for this element; none when speech in its scene is captioned instead. */
 	captions?: ResolvedCaptions;
 };
 

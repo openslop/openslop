@@ -1,56 +1,74 @@
-import mapValues from "lodash/mapValues";
-import { captionSourceOf, isCaptionable } from "@/lib/canvas/types";
+import {
+	captionSourceOf,
+	isCaptionable,
+	type ContentType,
+} from "@/lib/canvas/types";
+import { captionLines, type CaptionLine } from "@/lib/captions/caption-layout";
+import { frameSpan } from "./frames";
 import { layoutSequences, secUntilNextScene } from "./sequences";
 import type { RenderLayout, Sequence } from "./types";
 
 type Layout = Pick<RenderLayout, "series" | "sequences">;
 
-const overlaps = (a: Sequence, b: Sequence) =>
-	a.start < b.start + b.duration && b.start < a.start + a.duration;
+export type CaptionSequence = Sequence & {
+	/** Timed from the element's start, as its words are. */
+	line: CaptionLine;
+};
 
-const isSpeech = ({ element }: Sequence) =>
-	captionSourceOf(element.type) === "speech";
+/** A video gives way to speech: its scene's voices are captioned instead. */
+export const yieldsToSpeech = (type: ContentType, sceneSpeaks: boolean) =>
+	sceneSpeaks && captionSourceOf(type) === "video";
 
-const spokenOver = (sequence: Sequence, speech: Sequence[]) =>
-	captionSourceOf(sequence.element.type) === "video" &&
-	speech.some((other) => overlaps(sequence, other));
+export const isSpeech = (type: ContentType) =>
+	captionSourceOf(type) === "speech";
 
 /** The sequences that show captions once every speech has words, so a muted video never needs any. */
 export function captionableSequences(layout: Layout): Sequence[] {
 	const sequences = layoutSequences(layout);
-	const speech = sequences.filter(isSpeech);
+	const spokenScenes = new Set(
+		sequences
+			.filter(({ element }) => isSpeech(element.type))
+			.map(({ element }) => element.sceneId),
+	);
 	return sequences.filter(
-		(sequence) =>
-			isCaptionable(sequence.element.type) && !spokenOver(sequence, speech),
+		({ element }) =>
+			isCaptionable(element.type) &&
+			!yieldsToSpeech(element.type, spokenScenes.has(element.sceneId)),
 	);
 }
 
-/** Speech is always captioned, a video only with no speech over it; captions stop by where the next scene begins. */
-export function withCaptionRule(layout: Layout): Layout {
-	const speech = layoutSequences(layout).filter(
-		(sequence) => sequence.element.captions && isSpeech(sequence),
+function linesOf(
+	sequence: Sequence,
+	series: Sequence[],
+	lineMs: number,
+): CaptionSequence[] {
+	const { element, start } = sequence;
+	if (!element.captions) return [];
+	const untilSec = Math.min(
+		element.captions.untilSec,
+		secUntilNextScene(sequence, series),
 	);
-	const layOut = (sequence: Sequence): Sequence => {
-		const { captions } = sequence.element;
-		return {
-			...sequence,
-			element: {
-				...sequence.element,
-				captions:
-					captions && !spokenOver(sequence, speech)
-						? {
-								...captions,
-								untilSec: Math.min(
-									captions.untilSec,
-									secUntilNextScene(sequence, layout.series),
-								),
-							}
-						: undefined,
-			},
-		};
-	};
-	return {
-		series: layout.series.map(layOut),
-		sequences: mapValues(layout.sequences, (list) => list?.map(layOut)),
-	};
+	return captionLines({ ...element.captions, untilSec }, lineMs).map(
+		(line) => ({
+			element,
+			line,
+			start: start + line.start,
+			duration: line.end - line.start,
+		}),
+	);
+}
+
+/** Every caption line on the video's time, each stopping by where the next scene begins. */
+export function layoutCaptions(
+	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle" | "fps">,
+): CaptionSequence[] {
+	return layoutSequences(layout)
+		.flatMap((sequence) =>
+			linesOf(sequence, layout.series, layout.captionStyle.lineMs),
+		)
+		.filter(
+			({ start, duration }) =>
+				frameSpan(start, duration, layout.fps).durationInFrames > 0,
+		)
+		.sort((a, b) => a.start - b.start);
 }
