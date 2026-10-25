@@ -18,10 +18,10 @@ import { useLayout } from "@/app/components/player/render-layout-context";
 import { useGenerateSTT } from "../hooks/use-element-captions";
 
 const uncaptioned = (queue: GenerationQueue, elements: ElementRef[]) =>
-	elements.filter(
-		({ id }) =>
-			queue.getElementSnapshot(id).result?.textTimestamps === undefined,
-	);
+	elements.filter(({ id }) => {
+		const { status, result } = queue.getElementSnapshot(id);
+		return !isGenerationActive(status) && result?.textTimestamps === undefined;
+	});
 
 function describe(active: boolean, pending: number, captionable: number) {
 	if (captionable === 0) return "No clips to caption";

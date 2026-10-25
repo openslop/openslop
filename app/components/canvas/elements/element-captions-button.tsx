@@ -57,6 +57,7 @@ function faceOf(captions: Captions): Face | null {
 			label: "Generating captions…",
 			icon: <Spinner className="text-current" />,
 		};
+	if (captions.captioned) return null;
 	if (captions.error)
 		return {
 			label: `Captions failed: ${captions.error}. Try again`,
@@ -64,7 +65,6 @@ function faceOf(captions: Captions): Face | null {
 			variant: "destructive",
 			onClick: captions.generate,
 		};
-	if (captions.captioned) return null;
 	return {
 		label: "Generate captions",
 		icon: <MagicCaptions size={SIZE} />,
@@ -85,6 +85,14 @@ function FaceButton({ face }: { face: Face }) {
 			</HeaderIconButton>
 		</SimpleTooltip>
 	);
+}
+
+function readyLabel(captions: Captions) {
+	if (captions.error)
+		return `Regenerating captions failed: ${captions.error}. The last captions still show`;
+	return captions.edited
+		? "Captions ready, edited in the player"
+		: "Captions ready";
 }
 
 function menuOf(captions: Captions, onRemove: () => void): ActionMenuItem[] {
@@ -125,9 +133,7 @@ export function ElementCaptionsButton({
 	const face = faceOf(captions);
 	if (face) return <FaceButton face={face} />;
 
-	const label = captions.edited
-		? "Captions ready, edited in the player"
-		: "Captions ready";
+	const label = readyLabel(captions);
 	return (
 		<>
 			<Tooltip>
@@ -136,8 +142,15 @@ export function ElementCaptionsButton({
 					align="end"
 				>
 					<TooltipTrigger asChild>
-						<HeaderIconButton ariaLabel={label}>
-							<CaptionsReady size={SIZE} />
+						<HeaderIconButton
+							ariaLabel={label}
+							variant={captions.error ? "destructive" : "quiet"}
+						>
+							{captions.error ? (
+								<CaptionsAlert size={SIZE} />
+							) : (
+								<CaptionsReady size={SIZE} />
+							)}
 						</HeaderIconButton>
 					</TooltipTrigger>
 				</ActionMenu>
