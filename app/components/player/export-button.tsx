@@ -43,7 +43,7 @@ export function ExportButton() {
 					type="button"
 					variant="panel"
 					size="sm"
-					className="shrink-0 sm:px-4"
+					className="shrink-0"
 					aria-label="Export"
 					disabled={disabled}
 				>

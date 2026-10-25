@@ -72,8 +72,7 @@ export function ReferenceImagesPopover({
 					{override && (
 						<Button
 							variant="link"
-							size="sm"
-							className="h-auto p-0"
+							size="inline"
 							tooltip="Use the project's reference images"
 							onClick={() =>
 								mergeAttrs(editor, element.id, { [attrKey]: null })

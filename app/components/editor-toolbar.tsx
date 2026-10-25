@@ -31,12 +31,7 @@ function Breadcrumbs() {
 		>
 			<ol className="flex min-w-0 items-center gap-1.5 text-label font-book text-foreground">
 				<li className="shrink-0">
-					<Button
-						variant="ghost"
-						size="sm"
-						asChild
-						className="h-7 gap-1.5 px-2 font-[475]"
-					>
+					<Button variant="ghost" size="xs" asChild className="font-book">
 						<Link href="/">
 							<Lock className="size-3" aria-hidden="true" />
 							Personal
@@ -49,10 +44,7 @@ function Breadcrumbs() {
 							/
 						</li>
 						<li className="min-w-0">
-							<span
-								aria-current="page"
-								className="block h-7 truncate px-2 leading-7"
-							>
+							<span aria-current="page" className="block truncate px-2">
 								{title}
 							</span>
 						</li>
@@ -107,7 +99,7 @@ function EditorToolbarComponent() {
 						type="button"
 						variant="generate"
 						size="sm"
-						className="shrink-0 sm:px-4"
+						className="shrink-0"
 						aria-label={generateLabel}
 						tooltip={loading ? NOTHING_TO_GENERATE : scope.description}
 						tooltipSide="bottom"

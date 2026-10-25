@@ -146,10 +146,11 @@ function ConnectHint({ provider }: { provider: Provider }) {
 			label={`Add your ${name} API key to generate with this model`}
 		>
 			<span
-				className={cn(
-					buttonVariants({ variant: "secondary", size: "xs" }),
-					"ml-auto h-5 px-1.5 text-label-xs",
-				)}
+				className={buttonVariants({
+					variant: "secondary",
+					size: "2xs",
+					className: "ml-auto",
+				})}
 			>
 				<Link aria-hidden="true" className="size-2.5" />
 				Connect

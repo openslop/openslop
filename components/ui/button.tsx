@@ -28,6 +28,7 @@ const buttonVariants = cva(
 				link: "text-accent underline-offset-4 hover:underline",
 			},
 			size: {
+				"2xs": "h-5 gap-1 px-1.5 text-label-xs",
 				xs: "h-6 gap-1 rounded-md px-2 text-label [&_svg:not([class*='size-'])]:size-3",
 				sm: "h-8 rounded-md px-3 text-label",
 				default: "h-9 px-4",
@@ -35,6 +36,7 @@ const buttonVariants = cva(
 				cta: "h-11 px-4",
 				lg: "h-11 px-6 text-body-lg",
 				icon: "size-9",
+				inline: "text-label",
 			},
 		},
 		defaultVariants: {
