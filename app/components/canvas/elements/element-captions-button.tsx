@@ -40,12 +40,12 @@ interface Face {
 }
 
 const NOT_GENERATED: Face = {
-	label: "Generate the clip first to caption it",
+	label: "Generate this element first to caption it",
 	icon: <MagicCaptions size={SIZE} />,
 };
 
 const GENERATING: Face = {
-	label: "Captions wait for the clip to finish generating",
+	label: "Captions wait for this element to finish generating",
 	icon: <Hourglass size={SIZE} />,
 };
 
@@ -166,7 +166,7 @@ export function ElementCaptionsButton({
 				title={({ type }) =>
 					`Remove this ${ELEMENT_CONFIGS[type].label.toLowerCase()}'s captions?`
 				}
-				description="Only this clip loses its captions and any edits to them. Getting them back means generating them again."
+				description="Only this element loses its captions and any edits to them. Getting them back means generating them again."
 				actionLabel="Remove captions"
 				onConfirm={captions.remove}
 			/>
