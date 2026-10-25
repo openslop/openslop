@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CaptionOverlay } from "@/components/captions/caption-overlay";
-import { groupIntoLines, wordsOnLine } from "@/lib/captions/caption-layout";
+import { groupIntoLines, wordsAt } from "@/lib/captions/caption-layout";
 import type { CaptionStyle } from "@/lib/captions/caption-style";
 
 const WORD_MS = 420;
@@ -67,7 +67,9 @@ export function CaptionStage({
 			),
 		[words, lineMs],
 	);
-	const line = lines.find(({ to }) => activeIndex < to);
+	const line = lines.find(
+		({ firstWord, tokens }) => activeIndex < firstWord + tokens.length,
+	);
 	return (
 		<div
 			className="relative shrink-0 overflow-hidden rounded-lg bg-on-media"
@@ -75,7 +77,7 @@ export function CaptionStage({
 		>
 			<CaptionOverlay
 				style={style}
-				words={line ? wordsOnLine(words, activeIndex, line) : []}
+				words={line ? wordsAt(line.tokens, (activeIndex * WORD_MS) / 1000) : []}
 				fontSizePx={fontSizePx}
 			/>
 		</div>

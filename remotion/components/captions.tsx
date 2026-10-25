@@ -6,9 +6,8 @@ import {
 } from "@/components/captions/caption-line";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import {
-	activeWordIndex,
 	captionLines,
-	wordsOnLine,
+	wordsAt,
 	type CaptionLine,
 } from "@/lib/captions/caption-layout";
 import {
@@ -25,21 +24,17 @@ const [CaptionStyleContext, useCaptionStyle] =
 
 export const CaptionStyleProvider = CaptionStyleContext.Provider;
 
-type Words = { text: string[]; startTimes: number[] };
-
 type Element = CaptionLineProps["element"];
 
 function Line({
 	line,
 	startFrame,
-	words,
 	firstWord,
 	element,
 	style,
 }: {
 	line: CaptionLine;
 	startFrame: number;
-	words: Words;
 	firstWord: number;
 	element: Element;
 	style: CaptionStyle;
@@ -47,17 +42,12 @@ function Line({
 	const renderLine = use(CaptionLineContext);
 	const frame = useCurrentFrame();
 	const { fps, height } = useVideoConfig();
-	const index = activeWordIndex(
-		words.startTimes,
-		toSeconds(startFrame + frame, fps),
-	);
 	return renderLine({
 		style,
-		words: wordsOnLine(words.text, index, line),
+		words: wordsAt(line.tokens, toSeconds(startFrame + frame, fps)),
 		fontSizePx: captionFontSizePx(style.fontSize, height),
 		element,
-		from: firstWord + line.from,
-		to: firstWord + line.to,
+		firstWord: firstWord + line.firstWord,
 	});
 }
 
@@ -74,13 +64,6 @@ export function Captions({
 		() => captionLines(captions, style.lineMs),
 		[captions, style.lineMs],
 	);
-	const words = useMemo(
-		() => ({
-			text: captions.words.map(({ text }) => text),
-			startTimes: captions.words.map(({ start }) => start),
-		}),
-		[captions.words],
-	);
 
 	return lines.flatMap((line) => {
 		const from = toFrames(line.start, fps);
@@ -88,14 +71,13 @@ export function Captions({
 		if (durationInFrames <= 0) return [];
 		return (
 			<Sequence
-				key={`${line.from}-${line.start}`}
+				key={`${line.firstWord}-${line.start}`}
 				from={from}
 				durationInFrames={durationInFrames}
 			>
 				<Line
 					line={line}
 					startFrame={from}
-					words={words}
 					firstWord={captions.firstWord}
 					element={element}
 					style={style}

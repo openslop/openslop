@@ -9,9 +9,8 @@ export type CaptionLineProps = {
 	words: CaptionWord[];
 	fontSizePx: number;
 	element: Pick<ResolvedElement, "id" | "sceneId" | "type">;
-	/** The span of the element's words the line shows, which an edit replaces. */
-	from: number;
-	to: number;
+	/** Where the line's first word sits in the element's words, so an edit can find each one. */
+	firstWord: number;
 };
 
 // The editor swaps in a line that edits; an export keeps the static one.

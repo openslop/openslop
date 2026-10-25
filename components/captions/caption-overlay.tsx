@@ -1,4 +1,3 @@
-import { Slot } from "radix-ui";
 import type { CSSProperties, ReactNode } from "react";
 import type { CaptionWord } from "@/lib/captions/caption-layout";
 import { captionFontStack } from "@/lib/captions/caption-fonts";
@@ -65,7 +64,7 @@ export function captionWordStyle(style: CaptionTextStyle): CSSProperties {
 	};
 }
 
-export function CaptionWords({
+function CaptionWords({
 	style,
 	words,
 }: {
@@ -92,20 +91,14 @@ export function CaptionOverlay({
 	style,
 	words,
 	fontSizePx,
-	lineClassName,
-	asChild = false,
 	children = <CaptionWords style={style} words={words} />,
 }: {
 	style: CaptionStyle;
 	words: readonly CaptionWord[];
 	fontSizePx: number;
-	lineClassName?: string;
-	/** Draws the line as `children`, such as a button, instead of a div. */
-	asChild?: boolean;
 	children?: ReactNode;
 }) {
 	if (words.length === 0) return null;
-	const Line = asChild ? Slot.Root : "div";
 
 	return (
 		<div
@@ -120,8 +113,7 @@ export function CaptionOverlay({
 				userSelect: "none",
 			}}
 		>
-			<Line
-				className={lineClassName}
+			<div
 				style={{
 					display: "flex",
 					flexWrap: "wrap",
@@ -140,7 +132,7 @@ export function CaptionOverlay({
 				}}
 			>
 				{children}
-			</Line>
+			</div>
 		</div>
 	);
 }
