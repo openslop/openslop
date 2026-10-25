@@ -54,6 +54,7 @@ function icon(name: string): IconComponent {
 }
 
 export const AlertCircle = icon("alert");
+export const AlertCircleFilled = icon("alert-filled");
 export const AlertTriangle = icon("alert-triangle");
 export const AlignBottom = icon("arrow-line-down");
 export const AlignCenter = icon("arrows-inwards");

@@ -8,7 +8,6 @@ import {
 	TOGGLE_VALUES,
 } from "@/lib/connectors/attributes/schema";
 import { EffectType } from "@/lib/connectors/image/enums";
-import { MusicLength } from "@/lib/connectors/music/enums";
 import {
 	CONTINUITY_ATTR,
 	NO_FRAME,
@@ -16,6 +15,7 @@ import {
 	START_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
 import { CHARACTER_REFS_RULE } from "@/lib/script/prompt/character-refs";
+import { MUSIC_PROMPT_FORMAT } from "@/lib/script/prompt/music-prompt";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
@@ -36,7 +36,6 @@ const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
 		...PICTURE_ATTRIBUTES,
 		`${START_FRAME_ATTR} (${NO_FRAME} | ${PREVIOUS_VISUAL}, or a picture URL: an image's URL from view_image, with ${CONTINUITY_ATTR}="false" so the look before it does not fight that picture; leave a URL already set alone)`,
 	],
-	music: [`length ${enumeration(Object.values(MusicLength))}`],
 };
 
 /** Attributes Sloppy can write by hand: enums with their options, and free text. */
@@ -110,6 +109,8 @@ export const editScript = defineTool({
 	  ${CHARACTER_REFS_RULE}
 
 	  ${VIDEO_PROMPT_FORMAT}
+
+	  ${MUSIC_PROMPT_FORMAT}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
 	  surrounding script, whatever language the request is in. Image, video, sound and music

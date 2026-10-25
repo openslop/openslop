@@ -1,10 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/api/asset-bundle");
-
-import { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseProvider, type WithMetadata } from "../base";
 import type { BundleFile } from "@/lib/api/asset-bundle";
+import { spyAssetBundle } from "./_asset-bundle";
 
 type TestParams = { prompt: string; size?: number };
 type TestRawResult = { data: string; costUsd: number } & WithMetadata;
@@ -34,6 +32,7 @@ class TestProvider extends BaseProvider<TestParams, TestRawResult> {
 }
 
 describe("BaseProvider", () => {
+	const { upload } = spyAssetBundle();
 	let provider: TestProvider;
 
 	beforeEach(() => {
@@ -47,7 +46,7 @@ describe("BaseProvider", () => {
 		const result = await provider.generate({ prompt: "hello" });
 
 		expect(provider.generateFn).toHaveBeenCalledWith({ prompt: "hello" });
-		expect(AssetBundle.upload).toHaveBeenCalledWith(
+		expect(upload).toHaveBeenCalledWith(
 			"test",
 			"mock",
 			[
@@ -61,7 +60,10 @@ describe("BaseProvider", () => {
 			undefined,
 		);
 		expect(result.output).toEqual(
-			expect.objectContaining({ provider: "mock", result: { output: "url" } }),
+			expect.objectContaining({
+				provider: "mock",
+				result: { output: "out.bin" },
+			}),
 		);
 		expect(result.costUsd).toBe(0.01);
 	});
@@ -75,12 +77,9 @@ describe("BaseProvider", () => {
 
 		await provider.generate({ prompt: "hi" });
 
-		expect(AssetBundle.upload).toHaveBeenCalledWith(
-			"test",
-			"mock",
-			expect.any(Array),
-			{ durationSec: 5 },
-		);
+		expect(upload).toHaveBeenCalledWith("test", "mock", expect.any(Array), {
+			durationSec: 5,
+		});
 	});
 
 	it("propagates _generate errors", async () => {
@@ -89,14 +88,12 @@ describe("BaseProvider", () => {
 		await expect(provider.generate({ prompt: "fail" })).rejects.toThrow(
 			"provider down",
 		);
-		expect(AssetBundle.upload).not.toHaveBeenCalled();
+		expect(upload).not.toHaveBeenCalled();
 	});
 
 	it("propagates upload errors", async () => {
 		provider.generateFn.mockResolvedValue({ data: "ok", costUsd: 0.01 });
-		vi.mocked(AssetBundle.upload).mockRejectedValueOnce(
-			new Error("upload failed"),
-		);
+		upload.mockRejectedValueOnce(new Error("upload failed"));
 
 		await expect(provider.generate({ prompt: "x" })).rejects.toThrow(
 			"upload failed",

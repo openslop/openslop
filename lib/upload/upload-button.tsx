@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { keepFocus } from "@/components/ui/keep-focus";
 import {
 	ImagePlus,
 	Loader2,
@@ -47,7 +48,7 @@ export function UploadButton({
 				tooltip={uploading ? `Uploading ${kind}…` : `Upload your own ${kind}`}
 				className={className}
 				disabled={uploading || disabled}
-				onMouseDown={(e) => e.preventDefault()}
+				onMouseDown={keepFocus}
 				onClick={openPicker}
 			>
 				{uploading ? (

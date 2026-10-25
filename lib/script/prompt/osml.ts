@@ -8,11 +8,11 @@ import {
 import { MOTION_EFFECTS } from "@/lib/render/motion-effect-names";
 import { VIDEO_FORMAT_RULES } from "./formats";
 import { EffectType } from "@/lib/connectors/image/enums";
-import { MusicLength } from "@/lib/connectors/music/enums";
 import { TTS_EMOTIONS, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { languagePrompt } from "./language";
 import { CHARACTER_REFS_RULE } from "./character-refs";
 import { VIDEO_PROMPT_FORMAT } from "./video-prompt";
+import { MUSIC_PROMPT_FORMAT } from "./music-prompt";
 
 export function osmlSpec(language: string): string {
 	return dedent`
@@ -63,9 +63,10 @@ export function osmlSpec(language: string): string {
 		- Never a voice: no sighs, gasps, laughter or crying.
 
 		## <music>
-		- Music for the mood of part of the story. The body is a short, plain music prompt. Example: <music length="long">Soft, slow, sad piano for a breakup</music>
-		- Change the music every few scenes.
-		- length: ${Object.values(MusicLength).join(", ")}.
-		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. Use more for music that should fill several scenes.
+		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the Music prompts section says.
+		- Place it ahead of the first visual it plays under, so it starts with that scene.
+		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. A cue written to its runtime plays once; use more only for a short bed that should repeat.
+
+		${MUSIC_PROMPT_FORMAT}
 	`;
 }

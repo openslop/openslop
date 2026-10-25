@@ -1,7 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/api/asset-bundle");
-
 const mockDisconnect = vi.fn();
 const mockImageInference = vi.fn();
 
@@ -16,12 +14,14 @@ vi.mock("@runware/sdk-js", () => ({
 	},
 }));
 
-import { AssetBundle } from "@/lib/api/asset-bundle";
 import { RunwareImage } from "../image/runware";
+import { spyAssetBundle } from "./_asset-bundle";
 
 const MODEL = "bytedance:seedream@5.0-lite";
 
 describe("RunwareImage", () => {
+	const { upload } = spyAssetBundle();
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -34,7 +34,7 @@ describe("RunwareImage", () => {
 		const provider = new RunwareImage("test-key");
 		const result = await provider.generate({ prompt: "a cat", model: MODEL });
 
-		expect(result.output.result.image).toBe("url");
+		expect(result.output.result.image).toBe("output.jpg");
 		expect(mockImageInference).toHaveBeenCalledWith({
 			positivePrompt: "a cat",
 			model: MODEL,
@@ -84,7 +84,7 @@ describe("RunwareImage", () => {
 		expect(mockImageInference).toHaveBeenCalledWith(
 			expect.objectContaining({ outputFormat: "WEBP" }),
 		);
-		expect(AssetBundle.upload).toHaveBeenCalledWith(
+		expect(upload).toHaveBeenCalledWith(
 			"image",
 			"runware",
 			[

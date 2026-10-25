@@ -1,7 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("@/lib/api/asset-bundle");
-
 const { mockCacheStore } = vi.hoisted(() => ({
 	mockCacheStore: new Map<string, unknown>(),
 }));
@@ -54,8 +52,8 @@ vi.mock("@ai-sdk/openai", () => ({
 
 import type Cartesia from "@cartesia/cartesia-js";
 import { TTSEmotion } from "@/lib/connectors/tts/enums";
-import { AssetBundle } from "@/lib/api/asset-bundle";
 import { CartesiaTTS, collectVoices } from "../tts/cartesia";
+import { spyAssetBundle } from "./_asset-bundle";
 
 /** pcm_f32le @ 44.1kHz mono: 4 bytes per sample. */
 const PCM_BYTES_PER_SEC = 44100 * 4;
@@ -200,6 +198,8 @@ describe("collectVoices", () => {
 const MODEL = "sonic-3.6";
 
 describe("CartesiaTTS", () => {
+	const { upload } = spyAssetBundle();
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockCacheStore.clear();
@@ -229,9 +229,9 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			expect(result.output.result.audio).toBe("url");
-			expect(result.output.result.timestamps).toBe("url");
-			const [, , files] = vi.mocked(AssetBundle.upload).mock.calls[0];
+			expect(result.output.result.audio).toBe("output.wav");
+			expect(result.output.result.timestamps).toBe("timestamps.json");
+			const [, , files] = upload.mock.calls[0];
 			const timestamps = files.find((f) => f.key === "timestamps");
 			if (!timestamps || !("data" in timestamps))
 				throw new Error("Captions were not written inline");
@@ -287,7 +287,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			const [, , files] = vi.mocked(AssetBundle.upload).mock.calls[0];
+			const [, , files] = upload.mock.calls[0];
 			const audio = files.find((file) => file.key === "audio");
 			if (!audio || !("data" in audio) || !Buffer.isBuffer(audio.data))
 				throw new Error("Expected the audio file to carry its bytes");

@@ -3,11 +3,12 @@ import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import type { ElementLength } from "@/lib/render/element-lengths";
 import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
-import { NARRATION_WORDS_PER_MINUTE } from "@/lib/project/video-length";
+import {
+	NARRATION_WORDS_PER_MINUTE,
+	NARRATION_WORDS_PER_SECOND,
+} from "@/lib/project/video-length";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./define-tool";
-
-const WORDS_PER_SECOND = Math.round(NARRATION_WORDS_PER_MINUTE / 60);
 
 const dialogue = ({ words, dialogueIds }: ElementLength) =>
 	`${words} words of dialogue (${dialogueIds.join(", ")})`;
@@ -38,7 +39,7 @@ export const measureElementLengths = defineTool({
 
 	  A visual is on screen for its own length or the dialogue after it, up to the next
 	  visual, whichever is longer. An image has no length of its own; a video's is its
-	  \`duration\`. Dialogue runs at about ${WORDS_PER_SECOND} words a second. Every visual
+	  \`duration\`. Dialogue runs at about ${NARRATION_WORDS_PER_SECOND} words a second. Every visual
 	  is on screen for at least ${seconds(MIN_DURATION_SEC)}.
 
 	  Use this when the user asks how long something is shown or wants it changed. To

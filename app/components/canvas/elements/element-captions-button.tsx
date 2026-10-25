@@ -23,7 +23,6 @@ import {
 import type { ContentElement } from "@/lib/canvas/types";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { useElementCaptions } from "../hooks/use-element-captions";
-import { ELEMENT_CONFIGS } from "./element-configs";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
 
@@ -163,9 +162,7 @@ export function ElementCaptionsButton({
 			<ConfirmDeleteDialog
 				target={removing ? element : undefined}
 				onClose={() => setRemoving(false)}
-				title={({ type }) =>
-					`Remove this ${ELEMENT_CONFIGS[type].label.toLowerCase()}'s captions?`
-				}
+				title={() => "Remove this element's captions?"}
 				description="Only this element loses its captions and any edits to them. Getting them back means generating them again."
 				actionLabel="Remove captions"
 				onConfirm={captions.remove}

@@ -19,6 +19,11 @@ export const DEFAULT_VIDEO_LENGTH: VideoLength = "auto";
 
 export const NARRATION_WORDS_PER_MINUTE = 180;
 
+/** The rate a prompt quotes to its reader, so a whole number. */
+export const NARRATION_WORDS_PER_SECOND = Math.round(
+	NARRATION_WORDS_PER_MINUTE / 60,
+);
+
 const wordsForSeconds = (sec: number): number =>
 	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;
 

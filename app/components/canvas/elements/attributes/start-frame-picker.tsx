@@ -2,6 +2,7 @@
 
 import { useSlateStatic } from "slate-react";
 import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -37,7 +38,7 @@ function FrameTile({
 			role="radio"
 			aria-checked={selected}
 			aria-label={label}
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={onSelect}
 			className="focus-ring flex w-16 flex-col gap-1 sm:w-20"
 		>

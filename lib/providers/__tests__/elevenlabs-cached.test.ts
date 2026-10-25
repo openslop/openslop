@@ -1,6 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/api/asset-bundle");
+vi.hoisted(() => vi.stubEnv("PINECONE_API_KEY", "test-key"));
+
+/** The providers build their cache at import, so Pinecone's spies must exist before the static imports run. */
+const { mockQuery, mockUpsert } = vi.hoisted(() => ({
+	mockQuery: vi.fn(),
+	mockUpsert: vi.fn(),
+}));
 
 const mockCompose = vi.fn();
 const mockConvert = vi.fn();
@@ -11,8 +17,6 @@ vi.mock("@elevenlabs/elevenlabs-js", () => ({
 	},
 }));
 
-const mockQuery = vi.fn();
-const mockUpsert = vi.fn();
 vi.mock("@pinecone-database/pinecone", () => ({
 	Pinecone: class {
 		index = () => ({ query: mockQuery, upsert: mockUpsert });
@@ -24,23 +28,24 @@ vi.mock("../embed", () => ({
 	embedText: (t: string) => mockEmbedText(t),
 }));
 
-async function loadProviders() {
-	vi.resetModules();
-	process.env.PINECONE_API_KEY = "test-key";
-	return {
-		music: (await import("../music/elevenlabs")).ElevenLabsMusic,
-		sfx: (await import("../sfx/elevenlabs")).ElevenLabsSFX,
-	};
-}
+import { ElevenLabsMusic } from "../music/elevenlabs";
+import { ElevenLabsSFX } from "../sfx/elevenlabs";
+import { spyAssetBundle } from "./_asset-bundle";
 
 const MUSIC_MODEL = "music_v1";
 const SFX_MODEL = "eleven_text_to_sound_v2";
 
 describe("ElevenLabs providers with pinecone cache enabled", () => {
+	spyAssetBundle();
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockEmbedText.mockResolvedValue([0.1, 0.2]);
 		mockUpsert.mockResolvedValue(undefined);
+	});
+
+	afterAll(() => {
+		vi.unstubAllEnvs();
 	});
 
 	it("music: serves cache hit without calling ElevenLabs", async () => {
@@ -57,7 +62,6 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 			],
 		});
 
-		const { music: ElevenLabsMusic } = await loadProviders();
 		const result = await new ElevenLabsMusic("k").generate({
 			prompt: "jazz",
 			model: MUSIC_MODEL,
@@ -70,7 +74,7 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 		expect(mockEmbedText).toHaveBeenCalledWith("jazz");
 	});
 
-	it("music: on miss, runs ElevenLabs and upserts with prompt-only key", async () => {
+	it("music: on miss, runs ElevenLabs and upserts the stored file's url under the prompt", async () => {
 		mockQuery.mockResolvedValue({ matches: [] });
 		mockCompose.mockResolvedValue(
 			new ReadableStream<Uint8Array>({
@@ -81,22 +85,21 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 			}),
 		);
 
-		const { music: ElevenLabsMusic } = await loadProviders();
 		const result = await new ElevenLabsMusic("k").generate({
 			prompt: "jazz",
 			durationSeconds: 5,
 			model: MUSIC_MODEL,
 		});
 
-		expect(result.output.result.audio).toBe("url"); // mocked AssetBundle.upload
+		expect(result.output.result.audio).toBe("output.mp3");
 		expect(mockCompose).toHaveBeenCalled();
-		expect(mockEmbedText).toHaveBeenCalledWith("jazz"); // prompt only — duration excluded
+		expect(mockEmbedText).toHaveBeenCalledWith("jazz");
 		expect(mockUpsert).toHaveBeenCalledWith({
 			records: [
 				expect.objectContaining({
 					values: [0.1, 0.2],
 					metadata: expect.objectContaining({
-						url: "/assets/music/elevenlabs/test/url", // resolved via AssetBundle
+						url: "https://assets.test/assets/music/elevenlabs/drawn/output.mp3",
 						description: "jazz",
 					}),
 				}),
@@ -115,7 +118,6 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 			}),
 		);
 
-		const { sfx: ElevenLabsSFX } = await loadProviders();
 		await new ElevenLabsSFX("k").generate({
 			prompt: "boom",
 			durationSeconds: 3,

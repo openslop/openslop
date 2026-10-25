@@ -22,7 +22,7 @@ import {
 	type SegmentedControlOption,
 } from "@/components/ui/segmented-control";
 import AnimatedPlaceholder from "@/app/components/animated-placeholder";
-import { useAssetEditors } from "@/app/components/canvas/elements/character/asset-edit-provider";
+import { useAssetEditors } from "@/app/components/canvas/elements/asset-edit-context";
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
 import { templateBrief } from "@/lib/templates/template-brief";
 import { useTemplate } from "@/lib/templates/use-template";

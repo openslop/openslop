@@ -2,6 +2,7 @@
 
 import { type ComponentProps, type ReactNode } from "react";
 import { Check, ChevronDown } from "@/components/ui/icon";
+import { keepFocus } from "@/components/ui/keep-focus";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -9,6 +10,11 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { selectTriggerClassName } from "@/components/ui/select";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export interface SelectMenuOption<T extends string> {
@@ -57,7 +63,6 @@ export function SelectMenuItem({
 export const inlineControlClassName =
 	"focus-ring inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1 text-label text-muted-foreground transition-colors hover:bg-button-hover hover:text-foreground disabled:pointer-events-none unavailable:opacity-40";
 
-/** Mousedown is swallowed so opening a picker never moves the caret out of the text it sits in. */
 export function InlineMenuTrigger({
 	className,
 	children,
@@ -66,7 +71,7 @@ export function InlineMenuTrigger({
 	return (
 		<button
 			type="button"
-			onMouseDown={(event) => event.preventDefault()}
+			onMouseDown={keepFocus}
 			className={cn(inlineControlClassName, "max-w-[140px]", className)}
 			{...props}
 		>
@@ -115,6 +120,7 @@ export function SelectMenu<T extends string>({
 	children,
 	side = "bottom",
 	align = "start",
+	tooltip,
 	contentClassName,
 	itemClassName,
 }: {
@@ -124,29 +130,43 @@ export function SelectMenu<T extends string>({
 	children: ReactNode;
 	side?: "top" | "bottom";
 	align?: "start" | "center" | "end";
+	tooltip?: ReactNode;
 	contentClassName?: string;
 	itemClassName?: string;
 }) {
 	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-			<DropdownMenuContent
-				side={side}
-				align={align}
-				className={cn("min-w-32", contentClassName)}
-			>
-				{options.map((option) => (
-					<SelectMenuItem
-						key={option.value}
-						selected={option.value === value}
-						onSelect={() => onChange(option.value)}
-						className={itemClassName}
-					>
-						{option.icon}
-						{option.label}
-					</SelectMenuItem>
-				))}
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<Tooltip>
+			<DropdownMenu modal={false}>
+				<DropdownMenuTrigger asChild>
+					{tooltip ? (
+						<TooltipTrigger asChild>{children}</TooltipTrigger>
+					) : (
+						children
+					)}
+				</DropdownMenuTrigger>
+				<DropdownMenuContent
+					side={side}
+					align={align}
+					className={cn("min-w-32", contentClassName)}
+				>
+					{options.map((option) => (
+						<SelectMenuItem
+							key={option.value}
+							selected={option.value === value}
+							onSelect={() => onChange(option.value)}
+							className={itemClassName}
+						>
+							{option.icon}
+							{option.label}
+						</SelectMenuItem>
+					))}
+				</DropdownMenuContent>
+			</DropdownMenu>
+			{tooltip && (
+				<TooltipContent side={side === "bottom" ? "top" : "bottom"}>
+					{tooltip}
+				</TooltipContent>
+			)}
+		</Tooltip>
 	);
 }

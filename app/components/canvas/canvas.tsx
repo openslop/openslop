@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { Editable, useSlateStatic } from "slate-react";
+import {
+	Editable,
+	useSlateStatic,
+	type RenderPlaceholderProps,
+} from "slate-react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -24,6 +28,20 @@ const renderElement = renderCanvasElement({
 	Scene: SortableScene,
 	Content: SortableContent,
 });
+
+// Slate pins its placeholder to `top: 0`, above the input box's padding.
+const renderPlaceholder = ({
+	attributes,
+	children,
+}: RenderPlaceholderProps) => (
+	<span
+		{...attributes}
+		style={{ ...attributes.style, top: undefined, opacity: undefined }}
+		className="top-2.5 text-muted-foreground"
+	>
+		{children}
+	</span>
+);
 
 export default function Canvas() {
 	const editor = useSlateStatic();
@@ -62,6 +80,7 @@ export default function Canvas() {
 				>
 					<Editable
 						placeholder="Start typing your story…"
+						renderPlaceholder={renderPlaceholder}
 						renderElement={renderElement}
 						onKeyDown={onKeyDown}
 						aria-controls={mention && listboxId}
