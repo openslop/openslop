@@ -30,6 +30,7 @@ import { HeaderIconButton } from "./header-icon-button";
 const SIZE = ICON_SIZES.header;
 
 type Captions = ReturnType<typeof useElementCaptions>;
+type Generation = ReturnType<typeof useElementGeneration>;
 
 interface Face {
 	label: string;
@@ -49,7 +50,12 @@ const GENERATING: Face = {
 };
 
 /** How the button looks before there are captions to act on; null once there are. */
-function faceOf(captions: Captions): Face | null {
+function faceOf(
+	{ result, status }: Generation,
+	captions: Captions,
+): Face | null {
+	if (!result) return NOT_GENERATED;
+	if (isGenerationActive(status)) return GENERATING;
 	if (captions.status === "queued")
 		return { label: "Captions queued", icon: <Hourglass size={SIZE} /> };
 	if (captions.status !== "idle")
@@ -124,13 +130,11 @@ export function ElementCaptionsButton({
 }: {
 	element: ContentElement;
 }) {
-	const { result, status } = useElementGeneration();
-	const captions = useElementCaptions(element, result);
+	const generation = useElementGeneration();
+	const captions = useElementCaptions(element, generation.result);
 	const [removing, setRemoving] = useState(false);
 
-	if (!result) return <FaceButton face={NOT_GENERATED} />;
-	if (isGenerationActive(status)) return <FaceButton face={GENERATING} />;
-	const face = faceOf(captions);
+	const face = faceOf(generation, captions);
 	if (face) return <FaceButton face={face} />;
 
 	const label = readyLabel(captions);
