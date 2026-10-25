@@ -55,7 +55,6 @@ function el(
 		loop: false,
 		volume: 10,
 		motion: "none",
-		captioned: false,
 		...overrides,
 	};
 }

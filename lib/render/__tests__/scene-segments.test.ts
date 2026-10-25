@@ -117,7 +117,6 @@ const resolved = (
 	loop: false,
 	volume: 10,
 	motion: "none",
-	captioned: false,
 });
 
 const sequence = (

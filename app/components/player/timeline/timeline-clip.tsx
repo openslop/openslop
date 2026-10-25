@@ -154,7 +154,7 @@ export function TimelineClip({
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
-		element.captioned && "captioned",
+		element.captions && "captioned",
 		range,
 	]
 		.filter(Boolean)
@@ -210,7 +210,7 @@ export function TimelineClip({
 					</span>
 				</CornerChip>
 			) : null}
-			{element.captioned ? (
+			{element.captions ? (
 				<CornerChip corner="right">
 					<CaptionsFill size={HEADER_ICON_SIZE} />
 				</CornerChip>

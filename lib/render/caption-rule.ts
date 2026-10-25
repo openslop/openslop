@@ -1,8 +1,4 @@
-import {
-	captionSourceOf,
-	isCaptionable,
-	type ContentType,
-} from "@/lib/canvas/types";
+import { captionSourceOf, isCaptionable } from "@/lib/canvas/types";
 import { captionLines, type CaptionLine } from "@/lib/captions/caption-layout";
 import { frameSpan } from "./frames";
 import { layoutSequences, secUntilNextScene } from "./sequences";
@@ -15,25 +11,25 @@ export type CaptionSequence = Sequence & {
 	line: CaptionLine;
 };
 
-/** A video gives way to speech: its scene's voices are captioned instead. */
-export const yieldsToSpeech = (type: ContentType, sceneSpeaks: boolean) =>
-	sceneSpeaks && captionSourceOf(type) === "video";
+const isSpeech = ({ element }: Sequence) =>
+	captionSourceOf(element.type) === "speech";
 
-export const isSpeech = (type: ContentType) =>
-	captionSourceOf(type) === "speech";
+const scenesOf = (sequences: Sequence[]) =>
+	new Set(sequences.map(({ element }) => element.sceneId));
+
+/** A video gives way to speech: its scene's voices are captioned instead. */
+const yieldsToSpeech = ({ element }: Sequence, spokenScenes: Set<string>) =>
+	captionSourceOf(element.type) === "video" &&
+	spokenScenes.has(element.sceneId);
 
 /** The sequences that show captions once every speech has words, so a muted video never needs any. */
 export function captionableSequences(layout: Layout): Sequence[] {
 	const sequences = layoutSequences(layout);
-	const spokenScenes = new Set(
-		sequences
-			.filter(({ element }) => isSpeech(element.type))
-			.map(({ element }) => element.sceneId),
-	);
+	const spokenScenes = scenesOf(sequences.filter(isSpeech));
 	return sequences.filter(
-		({ element }) =>
-			isCaptionable(element.type) &&
-			!yieldsToSpeech(element.type, spokenScenes.has(element.sceneId)),
+		(sequence) =>
+			isCaptionable(sequence.element.type) &&
+			!yieldsToSpeech(sequence, spokenScenes),
 	);
 }
 
@@ -58,11 +54,18 @@ function linesOf(
 	);
 }
 
-/** Every caption line on the video's time, each stopping by where the next scene begins. */
+/** Every caption line on the video's time; a video yields to captioned speech in its scene, and each stops by where the next scene begins. */
 export function layoutCaptions(
 	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle" | "fps">,
 ): CaptionSequence[] {
-	return layoutSequences(layout)
+	const sequences = layoutSequences(layout);
+	const spokenScenes = scenesOf(
+		sequences.filter(
+			(sequence) => sequence.element.captions && isSpeech(sequence),
+		),
+	);
+	return sequences
+		.filter((sequence) => !yieldsToSpeech(sequence, spokenScenes))
 		.flatMap((sequence) =>
 			linesOf(sequence, layout.series, layout.captionStyle.lineMs),
 		)

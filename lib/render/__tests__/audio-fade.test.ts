@@ -28,7 +28,6 @@ function el(overrides: Partial<ResolvedElement>): ResolvedElement {
 		loop: false,
 		volume: 10,
 		motion: "none",
-		captioned: false,
 		...overrides,
 	};
 }

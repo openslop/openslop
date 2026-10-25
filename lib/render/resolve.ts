@@ -16,7 +16,6 @@ import {
 	getMotion,
 	getVolume,
 } from "../canvas/element-attributes";
-import { isSpeech, yieldsToSpeech } from "./caption-rule";
 import { elementTrim, trimTimestamps } from "./clip-trim";
 
 function resolveCaptions(
@@ -44,10 +43,6 @@ export function resolveElements(
 	for (const scene of blocks) {
 		if (!isScene(scene)) continue;
 		sceneNumber += 1;
-		const sceneSpeaks = scene.children.some(
-			({ id, type }) =>
-				isSpeech(type) && !!getSnapshot(id).result?.textTimestamps?.length,
-		);
 
 		for (const element of scene.children) {
 			const snapshot = getSnapshot(element.id);
@@ -59,9 +54,6 @@ export function resolveElements(
 
 			const mediaDurationSec = snapshot.result.durationSec;
 			const trim = elementTrim(element, mediaDurationSec);
-			const words = captionsEnabled
-				? resolveCaptions(element, snapshot.result, trim)
-				: undefined;
 
 			resolved.push({
 				id: element.id,
@@ -78,8 +70,9 @@ export function resolveElements(
 				loop: getLoop(element),
 				volume: getVolume(element),
 				motion: getMotion(element),
-				captioned: words !== undefined,
-				captions: yieldsToSpeech(element.type, sceneSpeaks) ? undefined : words,
+				captions: captionsEnabled
+					? resolveCaptions(element, snapshot.result, trim)
+					: undefined,
 			});
 		}
 	}

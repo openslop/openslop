@@ -22,7 +22,6 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 		loop: false,
 		volume: 0,
 		motion: "none",
-		captioned: false,
 	};
 }
 

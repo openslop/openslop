@@ -27,7 +27,6 @@ function el(
 		loop: false,
 		volume: 10,
 		motion: "none",
-		captioned: captions !== undefined,
 		captions,
 	};
 }
@@ -64,6 +63,34 @@ describe("layoutCaptions", () => {
 		);
 		expect(lastLine.start).toBe(last.start);
 		expect(lastLine.duration).toBe(last.duration);
+	});
+
+	it("captions the speech instead of a video when its scene's speech has words", () => {
+		expect(
+			spans(
+				layoutOf([
+					el("vid", "video", words(10)),
+					el("nar", "narration", words(3)),
+				]),
+			).map(({ id }) => id),
+		).toEqual(["nar"]);
+	});
+
+	it("keeps a video's captions while its scene's speech has no words", () => {
+		expect(
+			spans(
+				layoutOf([el("vid", "video", words(10)), el("nar", "narration")]),
+			).map(({ id }) => id),
+		).toEqual(["vid"]);
+	});
+
+	it("keeps a video's captions when the speech is in another scene", () => {
+		const speech = { ...el("nar", "narration", words(3)), sceneId: "s2" };
+		expect(
+			spans(layoutOf([el("vid", "video", words(10)), speech])).map(
+				({ id }) => id,
+			),
+		).toEqual(["vid", "nar"]);
 	});
 
 	it("drops a line too short to cover a frame", () => {
