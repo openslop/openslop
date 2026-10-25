@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CaptionOverlay } from "@/components/captions/caption-overlay";
 import { groupIntoLines, wordsAt } from "@/lib/captions/caption-layout";
+import type { Caption } from "@remotion/captions";
 import type { CaptionStyle } from "@/lib/captions/caption-style";
 
 const WORD_MS = 420;
@@ -40,7 +41,7 @@ export function useCaptionCycle(wordCount: number, playing: boolean): number {
  */
 export function CaptionStage({
 	style,
-	words,
+	captions,
 	activeIndex,
 	width,
 	height,
@@ -48,7 +49,7 @@ export function CaptionStage({
 	lineMs = style.lineMs,
 }: {
 	style: CaptionStyle;
-	words: readonly string[];
+	captions: Caption[];
 	activeIndex: number;
 	width: number;
 	height: number;
@@ -56,20 +57,11 @@ export function CaptionStage({
 	lineMs?: number;
 }) {
 	const lines = useMemo(
-		() =>
-			groupIntoLines(
-				words.map((text, at) => ({
-					text,
-					start: (at * WORD_MS) / 1000,
-					end: ((at + 1) * WORD_MS) / 1000,
-				})),
-				lineMs,
-			),
-		[words, lineMs],
+		() => groupIntoLines(captions, lineMs),
+		[captions, lineMs],
 	);
-	const line = lines.find(
-		({ firstWord, tokens }) => activeIndex < firstWord + tokens.length,
-	);
+	const seconds = captions[activeIndex].startMs / 1000;
+	const line = lines.find(({ end }) => seconds < end);
 	return (
 		<div
 			className="relative shrink-0 overflow-hidden rounded-lg bg-on-media"
@@ -77,7 +69,7 @@ export function CaptionStage({
 		>
 			<CaptionOverlay
 				style={style}
-				words={line ? wordsAt(line.tokens, (activeIndex * WORD_MS) / 1000) : []}
+				words={line ? wordsAt(line.tokens, seconds) : []}
 				fontSizePx={fontSizePx}
 			/>
 		</div>

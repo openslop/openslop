@@ -1,16 +1,17 @@
 import {
 	createTikTokStyleCaptions,
+	type Caption,
 	type TikTokToken,
 } from "@remotion/captions";
-import type { TextTimestamp } from "@/lib/connectors/types";
 
 export type CaptionWord = { text: string; active: boolean };
 
-/** A page of words shown together, on screen over `[start, end)` seconds. */
+/** A page of captions shown together, on screen over `[start, end)` seconds. */
 export type CaptionLine = {
-	/** Where the line's first token sits in the element's words; tokens map to words one to one. */
+	/** Where the line's first token sits in the element's captions; tokens map to captions one to one. */
 	firstWord: number;
 	tokens: TikTokToken[];
+	text: string;
 	start: number;
 	end: number;
 };
@@ -27,40 +28,40 @@ export function wordsAt(
 	}));
 }
 
-/** Words join a line until it has run `lineMs`; each line holds until the next one starts. */
+/** Captions join a line until it has run `lineMs`; each line holds until the next one starts. */
 export function groupIntoLines(
-	words: readonly TextTimestamp[],
+	captions: Caption[],
 	lineMs: number,
+	firstWord = 0,
 ): CaptionLine[] {
 	const { pages } = createTikTokStyleCaptions({
-		captions: words.map(({ text, start, end }, index) => ({
-			text: index === 0 ? text : ` ${text}`,
-			startMs: start * 1000,
-			endMs: end * 1000,
-			timestampMs: null,
-			confidence: null,
-		})),
+		captions,
 		combineTokensWithinMilliseconds: lineMs,
 	});
-	let firstWord = 0;
-	return pages.map(({ startMs, durationMs, tokens }) => {
+	let at = firstWord;
+	return pages.map(({ text, startMs, durationMs, tokens }) => {
 		const line = {
-			firstWord,
+			firstWord: at,
 			tokens,
+			text,
 			start: startMs / 1000,
 			end: (startMs + durationMs) / 1000,
 		};
-		firstWord += tokens.length;
+		at += tokens.length;
 		return line;
 	});
 }
 
 /** The lines an element shows, the last held until its captions stop. */
 export function captionLines(
-	{ words, untilSec }: { words: readonly TextTimestamp[]; untilSec: number },
+	{
+		firstWord,
+		words,
+		untilSec,
+	}: { firstWord: number; words: Caption[]; untilSec: number },
 	lineMs: number,
 ): CaptionLine[] {
-	const lines = groupIntoLines(words, lineMs).filter(
+	const lines = groupIntoLines(words, lineMs, firstWord).filter(
 		(line) => line.start < untilSec,
 	);
 	return lines.map((line, index) => ({

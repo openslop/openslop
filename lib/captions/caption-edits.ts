@@ -1,15 +1,17 @@
-import type { AssetResult, TextTimestamp } from "@/lib/connectors/types";
+import type { Caption } from "@remotion/captions";
+import type { AssetResult } from "@/lib/connectors/types";
 
-/** The typed text replaces the word and keeps its timing; clearing it deletes the word. */
+/** The typed text replaces the caption's and keeps its timing and leading space; clearing it deletes the caption. */
 export function reviseWord(
-	words: readonly TextTimestamp[],
+	captions: readonly Caption[],
 	index: number,
 	text: string,
-): TextTimestamp[] {
+): Caption[] {
 	const typed = text.trim();
-	return typed
-		? words.with(index, { ...words[index], text: typed })
-		: words.toSpliced(index, 1);
+	if (!typed) return captions.toSpliced(index, 1);
+	const caption = captions[index];
+	const space = caption.text.startsWith(" ") ? " " : "";
+	return captions.with(index, { ...caption, text: space + typed });
 }
 
 /** The first edit keeps the words as generated, so every later one can be reset to them. */

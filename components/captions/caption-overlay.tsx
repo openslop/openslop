@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import type { CaptionWord } from "@/lib/captions/caption-layout";
 import { captionFontStack } from "@/lib/captions/caption-fonts";
 import {
@@ -45,7 +45,7 @@ function outline(width: number, color: string): CSSProperties {
 	};
 }
 
-export function captionWordStyle(style: CaptionTextStyle): CSSProperties {
+function captionWordStyle(style: CaptionTextStyle): CSSProperties {
 	return {
 		color: style.fill,
 		fontWeight: style.bold ? 700 : 400,
@@ -64,23 +64,15 @@ export function captionWordStyle(style: CaptionTextStyle): CSSProperties {
 	};
 }
 
-function CaptionWords({
-	style,
-	words,
-}: {
-	style: CaptionStyle;
-	words: readonly CaptionWord[];
-}) {
-	return words.map((word, i) => (
-		<span
-			// Words repeat within a line, so the position is the identity.
-			key={i}
-			style={captionWordStyle(word.active ? style.activeWord : style.base)}
-		>
-			{word.text}
-		</span>
-	));
-}
+type RenderWord = (
+	word: CaptionWord,
+	style: CSSProperties,
+	index: number,
+) => ReactNode;
+
+const renderSpan: RenderWord = (word, style) => (
+	<span style={style}>{word.text}</span>
+);
 
 /**
  * Draws one caption line over its parent (which must be positioned). Shared by
@@ -91,12 +83,13 @@ export function CaptionOverlay({
 	style,
 	words,
 	fontSizePx,
-	children = <CaptionWords style={style} words={words} />,
+	renderWord = renderSpan,
 }: {
 	style: CaptionStyle;
 	words: readonly CaptionWord[];
 	fontSizePx: number;
-	children?: ReactNode;
+	/** Draws each word, such as a field that edits it, instead of a span. */
+	renderWord?: RenderWord;
 }) {
 	if (words.length === 0) return null;
 
@@ -131,7 +124,16 @@ export function CaptionOverlay({
 					textTransform: TRANSFORM[style.casing],
 				}}
 			>
-				{children}
+				{words.map((word, index) => (
+					// Words repeat within a line, so the position is the identity.
+					<Fragment key={index}>
+						{renderWord(
+							word,
+							captionWordStyle(word.active ? style.activeWord : style.base),
+							index,
+						)}
+					</Fragment>
+				))}
 			</div>
 		</div>
 	);

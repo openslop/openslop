@@ -29,13 +29,11 @@ type Element = CaptionLineProps["element"];
 function Line({
 	line,
 	startFrame,
-	firstWord,
 	element,
 	style,
 }: {
 	line: CaptionLine;
 	startFrame: number;
-	firstWord: number;
 	element: Element;
 	style: CaptionStyle;
 }) {
@@ -47,7 +45,7 @@ function Line({
 		words: wordsAt(line.tokens, toSeconds(startFrame + frame, fps)),
 		fontSizePx: captionFontSizePx(style.fontSize, height),
 		element,
-		firstWord: firstWord + line.firstWord,
+		firstWord: line.firstWord,
 	});
 }
 
@@ -75,13 +73,7 @@ export function Captions({
 				from={from}
 				durationInFrames={durationInFrames}
 			>
-				<Line
-					line={line}
-					startFrame={from}
-					firstWord={captions.firstWord}
-					element={element}
-					style={style}
-				/>
+				<Line line={line} startFrame={from} element={element} style={style} />
 			</Sequence>
 		);
 	});

@@ -137,7 +137,7 @@ function linesOf({ element, start }: Sequence, lineMs: number): CaptionClip[] {
 		element,
 		start: start + line.start,
 		duration: line.end - line.start,
-		text: line.tokens.map((token) => token.text.trim()).join(" "),
+		text: line.text,
 	}));
 }
 

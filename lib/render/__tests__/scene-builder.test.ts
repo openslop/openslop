@@ -6,6 +6,7 @@ import type { BuildLayoutOptions } from "../scene-builder";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import type { ContentType } from "@/lib/canvas/types";
 import { layoutOf } from "./_layout";
+import { caption } from "@/lib/captions/__tests__/_captions";
 
 // The rendered transition overlap: TRANSITION_DURATION_SEC (0.4s) snapped to the
 // 24fps frame grid, which is what <TransitionSeries> actually lays down.
@@ -654,7 +655,7 @@ describe("buildRenderLayout", () => {
 describe("the caption rule", () => {
 	const captions = (untilSec: number) => ({
 		firstWord: 0,
-		words: [{ text: "hi", start: 0, end: 1 }],
+		words: [caption("hi", 0, 1)],
 		untilSec,
 	});
 	const video = el({

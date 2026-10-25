@@ -3,7 +3,7 @@ import {
 	getTrimStart,
 } from "@/lib/canvas/element-attributes";
 import { CONTENT_TYPES, type ContentElement } from "@/lib/canvas/types";
-import type { TextTimestamp } from "@/lib/connectors/types";
+import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
 import { MIN_DURATION_SEC } from "./scene-builder";
 import type { ResolvedElement } from "./types";
@@ -72,17 +72,17 @@ export const elementTrim = (
 		getTimelineDuration(element),
 	);
 
-/** Word timings counted from the trim start, without the words cut before it. */
+/** Caption timings counted from the trim start, without the captions cut before it. */
 export const trimTimestamps = (
-	timestamps: TextTimestamp[],
+	captions: Caption[],
 	startSec: number,
-): TextTimestamp[] =>
-	timestamps
-		.filter(({ end }) => end > startSec)
-		.map((word) => ({
-			...word,
-			start: word.start - startSec,
-			end: word.end - startSec,
+): Caption[] =>
+	captions
+		.filter(({ endMs }) => endMs > startSec * 1000)
+		.map((caption) => ({
+			...caption,
+			startMs: caption.startMs - startSec * 1000,
+			endMs: caption.endMs - startSec * 1000,
 		}));
 
 /**

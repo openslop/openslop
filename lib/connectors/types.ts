@@ -1,3 +1,4 @@
+import type { Caption } from "@remotion/captions";
 import { z } from "zod";
 import type { CanvasElement } from "@/lib/canvas/types";
 import type { Dependency, Read } from "@/lib/generation/declare";
@@ -131,22 +132,23 @@ export type ResolvedConnectorConfig = ConnectorConfig & { model: ModelRef };
  */
 export type ConnectorGenerateParams = Partial<ModelRef> & { prompt: string };
 
-export const TextTimestampSchema = z.object({
-	text: z.string(),
-	start: z.number(),
-	end: z.number(),
-});
-
-export type TextTimestamp = z.infer<typeof TextTimestampSchema>;
+/** Remotion's caption, which each provider writes: a leading space starts a word, and a caption is never blank. */
+export const CaptionSchema = z.object({
+	text: z.string().regex(/\S/, "A caption holds no words"),
+	startMs: z.number(),
+	endMs: z.number(),
+	timestampMs: z.number().nullable(),
+	confidence: z.number().nullable(),
+}) satisfies z.ZodType<Caption>;
 
 export const AssetResultSchema = z.object({
 	durationSec: z.number(),
 	imageUrl: z.string().optional(),
 	audioUrl: z.string().optional(),
 	videoUrl: z.string().optional(),
-	textTimestamps: z.array(TextTimestampSchema).optional(),
+	textTimestamps: z.array(CaptionSchema).optional(),
 	/** The words as generated, kept once the user edits them. */
-	generatedTextTimestamps: z.array(TextTimestampSchema).optional(),
+	generatedTextTimestamps: z.array(CaptionSchema).optional(),
 	voiceId: z.string().optional(),
 });
 
@@ -207,7 +209,7 @@ export type ImageGenerateParams = ConnectorGenerateParams & {
 };
 
 export const TTSResultSchema = AssetResultSchema.extend({
-	textTimestamps: z.array(TextTimestampSchema),
+	textTimestamps: z.array(CaptionSchema),
 });
 
 export type TTSResult = z.infer<typeof TTSResultSchema>;
@@ -231,7 +233,7 @@ export type SourcedSTTParams = STTGenerateParams & {
 
 export type STTResult = {
 	durationSec: number;
-	textTimestamps: TextTimestamp[];
+	textTimestamps: Caption[];
 };
 
 /** A TTS request after its speaker's voice is resolved. */

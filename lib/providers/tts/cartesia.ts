@@ -1,10 +1,7 @@
+import type { Caption } from "@remotion/captions";
 import { unstable_cache } from "next/cache";
 import Cartesia from "@cartesia/cartesia-js";
-import type {
-	TextTimestamp,
-	VoiceInfo,
-	VoiceSearchParams,
-} from "@/lib/connectors/types";
+import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import {
 	DEFAULT_TTS_EMOTION,
 	DEFAULT_TTS_SPEED,
@@ -15,7 +12,7 @@ import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type RawResult } from "../base";
 import { timestampsFile } from "../timestamps-file";
-import { validateCartesiaKey } from "../cartesia";
+import { cartesiaCaptions, validateCartesiaKey } from "../cartesia";
 import { pcmDurationSec, pcmSilence, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voice-preview";
@@ -31,7 +28,7 @@ import type {
 
 type RawTTSResult = {
 	data: Buffer;
-	textTimestamps: TextTimestamp[];
+	textTimestamps: Caption[];
 } & RawResult;
 
 /** Cartesia reports no per-request cost; the Scale plan is $299 for 8M characters. */
@@ -199,7 +196,7 @@ export class CartesiaTTS
 
 		try {
 			const audioChunks: Buffer[] = [];
-			const textTimestamps: TextTimestamp[] = [];
+			const textTimestamps: Caption[] = [];
 			const request: GenerationRequest = {
 				model_id: params.model,
 				transcript: params.prompt,
@@ -223,7 +220,9 @@ export class CartesiaTTS
 				if (response.type === "timestamps" && response.word_timestamps) {
 					const { words, start, end } = response.word_timestamps;
 					textTimestamps.push(
-						...words.map((text, i) => ({ text, start: start[i], end: end[i] })),
+						...cartesiaCaptions(
+							words.map((text, i) => ({ text, start: start[i], end: end[i] })),
+						),
 					);
 				}
 			}

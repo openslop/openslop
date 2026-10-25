@@ -3,7 +3,7 @@ import type {
 	SpeechToTextConvertRequestModelId,
 	SpeechToTextWordResponseModel,
 } from "@elevenlabs/elevenlabs-js/api";
-import type { TextTimestamp } from "@/lib/connectors/types";
+import type { Caption } from "@remotion/captions";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
 import { timestampsFile } from "../timestamps-file";
@@ -14,15 +14,22 @@ import type { STTProvider } from "../types";
 /** ElevenLabs reports no per-request cost; batch Scribe is $0.22 an hour. */
 const USD_PER_HOUR = 0.22;
 
-/** Spoken words only: the gaps between them and sounds like laughter are not captions. */
-const toTimestamps = (
-	words: SpeechToTextWordResponseModel[],
-): TextTimestamp[] =>
-	words.flatMap(({ text, type, start, end }) =>
-		type === "word" && start !== undefined && end !== undefined
-			? [{ text, start, end }]
-			: [],
-	);
+/** Spoken words only: the spacing before a word leads its text, and sounds like laughter are not captions. */
+const toCaptions = (words: SpeechToTextWordResponseModel[]): Caption[] =>
+	words.flatMap(({ text, type, start, end }, index) => {
+		const before = words[index - 1];
+		return type === "word" && start !== undefined && end !== undefined
+			? [
+					{
+						text: before?.type === "spacing" ? before.text + text : text,
+						startMs: start * 1000,
+						endMs: end * 1000,
+						timestampMs: null,
+						confidence: null,
+					},
+				]
+			: [];
+	});
 
 export class ElevenLabsSTT
 	extends BaseProvider<STTRequest, RawSTT>
@@ -56,7 +63,7 @@ export class ElevenLabsSTT
 				tagAudioEvents: false,
 			},
 		);
-		const textTimestamps = toTimestamps(words);
+		const textTimestamps = toCaptions(words);
 		if (audioDurationSecs === undefined)
 			throw new Error("ElevenLabs reported no audio duration");
 		return {

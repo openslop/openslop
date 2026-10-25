@@ -4,13 +4,13 @@ import { useState } from "react";
 import isEqual from "lodash/isEqual";
 import {
 	CAPTION_PRESETS,
+	CAPTION_THUMBNAIL_SAMPLE,
 	type CaptionPreset,
 } from "@/lib/captions/caption-presets";
 import type { CaptionStyle } from "@/lib/captions/caption-style";
 import { cn } from "@/lib/utils";
 import { CaptionStage, useCaptionCycle } from "./caption-stage";
 
-const SAMPLE = ["Look", "at", "this"];
 const WIDTH = 96;
 const HEIGHT = 54;
 // Thumbnails preview the look, not the framing, so they use a legible fixed
@@ -27,7 +27,7 @@ function PresetCard({
 	onSelect: () => void;
 }) {
 	const [active, setActive] = useState(false);
-	const activeIndex = useCaptionCycle(SAMPLE.length, active);
+	const activeIndex = useCaptionCycle(CAPTION_THUMBNAIL_SAMPLE.length, active);
 
 	return (
 		<button
@@ -45,7 +45,7 @@ function PresetCard({
 		>
 			<CaptionStage
 				style={preset.style}
-				words={SAMPLE}
+				captions={CAPTION_THUMBNAIL_SAMPLE}
 				activeIndex={activeIndex}
 				width={WIDTH}
 				height={HEIGHT}

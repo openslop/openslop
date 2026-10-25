@@ -231,6 +231,26 @@ describe("CartesiaTTS", () => {
 
 			expect(result.output.result.audio).toBe("url");
 			expect(result.output.result.timestamps).toBe("url");
+			const [, , files] = vi.mocked(AssetBundle.upload).mock.calls[0];
+			const timestamps = files.find((f) => f.key === "timestamps");
+			if (!timestamps || !("data" in timestamps))
+				throw new Error("Captions were not written inline");
+			expect(JSON.parse(String(timestamps.data))).toEqual([
+				{
+					text: " hello",
+					startMs: 0,
+					endMs: 400,
+					timestampMs: null,
+					confidence: null,
+				},
+				{
+					text: " world",
+					startMs: 500,
+					endMs: 900,
+					timestampMs: null,
+					confidence: null,
+				},
+			]);
 			expect(mockConnect).toHaveBeenCalled();
 			expect(mockClose).toHaveBeenCalled();
 		});

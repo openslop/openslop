@@ -18,6 +18,7 @@ import {
 	captionsNodeId,
 	withCaptionsLanding,
 } from "../captions-job";
+import { caption } from "./_captions";
 
 let generateMock: Mock<typeof generateForElement>;
 
@@ -27,7 +28,7 @@ vi.mock("@/lib/generation/generate-for-element", () => ({
 }));
 
 const spoken = { audioUrl: "https://example.com/a.wav", durationSec: 2 };
-const heard = [{ text: "hi", start: 0, end: 1 }];
+const heard = [caption("hi", 0, 1)];
 const element = { id: "narration", type: "narration" } as const;
 const stt = (result: AssetResult = spoken) =>
 	captionsNode(element, result, DEFAULT_MODELS.stt);

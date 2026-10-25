@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useElementWidth } from "@/lib/components/use-element-width";
 import { ASPECT_RATIO_DIMENSIONS } from "@/lib/project/aspect-ratio";
-import { CAPTION_SAMPLE_WORDS } from "@/lib/captions/caption-presets";
+import { CAPTION_SAMPLE } from "@/lib/captions/caption-presets";
 import {
 	captionFontSizePx,
 	type CaptionStyle,
@@ -24,7 +24,7 @@ export function CaptionPreview({ style }: { style: CaptionStyle }) {
 	const { output } = ASPECT_RATIO_DIMENSIONS[aspectRatio];
 	const scale = Math.min(available / output.width, MAX_HEIGHT / output.height);
 	const height = Math.round(output.height * scale);
-	const activeIndex = useCaptionCycle(CAPTION_SAMPLE_WORDS.length, playing);
+	const activeIndex = useCaptionCycle(CAPTION_SAMPLE.length, playing);
 
 	return (
 		<div
@@ -35,7 +35,7 @@ export function CaptionPreview({ style }: { style: CaptionStyle }) {
 		>
 			<CaptionStage
 				style={style}
-				words={CAPTION_SAMPLE_WORDS}
+				captions={CAPTION_SAMPLE}
 				activeIndex={activeIndex}
 				width={Math.round(output.width * scale)}
 				height={height}

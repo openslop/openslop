@@ -8,6 +8,7 @@ import {
 	buildTimelineRows,
 	packLanes,
 } from "../timeline-rows";
+import { caption } from "@/lib/captions/__tests__/_captions";
 
 function el(
 	id: string,
@@ -213,11 +214,9 @@ describe("buildTimelineRows", () => {
 });
 
 describe("buildCaptionRows", () => {
-	const words = ["one", "two", "three"].map((text, at) => ({
-		text,
-		start: at,
-		end: at + 1,
-	}));
+	const words = ["one", "two", "three"].map((text, at) =>
+		caption(text, at, at + 1),
+	);
 	const narration = el("n", "narration", {
 		captions: { firstWord: 0, words, untilSec: 4 },
 	});

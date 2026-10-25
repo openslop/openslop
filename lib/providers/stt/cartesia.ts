@@ -4,7 +4,7 @@ import { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
 import { timestampsFile } from "../timestamps-file";
 import type { RawSTT, STTRequest } from "./base";
-import { validateCartesiaKey } from "../cartesia";
+import { cartesiaCaptions, validateCartesiaKey } from "../cartesia";
 import type { STTProvider } from "../types";
 
 /** Cartesia reports no per-request cost: a credit buys 2 seconds, at the Scale plan's $299 for 8M credits. */
@@ -46,11 +46,9 @@ export class CartesiaSTT
 			model,
 			timestamp_granularities: ["word"],
 		});
-		const textTimestamps = (words ?? []).map(({ word, start, end }) => ({
-			text: word,
-			start,
-			end,
-		}));
+		const textTimestamps = cartesiaCaptions(
+			(words ?? []).map(({ word, start, end }) => ({ text: word, start, end })),
+		);
 		if (duration == null)
 			throw new Error("Cartesia reported no audio duration");
 		return {
