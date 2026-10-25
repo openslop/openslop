@@ -48,8 +48,7 @@ const CAPTION_ROW = {
 // overlap still counts as a touch.
 const TOUCH_EPSILON = 1e-6;
 
-/** A scene's own span ends where the next begins. */
-function ownSpans(series: Sequence[]): Sequence[] {
+function endScenesWhereNextBegins(series: Sequence[]): Sequence[] {
 	return series.map((sequence) => ({
 		...sequence,
 		duration: secUntilNextScene(sequence, series),
@@ -57,7 +56,7 @@ function ownSpans(series: Sequence[]): Sequence[] {
 }
 
 function sequencesForRole(layout: RenderLayout, role: ElementRole): Sequence[] {
-	if (role === "foreground") return ownSpans(layout.series);
+	if (role === "foreground") return endScenesWhereNextBegins(layout.series);
 	return Object.values(layout.sequences)
 		.flat()
 		.filter((sequence) => sequence.element.role === role)

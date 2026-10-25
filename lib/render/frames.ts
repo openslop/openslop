@@ -13,7 +13,6 @@ export function toSeconds(frames: number, fps: number): number {
 	return frames / fps;
 }
 
-/** The frames a span covers, ending where the next span from its end would begin. */
 export function frameSpan(
 	startSec: number,
 	durationSec: number,

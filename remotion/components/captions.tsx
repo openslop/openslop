@@ -9,7 +9,6 @@ import {
 import { frameSpan, toSeconds } from "@/lib/render/frames";
 import type { CaptionSequence } from "@/lib/render/caption-rule";
 
-/** Draws only the lines on screen at this frame, so a long video's other lines cost nothing. */
 export function Captions({
 	captions,
 	style,

@@ -14,26 +14,30 @@ export type CaptionSequence = Sequence & {
 const isSpeech = ({ element }: Sequence) =>
 	captionSourceOf(element.type) === "speech";
 
-const scenesOf = (sequences: Sequence[]) =>
+const sceneIdsOf = (sequences: Sequence[]) =>
 	new Set(sequences.map(({ element }) => element.sceneId));
 
-/** A video gives way to speech: its scene's voices are captioned instead. */
-const yieldsToSpeech = ({ element }: Sequence, spokenScenes: Set<string>) =>
+const isVideoInSpokenScene = (
+	{ element }: Sequence,
+	spokenScenes: Set<string>,
+) =>
 	captionSourceOf(element.type) === "video" &&
 	spokenScenes.has(element.sceneId);
 
-/** The sequences that show captions once every speech has words, so a muted video never needs any. */
 export function captionableSequences(layout: Layout): Sequence[] {
 	const sequences = layoutSequences(layout);
-	const spokenScenes = scenesOf(sequences.filter(isSpeech));
+	const scenesWithSpeech = sceneIdsOf(sequences.filter(isSpeech));
 	return sequences.filter(
 		(sequence) =>
 			isCaptionable(sequence.element.type) &&
-			!yieldsToSpeech(sequence, spokenScenes),
+			!isVideoInSpokenScene(sequence, scenesWithSpeech),
 	);
 }
 
-function linesOf(
+const coversAFrame = (start: number, duration: number, fps: number) =>
+	frameSpan(start, duration, fps).durationInFrames > 0;
+
+function linesUntilNextScene(
 	sequence: Sequence,
 	series: Sequence[],
 	lineMs: number,
@@ -54,24 +58,22 @@ function linesOf(
 	);
 }
 
-/** Every caption line on the video's time; a video yields to captioned speech in its scene, and each stops by where the next scene begins. */
 export function layoutCaptions(
 	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle" | "fps">,
 ): CaptionSequence[] {
 	const sequences = layoutSequences(layout);
-	const spokenScenes = scenesOf(
+	const scenesWithCaptionedSpeech = sceneIdsOf(
 		sequences.filter(
 			(sequence) => sequence.element.captions && isSpeech(sequence),
 		),
 	);
 	return sequences
-		.filter((sequence) => !yieldsToSpeech(sequence, spokenScenes))
-		.flatMap((sequence) =>
-			linesOf(sequence, layout.series, layout.captionStyle.lineMs),
-		)
 		.filter(
-			({ start, duration }) =>
-				frameSpan(start, duration, layout.fps).durationInFrames > 0,
+			(sequence) => !isVideoInSpokenScene(sequence, scenesWithCaptionedSpeech),
 		)
+		.flatMap((sequence) =>
+			linesUntilNextScene(sequence, layout.series, layout.captionStyle.lineMs),
+		)
+		.filter(({ start, duration }) => coversAFrame(start, duration, layout.fps))
 		.sort((a, b) => a.start - b.start);
 }
