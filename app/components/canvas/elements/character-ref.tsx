@@ -16,7 +16,7 @@ import { isCharacter } from "@/lib/canvas/assets";
 import { useHasAsset } from "@/lib/canvas/use-assets";
 import { cn } from "@/lib/utils";
 import { CharacterAvatar } from "./character-pill";
-import { useAssetEditors } from "./character/asset-edit-provider";
+import { useAssetEditors } from "./asset-edit-context";
 
 const noSubscription = () => () => {};
 
