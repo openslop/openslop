@@ -11,12 +11,12 @@ export class MockSTT
 	protected readonly variants = [
 		{
 			id: "1",
-			result: { timestamps: `${TTS_MOCK}/1/timestamps.json` },
+			result: { timestamps: `${TTS_MOCK}/1/captions.json` },
 			metadata: { durationSec: 10 },
 		},
 		{
 			id: "2",
-			result: { timestamps: `${TTS_MOCK}/2/timestamps.json` },
+			result: { timestamps: `${TTS_MOCK}/2/captions.json` },
 			metadata: { durationSec: 18 },
 		},
 	];
