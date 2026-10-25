@@ -11,7 +11,8 @@ import {
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type RawResult } from "../base";
-import { secondsCaption, timestampsFile } from "../timestamps-file";
+import { timestampsFile } from "../timestamps-file";
+import { type TimedToken, wordCaptions } from "../word-captions";
 import { validateCartesiaKey } from "../cartesia";
 import { pcmDurationSec, pcmSilence, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
@@ -196,7 +197,7 @@ export class CartesiaTTS
 
 		try {
 			const audioChunks: Buffer[] = [];
-			const textTimestamps: Caption[] = [];
+			const tokens: TimedToken[] = [];
 			const request: GenerationRequest = {
 				model_id: params.model,
 				transcript: params.prompt,
@@ -219,10 +220,8 @@ export class CartesiaTTS
 				}
 				if (response.type === "timestamps" && response.word_timestamps) {
 					const { words, start, end } = response.word_timestamps;
-					textTimestamps.push(
-						...words.map((text, i) =>
-							secondsCaption(` ${text}`, start[i], end[i]),
-						),
+					tokens.push(
+						...words.map((text, i) => ({ text, start: start[i], end: end[i] })),
 					);
 				}
 			}
@@ -240,7 +239,7 @@ export class CartesiaTTS
 			]);
 			return {
 				data: wavFromPcm(padded, STREAMED_FORMAT),
-				textTimestamps,
+				textTimestamps: wordCaptions(tokens),
 				costUsd: params.prompt.length * USD_PER_CHARACTER,
 				// Word timestamps stop at the last word, and may be absent.
 				metadata: {

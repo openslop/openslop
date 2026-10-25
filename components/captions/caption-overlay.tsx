@@ -53,14 +53,13 @@ function captionWordStyle(style: CaptionTextStyle): CSSProperties {
 		textDecoration: style.underline ? "underline" : "none",
 		...(style.border && outline(style.border.width, style.border.color)),
 		backgroundColor: style.background ?? undefined,
-		// The padding is unconditional and carries the word spacing, so switching
-		// a background on changes only the paint and never the layout.
-		padding: "0.05em 0.11em",
+		// Shadows widen the background past the glyphs without taking up room,
+		// so switching one on changes only the paint and never the layout.
+		boxShadow: style.background
+			? `-0.06em 0 0 0.05em ${style.background}, 0.06em 0 0 0.05em ${style.background}`
+			: undefined,
+		padding: 0,
 		borderRadius: "0.12em",
-		// `anywhere`, not `break-word`: only the former shrinks the span's
-		// min-content size, so a word wider than the frame wraps instead of
-		// overflowing this flex item.
-		overflowWrap: "anywhere",
 	};
 }
 
@@ -108,11 +107,9 @@ export function CaptionOverlay({
 		>
 			<div
 				style={{
-					display: "flex",
-					flexWrap: "wrap",
-					justifyContent: ALIGN_X[style.alignX],
-					alignItems: "baseline",
-					gap: "0.1em 0.06em",
+					// `anywhere`, not `break-word`: only the former shrinks this flex
+					// item's min-content size, so a word wider than the frame wraps.
+					overflowWrap: "anywhere",
 					fontFamily: captionFontStack(style.font),
 					fontSize: fontSizePx,
 					letterSpacing: "-0.01em",
@@ -127,6 +124,7 @@ export function CaptionOverlay({
 				{words.map((word, index) => (
 					// Words repeat within a line, so the position is the identity.
 					<Fragment key={index}>
+						{word.spaceBefore && " "}
 						{renderWord(
 							word,
 							captionWordStyle(word.active ? style.activeWord : style.base),

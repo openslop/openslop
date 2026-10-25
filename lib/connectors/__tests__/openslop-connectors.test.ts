@@ -124,7 +124,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 
 		expect(result.audioUrl).toBe(`${bundleUrl}/output.wav`);
 		expect(result.textTimestamps).toHaveLength(1);
-		expect(result.textTimestamps[0].text).toBe(" hello");
+		expect(result.textTimestamps[0].text).toBe("hello");
 	});
 
 	it("TTS: searchVoices calls /api/v1/tts/voices", async () => {

@@ -132,9 +132,12 @@ export type ResolvedConnectorConfig = ConnectorConfig & { model: ModelRef };
  */
 export type ConnectorGenerateParams = Partial<ModelRef> & { prompt: string };
 
-/** Remotion's caption, which each provider writes: a leading space starts a word, and a caption is never blank. */
+/** Remotion's caption, holding one word as its provider spelled it, never padded with spaces. */
 export const CaptionSchema = z.object({
-	text: z.string().regex(/\S/, "A caption holds no words"),
+	text: z
+		.string()
+		.min(1, "A caption holds no word")
+		.refine((text) => text === text.trim(), "A caption is never padded"),
 	startMs: z.number(),
 	endMs: z.number(),
 	timestampMs: z.number().nullable(),

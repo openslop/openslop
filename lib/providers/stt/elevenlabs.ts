@@ -6,7 +6,8 @@ import type {
 import type { Caption } from "@remotion/captions";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
-import { secondsCaption, timestampsFile } from "../timestamps-file";
+import { timestampsFile } from "../timestamps-file";
+import { wordCaptions } from "../word-captions";
 import type { RawSTT, STTRequest } from "./base";
 import { validateElevenLabsKey } from "../elevenlabs";
 import type { STTProvider } from "../types";
@@ -14,20 +15,15 @@ import type { STTProvider } from "../types";
 /** ElevenLabs reports no per-request cost; batch Scribe is $0.22 an hour. */
 const USD_PER_HOUR = 0.22;
 
-/** Spoken words only: the spacing before a word leads its text, and sounds like laughter are not captions. */
+/** Sounds like laughter are not captions, and Scribe times the spacing between words as tokens of its own. */
 const toCaptions = (words: SpeechToTextWordResponseModel[]): Caption[] =>
-	words.flatMap(({ text, type, start, end }, index) => {
-		const before = words[index - 1];
-		return type === "word" && start !== undefined && end !== undefined
-			? [
-					secondsCaption(
-						before?.type === "spacing" ? before.text + text : text,
-						start,
-						end,
-					),
-				]
-			: [];
-	});
+	wordCaptions(
+		words.flatMap(({ text, type, start, end }) =>
+			type === "word" && start !== undefined && end !== undefined
+				? [{ text, start, end }]
+				: [],
+		),
+	);
 
 export class ElevenLabsSTT
 	extends BaseProvider<STTRequest, RawSTT>

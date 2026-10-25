@@ -1,17 +1,15 @@
 import type { Caption } from "@remotion/captions";
 import type { AssetResult } from "@/lib/connectors/types";
 
-/** The typed text replaces the caption's and keeps its timing and leading space; clearing it deletes the caption. */
+/** The typed word replaces the caption's and keeps its timing; clearing it deletes the caption. */
 export function reviseWord(
 	captions: readonly Caption[],
 	index: number,
 	text: string,
 ): Caption[] {
-	const typed = text.trim();
-	if (!typed) return captions.toSpliced(index, 1);
-	const caption = captions[index];
-	const space = caption.text.startsWith(" ") ? " " : "";
-	return captions.with(index, { ...caption, text: space + typed });
+	const word = text.trim();
+	if (!word) return captions.toSpliced(index, 1);
+	return captions.with(index, { ...captions[index], text: word });
 }
 
 /** The first edit keeps the words as generated, so every later one can be reset to them. */

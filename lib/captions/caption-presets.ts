@@ -95,7 +95,7 @@ export const SAMPLE_WORD_MS = 420;
 
 const sampleCaptions = (text: string): Caption[] =>
 	text.split(" ").map((word, index) => ({
-		text: index === 0 ? word : ` ${word}`,
+		text: word,
 		startMs: index * SAMPLE_WORD_MS,
 		endMs: (index + 1) * SAMPLE_WORD_MS,
 		timestampMs: null,

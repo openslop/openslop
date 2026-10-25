@@ -33,7 +33,7 @@ function el(
 }
 
 const heard: ResolvedCaptions = {
-	firstWord: 0,
+	firstWordIndex: 0,
 	words: [caption("hi", 0, 1)],
 };
 

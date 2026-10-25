@@ -5,9 +5,9 @@ import { caption } from "./_captions";
 const WORDS = ["one", "two", "three", "four", "five"];
 /** A word a second, each spoken for most of it. */
 const timed = WORDS.map((text, at) => caption(text, at, at + 0.8));
-const spans = (lines: { firstWord: number; tokens: unknown[] }[]) =>
-	lines.map(({ firstWord, tokens }) =>
-		WORDS.slice(firstWord, firstWord + tokens.length),
+const spans = (lines: { firstWordIndex: number; tokens: unknown[] }[]) =>
+	lines.map(({ firstWordIndex, tokens }) =>
+		WORDS.slice(firstWordIndex, firstWordIndex + tokens.length),
 	);
 
 describe("wordsAt", () => {
@@ -26,13 +26,19 @@ describe("wordsAt", () => {
 		expect(active(99)).toBe("three");
 	});
 
-	it("shows each word without the space that starts it", () => {
+	it("shows each word as stored, joined with spaces in the line's text", () => {
 		expect(wordsAt(line.tokens, 0).map(({ text }) => text)).toEqual([
 			"one",
 			"two",
 			"three",
 		]);
 		expect(line.text).toBe("one two three");
+	});
+
+	it("puts a space before every word but the line's first", () => {
+		expect(
+			wordsAt(line.tokens, 0).map(({ spaceBefore }) => spaceBefore),
+		).toEqual([false, true, true]);
 	});
 });
 
@@ -45,13 +51,16 @@ describe("groupIntoLines", () => {
 		]);
 	});
 
-	it("never breaks a line before a caption that continues a word", () => {
-		const [line] = groupIntoLines(
-			[caption("Remotion", 0, 1), { ...caption("'s", 1, 2), text: "'s" }],
-			0,
+	it("breaks lines in a language written without spaces, and draws none between its words", () => {
+		const unspaced = ["今日", "は", "晴れ", "です"].map((text, at) =>
+			caption(text, at, at + 0.8),
 		);
-		expect(line.text).toBe("Remotion's");
-		expect(line.tokens).toHaveLength(2);
+		const lines = groupIntoLines(unspaced, 1500);
+		expect(lines.map(({ text }) => text)).toEqual(["今日は", "晴れです"]);
+		expect(lines.map(({ firstWordIndex }) => firstWordIndex)).toEqual([0, 2]);
+		expect(
+			wordsAt(lines[0].tokens, 0).map(({ spaceBefore }) => spaceBefore),
+		).toEqual([false, false]);
 	});
 
 	it("shows one word at a time at a line length of 0", () => {
@@ -72,22 +81,26 @@ describe("groupIntoLines", () => {
 describe("captionLines", () => {
 	it("counts each line's first word from where the trim left the element's words", () => {
 		expect(
-			captionLines({ firstWord: 3, words: timed }, 10, 1500).map(
-				({ firstWord }) => firstWord,
+			captionLines({ firstWordIndex: 3, words: timed }, 10, 1500).map(
+				({ firstWordIndex }) => firstWordIndex,
 			),
 		).toEqual([3, 5, 7]);
 	});
 
 	it("holds the last line until the captions stop, and drops lines after", () => {
-		const lines = captionLines({ firstWord: 0, words: timed }, 3.5, 1500);
+		const lines = captionLines({ firstWordIndex: 0, words: timed }, 3.5, 1500);
 		expect(
-			lines.map(({ firstWord, start, end }) => [firstWord, start, end]),
+			lines.map(({ firstWordIndex, start, end }) => [
+				firstWordIndex,
+				start,
+				end,
+			]),
 		).toEqual([
 			[0, 0, 2],
 			[2, 2, 3.5],
 		]);
 		expect(
-			captionLines({ firstWord: 0, words: timed }, 10, 1500).at(-1)?.end,
+			captionLines({ firstWordIndex: 0, words: timed }, 10, 1500).at(-1)?.end,
 		).toBe(10);
 	});
 });

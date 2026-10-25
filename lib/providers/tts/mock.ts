@@ -4,7 +4,7 @@ import { MockProvider } from "../mock-base";
 import type { TTSProvider, TTSRequest } from "./base";
 import { fetchAllowedVoicePreview } from "./voice-preview";
 
-export const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
+const BLOB_BASE = `${BLOB_BASE_URL}/assets/tts/mock`;
 
 const PREVIEW_HOST = new URL(BLOB_BASE).hostname;
 
@@ -14,7 +14,7 @@ export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 			id: "1",
 			result: {
 				audio: `${BLOB_BASE}/1/output.mp3`,
-				timestamps: `${BLOB_BASE}/1/captions.json`,
+				timestamps: `${BLOB_BASE}/1/transcript.json`,
 			},
 			metadata: { durationSec: 10 },
 		},
@@ -22,7 +22,7 @@ export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 			id: "2",
 			result: {
 				audio: `${BLOB_BASE}/2/output.m4a`,
-				timestamps: `${BLOB_BASE}/2/captions.json`,
+				timestamps: `${BLOB_BASE}/2/transcript.json`,
 			},
 			metadata: { durationSec: 18 },
 		},
@@ -30,7 +30,7 @@ export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 			id: "3",
 			result: {
 				audio: `${BLOB_BASE}/3/output.wav`,
-				timestamps: `${BLOB_BASE}/3/captions.json`,
+				timestamps: `${BLOB_BASE}/3/transcript.json`,
 			},
 			metadata: { durationSec: 25 },
 		},
@@ -38,7 +38,7 @@ export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 			id: "4",
 			result: {
 				audio: `${BLOB_BASE}/4/output.mp3`,
-				timestamps: `${BLOB_BASE}/4/captions.json`,
+				timestamps: `${BLOB_BASE}/4/transcript.json`,
 			},
 			metadata: { durationSec: 8 },
 		},
@@ -46,7 +46,7 @@ export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 			id: "5",
 			result: {
 				audio: `${BLOB_BASE}/5/output.wav`,
-				timestamps: `${BLOB_BASE}/5/captions.json`,
+				timestamps: `${BLOB_BASE}/5/transcript.json`,
 			},
 			metadata: { durationSec: 21 },
 		},
@@ -54,7 +54,7 @@ export class MockTTS extends MockProvider<TTSRequest> implements TTSProvider {
 			id: "6",
 			result: {
 				audio: `${BLOB_BASE}/6/output.m4a`,
-				timestamps: `${BLOB_BASE}/6/captions.json`,
+				timestamps: `${BLOB_BASE}/6/transcript.json`,
 			},
 			metadata: { durationSec: 6 },
 		},

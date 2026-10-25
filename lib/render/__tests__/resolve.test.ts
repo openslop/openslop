@@ -269,7 +269,7 @@ describe("resolveElements", () => {
 
 		it("captions an element with the words on its own result, until it ends", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
-				firstWord: 0,
+				firstWordIndex: 0,
 				words: heard,
 			});
 		});
@@ -284,7 +284,7 @@ describe("resolveElements", () => {
 			const { captions } = resolveOne(
 				makeElement("vid", "video", { trimStart: "1.5" }),
 			);
-			expect(captions?.firstWord).toBe(1);
+			expect(captions?.firstWordIndex).toBe(1);
 			expect(captions?.words).toEqual([caption("two", 0.5, 1.5)]);
 		});
 

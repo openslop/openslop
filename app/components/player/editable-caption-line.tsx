@@ -29,7 +29,7 @@ export function EditableCaptionLine({
 	words,
 	fontSizePx,
 	element,
-	firstWord,
+	firstWordIndex,
 }: CaptionLineProps) {
 	const playing = usePlayerPlaying();
 	const queue = useGenerationQueue();
@@ -52,7 +52,7 @@ export function EditableCaptionLine({
 		setDraft(null);
 		if (cancelled.current || text.trim() === words[index].text) return;
 		queue.reviseResult(element, (result) =>
-			editCaptions(result, firstWord + index, text),
+			editCaptions(result, firstWordIndex + index, text),
 		);
 	};
 

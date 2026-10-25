@@ -30,7 +30,7 @@ export function Captions({
 				words={wordsAt(line.tokens, line.start + toSeconds(frame - from, fps))}
 				fontSizePx={fontSizePx}
 				element={element}
-				firstWord={line.firstWord}
+				firstWordIndex={line.firstWordIndex}
 			/>
 		);
 	});

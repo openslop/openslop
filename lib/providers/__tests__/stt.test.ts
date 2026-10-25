@@ -42,7 +42,7 @@ afterEach(() => {
 });
 
 describe("ElevenLabsSTT", () => {
-	it("turns the gap before a word into its leading space, and drops the gaps and sounds", async () => {
+	it("keeps only spoken words, without the spacing Scribe times between them", async () => {
 		mockConvert.mockResolvedValue({
 			audioDurationSecs: 2,
 			words: [
@@ -62,20 +62,22 @@ describe("ElevenLabsSTT", () => {
 
 		expect(uploadedCaptions()).toEqual([
 			caption("Hi", 0, 400),
-			caption(" there,", 500, 1000),
+			caption("there,", 500, 1000),
 			caption("pal", 1500, 2000),
 		]);
 	});
 });
 
 describe("CartesiaSTT", () => {
-	it("starts a word with each word it hears", async () => {
+	it("trims the space Ink leads some words with, and keeps words with none", async () => {
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("audio")));
 		mockTranscribe.mockResolvedValue({
 			duration: 1,
 			words: [
-				{ word: "Hi", start: 0, end: 0.4 },
-				{ word: "there", start: 0.5, end: 1 },
+				{ word: " Hi", start: 0, end: 0.4 },
+				{ word: " there", start: 0.5, end: 0.7 },
+				{ word: "猫", start: 0.7, end: 0.85 },
+				{ word: "は", start: 0.85, end: 1 },
 			],
 		});
 
@@ -86,8 +88,10 @@ describe("CartesiaSTT", () => {
 		});
 
 		expect(uploadedCaptions()).toEqual([
-			caption(" Hi", 0, 400),
-			caption(" there", 500, 1000),
+			caption("Hi", 0, 400),
+			caption("there", 500, 700),
+			caption("猫", 700, 850),
+			caption("は", 850, 1000),
 		]);
 	});
 });

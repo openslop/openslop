@@ -10,7 +10,7 @@ export type CaptionLineProps = {
 	fontSizePx: number;
 	element: Pick<ResolvedElement, "id" | "type">;
 	/** Where the line's first word sits in the element's words, so an edit can find each one. */
-	firstWord: number;
+	firstWordIndex: number;
 };
 
 // The editor swaps in a line that edits; an export keeps the static one.

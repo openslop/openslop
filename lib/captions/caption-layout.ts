@@ -3,13 +3,18 @@ import {
 	type Caption,
 	type TikTokToken,
 } from "@remotion/captions";
+import { joinWords, spacedApart } from "./word-spacing";
 
-export type CaptionWord = { text: string; active: boolean };
+export type CaptionWord = {
+	text: string;
+	active: boolean;
+	spaceBefore: boolean;
+};
 
 /** A page of captions shown together, on screen over `[start, end)` seconds. */
 export type CaptionLine = {
 	/** Where the line's first token sits in the element's captions; tokens map to captions one to one. */
-	firstWord: number;
+	firstWordIndex: number;
 	tokens: TikTokToken[];
 	text: string;
 	start: number;
@@ -23,8 +28,9 @@ export function wordsAt(
 ): CaptionWord[] {
 	const active = tokens.findLastIndex(({ fromMs }) => fromMs <= seconds * 1000);
 	return tokens.map(({ text }, index) => ({
-		text: text.trim(),
+		text,
 		active: index === active,
+		spaceBefore: index > 0 && spacedApart(tokens[index - 1].text, text),
 	}));
 }
 
@@ -32,18 +38,26 @@ export function wordsAt(
 export function groupIntoLines(
 	captions: Caption[],
 	lineMs: number,
-	firstWord = 0,
+	firstWordIndex = 0,
 ): CaptionLine[] {
 	const { pages } = createTikTokStyleCaptions({
-		captions,
+		// Remotion expects a leading space for each word, regardless of language
+		captions: captions.map((caption) => ({
+			...caption,
+			text: ` ${caption.text}`,
+		})),
 		combineTokensWithinMilliseconds: lineMs,
 	});
-	let at = firstWord;
-	return pages.map(({ text, startMs, durationMs, tokens }) => {
+	let at = firstWordIndex;
+	return pages.map(({ startMs, durationMs, tokens }) => {
+		const words = tokens.map((token) => ({
+			...token,
+			text: token.text.trimStart(),
+		}));
 		const line = {
-			firstWord: at,
-			tokens,
-			text,
+			firstWordIndex: at,
+			tokens: words,
+			text: joinWords(words.map(({ text }) => text)),
 			start: startMs / 1000,
 			end: (startMs + durationMs) / 1000,
 		};
@@ -54,11 +68,11 @@ export function groupIntoLines(
 
 /** The lines an element shows, the last held until its captions stop. */
 export function captionLines(
-	{ firstWord, words }: { firstWord: number; words: Caption[] },
+	{ firstWordIndex, words }: { firstWordIndex: number; words: Caption[] },
 	untilSec: number,
 	lineMs: number,
 ): CaptionLine[] {
-	const lines = groupIntoLines(words, lineMs, firstWord).filter(
+	const lines = groupIntoLines(words, lineMs, firstWordIndex).filter(
 		(line) => line.start < untilSec,
 	);
 	return lines.map((line, index) => ({

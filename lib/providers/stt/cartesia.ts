@@ -2,7 +2,8 @@ import Cartesia from "@cartesia/cartesia-js";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
-import { secondsCaption, timestampsFile } from "../timestamps-file";
+import { timestampsFile } from "../timestamps-file";
+import { wordCaptions } from "../word-captions";
 import type { RawSTT, STTRequest } from "./base";
 import { validateCartesiaKey } from "../cartesia";
 import type { STTProvider } from "../types";
@@ -46,8 +47,8 @@ export class CartesiaSTT
 			model,
 			timestamp_granularities: ["word"],
 		});
-		const textTimestamps = (words ?? []).map(({ word, start, end }) =>
-			secondsCaption(` ${word}`, start, end),
+		const textTimestamps = wordCaptions(
+			(words ?? []).map(({ word, start, end }) => ({ text: word, start, end })),
 		);
 		if (duration == null)
 			throw new Error("Cartesia reported no audio duration");

@@ -1,23 +1,19 @@
 import type { SourcedSTTParams } from "@/lib/connectors/types";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { MockProvider } from "../mock-base";
-import { BLOB_BASE as TTS_MOCK } from "../tts/mock";
 import type { STTProvider } from "../types";
 
-/** Any word timings will do, so the mock reads the ones mock speech already serves. */
+const BLOB_BASE = `${BLOB_BASE_URL}/assets/stt/mock`;
+
+const DURATIONS_SEC = [5, 8, 12, 15, 20, 24, 30, 10];
+
 export class MockSTT
 	extends MockProvider<SourcedSTTParams>
 	implements STTProvider
 {
-	protected readonly variants = [
-		{
-			id: "1",
-			result: { timestamps: `${TTS_MOCK}/1/captions.json` },
-			metadata: { durationSec: 10 },
-		},
-		{
-			id: "2",
-			result: { timestamps: `${TTS_MOCK}/2/captions.json` },
-			metadata: { durationSec: 18 },
-		},
-	];
+	protected readonly variants = DURATIONS_SEC.map((durationSec, index) => ({
+		id: `${index + 1}`,
+		result: { timestamps: `${BLOB_BASE}/${index + 1}/transcript.json` },
+		metadata: { durationSec },
+	}));
 }
