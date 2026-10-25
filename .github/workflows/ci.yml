@@ -8,21 +8,26 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'push' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  VERCEL_CHECK: "Vercel - openslop-app: ci"
 
 jobs:
-  ci:
+  checks:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
       statuses: write
     steps:
-      - name: Report to Vercel deployment checks
+      - name: Mark Vercel deployment check pending
         if: github.event_name == 'push'
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: "Vercel - openslop-app: ci"
+        run: gh api "repos/${{ github.repository }}/statuses/${{ github.sha }}" -f state=pending -f context="$VERCEL_CHECK"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - uses: actions/checkout@v4
 
@@ -45,23 +50,66 @@ jobs:
       - name: Dead code check
         run: npm run knip
 
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
 
       - name: Tests
         run: npm run test:coverage
 
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('app/**', 'components/**', 'lib/**', 'remotion/**', '*.ts') }}
+          restore-keys: nextjs-${{ hashFiles('package-lock.json') }}-
+
+      - name: Build
+        run: npm run build
+
+      - name: Read Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browser
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
       - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Smoke tests
         run: npm run test:e2e
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Upload Playwright report
         if: ${{ failure() }}
@@ -82,3 +130,22 @@ jobs:
           du -sh .next/static/ >> $GITHUB_STEP_SUMMARY
           du -sh .next/static/**/* >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+  ci:
+    needs: [checks, test, build]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+    env:
+      STATE: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+    steps:
+      - name: Report to Vercel deployment checks
+        if: github.event_name == 'push'
+        run: gh api "repos/${{ github.repository }}/statuses/${{ github.sha }}" -f state="$STATE" -f context="$VERCEL_CHECK" -f target_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Require every job to pass
+        if: env.STATE != 'success'
+        run: exit 1
