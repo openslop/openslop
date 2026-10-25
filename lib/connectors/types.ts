@@ -141,14 +141,17 @@ export const CaptionSchema = z.object({
 	confidence: z.number().nullable(),
 }) satisfies z.ZodType<Caption>;
 
+/** Words saved in an older shape load as none, so the clip opens uncaptioned. */
+const WordsSchema = z.array(CaptionSchema).optional().catch(undefined);
+
 export const AssetResultSchema = z.object({
 	durationSec: z.number(),
 	imageUrl: z.string().optional(),
 	audioUrl: z.string().optional(),
 	videoUrl: z.string().optional(),
-	textTimestamps: z.array(CaptionSchema).optional(),
+	textTimestamps: WordsSchema,
 	/** The words as generated, kept once the user edits them. */
-	generatedTextTimestamps: z.array(CaptionSchema).optional(),
+	generatedTextTimestamps: WordsSchema,
 	voiceId: z.string().optional(),
 });
 

@@ -171,9 +171,9 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 			<RgbSplit enabled={rgbSplit}>
 				<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
 				{layeredSequenceNodes}
+				<Captions captions={captions} style={captionStyle} />
 			</RgbSplit>
 			{filmGrain && <FilmGrain />}
-			<Captions captions={captions} style={captionStyle} />
 		</AbsoluteFill>
 	);
 };
