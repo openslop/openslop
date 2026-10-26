@@ -594,6 +594,51 @@ describe("GenerationQueue", () => {
 		});
 	});
 
+	describe("a node that lands", () => {
+		const landing = (revise: (current: AssetResult) => AssetResult) => ({
+			...makeJob("pass"),
+			lands: { on: { id: "lr1", type: "image" as const }, revise },
+		});
+
+		beforeEach(async () => {
+			generateMock.mockResolvedValue({ imageUrl: "a.png", durationSec: 0 });
+			generationQueue.enqueueGraph([makeJob("lr1")]);
+			await vi.runAllTimersAsync();
+			committed.mockClear();
+		});
+
+		it("revises its target under the target's inputs and keeps nothing of its own", async () => {
+			const made = generationQueue.getElementSnapshot("lr1").resultInputs;
+			generateMock.mockResolvedValue({ imageUrl: "b.png", durationSec: 0 });
+			generationQueue.enqueueGraph([
+				landing((current) => ({ ...current, imageUrl: "c.png" })),
+			]);
+			await vi.runAllTimersAsync();
+
+			expect(generationQueue.getElementSnapshot("lr1")).toMatchObject({
+				result: { imageUrl: "c.png" },
+				resultInputs: made,
+			});
+			expect(generationQueue.getElementSnapshot("pass").status).toBe("idle");
+			expect(committed.mock.calls.map(([v]) => v.elementId)).toEqual(["lr1"]);
+		});
+
+		it("puts a revise that throws on itself, leaving the target alone", async () => {
+			generationQueue.enqueueGraph([
+				landing(() => {
+					throw new Error("moved on");
+				}),
+			]);
+			await vi.runAllTimersAsync();
+
+			expect(generationQueue.getElementSnapshot("lr1").result).toMatchObject({
+				imageUrl: "a.png",
+			});
+			expect(generationQueue.getElementSnapshot("pass").error).toBe("moved on");
+			expect(committed).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("restoreResult", () => {
 		it("shows a result supplied for inputs the element has drifted from", async () => {
 			const result = {

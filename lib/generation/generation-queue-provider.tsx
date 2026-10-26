@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { withCaptionsLanding } from "@/lib/captions/captions-job";
 import { createStoreContext } from "@/lib/store/create-store-context";
 import { ElementHistory, type ElementVersionStorage } from "./history";
 import { GenerationQueue } from "./queue";
@@ -33,7 +32,7 @@ export function GenerationQueueProvider({
 	const [{ queue, history }] = useState(() => {
 		const history = new ElementHistory(storage);
 		const queue = new GenerationQueue({ initialState });
-		queue.onCommitted(withCaptionsLanding(queue, history.record));
+		queue.onCommitted(history.record);
 		return { queue, history };
 	});
 	useEffect(() => () => queue.cancelAll(), [queue]);

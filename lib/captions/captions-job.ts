@@ -1,18 +1,10 @@
 import type { ElementRef } from "@/lib/canvas/types";
 import type { AssetResult, ModelRef } from "@/lib/connectors/types";
 import type { GenerationNode, NodeId } from "@/lib/generation/graph";
-import type { GenerationQueue } from "@/lib/generation/queue";
-import { isGenerationActive } from "@/lib/generation/snapshots";
-import type { CommittedVersion } from "@/lib/generation/versions";
 import { replaceCaptions } from "./caption-edits";
 
-const PREFIX = "captions:";
-
 export const captionsNodeId = (elementId: string): NodeId =>
-	`${PREFIX}${elementId}`;
-
-const captionedOf = (id: NodeId) =>
-	id.startsWith(PREFIX) ? id.slice(PREFIX.length) : null;
+	`captions:${elementId}`;
 
 const soundOf = (result: AssetResult) => result.videoUrl ?? result.audioUrl;
 
@@ -34,33 +26,15 @@ export function captionsNode(
 			model,
 			config: {},
 		},
+		lands: {
+			on: element,
+			revise: (current, { textTimestamps }) => {
+				if (soundOf(current) !== mediaUrl)
+					throw new Error("The clip changed while it was captioned");
+				if (!textTimestamps)
+					throw new Error("This speech to text result has no words");
+				return replaceCaptions(current, textTimestamps);
+			},
+		},
 	};
 }
-
-/** Records each commit, but lands speech to text on its element instead of keeping it as a version. */
-export const withCaptionsLanding =
-	(queue: GenerationQueue, record: (version: CommittedVersion) => void) =>
-	(version: CommittedVersion) => {
-		const elementId = captionedOf(version.elementId);
-		if (!elementId) return record(version);
-		const captioned = queue.getElementSnapshot(elementId);
-		if (
-			!captioned.result ||
-			isGenerationActive(captioned.status) ||
-			soundOf(captioned.result) !== version.inputs.attributes.mediaUrl
-		) {
-			queue.setError(
-				version.elementId,
-				"The clip changed while it was captioned",
-			);
-			return;
-		}
-		const { textTimestamps } = version.result;
-		if (!textTimestamps)
-			throw new Error("This speech to text result has no words");
-		queue.reviseResult(
-			{ id: elementId, type: version.elementType },
-			(current) => replaceCaptions(current, textTimestamps),
-		);
-		queue.discard(version.elementId);
-	};

@@ -14,7 +14,12 @@ import {
 } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
 import type { CommittedVersion } from "./versions";
-import { flattenGraph, type GenerationNode } from "./graph";
+import {
+	flattenGraph,
+	type GenerationNode,
+	type Landing,
+	type NodeId,
+} from "./graph";
 
 type ActiveJob = {
 	controller: AbortController;
@@ -176,6 +181,11 @@ export class GenerationQueue {
 		this.committed.notify(version);
 	}
 
+	private land(id: NodeId, { on, revise }: Landing, result: AssetResult) {
+		this.snapshots.remove(id);
+		this.reviseResult(on, (current) => revise(current, result));
+	}
+
 	private abortJob(id: string) {
 		this.active.get(id)?.controller.abort();
 		this.active.delete(id);
@@ -263,6 +273,7 @@ export class GenerationQueue {
 				signal,
 			);
 			if (signal.aborted) return;
+			if (node.lands) return this.land(elementId, node.lands, result);
 			this.commit({
 				elementId,
 				elementType,

@@ -13,11 +13,7 @@ import type { generateForElement } from "@/lib/generation/generate-for-element";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { jobNode } from "@/lib/generation/__tests__/_graph";
 import type { CommittedVersion } from "@/lib/generation/versions";
-import {
-	captionsNode,
-	captionsNodeId,
-	withCaptionsLanding,
-} from "../captions-job";
+import { captionsNode, captionsNodeId } from "../captions-job";
 import { secondsCaption } from "@/lib/providers/word-captions";
 
 let generateMock: Mock<typeof generateForElement>;
@@ -35,7 +31,7 @@ const stt = (result: AssetResult = spoken) =>
 
 describe("captions jobs", () => {
 	let queue: GenerationQueue;
-	let stopLanding: () => void;
+	let stopRecording: () => void;
 	let record: Mock<(version: CommittedVersion) => void>;
 
 	beforeEach(async () => {
@@ -43,14 +39,14 @@ describe("captions jobs", () => {
 		generateMock = vi.fn<typeof generateForElement>();
 		queue = new GenerationQueue();
 		record = vi.fn();
-		stopLanding = queue.onCommitted(withCaptionsLanding(queue, record));
+		stopRecording = queue.onCommitted(record);
 		generateMock.mockResolvedValue(spoken);
 		queue.enqueueGraph([jobNode("narration")]);
 		await vi.runAllTimersAsync();
 	});
 
 	afterEach(() => {
-		stopLanding();
+		stopRecording();
 		vi.useRealTimers();
 	});
 
