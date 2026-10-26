@@ -1,5 +1,5 @@
 import type { Caption } from "@remotion/captions";
-import { spacedApart } from "@/lib/captions/word-spacing";
+import { spacesBefore } from "@/lib/captions/word-spacing";
 
 export type TimedToken = { text: string; start: number; end: number };
 
@@ -31,9 +31,7 @@ export function wordCaptions(tokens: readonly TimedToken[]): Caption[] {
 	const parts = tokens
 		.map((token) => ({ ...token, text: token.text.trim() }))
 		.filter(({ text }) => text !== "");
-	const spaced = parts.map(
-		(part, index) => index > 0 && spacedApart(parts[index - 1].text, part.text),
-	);
+	const spaced = spacesBefore(parts.map(({ text }) => text));
 	const pieces = parts.map(({ text }, index) =>
 		spaced[index] ? ` ${text}` : text,
 	);

@@ -1,28 +1,20 @@
 import type { Caption } from "@remotion/captions";
 import type { AssetResult } from "@/lib/connectors/types";
 
-/** The typed word replaces the caption's and keeps its timing; clearing it deletes the caption. */
-export function reviseWord(
-	captions: readonly Caption[],
-	index: number,
-	text: string,
-): Caption[] {
-	const word = text.trim();
-	if (!word) return captions.toSpliced(index, 1);
-	return captions.with(index, { ...captions[index], text: word });
-}
-
-/** The first edit keeps the words as generated, so every later one can be reset to them. */
-export function editCaptions(
+/** Retypes one word, or deletes it once cleared, keeping the words as generated for a reset. */
+export function editCaption(
 	result: AssetResult,
 	index: number,
 	text: string,
 ): AssetResult {
 	const { textTimestamps, generatedTextTimestamps } = result;
 	if (!textTimestamps) throw new Error("This result has no captions");
+	const word = text.trim();
 	return {
 		...result,
-		textTimestamps: reviseWord(textTimestamps, index, text),
+		textTimestamps: word
+			? textTimestamps.with(index, { ...textTimestamps[index], text: word })
+			: textTimestamps.toSpliced(index, 1),
 		generatedTextTimestamps: generatedTextTimestamps ?? textTimestamps,
 	};
 }
@@ -36,21 +28,14 @@ export function resetCaptions({
 	return { ...result, textTimestamps: generatedTextTimestamps };
 }
 
-/** Speech to text's words replace the element's, edits and all. */
-export function withSTTResult(
-	{ generatedTextTimestamps: _edits, ...result }: AssetResult,
-	{ textTimestamps }: AssetResult,
+/** New words, or none, replace the element's along with their edits. */
+export function replaceCaptions(
+	{
+		textTimestamps: _words,
+		generatedTextTimestamps: _edits,
+		...result
+	}: AssetResult,
+	words?: Caption[],
 ): AssetResult {
-	if (!textTimestamps)
-		throw new Error("This speech to text result has no words");
-	return { ...result, textTimestamps };
-}
-
-export function removeCaptions({
-	textTimestamps,
-	generatedTextTimestamps: _edits,
-	...result
-}: AssetResult): AssetResult {
-	if (!textTimestamps) throw new Error("This result has no captions");
-	return result;
+	return words ? { ...result, textTimestamps: words } : result;
 }

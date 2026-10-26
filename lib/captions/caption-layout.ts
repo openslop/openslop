@@ -3,7 +3,7 @@ import {
 	type Caption,
 	type TikTokToken,
 } from "@remotion/captions";
-import { joinWords, spacedApart } from "./word-spacing";
+import { joinWords, spacesBefore } from "./word-spacing";
 
 export type CaptionWord = {
 	text: string;
@@ -32,10 +32,11 @@ export function wordsAt(
 	seconds: number,
 ): CaptionWord[] {
 	const active = tokens.findLastIndex(({ fromMs }) => fromMs <= seconds * 1000);
+	const spaced = spacesBefore(tokens.map(({ text }) => text));
 	return tokens.map(({ text }, index) => ({
 		text,
 		active: index === active,
-		spaceBefore: index > 0 && spacedApart(tokens[index - 1].text, text),
+		spaceBefore: spaced[index],
 	}));
 }
 

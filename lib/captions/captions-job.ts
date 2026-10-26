@@ -4,7 +4,7 @@ import type { GenerationNode, NodeId } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import type { CommittedVersion } from "@/lib/generation/versions";
-import { withSTTResult } from "./caption-edits";
+import { replaceCaptions } from "./caption-edits";
 
 const SUFFIX = ":captions";
 
@@ -55,9 +55,12 @@ export const withCaptionsLanding =
 			);
 			return;
 		}
+		const { textTimestamps } = version.result;
+		if (!textTimestamps)
+			throw new Error("This speech to text result has no words");
 		queue.reviseResult(
 			{ id: elementId, type: version.elementType },
-			(current) => withSTTResult(current, version.result),
+			(current) => replaceCaptions(current, textTimestamps),
 		);
 		queue.discard(version.elementId);
 	};

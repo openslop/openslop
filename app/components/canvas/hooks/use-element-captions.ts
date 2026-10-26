@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import { captionsNode, captionsNodeId } from "@/lib/captions/captions-job";
-import { removeCaptions, resetCaptions } from "@/lib/captions/caption-edits";
+import { replaceCaptions, resetCaptions } from "@/lib/captions/caption-edits";
 import type { ElementRef, GeneratedElement } from "@/lib/canvas/types";
 import { resolveModel } from "@/lib/connectors/models";
 import type { AssetResult } from "@/lib/connectors/types";
@@ -45,7 +45,8 @@ export function useElementCaptions(
 		status,
 		error,
 		generate: () => generateSTT([element]),
-		remove: () => queue.reviseResult(element, removeCaptions),
+		remove: () =>
+			queue.reviseResult(element, (current) => replaceCaptions(current)),
 		reset: () => queue.reviseResult(element, resetCaptions),
 	};
 }

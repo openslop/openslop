@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import type { CaptionLineProps } from "@/components/captions/caption-line";
 import { CaptionOverlay } from "@/components/captions/caption-overlay";
 import { scrollToElement } from "@/app/components/canvas/utils/scroll-to";
-import { editCaptions } from "@/lib/captions/caption-edits";
+import { editCaption } from "@/lib/captions/caption-edits";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import {
 	useGenerationQueue,
@@ -52,7 +52,7 @@ export function EditableCaptionLine({
 		setDraft(null);
 		if (cancelled.current || text.trim() === words[index].text) return;
 		queue.reviseResult(element, (result) =>
-			editCaptions(result, firstWordIndex + index, text),
+			editCaption(result, firstWordIndex + index, text),
 		);
 	};
 

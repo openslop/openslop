@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { joinWords, spacedApart } from "../word-spacing";
+import { joinWords, spacesBefore } from "../word-spacing";
 
-describe("spacedApart", () => {
-	it("spaces words apart in scripts that space their words", () => {
-		expect(spacedApart("hello", "world")).toBe(true);
-		expect(spacedApart("बिल्ली", "हम")).toBe(true);
+describe("spacesBefore", () => {
+	it("spaces words apart in scripts that space their words, never before the first", () => {
+		expect(spacesBefore(["hello", "world"])).toEqual([false, true]);
+		expect(spacesBefore(["बिल्ली", "हम"])).toEqual([false, true]);
 	});
 
 	it("runs words together when either side is written without spaces", () => {
-		expect(spacedApart("猫", "は")).toBe(false);
-		expect(spacedApart("我们", "都")).toBe(false);
-		expect(spacedApart("AI", "は")).toBe(false);
-		expect(spacedApart("สวัสดี", "ครับ")).toBe(false);
+		expect(spacesBefore(["猫", "は"])).toEqual([false, false]);
+		expect(spacesBefore(["我们", "都"])).toEqual([false, false]);
+		expect(spacesBefore(["AI", "は"])).toEqual([false, false]);
+		expect(spacesBefore(["สวัสดี", "ครับ"])).toEqual([false, false]);
 	});
 });
 
