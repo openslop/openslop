@@ -40,9 +40,11 @@ export class HttpTTSConnector
 
 	/** Speech carries the word timings the karaoke captions are drawn from. */
 	async resolveBundle(bundle: AssetBundle): Promise<TTSResult> {
+		const words = await readTimestamps(bundle);
 		return {
 			...(await super.resolveBundle(bundle)),
-			textTimestamps: await readTimestamps(bundle),
+			textTimestamps: words,
+			originalTextTimestamps: words,
 		};
 	}
 }

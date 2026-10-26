@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { editCaption, replaceCaptions, resetCaptions } from "../caption-edits";
+import {
+	captionsEdited,
+	editCaption,
+	replaceCaptions,
+	resetCaptions,
+} from "../caption-edits";
 import { secondsCaption } from "@/lib/providers/word-captions";
 
 const song = ["the", "quick", "fox", "ran", "over", "the", "lazy", "dog"].map(
 	(text, at) => secondsCaption(text, at, at + 1),
 );
-const generated = { durationSec: 8, textTimestamps: song };
+const generated = {
+	durationSec: 8,
+	textTimestamps: song,
+	originalTextTimestamps: song,
+};
 
 describe("editCaption", () => {
 	it("replaces one word's text and keeps its timing", () => {
@@ -22,32 +31,39 @@ describe("editCaption", () => {
 		);
 	});
 
-	it("keeps the words as generated through every edit, and resets to them", () => {
-		const once = editCaption(generated, 0, "a");
-		const twice = editCaption(once, 2, "cat");
-		expect(twice.generatedTextTimestamps).toBe(song);
+	it("keeps the original words through every edit, and resets to them", () => {
+		const twice = editCaption(editCaption(generated, 0, "a"), 2, "cat");
+		expect(twice.originalTextTimestamps).toBe(song);
 		expect(resetCaptions(twice)).toEqual(generated);
 	});
 });
 
-describe("resetCaptions", () => {
-	it("refuses to reset captions nobody edited", () => {
-		expect(() => resetCaptions(generated)).toThrow();
+describe("captionsEdited", () => {
+	it("is edited while the words differ from the original", () => {
+		expect(captionsEdited(generated)).toBe(false);
+		const edited = editCaption(generated, 0, "a");
+		expect(captionsEdited(edited)).toBe(true);
+		expect(captionsEdited(editCaption(edited, 0, "the"))).toBe(false);
+	});
+
+	it("is never edited without captions", () => {
+		expect(captionsEdited({ durationSec: 8 })).toBe(false);
 	});
 });
 
 describe("replaceCaptions", () => {
 	const edited = editCaption(generated, 0, "a");
 
-	it("replaces the words, edits and all", () => {
+	it("replaces the words and the original they reset to", () => {
 		const heard = [secondsCaption("hey", 0, 1)];
 		expect(replaceCaptions(edited, heard)).toEqual({
 			durationSec: 8,
 			textTimestamps: heard,
+			originalTextTimestamps: heard,
 		});
 	});
 
-	it("removes the words and their edits without any, and keeps the rest of the result", () => {
+	it("removes the words and their original without any, and keeps the rest of the result", () => {
 		expect(replaceCaptions(edited)).toEqual({ durationSec: 8 });
 		expect(replaceCaptions({ durationSec: 8 })).toEqual({ durationSec: 8 });
 	});

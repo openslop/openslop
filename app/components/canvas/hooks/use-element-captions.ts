@@ -1,7 +1,11 @@
 import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import { captionsNode, captionsNodeId } from "@/lib/captions/captions-job";
-import { replaceCaptions, resetCaptions } from "@/lib/captions/caption-edits";
+import {
+	captionsEdited,
+	replaceCaptions,
+	resetCaptions,
+} from "@/lib/captions/caption-edits";
 import type { ElementRef, GeneratedElement } from "@/lib/canvas/types";
 import { resolveModel } from "@/lib/connectors/models";
 import type { AssetResult } from "@/lib/connectors/types";
@@ -41,7 +45,7 @@ export function useElementCaptions(
 	);
 	return {
 		captioned: result?.textTimestamps !== undefined,
-		edited: Boolean(result?.generatedTextTimestamps),
+		edited: result ? captionsEdited(result) : false,
 		status,
 		error,
 		generate: () => generateSTT([element]),

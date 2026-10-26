@@ -153,8 +153,8 @@ export const AssetResultSchema = z.object({
 	audioUrl: z.string().optional(),
 	videoUrl: z.string().optional(),
 	textTimestamps: WordsSchema,
-	/** The words as generated, kept once the user edits them. */
-	generatedTextTimestamps: WordsSchema,
+	/** The words as generated, which a reset brings back. */
+	originalTextTimestamps: WordsSchema,
 	voiceId: z.string().optional(),
 });
 
@@ -235,7 +235,8 @@ export type STTResult = Pick<AssetResult, "durationSec"> & {
 	textTimestamps: Caption[];
 };
 
-export type TTSResult = AssetResult & STTResult;
+export type TTSResult = AssetResult &
+	STTResult & { originalTextTimestamps: Caption[] };
 
 /** A TTS request after its speaker's voice is resolved. */
 export type VoicedTTSParams = TTSGenerateParams & { voiceId: string };
