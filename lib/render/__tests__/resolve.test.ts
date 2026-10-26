@@ -7,7 +7,7 @@ import {
 } from "@/lib/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { splitAttributes } from "@/lib/canvas/element-attributes";
-import { caption } from "@/lib/captions/__tests__/_captions";
+import { secondsCaption } from "@/lib/providers/word-captions";
 
 function makeElement(
 	id: string,
@@ -250,7 +250,7 @@ describe("resolveElements", () => {
 	});
 
 	describe("captions", () => {
-		const heard = [caption("one", 0, 1), caption("two", 2, 3)];
+		const heard = [secondsCaption("one", 0, 1), secondsCaption("two", 2, 3)];
 		const snapshots: Record<string, ElementSnapshot> = {
 			vid: makeSnapshot({
 				result: {
@@ -285,7 +285,7 @@ describe("resolveElements", () => {
 				makeElement("vid", "video", { trimStart: "1.5" }),
 			);
 			expect(captions?.firstWordIndex).toBe(1);
-			expect(captions?.words).toEqual([caption("two", 0.5, 1.5)]);
+			expect(captions?.words).toEqual([secondsCaption("two", 0.5, 1.5)]);
 		});
 
 		it("captions nothing an element has no words for", () => {

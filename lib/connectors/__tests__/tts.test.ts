@@ -3,7 +3,7 @@ import { HttpTTSConnector } from "../tts/connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence } from "./_gateway-mock";
-import { caption } from "@/lib/captions/__tests__/_captions";
+import { secondsCaption } from "@/lib/providers/word-captions";
 
 const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
@@ -23,7 +23,7 @@ const SUCCESS: Parameters<typeof mockGatewaySequence>[0] = [
 			result: { audio: "output.wav", timestamps: "timestamps.json" },
 		},
 	},
-	{ payload: [caption("hello", 0, 0.5)] },
+	{ payload: [secondsCaption("hello", 0, 0.5)] },
 ];
 
 const mockSuccess = () => mockGatewaySequence(SUCCESS);

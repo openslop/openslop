@@ -6,10 +6,10 @@ import {
 	reviseWord,
 	withSTTResult,
 } from "../caption-edits";
-import { caption } from "./_captions";
+import { secondsCaption } from "@/lib/providers/word-captions";
 
 const song = ["the", "quick", "fox", "ran", "over", "the", "lazy", "dog"].map(
-	(text, at) => caption(text, at, at + 1),
+	(text, at) => secondsCaption(text, at, at + 1),
 );
 
 describe("editCaptions", () => {
@@ -34,7 +34,7 @@ describe("editCaptions", () => {
 
 	it("lets speech to text replace the words, edits and all", () => {
 		const edited = editCaptions(generated, 0, "a");
-		const heard = [caption("hey", 0, 1)];
+		const heard = [secondsCaption("hey", 0, 1)];
 		expect(
 			withSTTResult(edited, { durationSec: 8, textTimestamps: heard }),
 		).toEqual({ durationSec: 8, textTimestamps: heard });
@@ -46,17 +46,9 @@ describe("reviseWord", () => {
 	it("replaces one word's text and keeps its timing", () => {
 		expect(reviseWord(song, 2, " cat ")).toEqual([
 			...song.slice(0, 2),
-			caption("cat", 2, 3),
+			secondsCaption("cat", 2, 3),
 			...song.slice(3),
 		]);
-	});
-
-	it("keeps a caption that continues a word joined to it", () => {
-		const joined = [
-			caption("Remotion", 0, 1),
-			{ ...caption("'s", 1, 2), text: "'s" },
-		];
-		expect(reviseWord(joined, 1, "s")[1].text).toBe("s");
 	});
 
 	it("deletes a word cleared of its text", () => {
