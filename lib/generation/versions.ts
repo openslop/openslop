@@ -18,13 +18,7 @@ export type ElementVersion = {
 	pinned: boolean;
 };
 
-/** Every commit knows its element's type; only stored versions may predate it. */
-export type CommittedVersion = Omit<
-	ElementVersion,
-	"createdAt" | "elementType"
-> & {
-	elementType: ElementType;
-};
+export type CommittedVersion = Omit<ElementVersion, "createdAt">;
 
 const NO_VERSIONS: readonly ElementVersion[] = [];
 

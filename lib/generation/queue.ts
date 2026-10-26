@@ -164,7 +164,7 @@ export class GenerationQueue {
 		result,
 		connectorType,
 		pinned,
-	}: Omit<CommittedVersion, "elementType">): void {
+	}: CommittedVersion): void {
 		this.snapshots.update(elementId, {
 			result,
 			error: null,
