@@ -11,15 +11,20 @@ export type CaptionWord = {
 	spaceBefore: boolean;
 };
 
-/** A page of captions shown together, on screen over `[start, end)` seconds. */
+/** A page of captions shown together. */
 export type CaptionLine = {
 	/** Where the line's first token sits in the element's captions; tokens map to captions one to one. */
 	firstWordIndex: number;
 	tokens: TikTokToken[];
-	text: string;
-	start: number;
-	end: number;
 };
+
+export const lineSpanSec = ({ tokens }: CaptionLine) => ({
+	fromSec: tokens[0].fromMs / 1000,
+	toSec: tokens[tokens.length - 1].toMs / 1000,
+});
+
+export const lineText = ({ tokens }: CaptionLine): string =>
+	joinWords(tokens.map(({ text }) => text));
 
 /** The line's words, the one being spoken at `seconds` marked active. */
 export function wordsAt(
@@ -34,7 +39,7 @@ export function wordsAt(
 	}));
 }
 
-/** Captions join a line until it has run `lineMs`; each line holds until the next one starts. */
+/** Captions join a line until it has run `lineMs`. */
 export function groupIntoLines(
 	captions: Caption[],
 	lineMs: number,
@@ -48,35 +53,17 @@ export function groupIntoLines(
 		})),
 		combineTokensWithinMilliseconds: lineMs,
 	});
+	const lines: CaptionLine[] = [];
 	let at = firstWordIndex;
-	return pages.map(({ startMs, durationMs, tokens }) => {
-		const words = tokens.map((token) => ({
-			...token,
-			text: token.text.trimStart(),
-		}));
-		const line = {
+	for (const { tokens } of pages) {
+		lines.push({
 			firstWordIndex: at,
-			tokens: words,
-			text: joinWords(words.map(({ text }) => text)),
-			start: startMs / 1000,
-			end: (startMs + durationMs) / 1000,
-		};
+			tokens: tokens.map((token) => ({
+				...token,
+				text: token.text.trimStart(),
+			})),
+		});
 		at += tokens.length;
-		return line;
-	});
-}
-
-/** The lines an element shows, the last held until its captions stop. */
-export function captionLines(
-	{ firstWordIndex, words }: { firstWordIndex: number; words: Caption[] },
-	untilSec: number,
-	lineMs: number,
-): CaptionLine[] {
-	const lines = groupIntoLines(words, lineMs, firstWordIndex).filter(
-		(line) => line.start < untilSec,
-	);
-	return lines.map((line, index) => ({
-		...line,
-		end: index === lines.length - 1 ? untilSec : line.end,
-	}));
+	}
+	return lines;
 }

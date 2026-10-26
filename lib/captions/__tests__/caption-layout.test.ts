@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { captionLines, groupIntoLines, wordsAt } from "../caption-layout";
+import { groupIntoLines, lineText, wordsAt } from "../caption-layout";
 import { caption } from "./_captions";
 
 const WORDS = ["one", "two", "three", "four", "five"];
@@ -32,7 +32,7 @@ describe("wordsAt", () => {
 			"two",
 			"three",
 		]);
-		expect(line.text).toBe("one two three");
+		expect(lineText(line)).toBe("one two three");
 	});
 
 	it("puts a space before every word but the line's first", () => {
@@ -56,7 +56,7 @@ describe("groupIntoLines", () => {
 			caption(text, at, at + 0.8),
 		);
 		const lines = groupIntoLines(unspaced, 1500);
-		expect(lines.map(({ text }) => text)).toEqual(["今日は", "晴れです"]);
+		expect(lines.map(lineText)).toEqual(["今日は", "晴れです"]);
 		expect(lines.map(({ firstWordIndex }) => firstWordIndex)).toEqual([0, 2]);
 		expect(
 			wordsAt(lines[0].tokens, 0).map(({ spaceBefore }) => spaceBefore),
@@ -67,40 +67,11 @@ describe("groupIntoLines", () => {
 		expect(spans(groupIntoLines(timed, 0))).toEqual(WORDS.map((w) => [w]));
 	});
 
-	it("holds each line until the next one starts, the last until its last word ends", () => {
-		expect(
-			groupIntoLines(timed, 1500).map(({ start, end }) => [start, end]),
-		).toEqual([
-			[0, 2],
-			[2, 4],
-			[4, 4.8],
-		]);
-	});
-});
-
-describe("captionLines", () => {
 	it("counts each line's first word from where the trim left the element's words", () => {
 		expect(
-			captionLines({ firstWordIndex: 3, words: timed }, 10, 1500).map(
+			groupIntoLines(timed, 1500, 3).map(
 				({ firstWordIndex }) => firstWordIndex,
 			),
 		).toEqual([3, 5, 7]);
-	});
-
-	it("holds the last line until the captions stop, and drops lines after", () => {
-		const lines = captionLines({ firstWordIndex: 0, words: timed }, 3.5, 1500);
-		expect(
-			lines.map(({ firstWordIndex, start, end }) => [
-				firstWordIndex,
-				start,
-				end,
-			]),
-		).toEqual([
-			[0, 0, 2],
-			[2, 2, 3.5],
-		]);
-		expect(
-			captionLines({ firstWordIndex: 0, words: timed }, 10, 1500).at(-1)?.end,
-		).toBe(10);
 	});
 });

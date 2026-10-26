@@ -72,13 +72,13 @@ export const elementTrim = (
 		getTimelineDuration(element),
 	);
 
-/** Caption timings counted from the trim start, without the captions cut before it. */
+/** Caption timings counted from the trim start, keeping only the words that start after it. */
 export const trimTimestamps = (
 	captions: Caption[],
 	startSec: number,
 ): Caption[] =>
 	captions
-		.filter(({ endMs }) => endMs > startSec * 1000)
+		.filter(({ startMs }) => startMs >= startSec * 1000)
 		.map((caption) => ({
 			...caption,
 			startMs: caption.startMs - startSec * 1000,

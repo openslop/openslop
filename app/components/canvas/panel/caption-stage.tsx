@@ -60,7 +60,10 @@ export function CaptionStage({
 		[captions, lineMs],
 	);
 	const seconds = captions[activeIndex].startMs / 1000;
-	const line = lines.find(({ end }) => seconds < end);
+	const line = lines.find(
+		({ firstWordIndex, tokens }) =>
+			activeIndex < firstWordIndex + tokens.length,
+	);
 	return (
 		<div
 			className="relative shrink-0 overflow-hidden rounded-lg bg-on-media"

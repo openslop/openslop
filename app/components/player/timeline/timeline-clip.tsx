@@ -8,6 +8,7 @@ import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
 import { truncateMiddle } from "@/lib/format";
+import { lineText } from "@/lib/captions/caption-layout";
 import { isTrimmable, playedSec, type Trim } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import type { ResolvedElement } from "@/lib/render/types";
@@ -229,10 +230,11 @@ export function TimelineCaptionClip({
 	width: number;
 	selected: boolean;
 }) {
+	const text = lineText(clip.line);
 	return (
 		<div
 			role="img"
-			aria-label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${clip.line.text}`}
+			aria-label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${text}`}
 			className={cn(
 				FRAME,
 				"timeline-clip-surface justify-center",
@@ -240,7 +242,7 @@ export function TimelineCaptionClip({
 				selected ? SELECTED_EDGE : "border-border",
 			)}
 		>
-			<ClipHeader icon={Captions} label={clip.line.text} width={width} />
+			<ClipHeader icon={Captions} label={text} width={width} />
 			{selected ? <SelectedWash /> : null}
 		</div>
 	);

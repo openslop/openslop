@@ -1,5 +1,9 @@
 import { captionSourceOf, isCaptionable } from "@/lib/canvas/types";
-import { captionLines, type CaptionLine } from "@/lib/captions/caption-layout";
+import {
+	groupIntoLines,
+	lineSpanSec,
+	type CaptionLine,
+} from "@/lib/captions/caption-layout";
 import { frameSpan } from "./frames";
 import { layoutSequences, secUntilNextScene } from "./sequences";
 import type { RenderLayout, Sequence } from "./types";
@@ -48,12 +52,18 @@ function linesUntilNextScene(
 		element.durationSec,
 		secUntilNextScene(sequence, series),
 	);
-	return captionLines(element.captions, untilSec, lineMs).map((line) => ({
-		element,
-		line,
-		start: start + line.start,
-		duration: line.end - line.start,
-	}));
+	const { firstWordIndex, words } = element.captions;
+	return groupIntoLines(words, lineMs, firstWordIndex)
+		.map((line) => {
+			const { fromSec, toSec } = lineSpanSec(line);
+			return {
+				element,
+				line,
+				start: start + fromSec,
+				duration: Math.min(toSec, untilSec) - fromSec,
+			};
+		})
+		.filter(({ duration }) => duration > 0);
 }
 
 export function layoutCaptions(

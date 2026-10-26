@@ -9,6 +9,7 @@ import {
 	packLanes,
 } from "../timeline-rows";
 import { caption } from "@/lib/captions/__tests__/_captions";
+import { lineText } from "@/lib/captions/caption-layout";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
 
 function el(
@@ -228,17 +229,17 @@ describe("buildCaptionRows", () => {
 		});
 	};
 
-	it("lays one clip per line, the last held until the clip's captions stop", () => {
+	it("lays one clip per line, the last ending with its last word", () => {
 		const [row] = buildCaptionRows(twoPerLine(el("a", "image"), narration));
 		expect(
 			row.clips.map(({ start, duration, line }) => ({
 				start,
 				duration,
-				text: line.text,
+				text: lineText(line),
 			})),
 		).toEqual([
 			{ start: 0, duration: 2, text: "one two" },
-			{ start: 2, duration: 2, text: "three" },
+			{ start: 2, duration: 1, text: "three" },
 		]);
 	});
 });
