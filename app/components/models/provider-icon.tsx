@@ -35,7 +35,7 @@ export function ProviderIcon({
 			// A vector mark at icon size: the optimizer has nothing to shrink, and
 			// refuses SVG without `dangerouslyAllowSVG` anyway.
 			unoptimized
-			className={cn("shrink-0 rounded-[3px] object-contain", className)}
+			className={cn("shrink-0 rounded-xs object-contain", className)}
 			style={{ width: size, height: size }}
 			title={name}
 		/>

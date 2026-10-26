@@ -28,7 +28,7 @@ Semantic tokens only. Never raw hexes, `bg-black/N`, or `*-white/N`.
 - **`font-numeric`** (Slopella with `tnum`): numbers that update in place (timecodes, durations, counters, percentages) and preformatted output (`DisclosureText` / `DisclosureJson`, with `whitespace-pre-wrap`). Never pair it with `tabular-nums`. Skip it only where the digit count itself changes, which tabular figures cannot steady anyway (the player's "N of M generated").
 - Marketing only: **Instrument Serif** (`--font-serif`) for hero headlines, **Sentient** (`.font-sentient`) for the onboarding wordmark. There is no monospace stack.
 
-Sizes: `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display`. Never `text-xs`, `text-sm`, or `text-[Npx]`.
+Sizes: `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` / `text-hero` (fluid, bakes its tracking too, marketing headlines only). Never `text-xs`, `text-sm`, or `text-[Npx]`.
 
 - Each bakes its own line-height, so add `leading-*` only to override it, and `font-medium` for weight. `text-label-xs` also bakes weight 475; `font-book` is that same weight for the sizes that do not.
 - `.font-body` and `.font-title` are unlayered, so their line-height (1.5 / 1.2) beats a token's baked leading wherever they pair (form controls, buttons, titles). Those need an explicit `leading-*`.

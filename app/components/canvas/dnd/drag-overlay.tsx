@@ -57,7 +57,7 @@ export function DragOverlayPreview({ block }: { block: CanvasBlock }) {
 				<Editable
 					readOnly={true}
 					renderElement={renderElement}
-					className="text-xl leading-relaxed text-center break-all"
+					className="font-body text-body leading-relaxed text-center break-all"
 				/>
 			</Slate>
 		</div>

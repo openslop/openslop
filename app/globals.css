@@ -450,6 +450,9 @@
 	--text-heading-lg--line-height: 2.5rem; /* 40px */
 	--text-display: 3rem; /* 48px */
 	--text-display--line-height: 1; /* leading-none */
+	--text-hero: clamp(3rem, 12vw, 5.3125rem); /* 48px to 85px */
+	--text-hero--line-height: 0.95;
+	--text-hero--letter-spacing: -0.04em;
 
 	--shadow-elevation-1: var(--elevation-1);
 	--shadow-elevation-3: var(--elevation-3);

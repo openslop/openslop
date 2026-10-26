@@ -8,6 +8,10 @@ describe("cn", () => {
 		);
 	});
 
+	it("lets a later custom text size override an earlier one", () => {
+		expect(cn("text-hero", "text-display")).toBe("text-display");
+	});
+
 	it("lets a later custom font weight override an earlier one", () => {
 		expect(cn("font-medium", "font-book")).toBe("font-book");
 	});

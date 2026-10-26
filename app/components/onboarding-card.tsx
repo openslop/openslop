@@ -26,11 +26,11 @@ export default function OnboardingCard({
 
 			<Card
 				glow
-				className="w-full max-w-lg items-center gap-4 rounded-3xl p-5 sm:gap-6 sm:p-8"
+				className="w-full max-w-lg items-center gap-4 p-5 sm:gap-6 sm:p-8"
 			>
 				{icon ?? <OpenSlopLogo className="h-auto w-14 text-foreground" />}
 
-				<h1 className="text-center text-heading font-light text-balance text-foreground sm:text-3xl">
+				<h1 className="text-center text-heading font-light text-balance text-foreground sm:text-heading-lg">
 					{heading}
 				</h1>
 

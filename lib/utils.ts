@@ -21,6 +21,7 @@ const twMerge = extendTailwindMerge({
 						"heading",
 						"heading-lg",
 						"display",
+						"hero",
 					],
 				},
 			],
