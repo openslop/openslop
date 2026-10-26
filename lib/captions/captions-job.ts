@@ -6,13 +6,13 @@ import { isGenerationActive } from "@/lib/generation/snapshots";
 import type { CommittedVersion } from "@/lib/generation/versions";
 import { replaceCaptions } from "./caption-edits";
 
-const SUFFIX = ":captions";
+const PREFIX = "captions:";
 
 export const captionsNodeId = (elementId: string): NodeId =>
-	`${elementId}${SUFFIX}`;
+	`${PREFIX}${elementId}`;
 
 const captionedOf = (id: NodeId) =>
-	id.endsWith(SUFFIX) ? id.slice(0, -SUFFIX.length) : null;
+	id.startsWith(PREFIX) ? id.slice(PREFIX.length) : null;
 
 const soundOf = (result: AssetResult) => result.videoUrl ?? result.audioUrl;
 
