@@ -14,12 +14,23 @@ describe("spaceBetween", () => {
 		expect(spaceBetween("AI", "は")).toBe("");
 		expect(spaceBetween("สวัสดี", "ครับ")).toBe("");
 	});
+
+	it("puts no space before punctuation timed as a word of its own", () => {
+		expect(spaceBetween("Hi", ",")).toBe("");
+		expect(spaceBetween("there", "?!")).toBe("");
+		expect(spaceBetween("said", ")")).toBe("");
+		expect(spaceBetween("said", "(")).toBe(" ");
+		expect(spaceBetween("so", "-")).toBe(" ");
+		expect(spaceBetween("Hi", "'cause")).toBe(" ");
+	});
 });
 
 describe("joinWords", () => {
 	it("joins words as each script writes them", () => {
 		expect(joinWords(["Hi", "there"])).toBe("Hi there");
 		expect(joinWords(["猫は", "私たちの"])).toBe("猫は私たちの");
+		expect(joinWords(["Hi", ",", "there", "."])).toBe("Hi, there.");
+		expect(joinWords(["猫", "は", "。"])).toBe("猫は。");
 		expect(joinWords([])).toBe("");
 	});
 });

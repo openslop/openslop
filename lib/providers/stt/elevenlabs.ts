@@ -7,11 +7,7 @@ import type { Caption } from "@remotion/captions";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
 import { timestampsFile } from "../timestamps-file";
-import {
-	trimmedWords,
-	wordsFromCharacters,
-	type TimedToken,
-} from "@/lib/captions/word-captions";
+import { trimmedWords, type TimedToken } from "@/lib/captions/word-captions";
 import type { RawSTT, STTRequest } from "./base";
 import { validateElevenLabsKey } from "../elevenlabs";
 import type { STTProvider } from "../types";
@@ -26,7 +22,7 @@ const isTimedWord = (
 	word.type === "word" && word.start !== undefined && word.end !== undefined;
 
 const toCaptions = (words: SpeechToTextWordResponseModel[]): Caption[] =>
-	wordsFromCharacters(trimmedWords(words.filter(isTimedWord)));
+	trimmedWords(words.filter(isTimedWord));
 
 export class ElevenLabsSTT
 	extends BaseProvider<STTRequest, RawSTT>
