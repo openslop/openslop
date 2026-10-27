@@ -95,14 +95,6 @@ describe("layoutCaptions", () => {
 			spans(layoutOf([el("vid", "video", heard), speech])).map(({ id }) => id),
 		).toEqual(["vid", "nar"]);
 	});
-
-	it("drops a line too short to cover a frame", () => {
-		const blink: ResolvedCaptions = {
-			firstWordIndex: 0,
-			words: [toCaption("hi", 0, 0.01)],
-		};
-		expect(layoutCaptions(layoutOf([el("vid", "video", blink)]))).toEqual([]);
-	});
 });
 
 describe("captionableSequences", () => {

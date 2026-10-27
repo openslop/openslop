@@ -3,7 +3,6 @@ import {
 	groupIntoLines,
 	type CaptionLine,
 } from "@/lib/captions/caption-layout";
-import { frameSpan } from "./frames";
 import { allSequences } from "./sequences";
 import type { RenderLayout, Sequence } from "./types";
 
@@ -37,9 +36,6 @@ export function captionableSequences(layout: Layout): Sequence[] {
 	);
 }
 
-const coversAFrame = (start: number, duration: number, fps: number) =>
-	frameSpan(start, duration, fps).durationInFrames > 0;
-
 function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 	const { element, start } = sequence;
 	if (!element.captions) return [];
@@ -53,7 +49,7 @@ function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 }
 
 export function layoutCaptions(
-	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle" | "fps">,
+	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle">,
 ): CaptionSequence[] {
 	const sequences = allSequences(layout);
 	const scenesWithCaptionedSpeech = sceneIdsOf(
@@ -66,6 +62,5 @@ export function layoutCaptions(
 			(sequence) => !isVideoInSpokenScene(sequence, scenesWithCaptionedSpeech),
 		)
 		.flatMap((sequence) => captionLines(sequence, layout.captionStyle.lineMs))
-		.filter(({ start, duration }) => coversAFrame(start, duration, layout.fps))
 		.sort((a, b) => a.start - b.start);
 }

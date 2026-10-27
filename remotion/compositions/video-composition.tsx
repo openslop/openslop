@@ -162,8 +162,8 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	);
 
 	const captions = useMemo(
-		() => layoutCaptions({ series, sequences, captionStyle, fps }),
-		[series, sequences, captionStyle, fps],
+		() => layoutCaptions({ series, sequences, captionStyle }),
+		[series, sequences, captionStyle],
 	);
 
 	return (
