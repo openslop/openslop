@@ -34,13 +34,11 @@ describe("unexpected route errors", () => {
 		expect(body.requestId).toMatch(/^[0-9a-f]{8}$/);
 		expect(JSON.stringify(body)).not.toContain("users_private_notes");
 
-		// The full error is still logged server-side...
 		expect(logger.error).toHaveBeenCalledTimes(1);
 		const [logged, message] = vi.mocked(logger.error).mock.calls[0];
 		expect(String(logged instanceof Error ? logged.message : logged)).toContain(
 			internal,
 		);
-		// ...and the log line carries the same request id the body quotes.
 		expect(message).toContain(body.requestId);
 	});
 
