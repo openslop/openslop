@@ -10,9 +10,7 @@ export const spaceBetween = (before: string | undefined, after: string) =>
 		? ""
 		: " ";
 
-/** Each word as running text writes it, led by the space its script takes. */
-export const spacedWords = (words: readonly string[]): string[] =>
-	words.map((word, index) => spaceBetween(words[index - 1], word) + word);
-
 export const joinWords = (words: readonly string[]): string =>
-	spacedWords(words).join("");
+	words
+		.map((word, index) => spaceBetween(words[index - 1], word) + word)
+		.join("");

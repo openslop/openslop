@@ -5,10 +5,10 @@ import {
 	replaceCaptions,
 	resetCaptions,
 } from "../caption-edits";
-import { captionFromSeconds } from "@/lib/providers/word-captions";
+import { toCaption } from "../word-captions";
 
 const song = ["the", "quick", "fox", "ran", "over", "the", "lazy", "dog"].map(
-	(text, at) => captionFromSeconds(text, at, at + 1),
+	(text, at) => toCaption(text, at, at + 1),
 );
 const generated = {
 	durationSec: 8,
@@ -20,7 +20,7 @@ describe("editCaption", () => {
 	it("replaces one word's text and keeps its timing", () => {
 		expect(editCaption(generated, 2, " cat ").textTimestamps).toEqual([
 			...song.slice(0, 2),
-			captionFromSeconds("cat", 2, 3),
+			toCaption("cat", 2, 3),
 			...song.slice(3),
 		]);
 	});
@@ -55,7 +55,7 @@ describe("replaceCaptions", () => {
 	const edited = editCaption(generated, 0, "a");
 
 	it("replaces the words and the original they reset to", () => {
-		const heard = [captionFromSeconds("hey", 0, 1)];
+		const heard = [toCaption("hey", 0, 1)];
 		expect(replaceCaptions(edited, heard)).toEqual({
 			durationSec: 8,
 			textTimestamps: heard,

@@ -145,9 +145,8 @@ export class GenerationQueue {
 		const { result, resultInputs, connectorType, pinned, status } =
 			this.snapshots.get(elementId);
 		if (!result || !resultInputs || !connectorType)
-			throw new Error(`Element "${elementId}" holds no result to edit`);
-		if (isGenerationActive(status))
-			throw new Error(`Element "${elementId}" is generating`);
+			throw new Error("There is nothing here to edit yet");
+		if (isGenerationActive(status)) throw new Error("This is still generating");
 		this.commit({
 			elementId,
 			elementType,

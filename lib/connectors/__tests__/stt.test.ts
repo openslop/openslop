@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { HttpSTTConnector } from "../stt/connector";
 import { mockGatewaySequence } from "./_gateway-mock";
-import { captionFromSeconds } from "@/lib/providers/word-captions";
+import { toCaption } from "@/lib/captions/word-captions";
 
 describe("HttpSTTConnector", () => {
 	beforeEach(() => {
@@ -9,7 +9,7 @@ describe("HttpSTTConnector", () => {
 	});
 
 	it("reads the word timings from the bundle, with no media of its own", async () => {
-		const words = [captionFromSeconds("hi", 0, 0.4)];
+		const words = [toCaption("hi", 0, 0.4)];
 		mockGatewaySequence([
 			{ submitStatus: "pending" },
 			{

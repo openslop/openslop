@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CONTENT_TYPES, type ContentType } from "@/lib/canvas/types";
-import { captionFromSeconds } from "@/lib/providers/word-captions";
+import { toCaption } from "@/lib/captions/word-captions";
 import { captionableSequences, layoutCaptions } from "../caption-rule";
 import type { RenderLayout, ResolvedCaptions, ResolvedElement } from "../types";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
@@ -35,7 +35,7 @@ function el(
 
 const heard: ResolvedCaptions = {
 	firstWordIndex: 0,
-	words: [captionFromSeconds("hi", 0, 1)],
+	words: [toCaption("hi", 0, 1)],
 };
 
 describe("layoutCaptions", () => {
@@ -55,7 +55,7 @@ describe("layoutCaptions", () => {
 	describe("with a word a line", () => {
 		const paused: ResolvedCaptions = {
 			firstWordIndex: 0,
-			words: [captionFromSeconds("one", 0, 1), captionFromSeconds("two", 3, 4)],
+			words: [toCaption("one", 0, 1), toCaption("two", 3, 4)],
 		};
 		const wordPerLine = (element: ResolvedElement) =>
 			layoutOf([element], {
@@ -82,7 +82,7 @@ describe("layoutCaptions", () => {
 	it("stops captions where the next scene begins, and the last scene's where it ends", () => {
 		const spoken: ResolvedCaptions = {
 			firstWordIndex: 0,
-			words: [captionFromSeconds("hi", 0, 12)],
+			words: [toCaption("hi", 0, 12)],
 		};
 		const layout = layoutOf(
 			[el("vid", "video", spoken), el("vid2", "video", spoken)],

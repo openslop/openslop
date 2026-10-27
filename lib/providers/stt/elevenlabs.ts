@@ -7,7 +7,11 @@ import type { Caption } from "@remotion/captions";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
 import { timestampsFile } from "../timestamps-file";
-import { trimmedWords, wordsFromCharacters } from "../word-captions";
+import {
+	trimmedWords,
+	wordsFromCharacters,
+	type TimedToken,
+} from "@/lib/captions/word-captions";
 import type { RawSTT, STTRequest } from "./base";
 import { validateElevenLabsKey } from "../elevenlabs";
 import type { STTProvider } from "../types";
@@ -16,16 +20,13 @@ import type { STTProvider } from "../types";
 const USD_PER_HOUR = 0.22;
 
 /** Sounds like laughter are not captions, and Scribe times the spacing between words as tokens of its own. */
+const isTimedWord = (
+	word: SpeechToTextWordResponseModel,
+): word is SpeechToTextWordResponseModel & TimedToken =>
+	word.type === "word" && word.start !== undefined && word.end !== undefined;
+
 const toCaptions = (words: SpeechToTextWordResponseModel[]): Caption[] =>
-	wordsFromCharacters(
-		trimmedWords(
-			words.flatMap(({ text, type, start, end }) =>
-				type === "word" && start !== undefined && end !== undefined
-					? [{ text, start, end }]
-					: [],
-			),
-		),
-	);
+	wordsFromCharacters(trimmedWords(words.filter(isTimedWord)));
 
 export class ElevenLabsSTT
 	extends BaseProvider<STTRequest, RawSTT>

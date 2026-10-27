@@ -3,7 +3,10 @@ import type { BundleFile } from "@/lib/api/asset-bundle";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
 import { timestampsFile } from "../timestamps-file";
-import { trimmedWords, wordsFromCharacters } from "../word-captions";
+import {
+	trimmedWords,
+	wordsFromCharacters,
+} from "@/lib/captions/word-captions";
 import type { RawSTT, STTRequest } from "./base";
 import { validateCartesiaKey } from "../cartesia";
 import type { STTProvider } from "../types";

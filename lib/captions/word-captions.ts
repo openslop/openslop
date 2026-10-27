@@ -1,11 +1,11 @@
 import type { Caption } from "@remotion/captions";
-import { spacedWords } from "@/lib/captions/word-spacing";
+import { joinWords, spaceBetween } from "./word-spacing";
 
 export type TimedToken = { text: string; start: number; end: number };
 
 const HAS_LETTERS = /[\p{L}\p{N}]/u;
 
-export const captionFromSeconds = (
+export const toCaption = (
 	text: string,
 	startSec: number,
 	endSec: number,
@@ -19,10 +19,9 @@ export const captionFromSeconds = (
 
 /** Words a provider may lead with a space, trimmed, and the blanks it times as spacing dropped. */
 export const trimmedWords = (tokens: readonly TimedToken[]): Caption[] =>
-	tokens.flatMap(({ text, start, end }) => {
-		const word = text.trim();
-		return word ? [captionFromSeconds(word, start, end)] : [];
-	});
+	tokens
+		.map(({ text, start, end }) => toCaption(text.trim(), start, end))
+		.filter(({ text }) => text !== "");
 
 function wordStarts(text: string): Set<number> {
 	const segments = new Intl.Segmenter(undefined, { granularity: "word" });
@@ -35,15 +34,15 @@ function wordStarts(text: string): Set<number> {
 
 /** Joins the single characters some scripts are timed in into whole words, and punctuation onto the word before it. */
 export function wordsFromCharacters(captions: readonly Caption[]): Caption[] {
-	const pieces = spacedWords(captions.map(({ text }) => text));
-	const starts = wordStarts(pieces.join(""));
+	const starts = wordStarts(joinWords(captions.map(({ text }) => text)));
 	const words: Caption[] = [];
 	let offset = 0;
 	for (const [index, caption] of captions.entries()) {
-		const spaced = pieces[index] !== caption.text;
+		const space = spaceBetween(captions[index - 1]?.text, caption.text);
+		offset += space.length;
 		const startsWord =
-			HAS_LETTERS.test(caption.text) && (spaced || starts.has(offset));
-		offset += pieces[index].length;
+			HAS_LETTERS.test(caption.text) && (space !== "" || starts.has(offset));
+		offset += caption.text.length;
 		const last = words.at(-1);
 		if (last && !startsWord)
 			words[words.length - 1] = {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { groupIntoLines, lineText, wordsAt } from "../caption-layout";
-import { captionFromSeconds } from "@/lib/providers/word-captions";
+import { toCaption } from "../word-captions";
 
 const WORDS = ["one", "two", "three", "four", "five"];
 /** A word a second, each spoken for most of it. */
-const timed = WORDS.map((text, at) => captionFromSeconds(text, at, at + 0.8));
+const timed = WORDS.map((text, at) => toCaption(text, at, at + 0.8));
 const spans = (lines: { firstWordIndex: number; tokens: unknown[] }[]) =>
 	lines.map(({ firstWordIndex, tokens }) =>
 		WORDS.slice(firstWordIndex, firstWordIndex + tokens.length),
@@ -47,7 +47,7 @@ describe("groupIntoLines", () => {
 
 	it("breaks lines in a language written without spaces, and draws none between its words", () => {
 		const unspaced = ["今日", "は", "晴れ", "です"].map((text, at) =>
-			captionFromSeconds(text, at, at + 0.8),
+			toCaption(text, at, at + 0.8),
 		);
 		const lines = groupIntoLines(unspaced, 1500);
 		expect(lines.map(lineText)).toEqual(["今日は", "晴れです"]);

@@ -14,7 +14,7 @@ import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
 import type { CommittedVersion } from "../versions";
 import { inputsFor, jobNode as makeJob } from "./_graph";
-import { captionFromSeconds } from "@/lib/providers/word-captions";
+import { toCaption } from "@/lib/captions/word-captions";
 
 let generateMock: Mock<typeof generateForElement>;
 
@@ -532,11 +532,11 @@ describe("GenerationQueue", () => {
 		const spoken = {
 			audioUrl: "https://example.com/line.wav",
 			durationSec: 1,
-			textTimestamps: [captionFromSeconds("hi", 0, 1)],
+			textTimestamps: [toCaption("hi", 0, 1)],
 		};
 		const edited = {
 			...spoken,
-			textTimestamps: [captionFromSeconds("hey", 0, 1)],
+			textTimestamps: [toCaption("hey", 0, 1)],
 		};
 
 		it("swaps in the edit under the inputs the result was made from, so it is no fresher than it", async () => {
@@ -590,7 +590,7 @@ describe("GenerationQueue", () => {
 					{ id: "rv2", type: "narration" },
 					() => edited,
 				),
-			).toThrow(/no result/);
+			).toThrow(/nothing here to edit/);
 		});
 	});
 

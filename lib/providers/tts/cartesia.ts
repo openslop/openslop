@@ -16,7 +16,7 @@ import {
 	trimmedWords,
 	wordsFromCharacters,
 	type TimedToken,
-} from "../word-captions";
+} from "@/lib/captions/word-captions";
 import { validateCartesiaKey } from "../cartesia";
 import { pcmDurationSec, pcmSilence, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { joinWords, spaceBetween, spacedWords } from "../word-spacing";
+import { joinWords, spaceBetween } from "../word-spacing";
 
 describe("spaceBetween", () => {
 	it("spaces words apart in scripts that space their words, never before the first", () => {
@@ -13,17 +13,6 @@ describe("spaceBetween", () => {
 		expect(spaceBetween("我们", "都")).toBe("");
 		expect(spaceBetween("AI", "は")).toBe("");
 		expect(spaceBetween("สวัสดี", "ครับ")).toBe("");
-	});
-});
-
-describe("spacedWords", () => {
-	it("leads each word with the space its script takes", () => {
-		expect(spacedWords(["Hi", "there", "猫", "は"])).toEqual([
-			"Hi",
-			" there",
-			"猫",
-			"は",
-		]);
 	});
 });
 

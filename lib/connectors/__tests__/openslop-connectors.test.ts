@@ -6,7 +6,7 @@ import { HttpImageConnector } from "../image/connector";
 import { HttpTTSConnector } from "../tts/connector";
 import { HttpVideoConnector } from "../video/connector";
 import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
-import { captionFromSeconds } from "@/lib/providers/word-captions";
+import { toCaption } from "@/lib/captions/word-captions";
 
 const config = (model: string) =>
 	({ model: { provider: "openslop", model } }) as const;
@@ -114,7 +114,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 					result: { audio: "output.wav", timestamps: "timestamps.json" },
 				},
 			},
-			{ payload: [captionFromSeconds("hello", 0, 0.5)] },
+			{ payload: [toCaption("hello", 0, 0.5)] },
 		]);
 
 		const result = await new HttpTTSConnector(config("Slop TTS v1")).generate({

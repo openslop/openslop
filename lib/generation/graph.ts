@@ -24,7 +24,7 @@ export type GenerationJob = {
 	config: ConnectorConfig;
 };
 
-/** Where a node's result goes when it revises another element's instead of keeping its own. */
+/** A node that lands keeps no result of its own. */
 export type Landing = {
 	on: ElementRef;
 	revise: (current: AssetResult, result: AssetResult) => AssetResult;

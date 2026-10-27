@@ -8,7 +8,7 @@ import {
 	buildTimelineRows,
 	packLanes,
 } from "../timeline-rows";
-import { captionFromSeconds } from "@/lib/providers/word-captions";
+import { toCaption } from "@/lib/captions/word-captions";
 import { lineText } from "@/lib/captions/caption-layout";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
 
@@ -217,7 +217,7 @@ describe("buildTimelineRows", () => {
 
 describe("buildCaptionRows", () => {
 	const words = ["one", "two", "three"].map((text, at) =>
-		captionFromSeconds(text, at, at + 1),
+		toCaption(text, at, at + 1),
 	);
 	const narration = el("n", "narration", {
 		captions: { firstWordIndex: 0, words },
