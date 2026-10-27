@@ -16,9 +16,7 @@ export function createDimensionsPlugin(
 ): ConnectorPlugin<Dimensioned> {
 	return {
 		name: "dimensions",
-		reads: [
-			(_, { state }) => ({ [ASPECT_RATIO]: state.videoSettings.aspectRatio }),
-		],
+		reads: [(_, { settings }) => ({ [ASPECT_RATIO]: settings.aspectRatio })],
 		beforeGenerate: (params, ctx) => ({
 			...params,
 			...renderSize(

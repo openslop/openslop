@@ -1,4 +1,3 @@
-import pick from "lodash/pick";
 import type {
 	ElementRef,
 	ElementType,
@@ -39,12 +38,13 @@ export type GenerationNode = {
 	lands?: Landing;
 };
 
-/** The settings a build reads, so the live graph rebuilds when one changes. */
-export const buildSettings = (state: ProjectData) =>
-	pick(state, ["videoSettings", "scriptSettings"]);
+/** The project settings a plugin can read; the live graph watches exactly these. */
+export const buildSettings = ({ videoSettings }: ProjectData) => ({
+	aspectRatio: videoSettings.aspectRatio,
+});
 
 export type BuildContext = {
-	state: ReturnType<typeof buildSettings>;
+	settings: ReturnType<typeof buildSettings>;
 	canvas: CanvasElement[];
 	registry: ConnectorRegistry;
 };

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createDimensionsPlugin } from "@/lib/connectors/plugins/dimensions";
 import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
-import { projectState } from "@/lib/generation/__tests__/_context";
+import { projectSettings } from "@/lib/generation/__tests__/_context";
 import { pluginCtx, readsOf } from "./_state-ctx";
 
 const SEEDANCE = { provider: "runware", model: "Seedance 2 Fast" } as const;
 const SLOP_IMAGE = { provider: "openslop", model: "Slop Image v2" } as const;
 const image = createCanvasElement("image", { id: "i1" });
-const portraitState = projectState({ aspectRatio: "9:16" });
+const portraitState = projectSettings({ aspectRatio: "9:16" });
 const portrait = pluginCtx({
 	reads: readsOf(createDimensionsPlugin("image"), image, [], portraitState),
 });

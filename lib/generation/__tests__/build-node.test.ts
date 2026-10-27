@@ -15,7 +15,7 @@ import { buildNode } from "../generation-graph";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { staleReason } from "../stale-reason";
 import { isNodeStale } from "../staleness";
-import { buildCtx } from "./_context";
+import { storeCtx } from "./_context";
 
 let store: ProjectStore;
 let assets: CanvasElement[];
@@ -37,7 +37,7 @@ const element = (
 ) => elementWithText(id, type, "a sunset", customAttributes);
 
 const resolveOn = (el: GeneratedElement, canvas: CanvasElement[]) =>
-	buildNode(el, buildCtx([...assets, ...canvas], { state: store.getState() }));
+	buildNode(el, storeCtx(store, [...assets, ...canvas]));
 
 const resolve = (el: GeneratedElement) => resolveOn(el, []);
 

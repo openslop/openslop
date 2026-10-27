@@ -5,9 +5,9 @@ import type {
 	ConnectorPlugin,
 	PluginContext,
 } from "@/lib/connectors/types";
+import type { BuildContext } from "@/lib/generation/graph";
 import { pluginRecords } from "@/lib/generation/generation-graph";
 import { buildCtx } from "@/lib/generation/__tests__/_context";
-import type { ProjectData } from "@/lib/project/store";
 
 export const pluginCtx = ({
 	reads = {},
@@ -21,8 +21,8 @@ export const readsOf = (
 	plugin: ConnectorPlugin,
 	element: GeneratedElement,
 	canvas: CanvasElement[] = [],
-	state?: ProjectData,
-) => pluginRecords([plugin], "reads", element, buildCtx(canvas, { state }));
+	settings?: BuildContext["settings"],
+) => pluginRecords([plugin], "reads", element, buildCtx(canvas, { settings }));
 
 export const dependenciesOf = (
 	plugin: ConnectorPlugin,

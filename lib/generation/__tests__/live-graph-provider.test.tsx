@@ -22,9 +22,8 @@ const editor = { children: [] as Descendant[] };
 vi.mock("slate-react", () => ({ useSlateStatic: () => editor }));
 
 const store = createProjectStore();
-const state = store.getState();
 const contextNow = () =>
-	vi.fn(() => buildCtx(getCanvasElements(editor.children), { state }));
+	vi.fn(() => buildCtx(getCanvasElements(editor.children)));
 let buildContext = contextNow();
 vi.mock("../use-build-context", () => ({
 	useBuildContext: () => buildContext,

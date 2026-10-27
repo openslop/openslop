@@ -13,7 +13,7 @@ export function useBuildContext(): () => BuildContext {
 	const editor = useSlateStatic();
 	return useCallback(
 		() => ({
-			state: buildSettings(store.getState()),
+			settings: buildSettings(store.getState()),
 			canvas: getCanvasElements(editor.children),
 			registry: DEFAULT_CONNECTOR_REGISTRY,
 		}),

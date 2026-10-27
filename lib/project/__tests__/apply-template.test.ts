@@ -21,14 +21,13 @@ import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
 import { createProjectStore, type ProjectStore } from "../store";
 import { VoiceSchema } from "../types";
 import { makeEditor } from "@/lib/canvas/__tests__/_assets";
-import { buildCtx } from "@/lib/generation/__tests__/_context";
+import { storeCtx } from "@/lib/generation/__tests__/_context";
 
 let editor: Editor;
 let queue: GenerationQueue;
 let store: ProjectStore;
 
-const buildContext = () =>
-	buildCtx(getCanvasElements(editor.children), { state: store.getState() });
+const buildContext = () => storeCtx(store, getCanvasElements(editor.children));
 const assets = () => getAssets(editor.children);
 const settings = () => store.getState().scriptSettings;
 

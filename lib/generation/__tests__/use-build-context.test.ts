@@ -105,7 +105,7 @@ describe("useBuildContext", () => {
 
 		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 
-		expect(context().state.videoSettings.aspectRatio).toBe("9:16");
+		expect(context().settings.aspectRatio).toBe("9:16");
 	});
 
 	it("reads every element of the document, assets first", () => {
