@@ -35,7 +35,7 @@ export function ProviderKeyForm({
 			try {
 				const result = await saveKey(provider, apiKey.trim());
 				setApiKey("");
-				// The key is stored either way; a rejection is worth staying to read.
+				// A rejected key is not stored; the reason is worth staying to read.
 				setError(result.ok ? null : result.error);
 				if (result.ok) onSaved();
 			} catch (cause) {
