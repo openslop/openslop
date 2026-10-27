@@ -11,14 +11,14 @@ import {
 	getMotion,
 	getVolume,
 } from "../canvas/element-attributes";
-import { elementTrim, trimTimestamps } from "./clip-trim";
+import { elementTrim, trimTimestamps, type Trim } from "./clip-trim";
 
 function resolveCaptions(
 	{ textTimestamps }: AssetResult,
-	trimStartSec: number,
+	trim: Trim,
 ): ResolvedCaptions | undefined {
 	if (!textTimestamps?.length) return undefined;
-	const words = trimTimestamps(textTimestamps, trimStartSec);
+	const words = trimTimestamps(textTimestamps, trim);
 	return { firstWordIndex: textTimestamps.length - words.length, words };
 }
 
@@ -61,7 +61,7 @@ export function resolveElements(
 				volume: getVolume(element),
 				motion: getMotion(element),
 				captions: captionsEnabled
-					? resolveCaptions(snapshot.result, trim.trimStartSec)
+					? resolveCaptions(snapshot.result, trim)
 					: undefined,
 			});
 		}

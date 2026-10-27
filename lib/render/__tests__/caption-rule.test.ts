@@ -46,7 +46,7 @@ describe("layoutCaptions", () => {
 			duration,
 		}));
 
-	it("lays a line out while its words are spoken, and drops it once they end", () => {
+	it("ends the last line with its last word", () => {
 		expect(spans(layoutOf([el("vid", "video", heard)]))).toEqual([
 			{ id: "vid", start: 0, duration: 1 },
 		]);
@@ -65,16 +65,16 @@ describe("layoutCaptions", () => {
 				},
 			});
 
-		it("drops a line once its last word ends, even before the next line starts", () => {
+		it("holds a line through a pause until the next line starts", () => {
 			expect(spans(wordPerLine(el("vid", "video", paused)))).toEqual([
-				{ id: "vid", start: 0, duration: 1 },
+				{ id: "vid", start: 0, duration: 3 },
 				{ id: "vid", start: 3, duration: 1 },
 			]);
 		});
 
-		it("drops lines that start after the clip ends", () => {
+		it("holds a line no longer than the clip, and drops lines that start after it ends", () => {
 			expect(spans(wordPerLine(el("vid", "video", paused, 2)))).toEqual([
-				{ id: "vid", start: 0, duration: 1 },
+				{ id: "vid", start: 0, duration: 2 },
 			]);
 		});
 	});
@@ -121,9 +121,11 @@ describe("layoutCaptions", () => {
 	});
 
 	it("drops a line too short to cover a frame", () => {
-		expect(layoutCaptions(layoutOf([el("vid", "video", heard, 0.01)]))).toEqual(
-			[],
-		);
+		const blink: ResolvedCaptions = {
+			firstWordIndex: 0,
+			words: [toCaption("hi", 0, 0.01)],
+		};
+		expect(layoutCaptions(layoutOf([el("vid", "video", blink)]))).toEqual([]);
 	});
 });
 

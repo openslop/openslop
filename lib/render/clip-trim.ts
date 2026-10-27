@@ -72,18 +72,21 @@ export const elementTrim = (
 		getTimelineDuration(element),
 	);
 
-/** Caption timings counted from the trim start, keeping only the words that start after it. */
-export const trimTimestamps = (
+/** Caption timings counted from the trim start, keeping only the words spoken whole inside the clip. */
+export function trimTimestamps(
 	captions: Caption[],
-	startSec: number,
-): Caption[] =>
-	captions
-		.filter(({ startMs }) => startMs >= startSec * 1000)
+	{ trimStartSec, durationSec }: Trim,
+): Caption[] {
+	const startMs = trimStartSec * 1000;
+	const endMs = startMs + durationSec * 1000;
+	return captions
+		.filter((caption) => caption.startMs >= startMs && caption.endMs <= endMs)
 		.map((caption) => ({
 			...caption,
-			startMs: caption.startMs - startSec * 1000,
-			endMs: caption.endMs - startSec * 1000,
+			startMs: caption.startMs - startMs,
+			endMs: caption.endMs - startMs,
 		}));
+}
 
 /**
  * The clip's start stays put and what follows ripples. The clip holds at least

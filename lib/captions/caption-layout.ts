@@ -14,13 +14,11 @@ export type CaptionWord = {
 export type CaptionLine = {
 	/** Where the line's first token sits in the element's captions; tokens map to captions one to one. */
 	firstWordIndex: number;
+	/** Remotion holds a line until the next one starts; the last line ends with its last word. */
+	startMs: number;
+	durationMs: number;
 	tokens: TikTokToken[];
 };
-
-export const lineSpanSec = ({ tokens }: CaptionLine) => ({
-	fromSec: tokens[0].fromMs / 1000,
-	toSec: tokens[tokens.length - 1].toMs / 1000,
-});
 
 export const lineText = ({ tokens }: CaptionLine): string =>
 	joinWords(tokens.map(({ text }) => text));
@@ -50,9 +48,11 @@ export function groupIntoLines(
 	});
 	const lines: CaptionLine[] = [];
 	let at = firstWordIndex;
-	for (const { tokens } of pages) {
+	for (const { startMs, durationMs, tokens } of pages) {
 		lines.push({
 			firstWordIndex: at,
+			startMs,
+			durationMs,
 			tokens: tokens.map((token) => ({
 				...token,
 				text: token.text.trimStart(),

@@ -1,7 +1,7 @@
 import { use } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { CaptionLineContext } from "@/components/captions/caption-line";
-import { lineSpanSec, wordsAt } from "@/lib/captions/caption-layout";
+import { wordsAt } from "@/lib/captions/caption-layout";
 import {
 	captionFontSizePx,
 	type CaptionStyle,
@@ -29,7 +29,7 @@ export function Captions({
 				style={style}
 				words={wordsAt(
 					line.tokens,
-					lineSpanSec(line).fromSec + toSeconds(frame - from, fps),
+					line.startMs / 1000 + toSeconds(frame - from, fps),
 				)}
 				fontSizePx={fontSizePx}
 				element={element}

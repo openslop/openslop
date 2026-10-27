@@ -1,7 +1,6 @@
 import { captionSourceOf, isCaptionable } from "@/lib/canvas/types";
 import {
 	groupIntoLines,
-	lineSpanSec,
 	type CaptionLine,
 } from "@/lib/captions/caption-layout";
 import { frameSpan } from "./frames";
@@ -48,14 +47,12 @@ function linesUntilNextScene(
 ): CaptionSequence[] {
 	const { element, start } = sequence;
 	if (!element.captions) return [];
-	const untilSec = Math.min(
-		element.durationSec,
-		secUntilNextScene(sequence, series),
-	);
+	const untilSec = secUntilNextScene(sequence, series);
 	const { firstWordIndex, words } = element.captions;
 	return groupIntoLines(words, lineMs, firstWordIndex)
 		.map((line) => {
-			const { fromSec, toSec } = lineSpanSec(line);
+			const fromSec = line.startMs / 1000;
+			const toSec = (line.startMs + line.durationMs) / 1000;
 			return {
 				element,
 				line,

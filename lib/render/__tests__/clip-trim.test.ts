@@ -164,7 +164,10 @@ describe("trimEdge", () => {
 describe("trimTimestamps", () => {
 	it("counts words from the trim start and drops the ones cut before it", () => {
 		expect(
-			trimTimestamps([toCaption("cut", 0, 1), toCaption("kept", 1.5, 2)], 1.25),
+			trimTimestamps([toCaption("cut", 0, 1), toCaption("kept", 1.5, 2)], {
+				trimStartSec: 1.25,
+				durationSec: 10,
+			}),
 		).toEqual([toCaption("kept", 0.25, 0.75)]);
 	});
 
@@ -172,8 +175,21 @@ describe("trimTimestamps", () => {
 		expect(
 			trimTimestamps(
 				[toCaption("halved", 0.2, 0.6), toCaption("kept", 1, 1.5)],
-				0.3,
+				{ trimStartSec: 0.3, durationSec: 10 },
 			),
 		).toEqual([toCaption("kept", 0.7, 1.2)]);
+	});
+
+	it("drops the words the end trim cuts or leaves out", () => {
+		expect(
+			trimTimestamps(
+				[
+					toCaption("kept", 0, 1),
+					toCaption("halved", 1.5, 2.5),
+					toCaption("after", 3, 4),
+				],
+				{ trimStartSec: 0, durationSec: 2 },
+			),
+		).toEqual([toCaption("kept", 0, 1)]);
 	});
 });
