@@ -3,7 +3,7 @@ import {
 	type Caption,
 	type TikTokToken,
 } from "@remotion/captions";
-import { joinWords } from "./word-spacing";
+import { closesWordBefore, joinWords } from "./word-spacing";
 
 export type CaptionWord = {
 	text: string;
@@ -39,10 +39,10 @@ export function groupIntoLines(
 	firstWordIndex = 0,
 ): CaptionLine[] {
 	const { pages } = createTikTokStyleCaptions({
-		// Remotion expects a leading space for each word, regardless of language
+		// Remotion starts a line only at a word with a leading space, regardless of language
 		captions: captions.map((caption) => ({
 			...caption,
-			text: ` ${caption.text}`,
+			text: closesWordBefore(caption.text) ? caption.text : ` ${caption.text}`,
 		})),
 		combineTokensWithinMilliseconds: lineMs,
 	});

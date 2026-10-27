@@ -54,6 +54,34 @@ describe("groupIntoLines", () => {
 		expect(lines.map(({ firstWordIndex }) => firstWordIndex)).toEqual([0, 2]);
 	});
 
+	it("never starts a line with punctuation timed on its own", () => {
+		const punctuated = [
+			"こ",
+			"ん",
+			"に",
+			"ち",
+			"は",
+			"、",
+			"世",
+			"界",
+			"！",
+		].map((text, at) => toCaption(text, at, at + 0.8));
+		const lines = groupIntoLines(punctuated, 1500);
+		expect(lines.map(({ firstWordIndex }) => firstWordIndex)).toEqual([
+			0, 2, 4, 6,
+		]);
+		expect(lines.map(lineText)).toEqual(["こん", "にち", "は、", "世界！"]);
+		expect(groupIntoLines(punctuated, 0).map(lineText)).toEqual([
+			"こ",
+			"ん",
+			"に",
+			"ち",
+			"は、",
+			"世",
+			"界！",
+		]);
+	});
+
 	it("shows one word at a time at a line length of 0", () => {
 		expect(spans(groupIntoLines(timed, 0))).toEqual(WORDS.map((w) => [w]));
 	});
