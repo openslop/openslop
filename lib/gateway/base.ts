@@ -1,4 +1,5 @@
-import type { BundleResponse } from "@/lib/api/asset-bundle";
+import { z } from "zod";
+import { BundleResponseSchema } from "@/lib/api/asset-bundle";
 
 export abstract class GatewayClient<TParams = unknown, TResult = unknown> {
 	abstract generate(params: TParams): Promise<TResult>;
@@ -18,14 +19,19 @@ export function isTerminal(status: JobStatus): boolean {
 	return status === "completed" || status === "failed";
 }
 
-export type JobSubmission = { jobId: string; status: JobStatus };
+export const JobSubmissionSchema = z.object({
+	jobId: z.string(),
+	status: z.enum(JOB_STATUSES),
+});
 
-export type JobPoll = {
-	jobId: string;
-	status: JobStatus;
-	result: BundleResponse | null;
-	error: string | null;
-};
+export type JobSubmission = z.infer<typeof JobSubmissionSchema>;
+
+export const JobPollSchema = JobSubmissionSchema.extend({
+	result: BundleResponseSchema.nullable(),
+	error: z.string().nullable(),
+});
+
+export type JobPoll = z.infer<typeof JobPollSchema>;
 
 export abstract class AssetGateway<TParams> extends GatewayClient<
 	TParams,

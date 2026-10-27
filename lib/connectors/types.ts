@@ -2,13 +2,17 @@ import type { Caption } from "@remotion/captions";
 import { z } from "zod";
 import type { CanvasElement } from "@/lib/canvas/types";
 import type { Dependency, Read } from "@/lib/generation/declare";
-import type { WithMetadata } from "@/lib/providers/base";
 import type { MediaResolution } from "@/lib/project/aspect-ratio";
 import type { CharacterSchema } from "@/lib/api/request-schema-fields";
 import type { AttributeSchema } from "./attributes/schema";
 import type { ImageFormat } from "./image/enums";
 import type { ThinkingLevel } from "./llm/enums";
-import type { TTSEmotion, TTSGender, TTSSpeed } from "./tts/enums";
+import {
+	TTS_GENDERS,
+	type TTSEmotion,
+	type TTSGender,
+	type TTSSpeed,
+} from "./tts/enums";
 
 export const ASSET_CONNECTOR_TYPES = [
 	"music",
@@ -173,11 +177,16 @@ export type LLMGenerateParams = ConnectorGenerateParams & {
 	referenceImages?: string[];
 };
 
-export type LLMGenerateResult = {
-	text: string;
-	model: string;
-	usage?: { inputTokens: number; outputTokens: number };
-} & WithMetadata;
+export const LLMGenerateResultSchema = z.object({
+	text: z.string(),
+	model: z.string(),
+	usage: z
+		.object({ inputTokens: z.number(), outputTokens: z.number() })
+		.optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+export type LLMGenerateResult = z.infer<typeof LLMGenerateResultSchema>;
 
 export const LLMStreamChunkSchema = z.object({
 	text: z.string(),
@@ -241,16 +250,30 @@ export type TTSResult = AssetResult &
 /** A TTS request after its speaker's voice is resolved. */
 export type VoicedTTSParams = TTSGenerateParams & { voiceId: string };
 
-export type VoiceInfo = {
-	id: string;
-	name: string;
-	language?: string;
-	gender?: TTSGender;
-	accent?: string;
-	description: string;
+export const VoiceInfoSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	language: z.string().optional(),
+	gender: z.enum(TTS_GENDERS).optional(),
+	accent: z.string().optional(),
+	description: z.string(),
 	/** Where the vendor keeps the voice's preview, behind its key; hear it through `voicePreview`. */
-	previewUrl?: string;
-};
+	previewUrl: z.string().optional(),
+});
+
+export type VoiceInfo = z.infer<typeof VoiceInfoSchema>;
+
+export const VoiceSearchResponseSchema = z.object({
+	voices: z.array(VoiceInfoSchema),
+});
+
+export type VoiceSearchResponse = z.infer<typeof VoiceSearchResponseSchema>;
+
+export const VoicePreviewResponseSchema = z.object({
+	preview: HostedVoicePreviewSchema,
+});
+
+export type VoicePreviewResponse = z.infer<typeof VoicePreviewResponseSchema>;
 
 export type VoiceSearchParams = {
 	query?: string;

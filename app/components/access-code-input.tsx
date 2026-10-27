@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { fieldClassName } from "@/components/ui/input";
 import {
 	ACCESS_CODE_LENGTH,
+	AccessGrantedSchema,
 	type CodeEntry,
 	emptyAccessCode,
 	eraseBefore,
@@ -38,8 +39,9 @@ export default function AccessCodeInput() {
 			setError("");
 			startValidating(async () => {
 				try {
-					const { redirect } = await apiJson<{ redirect: string }>(
+					const { redirect } = await apiJson(
 						"/api/validate-code",
+						AccessGrantedSchema,
 						{ method: "POST", body: { code } },
 					);
 					router.push(redirect);

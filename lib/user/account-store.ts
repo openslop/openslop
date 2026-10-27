@@ -1,13 +1,12 @@
 import PQueue from "p-queue";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { apiJson } from "@/lib/clients/http";
-import type {
-	ProviderKeyCheck,
-	ProviderKeysView,
-} from "@/lib/api/provider-keys";
-import type {
-	ProviderKeyRecord,
-	ValidationResult,
+import {
+	ProviderKeyCheckSchema,
+	ProviderKeysViewSchema,
+	type ProviderKeyRecord,
+	type ProviderKeysView,
+	type ValidationResult,
 } from "@/lib/connectors/provider-key";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
@@ -62,7 +61,7 @@ export function createAccountStore(initial: AccountData): AccountStore {
 
 			saveKey: async (provider, apiKey) =>
 				applyView(
-					await apiJson<ProviderKeyCheck>("/api/providers", {
+					await apiJson("/api/providers", ProviderKeyCheckSchema, {
 						method: "POST",
 						body: { provider, apiKey },
 					}),
@@ -70,14 +69,14 @@ export function createAccountStore(initial: AccountData): AccountStore {
 
 			testKey: async (provider) =>
 				applyView(
-					await apiJson<ProviderKeyCheck>(`/api/providers/${provider}`, {
+					await apiJson(`/api/providers/${provider}`, ProviderKeyCheckSchema, {
 						method: "POST",
 					}),
 				).validation,
 
 			removeKey: async (provider) => {
 				applyView(
-					await apiJson<ProviderKeysView>(`/api/providers/${provider}`, {
+					await apiJson(`/api/providers/${provider}`, ProviderKeysViewSchema, {
 						method: "DELETE",
 					}),
 				);

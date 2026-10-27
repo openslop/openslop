@@ -1,4 +1,10 @@
+import { z } from "zod";
+
 export const ACCESS_CODE_LENGTH = 6;
+
+export const AccessGrantedSchema = z.object({ redirect: z.string() });
+
+export type AccessGranted = z.infer<typeof AccessGrantedSchema>;
 
 const ALLOWED_CHAR = /^[A-Z0-9]$/;
 

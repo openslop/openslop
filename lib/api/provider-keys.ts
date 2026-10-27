@@ -3,7 +3,9 @@ import { z } from "zod";
 import {
 	KEY_STATUSES,
 	type KeyStatus,
+	type ProviderKeyCheck,
 	type ProviderKeyRecord,
+	type ProviderKeysView,
 	type ValidationResult,
 } from "@/lib/connectors/provider-key";
 import {
@@ -160,13 +162,6 @@ export async function setKeyStatus(
 		"Failed to update provider key",
 	);
 }
-
-export type ProviderKeysView = { providerKeys: ProviderKeyRecord[] };
-
-/** A key change answered with whether that key works, beside the list it changed. */
-export type ProviderKeyCheck = ProviderKeysView & {
-	validation: ValidationResult;
-};
 
 export async function providerKeysView(user: User): Promise<ProviderKeysView> {
 	return { providerKeys: await listProviderKeys(user) };

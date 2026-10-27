@@ -1,7 +1,10 @@
 import { apiFetch, apiJson } from "@/lib/clients/http";
 import { readSSE } from "@/lib/api/sse";
 import {
+	LLMGenerateResultSchema,
 	LLMStreamChunkSchema,
+	VoicePreviewResponseSchema,
+	VoiceSearchResponseSchema,
 	type HostedVoicePreview,
 	type LLMGenerateParams,
 	type LLMGenerateResult,
@@ -11,8 +14,14 @@ import {
 	type VoiceInfo,
 	type VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { AssetGateway, GatewayClient } from "./base";
-import type { JobPoll, JobSubmission } from "./base";
+import {
+	AssetGateway,
+	GatewayClient,
+	JobPollSchema,
+	JobSubmissionSchema,
+	type JobPoll,
+	type JobSubmission,
+} from "./base";
 import { apiPrefixFor } from "./prefix";
 
 /**
@@ -33,11 +42,14 @@ export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
 	}
 
 	async generate(params: TParams): Promise<JobSubmission> {
-		return apiJson<JobSubmission>(this.route, { method: "POST", body: params });
+		return apiJson(this.route, JobSubmissionSchema, {
+			method: "POST",
+			body: params,
+		});
 	}
 
 	async poll(jobId: string, signal?: AbortSignal): Promise<JobPoll> {
-		return apiJson<JobPoll>(`${this.route}/${jobId}`, { signal });
+		return apiJson(`${this.route}/${jobId}`, JobPollSchema, { signal });
 	}
 }
 
@@ -54,7 +66,10 @@ export class HttpLLMGateway extends GatewayClient<
 	}
 
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
-		return apiJson(this.route, { method: "POST", body: params });
+		return apiJson(this.route, LLMGenerateResultSchema, {
+			method: "POST",
+			body: params,
+		});
 	}
 
 	async *stream(
@@ -78,16 +93,18 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 
 	/** A voice search names its model like a generation does, so the route knows whose key to read. */
 	async searchVoices(params: VoiceSearchParams): Promise<VoiceInfo[]> {
-		const { voices } = await apiJson<{ voices: VoiceInfo[] }>(
+		const { voices } = await apiJson(
 			`${this.route}/voices`,
+			VoiceSearchResponseSchema,
 			{ params: { ...params, ...this.model } },
 		);
 		return voices;
 	}
 
 	async voicePreview(voiceId: string): Promise<HostedVoicePreview> {
-		const { preview } = await apiJson<{ preview: HostedVoicePreview }>(
+		const { preview } = await apiJson(
 			`${this.route}/voices/preview`,
+			VoicePreviewResponseSchema,
 			{ params: { voiceId, ...this.model } },
 		);
 		return preview;

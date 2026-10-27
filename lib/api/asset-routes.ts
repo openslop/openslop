@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import type { JobPoll } from "@/lib/gateway/base";
+import type { JobPoll, JobSubmission } from "@/lib/gateway/base";
 import type { ModelRef } from "@/lib/connectors/types";
 import { errorMessage } from "@/lib/errors";
 import {
@@ -65,7 +65,7 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 				});
 				throw error;
 			}
-			return NextResponse.json({ jobId: id, status: "pending" });
+			return NextResponse.json<JobSubmission>({ jobId: id, status: "pending" });
 		},
 	});
 };

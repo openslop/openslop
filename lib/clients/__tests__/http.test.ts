@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { z, ZodError } from "zod";
 import { apiFetch, apiJson, UnreachableError } from "../http";
 
 describe("apiFetch", () => {
@@ -103,18 +104,29 @@ describe("apiFetch", () => {
 });
 
 describe("apiJson", () => {
-	it("returns the parsed body", async () => {
+	const Uploaded = z.object({ url: z.string() });
+	const answer = (body: unknown) =>
 		vi.stubGlobal(
 			"fetch",
-			vi.fn().mockResolvedValue({
-				ok: true,
-				json: () => Promise.resolve({ url: "https://blob/img.png" }),
-			}),
+			vi
+				.fn()
+				.mockResolvedValue({ ok: true, json: () => Promise.resolve(body) }),
 		);
 
-		await expect(apiJson("/api/upload/image")).resolves.toEqual({
+	it("returns the body parsed through the caller's schema", async () => {
+		answer({ url: "https://blob/img.png", etag: "abc" });
+
+		await expect(apiJson("/api/upload/image", Uploaded)).resolves.toEqual({
 			url: "https://blob/img.png",
 		});
+	});
+
+	it("throws when the route answers a shape the caller did not ask for", async () => {
+		answer({ href: "https://blob/img.png" });
+
+		await expect(apiJson("/api/upload/image", Uploaded)).rejects.toThrow(
+			ZodError,
+		);
 	});
 });
 

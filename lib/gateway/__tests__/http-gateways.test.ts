@@ -73,6 +73,14 @@ describe("HTTP gateways", () => {
 			);
 		});
 
+		it("throws on a poll answer of the wrong shape", async () => {
+			fetchMock.mockResolvedValue(jsonResponse({ jobId: "job-1" }));
+
+			await expect(
+				new HttpAssetGateway(HOSTED_VIDEO, "video").poll("job-1"),
+			).rejects.toThrow(ZodError);
+		});
+
 		it("hands the abort signal to the poll request", async () => {
 			fetchMock.mockResolvedValue(
 				jsonResponse({
@@ -95,7 +103,9 @@ describe("HTTP gateways", () => {
 
 	describe("HttpTTSGateway", () => {
 		it("searches voices with the query it was given", async () => {
-			const voices = [{ id: "v1", name: "Alice", gender: "feminine" }];
+			const voices = [
+				{ id: "v1", name: "Alice", gender: "feminine", description: "Warm" },
+			];
 			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 
 			const gateway = new HttpTTSGateway(HOSTED_TTS);
@@ -113,7 +123,12 @@ describe("HTTP gateways", () => {
 
 		it("hands previews back as the vendor names them", async () => {
 			const voices = [
-				{ id: "v1", name: "Alice", previewUrl: "https://vendor/a.mp3" },
+				{
+					id: "v1",
+					name: "Alice",
+					description: "Warm",
+					previewUrl: "https://vendor/a.mp3",
+				},
 			];
 			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 

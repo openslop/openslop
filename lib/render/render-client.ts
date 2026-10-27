@@ -1,6 +1,6 @@
 import { apiJson } from "@/lib/clients/http";
 import { pollUpdates } from "@/lib/providers/poll";
-import type { RenderHandle, RenderProgress } from "./render-api";
+import { RenderHandle, RenderProgress } from "./render-api";
 import type { Resolution } from "./resolutions";
 import type { RenderLayout } from "./types";
 
@@ -16,14 +16,14 @@ export async function* runRender(
 	layout: RenderLayout,
 	resolution: Resolution,
 ): AsyncGenerator<RenderUpdate> {
-	const handle = await apiJson<RenderHandle>("/api/render", {
+	const handle = await apiJson("/api/render", RenderHandle, {
 		method: "POST",
 		body: { inputProps: layout, resolution },
 	});
 	yield { status: "rendering", progress: 0 };
 
 	const progress = () =>
-		apiJson<RenderProgress>("/api/render/progress", {
+		apiJson("/api/render/progress", RenderProgress, {
 			method: "POST",
 			body: handle,
 		});

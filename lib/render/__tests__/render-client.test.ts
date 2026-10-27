@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiJson, UnreachableError } from "@/lib/clients/http";
+import { RenderHandle, RenderProgress } from "../render-api";
 import type { RenderLayout } from "../types";
 import { runRender, type RenderUpdate } from "../render-client";
 
@@ -53,14 +54,18 @@ describe("runRender", () => {
 			{ status: "rendering", progress: 0.4 },
 			{ status: "done", url: "/out.mp4", size: 1024 },
 		]);
-		expect(apiJsonMock).toHaveBeenNthCalledWith(1, "/api/render", {
-			method: "POST",
-			body: { inputProps: LAYOUT, resolution: "720p" },
-		});
-		expect(apiJsonMock).toHaveBeenNthCalledWith(2, "/api/render/progress", {
-			method: "POST",
-			body: HANDLE,
-		});
+		expect(apiJsonMock).toHaveBeenNthCalledWith(
+			1,
+			"/api/render",
+			RenderHandle,
+			{ method: "POST", body: { inputProps: LAYOUT, resolution: "720p" } },
+		);
+		expect(apiJsonMock).toHaveBeenNthCalledWith(
+			2,
+			"/api/render/progress",
+			RenderProgress,
+			{ method: "POST", body: HANDLE },
+		);
 	});
 
 	it("keeps polling when a progress request never reaches the server", async () => {

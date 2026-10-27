@@ -1,6 +1,7 @@
 import isUndefined from "lodash/isUndefined";
 import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
+import type { z } from "zod";
 import { ApiErrorEnvelope } from "@/lib/api/error-envelope";
 
 export type QueryParams = Record<string, string | number | undefined>;
@@ -68,8 +69,9 @@ export async function apiFetch(
 
 export async function apiJson<T>(
 	url: string,
+	schema: z.ZodType<T>,
 	options?: RequestOptions,
 ): Promise<T> {
 	const response = await apiFetch(url, options);
-	return response.json() as Promise<T>;
+	return schema.parse(await response.json());
 }

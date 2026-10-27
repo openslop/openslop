@@ -21,7 +21,7 @@ export const RenderRequest = z.object({
 
 // Both fields are forwarded to AWS as the bucket and key prefix the render is
 // read from, so they are parsed down to the shapes Remotion actually mints.
-export const RenderHandleRequest = z.object({
+export const RenderHandle = z.object({
 	renderId: z.string().regex(/^[A-Za-z0-9-]{1,64}$/, "Invalid renderId"),
 	bucketName: z
 		.string()
@@ -29,9 +29,12 @@ export const RenderHandleRequest = z.object({
 });
 
 /** Identifies an in-flight Lambda render: returned by `/api/render`, polled by progress. */
-export type RenderHandle = z.infer<typeof RenderHandleRequest>;
+export type RenderHandle = z.infer<typeof RenderHandle>;
 
-export type RenderProgress =
-	| { type: "progress"; progress: number }
-	| { type: "done"; url: string; size: number }
-	| { type: "error"; message: string };
+export const RenderProgress = z.discriminatedUnion("type", [
+	z.object({ type: z.literal("progress"), progress: z.number() }),
+	z.object({ type: z.literal("done"), url: z.string(), size: z.number() }),
+	z.object({ type: z.literal("error"), message: z.string() }),
+]);
+
+export type RenderProgress = z.infer<typeof RenderProgress>;

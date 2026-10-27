@@ -8,6 +8,7 @@ const connector = () =>
 	});
 
 const PREVIEW = { url: "https://assets/preview.wav", durationSec: 3 };
+const voice = (id: string) => ({ id, name: id, description: "" });
 
 const queryOf = (fetch: ReturnType<typeof mockGatewaySequence>, call: number) =>
 	new URL(String(fetch.mock.calls[call]?.[0]), "http://app").searchParams;
@@ -19,7 +20,7 @@ describe("HttpVoiceConnector", () => {
 
 	it("generates the first voice its traits find, heard through its preview", async () => {
 		const fetch = mockGatewaySequence([
-			{ payload: { voices: [{ id: "v-found" }, { id: "v-other" }] } },
+			{ payload: { voices: [voice("v-found"), voice("v-other")] } },
 			{ payload: { preview: PREVIEW } },
 		]);
 

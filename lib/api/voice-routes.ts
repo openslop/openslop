@@ -1,7 +1,11 @@
 import omit from "lodash/omit";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import type { ModelRef } from "@/lib/connectors/types";
+import type {
+	ModelRef,
+	VoicePreviewResponse,
+	VoiceSearchResponse,
+} from "@/lib/connectors/types";
 import { voiceSearchParamsSchema } from "@/lib/project/types";
 import { voicePreview } from "@/lib/providers/tts/voice-preview";
 import { requiredVoiceId } from "./request-schema-fields";
@@ -16,7 +20,7 @@ export const createVoiceSearchHandler = <TPicked extends ModelRef>(
 		handle: async ({ user, input }) => {
 			const tts = await family.providerFor(user.id, "tts", input);
 			const voices = await tts.search(omit(input, "provider", "model"));
-			return NextResponse.json({ voices });
+			return NextResponse.json<VoiceSearchResponse>({ voices });
 		},
 	});
 
@@ -30,7 +34,7 @@ export const createVoicePreviewHandler = <TPicked extends ModelRef>(
 		label: "Voice preview",
 		handle: async ({ user, input }) => {
 			const tts = await family.providerFor(user.id, "tts", input);
-			return NextResponse.json(
+			return NextResponse.json<VoicePreviewResponse>(
 				{ preview: await voicePreview(tts, input) },
 				{ headers: { "Cache-Control": "private, max-age=3600" } },
 			);

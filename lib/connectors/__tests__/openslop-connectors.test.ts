@@ -131,7 +131,9 @@ describe("OpenSlop connectors (via gateways)", () => {
 	it("TTS: searchVoices calls /api/v1/tts/voices", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({
-				voices: [{ id: "v1", name: "Voice 1", language: "en" }],
+				voices: [
+					{ id: "v1", name: "Voice 1", language: "en", description: "" },
+				],
 			}),
 		);
 

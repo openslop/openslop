@@ -2,13 +2,10 @@ import { getRenderProgress } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
 import { createSessionRouteHandler } from "@/lib/api/route-handler";
 import { getFunctionName, REGION } from "@/lib/render/lambda-config";
-import {
-	RenderHandleRequest,
-	type RenderProgress,
-} from "@/lib/render/render-api";
+import { RenderHandle, type RenderProgress } from "@/lib/render/render-api";
 
 export const POST = createSessionRouteHandler({
-	schema: RenderHandleRequest,
+	schema: RenderHandle,
 	label: "render/progress",
 	handle: async ({ input }) => {
 		const progress = await getRenderProgress({

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { unauthorized } from "@/lib/api/response";
 import { createPublicRouteHandler } from "@/lib/api/route-handler";
-import { ACCESS_CODE_LENGTH } from "@/lib/auth/access-code";
+import { ACCESS_CODE_LENGTH, type AccessGranted } from "@/lib/auth/access-code";
 import { createClient } from "@/lib/supabase/server";
 
 const Outcome = z.enum(["valid", "invalid", "inactive", "expired"]);
@@ -36,6 +36,6 @@ export const POST = createPublicRouteHandler({
 		const outcome = Outcome.parse(data);
 		if (outcome !== "valid") return unauthorized(REJECTIONS[outcome]);
 
-		return NextResponse.json({ redirect: "/signup" });
+		return NextResponse.json<AccessGranted>({ redirect: "/signup" });
 	},
 });
