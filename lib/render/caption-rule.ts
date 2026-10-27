@@ -5,7 +5,7 @@ import {
 	type CaptionLine,
 } from "@/lib/captions/caption-layout";
 import { frameSpan } from "./frames";
-import { layoutSequences, secUntilNextScene } from "./sequences";
+import { allSequences, secUntilNextScene } from "./sequences";
 import type { RenderLayout, Sequence } from "./types";
 
 type Layout = Pick<RenderLayout, "series" | "sequences">;
@@ -29,7 +29,7 @@ const isVideoInSpokenScene = (
 	spokenScenes.has(element.sceneId);
 
 export function captionableSequences(layout: Layout): Sequence[] {
-	const sequences = layoutSequences(layout);
+	const sequences = allSequences(layout);
 	const scenesWithSpeech = sceneIdsOf(sequences.filter(isSpeech));
 	return sequences.filter(
 		(sequence) =>
@@ -69,7 +69,7 @@ function linesUntilNextScene(
 export function layoutCaptions(
 	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle" | "fps">,
 ): CaptionSequence[] {
-	const sequences = layoutSequences(layout);
+	const sequences = allSequences(layout);
 	const scenesWithCaptionedSpeech = sceneIdsOf(
 		sequences.filter(
 			(sequence) => sequence.element.captions && isSpeech(sequence),

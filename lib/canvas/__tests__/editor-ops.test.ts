@@ -319,7 +319,7 @@ describe("mergeAttrs", () => {
 
 describe("applyElementVersion", () => {
 	const version = (
-		elementType: ContentElement["type"] | undefined,
+		elementType: ContentElement["type"],
 		attributes: Record<string, string>,
 		prompt: string,
 	) => ({
@@ -354,20 +354,5 @@ describe("applyElementVersion", () => {
 		applyElementVersion(editor, "n1", version("image", {}, "a wolf"));
 
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}a wolf`);
-	});
-
-	it("leaves the type alone for a version stored without one", () => {
-		const el = content("video", "n1", "a fox", { style: "ink" });
-		const editor = makeEditor([scene([el])]);
-
-		applyElementVersion(
-			editor,
-			"n1",
-			version(undefined, { style: "oil" }, "a fox"),
-		);
-
-		const node = (editor.children[0] as Scene).children[0];
-		expect(node.type).toBe("video");
-		expect(node.generationAttributes).toEqual({ style: "oil" });
 	});
 });

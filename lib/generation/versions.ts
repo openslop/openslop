@@ -10,8 +10,7 @@ export type ElementVersion = {
 	elementId: string;
 	createdAt: string;
 	connectorType: AssetConnectorType;
-	/** Absent on versions stored before the element type was recorded. */
-	elementType?: ElementType;
+	elementType: ElementType;
 	inputs: GenerationInputs;
 	result: AssetResult;
 	/** The result was supplied rather than generated. */

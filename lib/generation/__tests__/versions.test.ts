@@ -23,6 +23,7 @@ const version = (
 	elementId: "a",
 	createdAt,
 	connectorType: "image",
+	elementType: "image",
 	inputs: inputsFor(prompt),
 	result: result(url),
 	pinned: false,

@@ -21,7 +21,7 @@ const RowSchema = z.object({
 	element_id: z.string(),
 	created_at: z.string(),
 	connector_type: z.enum(ASSET_CONNECTOR_TYPES),
-	element_type: ElementTypeSchema.nullish(),
+	element_type: ElementTypeSchema,
 	inputs: GenerationInputsSchema,
 	result: AssetResultSchema,
 	pinned: z.boolean(),
@@ -31,7 +31,7 @@ const toVersion = (row: z.infer<typeof RowSchema>): ElementVersion => ({
 	elementId: row.element_id,
 	createdAt: row.created_at,
 	connectorType: row.connector_type,
-	elementType: row.element_type ?? undefined,
+	elementType: row.element_type,
 	inputs: row.inputs,
 	result: row.result,
 	pinned: row.pinned,
@@ -79,6 +79,8 @@ export async function fetchElementVersions(
 		.select(COLUMNS)
 		.eq("project_id", projectId)
 		.eq("element_id", elementId)
+		// Rows from before versions recorded their element type cannot be restored
+		.not("element_type", "is", null)
 		.order("created_at", { ascending: true });
 	if (error) throw error;
 	return parseElementVersions(data);

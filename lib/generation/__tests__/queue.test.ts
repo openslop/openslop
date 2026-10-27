@@ -654,6 +654,7 @@ describe("GenerationQueue", () => {
 
 			generationQueue.restoreResult({
 				elementId: "rr1",
+				elementType: "image",
 				connectorType: "image",
 				inputs,
 				result,
@@ -684,6 +685,7 @@ describe("GenerationQueue", () => {
 
 			generationQueue.restoreResult({
 				elementId: "rr2",
+				elementType: "image",
 				connectorType: "image",
 				inputs,
 				result: first,
@@ -710,6 +712,7 @@ describe("GenerationQueue", () => {
 
 			generationQueue.restoreResult({
 				elementId: "rr3",
+				elementType: "image",
 				connectorType: "image",
 				inputs: shared,
 				result: uploaded,
@@ -737,6 +740,7 @@ describe("GenerationQueue", () => {
 
 			generationQueue.restoreResult({
 				elementId: "rr4",
+				elementType: "image",
 				connectorType: "image",
 				inputs: shared,
 				result: generated,

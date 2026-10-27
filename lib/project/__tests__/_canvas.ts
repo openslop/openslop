@@ -14,6 +14,7 @@ export function resultQueue(
 			inputs: inputsFor(""),
 			result: { durationSec: 0, ...result },
 			connectorType: "image",
+			elementType: "image",
 			pinned,
 		});
 	return queue;

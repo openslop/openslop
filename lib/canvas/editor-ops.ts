@@ -143,8 +143,7 @@ export function applyElementVersion(
 	{ elementType, inputs }: Pick<ElementVersion, "elementType" | "inputs">,
 ): void {
 	const [, path] = requireElement(editor, id);
-	if (elementType)
-		Transforms.setNodes(editor, { type: elementType }, { at: path });
+	Transforms.setNodes(editor, { type: elementType }, { at: path });
 	replaceGenerationAttrs(editor, path, inputs.attributes);
 	updateElementText(editor, id, inputs.prompt);
 }

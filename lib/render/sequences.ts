@@ -1,6 +1,6 @@
 import type { RenderLayout, Sequence } from "./types";
 
-export const layoutSequences = ({
+export const allSequences = ({
 	series,
 	sequences,
 }: Pick<RenderLayout, "series" | "sequences">): Sequence[] => [

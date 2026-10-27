@@ -17,6 +17,7 @@ const row = (overrides: Record<string, unknown> = {}) => ({
 	element_id: "el-1",
 	created_at: "2026-01-01T00:00:00.000Z",
 	connector_type: "image",
+	element_type: "image",
 	inputs: {
 		prompt: "a fox",
 		attributes: { style: "ink" },
@@ -35,6 +36,7 @@ describe("parseElementVersions", () => {
 				elementId: "el-1",
 				createdAt: "2026-01-01T00:00:00.000Z",
 				connectorType: "image",
+				elementType: "image",
 				inputs: {
 					prompt: "a fox",
 					attributes: { style: "ink" },
@@ -52,11 +54,6 @@ describe("parseElementVersions", () => {
 		expect(version?.elementType).toBe("video");
 	});
 
-	it("leaves the element type unset on a row written without one", () => {
-		const [version] = parseElementVersions([row()]);
-		expect(version?.elementType).toBeUndefined();
-	});
-
 	it("treats a project with no history as empty", () => {
 		expect(parseElementVersions(null)).toEqual([]);
 	});
@@ -66,6 +63,7 @@ describe("parseElementVersions", () => {
 			parseElementVersions([row({ connector_type: "gif" })]),
 		).toThrow();
 		expect(() => parseElementVersions([row({ result: {} })])).toThrow();
+		expect(() => parseElementVersions([row({ element_type: null })])).toThrow();
 	});
 });
 
