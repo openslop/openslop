@@ -4,7 +4,7 @@ import {
 	type CaptionLine,
 } from "@/lib/captions/caption-layout";
 import { frameSpan } from "./frames";
-import { allSequences, secUntilNextScene } from "./sequences";
+import { allSequences } from "./sequences";
 import type { RenderLayout, Sequence } from "./types";
 
 type Layout = Pick<RenderLayout, "series" | "sequences">;
@@ -40,27 +40,16 @@ export function captionableSequences(layout: Layout): Sequence[] {
 const coversAFrame = (start: number, duration: number, fps: number) =>
 	frameSpan(start, duration, fps).durationInFrames > 0;
 
-function linesUntilNextScene(
-	sequence: Sequence,
-	series: Sequence[],
-	lineMs: number,
-): CaptionSequence[] {
+function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 	const { element, start } = sequence;
 	if (!element.captions) return [];
-	const untilSec = secUntilNextScene(sequence, series);
 	const { firstWordIndex, words } = element.captions;
-	return groupIntoLines(words, lineMs, firstWordIndex)
-		.map((line) => {
-			const fromSec = line.startMs / 1000;
-			const toSec = (line.startMs + line.durationMs) / 1000;
-			return {
-				element,
-				line,
-				start: start + fromSec,
-				duration: Math.min(toSec, untilSec) - fromSec,
-			};
-		})
-		.filter(({ duration }) => duration > 0);
+	return groupIntoLines(words, lineMs, firstWordIndex).map((line) => ({
+		element,
+		line,
+		start: start + line.startMs / 1000,
+		duration: line.durationMs / 1000,
+	}));
 }
 
 export function layoutCaptions(
@@ -76,9 +65,7 @@ export function layoutCaptions(
 		.filter(
 			(sequence) => !isVideoInSpokenScene(sequence, scenesWithCaptionedSpeech),
 		)
-		.flatMap((sequence) =>
-			linesUntilNextScene(sequence, layout.series, layout.captionStyle.lineMs),
-		)
+		.flatMap((sequence) => captionLines(sequence, layout.captionStyle.lineMs))
 		.filter(({ start, duration }) => coversAFrame(start, duration, layout.fps))
 		.sort((a, b) => a.start - b.start);
 }

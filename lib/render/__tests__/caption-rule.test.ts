@@ -71,30 +71,6 @@ describe("layoutCaptions", () => {
 				{ id: "vid", start: 3, duration: 1 },
 			]);
 		});
-
-		it("holds a line no longer than the clip, and drops lines that start after it ends", () => {
-			expect(spans(wordPerLine(el("vid", "video", paused, 2)))).toEqual([
-				{ id: "vid", start: 0, duration: 2 },
-			]);
-		});
-	});
-
-	it("stops captions where the next scene begins, and the last scene's where it ends", () => {
-		const spoken: ResolvedCaptions = {
-			firstWordIndex: 0,
-			words: [toCaption("hi", 0, 12)],
-		};
-		const layout = layoutOf(
-			[el("vid", "video", spoken), el("vid2", "video", spoken)],
-			{ transitionType: "fade" },
-		);
-		const [first, last] = layout.series;
-		const [firstLine, lastLine] = layoutCaptions(layout);
-		expect(firstLine.duration).toBeCloseTo(
-			first.duration - layout.transitionDurationSec,
-		);
-		expect(lastLine.start).toBe(last.start);
-		expect(lastLine.duration).toBe(last.duration);
 	});
 
 	it("captions the speech instead of a video when its scene's speech has words", () => {
