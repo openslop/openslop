@@ -35,7 +35,7 @@ vi.mock("@/lib/connectors/factory", () => ({
 				...defaultAttributes,
 				...attrs,
 			}),
-			offers: () => true,
+			offers: (_key: string, value: string) => value !== "unoffered",
 		};
 	},
 }));
@@ -185,6 +185,45 @@ describe("applyRefineOp — insert", () => {
 		expect(texts).toEqual(["first", "A", "B", "C"]);
 	});
 
+	it("stacks before-inserts at the anchor while after-inserts stack past it", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
+		const anchorMap: Record<string, string> = {};
+		const insert = (text: string, position?: "before" | "after") =>
+			applyRefineOp(
+				editor,
+				{ op: "insert", anchor_id: "n1", position, type: "sound", text },
+				anchorMap,
+			);
+
+		insert("A");
+		insert("B", "before");
+		insert("C", "before");
+		insert("D");
+
+		expect(getContentTexts(editor)).toEqual(["B", "C", "first", "A", "D"]);
+	});
+
+	it("refuses an attribute value the type does not offer", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOp(
+			editor,
+			{
+				op: "insert",
+				type: "sound",
+				text: "rain",
+				attrs: { loops: "unoffered" },
+			},
+			{},
+		);
+
+		expect(result).toEqual({
+			ok: false,
+			reason: 'insert: sound offers no loops "unoffered"',
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
+	});
+
 	it("reports a missing anchor instead of appending somewhere else", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 		const anchorMap: Record<string, string> = {};
@@ -325,6 +364,27 @@ describe("applyRefineOp — set", () => {
 		const el = getNode(editor, "n1");
 		expect(flatAttributes(el)).toEqual({ name: "Alice", emotion: "happy" });
 		expect(getPromptText(el)).toBe("Hello!");
+	});
+
+	it("refuses an attribute value the type does not offer, changing nothing", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOp(
+			editor,
+			{
+				op: "set",
+				id: "n1",
+				attrs: { emotion: "unoffered" },
+				text: "changed",
+			},
+			{},
+		);
+
+		expect(result).toEqual({
+			ok: false,
+			reason: 'set: narration offers no emotion "unoffered"',
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
 	it("keeps the caret marker when text is replaced or cleared", () => {
@@ -715,6 +775,37 @@ describe("applyRefineOp — assets", () => {
 		]);
 	});
 
+	it("inserts a voice from its traits alone, with no text", () => {
+		const editor = makeCanvas([]);
+
+		const result = apply(editor, {
+			op: "insert",
+			type: "asset_voice",
+			attrs: { name: "Mia", age: "child" },
+		});
+
+		expect(result).toEqual({ applied: 1, failures: [] });
+		expect(describeAssets(editor)).toEqual([
+			["asset_voice:Mia", { name: "Mia", age: "child", ...VOICE }, ""],
+		]);
+	});
+
+	it("refuses a voice trait the voice schema does not offer", () => {
+		const editor = makeCanvas([]);
+
+		const result = apply(editor, {
+			op: "insert",
+			type: "asset_voice",
+			attrs: { name: "Mia", age: "ageless" },
+		});
+
+		expect(result).toEqual({
+			applied: 0,
+			failures: ['insert: asset_voice offers no age "ageless"'],
+		});
+		expect(describeAssets(editor)).toEqual([]);
+	});
+
 	it("keeps an asset's description when an insert rewrites it with no text", () => {
 		const editor = makeCanvas([
 			asset("asset_avatar", { name: "Mia", text: "a girl" }),
@@ -746,6 +837,32 @@ describe("applyRefineOp — assets", () => {
 		).toEqual([
 			`set: an asset's name never changes; remove "${voice.id}" and insert it again`,
 		]);
+		expect(
+			apply(editor, { op: "set", id: voice.id, attrs: { name: null } })
+				.failures,
+		).toEqual([
+			`set: an asset's name never changes; remove "${voice.id}" and insert it again`,
+		]);
+	});
+
+	it("lets a set repeat an asset's unchanged name", () => {
+		const voice = asset("asset_voice", {
+			name: "Mia",
+			attrs: { age: "child" },
+		});
+		const editor = makeCanvas([voice]);
+
+		const result = apply(editor, {
+			op: "set",
+			id: voice.id,
+			attrs: { name: "Mia", age: "adult" },
+		});
+
+		expect(result).toEqual({ applied: 1, failures: [] });
+		expect(describeAssets(editor)[0]?.[1]).toMatchObject({
+			name: "Mia",
+			age: "adult",
+		});
 	});
 
 	it("refuses to anchor a script element on an asset", () => {
