@@ -7,7 +7,7 @@ import {
 	trimEdge,
 	trimTimestamps,
 } from "../clip-trim";
-import { secondsCaption } from "@/lib/providers/word-captions";
+import { captionFromSeconds } from "@/lib/providers/word-captions";
 
 describe("isTrimmable", () => {
 	it("trims only what has a media length", () => {
@@ -165,18 +165,21 @@ describe("trimTimestamps", () => {
 	it("counts words from the trim start and drops the ones cut before it", () => {
 		expect(
 			trimTimestamps(
-				[secondsCaption("cut", 0, 1), secondsCaption("kept", 1.5, 2)],
+				[captionFromSeconds("cut", 0, 1), captionFromSeconds("kept", 1.5, 2)],
 				1.25,
 			),
-		).toEqual([secondsCaption("kept", 0.25, 0.75)]);
+		).toEqual([captionFromSeconds("kept", 0.25, 0.75)]);
 	});
 
 	it("drops a word the cut lands in, so no word starts before the clip", () => {
 		expect(
 			trimTimestamps(
-				[secondsCaption("halved", 0.2, 0.6), secondsCaption("kept", 1, 1.5)],
+				[
+					captionFromSeconds("halved", 0.2, 0.6),
+					captionFromSeconds("kept", 1, 1.5),
+				],
 				0.3,
 			),
-		).toEqual([secondsCaption("kept", 0.7, 1.2)]);
+		).toEqual([captionFromSeconds("kept", 0.7, 1.2)]);
 	});
 });

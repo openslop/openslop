@@ -5,7 +5,7 @@ export type TimedToken = { text: string; start: number; end: number };
 
 const HAS_LETTERS = /[\p{L}\p{N}]/u;
 
-export const secondsCaption = (
+export const captionFromSeconds = (
 	text: string,
 	startSec: number,
 	endSec: number,
@@ -17,6 +17,13 @@ export const secondsCaption = (
 	confidence: null,
 });
 
+/** Words a provider may lead with a space, trimmed, and the blanks it times as spacing dropped. */
+export const trimmedWords = (tokens: readonly TimedToken[]): Caption[] =>
+	tokens.flatMap(({ text, start, end }) => {
+		const word = text.trim();
+		return word ? [captionFromSeconds(word, start, end)] : [];
+	});
+
 function wordStarts(text: string): Set<number> {
 	const segments = new Intl.Segmenter(undefined, { granularity: "word" });
 	return new Set(
@@ -26,28 +33,27 @@ function wordStarts(text: string): Set<number> {
 	);
 }
 
-/** Providers time tokens, single characters in some scripts; a caption is a whole word, without spaces. */
-export function wordCaptions(tokens: readonly TimedToken[]): Caption[] {
-	const parts = tokens
-		.map((token) => ({ ...token, text: token.text.trim() }))
-		.filter(({ text }) => text !== "");
-	const spaced = spacesBefore(parts.map(({ text }) => text));
-	const pieces = parts.map(({ text }, index) =>
+/** Joins the single characters some scripts are timed in into whole words, and punctuation onto the word before it. */
+export function wordsFromCharacters(captions: readonly Caption[]): Caption[] {
+	const spaced = spacesBefore(captions.map(({ text }) => text));
+	const pieces = captions.map(({ text }, index) =>
 		spaced[index] ? ` ${text}` : text,
 	);
 	const starts = wordStarts(pieces.join(""));
 	const words: Caption[] = [];
 	let offset = 0;
-	parts.forEach((part, index) => {
-		const at = offset + (spaced[index] ? 1 : 0);
+	for (const [index, caption] of captions.entries()) {
+		const startsWord =
+			HAS_LETTERS.test(caption.text) && (spaced[index] || starts.has(offset));
 		offset += pieces[index].length;
 		const last = words.at(-1);
-		const startsWord =
-			HAS_LETTERS.test(part.text) && (spaced[index] || starts.has(at));
-		if (last && !startsWord) {
-			last.text += part.text;
-			last.endMs = part.end * 1000;
-		} else words.push(secondsCaption(part.text, part.start, part.end));
-	});
+		if (last && !startsWord)
+			words[words.length - 1] = {
+				...last,
+				text: last.text + caption.text,
+				endMs: caption.endMs,
+			};
+		else words.push(caption);
+	}
 	return words;
 }

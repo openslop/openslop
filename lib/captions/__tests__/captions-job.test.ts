@@ -14,7 +14,7 @@ import { GenerationQueue } from "@/lib/generation/queue";
 import { jobNode } from "@/lib/generation/__tests__/_graph";
 import type { CommittedVersion } from "@/lib/generation/versions";
 import { captionsNode, captionsNodeId } from "../captions-job";
-import { secondsCaption } from "@/lib/providers/word-captions";
+import { captionFromSeconds } from "@/lib/providers/word-captions";
 
 let generateMock: Mock<typeof generateForElement>;
 
@@ -24,7 +24,7 @@ vi.mock("@/lib/generation/generate-for-element", () => ({
 }));
 
 const spoken = { audioUrl: "https://example.com/a.wav", durationSec: 2 };
-const heard = [secondsCaption("hi", 0, 1)];
+const heard = [captionFromSeconds("hi", 0, 1)];
 const element = { id: "narration", type: "narration" } as const;
 const stt = (result: AssetResult = spoken) =>
 	captionsNode(element, result, DEFAULT_MODELS.stt);

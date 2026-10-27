@@ -12,7 +12,11 @@ import type { BundleFile } from "@/lib/api/asset-bundle";
 import { logger } from "@/lib/api/logger";
 import { BaseProvider, type RawResult } from "../base";
 import { timestampsFile } from "../timestamps-file";
-import { type TimedToken, wordCaptions } from "../word-captions";
+import {
+	trimmedWords,
+	wordsFromCharacters,
+	type TimedToken,
+} from "../word-captions";
 import { validateCartesiaKey } from "../cartesia";
 import { pcmDurationSec, pcmSilence, wavFromPcm, type PcmFormat } from "../wav";
 import type { TTSProvider, TTSRequest } from "./base";
@@ -239,7 +243,7 @@ export class CartesiaTTS
 			]);
 			return {
 				data: wavFromPcm(padded, STREAMED_FORMAT),
-				textTimestamps: wordCaptions(tokens),
+				textTimestamps: wordsFromCharacters(trimmedWords(tokens)),
 				costUsd: params.prompt.length * USD_PER_CHARACTER,
 				// Word timestamps stop at the last word, and may be absent.
 				metadata: {

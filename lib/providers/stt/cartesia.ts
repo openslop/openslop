@@ -3,7 +3,7 @@ import type { BundleFile } from "@/lib/api/asset-bundle";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
 import { timestampsFile } from "../timestamps-file";
-import { wordCaptions } from "../word-captions";
+import { trimmedWords, wordsFromCharacters } from "../word-captions";
 import type { RawSTT, STTRequest } from "./base";
 import { validateCartesiaKey } from "../cartesia";
 import type { STTProvider } from "../types";
@@ -47,8 +47,14 @@ export class CartesiaSTT
 			model,
 			timestamp_granularities: ["word"],
 		});
-		const textTimestamps = wordCaptions(
-			(words ?? []).map(({ word, start, end }) => ({ text: word, start, end })),
+		const textTimestamps = wordsFromCharacters(
+			trimmedWords(
+				(words ?? []).map(({ word, start, end }) => ({
+					text: word,
+					start,
+					end,
+				})),
+			),
 		);
 		if (duration == null)
 			throw new Error("Cartesia reported no audio duration");
