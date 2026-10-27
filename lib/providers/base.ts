@@ -1,6 +1,7 @@
 import type { BundleFile, BundleResponse } from "@/lib/api/asset-bundle";
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
+import { errorMessage } from "@/lib/errors";
 
 export type WithMetadata<
 	T extends Record<string, unknown> = Record<string, unknown>,
@@ -9,6 +10,20 @@ export type WithMetadata<
 };
 
 export type Priced<T> = { output: T; costUsd: number };
+
+/** The vendor charged for a result the app then failed to keep, so the charge still has to be booked. */
+export class ChargedError extends Error {
+	constructor(
+		readonly costUsd: number,
+		cause: unknown,
+	) {
+		super(errorMessage(cause), { cause });
+		this.name = "ChargedError";
+	}
+}
+
+export const chargedUsd = (error: unknown): number | undefined =>
+	error instanceof ChargedError ? error.costUsd : undefined;
 
 /**
  * Every provider can be asked whether the key it was built with works. The
@@ -51,6 +66,10 @@ export abstract class BaseProvider<
 
 	async generate(params: TParams): Promise<Priced<BundleResponse>> {
 		const raw = await this._generate(params);
-		return { output: await this.store(raw), costUsd: raw.costUsd };
+		try {
+			return { output: await this.store(raw), costUsd: raw.costUsd };
+		} catch (error) {
+			throw new ChargedError(raw.costUsd, error);
+		}
 	}
 }

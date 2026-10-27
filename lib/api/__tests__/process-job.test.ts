@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ChargedError } from "@/lib/providers/base";
 
 const mockLoadJobForProcessing = vi.fn();
 const mockClaimJob = vi.fn();
@@ -223,6 +224,22 @@ describe("processQueuedJob", () => {
 			error: "provider down",
 		});
 		expect(mockEnqueueJob).not.toHaveBeenCalled();
+	});
+
+	it("books the vendor's charge on a job that failed after the vendor was paid", async () => {
+		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
+		const failure = new ChargedError(0.18, new Error("blob unavailable"));
+		mockGetJobHandler.mockReturnValue({
+			process: vi.fn().mockRejectedValue(failure),
+		});
+
+		await expect(processQueuedJob(JOB_ID)).rejects.toBe(failure);
+
+		expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
+			status: "failed",
+			error: "blob unavailable",
+			cost_usd: 0.18,
+		});
 	});
 
 	it("picks the handler from the job row's connector type", async () => {

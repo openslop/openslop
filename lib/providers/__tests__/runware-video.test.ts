@@ -32,6 +32,7 @@ vi.mock("@runware/sdk-js", () => ({
 }));
 
 import { EmptyRemoteFileError } from "@/lib/api/asset-bundle";
+import { chargedUsd } from "../base";
 import { RunwareVideo } from "../video/runware";
 import { spyAssetBundle } from "./_asset-bundle";
 
@@ -877,6 +878,25 @@ describe("RunwareVideo", () => {
 			});
 
 			expect(result).toEqual({ kind: "pending" });
+		});
+
+		it("carries the vendor's charge when a finished video cannot be stored", async () => {
+			mockGetResponse.mockResolvedValue([
+				{
+					taskUUID: "job-1",
+					status: "success",
+					cost: 0.18,
+					videoURL: "https://r.mp4",
+				},
+			]);
+			upload.mockRejectedValueOnce(new Error("blob unavailable"));
+
+			const error = await new RunwareVideo("test-key")
+				.poll("job-1", { prompt: "test", model: MODEL })
+				.catch((e) => e);
+
+			expect(chargedUsd(error)).toBe(0.18);
+			expect(error).toMatchObject({ message: "blob unavailable" });
 		});
 
 		it("fails a job that errored even when it carries a url", async () => {

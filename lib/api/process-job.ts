@@ -1,5 +1,6 @@
 import { errorMessage } from "@/lib/errors";
 import { isTerminal } from "@/lib/gateway/base";
+import { chargedUsd } from "@/lib/providers/base";
 import { failIfExpired } from "./job-deadline";
 import { getJobHandler } from "./job-handlers";
 import { claimJob, enqueueJob, loadJobForProcessing, updateJob } from "./jobs";
@@ -32,7 +33,11 @@ export async function processQueuedJob(jobId: string): Promise<void> {
 		outcome = await handler.process(job);
 	} catch (error) {
 		logger.error(error, `Job ${jobId} failed`);
-		await updateJob(jobId, { status: "failed", error: errorMessage(error) });
+		await updateJob(jobId, {
+			status: "failed",
+			error: errorMessage(error),
+			cost_usd: chargedUsd(error),
+		});
 		throw error;
 	}
 

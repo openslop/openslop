@@ -6,7 +6,7 @@ import {
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 import type { VideoGenerateParams } from "@/lib/connectors/types";
-import type { ProviderContract } from "../base";
+import { ChargedError, type ProviderContract } from "../base";
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
 
@@ -86,15 +86,16 @@ export abstract class BaseVideoProvider implements VideoProvider {
 				request.duration ??
 				DEFAULT_VIDEO_DURATION_SEC,
 		};
+		const costUsd = job.costUsd ?? 0;
 		try {
 			return {
 				kind: "ready",
 				asset: await this.store({ url: job.url, metadata }),
-				costUsd: job.costUsd ?? 0,
+				costUsd,
 			};
 		} catch (error) {
 			if (error instanceof EmptyRemoteFileError) return { kind: "pending" };
-			throw error;
+			throw new ChargedError(costUsd, error);
 		}
 	}
 }

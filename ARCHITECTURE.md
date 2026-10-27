@@ -85,14 +85,14 @@ Each content type's card controls are declared in `app/components/canvas/element
 
 Supabase Postgres with row-level security. Queue workers use the service role.
 
-| Table             | Purpose                                                                                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `projects`        | Canvas (as OSML), project store and generation snapshots                                                                                           |
-| `canvas_versions` | Autosaved history of those columns                                                                                                                 |
-| `jobs`            | Async generation jobs: `pending → processing → completed \| failed`, with `cost_usd` once completed. A hosted LLM call books a `completed` row too |
-| `provider_keys`   | One row per user and provider: vault id, last four, status                                                                                         |
-| `conversations`   | One Sloppy conversation per project                                                                                                                |
-| `messages`        | Its turns                                                                                                                                          |
+| Table             | Purpose                                                                                                                                                                                                                      |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projects`        | Canvas (as OSML), project store and generation snapshots                                                                                                                                                                     |
+| `canvas_versions` | Autosaved history of those columns                                                                                                                                                                                           |
+| `jobs`            | Async generation jobs: `pending → processing → completed \| failed`, with `cost_usd` once the vendor has charged, so a job that then fails to store its result still books it. A hosted LLM call books a `completed` row too |
+| `provider_keys`   | One row per user and provider: vault id, last four, status                                                                                                                                                                   |
+| `conversations`   | One Sloppy conversation per project                                                                                                                                                                                          |
+| `messages`        | Its turns                                                                                                                                                                                                                    |
 
 Generated assets live in Vercel Blob as public CDN URLs.
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-import { BaseProvider, type WithMetadata } from "../base";
+import { BaseProvider, chargedUsd, type WithMetadata } from "../base";
 import type { BundleFile } from "@/lib/api/asset-bundle";
 import { spyAssetBundle } from "./_asset-bundle";
 
@@ -91,12 +91,14 @@ describe("BaseProvider", () => {
 		expect(upload).not.toHaveBeenCalled();
 	});
 
-	it("propagates upload errors", async () => {
+	it("carries the vendor's charge on an upload error, with its reason", async () => {
 		provider.generateFn.mockResolvedValue({ data: "ok", costUsd: 0.01 });
-		upload.mockRejectedValueOnce(new Error("upload failed"));
+		const failure = new Error("upload failed");
+		upload.mockRejectedValueOnce(failure);
 
-		await expect(provider.generate({ prompt: "x" })).rejects.toThrow(
-			"upload failed",
-		);
+		const error = await provider.generate({ prompt: "x" }).catch((e) => e);
+
+		expect(chargedUsd(error)).toBe(0.01);
+		expect(error).toMatchObject({ message: "upload failed", cause: failure });
 	});
 });

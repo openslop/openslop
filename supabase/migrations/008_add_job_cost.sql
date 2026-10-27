@@ -1,4 +1,5 @@
--- Set when a job completes, so a failed or unfinished job adds nothing to spend.
+-- Set once the vendor has charged, so a job that failed before the vendor call
+-- or is still running adds nothing to spend.
 alter table jobs add column if not exists cost_usd numeric;
 
 create or replace function public.spend_since(
