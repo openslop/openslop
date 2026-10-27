@@ -6,7 +6,7 @@ import { CONTENT_TYPES, type ContentElement } from "@/lib/canvas/types";
 import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
 import { MIN_DURATION_SEC } from "./scene-builder";
-import type { ResolvedElement } from "./types";
+import type { ResolvedCaptions, ResolvedElement } from "./types";
 
 export type TrimEdge = "start" | "end";
 
@@ -72,20 +72,25 @@ export const elementTrim = (
 		getTimelineDuration(element),
 	);
 
-/** Caption timings counted from the trim start, keeping only the words spoken whole inside the clip. */
+/** The words spoken whole inside the clip, timed from its trim start, and where they sit among the element's own. */
 export function trimTimestamps(
 	captions: Caption[],
 	{ trimStartSec, durationSec }: Trim,
-): Caption[] {
+): ResolvedCaptions {
 	const startMs = trimStartSec * 1000;
 	const endMs = startMs + durationSec * 1000;
-	return captions
-		.filter((caption) => caption.startMs >= startMs && caption.endMs <= endMs)
-		.map((caption) => ({
+	const firstWordIndex = captions.filter(
+		(caption) => caption.startMs < startMs,
+	).length;
+	const end = captions.filter((caption) => caption.endMs <= endMs).length;
+	return {
+		firstWordIndex,
+		words: captions.slice(firstWordIndex, end).map((caption) => ({
 			...caption,
 			startMs: caption.startMs - startMs,
 			endMs: caption.endMs - startMs,
-		}));
+		})),
+	};
 }
 
 /**

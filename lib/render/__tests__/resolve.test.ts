@@ -288,6 +288,13 @@ describe("resolveElements", () => {
 			expect(captions?.words).toEqual([toCaption("two", 0.5, 1.5)]);
 		});
 
+		it("starts the words at the element's first, though the end trim cuts the last", () => {
+			const { captions } = resolveOne(
+				makeElement("vid", "video", { timelineDuration: "1.5" }),
+			);
+			expect(captions).toEqual({ firstWordIndex: 0, words: [heard[0]] });
+		});
+
 		it("captions nothing an element has no words for", () => {
 			expect(resolveOne(makeElement("img", "image")).captions).toBeUndefined();
 		});

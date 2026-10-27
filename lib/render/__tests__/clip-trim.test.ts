@@ -168,7 +168,7 @@ describe("trimTimestamps", () => {
 				trimStartSec: 1.25,
 				durationSec: 10,
 			}),
-		).toEqual([toCaption("kept", 0.25, 0.75)]);
+		).toEqual({ firstWordIndex: 1, words: [toCaption("kept", 0.25, 0.75)] });
 	});
 
 	it("drops a word the cut lands in, so no word starts before the clip", () => {
@@ -177,7 +177,7 @@ describe("trimTimestamps", () => {
 				[toCaption("halved", 0.2, 0.6), toCaption("kept", 1, 1.5)],
 				{ trimStartSec: 0.3, durationSec: 10 },
 			),
-		).toEqual([toCaption("kept", 0.7, 1.2)]);
+		).toEqual({ firstWordIndex: 1, words: [toCaption("kept", 0.7, 1.2)] });
 	});
 
 	it("drops the words the end trim cuts or leaves out", () => {
@@ -190,6 +190,20 @@ describe("trimTimestamps", () => {
 				],
 				{ trimStartSec: 0, durationSec: 2 },
 			),
-		).toEqual([toCaption("kept", 0, 1)]);
+		).toEqual({ firstWordIndex: 0, words: [toCaption("kept", 0, 1)] });
+	});
+
+	it("places the kept words among the element's own whichever ends the trim cuts", () => {
+		expect(
+			trimTimestamps(
+				[
+					toCaption("before", 0, 1),
+					toCaption("kept", 1, 2),
+					toCaption("after", 2, 3),
+					toCaption("last", 3, 4),
+				],
+				{ trimStartSec: 1, durationSec: 1 },
+			),
+		).toEqual({ firstWordIndex: 1, words: [toCaption("kept", 0, 1)] });
 	});
 });
