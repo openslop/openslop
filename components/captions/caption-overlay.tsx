@@ -1,5 +1,6 @@
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import type { CaptionWord } from "@/lib/captions/caption-layout";
+import { spaceBetween } from "@/lib/captions/word-spacing";
 import { captionFontStack } from "@/lib/captions/caption-fonts";
 import {
 	type CaptionAlignX,
@@ -124,7 +125,7 @@ export function CaptionOverlay({
 				{words.map((word, index) => (
 					// Words repeat within a line, so the position is the identity.
 					<Fragment key={index}>
-						{word.spaceBefore && " "}
+						{spaceBetween(words[index - 1]?.text, word.text)}
 						{renderWord(
 							word,
 							captionWordStyle(word.active ? style.activeWord : style.base),

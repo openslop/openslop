@@ -1,5 +1,5 @@
 import type { Caption } from "@remotion/captions";
-import { spacesBefore } from "@/lib/captions/word-spacing";
+import { spacedWords } from "@/lib/captions/word-spacing";
 
 export type TimedToken = { text: string; start: number; end: number };
 
@@ -35,16 +35,14 @@ function wordStarts(text: string): Set<number> {
 
 /** Joins the single characters some scripts are timed in into whole words, and punctuation onto the word before it. */
 export function wordsFromCharacters(captions: readonly Caption[]): Caption[] {
-	const spaced = spacesBefore(captions.map(({ text }) => text));
-	const pieces = captions.map(({ text }, index) =>
-		spaced[index] ? ` ${text}` : text,
-	);
+	const pieces = spacedWords(captions.map(({ text }) => text));
 	const starts = wordStarts(pieces.join(""));
 	const words: Caption[] = [];
 	let offset = 0;
 	for (const [index, caption] of captions.entries()) {
+		const spaced = pieces[index] !== caption.text;
 		const startsWord =
-			HAS_LETTERS.test(caption.text) && (spaced[index] || starts.has(offset));
+			HAS_LETTERS.test(caption.text) && (spaced || starts.has(offset));
 		offset += pieces[index].length;
 		const last = words.at(-1);
 		if (last && !startsWord)

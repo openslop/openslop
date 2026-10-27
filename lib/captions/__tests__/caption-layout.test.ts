@@ -34,12 +34,6 @@ describe("wordsAt", () => {
 		]);
 		expect(lineText(line)).toBe("one two three");
 	});
-
-	it("puts a space before every word but the line's first", () => {
-		expect(
-			wordsAt(line.tokens, 0).map(({ spaceBefore }) => spaceBefore),
-		).toEqual([false, true, true]);
-	});
 });
 
 describe("groupIntoLines", () => {
@@ -58,9 +52,6 @@ describe("groupIntoLines", () => {
 		const lines = groupIntoLines(unspaced, 1500);
 		expect(lines.map(lineText)).toEqual(["今日は", "晴れです"]);
 		expect(lines.map(({ firstWordIndex }) => firstWordIndex)).toEqual([0, 2]);
-		expect(
-			wordsAt(lines[0].tokens, 0).map(({ spaceBefore }) => spaceBefore),
-		).toEqual([false, false]);
 	});
 
 	it("shows one word at a time at a line length of 0", () => {

@@ -1,17 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { joinWords, spacesBefore } from "../word-spacing";
+import { joinWords, spaceBetween, spacedWords } from "../word-spacing";
 
-describe("spacesBefore", () => {
+describe("spaceBetween", () => {
 	it("spaces words apart in scripts that space their words, never before the first", () => {
-		expect(spacesBefore(["hello", "world"])).toEqual([false, true]);
-		expect(spacesBefore(["बिल्ली", "हम"])).toEqual([false, true]);
+		expect(spaceBetween("hello", "world")).toBe(" ");
+		expect(spaceBetween("बिल्ली", "हम")).toBe(" ");
+		expect(spaceBetween(undefined, "hello")).toBe("");
 	});
 
 	it("runs words together when either side is written without spaces", () => {
-		expect(spacesBefore(["猫", "は"])).toEqual([false, false]);
-		expect(spacesBefore(["我们", "都"])).toEqual([false, false]);
-		expect(spacesBefore(["AI", "は"])).toEqual([false, false]);
-		expect(spacesBefore(["สวัสดี", "ครับ"])).toEqual([false, false]);
+		expect(spaceBetween("猫", "は")).toBe("");
+		expect(spaceBetween("我们", "都")).toBe("");
+		expect(spaceBetween("AI", "は")).toBe("");
+		expect(spaceBetween("สวัสดี", "ครับ")).toBe("");
+	});
+});
+
+describe("spacedWords", () => {
+	it("leads each word with the space its script takes", () => {
+		expect(spacedWords(["Hi", "there", "猫", "は"])).toEqual([
+			"Hi",
+			" there",
+			"猫",
+			"は",
+		]);
 	});
 });
 

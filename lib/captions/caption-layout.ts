@@ -3,12 +3,11 @@ import {
 	type Caption,
 	type TikTokToken,
 } from "@remotion/captions";
-import { joinWords, spacesBefore } from "./word-spacing";
+import { joinWords } from "./word-spacing";
 
 export type CaptionWord = {
 	text: string;
 	active: boolean;
-	spaceBefore: boolean;
 };
 
 /** A page of captions shown together. */
@@ -32,12 +31,7 @@ export function wordsAt(
 	seconds: number,
 ): CaptionWord[] {
 	const active = tokens.findLastIndex(({ fromMs }) => fromMs <= seconds * 1000);
-	const spaced = spacesBefore(tokens.map(({ text }) => text));
-	return tokens.map(({ text }, index) => ({
-		text,
-		active: index === active,
-		spaceBefore: spaced[index],
-	}));
+	return tokens.map(({ text }, index) => ({ text, active: index === active }));
 }
 
 /** Captions join a line until it has run `lineMs`. */
