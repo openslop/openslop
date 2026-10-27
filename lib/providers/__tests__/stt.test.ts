@@ -16,6 +16,7 @@ vi.mock("@cartesia/cartesia-js", () => ({
 	},
 }));
 
+import { toCaption } from "@/lib/captions/word-captions";
 import { CartesiaSTT } from "../stt/cartesia";
 import { ElevenLabsSTT } from "../stt/elevenlabs";
 
@@ -27,14 +28,6 @@ const uploadedCaptions = () => {
 	if (!("data" in file)) throw new Error("Captions were not written inline");
 	return JSON.parse(String(file.data));
 };
-
-const caption = (text: string, startMs: number, endMs: number) => ({
-	text,
-	startMs,
-	endMs,
-	timestampMs: null,
-	confidence: null,
-});
 
 afterEach(() => {
 	vi.clearAllMocks();
@@ -61,9 +54,9 @@ describe("ElevenLabsSTT", () => {
 		});
 
 		expect(uploadedCaptions()).toEqual([
-			caption("Hi", 0, 400),
-			caption("there,", 500, 1000),
-			caption("pal", 1500, 2000),
+			toCaption("Hi", 0, 0.4),
+			toCaption("there,", 0.5, 1),
+			toCaption("pal", 1.5, 2),
 		]);
 	});
 });
@@ -88,10 +81,10 @@ describe("CartesiaSTT", () => {
 		});
 
 		expect(uploadedCaptions()).toEqual([
-			caption("Hi", 0, 400),
-			caption("there", 500, 700),
-			caption("猫", 700, 850),
-			caption("は", 850, 1000),
+			toCaption("Hi", 0, 0.4),
+			toCaption("there", 0.5, 0.7),
+			toCaption("猫", 0.7, 0.85),
+			toCaption("は", 0.85, 1),
 		]);
 	});
 });

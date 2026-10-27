@@ -93,8 +93,8 @@ export const captionPresetLabel = (key: CaptionPresetKey): string =>
 
 export const SAMPLE_WORD_MS = 420;
 
-const sampleCaptions = (text: string): Caption[] =>
-	text.split(" ").map((word, index) => ({
+const sampleCaptions = (sentence: string): Caption[] =>
+	sentence.split(" ").map((word, index) => ({
 		text: word,
 		startMs: index * SAMPLE_WORD_MS,
 		endMs: (index + 1) * SAMPLE_WORD_MS,

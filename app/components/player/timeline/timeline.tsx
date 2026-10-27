@@ -61,7 +61,7 @@ type ClipProps<T> = {
 	clip: T;
 	pxPerSec: number;
 	selected: boolean;
-	onSelect: (clip: TimelineClipData) => void;
+	onSelect: (clip: T) => void;
 };
 
 function ClipSlot({

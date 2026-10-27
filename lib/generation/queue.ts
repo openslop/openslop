@@ -209,9 +209,9 @@ export class GenerationQueue {
 	private processQueue() {
 		for (;;) {
 			const index = this.pending.findIndex(
-				(node) =>
-					this.hasCapacity(node.job.connectorType) &&
-					!this.blockingDependency(node),
+				(candidate) =>
+					this.hasCapacity(candidate.job.connectorType) &&
+					!this.blockingDependency(candidate),
 			);
 			if (index === -1) break;
 			const [node] = this.pending.splice(index, 1);
