@@ -7,3 +7,8 @@ vi.mock("@/lib/supabase/client", () => ({
 		},
 	}),
 }));
+
+vi.mock("next/headers", async (importOriginal) => ({
+	...(await importOriginal<typeof import("next/headers")>()),
+	headers: async () => new Headers(),
+}));

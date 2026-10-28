@@ -47,6 +47,17 @@ export class UnreachableError extends Error {
 	}
 }
 
+/** A route answered with an error; `requestId` finds the request in Vercel's logs. */
+export class ApiError extends Error {
+	constructor(
+		message: string,
+		readonly requestId: string | null,
+	) {
+		super(message);
+		this.name = "ApiError";
+	}
+}
+
 // fetch rejects with a TypeError only when no response came back at all;
 // an abort is a DOMException and stays as-is.
 function asUnreachable(error: unknown): never {
@@ -54,7 +65,7 @@ function asUnreachable(error: unknown): never {
 	throw error;
 }
 
-/** Calls one of our own API routes, surfacing its error envelope as a thrown `Error`. */
+/** Calls one of our own API routes, surfacing its error envelope as a thrown `ApiError`. */
 export async function apiFetch(
 	url: string,
 	{ method = "GET", body, params, signal }: RequestOptions = {},
@@ -63,7 +74,11 @@ export async function apiFetch(
 		...buildInit(method, body),
 		signal,
 	}).catch(asUnreachable);
-	if (!response.ok) throw new Error(await readErrorMessage(response));
+	if (!response.ok)
+		throw new ApiError(
+			await readErrorMessage(response),
+			response.headers.get("x-vercel-id"),
+		);
 	return response;
 }
 

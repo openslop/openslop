@@ -13,11 +13,8 @@ export function notFound() {
 	return errorResponse({ error: "Not found" }, 404);
 }
 
-export function serverError(message: string, requestId?: string) {
-	return errorResponse(
-		requestId ? { error: message, requestId } : { error: message },
-		500,
-	);
+export function serverError(message: string) {
+	return errorResponse({ error: message }, 500);
 }
 
 export function unauthorized(message = "Unauthorized") {

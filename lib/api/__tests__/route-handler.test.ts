@@ -163,16 +163,13 @@ describe("createHostedRouteHandler", () => {
 		expect(await res.json()).toEqual({ ok: true, prompt: "hello" });
 	});
 
-	it("returns 500 with a generic message and a request id, not the internal error", async () => {
+	it("returns 500 with a generic message, not the internal error", async () => {
 		const handler = makeHandler(async () => {
 			throw new Error("boom");
 		});
 		const res = await handler(makeRequest(VALID_BODY));
 		expect(res.status).toBe(500);
-		const json = await res.json();
-		expect(json.error).toBe("TestRoute failed");
-		expect(json.requestId).toMatch(/^[0-9a-f]{8}$/);
-		expect(JSON.stringify(json)).not.toContain("boom");
+		expect(await res.json()).toEqual({ error: "TestRoute failed" });
 	});
 
 	it("answers a generic 500 for non-Error throws too", async () => {
@@ -181,9 +178,7 @@ describe("createHostedRouteHandler", () => {
 		});
 		const res = await handler(makeRequest(VALID_BODY));
 		expect(res.status).toBe(500);
-		const json = await res.json();
-		expect(json.error).toBe("TestRoute failed");
-		expect(json.requestId).toMatch(/^[0-9a-f]{8}$/);
+		expect(await res.json()).toEqual({ error: "TestRoute failed" });
 	});
 });
 

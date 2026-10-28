@@ -25,6 +25,7 @@ describe("impersonateUser", () => {
 			ok: false,
 			status: 400,
 			statusText: "Bad Request",
+			headers: new Headers(),
 			json: async () => ({ error: "Cannot impersonate unknown@x.com" }),
 		});
 

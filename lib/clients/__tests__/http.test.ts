@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z, ZodError } from "zod";
-import { apiFetch, apiJson, UnreachableError } from "../http";
+import { ApiError, apiFetch, apiJson, UnreachableError } from "../http";
 
 describe("apiFetch", () => {
 	let fetchMock: ReturnType<typeof vi.fn>;
@@ -62,12 +62,28 @@ describe("apiFetch", () => {
 			ok: false,
 			status: 400,
 			statusText: "Bad Request",
+			headers: new Headers(),
 			json: () => Promise.resolve({ error: "File must be under 10 MB" }),
 		});
 
 		await expect(apiFetch("/api/upload/image")).rejects.toThrow(
 			"File must be under 10 MB",
 		);
+	});
+
+	it("carries the platform request id on the thrown error", async () => {
+		fetchMock.mockResolvedValue({
+			ok: false,
+			status: 500,
+			statusText: "Internal Server Error",
+			headers: new Headers({ "x-vercel-id": "iad1::abc-123" }),
+			json: () => Promise.resolve({ error: "render failed" }),
+		});
+
+		await expect(apiFetch("/api/render")).rejects.toEqual(
+			expect.objectContaining({ requestId: "iad1::abc-123" }),
+		);
+		await expect(apiFetch("/api/render")).rejects.toBeInstanceOf(ApiError);
 	});
 
 	it.each([
@@ -82,7 +98,13 @@ describe("apiFetch", () => {
 	])(
 		"falls back to the status line when the body %s",
 		async (_, status, statusText, json) => {
-			fetchMock.mockResolvedValue({ ok: false, status, statusText, json });
+			fetchMock.mockResolvedValue({
+				ok: false,
+				status,
+				statusText,
+				headers: new Headers(),
+				json,
+			});
 
 			await expect(apiFetch("/api/render")).rejects.toThrow(
 				`${status} ${statusText}`,
