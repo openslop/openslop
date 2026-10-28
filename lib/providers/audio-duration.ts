@@ -1,10 +1,7 @@
+import { openAudio } from "./audio-containers";
+
 export async function audioDurationSec(bytes: ArrayBuffer): Promise<number> {
-	const { ADTS, BufferSource, FLAC, Input, MP3, MP4, OGG, WAVE } =
-		await import("mediabunny");
-	const input = new Input({
-		source: new BufferSource(bytes),
-		formats: [MP3, WAVE, OGG, MP4, FLAC, ADTS],
-	});
+	const input = openAudio(await import("mediabunny"), bytes);
 	try {
 		return (
 			(await input.getDurationFromMetadata()) ?? (await input.computeDuration())

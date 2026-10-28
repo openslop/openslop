@@ -3,16 +3,14 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
-import { PROVIDERS, type Provider } from "@/lib/connectors/types";
+import { ProviderSchema, type Provider } from "@/lib/connectors/types";
 
 const tabSchema = z.enum(["models"]);
 
 export type SettingsTab = z.infer<typeof tabSchema>;
 
-/** Which provider the tab should open on, so a "connect" link lands on it. */
-const providerSchema = z.enum(PROVIDERS);
-
 const TAB_PARAM = "settings";
+/** Which provider the tab should open on, so a "connect" link lands on it. */
 const PROVIDER_PARAM = "provider";
 
 export type SettingsRoute = {
@@ -47,7 +45,7 @@ export function useSettings(): SettingsRoute {
 	return useMemo(
 		() => ({
 			tab: parse(tabSchema, params.get(TAB_PARAM)),
-			provider: parse(providerSchema, params.get(PROVIDER_PARAM)),
+			provider: parse(ProviderSchema, params.get(PROVIDER_PARAM)),
 			open: (tab, provider) => {
 				const next = new URLSearchParams(params);
 				next.set(TAB_PARAM, tab);

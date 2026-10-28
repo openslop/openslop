@@ -2,6 +2,7 @@ import pickBy from "lodash/pickBy";
 import { findAsset } from "@/lib/canvas/assets";
 import type { CanvasElement } from "@/lib/canvas/types";
 import { referencedNames } from "@/lib/connectors/character-refs";
+import { isPictured, isVoiced } from "@/lib/connectors/characters";
 import type {
 	Character,
 	ConnectorPlugin,
@@ -56,12 +57,12 @@ export function createCharacterAssetsPlugin({
 		beforeGenerate(params, ctx) {
 			const characters = referencedNames(params.prompt)
 				.map((name) => characterOf(ctx, name))
-				.filter(({ avatarUrl, voice }) => avatarUrl || voice);
+				.filter((character) => isPictured(character) || isVoiced(character));
 			if (characters.length === 0) return params;
 
 			return {
 				...params,
-				prompt: characters.some(({ avatarUrl }) => avatarUrl)
+				prompt: characters.some(isPictured)
 					? `${params.prompt}. No nameplates`
 					: params.prompt,
 				characterAssets: characters,

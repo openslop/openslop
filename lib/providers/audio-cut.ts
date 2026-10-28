@@ -1,18 +1,7 @@
 import { AssetBundle } from "@/lib/api/asset-bundle";
 import type { HostedVoicePreview } from "@/lib/connectors/types";
+import { audioContainers, openAudio } from "./audio-containers";
 import { type AudioBytes, audioOf, hostedAudio } from "./hosted-audio";
-
-type Mediabunny = typeof import("mediabunny");
-
-/** PCM is rewritten losslessly to the sample; the rest is copied a frame at a time. */
-const containers = (mb: Mediabunny) => [
-	{ input: mb.MP3, output: mb.Mp3OutputFormat },
-	{ input: mb.WAVE, output: mb.WavOutputFormat, forceTranscode: true },
-	{ input: mb.OGG, output: mb.OggOutputFormat },
-	{ input: mb.FLAC, output: mb.FlacOutputFormat },
-	{ input: mb.ADTS, output: mb.AdtsOutputFormat },
-	{ input: mb.MP4, output: mb.Mp4OutputFormat },
-];
 
 /** A copied cut can run over its mark by up to one frame. */
 const FRAME_SEC = 0.05;
@@ -23,14 +12,10 @@ export async function trimAudio(
 	seconds: number,
 ): Promise<AudioBytes> {
 	const mb = await import("mediabunny");
-	const known = containers(mb);
-	const input = new mb.Input({
-		source: new mb.BufferSource(bytes),
-		formats: known.map(({ input }) => input),
-	});
+	const input = openAudio(mb, bytes);
 	try {
 		const format = await input.getFormat();
-		const container = known.find((c) => c.input === format);
+		const container = audioContainers(mb).find((c) => c.input === format);
 		if (!container) throw new Error(`Cannot trim ${format.name} audio`);
 		const target = new mb.BufferTarget();
 		const output = new mb.Output({ format: new container.output(), target });

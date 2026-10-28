@@ -6,6 +6,8 @@ import { fromStatus, probe, rejected } from "./validate";
 /** The SDK rejects a refused task with the API's error object. */
 const RefusedTask = z.object({ error: z.object({ message: z.string() }) });
 
+const AuthAnswer = z.object({ errors: z.array(z.unknown()).optional() });
+
 export async function withRunware<T>(
 	apiKey: string,
 	fn: (runware: InstanceType<typeof Runware>) => Promise<T>,
@@ -43,6 +45,6 @@ export async function validateRunwareKey(
 		body: JSON.stringify([{ taskType: "authentication", apiKey }]),
 	});
 	if (!response.ok) return fromStatus(response);
-	const body = (await response.json()) as { errors?: unknown[] };
-	return body.errors?.length ? rejected : { ok: true };
+	const { errors } = AuthAnswer.parse(await response.json());
+	return errors?.length ? rejected : { ok: true };
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PROVIDERS, type Provider } from "./types";
+import { ProviderSchema, type Provider } from "./types";
 
 /** Whether a stored key has been seen to work since it was last written. */
 export const KEY_STATUSES = ["unverified", "valid", "invalid"] as const;
@@ -12,7 +12,7 @@ export type KeyStatus = (typeof KEY_STATUSES)[number];
  * key they stored without it being readable again.
  */
 export const ProviderKeyRecordSchema = z.object({
-	provider: z.enum(PROVIDERS),
+	provider: ProviderSchema,
 	last4: z.string(),
 	status: z.enum(KEY_STATUSES),
 	verifiedAt: z.string().nullable(),

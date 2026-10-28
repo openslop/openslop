@@ -38,6 +38,8 @@ export const PROVIDERS = [
 	"elevenlabs",
 ] as const;
 
+export const ProviderSchema = z.enum(PROVIDERS);
+
 export type Provider = (typeof PROVIDERS)[number];
 
 /** How a model trades off against its siblings. Relative within a connector type, never absolute. */

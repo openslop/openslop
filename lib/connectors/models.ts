@@ -15,7 +15,7 @@ import {
 	type ModelRef,
 	type ModelsByProvider,
 	type Provider,
-	PROVIDERS,
+	ProviderSchema,
 	type VisualModelEntry,
 } from "./types";
 import { DEFAULT_VIDEO_MODEL, VIDEO_MODELS } from "./video/models";
@@ -125,7 +125,7 @@ export function modalitiesFor(provider: Provider): ConnectorType[] {
 }
 
 export const modelRefSchema = z.object({
-	provider: z.enum(PROVIDERS),
+	provider: ProviderSchema,
 	model: z.string(),
 });
 
