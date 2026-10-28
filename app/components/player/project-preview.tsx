@@ -2,7 +2,7 @@
 
 import type { CallbackListener, PlayerRef } from "@remotion/player";
 import dynamic from "next/dynamic";
-import { useEffect, useState, type MutableRefObject, type Ref } from "react";
+import { useEffect, useState, type Ref } from "react";
 import { CaptionLineContext } from "@/components/captions/caption-line";
 import type { RenderLayout } from "@/lib/render/types";
 import { ToastErrorBoundary } from "../toast-error-boundary";
@@ -10,7 +10,6 @@ import { ActiveSceneSync } from "./active-scene-sync";
 import { EditableCaptionLine } from "./editable-caption-line";
 import { usePlayerControl } from "./player-control-context";
 import { PlayPauseFlash } from "./play-pause-flash";
-import { usePreservedPlayhead } from "./use-preserved-playhead";
 import styles from "./project-preview.module.css";
 
 const fullSizeStyle = { width: "100%", height: "100%" };
@@ -59,21 +58,12 @@ const RemotionPlayer = dynamic(
 	{ ssr: false },
 );
 
-type ProjectPreviewProps = {
-	layout: RenderLayout;
-	restoreFrameRef: MutableRefObject<number | null>;
-};
-
-export function ProjectPreview({
-	layout,
-	restoreFrameRef,
-}: ProjectPreviewProps) {
+export function ProjectPreview({ layout }: { layout: RenderLayout }) {
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const { player, registerPlayer } = usePlayerControl();
 	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
 		null,
 	);
-	usePreservedPlayhead(player, restoreFrameRef, layout.totalFrames);
 	useEffect(() => {
 		if (!player) return;
 		const handler: CallbackListener<"fullscreenchange"> = ({ detail }) =>

@@ -1,7 +1,14 @@
 "use client";
 
 import type { PlayerRef } from "@remotion/player";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+	type ReactNode,
+} from "react";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import { usePlayerPlacement } from "./player-placement-context";
 import { startPlaybackAt } from "./start-playback-at";
@@ -21,11 +28,23 @@ export function PlayerControlProvider({ children }: { children: ReactNode }) {
 	// only copy of the handle — nothing downstream mirrors it.
 	const [player, registerPlayer] = useState<PlayerRef | null>(null);
 	const { showPlayer } = usePlayerPlacement();
+	// The preview remounts whenever the panel moves, hides or waits on the queue.
+	const openAtFrameRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		if (!player) return;
+		const openAt = openAtFrameRef.current;
+		if (openAt !== null) player.seekTo(openAt);
+		return () => {
+			openAtFrameRef.current = player.getCurrentFrame();
+		};
+	}, [player]);
 
 	const playFromFrame = useCallback(
 		(frame: number) => {
-			showPlayer();
 			if (player) startPlaybackAt(player, frame);
+			else openAtFrameRef.current = frame;
+			showPlayer();
 		},
 		[showPlayer, player],
 	);

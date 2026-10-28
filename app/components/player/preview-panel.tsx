@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { useSloppy } from "../sloppy/sloppy-provider";
 import { useLayout } from "./render-layout-context";
 import { ProjectPreview } from "./project-preview";
@@ -10,7 +9,6 @@ import { PlayerShimmer } from "./player-shimmer";
 function PreviewPanelBody() {
 	const { layout, ready } = useLayout();
 	const { writingScript } = useSloppy();
-	const restoreFrameRef = useRef<number | null>(null);
 
 	if (writingScript) {
 		return (
@@ -27,7 +25,7 @@ function PreviewPanelBody() {
 		);
 	}
 	if (!ready) return <QueueProgressBar />;
-	return <ProjectPreview layout={layout} restoreFrameRef={restoreFrameRef} />;
+	return <ProjectPreview layout={layout} />;
 }
 
 export function PreviewPanel() {

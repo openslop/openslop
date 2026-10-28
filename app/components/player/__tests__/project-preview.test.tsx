@@ -2,7 +2,7 @@
 
 import { renderToStaticMarkup } from "react-dom/server";
 import { expect, it, vi } from "vitest";
-import type { MutableRefObject, ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { RenderLayout } from "@/lib/render/types";
 import { ProjectPreview } from "../project-preview";
 
@@ -17,16 +17,10 @@ vi.mock("../player-control-context", () => ({
 	usePlayerControl: () => ({ player: null, registerPlayer: () => {} }),
 }));
 vi.mock("../play-pause-flash", () => ({ PlayPauseFlash: () => null }));
-vi.mock("../use-preserved-playhead", () => ({
-	usePreservedPlayhead: () => {},
-}));
 
 it("keeps the play surface in the keyboard tab order", () => {
 	const markup = renderToStaticMarkup(
-		<ProjectPreview
-			layout={{} as RenderLayout}
-			restoreFrameRef={{ current: null } as MutableRefObject<number | null>}
-		/>,
+		<ProjectPreview layout={{} as RenderLayout} />,
 	);
 	const wrapper = document.createElement("div");
 	wrapper.innerHTML = markup;
