@@ -57,7 +57,7 @@ export function TextAttributePopover({
 						{label}
 					</span>
 				)}
-				{value ? value : <span className="opacity-50">— add</span>}
+				{value || <span className="opacity-50">— add</span>}
 			</AttributeTrigger>
 			<PopoverContent
 				align="start"

@@ -4,7 +4,7 @@ import type { CanvasEditor } from "@/lib/canvas/types";
 
 const isUndoHotkey = isHotkey("mod+z");
 const isRedoHotkey = isHotkey(["mod+shift+z", "mod+y"]);
-const textInputTypes = new Set([
+const TEXT_INPUT_TYPES = new Set([
 	"text",
 	"search",
 	"url",
@@ -14,13 +14,10 @@ const textInputTypes = new Set([
 	"number",
 ]);
 
-function isTextEntryTarget(target: EventTarget | null): boolean {
-	if (target instanceof HTMLTextAreaElement) return true;
-	if (target instanceof HTMLInputElement && textInputTypes.has(target.type)) {
-		return true;
-	}
-	return target instanceof HTMLElement && target.isContentEditable;
-}
+const isTextEntryTarget = (target: EventTarget | null): boolean =>
+	target instanceof HTMLTextAreaElement ||
+	(target instanceof HTMLInputElement && TEXT_INPUT_TYPES.has(target.type)) ||
+	(target instanceof HTMLElement && target.isContentEditable);
 
 function handleProjectHistoryKeyDown(
 	event: KeyboardEvent,
@@ -29,8 +26,7 @@ function handleProjectHistoryKeyDown(
 	if (event.defaultPrevented || event.altKey || event.isComposing) return;
 
 	const isUndo = isUndoHotkey(event);
-	const isRedo = isRedoHotkey(event);
-	if (!isUndo && !isRedo) return;
+	if (!isUndo && !isRedoHotkey(event)) return;
 	if (isTextEntryTarget(event.target)) return;
 
 	event.preventDefault();

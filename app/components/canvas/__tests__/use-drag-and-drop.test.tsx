@@ -51,7 +51,7 @@ function KeyboardSortingProbe({
 }) {
 	const {
 		sceneItems,
-		sensors: canvasSensors,
+		sensors,
 		handleDragStart,
 		handleDragOver,
 		handleDragEnd,
@@ -59,7 +59,7 @@ function KeyboardSortingProbe({
 	} = useDragAndDrop(editor);
 	return (
 		<DndContext
-			sensors={canvasSensors}
+			sensors={sensors}
 			collisionDetection={canvasCollisionDetection}
 			onDragStart={handleDragStart}
 			onDragOver={handleDragOver}

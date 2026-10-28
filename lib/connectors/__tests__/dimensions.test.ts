@@ -7,9 +7,9 @@ import { pluginCtx, readsOf } from "./_state-ctx";
 const SEEDANCE = { provider: "runware", model: "Seedance 2 Fast" } as const;
 const SLOP_IMAGE = { provider: "openslop", model: "Slop Image v2" } as const;
 const image = createCanvasElement("image", { id: "i1" });
-const portraitState = projectSettings({ aspectRatio: "9:16" });
+const portraitSettings = projectSettings({ aspectRatio: "9:16" });
 const portrait = pluginCtx({
-	reads: readsOf(createDimensionsPlugin("image"), image, [], portraitState),
+	reads: readsOf(createDimensionsPlugin("image"), image, [], portraitSettings),
 });
 
 describe("createDimensionsPlugin", () => {
@@ -63,7 +63,7 @@ describe("createDimensionsPlugin", () => {
 
 	it("records the aspect ratio, so changing it stales the result", () => {
 		expect(
-			readsOf(createDimensionsPlugin("image"), image, [], portraitState),
+			readsOf(createDimensionsPlugin("image"), image, [], portraitSettings),
 		).toEqual({ "the aspect ratio": "9:16" });
 	});
 });
