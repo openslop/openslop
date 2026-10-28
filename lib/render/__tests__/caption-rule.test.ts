@@ -95,6 +95,12 @@ describe("layoutCaptions", () => {
 			spans(layoutOf([el("vid", "video", heard), speech])).map(({ id }) => id),
 		).toEqual(["vid", "nar"]);
 	});
+
+	it("lays out a music track's captions", () => {
+		expect(spans(layoutOf([el("song", "music", heard)]))).toEqual([
+			{ id: "song", start: 0, duration: 1 },
+		]);
+	});
 });
 
 describe("captionableSequences", () => {
@@ -109,5 +115,9 @@ describe("captionableSequences", () => {
 
 	it("captions a video with no speech in its scene", () => {
 		expect(ids(layoutOf([el("vid", "video")]))).toEqual(["vid"]);
+	});
+
+	it("leaves music out, since generated tracks have no lyrics", () => {
+		expect(ids(layoutOf([el("song", "music")]))).toEqual([]);
 	});
 });
