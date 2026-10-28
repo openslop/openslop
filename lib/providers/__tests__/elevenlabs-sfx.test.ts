@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const mockConvert = vi.fn();
 
@@ -24,10 +24,6 @@ const MODEL = "eleven_text_to_sound_v2";
 
 describe("ElevenLabsSFX", () => {
 	spyAssetBundle();
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
 
 	it("omits durationSeconds and computes duration from buffer when no duration provided", async () => {
 		// 32000 bytes at 128 kbps CBR mp3 = 2 seconds

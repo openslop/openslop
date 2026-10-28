@@ -31,7 +31,6 @@ vi.mock("@/lib/generation/generation-queue-provider", () => ({
 let canvas: ReturnType<typeof mountOnCanvas>;
 
 beforeEach(() => {
-	loadHistory.mockClear();
 	history = { versions: [], status: "failed", activeIndex: -1 };
 	element = { layoutAttributes: { volume: "4" } };
 	canvas = mountOnCanvas();

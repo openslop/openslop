@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 type Voice = { url: string; durationSec: number };
 
@@ -41,10 +41,6 @@ const SEEDANCE_25 = "bytedance:seedance@2.5";
 
 describe("RunwareVideo", () => {
 	const { upload } = spyAssetBundle();
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
 
 	describe("submit", () => {
 		it("submits a video job with defaults and deliveryMethod async", async () => {

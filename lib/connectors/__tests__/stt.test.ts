@@ -1,13 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { HttpSTTConnector } from "../stt/connector";
 import { mockGatewaySequence } from "./_gateway-mock";
 import { toCaption } from "@/lib/captions/word-captions";
 
 describe("HttpSTTConnector", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("reads the word timings from the bundle, with no media of its own", async () => {
 		const words = [toCaption("hi", 0, 0.4)];
 		mockGatewaySequence([

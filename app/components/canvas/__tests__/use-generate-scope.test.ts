@@ -84,14 +84,13 @@ function useGenerateAllFor(elements: ContentElement[]) {
 }
 
 const enqueuedIds = (): string[] =>
-	(enqueueGraphSpy.mock.calls[0]?.[0] as GenerationNode[] | undefined)?.map(
+	(enqueueGraphSpy.mock.lastCall?.[0] as GenerationNode[] | undefined)?.map(
 		(node) => node.id,
 	) ?? [];
 
 let enqueueGraphSpy: ReturnType<typeof vi.spyOn>;
 
 beforeEach(() => {
-	vi.clearAllMocks();
 	queue = new GenerationQueue();
 	enqueueGraphSpy = vi
 		.spyOn(queue, "enqueueGraph")
@@ -219,7 +218,6 @@ describe("useGenerateScope", () => {
 		useGenerateAllFor([...sceneOne, ...sceneTwo]);
 		expect(enqueuedIds()).toEqual(["a", "b", "c"]);
 
-		vi.clearAllMocks();
 		useGenerateScope(() => sceneTwo, "scene").run();
 		expect(enqueuedIds()).toEqual(["c"]);
 	});

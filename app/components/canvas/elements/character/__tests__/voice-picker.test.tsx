@@ -31,7 +31,6 @@ beforeEach(() => {
 
 afterEach(() => {
 	act(() => root.unmount());
-	vi.clearAllMocks();
 });
 
 const render = (selected: boolean, voice: VoiceInfo = VOICE) =>

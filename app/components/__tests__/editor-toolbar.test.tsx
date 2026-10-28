@@ -59,7 +59,6 @@ beforeEach(() => {
 	state.generating = false;
 	state.loading = false;
 	state.writingScript = false;
-	vi.clearAllMocks();
 	root = createRoot(container);
 });
 

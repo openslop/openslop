@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { startPlaybackAt, type PlaybackTarget } from "../start-playback-at";
 
 let frameCallbacks: FrameRequestCallback[] = [];
@@ -9,8 +9,6 @@ beforeEach(() => {
 		frameCallbacks.push(cb),
 	);
 });
-
-afterEach(() => vi.unstubAllGlobals());
 
 function nextFrame() {
 	const due = frameCallbacks;

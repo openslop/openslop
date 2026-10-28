@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.hoisted(() => vi.stubEnv("PINECONE_API_KEY", "test-key"));
 
@@ -39,13 +39,8 @@ describe("ElevenLabs providers with pinecone cache enabled", () => {
 	spyAssetBundle();
 
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockEmbedText.mockResolvedValue([0.1, 0.2]);
 		mockUpsert.mockResolvedValue(undefined);
-	});
-
-	afterAll(() => {
-		vi.unstubAllEnvs();
 	});
 
 	it("music: serves cache hit without calling ElevenLabs", async () => {

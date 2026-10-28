@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockRpc = vi.fn();
@@ -28,10 +28,6 @@ function makeRequest(body?: unknown) {
 }
 
 describe("POST /api/validate-code", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
 	it("returns 400 when code is missing", async () => {
 		const res = await POST(makeRequest({}));
 		expect(res.status).toBe(400);

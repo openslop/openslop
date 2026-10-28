@@ -36,7 +36,6 @@ describe("BaseProvider", () => {
 	let provider: TestProvider;
 
 	beforeEach(() => {
-		vi.clearAllMocks();
 		provider = new TestProvider();
 	});
 

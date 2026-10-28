@@ -64,7 +64,6 @@ beforeEach(() => {
 
 afterEach(() => {
 	act(() => root.unmount());
-	vi.clearAllMocks();
 	vi.useRealTimers();
 });
 

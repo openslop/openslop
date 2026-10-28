@@ -83,10 +83,6 @@ function makePage(data: object[], more = false) {
 const stubClient = { get: mockGet } as unknown as Cartesia;
 
 describe("collectVoices", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
 	it("returns a single short page when has_more is false", async () => {
 		mockGet.mockResolvedValue(makePage(makeVoices(30)));
 
@@ -201,7 +197,6 @@ describe("CartesiaTTS", () => {
 	const { upload } = spyAssetBundle();
 
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockCacheStore.clear();
 	});
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { HttpVideoConnector } from "../video/connector";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
@@ -21,10 +21,6 @@ function mockSuccess() {
 }
 
 describe("HttpVideoConnector", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("submits and resolves to AssetResult once the job completes", async () => {
 		mockSuccess();
 		const result = await new HttpVideoConnector(config).generate({

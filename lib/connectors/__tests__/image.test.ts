@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import { HttpImageConnector } from "../image/connector";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
@@ -21,10 +21,6 @@ function mockSuccess() {
 }
 
 describe("BaseImageConnector", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("generates image via provider", async () => {
 		mockSuccess();
 		const result = await new HttpImageConnector(config).generate({

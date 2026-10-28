@@ -70,7 +70,6 @@ describe("createAutosaver", () => {
 
 	afterEach(() => {
 		vi.useRealTimers();
-		vi.restoreAllMocks();
 	});
 
 	let edits = 0;

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { HttpLLMConnector } from "../llm/connector";
 import { HttpMusicConnector } from "../music/connector";
 import { HttpSFXConnector } from "../sfx/connector";
@@ -27,10 +27,6 @@ function mockAsset(type: string, result: Record<string, string>) {
 }
 
 describe("OpenSlop connectors (via gateways)", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("LLM: generate calls /api/v1/llm", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({

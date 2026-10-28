@@ -56,7 +56,6 @@ beforeEach(() => {
 
 afterEach(() => {
 	canvas.unmount();
-	vi.clearAllMocks();
 });
 
 const query = (selector: string) => document.body.querySelector(selector);

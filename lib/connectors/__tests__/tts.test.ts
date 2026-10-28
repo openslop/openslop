@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { HttpTTSConnector } from "../tts/connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
 import type { ConnectorPlugin } from "../types";
@@ -29,10 +29,6 @@ const SUCCESS: Parameters<typeof mockGatewaySequence>[0] = [
 const mockSuccess = () => mockGatewaySequence(SUCCESS);
 
 describe("BaseTTSConnector", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("generates TTS via provider with voiceId", async () => {
 		mockSuccess();
 		const result = await new HttpTTSConnector(config).generate({

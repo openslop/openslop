@@ -68,7 +68,6 @@ const userContent = () => lastCall().prompt.at(-1)?.content;
 
 describe("AnthropicLLM", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		calls.length = 0;
 	});
 

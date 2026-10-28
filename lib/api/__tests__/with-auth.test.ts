@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { logger } from "../logger";
 import { MissingProviderKeyError } from "../provider-keys";
 import { withPublic } from "../with-auth";
@@ -19,10 +19,6 @@ vi.mock("../provider-keys", () => ({
 	hasApiAccess: () => true,
 	MissingProviderKeyError: class MissingProviderKeyError extends Error {},
 }));
-
-beforeEach(() => {
-	vi.clearAllMocks();
-});
 
 describe("unexpected route errors", () => {
 	it("returns a generic message and logs the internal error under the platform request id", async () => {

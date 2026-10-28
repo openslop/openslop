@@ -33,7 +33,6 @@ async function tokenOptions() {
 }
 
 beforeEach(() => {
-	vi.clearAllMocks();
 	mockGetUser.mockResolvedValue({ id: "user-1" });
 	mockHandleUpload.mockResolvedValue({
 		type: "blob.generate-client-token",

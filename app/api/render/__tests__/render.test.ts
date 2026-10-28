@@ -32,7 +32,6 @@ function makeRequest(body: unknown) {
 
 describe("POST /api/render", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({ id: "user-1" });
 	});
 

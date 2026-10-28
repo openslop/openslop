@@ -53,7 +53,6 @@ function pendingJob(ageMs = 0) {
 
 describe("processQueuedJob", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockClaimJob.mockResolvedValue(true);
 		mockUpdateJob.mockResolvedValue(undefined);
 		mockEnqueueJob.mockResolvedValue(undefined);

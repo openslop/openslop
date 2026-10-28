@@ -18,7 +18,6 @@ beforeEach(() => {
 
 afterEach(() => {
 	act(() => root.unmount());
-	vi.clearAllMocks();
 });
 
 const render = (target: string | undefined) =>

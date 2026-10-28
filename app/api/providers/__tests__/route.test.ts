@@ -30,7 +30,6 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 const fetchMock = vi.fn();
-vi.stubGlobal("fetch", fetchMock);
 
 const save = (apiKey = "sk-ant-a-working-key") =>
 	POST(
@@ -47,7 +46,7 @@ const rpcCalls = () => mockRpc.mock.calls.map(([fn]) => fn);
 
 describe("POST /api/providers", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
+		vi.stubGlobal("fetch", fetchMock);
 		mockGetUser.mockResolvedValue({ id: "u1", app_metadata: {} });
 		mockRpc.mockResolvedValue(rpcOk);
 		storedRows.mockReturnValue([

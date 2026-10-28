@@ -19,7 +19,6 @@ let root: Root;
 const copyButton = () => container.querySelector<HTMLButtonElement>("button");
 
 beforeEach(() => {
-	vi.clearAllMocks();
 	root = createRoot(container);
 	act(() => root.render(<ErrorMessage message="Runware: refused" />));
 });

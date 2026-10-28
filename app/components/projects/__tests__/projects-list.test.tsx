@@ -41,7 +41,6 @@ beforeEach(() => {
 
 afterEach(() => {
 	act(() => root.unmount());
-	vi.clearAllMocks();
 });
 
 const cardNames = () =>

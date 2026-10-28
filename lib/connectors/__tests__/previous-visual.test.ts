@@ -62,7 +62,6 @@ describe("previous-visual plugin", () => {
 
 	beforeEach(() => {
 		plugin = createPreviousVisualPlugin();
-		captureFrames.mockClear();
 	});
 
 	describe("dependencies", () => {

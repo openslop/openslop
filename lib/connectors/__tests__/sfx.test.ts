@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it } from "vitest";
 import { HttpSFXConnector } from "../sfx/connector";
 import type { ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
@@ -21,10 +21,6 @@ function mockSuccess(metadata?: Record<string, unknown>) {
 }
 
 describe("BaseSFXConnector", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("generates audio via provider", async () => {
 		mockSuccess();
 		const result = await new HttpSFXConnector(config).generate({

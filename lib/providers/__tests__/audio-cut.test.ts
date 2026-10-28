@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cutVoice, secondsCap, trimAudio } from "../audio-cut";
 import { audioDurationSec } from "../audio-duration";
 import { spyAssetBundle } from "./_asset-bundle";
@@ -43,16 +43,11 @@ describe("cutVoice", () => {
 	};
 
 	beforeEach(() => {
-		vi.clearAllMocks();
 		vi.stubGlobal("fetch", fetchMock);
 		fetchMock.mockImplementation(
 			async () =>
 				new Response(wav(10), { headers: { "Content-Type": "audio/wav" } }),
 		);
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
 	});
 
 	it("fetches, trims, measures and stores a cut it has not made", async () => {

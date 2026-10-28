@@ -90,7 +90,6 @@ describe("NewCharacterDialog", () => {
 				<NewCharacterDialog onCreated={onCreated} />
 			</Dialog>,
 		);
-	afterEach(() => onCreated.mockClear());
 
 	it("hands on the name, normalized, and adds nothing itself", async () => {
 		canvas = mountOnCanvas();
@@ -133,7 +132,6 @@ describe("CharacterEditModal", () => {
 				<CharacterEditModal name="Mia" onClose={onClose} />
 			</Dialog>,
 		);
-	afterEach(() => onClose.mockClear());
 
 	it("shows the appearance the avatar asset holds and writes edits back to it", async () => {
 		canvas = mountOnCanvas([mia("a girl")]);

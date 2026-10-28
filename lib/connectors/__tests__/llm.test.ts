@@ -14,7 +14,6 @@ const model = { provider: "openslop", model: "Slop LLM v1" } as const;
 
 describe("BaseLLMConnector", () => {
 	beforeEach(() => {
-		vi.restoreAllMocks();
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			mockJsonResponse(llmResult),
 		);

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { HttpMusicConnector } from "../music/connector";
 import type { AssetResult, ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
@@ -20,10 +20,6 @@ function mockSuccess() {
 }
 
 describe("BaseMusicConnector", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("runs transformPrompt plugin", async () => {
 		mockSuccess();
 		const plugin: ConnectorPlugin = {

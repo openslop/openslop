@@ -113,7 +113,6 @@ const PROJECT_ID = "00000000-0000-4000-8000-000000000000";
 
 describe("API routes", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({
 			id: "user-1",
 			created_at: "2026-06-14T09:30:00Z",

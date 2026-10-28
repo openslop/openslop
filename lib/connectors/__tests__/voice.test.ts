@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { HttpVoiceConnector } from "../voice/connector";
 import { mockGatewaySequence } from "./_gateway-mock";
 
@@ -14,10 +14,6 @@ const queryOf = (fetch: ReturnType<typeof mockGatewaySequence>, call: number) =>
 	new URL(String(fetch.mock.calls[call]?.[0]), "http://app").searchParams;
 
 describe("HttpVoiceConnector", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	it("generates the first voice its traits find, heard through its preview", async () => {
 		const fetch = mockGatewaySequence([
 			{ payload: { voices: [voice("v-found"), voice("v-other")] } },

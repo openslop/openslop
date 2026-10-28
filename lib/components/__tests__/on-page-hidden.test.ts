@@ -19,7 +19,6 @@ describe("onPageHidden", () => {
 
 	afterEach(() => {
 		stop();
-		vi.restoreAllMocks();
 	});
 
 	it("fires when the tab is hidden", () => {

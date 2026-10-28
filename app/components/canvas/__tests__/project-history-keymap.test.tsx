@@ -17,7 +17,6 @@ const containers: HTMLElement[] = [];
 afterEach(() => {
 	for (const root of roots.splice(0)) act(() => root.unmount());
 	for (const container of containers.splice(0)) container.remove();
-	vi.restoreAllMocks();
 });
 
 function ProjectHistoryHotkeys({ editor }: { editor: CanvasEditor }) {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { spyAssetBundle } from "./_asset-bundle";
 
 const mockConvert = vi.fn();
@@ -28,11 +28,6 @@ const uploadedCaptions = () => {
 	if (!("data" in file)) throw new Error("Captions were not written inline");
 	return JSON.parse(String(file.data));
 };
-
-afterEach(() => {
-	vi.clearAllMocks();
-	vi.unstubAllGlobals();
-});
 
 describe("ElevenLabsSTT", () => {
 	it("keeps only spoken words, without the spacing Scribe times between them", async () => {

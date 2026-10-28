@@ -37,7 +37,6 @@ const post = (body: Record<string, unknown>) => postTo("image", body);
 
 describe("POST /api/third-party/image", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
 	});
@@ -93,7 +92,6 @@ describe("POST /api/third-party/image", () => {
 
 describe("POST /api/third-party/llm", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
 	});
 

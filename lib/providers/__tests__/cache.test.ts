@@ -38,14 +38,13 @@ const row = (url: string, duration: number) => ({
 
 describe("audioPromptCache", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
-		process.env.PINECONE_API_KEY = "test-key";
+		vi.stubEnv("PINECONE_API_KEY", "test-key");
 		mockEmbed.mockResolvedValue([0.1, 0.2, 0.3]);
 		mockUpsert.mockResolvedValue(undefined);
 	});
 
 	it("produces without touching Pinecone when PINECONE_API_KEY is unset", async () => {
-		delete process.env.PINECONE_API_KEY;
+		vi.stubEnv("PINECONE_API_KEY", undefined);
 		const { audioPromptCache } = await loadCache();
 		const produce = vi
 			.fn()

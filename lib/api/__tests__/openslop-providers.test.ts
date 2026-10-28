@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const classes = vi.hoisted(() => ({
 	RunwareImage: vi.fn(),
@@ -92,14 +92,6 @@ const HOSTED = [
 ] as const;
 
 describe("hostedProviderFor", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	afterEach(() => {
-		vi.unstubAllEnvs();
-	});
-
 	describe.each(HOSTED)(
 		"$type $model",
 		({ type, model, envVar, real, mock }) => {

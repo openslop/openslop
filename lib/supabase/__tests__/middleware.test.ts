@@ -17,9 +17,8 @@ function makeRequest(path: string) {
 
 describe("middleware - session refresh", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
-		process.env.NEXT_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
-		process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
+		vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+		vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-key");
 	});
 
 	it("passes through for non-auth routes when unauthenticated", async () => {

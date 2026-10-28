@@ -72,6 +72,5 @@ describe("CharacterAvatar after its avatar goes away", () => {
 		expect(container.innerHTML).toContain("--user-icon");
 
 		act(() => root.unmount());
-		vi.unstubAllGlobals();
 	});
 });

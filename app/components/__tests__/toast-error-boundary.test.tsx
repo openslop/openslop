@@ -26,7 +26,6 @@ beforeEach(() => {
 
 afterEach(() => {
 	act(() => root.unmount());
-	vi.clearAllMocks();
 });
 
 const render = (label?: string) =>

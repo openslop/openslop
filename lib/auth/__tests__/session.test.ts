@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { signInWithOtp, signInWithOAuth, signOutFn } = vi.hoisted(() => ({
 	signInWithOtp: vi.fn(),
@@ -21,15 +21,10 @@ import { sendMagicLink, signInWithGoogle, signOut } from "../session";
 const CALLBACK = "https://app.test/auth/callback";
 
 beforeEach(() => {
-	vi.clearAllMocks();
 	signInWithOtp.mockResolvedValue({ error: null });
 	signInWithOAuth.mockResolvedValue({ error: null });
 	signOutFn.mockResolvedValue({ error: null });
 	vi.stubGlobal("window", { location: { origin: "https://app.test" } });
-});
-
-afterEach(() => {
-	vi.unstubAllGlobals();
 });
 
 describe("sendMagicLink", () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const mockCompose = vi.fn();
 
@@ -24,10 +24,6 @@ const MODEL = "music_v1";
 
 describe("ElevenLabsMusic", () => {
 	spyAssetBundle();
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
 
 	it("omits musicLengthMs and computes duration from buffer when no duration provided", async () => {
 		// 16000 bytes at 128 kbps CBR mp3 = 1 second

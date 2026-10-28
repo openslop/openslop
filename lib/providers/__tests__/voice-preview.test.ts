@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { VoiceInfo } from "@/lib/connectors/types";
 import type { TTSProvider } from "../tts/base";
 import { PREVIEW_LINES } from "../tts/preview-lines";
@@ -15,10 +15,6 @@ describe("fetchAllowedVoicePreview", () => {
 	beforeEach(() => {
 		fetchMock.mockReset().mockResolvedValue(new Response("ok"));
 		vi.stubGlobal("fetch", fetchMock);
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
 	});
 
 	it("fetches an allowed origin with redirects disabled", async () => {
@@ -86,7 +82,6 @@ describe("voicePreview", () => {
 	const { load, upload } = spyAssetBundle();
 
 	beforeEach(() => {
-		vi.clearAllMocks();
 		getVoice.mockResolvedValue(VOICE);
 	});
 
@@ -160,7 +155,6 @@ describe("voicePreview for a voice the vendor has no preview of", () => {
 	const fetchMock = vi.fn();
 
 	beforeEach(() => {
-		vi.clearAllMocks();
 		vi.stubGlobal("fetch", fetchMock);
 		getVoice.mockResolvedValue({ ...VOICE, previewUrl: undefined });
 		generate.mockResolvedValue({
@@ -173,10 +167,6 @@ describe("voicePreview for a voice the vendor has no preview of", () => {
 			costUsd: 0,
 		});
 		fetchMock.mockResolvedValue(upstream(2));
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
 	});
 
 	it.each([

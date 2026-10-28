@@ -32,7 +32,6 @@ const validBody = {
 
 describe("POST /api/render/progress", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		mockGetUser.mockResolvedValue({ id: "user-1" });
 	});
 

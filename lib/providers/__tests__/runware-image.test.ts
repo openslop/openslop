@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const mockDisconnect = vi.fn();
 const mockImageInference = vi.fn();
@@ -21,10 +21,6 @@ const MODEL = "bytedance:seedream@5.0-lite";
 
 describe("RunwareImage", () => {
 	const { upload } = spyAssetBundle();
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
 
 	it("generates an image with defaults", async () => {
 		mockImageInference.mockResolvedValue([

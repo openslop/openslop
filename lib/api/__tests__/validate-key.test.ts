@@ -5,12 +5,10 @@ import { validateKey, verifyProviderKey } from "../providers/byok";
 
 vi.mock("../provider-keys", () => ({ setKeyStatus: vi.fn() }));
 
-let fetchMock: ReturnType<typeof vi.fn>;
+const fetchMock = vi.fn();
 
 beforeEach(() => {
-	fetchMock = vi.fn();
 	vi.stubGlobal("fetch", fetchMock);
-	vi.mocked(setKeyStatus).mockClear();
 });
 
 describe("validateKey", () => {

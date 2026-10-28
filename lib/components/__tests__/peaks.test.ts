@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { extractPeaks, loadPeaks } from "../peaks";
 
 describe("extractPeaks", () => {
@@ -62,10 +62,6 @@ describe("extractPeaks", () => {
 });
 
 describe("loadPeaks", () => {
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
-
 	it("decodes the fetched audio into normalized peaks", async () => {
 		const samples = new Float32Array(400).fill(0.5);
 		samples[0] = 1;

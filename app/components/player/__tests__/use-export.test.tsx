@@ -69,7 +69,6 @@ beforeEach(() => {
 	root = createRoot(container);
 	toastRoot = createRoot(toastContainer);
 	act(() => root.render(<Reader onRead={(read) => (hook = read)} />));
-	vi.clearAllMocks();
 });
 
 afterEach(() =>

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { z } from "zod";
 import { AssetBundle, EmptyRemoteFileError } from "../asset-bundle";
 import type { BundleResponse } from "../asset-bundle";
@@ -85,10 +85,6 @@ describe("AssetBundle", () => {
 			vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
 		}
 
-		afterEach(() => {
-			vi.unstubAllGlobals();
-		});
-
 		it("fetches the resolved url and parses the body through the schema", async () => {
 			stubFetch({ ok: true, json: () => Promise.resolve(payload) });
 
@@ -125,10 +121,6 @@ describe("AssetBundle", () => {
 			vi.doMock("@vercel/blob", () => ({
 				put: (...args: unknown[]) => putMock(...args),
 			}));
-		});
-
-		afterEach(() => {
-			vi.restoreAllMocks();
 		});
 
 		it("uploads files and returns BundleResponse", async () => {
@@ -205,8 +197,6 @@ describe("AssetBundle", () => {
 			);
 			const [[, body]] = putMock.mock.calls;
 			await expect(new Response(body).text()).resolves.toBe("fake-video");
-
-			vi.unstubAllGlobals();
 		});
 
 		it("names the file and provider when a remote file comes back with no bytes", async () => {
@@ -223,8 +213,6 @@ describe("AssetBundle", () => {
 				AssetBundle.upload("video", "runware", [remoteVideo]),
 			).rejects.toThrow('Empty file for "video" from runware');
 			expect(putMock).not.toHaveBeenCalled();
-
-			vi.unstubAllGlobals();
 		});
 
 		it("knows a remote file is empty even when its host sends no length", async () => {
@@ -241,8 +229,6 @@ describe("AssetBundle", () => {
 				AssetBundle.upload("video", "runware", [remoteVideo]),
 			).rejects.toBeInstanceOf(EmptyRemoteFileError);
 			expect(putMock).not.toHaveBeenCalled();
-
-			vi.unstubAllGlobals();
 		});
 
 		it("throws when a remote file's source url is already dead", async () => {
@@ -259,18 +245,12 @@ describe("AssetBundle", () => {
 			await expect(
 				AssetBundle.upload("video", "runware", [remoteVideo]),
 			).rejects.toThrow(/video.*404.*Not Found/);
-
-			vi.unstubAllGlobals();
 		});
 	});
 
 	describe("load", () => {
 		beforeEach(() => {
 			AssetBundle.baseUrl = "https://blob.example.com";
-		});
-
-		afterEach(() => {
-			vi.unstubAllGlobals();
 		});
 
 		it("reads a stored bundle back by name", async () => {

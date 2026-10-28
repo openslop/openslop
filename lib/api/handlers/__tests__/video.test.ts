@@ -43,7 +43,6 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 
 describe("videoHandler.process", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
 		poll.mockResolvedValue({ kind: "pending" });
 	});
 

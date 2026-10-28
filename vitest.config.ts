@@ -9,6 +9,10 @@ export default defineConfig({
 	},
 	test: {
 		setupFiles: ["./vitest.setup.ts"],
+		clearMocks: true,
+		restoreMocks: true,
+		unstubEnvs: true,
+		unstubGlobals: true,
 		exclude: [...configDefaults.exclude, "e2e/**"],
 		coverage: {
 			provider: "v8",

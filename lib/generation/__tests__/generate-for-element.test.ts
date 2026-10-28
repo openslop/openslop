@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { AssetResult, PluginContext } from "@/lib/connectors/types";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 
@@ -20,10 +20,6 @@ const node = jobNode("a sunset", [], {
 });
 
 describe("generateForElement", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
 	it("generates on the job's connector with the node's inputs, dependency results and signal", async () => {
 		const expected: AssetResult = { imageUrl: "img.png", durationSec: 0 };
 		mockGenerate.mockResolvedValue(expected);

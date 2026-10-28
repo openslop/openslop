@@ -224,7 +224,6 @@ describe("useAssetPrefetch", () => {
 	const settle = () => act(() => new Promise((resolve) => setTimeout(resolve)));
 
 	beforeEach(() => {
-		vi.clearAllMocks();
 		root = createRoot(container);
 	});
 
