@@ -49,6 +49,12 @@ describe("durationFits", () => {
 			durationFits([length({ type: "image", durationSec: undefined })]),
 		).toEqual([]);
 	});
+
+	it("leaves a trimmed video out, since the trim holds it whatever its duration", () => {
+		expect(
+			durationFits([length({ trimmedSec: 5, decidedBy: "trim" })]),
+		).toEqual([]);
+	});
 });
 
 const words = (count: number) => Array(count).fill("word").join(" ");

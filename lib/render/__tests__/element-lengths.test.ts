@@ -72,14 +72,48 @@ describe("measureElementLengths", () => {
 		expect(extended.seconds).toBe(30);
 	});
 
-	it("holds a trimmed video for its trimmed length", () => {
-		const [trimmed] = measureElementLengths([
+	it("holds a trimmed video for its trimmed length, and says the trim set it", () => {
+		const [cut, opened] = measureElementLengths([
 			scene(
 				element("video", "A pan.", { duration: "8", timelineDuration: "5" }),
+				element("video", "A zoom.", { duration: "8", trimStart: "3" }),
 			),
 		]);
 
-		expect(trimmed.seconds).toBe(5);
+		expect(cut).toMatchObject({
+			seconds: 5,
+			durationSec: 8,
+			trimmedSec: 5,
+			decidedBy: "trim",
+		});
+		expect(opened).toMatchObject({
+			seconds: 5,
+			trimmedSec: 5,
+			decidedBy: "trim",
+		});
+	});
+
+	it("lets dialogue run past a trim, carrying the trimmed length it beat", () => {
+		const [held] = measureElementLengths([
+			scene(
+				element("video", "A pan.", { duration: "8", timelineDuration: "5" }),
+				element("narration", words(90)),
+			),
+		]);
+
+		expect(held).toMatchObject({
+			seconds: 30,
+			trimmedSec: 5,
+			decidedBy: "dialogue",
+		});
+	});
+
+	it("carries no trimmed length for a video the user left whole", () => {
+		const [whole] = measureElementLengths([
+			scene(element("video", "A pan.", { duration: "8" })),
+		]);
+
+		expect(whole.trimmedSec).toBeUndefined();
 	});
 
 	it("ignores silent elements and dialogue before the first visual", () => {

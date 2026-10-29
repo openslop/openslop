@@ -446,6 +446,101 @@ describe("executeToolCall", () => {
 		);
 	});
 
+	it("says when the user's trim sets a video's length, which duration cannot move", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_element_lengths", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						...onScreen("v1", 5),
+						durationSec: 8,
+						trimmedSec: 5,
+						decidedBy: "trim",
+					},
+					{
+						...onScreen("v2", 30),
+						durationSec: 8,
+						trimmedSec: 5,
+						words: 90,
+						dialogueIds: ["nar1"],
+						decidedBy: "dialogue",
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v1: 5.0s, its trim on the timeline; no dialogue after it.",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v2: 30.0s, 90 words of dialogue (nar1) after it, longer than its 5.0s trim.",
+		);
+	});
+
+	it("leaves a trimmed video alone when fitting, and says the trim holds it", async () => {
+		const ops: RefineOp[][] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						...onScreen("cut", 5),
+						durationSec: 4,
+						trimmedSec: 5,
+						words: 30,
+						dialogueIds: ["nar1"],
+						decidedBy: "dialogue",
+					},
+					{
+						...onScreen("whole", 4),
+						durationSec: 4,
+						words: 30,
+						dialogueIds: ["nar2"],
+						decidedBy: "dialogue",
+					},
+				],
+				editScript: (next) => {
+					ops.push(next);
+					return { applied: next.length, failures: [] };
+				},
+			}),
+		);
+
+		expect(ops).toEqual([
+			[{ op: "set", id: "whole", attrs: { duration: "11" } }],
+		]);
+		expect(outcome.ok && outcome.output).toContain("Fitted 1 of 1.");
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video cut is trimmed to 5.0s on the timeline, which `duration` cannot move; left alone until the user resets the trim.",
+		);
+		expect(outcome.ok && outcome.output).not.toContain("without dialogue");
+	});
+
+	it("says every video in scope is trimmed rather than that there is nothing with dialogue", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						...onScreen("cut", 5),
+						durationSec: 8,
+						trimmedSec: 5,
+						words: 30,
+						dialogueIds: ["nar1"],
+						decidedBy: "dialogue",
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"Nothing to fit: every video with dialogue under it is trimmed on the timeline.",
+		);
+		expect(outcome.ok && outcome.output).not.toContain(
+			"No video elements with dialogue",
+		);
+	});
+
 	it("fits each video element to the dialogue under it and says it went stale", async () => {
 		const ops: RefineOp[][] = [];
 		const outcome = await executeToolCall(
