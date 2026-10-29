@@ -110,11 +110,7 @@ const thinking = (effort: ThinkingLevel) => ({
 });
 
 export class AnthropicLLM implements LLMProvider {
-	private apiKey: string;
-
-	constructor(apiKey: string) {
-		this.apiKey = apiKey;
-	}
+	constructor(private readonly apiKey: string) {}
 
 	/** Listing one model is the cheapest call the API authenticates. */
 	async validate() {

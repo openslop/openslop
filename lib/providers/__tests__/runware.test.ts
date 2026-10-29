@@ -1,15 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { validateRunwareKey } from "../runware";
 
-let fetchMock: ReturnType<typeof vi.fn>;
+const fetchMock = vi.fn();
 
 beforeEach(() => {
-	fetchMock = vi.fn();
 	vi.stubGlobal("fetch", fetchMock);
-});
-
-afterEach(() => {
-	vi.unstubAllGlobals();
 });
 
 describe("validateRunwareKey", () => {

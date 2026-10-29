@@ -15,10 +15,10 @@ const USD_PER_SECOND = 299 / 8_000_000 / 2;
 async function fetchOwnMedia(url: string): Promise<Response> {
 	if (!AssetBundle.holds(url))
 		throw new Error(`Media to transcribe is not in our store: ${url}`);
-	const res = await fetch(url);
-	if (!res.ok)
-		throw new Error(`Media to transcribe failed to load (${res.status})`);
-	return res;
+	const response = await fetch(url);
+	if (!response.ok)
+		throw new Error(`Media to transcribe failed to load (${response.status})`);
+	return response;
 }
 
 export class CartesiaSTT

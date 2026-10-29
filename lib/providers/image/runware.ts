@@ -26,11 +26,9 @@ export class RunwareImage
 	implements ImageProvider
 {
 	protected readonly blobConfig = { type: "image", provider: "runware" };
-	private apiKey: string;
 
-	constructor(apiKey: string) {
+	constructor(private readonly apiKey: string) {
 		super();
-		this.apiKey = apiKey;
 	}
 
 	async validate() {

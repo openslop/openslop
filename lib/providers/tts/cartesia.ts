@@ -120,12 +120,10 @@ export class CartesiaTTS
 	implements TTSProvider
 {
 	protected readonly blobConfig = { type: "tts", provider: "cartesia" };
-	private client: Cartesia;
-	private apiKey: string;
+	private readonly client: Cartesia;
 
-	constructor(apiKey: string) {
+	constructor(private readonly apiKey: string) {
 		super();
-		this.apiKey = apiKey;
 		this.client = new Cartesia({ apiKey });
 	}
 

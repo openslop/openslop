@@ -38,11 +38,9 @@ export abstract class BaseElevenLabsAudio<
 	TParams extends { durationSeconds?: number },
 > extends BaseProvider<TParams, AudioResult> {
 	protected readonly client: ElevenLabsClient;
-	private readonly apiKey: string;
 
-	constructor(apiKey: string) {
+	constructor(private readonly apiKey: string) {
 		super();
-		this.apiKey = apiKey;
 		this.client = new ElevenLabsClient({ apiKey });
 	}
 

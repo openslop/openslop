@@ -69,11 +69,9 @@ const runwareModel = (model: string) =>
 
 export class RunwareVideo extends BaseVideoProvider {
 	protected readonly blobConfig = { type: "video", provider: "runware" };
-	private apiKey: string;
 
-	constructor(apiKey: string) {
+	constructor(private readonly apiKey: string) {
 		super();
-		this.apiKey = apiKey;
 	}
 
 	async validate() {
