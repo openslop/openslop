@@ -58,17 +58,4 @@ export type RenderLayout = {
 
 export const COMPOSITION_ID = "VideoComposition";
 
-export type VideoConfig = {
-	fps: number;
-	width: number;
-	height: number;
-};
-
-export const BASE_WIDTH = 1920;
-export const BASE_HEIGHT = 1080;
-
-export const DEFAULT_CONFIG: VideoConfig = {
-	fps: 24,
-	width: BASE_WIDTH,
-	height: BASE_HEIGHT,
-};
+export const DEFAULT_FPS = 24;

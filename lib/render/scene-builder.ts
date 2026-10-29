@@ -1,8 +1,7 @@
 import {
-	DEFAULT_CONFIG,
+	DEFAULT_FPS,
 	type ResolvedElement,
 	type Sequence,
-	type VideoConfig,
 	type RenderLayout,
 } from "./types";
 import { ASPECT_RATIO_DIMENSIONS } from "../project/aspect-ratio";
@@ -16,7 +15,7 @@ export type BuildLayoutOptions = Pick<
 	VideoSettings,
 	"transitionType" | "aspectRatio" | "captionStyle" | "filmGrain" | "rgbSplit"
 > &
-	Partial<Pick<VideoConfig, "fps">>;
+	Partial<Pick<RenderLayout, "fps">>;
 
 /** No sequence is ever shorter than this, however little content it holds. */
 export const MIN_DURATION_SEC = 1;
@@ -82,7 +81,7 @@ export function buildRenderLayout(
 		captionStyle,
 		filmGrain,
 		rgbSplit,
-		fps = DEFAULT_CONFIG.fps,
+		fps = DEFAULT_FPS,
 	}: BuildLayoutOptions,
 ): RenderLayout {
 	const config = { fps, ...ASPECT_RATIO_DIMENSIONS[aspectRatio].output };

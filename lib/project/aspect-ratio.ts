@@ -41,6 +41,9 @@ export const ASPECT_RATIO_DIMENSIONS: Record<
 	},
 };
 
+/** The frame render presets and caption sizes are measured against. */
+export const BASE_OUTPUT = ASPECT_RATIO_DIMENSIONS["16:9"].output;
+
 export function getAspectRatioValue(ratio: AspectRatio): number {
 	const { width, height } = ASPECT_RATIO_DIMENSIONS[ratio].output;
 	return width / height;

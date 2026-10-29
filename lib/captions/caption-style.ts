@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CAPTION_FONTS } from "./caption-fonts";
+import { BASE_OUTPUT } from "../project/aspect-ratio";
 
 export const CAPTION_CASINGS = ["none", "upper", "lower"] as const;
 export type CaptionCasing = (typeof CAPTION_CASINGS)[number];
@@ -14,7 +15,7 @@ export type CaptionAlignY = (typeof CAPTION_ALIGN_Y)[number];
 export type CaptionEmphasis = "bold" | "italic" | "underline";
 
 /** The frame height caption sizes are authored against. */
-export const CAPTION_BASE_HEIGHT = 1080;
+export const CAPTION_BASE_HEIGHT = BASE_OUTPUT.height;
 
 /** Type size scaled from the authoring baseline to a real frame height. */
 export const captionFontSizePx = (fontSize: number, frameHeight: number) =>

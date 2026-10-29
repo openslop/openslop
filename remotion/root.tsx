@@ -2,28 +2,12 @@ import React from "react";
 import { Composition } from "remotion";
 import { ActiveCaptionFont } from "./components/active-caption-font";
 import { VideoComposition } from "./compositions/video-composition";
+import { VideoSettingsSchema } from "@/lib/project/video-settings";
+import { buildRenderLayout } from "@/lib/render/scene-builder";
 import type { RenderLayout } from "@/lib/render/types";
-import { COMPOSITION_ID, DEFAULT_CONFIG } from "@/lib/render/types";
-import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/caption-style";
-import {
-	DEFAULT_TRANSITION,
-	transitionOverlapSec,
-} from "@/lib/render/transitions";
+import { COMPOSITION_ID } from "@/lib/render/types";
 
-const defaultProps: RenderLayout = {
-	series: [],
-	sequences: {},
-	fps: DEFAULT_CONFIG.fps,
-	width: DEFAULT_CONFIG.width,
-	height: DEFAULT_CONFIG.height,
-	totalDurationSec: 0,
-	totalFrames: 1,
-	transitionType: DEFAULT_TRANSITION,
-	transitionDurationSec: transitionOverlapSec(DEFAULT_TRANSITION),
-	captionStyle: DEFAULT_CAPTION_STYLE,
-	filmGrain: false,
-	rgbSplit: false,
-};
+const defaultProps = buildRenderLayout([], VideoSettingsSchema.parse({}));
 
 /**
  * Only the renderer registers the font here: the Player imports
@@ -40,10 +24,6 @@ export const RemotionRoot: React.FC = () => (
 	<Composition
 		id={COMPOSITION_ID}
 		component={RenderedVideo}
-		durationInFrames={1}
-		fps={DEFAULT_CONFIG.fps}
-		width={DEFAULT_CONFIG.width}
-		height={DEFAULT_CONFIG.height}
 		defaultProps={defaultProps}
 		calculateMetadata={({ props }) => ({
 			durationInFrames: props.totalFrames,

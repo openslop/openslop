@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { ASPECT_RATIO_DIMENSIONS } from "@/lib/project/aspect-ratio";
 import { RESOLUTIONS } from "./resolutions";
-import { DEFAULT_CONFIG } from "./types";
+import { DEFAULT_FPS } from "./types";
 
 // Lambda bills by the size `calculateMetadata` reads from these props, so the canvas is one of the project's own and the preset scales it.
 const RenderInputProps = z.union(
 	Object.values(ASPECT_RATIO_DIMENSIONS).map(({ output }) =>
 		z.looseObject({
-			fps: z.literal(DEFAULT_CONFIG.fps),
+			fps: z.literal(DEFAULT_FPS),
 			width: z.literal(output.width),
 			height: z.literal(output.height),
 		}),

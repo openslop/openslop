@@ -1,4 +1,4 @@
-import { BASE_WIDTH } from "./types";
+import { BASE_OUTPUT } from "@/lib/project/aspect-ratio";
 
 export const RESOLUTIONS = ["480p", "720p", "1080p", "1440p", "4K"] as const;
 
@@ -12,5 +12,6 @@ const OUTPUT_WIDTHS: Record<Resolution, number> = {
 	"4K": 3840,
 };
 
+/** Presets name the landscape width; the factor scales a portrait canvas the same. */
 export const renderScale = (resolution: Resolution): number =>
-	OUTPUT_WIDTHS[resolution] / BASE_WIDTH;
+	OUTPUT_WIDTHS[resolution] / BASE_OUTPUT.width;
