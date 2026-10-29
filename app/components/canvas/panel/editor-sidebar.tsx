@@ -110,16 +110,19 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 function RailItem({
 	icon: Icon,
 	label,
+	notice,
 	selected = false,
 	href,
 	onClick,
 }: {
 	icon: IconComponent;
 	label: string;
+	notice?: string;
 	selected?: boolean;
 	href?: string;
 	onClick?: () => void;
 }) {
+	const name = notice ? `${label}, ${notice}` : label;
 	const className = cn(
 		"flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center text-label-xs font-medium transition-colors",
 		selected
@@ -128,12 +131,20 @@ function RailItem({
 	);
 	const body = (
 		<>
-			<Icon className="h-4 w-4" />
+			<span className="relative flex">
+				<Icon className="h-4 w-4" />
+				{notice && (
+					<span
+						aria-hidden
+						className="absolute -top-0.5 -left-0.5 size-2 rounded-full bg-primary ring-2 ring-background"
+					/>
+				)}
+			</span>
 			<span className="hidden leading-tight lg:block">{label}</span>
 		</>
 	);
 	return href ? (
-		<Link href={href} className={className} aria-label={label}>
+		<Link href={href} className={className} aria-label={name}>
 			{body}
 		</Link>
 	) : (
@@ -141,7 +152,7 @@ function RailItem({
 			type="button"
 			onClick={onClick}
 			className={className}
-			aria-label={label}
+			aria-label={name}
 			aria-pressed={selected}
 		>
 			{body}
@@ -150,13 +161,14 @@ function RailItem({
 }
 
 function PanelRailItem({ panelKey }: { panelKey: PanelKey }) {
-	const { active, setActive } = useEditorPanel();
+	const { active, setActive, notices } = useEditorPanel();
 	const { label, icon, iconActive } = PANELS[panelKey];
 	const selected = active === panelKey;
 	return (
 		<RailItem
 			icon={selected ? iconActive : icon}
 			label={label}
+			notice={notices[panelKey]}
 			selected={selected}
 			onClick={() => setActive(selected ? null : panelKey)}
 		/>
