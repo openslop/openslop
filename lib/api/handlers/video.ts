@@ -9,7 +9,7 @@ export const videoHandler: JobHandler<
 > = {
 	process: async (job) => {
 		const provider = await providerForJob("video", job);
-		const providerJobId = job.metadata.providerJobId;
+		const { providerJobId } = job.metadata;
 		if (!providerJobId) {
 			return {
 				kind: "pending",

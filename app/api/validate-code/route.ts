@@ -18,7 +18,7 @@ const ValidateCodeRequest = z.object(
 	{
 		code: z
 			.string({ error: INVALID_FORMAT })
-			.length(ACCESS_CODE_LENGTH, { message: INVALID_FORMAT }),
+			.length(ACCESS_CODE_LENGTH, { error: INVALID_FORMAT }),
 	},
 	INVALID_FORMAT,
 );

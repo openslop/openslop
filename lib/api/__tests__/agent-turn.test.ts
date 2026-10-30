@@ -118,7 +118,6 @@ const saved = (call: number) =>
 	conversations.saveConversationMessage.mock.calls[call][1] as SloppyMessage;
 
 beforeEach(() => {
-	vi.clearAllMocks();
 	calls = [];
 	conversations.listConversationMessages.mockResolvedValue([]);
 });

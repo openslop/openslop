@@ -48,7 +48,7 @@ export const byokModel = (type: ConnectorType): z.ZodType<BYOKModelRef> =>
 	z
 		.object({ provider: byokProviderField, model: z.string() })
 		.refine((pick) => hasModel(type, pick), {
-			message: `Invalid model. Supported: ${byokModelNames(type).join(", ")}`,
+			error: `Invalid model. Supported: ${byokModelNames(type).join(", ")}`,
 		});
 
 export const bodySchema = <
@@ -62,7 +62,7 @@ export const bodySchema = <
 		.object(
 			{
 				prompt: z.string({ error: "prompt is required" }).min(1, {
-					message: "prompt is required",
+					error: "prompt is required",
 				}),
 				projectId: z.uuid().optional(),
 				...shape,

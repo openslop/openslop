@@ -14,7 +14,7 @@ export const setDefaultModel = defineTool({
 	input: modelRefSchema
 		.extend({ type: z.enum(CONNECTOR_TYPES) })
 		.refine(({ type, ...model }) => hasModel(type, model), {
-			message: "Not a model of that type. Pick a pair from list_models.",
+			error: "Not a model of that type. Pick a pair from list_models.",
 		}),
 	output: z.string(),
 	icon: InsertElement,
