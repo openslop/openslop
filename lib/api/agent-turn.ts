@@ -75,10 +75,12 @@ export async function streamAgentTurn(
 	);
 
 	const modelMessages = pruneMessages({
-		messages: await convertToModelMessages(pruneTranscript(messages), {
-			tools: SLOPPY_TOOLS,
-			ignoreIncompleteToolCalls: true,
-		}),
+		messages: pruneTranscript(
+			await convertToModelMessages(messages, {
+				tools: SLOPPY_TOOLS,
+				ignoreIncompleteToolCalls: true,
+			}),
+		),
 	});
 
 	const startedAt = Date.now();

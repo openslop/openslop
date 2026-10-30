@@ -1,3 +1,4 @@
+import { convertToModelMessages } from "ai";
 import { describe, expect, it } from "vitest";
 import {
 	hasPendingToolCall,
@@ -6,7 +7,11 @@ import {
 	upsertMessage,
 	pruneTranscript,
 } from "../messages";
-import { DRAFTING_TOOLS, SNAPSHOT_TOOLS } from "../tools/registry";
+import {
+	DRAFTING_TOOLS,
+	SLOPPY_TOOLS,
+	SNAPSHOT_TOOLS,
+} from "../tools/registry";
 import type { SloppyMessage } from "../types";
 
 const asked: SloppyMessage = {
@@ -113,6 +118,14 @@ describe("pruneTranscript", () => {
 			output,
 		}) as const;
 
+	const look: SloppyMessage["parts"][number] = {
+		type: "tool-view_image",
+		toolCallId: "v1",
+		state: "output-available",
+		input: { id: "img1" },
+		output: { id: "img1", prompt: "a cat", urls: ["https://cdn.test/cat.png"] },
+	};
+
 	const edit: SloppyMessage["parts"][number] = {
 		type: "tool-edit_script",
 		toolCallId: "e1",
@@ -120,6 +133,9 @@ describe("pruneTranscript", () => {
 		input: { ops: [{ op: "remove", id: "n1" }] },
 		output: "Applied 1 operation.",
 	};
+
+	const say = (text: string) => ({ type: "text", text }) as const;
+	const step = { type: "step-start" } as const;
 
 	const thought = (text: string) =>
 		({
@@ -131,50 +147,91 @@ describe("pruneTranscript", () => {
 	const turnWith = (id: string, ...parts: SloppyMessage["parts"]) =>
 		({ id, role: "assistant", parts }) as SloppyMessage;
 
-	it("keeps every reading the turn in flight has taken", () => {
+	const modelView = async (messages: SloppyMessage[]) =>
+		pruneTranscript(
+			await convertToModelMessages(messages, { tools: SLOPPY_TOOLS }),
+		);
+
+	const stale = {
+		type: "text",
+		value:
+			"Taken in an earlier turn and not kept. The canvas may have changed since.",
+	};
+
+	const finished = turnWith(
+		"m2",
+		thought("first"),
+		say("ok boss reading the script"),
+		read("a", "the script as it was"),
+		step,
+		say("on it boss, making him taller"),
+		edit,
+		step,
+		say("done boss"),
+	);
+
+	it("keeps the announcement and the call it announced together", async () => {
+		const [user, announced, result] = await modelView([asked, finished, asked]);
+
+		expect(user).toEqual({
+			role: "user",
+			content: [{ type: "text", text: "make it shorter" }],
+		});
+		expect(announced).toEqual({
+			role: "assistant",
+			content: [
+				{ type: "text", text: "ok boss reading the script" },
+				expect.objectContaining({ type: "tool-call", toolName: "read_script" }),
+			],
+		});
+		expect(result).toMatchObject({
+			role: "tool",
+			content: [
+				{ type: "tool-result", toolName: "read_script", output: stale },
+			],
+		});
+	});
+
+	it("drops a finished turn's reasoning and keeps its edits", async () => {
+		const sent = JSON.stringify(await modelView([asked, finished, asked]));
+
+		expect(sent).not.toContain("reasoning");
+		expect(sent).toContain("Applied 1 operation.");
+	});
+
+	it("keeps a finished turn's look as a look, without the picture", async () => {
+		const looked = turnWith("m2", say("let me see"), look, step, say("cute"));
+		const [, , result] = await modelView([asked, looked, asked]);
+
+		expect(result).toMatchObject({
+			role: "tool",
+			content: [{ type: "tool-result", toolName: "view_image", output: stale }],
+		});
+	});
+
+	it("keeps every reading the turn in flight has taken", async () => {
 		const inFlight = turnWith(
 			"m2",
-			read("a", "was"),
+			read("a", "the script as it was"),
 			edit,
-			read("b", "stands"),
+			read("b", "the script as it stands"),
 		);
+		const sent = JSON.stringify(await modelView([asked, inFlight]));
 
-		expect(pruneTranscript([asked, inFlight])).toEqual([asked, inFlight]);
+		expect(sent).toContain("the script as it was");
+		expect(sent).toContain("the script as it stands");
 	});
 
-	it("keeps the reasoning of the turn in flight, which is signed with its calls", () => {
-		const inFlight = turnWith("m2", thought("first"), read("a", "was"), edit);
+	it("keeps the reasoning of the turn in flight, which is signed with its calls", async () => {
+		const inFlight = turnWith("m2", thought("first"), read("a", "was"));
+		const [, thinking] = await modelView([asked, inFlight]);
 
-		expect(pruneTranscript([asked, inFlight])).toEqual([asked, inFlight]);
-	});
-
-	it("drops the readings of a turn that has finished", () => {
-		const finished = turnWith("m2", read("a", "was"), edit);
-
-		expect(pruneTranscript([asked, finished, asked])).toEqual([
-			asked,
-			turnWith("m2", edit),
-			asked,
-		]);
-	});
-
-	it("drops the reasoning of a finished turn, whose signature the dropped reading breaks", () => {
-		const finished = turnWith(
-			"m2",
-			thought("first"),
-			read("a", "was"),
-			thought("second"),
-			edit,
-		);
-
-		expect(pruneTranscript([asked, finished, asked])).toEqual([
-			asked,
-			turnWith("m2", edit),
-			asked,
-		]);
-	});
-
-	it("leaves what the user said alone", () => {
-		expect(pruneTranscript([asked])).toEqual([asked]);
+		expect(thinking).toMatchObject({
+			role: "assistant",
+			content: [
+				{ type: "reasoning", text: "first" },
+				{ type: "tool-call", toolName: "read_script" },
+			],
+		});
 	});
 });
