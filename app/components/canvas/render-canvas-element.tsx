@@ -17,6 +17,8 @@ type Blocks = {
 	Content: ComponentType<BlockProps & { element: ContentElement }>;
 };
 
+export const CANVAS_TEXT_CLASS = "font-body text-body leading-relaxed";
+
 /** Renders any canvas node, leaving how a scene or an element is framed to the caller. */
 export function renderCanvasElement({ Scene, Content }: Blocks) {
 	return function renderElement({
