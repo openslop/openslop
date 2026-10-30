@@ -16,8 +16,8 @@ export const reviewScript = defineTool({
 	  smallest change that fixes it. Fix them with edit_script, read the script, then review
 	  again. Stop when it replies ${NO_FINDINGS}, or when three reviews have run.
 
-	  Leave a finding alone when acting on it would undo what the user asked for, and say
-	  which one you left and why.
+	  Skip a finding if fixing it would undo something the user asked for or changed themselves,
+	  and tell them which one you skipped and why.
 
 	  Run it when the user explicitly asks for a review or accepts your offer. Do not run it
 	  just because you wrote, adapted or edited the script.
