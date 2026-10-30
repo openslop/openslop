@@ -4,7 +4,7 @@ import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import type { ProviderType, Providers } from "@/lib/providers/types";
 import { byokModel, hostedModel, type BYOKModelRef } from "./generation-schema";
-import { createJob } from "./jobs";
+import { bookLlmSpend } from "./jobs";
 import { byokProviderFor } from "./providers/byok";
 import { hostedProviderFor } from "./providers/openslop";
 import {
@@ -46,13 +46,10 @@ export const HOSTED: RouteFamily<ModelRef> = {
 	model: hostedModel,
 	providerFor: async (_userId, type, picked) =>
 		hostedProviderFor(type, picked.model),
-	// LLM calls stream instead of queueing, so each is booked as a finished job.
 	recordSpend: (userId, picked, costUsd) =>
-		createJob({
+		bookLlmSpend({
 			userId,
-			connectorType: "llm",
 			request: pick(picked, "provider", "model"),
-			status: "completed",
 			costUsd,
 		}),
 };
