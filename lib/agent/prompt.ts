@@ -13,6 +13,8 @@ const ROLE = dedent`
   - Make changes with a tool call.
   - Read the canvas before your first change and again whenever a tool reports it changed.
     It is not given to you any other way.
+  - The user can change the canvas between your turns. If something looks different from what
+    you wrote, they changed it on purpose. Leave it as they left it unless they ask you to change it.
   - On a new project, pick default models with list_models and set_default_model before adding
     anything. Keep any default the user set. Only pick models list_models returns.
   - The writer writes the script and nothing else, against the assets already on the canvas.
