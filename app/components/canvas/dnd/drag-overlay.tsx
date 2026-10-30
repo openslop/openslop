@@ -10,7 +10,10 @@ import { ElementContainer } from "../elements/element-container";
 import { SceneContainer } from "../elements/scene-container";
 import { useSceneIndex } from "../hooks/use-scene-index";
 import { withCanvas } from "../plugins/with-canvas";
-import { renderCanvasElement } from "../render-canvas-element";
+import {
+	CANVAS_TEXT_CLASS,
+	renderCanvasElement,
+} from "../render-canvas-element";
 import { useSceneCollapsed } from "../view-mode-context";
 import styles from "../styles/sortable.module.css";
 
@@ -57,7 +60,7 @@ export function DragOverlayPreview({ block }: { block: CanvasBlock }) {
 				<Editable
 					readOnly={true}
 					renderElement={renderElement}
-					className="font-body text-body leading-relaxed text-center break-all"
+					className={`${CANVAS_TEXT_CLASS} text-center break-all`}
 				/>
 			</Slate>
 		</div>

@@ -22,7 +22,10 @@ import {
 	CharacterMentionMenu,
 	optionId,
 } from "./elements/character-mention-menu";
-import { renderCanvasElement } from "./render-canvas-element";
+import {
+	CANVAS_TEXT_CLASS,
+	renderCanvasElement,
+} from "./render-canvas-element";
 import { useCharacterMention } from "./hooks/use-character-mention";
 
 const renderElement = renderCanvasElement({
@@ -86,7 +89,7 @@ export default function Canvas() {
 						onKeyDown={onKeyDown}
 						aria-controls={mention && listboxId}
 						aria-activedescendant={mention && optionId(listboxId, active)}
-						className="font-body text-body leading-relaxed focus-ring"
+						className={`${CANVAS_TEXT_CLASS} focus-ring`}
 					/>
 				</SortableContext>
 				{mention && (

@@ -1,9 +1,9 @@
 .player {
-	border-radius: 0.5rem;
+	border-radius: var(--radius-md);
 	overflow: hidden;
 }
 
 .player :global(.__remotion-player) {
-	border-radius: 0.5rem;
+	border-radius: var(--radius-md);
 	overflow: hidden;
 }

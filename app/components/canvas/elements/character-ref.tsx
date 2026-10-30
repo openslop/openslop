@@ -10,6 +10,7 @@ import {
 } from "slate-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Pencil } from "@/components/ui/icon";
+import { keepFocus } from "@/components/ui/keep-focus";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import type { CharacterRefElement } from "@/lib/canvas/types";
 import { isCharacter } from "@/lib/canvas/assets";
@@ -34,7 +35,7 @@ function EditCharacterButton({ name }: { name: string }) {
 		<button
 			type="button"
 			aria-label={`Edit ${name}`}
-			onMouseDown={(e) => e.preventDefault()}
+			onMouseDown={keepFocus}
 			onClick={(e) => {
 				// Slate selects a void when a click inside it reaches the editor.
 				e.stopPropagation();
