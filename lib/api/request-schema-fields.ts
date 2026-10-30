@@ -40,7 +40,7 @@ export const optionalResolution = {
 export const referenceImageUrlOrDataUri = z
 	.string()
 	.refine((value) => parseImageSource(value) !== null, {
-		message: "An image must be a data URI or an HTTP(S) URL",
+		error: "An image must be a data URI or an HTTP(S) URL",
 	});
 
 export const optionalReferenceImages = {
@@ -68,4 +68,4 @@ export const optionalContinuityFrames = {
 
 export const requiredVoiceId = z
 	.string({ error: "voiceId is required" })
-	.min(1, { message: "voiceId is required" });
+	.min(1, { error: "voiceId is required" });

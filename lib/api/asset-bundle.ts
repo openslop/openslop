@@ -1,13 +1,13 @@
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
-const httpError = (res: Response, label: string) =>
-	new Error(`${label} (${res.status} ${res.statusText})`);
+const httpError = (response: Response, label: string) =>
+	new Error(`${label} (${response.status} ${response.statusText})`);
 
-async function fetchOk(url: string, label: string): Promise<Response> {
-	const res = await fetch(url);
-	if (!res.ok) throw httpError(res, label);
-	return res;
+async function fetchOk(url: string, key: string): Promise<Response> {
+	const response = await fetch(url);
+	if (!response.ok) throw httpError(response, `Failed to fetch "${key}"`);
+	return response;
 }
 
 /** The parts of a manifest a bundle is read through. */
@@ -70,9 +70,9 @@ async function sourceOf(
 	provider: string,
 ): Promise<{ body: PutBody; multipart: boolean }> {
 	if ("data" in file) return { body: file.data, multipart: false };
-	const res = await fetchOk(file.url, `Failed to fetch "${file.key}"`);
+	const response = await fetchOk(file.url, file.key);
 	// Vercel rejects empty uploads as "Invalid body"
-	const body = await withBytes(res.body);
+	const body = await withBytes(response.body);
 	if (!body) throw new EmptyRemoteFileError(file.key, provider);
 	return { body, multipart: true };
 }
@@ -107,8 +107,8 @@ export class AssetBundle {
 	}
 
 	async fetchJson<T>(key: string, schema: z.ZodType<T>): Promise<T> {
-		const res = await fetchOk(this.resolve(key), `Failed to fetch "${key}"`);
-		return schema.parse(await res.json());
+		const response = await fetchOk(this.resolve(key), key);
+		return schema.parse(await response.json());
 	}
 
 	static buildUrl(type: string, provider: string, id: string): string {
@@ -131,14 +131,14 @@ export class AssetBundle {
 		id: string,
 	): Promise<BundleResponse | null> {
 		const url = AssetBundle.buildUrl(type, provider, id);
-		const res = await fetch(`${url}/manifest.json`);
-		if (res.status === 404) return null;
-		if (!res.ok) throw httpError(res, "Failed to load asset bundle");
+		const response = await fetch(`${url}/manifest.json`);
+		if (response.status === 404) return null;
+		if (!response.ok) throw httpError(response, "Failed to load asset bundle");
 		return {
 			id,
 			type,
 			provider,
-			...BundleContentsSchema.parse(await res.json()),
+			...BundleContentsSchema.parse(await response.json()),
 		};
 	}
 

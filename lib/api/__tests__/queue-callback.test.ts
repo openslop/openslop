@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { MessageMetadata } from "@vercel/queue";
 import {
 	parseAssetQueueCallback,
@@ -40,10 +40,6 @@ describe("parseAssetQueueCallback", () => {
 });
 
 describe("retryWithBackoff", () => {
-	beforeEach(() => {
-		mockLogError.mockReset();
-	});
-
 	const delivery = (deliveryCount: number) =>
 		({ deliveryCount }) as MessageMetadata;
 

@@ -14,7 +14,7 @@ const saveSchema = z.object({
 	provider: byokProviderField,
 	apiKey: z
 		.string()
-		.min(MIN_KEY_LENGTH, { message: "That key looks too short." }),
+		.min(MIN_KEY_LENGTH, { error: "That key looks too short." }),
 });
 
 /** Stores the key only once the provider has taken it. */
