@@ -55,7 +55,7 @@ describe("ToastErrorBoundary", () => {
 		expect(container.querySelector("button")?.textContent).toBe("Try again");
 		expect(toast.error).toHaveBeenCalledExactlyOnceWith(
 			"Player: player crashed",
-			{},
+			expect.anything(),
 		);
 	});
 

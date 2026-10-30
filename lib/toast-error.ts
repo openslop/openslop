@@ -9,6 +9,11 @@ const requestIdLine = (error: unknown): string | undefined =>
 		? `Request ${error.requestId}`
 		: undefined;
 
+const untilDismissed = {
+	duration: Number.POSITIVE_INFINITY,
+	closeButton: true,
+} satisfies ExternalToast;
+
 /**
  * The one way an error reaches the user. Callers hand over the raw cause; this
  * decides what a human sees, so no UI has to pick between `errorMessage` and
@@ -21,6 +26,7 @@ export function toastError(
 ): void {
 	const message = errorMessage(error);
 	toast.error(label ? `${label}: ${message}` : message, {
+		...untilDismissed,
 		description: requestIdLine(error),
 		...options,
 	});
