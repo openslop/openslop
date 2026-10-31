@@ -2,12 +2,16 @@ import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import { ElementTypeSchema, type ElementType } from "@/lib/canvas/types";
+import {
+	ASSET_TYPES,
+	ContentTypeSchema,
+	ElementTypeSchema,
+	type ElementType,
+} from "@/lib/canvas/types";
 import {
 	type AttributeEdit,
 	TOGGLE_VALUES,
 } from "@/lib/connectors/attributes/schema";
-import { EffectType } from "@/lib/connectors/image/enums";
 import {
 	CONTINUITY_ATTR,
 	NO_FRAME,
@@ -24,16 +28,10 @@ import { defineTool } from "./define-tool";
 
 const enumeration = (values: readonly string[]) => `(${values.join(" | ")})`;
 
-const PICTURE_ATTRIBUTES = [
-	`overlays ${enumeration(Object.values(EffectType))}`,
-];
-
 /** Attributes the OSML prompt teaches that no schema carries. */
 const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
-	character: ["name"],
-	image: PICTURE_ATTRIBUTES,
+	character: ["name (an existing asset_voice's)"],
 	video: [
-		...PICTURE_ATTRIBUTES,
 		`${START_FRAME_ATTR} (${NO_FRAME} | ${PREVIOUS_VISUAL}, or a picture URL: an image's URL from view_image, with ${CONTINUITY_ATTR}="false" so the look before it does not fight that picture; leave a URL already set alone)`,
 	],
 };
@@ -93,18 +91,23 @@ export const editScript = defineTool({
 	    an \`id\` on an insert.
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
-	    text changes. Set an attribute to null to drop it.
+	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into
+	    another script type (an asset keeps its type) and resets its attributes, a character
+	    line's \`name\` included: send them again.
 
-	  To move an element, remove it and insert it again.
+	  To move an element, remove it and insert it again: the copy is a new, ungenerated
+	  element holding only what you send.
 
-	  Element types: ${ElementTypeSchema.options.join(", ")}
+	  Script types: ${ContentTypeSchema.options.join(", ")}
+	  Asset types: ${Object.keys(ASSET_TYPES).join(", ")}
 
 	  ${ASSETS}
 
-	  Attributes by type, all string values:
+	  Attributes by type, all string values; a value the type does not offer fails the operation:
 	  ${attributesByType(ElementTypeSchema.options)}
 
-	  To change a model, set provider and model to a pair from list_models.
+	  To change a model, set provider and model to a pair from list_models. Narration and
+	  character lines have none of their own: they speak with their asset_voice's.
 
 	  ${CHARACTER_REFS_RULE}
 
