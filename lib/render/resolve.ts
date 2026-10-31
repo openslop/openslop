@@ -10,7 +10,7 @@ import {
 	getMotion,
 	getVolume,
 } from "../canvas/element-attributes";
-import { elementTrim, trimTimestamps } from "./clip-trim";
+import { elementTrim, trimCaptions } from "./clip-trim";
 
 export function resolveElements(
 	blocks: CanvasBlock[],
@@ -52,7 +52,7 @@ export function resolveElements(
 				motion: getMotion(element),
 				captions:
 					captionsEnabled && textTimestamps?.length
-						? trimTimestamps(textTimestamps, trim)
+						? trimCaptions(textTimestamps, trim)
 						: undefined,
 			});
 		}

@@ -34,7 +34,7 @@ function el(
 }
 
 const heard: ResolvedCaptions = {
-	firstWordIndex: 0,
+	trimIndexOffset: 0,
 	words: [toCaption("hi", 0, 1)],
 };
 
@@ -54,7 +54,7 @@ describe("layoutCaptions", () => {
 
 	describe("with a word a line", () => {
 		const paused: ResolvedCaptions = {
-			firstWordIndex: 0,
+			trimIndexOffset: 0,
 			words: [toCaption("one", 0, 1), toCaption("two", 3, 4)],
 		};
 		const wordPerLine = (element: ResolvedElement) =>

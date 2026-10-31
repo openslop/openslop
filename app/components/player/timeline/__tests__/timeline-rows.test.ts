@@ -220,7 +220,7 @@ describe("buildCaptionRows", () => {
 		toCaption(text, at, at + 1),
 	);
 	const narration = el("n", "narration", {
-		captions: { firstWordIndex: 0, words },
+		captions: { trimIndexOffset: 0, words },
 	});
 	const twoPerLine = (...elements: ResolvedElement[]) => {
 		const { captionStyle } = VideoSettingsSchema.parse({});

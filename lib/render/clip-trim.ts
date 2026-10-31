@@ -73,22 +73,22 @@ export const elementTrim = (
 	);
 
 /** The words spoken whole inside the clip, timed from its trim start, and where they sit among the element's own. */
-export function trimTimestamps(
+export function trimCaptions(
 	captions: Caption[],
 	{ trimStartSec, durationSec }: Trim,
 ): ResolvedCaptions {
-	const startMs = trimStartSec * 1000;
-	const endMs = startMs + durationSec * 1000;
-	const firstWordIndex = captions.filter(
-		(caption) => caption.startMs < startMs,
+	const trimStartMs = trimStartSec * 1000;
+	const trimEndMs = trimStartMs + durationSec * 1000;
+	const start = captions.filter(
+		(caption) => caption.startMs < trimStartMs,
 	).length;
-	const end = captions.filter((caption) => caption.endMs <= endMs).length;
+	const end = captions.filter((caption) => caption.endMs <= trimEndMs).length;
 	return {
-		firstWordIndex,
-		words: captions.slice(firstWordIndex, end).map((caption) => ({
+		trimIndexOffset: start,
+		words: captions.slice(start, end).map((caption) => ({
 			...caption,
-			startMs: caption.startMs - startMs,
-			endMs: caption.endMs - startMs,
+			startMs: caption.startMs - trimStartMs,
+			endMs: caption.endMs - trimStartMs,
 		})),
 	};
 }
