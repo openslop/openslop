@@ -28,11 +28,11 @@ export default function ProjectsList({
 		withoutProject,
 	);
 	const [deleting, setDeleting] = useState<ProjectRow>();
-	const [creating, startCreate] = useTransition();
+	const [creating, startCreating] = useTransition();
 	const router = useRouter();
 
 	const handleCreate = () => {
-		startCreate(async () => {
+		startCreating(async () => {
 			try {
 				const project = await createProject();
 				router.push(`/projects/${project.id}`);

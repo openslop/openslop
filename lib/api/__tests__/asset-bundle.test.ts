@@ -117,7 +117,7 @@ describe("AssetBundle", () => {
 
 		beforeEach(() => {
 			AssetBundle.baseUrl = "https://blob.example.com";
-			putMock.mockReset().mockResolvedValue({ url: "https://blob/stored" });
+			putMock.mockResolvedValue({ url: "https://blob/stored" });
 			vi.doMock("@vercel/blob", () => ({
 				put: (...args: unknown[]) => putMock(...args),
 			}));
