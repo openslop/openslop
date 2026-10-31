@@ -47,10 +47,10 @@ export function groupIntoLines(
 		combineTokensWithinMilliseconds: lineMs,
 	});
 	const lines: CaptionLine[] = [];
-	let at = indexOffset;
+	let nextWordIndex = indexOffset;
 	for (const { startMs, durationMs, tokens } of pages) {
 		lines.push({
-			firstWordIndex: at,
+			firstWordIndex: nextWordIndex,
 			startMs,
 			durationMs,
 			tokens: tokens.map((token) => ({
@@ -58,7 +58,7 @@ export function groupIntoLines(
 				text: token.text.trimStart(),
 			})),
 		});
-		at += tokens.length;
+		nextWordIndex += tokens.length;
 	}
 	return lines;
 }
