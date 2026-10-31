@@ -1,5 +1,5 @@
 import { apiFetch, apiJson } from "@/lib/clients/http";
-import { readSSE } from "@/lib/api/sse";
+import { readSSE } from "@/lib/clients/sse";
 import {
 	LLMGenerateResultSchema,
 	LLMStreamChunkSchema,
