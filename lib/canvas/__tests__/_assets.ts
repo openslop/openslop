@@ -1,6 +1,7 @@
 import compact from "lodash/compact";
 import { createEditor, type Descendant, type Editor } from "slate";
 import type { ConnectorModels } from "@/lib/connectors/models";
+import type { TTSLanguage } from "@/lib/connectors/tts/enums";
 import { createCanvasElement } from "../create-canvas-element";
 import { isAssetElement, isContentElement } from "../guards";
 import { splitAttributes } from "../element-attributes";
@@ -35,9 +36,11 @@ export const labels = (nodes: readonly unknown[]): string[] => nodes.map(label);
 export function makeEditor(
 	children: Descendant[] = [],
 	defaultModels: ConnectorModels = {},
+	defaultLanguage?: TTSLanguage,
 ): Editor {
 	const editor = createEditor();
 	editor.defaultModels = () => defaultModels;
+	editor.defaultLanguage = () => defaultLanguage;
 	editor.children = children;
 	return editor;
 }

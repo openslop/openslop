@@ -7,6 +7,7 @@ import { Slate, withReact } from "slate-react";
 export function mountOnCanvas(children: Descendant[] = []) {
 	const editor = withReact(createEditor());
 	editor.defaultModels = () => ({});
+	editor.defaultLanguage = () => undefined;
 	editor.children = children;
 	const container = document.body.appendChild(document.createElement("div"));
 	const root = createRoot(container);

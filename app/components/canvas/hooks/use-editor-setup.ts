@@ -4,6 +4,7 @@ import { withHistory } from "slate-history";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import { resolveDefaultModels } from "@/lib/connectors/models";
 import { applyScriptToEditor } from "@/lib/project/apply-script";
+import { declaredLanguage } from "@/lib/project/language";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import type { ProjectStore } from "@/lib/project/store";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
@@ -21,6 +22,8 @@ function createCanvasEditor(
 			project: project.getState().models,
 			account: account.getState().models,
 		});
+	editor.defaultLanguage = () =>
+		declaredLanguage(project.getState().scriptSettings.language);
 	applyScriptToEditor(editor, script, sceneId);
 	return editor;
 }
