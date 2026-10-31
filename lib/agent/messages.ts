@@ -3,6 +3,8 @@ import {
 	isToolUIPart,
 	safeValidateUIMessages,
 	validateUIMessages,
+	type ModelMessage,
+	type ToolContent,
 } from "ai";
 import { SLOPPY_TOOLS, SNAPSHOT_TOOLS } from "./tools/registry";
 import { sloppyMetadataSchema, type SloppyMessage } from "./types";
@@ -55,20 +57,36 @@ export function settleUnansweredCalls(
 	}));
 }
 
-const isPruned = (part: SloppyMessage["parts"][number]) =>
-	part.type === "reasoning" ||
-	(isToolUIPart(part) && SNAPSHOT_TOOLS.has(getToolName(part)));
+const STALE_SNAPSHOT =
+	"Taken in an earlier turn and not kept. The canvas may have changed since.";
 
-/** Drops reasoning and snapshot tool parts from every assistant message that is not the trailing one. */
-export function pruneTranscript(messages: SloppyMessage[]): SloppyMessage[] {
-	return messages.map((message, index) => {
-		if (index === messages.length - 1 || message.role !== "assistant")
-			return message;
+const withStaleSnapshot = (part: ToolContent[number]) =>
+	part.type === "tool-result" && SNAPSHOT_TOOLS.has(part.toolName)
+		? { ...part, output: { type: "text" as const, value: STALE_SNAPSHOT } }
+		: part;
+
+const pruneFinished = (message: ModelMessage): ModelMessage => {
+	if (message.role === "assistant" && typeof message.content !== "string")
 		return {
 			...message,
-			parts: message.parts.filter((part) => !isPruned(part)),
+			content: message.content.filter((part) => part.type !== "reasoning"),
 		};
-	});
+	if (message.role === "tool")
+		return { ...message, content: message.content.map(withStaleSnapshot) };
+	return message;
+};
+
+/**
+ * Before the last user message is history: snapshot calls stay but their output
+ * goes, and so does reasoning, which no model reads back from an earlier turn.
+ */
+export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
+	const inFlightFrom = messages.findLastIndex(
+		(message) => message.role === "user",
+	);
+	return messages.map((message, index) =>
+		index < inFlightFrom ? pruneFinished(message) : message,
+	);
 }
 
 // Optional: the message a turn opens with carries no metadata yet, and the
