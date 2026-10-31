@@ -1,6 +1,11 @@
 "use client";
 
 import { Loader2, type IconComponent } from "@/components/ui/icon";
+import {
+	Thumbnail,
+	ThumbnailCaption,
+	ThumbnailFace,
+} from "@/components/ui/thumbnail";
 
 /** Dashed "add" tile matching {@link AssetTile}'s footprint within the assets grid. */
 export function AddAssetTile({
@@ -20,24 +25,24 @@ export function AddAssetTile({
 	busy?: boolean;
 }) {
 	return (
-		<button
-			type="button"
-			onClick={onClick}
-			aria-label={ariaLabel}
-			title={ariaLabel}
-			disabled={disabled}
-			className="flex w-16 flex-col gap-1 sm:w-20"
-		>
-			<div className="flex aspect-square items-center justify-center rounded-md border border-dashed border-border bg-muted text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground">
-				{busy ? (
-					<Loader2 className="h-4 w-4 animate-spin" />
-				) : (
-					<Icon className="h-4 w-4" />
-				)}
-			</div>
-			<span className="truncate text-center text-badge text-muted-foreground">
-				{label}
-			</span>
-		</button>
+		<Thumbnail asChild>
+			<button
+				type="button"
+				onClick={onClick}
+				aria-label={ariaLabel}
+				title={ariaLabel}
+				disabled={disabled}
+				className="focus-ring"
+			>
+				<ThumbnailFace look="dashed">
+					{busy ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						<Icon className="h-4 w-4" />
+					)}
+				</ThumbnailFace>
+				<ThumbnailCaption>{label}</ThumbnailCaption>
+			</button>
+		</Thumbnail>
 	);
 }
