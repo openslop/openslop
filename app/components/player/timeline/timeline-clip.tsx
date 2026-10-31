@@ -7,9 +7,11 @@ import {
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
+import type { ResultKind } from "@/lib/canvas/types";
+import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
-import { isTrimmable, playedSec, type Trim } from "@/lib/render/clip-trim";
+import type { Trim } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import type { ResolvedElement } from "@/lib/render/types";
 import { cn } from "@/lib/utils";
@@ -22,7 +24,6 @@ import type {
 const HEADER_ICON_SIZE = 9;
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
-const ROUNDING_SLACK_PX = 1;
 
 const FRAME =
 	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
@@ -31,27 +32,33 @@ const SELECTED_EDGE = "border-current/60";
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
 
-type PreviewBox = { src: string; width?: number };
-
 const urlAt = (url: string, sec: number) => (sec > 0 ? `${url}#t=${sec}` : url);
 
-function visualPreviews(
-	element: Pick<
+/** A frozen scene holds its last frame; a looping one plays the footage again until the scene ends. */
+function holdSources(
+	{
+		url,
+		loop,
+		trimStartSec,
+		mediaDurationSec,
+	}: Pick<
 		ResolvedElement,
 		"url" | "loop" | "trimStartSec" | "mediaDurationSec"
 	>,
 	playedWidth: number,
 	width: number,
-): PreviewBox[] {
-	const { url, loop, trimStartSec, mediaDurationSec } = element;
-	const inPoint = urlAt(url, trimStartSec);
-	if (!isTrimmable(element) || playedWidth >= width - ROUNDING_SLACK_PX)
-		return [{ src: inPoint }];
-	const playthrough = { src: inPoint, width: playedWidth };
-	if (!loop) return [playthrough, { src: urlAt(url, mediaDurationSec) }];
-	return Array.from(
-		{ length: Math.ceil(width / playedWidth) },
-		() => playthrough,
+): string[] {
+	if (!loop) return [urlAt(url, mediaDurationSec)];
+	return Array<string>(Math.ceil(width / playedWidth)).fill(
+		urlAt(url, trimStartSec),
+	);
+}
+
+function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
+	return (
+		<div className="relative aspect-square h-full overflow-hidden">
+			<MediaWithSkeleton outputKind={outputKind} src={src} alt="" />
+		</div>
 	);
 }
 
@@ -115,15 +122,20 @@ function ClipHeader({
 	icon: Icon,
 	label,
 	width,
+	className,
 }: {
 	icon: IconComponent;
 	label: string;
 	width: number;
+	className?: string;
 }) {
 	return (
 		<span className="relative z-10 flex h-3.5 shrink-0 items-center gap-1 px-1">
 			<Icon size={HEADER_ICON_SIZE} className="shrink-0" />
-			<span dir="auto" className="truncate text-badge-xs text-foreground">
+			<span
+				dir="auto"
+				className={cn("truncate text-badge-xs text-foreground", className)}
+			>
 				{fit(label, width)}
 			</span>
 		</span>
@@ -187,21 +199,12 @@ export function TimelineClip({
 						/>
 					</Preview>
 				) : (
-					visualPreviews(
-						element,
-						playedSec({ ...element, ...trim }) * pxPerSec,
-						width,
-					).map((box, i) => (
-						<Preview key={i} width={box.width}>
-							<div className="relative aspect-square h-full overflow-hidden">
-								<MediaWithSkeleton
-									outputKind={config.outputKind}
-									src={box.src}
-									alt=""
-								/>
-							</div>
-						</Preview>
-					))
+					<Preview>
+						<Footage
+							outputKind={config.outputKind}
+							src={urlAt(element.url, element.trimStartSec)}
+						/>
+					</Preview>
 				)}
 			</div>
 			{sceneNumber ? (
@@ -216,6 +219,54 @@ export function TimelineClip({
 					<CaptionsFill size={HEADER_ICON_SIZE} />
 				</CornerChip>
 			) : null}
+			{selected ? <SelectedWash /> : null}
+		</div>
+	);
+}
+
+/** The rest of a scene once its video has played out, drawn apart from the clip and never trimmed. */
+export function TimelineHold({
+	element,
+	start,
+	duration,
+	playedWidth,
+	width,
+	selected,
+}: {
+	element: ResolvedElement;
+	start: number;
+	duration: number;
+	/** How wide the footage before it is drawn, so loop passes match it. */
+	playedWidth: number;
+	width: number;
+	selected: boolean;
+}) {
+	const config = ELEMENT_CONFIGS[element.type];
+	const face = LOOP_FACES[element.loop ? "on" : "off"];
+	return (
+		<div
+			role="img"
+			aria-label={`${face.label}, ${formatTimeRange(start, duration)}`}
+			className={cn(
+				FRAME,
+				"timeline-preview-surface border-dashed",
+				config.colorClass,
+				selected ? SELECTED_EDGE : "border-border",
+			)}
+		>
+			<ClipHeader
+				icon={face.icon}
+				label={face.label}
+				width={width}
+				className="text-muted-foreground"
+			/>
+			<div className="flex min-h-0 flex-1 opacity-60">
+				{holdSources(element, playedWidth, width).map((src, i) => (
+					<Preview key={i} width={element.loop ? playedWidth : undefined}>
+						<Footage outputKind={config.outputKind} src={src} />
+					</Preview>
+				))}
+			</div>
 			{selected ? <SelectedWash /> : null}
 		</div>
 	);
