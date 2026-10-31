@@ -16,7 +16,11 @@ import { usePlayerControl } from "../player-control-context";
 import { usePlayerScrub } from "../use-player-scrub";
 import { useSelectScene } from "../use-select-scene";
 import { useLayout } from "../render-layout-context";
-import { TimelineCaptionClip, TimelineClip } from "./timeline-clip";
+import {
+	TimelineCaptionClip,
+	TimelineClip,
+	TimelineHold,
+} from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
 import { GUTTER_PX, LANE_HEIGHT, RULER_HEIGHT } from "../dock-layout";
@@ -114,35 +118,54 @@ function Clip({
 	onSelect,
 }: ClipProps<TimelineClipData> & { numbered: boolean }) {
 	const trim = useClipTrim(clip, pxPerSec, clip.overlaySec ?? 0);
-	const width = Math.max(trim.durationSec * pxPerSec, MIN_CLIP_WIDTH_PX);
+	const width = Math.max(trim.playedSec * pxPerSec, MIN_CLIP_WIDTH_PX);
+	const holdSec = trim.durationSec - trim.playedSec;
+	const holdWidth = holdSec * pxPerSec;
+	const holdStart = clip.start + trim.playedSec;
 	return (
-		<ClipSlot start={clip.start * pxPerSec} width={width}>
-			<SelectButton selected={selected} onClick={() => onSelect(clip)}>
-				<TimelineClip
-					clip={clip}
-					width={width}
-					label={renderCharacterRefs(clip.element.prompt)}
-					selected={selected}
-					sceneNumber={numbered ? clip.element.sceneNumber : undefined}
-					pxPerSec={pxPerSec}
-					trim={trim.trim}
-				/>
-			</SelectButton>
-			{trim.reset ? (
-				<TooltipIconButton
-					label="Reset trim"
-					side="bottom"
-					size="sm"
-					variant="quiet"
-					onClick={trim.reset}
-					className="absolute top-0.5 right-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
-				>
-					<RotateCcw size={12} />
-				</TooltipIconButton>
+		<>
+			<ClipSlot start={clip.start * pxPerSec} width={width}>
+				<SelectButton selected={selected} onClick={() => onSelect(clip)}>
+					<TimelineClip
+						clip={clip}
+						width={width}
+						label={renderCharacterRefs(clip.element.prompt)}
+						selected={selected}
+						sceneNumber={numbered ? clip.element.sceneNumber : undefined}
+						pxPerSec={pxPerSec}
+						trim={trim.trim}
+					/>
+				</SelectButton>
+				{trim.reset ? (
+					<TooltipIconButton
+						label="Reset trim"
+						side="bottom"
+						size="sm"
+						variant="quiet"
+						onClick={trim.reset}
+						className="absolute top-0.5 right-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
+					>
+						<RotateCcw size={12} />
+					</TooltipIconButton>
+				) : null}
+				<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
+				<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
+			</ClipSlot>
+			{holdWidth >= MIN_CLIP_WIDTH_PX ? (
+				<ClipSlot start={holdStart * pxPerSec} width={holdWidth}>
+					<SelectButton selected={selected} onClick={() => onSelect(clip)}>
+						<TimelineHold
+							element={clip.element}
+							start={holdStart}
+							duration={holdSec}
+							playedWidth={width}
+							width={holdWidth}
+							selected={selected}
+						/>
+					</SelectButton>
+				</ClipSlot>
 			) : null}
-			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
-			<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
-		</ClipSlot>
+		</>
 	);
 }
 

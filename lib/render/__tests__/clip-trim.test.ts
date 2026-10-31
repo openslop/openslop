@@ -38,35 +38,37 @@ describe("playedSec", () => {
 		expect(playedSec(clip)).toBe(5);
 		expect(playedSec({ ...clip, durationSec: 20 })).toBe(8);
 	});
+
+	it("plays a still for its whole span, having no media to run out of", () => {
+		expect(
+			playedSec({ trimStartSec: 0, durationSec: 4, mediaDurationSec: 0 }),
+		).toBe(4);
+	});
 });
 
-const audio = { layer: "audio", mediaDurationSec: 10 } as const;
-const video = { layer: "visual", mediaDurationSec: 10 } as const;
+const media = { mediaDurationSec: 10 };
 
 describe("trimClip", () => {
 	it("plays from its trim start to the end of its media", () => {
-		expect(trimClip(audio, 3)).toEqual({ trimStartSec: 3, durationSec: 7 });
-		expect(trimClip(video, 3)).toEqual({ trimStartSec: 3, durationSec: 7 });
+		expect(trimClip(media, 3)).toEqual({ trimStartSec: 3, durationSec: 7 });
 	});
 
-	it("cuts audio at its timeline duration, but never past its media", () => {
-		expect(trimClip(audio, 2, 4).durationSec).toBe(4);
-		expect(trimClip(audio, 2, 20).durationSec).toBe(8);
+	it("cuts at its timeline duration", () => {
+		expect(trimClip(media, 2, 4).durationSec).toBe(4);
 	});
 
-	it("runs a visual past its media for as long as its timeline duration", () => {
-		expect(trimClip(video, 2, 20).durationSec).toBe(20);
+	it("resolves a timeline duration stored past the media to the media's end", () => {
+		expect(trimClip(media, 2, 20).durationSec).toBe(8);
 	});
 
 	it("keeps a trim start inside the media, at least the minimum from its end", () => {
-		expect(trimClip(audio, 50).trimStartSec).toBe(9);
-		expect(trimClip(video, 50).trimStartSec).toBe(9);
+		expect(trimClip(media, 50).trimStartSec).toBe(9);
 	});
 });
 
 describe("trimEdge", () => {
-	const clip = { ...audio, trimStartSec: 2, durationSec: 5 };
-	const extended = { ...video, trimStartSec: 2, durationSec: 30 };
+	const clip = { ...media, trimStartSec: 2, durationSec: 5 };
+	const extended = { ...media, trimStartSec: 2, durationSec: 30 };
 
 	it("lengthens and shortens from the end, keeping the start", () => {
 		expect(trimEdge(clip, "end", -2)).toEqual({
@@ -79,13 +81,15 @@ describe("trimEdge", () => {
 		});
 	});
 
-	it("stops audio's end at its media and at the minimum", () => {
+	it("stops the end at the media's last frame and at the minimum", () => {
 		expect(trimEdge(clip, "end", 50).durationSec).toBe(8);
 		expect(trimEdge(clip, "end", -50).durationSec).toBe(1);
 	});
 
-	it("drags a visual's end past its media", () => {
-		expect(trimEdge({ ...clip, ...video }, "end", 50).durationSec).toBe(55);
+	it("stops the end at the last frame from the in-point, not from the media's start", () => {
+		expect(trimEdge({ ...clip, trimStartSec: 6 }, "end", 50).durationSec).toBe(
+			4,
+		);
 	});
 
 	it("keeps an extended visual's in-point inside its media", () => {
@@ -118,7 +122,7 @@ describe("trimEdge", () => {
 	});
 
 	describe("with a floor", () => {
-		const scene = { ...video, trimStartSec: 2, durationSec: 8 };
+		const scene = { ...media, trimStartSec: 2, durationSec: 8 };
 
 		it("stops the end at the floor instead of cutting the visual short", () => {
 			expect(trimEdge(scene, "end", -50, 4).durationSec).toBe(4);
@@ -137,7 +141,7 @@ describe("trimEdge", () => {
 		});
 
 		it("rests at the floor when the visual is shorter than the dialogue", () => {
-			const short = { ...video, trimStartSec: 0, durationSec: 5 };
+			const short = { ...media, trimStartSec: 0, durationSec: 5 };
 			expect(trimEdge(short, "end", 0, 8).durationSec).toBe(8);
 			expect(trimEdge(short, "end", -1, 8).durationSec).toBe(8);
 			expect(trimEdge(short, "end", 1, 8).durationSec).toBe(9);
@@ -145,6 +149,13 @@ describe("trimEdge", () => {
 				trimStartSec: 0,
 				durationSec: 8,
 			});
+		});
+
+		it("lets the dialogue hold a video past its media, but the handle can't", () => {
+			const held = { mediaDurationSec: 5, trimStartSec: 0, durationSec: 5 };
+			expect(trimEdge(held, "end", 0, 8).durationSec).toBe(8);
+			expect(trimEdge(held, "end", 3, 8).durationSec).toBe(8);
+			expect(trimEdge(held, "end", -3, 8).durationSec).toBe(8);
 		});
 
 		it("never goes under the minimum, however short the floor", () => {

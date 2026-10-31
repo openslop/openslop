@@ -9,6 +9,7 @@ import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
 	isTrimmed,
+	playedSec,
 	trimEdge,
 	type Trim,
 	type TrimEdge,
@@ -61,11 +62,19 @@ export function useClipTrim(
 		end: useEdgeDrag(pxPerSec, trimBy("end"), commit),
 	};
 
+	const trim = preview ?? resting;
+	// The drawn span can differ from the clip's own length (overlays, cross-fades), so preview the change.
+	const durationSec =
+		duration + (preview ? preview.durationSec - resting.durationSec : 0);
+
 	return {
-		// The drawn span can differ from the clip's own length (overlays, cross-fades), so preview the change.
-		durationSec:
-			duration + (preview ? preview.durationSec - resting.durationSec : 0),
-		trim: preview ?? resting,
+		durationSec,
+		/** How much of the span the footage covers; a scene can hold a video past it. */
+		playedSec: Math.min(
+			playedSec({ mediaDurationSec: element.mediaDurationSec, ...trim }),
+			durationSec,
+		),
+		trim,
 		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(element)
 			? () =>

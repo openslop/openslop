@@ -2,7 +2,7 @@ import {
 	getTimelineDuration,
 	getTrimStart,
 } from "@/lib/canvas/element-attributes";
-import { CONTENT_TYPES, type ContentElement } from "@/lib/canvas/types";
+import type { ContentElement } from "@/lib/canvas/types";
 import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
 import { MIN_DURATION_SEC } from "./scene-builder";
@@ -15,35 +15,27 @@ export type Trim = Pick<ResolvedElement, "trimStartSec" | "durationSec">;
 
 type Media = Pick<ResolvedElement, "mediaDurationSec">;
 
-type Trimmable = Trim & Media & Pick<ResolvedElement, "layer">;
-
-/** A visual outlasts its media by looping or freezing; audio ends with it. */
-const longestSec = ({
-	layer,
-	mediaDurationSec,
-	trimStartSec,
-}: Omit<Trimmable, "durationSec">) =>
-	layer === "visual" ? Infinity : mediaDurationSec - trimStartSec;
+type Trimmable = Trim & Media;
 
 /** A still has no media length to trim. */
 export const isTrimmable = ({ mediaDurationSec }: Media): boolean =>
 	mediaDurationSec > 0;
 
-export const isTrimmed = (clip: Trim & Media): boolean =>
+/** A clip ends with its media; a still holds for as long as it is asked to. */
+const longestSec = (clip: Media & Pick<Trim, "trimStartSec">): number =>
+	isTrimmable(clip) ? clip.mediaDurationSec - clip.trimStartSec : Infinity;
+
+export const isTrimmed = (clip: Trimmable): boolean =>
 	isTrimmable(clip) &&
 	(clip.trimStartSec > 0 || clip.durationSec !== clip.mediaDurationSec);
 
-/** How long the media itself plays before the clip loops or freezes. */
-export const playedSec = ({
-	trimStartSec,
-	durationSec,
-	mediaDurationSec,
-}: Trim & Media): number =>
-	Math.min(durationSec, mediaDurationSec - trimStartSec);
+/** How long the media itself plays before the scene loops or freezes it. */
+export const playedSec = (clip: Trimmable): number =>
+	Math.min(clip.durationSec, longestSec(clip));
 
 /** A clip plays from its trim start for its timeline duration, or to the end of its media by default. */
 export function trimClip(
-	media: Omit<Trimmable, keyof Trim>,
+	media: Media,
 	startSec: number,
 	timelineDurationSec?: number,
 ): Trim {
@@ -67,7 +59,7 @@ export const elementTrim = (
 	mediaDurationSec: number,
 ): Trim =>
 	trimClip(
-		{ layer: CONTENT_TYPES[element.type].layer, mediaDurationSec },
+		{ mediaDurationSec },
 		getTrimStart(element),
 		getTimelineDuration(element),
 	);
