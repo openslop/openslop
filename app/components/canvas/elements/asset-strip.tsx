@@ -2,6 +2,7 @@
 
 import { useSlateStatic } from "slate-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Thumbnail } from "@/components/ui/thumbnail";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { deleteCharacter } from "./character/delete-character";
@@ -47,7 +48,9 @@ export function AssetStrip({
 			))}
 			{Array.from({ length: uploadingCount }).map((_, i) => (
 				<li key={`uploading:${i}`} aria-hidden>
-					<Skeleton className="aspect-square w-16 shrink-0 sm:w-20" />
+					<Thumbnail>
+						<Skeleton className="aspect-square" />
+					</Thumbnail>
 				</li>
 			))}
 		</ul>

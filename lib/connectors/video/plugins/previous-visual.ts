@@ -7,8 +7,7 @@ import {
 	CONTINUITY_ATTR,
 	CONTINUITY_FRAMES,
 	type FrameKey,
-	NO_FRAME,
-	PREVIOUS_VISUAL,
+	frameSource,
 	START_FRAME,
 	START_FRAME_ATTR,
 } from "../start-frame";
@@ -32,6 +31,17 @@ async function previousPictures(
 	throw new Error("The previous visual generated no picture to hand on");
 }
 
+async function openingPicture(
+	frame: string | undefined,
+	source: AssetResult | undefined,
+): Promise<string | undefined> {
+	const opening = frameSource(frame);
+	if (opening.kind === "none") return undefined;
+	if (opening.kind === "upload") return opening.url;
+	const [picture] = await previousPictures(source, [START_FRAME]);
+	return picture;
+}
+
 const PREVIOUS_VISUAL_LABEL = "the previous visual";
 
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
@@ -40,7 +50,7 @@ const previousWhenLinked: Dependency = (
 	{ canvas },
 ) => ({
 	[PREVIOUS_VISUAL_LABEL]:
-		attrs[START_FRAME_ATTR] === PREVIOUS_VISUAL ||
+		frameSource(attrs[START_FRAME_ATTR]).kind === "previous" ||
 		isToggleOn(attrs[CONTINUITY_ATTR])
 			? previousVisual(canvas, id)
 			: undefined,
@@ -52,20 +62,11 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 		name: "previous-visual",
 		dependencies: [previousWhenLinked],
 		async beforeGenerate(
-			{
-				[START_FRAME_ATTR]: frame = NO_FRAME,
-				[CONTINUITY_ATTR]: continuity,
-				...params
-			},
+			{ [START_FRAME_ATTR]: frame, [CONTINUITY_ATTR]: continuity, ...params },
 			ctx,
 		) {
 			const source = ctx.dependencies?.[PREVIOUS_VISUAL_LABEL];
-			const [frameImage] =
-				frame === PREVIOUS_VISUAL
-					? await previousPictures(source, [START_FRAME])
-					: URL.canParse(frame)
-						? [frame]
-						: [];
+			const frameImage = await openingPicture(frame, source);
 			const continuityFrames = isToggleOn(continuity)
 				? await previousPictures(source, CONTINUITY_FRAMES)
 				: [];
