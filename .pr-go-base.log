@@ -1,0 +1,44 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+
+ RUN  v4.1.12 C:/Users/nimol/.pr-go/work/openslop_openslop-1074-34216-d39a22
+
+ ❯ lib/agent/__tests__/messages.test.ts (15 tests | 1 failed | 14 skipped) 35ms
+     × settles a call with the given reason when the user stops the turn 31ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  lib/agent/__tests__/messages.test.ts > settleUnansweredCalls > settles a call with the given reason when the user stops the turn
+AssertionError: expected [ { type: 'tool-read_script', …(4) } ] to deeply equal [ { type: 'tool-read_script', …(4) } ]
+
+- Expected
++ Received
+
+@@ -1,8 +1,8 @@
+  [
+    {
+-     "errorText": "Stopped by you before the editor finished it",
++     "errorText": "Stopped before the editor ran it",
+      "input": {},
+      "state": "output-error",
+      "toolCallId": "call-0",
+      "type": "tool-read_script",
+    },
+
+ ❯ lib/agent/__tests__/messages.test.ts:105:33
+    103|   );
+    104|
+    105|   expect(settled.at(-1)?.parts).toEqual([
+       |                                 ^
+    106|    {
+    107|     type: "tool-read_script",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 skipped (15)
+   Start at  02:33:35
+   Duration  5.79s (transform 2.45s, setup 116ms, import 4.84s, tests 35ms, environment 0ms)
+
