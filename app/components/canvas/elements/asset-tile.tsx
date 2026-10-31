@@ -3,11 +3,15 @@
 import { Pencil, type IconComponent } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+	Thumbnail,
+	ThumbnailCaption,
+	ThumbnailFace,
+} from "@/components/ui/thumbnail";
+import {
 	isGenerationActive,
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
-import { cn } from "@/lib/utils";
 import { GenerationIndicator } from "./generation-indicator";
 import { RemoveCrossButton } from "./remove-cross-button";
 
@@ -39,13 +43,8 @@ export function AssetTile({
 			name.trim().charAt(0).toUpperCase()
 		);
 	return (
-		<div
-			className={cn(
-				"group/tile relative flex flex-col gap-1",
-				!fill && "w-16 sm:w-20",
-			)}
-		>
-			<div className="relative aspect-square overflow-hidden rounded-md border border-border bg-card">
+		<Thumbnail fill={fill} className="group/tile relative">
+			<ThumbnailFace>
 				{previewUrl ? (
 					<ImageWithShimmer
 						key={previewUrl}
@@ -56,9 +55,7 @@ export function AssetTile({
 						className="object-cover"
 					/>
 				) : (
-					<div className="flex size-full items-center justify-center text-body-lg text-muted-foreground">
-						{fallbackContent}
-					</div>
+					<span className="text-body-lg">{fallbackContent}</span>
 				)}
 				{status === "generating" && (
 					<Skeleton className="absolute inset-0" aria-hidden />
@@ -86,7 +83,7 @@ export function AssetTile({
 						<Pencil className="h-3.5 w-3.5" />
 					</button>
 				)}
-			</div>
+			</ThumbnailFace>
 			{onRemove && status !== "generating" && (
 				<RemoveCrossButton
 					label={`Remove ${name}`}
@@ -94,12 +91,7 @@ export function AssetTile({
 					className="z-10 opacity-0 group-hover/tile:opacity-100"
 				/>
 			)}
-			<span
-				className="truncate text-center text-badge text-muted-foreground"
-				title={name}
-			>
-				{name}
-			</span>
-		</div>
+			<ThumbnailCaption title={name}>{name}</ThumbnailCaption>
+		</Thumbnail>
 	);
 }
