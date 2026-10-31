@@ -10,7 +10,10 @@ import { useChat } from "@ai-sdk/react";
 import { agentPathFor } from "@/lib/agent/client";
 import type { ModelRef } from "@/lib/connectors/types";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
-import { hasPendingToolCall } from "@/lib/agent/messages";
+import {
+	hasPendingToolCall,
+	settleUnansweredCalls,
+} from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
 import { DRAFTING_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/use-agent-tools";
@@ -20,6 +23,8 @@ import {
 	useInitialTranscript,
 } from "@/lib/project/project-provider";
 import { toastError } from "@/lib/toast-error";
+
+const STOPPED_TEXT = "Stopped by you before the editor finished it";
 
 type SloppyControl = {
 	send: (message: string) => void;
@@ -50,7 +55,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 	// Stopping should also cancel the tool call in flight
 	const turn = useRef<AbortController>(undefined);
 
-	const { messages, sendMessage, stop, status, addToolOutput } =
+	const { messages, sendMessage, setMessages, stop, status, addToolOutput } =
 		useChat<SloppyMessage>({
 			messages: initialTranscript,
 			messageMetadataSchema: sloppyMetadataSchema,
@@ -103,11 +108,12 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			stop: () => {
 				turn.current?.abort();
 				void stop();
+				setMessages((current) => settleUnansweredCalls(current, STOPPED_TEXT));
 			},
 			loading: working,
 			writingScript,
 		}),
-		[sendMessage, stop, working, writingScript, model],
+		[sendMessage, setMessages, stop, working, writingScript, model],
 	);
 
 	return (
