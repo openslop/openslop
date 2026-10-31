@@ -28,7 +28,7 @@ export function ProviderKeyForm({
 	const errorId = useId();
 	const [apiKey, setApiKey] = useState("");
 	const [error, setError] = useState<string | null>(null);
-	const [busy, startSaving] = useTransition();
+	const [saving, startSaving] = useTransition();
 
 	const save = () =>
 		startSaving(async () => {
@@ -74,7 +74,7 @@ export function ProviderKeyForm({
 				<Button
 					type="submit"
 					size="sm"
-					disabled={busy || apiKey.trim().length < MIN_KEY_LENGTH}
+					disabled={saving || apiKey.trim().length < MIN_KEY_LENGTH}
 				>
 					<Key />
 					Save and validate

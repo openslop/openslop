@@ -25,7 +25,7 @@ export default function AccessCodeInput() {
 	const errorId = useId();
 	const [values, setValues] = useState<string[]>(emptyAccessCode);
 	const [error, setError] = useState("");
-	const [loading, startValidating] = useTransition();
+	const [validating, startValidating] = useTransition();
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
 	const resetWithError = useCallback((message: string) => {
@@ -120,7 +120,7 @@ export default function AccessCodeInput() {
 							onChange={(event) => handleChange(index, event.target.value)}
 							onKeyDown={(event) => handleKeyDown(index, event)}
 							onPaste={index === 0 ? handlePaste : undefined}
-							disabled={loading}
+							disabled={validating}
 							aria-label={`Code character ${index + 1}`}
 							aria-invalid={!!error}
 							spellCheck={false}
@@ -143,7 +143,7 @@ export default function AccessCodeInput() {
 					</p>
 				)}
 				<div role="status">
-					{loading && (
+					{validating && (
 						<p className="mt-3 text-center text-body text-muted-foreground">
 							Validating&hellip;
 						</p>
@@ -154,7 +154,7 @@ export default function AccessCodeInput() {
 				type="submit"
 				variant="accent"
 				size="cta"
-				disabled={loading}
+				disabled={validating}
 				className="mt-2 w-full"
 			>
 				Get Started
