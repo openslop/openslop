@@ -1,7 +1,11 @@
 import { sceneLabel } from "@/lib/canvas/constants";
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
-import type { ElementLength } from "@/lib/render/element-lengths";
+import {
+	hasDialogue,
+	ownLength,
+	type ElementLength,
+} from "@/lib/render/element-lengths";
 import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
 import {
 	NARRATION_WORDS_PER_MINUTE,
@@ -13,20 +17,25 @@ import { defineTool, seconds } from "./define-tool";
 const dialogue = ({ words, dialogueIds }: ElementLength) =>
 	`${words} words of dialogue (${dialogueIds.join(", ")})`;
 
+const after = (length: ElementLength) =>
+	`${hasDialogue(length) ? dialogue(length) : "no dialogue"} after it`;
+
 const REASONS: Record<
 	ElementLength["decidedBy"],
 	(length: ElementLength) => string
 > = {
-	duration: (length) =>
-		`its own length; ${length.words === 0 ? "no dialogue" : dialogue(length)} after it`,
-	dialogue: (length) =>
-		length.durationSec === undefined
-			? `${dialogue(length)} after it`
-			: `${dialogue(length)} after it, longer than its ${seconds(length.durationSec)} duration`,
+	duration: (length) => `its own length; ${after(length)}`,
+	trim: (length) => `its trim on the timeline; ${after(length)}`,
+	dialogue: (length) => {
+		const own = ownLength(length);
+		return own
+			? `${dialogue(length)} after it, longer than its ${seconds(own.seconds)} ${own.decidedBy}`
+			: `${dialogue(length)} after it`;
+	},
 	minimum: (length) =>
-		length.words === 0
-			? "the minimum, no dialogue after it"
-			: `the minimum, longer than the ${dialogue(length)} after it`,
+		hasDialogue(length)
+			? `the minimum, longer than the ${dialogue(length)} after it`
+			: "the minimum, no dialogue after it",
 };
 
 const line = (length: ElementLength) =>
@@ -39,13 +48,15 @@ export const measureElementLengths = defineTool({
 
 	  A visual is on screen for its own length or the dialogue after it, up to the next
 	  visual, whichever is longer. An image has no length of its own; a video's is its
-	  \`duration\`. Dialogue runs at about ${NARRATION_WORDS_PER_SECOND} words a second. Every visual
-	  is on screen for at least ${seconds(MIN_DURATION_SEC)}.
+	  \`duration\`, or what the user trimmed it to on the timeline. Dialogue runs at about
+	  ${NARRATION_WORDS_PER_SECOND} words a second. Every visual is on screen for at least
+	  ${seconds(MIN_DURATION_SEC)}.
 
 	  Use this when the user asks how long something is shown or wants it changed. To
 	  shorten a visual set by its dialogue, split the dialogue after it and insert a visual
 	  at the split; to lengthen one, add dialogue after it. For a video set by its own
-	  length, change \`duration\`.
+	  length, change \`duration\`. A trim holds a video whatever its \`duration\`: ask the
+	  user to change or reset it on the timeline.
 	`,
 	input: z.object({}),
 	output: z.string(),
