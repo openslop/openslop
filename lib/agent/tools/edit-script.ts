@@ -6,12 +6,8 @@ import {
 	ASSET_TYPES,
 	ContentTypeSchema,
 	ElementTypeSchema,
-	type ElementType,
 } from "@/lib/canvas/types";
-import {
-	type AttributeEdit,
-	TOGGLE_VALUES,
-} from "@/lib/connectors/attributes/schema";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
 	CONTINUITY_ATTR,
 	NO_FRAME,
@@ -26,40 +22,22 @@ import { Pencil } from "@/components/ui/icon";
 import { plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
-const enumeration = (values: readonly string[]) => `(${values.join(" | ")})`;
-
-/** Attributes the OSML prompt teaches that no schema carries. */
-const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
-	character: ["name (an existing asset_voice's)"],
-	video: [
-		`${START_FRAME_ATTR} (${NO_FRAME} | ${PREVIOUS_VISUAL}, or a picture URL: an image's URL from view_image, with ${CONTINUITY_ATTR}="false" so the look before it does not fight that picture; leave a URL already set alone)`,
-	],
-};
-
-/** Attributes Sloppy can write by hand: enums with their options, and free text. */
-const describeAttribute = (key: string, edit?: AttributeEdit): string[] => {
-	if (edit?.kind === "enum") return [`${key} ${enumeration(edit.options)}`];
-	if (edit?.kind === "toggle") return [`${key} ${enumeration(TOGGLE_VALUES)}`];
+/** Attributes Sloppy can write by hand: those limited to a list of options, and free text. */
+const describeAttribute = ({ key, edit }: AttributeDef): string[] => {
+	if (edit?.kind === "enum" || edit?.kind === "toggle")
+		return [`${key} (${edit.value.options.join(" | ")})`];
 	return edit?.kind === "text" ? [key] : [];
 };
 
-// TODO(#743): this reads each type's recommended model, which holds while a type
-// has one or two models. Once a canvas mixes providers/models within a type, Sloppy
-// needs a tool that resolves the schema for one element's own pair before editing it.
-const attributesFor = (type: ElementType): string[] =>
-	Object.entries(attributeSchemaFor(type, {}).allAttributes).flatMap(
-		([key, { edit }]) => describeAttribute(key, edit),
-	);
-
-const attributesByType = (types: readonly ElementType[]) =>
-	types
-		.map((type) => ({
-			type,
-			attributes: [...(SCRIPT_ATTRIBUTES[type] ?? []), ...attributesFor(type)],
-		}))
-		.filter(({ attributes }) => attributes.length > 0)
-		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
-		.join("\n");
+// TODO(#743): an element's model-specific options show only as the value it already holds.
+// Sloppy needs a tool that resolves one element's schema.
+const ATTRIBUTES_BY_TYPE = ElementTypeSchema.options
+	.flatMap((type) => {
+		const attributes =
+			attributeSchemaFor(type).baseDefs.flatMap(describeAttribute);
+		return attributes.length > 0 ? [`- ${type}: ${attributes.join(", ")}`] : [];
+	})
+	.join("\n");
 
 const ASSETS = dedent`
 	Assets sit ahead of the first scene and are global to the project. They are edited the
@@ -104,7 +82,14 @@ export const editScript = defineTool({
 	  ${ASSETS}
 
 	  Attributes by type, all string values; a value the type does not offer fails the operation:
-	  ${attributesByType(ElementTypeSchema.options)}
+	  ${ATTRIBUTES_BY_TYPE}
+
+	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: an image's URL from
+	  view_image, with ${CONTINUITY_ATTR}="false" so the look before it does not fight that picture;
+	  leave a URL already set alone.
+
+	  These hold for every model. An element also carries what its own provider and model offer,
+	  shown when you read it.
 
 	  To change a model, set provider and model to a pair from list_models. Narration and
 	  character lines have none of their own: they speak with their asset_voice's.

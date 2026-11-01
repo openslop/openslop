@@ -22,7 +22,6 @@ export interface ReferenceImagesPopoverProps {
 	element: ContentElement;
 	attrKey: string;
 	label: string;
-	hideLabel?: boolean;
 	/** References the element adds beyond these, counted in the summary. */
 	added?: number;
 	children?: React.ReactNode;
@@ -37,7 +36,6 @@ export function ReferenceImagesPopover({
 	element,
 	attrKey,
 	label,
-	hideLabel = false,
 	added = 0,
 	children,
 }: ReferenceImagesPopoverProps) {
@@ -60,10 +58,7 @@ export function ReferenceImagesPopover({
 
 	return (
 		<Popover>
-			<AttributeTrigger tooltip={tooltip}>
-				{!hideLabel && <span className="opacity-70 mr-1">{label}</span>}
-				{summary}
-			</AttributeTrigger>
+			<AttributeTrigger tooltip={tooltip}>{summary}</AttributeTrigger>
 			<PopoverContent align="end" className="w-72">
 				<div className="mb-2 flex items-baseline justify-between gap-2">
 					<span className="text-label text-muted-foreground">

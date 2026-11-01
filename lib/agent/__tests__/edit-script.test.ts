@@ -32,6 +32,19 @@ describe("edit_script", () => {
 		expect(editScript.spec.description).toContain("continuity (false | true)");
 	});
 
+	it("teaches a character line's name and a video's start frame", () => {
+		const { description } = editScript.spec;
+		expect(description).toContain("- character: name, emotion");
+		expect(description).toContain(
+			"startFrame is none, previous or a picture URL",
+		);
+	});
+
+	it("leaves a model's own options off the attributes every model has", () => {
+		expect(editScript.spec.description).toContain("These hold for every model");
+		expect(editScript.spec.description).not.toContain("resolution (");
+	});
+
 	it("writes music by the same cue-sheet guide the script writer follows", () => {
 		expect(editScript.spec.description).toContain("## Music prompts");
 		expect(editScript.spec.description).not.toMatch(/- music: length/);
