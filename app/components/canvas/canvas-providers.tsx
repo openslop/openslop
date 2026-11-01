@@ -15,6 +15,7 @@ import { ViewModeProvider } from "./view-mode-context";
 import { WorkspaceProvider } from "./workspace-context";
 import { ActiveCaptionFont } from "./caption-fonts";
 import { SloppyProvider } from "../sloppy/sloppy-provider";
+import { SloppyUnread } from "../sloppy/sloppy-unread";
 import { EditorPanelProvider } from "./panel/editor-panel-context";
 import { AssetEditProvider } from "./elements/character/asset-edit-provider";
 import { useEditorSession } from "./hooks/use-editor-session";
@@ -55,6 +56,7 @@ export function CanvasProviders({ children }: { children: ReactNode }) {
 			<CanvasHistoryProvider history={history}>
 				<CanvasScopedProviders>
 					<ActiveCaptionFont />
+					<SloppyUnread />
 					{children}
 				</CanvasScopedProviders>
 			</CanvasHistoryProvider>
