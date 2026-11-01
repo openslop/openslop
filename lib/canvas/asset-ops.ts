@@ -3,6 +3,7 @@ import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
 import { Editor, Transforms } from "slate";
 import { serializeReferenceImages } from "@/lib/connectors/attributes/reference-images";
+import type { TTSLanguage } from "@/lib/connectors/tts/enums";
 import { findAsset, isAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
 import { createCanvasElement } from "./create-canvas-element";
 import {
@@ -15,6 +16,12 @@ import type { AssetType } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
+const creationDefaults = (
+	editor: Editor,
+	type: AssetType,
+): { language?: TTSLanguage } =>
+	type === "asset_voice" ? { language: editor.defaultLanguage() } : {};
+
 export function setAsset(
 	editor: Editor,
 	type: AssetType,
@@ -26,7 +33,10 @@ export function setAsset(
 		Transforms.insertNodes(
 			editor,
 			createCanvasElement(type, {
-				attrs: omitBy({ name, ...attrs }, isNil) as Record<string, string>,
+				attrs: omitBy(
+					{ name, ...creationDefaults(editor, type), ...attrs },
+					isNil,
+				) as Record<string, string>,
 				text: text?.trim(),
 				defaultModels: editor.defaultModels(),
 			}),
