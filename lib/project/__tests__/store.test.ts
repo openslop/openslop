@@ -73,13 +73,13 @@ describe("project store", () => {
 describe("store snapshot", () => {
 	it("extracts a method-free snapshot, detached from its store", () => {
 		const store = createProjectStore();
-		const snap = extractStoreSnapshot(store);
+		const snapshot = extractStoreSnapshot(store);
 
 		store.getState().updateVideoSettings({ aspectRatio: "9:16" });
 		store.getState().updateModels({ image: RUNWARE });
 		store.getState().updateScriptSettings({ language: "fr" });
 
-		expect(snap).toEqual({
+		expect(snapshot).toEqual({
 			title: "",
 			videoSettings: VideoSettingsSchema.parse({}),
 			scriptSettings: ScriptSettingsSchema.parse({}),
@@ -88,21 +88,21 @@ describe("store snapshot", () => {
 	});
 
 	it("round-trips through createProjectStore", () => {
-		const src = createProjectStore();
-		src.getState().updateVideoSettings({
+		const source = createProjectStore();
+		source.getState().updateVideoSettings({
 			aspectRatio: "9:16",
 			transitionType: "fade",
 			captions: false,
 		});
-		src.getState().updateModels({ image: RUNWARE });
-		src
+		source.getState().updateModels({ image: RUNWARE });
+		source
 			.getState()
 			.updateScriptSettings({ language: "fr", template: "pov-life" });
-		src.getState().setTitle("Moon Cat");
+		source.getState().setTitle("Moon Cat");
 
-		const after = createProjectStore(extractStoreSnapshot(src)).getState();
-		expect(after.videoSettings).toEqual(src.getState().videoSettings);
-		expect(after.scriptSettings).toEqual(src.getState().scriptSettings);
+		const after = createProjectStore(extractStoreSnapshot(source)).getState();
+		expect(after.videoSettings).toEqual(source.getState().videoSettings);
+		expect(after.scriptSettings).toEqual(source.getState().scriptSettings);
 		expect(after.models).toEqual({ image: RUNWARE });
 		expect(after.title).toBe("Moon Cat");
 	});

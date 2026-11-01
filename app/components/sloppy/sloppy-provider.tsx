@@ -93,7 +93,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			throttle: 50,
 		});
 
-	const working =
+	const loading =
 		status === "submitted" ||
 		status === "streaming" ||
 		hasPendingToolCall(messages);
@@ -110,10 +110,10 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 				void stop();
 				setMessages((current) => settleUnansweredCalls(current, STOPPED_TEXT));
 			},
-			loading: working,
+			loading,
 			writingScript,
 		}),
-		[sendMessage, setMessages, stop, working, writingScript, model],
+		[sendMessage, setMessages, stop, loading, writingScript, model],
 	);
 
 	return (
