@@ -35,6 +35,10 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				ensureAsset(editor, type, name);
 				setEditing(DIALOG_OF[type](name));
 			},
+			createCharacter: (name) => {
+				addCharacter(editor, name);
+				setEditing({ kind: "character", name });
+			},
 			openCreateCharacter: () => setEditing({ kind: "create" }),
 		}),
 		[editor],
@@ -51,10 +55,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 			>
 				{editing?.kind === "create" && (
 					<NewCharacterDialog
-						onCreated={(name) => {
-							addCharacter(editor, name);
-							setEditing({ kind: "character", name });
-						}}
+						onCreated={editors.createCharacter}
 					/>
 				)}
 				{editing?.kind === "character" && (
