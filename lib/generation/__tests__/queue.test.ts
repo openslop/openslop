@@ -637,6 +637,78 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getElementSnapshot("pass").error).toBe("moved on");
 			expect(committed).not.toHaveBeenCalled();
 		});
+
+		const gone = { status: "idle", result: null, error: null };
+		const hang = () => generateMock.mockReturnValue(new Promise(() => {}));
+
+		it("is dropped when its target regenerates, so it never lands on the new result", async () => {
+			const revise = vi.fn((current: AssetResult) => current);
+			hang();
+			generationQueue.enqueueGraph([landing(revise)]);
+			await vi.advanceTimersByTimeAsync(0);
+			expect(generationQueue.getElementSnapshot("pass").status).toBe(
+				"generating",
+			);
+
+			generateMock.mockResolvedValue({ imageUrl: "b.png", durationSec: 0 });
+			generationQueue.enqueueGraph([makeJob("lr1")]);
+			await vi.runAllTimersAsync();
+
+			expect(generationQueue.getElementSnapshot("pass")).toMatchObject(gone);
+			expect(revise).not.toHaveBeenCalled();
+			expect(committed.mock.calls.map(([v]) => v.elementId)).toEqual(["lr1"]);
+		});
+
+		it("is dropped when an upload replaces its target", async () => {
+			const revise = vi.fn((current: AssetResult) => current);
+			hang();
+			generationQueue.enqueueGraph([landing(revise)]);
+			await vi.advanceTimersByTimeAsync(0);
+
+			generationQueue.commitResult(
+				makeJob("lr1"),
+				{ imageUrl: "up.png", durationSec: 0 },
+				{ pinned: true },
+			);
+			await vi.runAllTimersAsync();
+
+			expect(generationQueue.getElementSnapshot("pass")).toMatchObject(gone);
+			expect(generationQueue.getElementSnapshot("lr1").result).toMatchObject({
+				imageUrl: "up.png",
+			});
+			expect(revise).not.toHaveBeenCalled();
+		});
+
+		it("goes with its target when the target is discarded", async () => {
+			hang();
+			generationQueue.enqueueGraph([landing((current) => current)]);
+			await vi.advanceTimersByTimeAsync(0);
+
+			generationQueue.discard("lr1");
+
+			expect(generationQueue.getActiveCount()).toBe(0);
+			expect(generationQueue.getElementSnapshot("pass")).toMatchObject(gone);
+		});
+
+		it("is dropped while still waiting for capacity, so it never runs", async () => {
+			hang();
+			generationQueue.enqueueGraph([
+				makeJob("f1"),
+				makeJob("f2"),
+				makeJob("f3"),
+			]);
+			generationQueue.enqueueGraph([landing((current) => current)]);
+			await vi.advanceTimersByTimeAsync(0);
+			expect(generationQueue.getElementSnapshot("pass").status).toBe("queued");
+
+			generationQueue.discard("lr1");
+			await vi.runAllTimersAsync();
+
+			expect(generationQueue.getElementSnapshot("pass")).toMatchObject(gone);
+			expect(generateMock.mock.calls.map(([node]) => node.id)).not.toContain(
+				"pass",
+			);
+		});
 	});
 
 	describe("restoreResult", () => {

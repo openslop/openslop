@@ -23,7 +23,7 @@ import {
 
 type ActiveJob = {
 	controller: AbortController;
-	connectorType: AssetConnectorType;
+	node: GenerationNode;
 };
 
 /**
@@ -66,6 +66,7 @@ export class GenerationQueue {
 		for (const node of flattenGraph(roots)) {
 			if (this.snapshots.isActive(node.id)) continue;
 			if (!rootIds.has(node.id) && !needsGeneration(node, this)) continue;
+			this.dropLandings(node.id);
 			this.snapshots.update(node.id, {
 				status: "queued",
 				startedAt: null,
@@ -81,8 +82,7 @@ export class GenerationQueue {
 	}
 
 	cancel(elementId: string) {
-		if (!this.snapshots.isActive(elementId)) return;
-		this.abortJob(elementId);
+		if (!this.abortJob(elementId)) return;
 		this.snapshots.resetToIdle(elementId);
 		this.snapshots.notify();
 		this.processQueue();
@@ -104,11 +104,10 @@ export class GenerationQueue {
 	}
 
 	discard(elementId: string) {
-		const wasActive = this.snapshots.isActive(elementId);
-		if (wasActive) this.abortJob(elementId);
+		this.abortJob(elementId);
 		this.snapshots.remove(elementId);
 		this.snapshots.notify();
-		if (wasActive) this.processQueue();
+		this.processQueue();
 	}
 
 	setError(elementId: string, message: string) {
@@ -185,10 +184,27 @@ export class GenerationQueue {
 		this.reviseResult(on, (current) => revise(current, result));
 	}
 
-	private abortJob(id: string) {
+	/** Aborts `id` and whatever was going to land on it; true when either was in flight. */
+	private abortJob(id: string): boolean {
+		const own = this.snapshots.isActive(id);
 		this.active.get(id)?.controller.abort();
 		this.active.delete(id);
 		this.pending = this.pending.filter((node) => node.id !== id);
+		return this.dropLandings(id) || own;
+	}
+
+	/** A landing has nothing to land on once its target regenerates or goes. */
+	private dropLandings(elementId: string): boolean {
+		const landsHere = (node: GenerationNode) => node.lands?.on.id === elementId;
+		const landing = [
+			...this.pending,
+			...Array.from(this.active.values(), (job) => job.node),
+		].filter(landsHere);
+		for (const { id } of landing) {
+			this.abortJob(id);
+			this.snapshots.remove(id);
+		}
+		return landing.length > 0;
 	}
 
 	/** The dependency holding `node` back, if any: it gates until it settles. */
@@ -201,7 +217,7 @@ export class GenerationQueue {
 
 	private hasCapacity(connectorType: AssetConnectorType) {
 		const running = [...this.active.values()].filter(
-			(job) => job.connectorType === connectorType,
+			(job) => job.node.job.connectorType === connectorType,
 		).length;
 		return running < this.limits[connectorType];
 	}
@@ -256,7 +272,7 @@ export class GenerationQueue {
 		} = node;
 		const controller = new AbortController();
 		const { signal } = controller;
-		this.active.set(elementId, { controller, connectorType });
+		this.active.set(elementId, { controller, node });
 
 		this.snapshots.update(elementId, {
 			status: "generating",
