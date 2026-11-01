@@ -55,6 +55,8 @@ function CharacterActionButton({
 
 function KnownCharacter({ name }: { name: string }) {
 	const readOnly = useReadOnly();
+	const { editAsset } = useAssetEditors();
+	const hasAvatar = useHasAsset("asset_avatar", name);
 	return (
 		<Badge variant="subtle" size="inline" className="group/chip relative">
 			<CharacterAvatar name={name} size="xs" className="rounded-none" />
