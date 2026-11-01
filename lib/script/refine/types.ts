@@ -2,15 +2,18 @@ import { z } from "zod";
 import { ContentTypeSchema, ElementTypeSchema } from "@/lib/canvas/types";
 
 const ELEMENT_TEXT =
-	"The element's content: the spoken line for narration and character, the prompt for image, video, sound and music.";
+	"The element's content: the spoken line for narration and character; the prompt for image, video, sound and music; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.";
 
 const insertOp = z.object({
 	op: z.literal("insert"),
 	anchor_id: z.string().optional(),
-	position: z.enum(["before", "after"]).optional(),
+	position: z
+		.enum(["before", "after"])
+		.optional()
+		.describe("Which side of the anchor; after when omitted."),
 	type: ElementTypeSchema,
 	attrs: z.record(z.string(), z.string()).optional(),
-	text: z.string().describe(ELEMENT_TEXT),
+	text: z.string().optional().describe(ELEMENT_TEXT),
 });
 
 const removeOp = z.object({

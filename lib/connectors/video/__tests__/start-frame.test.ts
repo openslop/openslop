@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { frameSource, openingOn } from "../start-frame";
+import { AttributeSchema } from "../../attributes/schema";
+import { frameSource, openingOn, startFrameDef } from "../start-frame";
 
 describe("frameSource", () => {
 	it.each([undefined, "none", "not a url"])(
@@ -18,6 +19,21 @@ describe("frameSource", () => {
 			kind: "upload",
 			url: "https://img/frame.png",
 		});
+	});
+});
+
+describe("startFrameDef", () => {
+	const schema = AttributeSchema.from([startFrameDef]);
+
+	it.each(["none", "previous", "https://img/frame.png"])(
+		"offers %s",
+		(frame) => {
+			expect(schema.offers("startFrame", frame)).toBe(true);
+		},
+	);
+
+	it("offers no value that would fall through to nothing", () => {
+		expect(schema.offers("startFrame", "not a url")).toBe(false);
 	});
 });
 

@@ -9,11 +9,10 @@ import { NARRATOR } from "../assets";
 import { createCanvasElement } from "../create-canvas-element";
 import {
 	attributeSchemaFor,
-	elementModelPick,
 	elementSchema,
 	resolveElementConnector,
 } from "../element-connector";
-import type { ContentElement } from "../types";
+import { ElementTypeSchema, type ContentElement } from "../types";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -138,22 +137,37 @@ describe("createCanvasElement", () => {
 describe("elementSchema", () => {
 	it("resolves the connector type's schema from the element's own attributes", () => {
 		expect(elementSchema(element("image")).keys).toEqual(
-			imageAttributesFor(DEFAULT_MODELS.image).keys,
+			expect.arrayContaining(imageAttributesFor(DEFAULT_MODELS.image).keys),
 		);
 		expect(elementSchema(element("video")).keys).toEqual(
-			videoAttributesFor(DEFAULT_MODELS.video).keys,
+			expect.arrayContaining(videoAttributesFor(DEFAULT_MODELS.video).keys),
 		);
 		expect(elementSchema(element("narration")).keys).toEqual(
-			TTS_ATTRIBUTES.keys,
+			expect.arrayContaining(TTS_ATTRIBUTES.keys),
 		);
+	});
+
+	it("lets any speech line name its speaker", () => {
+		expect(attributeSchemaFor("character").keys).toContain("name");
+		expect(attributeSchemaFor("narration").keys).toContain("name");
+	});
+
+	it("offers every attribute an element is created with, and no made-up key", () => {
+		for (const type of ElementTypeSchema.options) {
+			const created = flatAttributes(createCanvasElement(type));
+			const schema = attributeSchemaFor(type, created);
+			for (const [key, value] of Object.entries(created))
+				expect(schema.offers(key, value)).toBe(true);
+			expect(schema.offers("tone", "dry")).toBe(false);
+		}
 	});
 });
 
 describe("asset schemas", () => {
-	const voice = attributeSchemaFor("asset_voice", {});
+	const voice = attributeSchemaFor("asset_voice");
 
 	it("lets a voice set its traits, each one optional, and describe itself", () => {
-		expect(voice.keys).toEqual([
+		expect(voice.settingsDefs.map(({ key }) => key)).toEqual([
 			"gender",
 			"language",
 			"age",
@@ -169,10 +183,10 @@ describe("asset schemas", () => {
 			"asset_style",
 			"asset_references",
 		] as const)
-			expect(attributeSchemaFor(type, {}).keys).toEqual([]);
+			expect(attributeSchemaFor(type).settingsDefs).toEqual([]);
 	});
 
-	it("keeps what an asset holds outside its schema when it is created", () => {
+	it("drops what an asset holds outside its schema when it is created", () => {
 		expect(
 			flatAttributes(
 				asset("asset_voice", {
@@ -183,25 +197,7 @@ describe("asset schemas", () => {
 		).toEqual({
 			name: "Mia",
 			...DEFAULT_MODELS.voice,
-			tone: "dry",
 			gender: "feminine",
-		});
-	});
-});
-
-describe("elementModelPick", () => {
-	it("picks an avatar's model from the image models", () => {
-		expect(elementModelPick(asset("asset_avatar", { name: "Mia" })).type).toBe(
-			"image",
-		);
-	});
-
-	it("picks the element's own pair from its connector type's models", () => {
-		expect(elementModelPick(element("narration"))).toEqual({
-			kind: "model",
-			type: "tts",
-			key: "model",
-			providerAttr: "provider",
 		});
 	});
 });

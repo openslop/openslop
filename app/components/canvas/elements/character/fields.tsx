@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 import type { CanvasElement } from "@/lib/canvas/types";
-import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { cn } from "@/lib/utils";
 import { useWriteThrough } from "@/app/components/canvas/hooks/use-write-through";
 
@@ -168,24 +168,24 @@ function EnumField({
 /** Text and enum attributes as labelled form fields, two to a row. */
 export function AttributeFields({
 	element,
-	specs,
+	defs,
 }: {
 	element: CanvasElement;
-	specs: Record<string, AttributeSpec>;
+	defs: AttributeDef[];
 }) {
 	const editor = useSlateStatic();
 	const attrs = flatAttributes(element);
 
 	return (
 		<div className="grid grid-cols-2 content-start gap-2">
-			{Object.entries(specs).map(([key, { label, edit }]) => {
+			{defs.map(({ key, label, edit }) => {
 				const set = (next: string | undefined) =>
 					mergeAttrs(editor, element.id, { [key]: next });
 				return edit?.kind === "enum" ? (
 					<EnumField
 						key={key}
 						label={label}
-						options={edit.options}
+						options={edit.value.options}
 						value={attrs[key]}
 						onChange={set}
 					/>

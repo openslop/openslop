@@ -1,159 +1,74 @@
+import pickBy from "lodash/pickBy";
+import type { z } from "zod";
 import type { IconComponent } from "@/components/ui/icon";
-import { TOGGLE_OFF, TOGGLE_ON } from "@/lib/canvas/types";
-import { parseNumber } from "@/lib/canvas/element-attributes";
-import { resolveModel, type ConnectorModels } from "../models";
-import type { ConnectorType } from "../types";
-
-export const TOGGLE_VALUES: readonly string[] = [TOGGLE_OFF, TOGGLE_ON];
+import type { toggleValue } from "./common";
 
 /** One face of a toggle: what it shows and says while in that state. */
-export type ToggleFace = { icon: IconComponent; label: string };
+type ToggleFace = { icon: IconComponent; label: string };
 
-export type AttributeEdit =
-	| { kind: "enum"; options: readonly string[] }
+type AttributeEdit =
+	| { kind: "enum"; value: z.ZodEnum<Record<string, string>> }
 	/** A boolean stored as "true" or "false", switched between two iconed faces. */
-	| { kind: "toggle"; on: ToggleFace; off: ToggleFace }
-	/**
-	 * The model a generation runs on, picked through a control that can also
-	 * say what each model costs and which of them the account can reach. One
-	 * pick writes two attributes: this one and the provider it names.
-	 */
-	| { kind: "model"; type: ConnectorType; providerAttr: string }
-	| { kind: "text"; placeholder?: string; rows?: number }
+	| {
+			kind: "toggle";
+			value: typeof toggleValue;
+			on: ToggleFace;
+			off: ToggleFace;
+	  }
+	| { kind: "text"; value?: undefined; placeholder?: string; rows?: number }
 	/** A count of seconds typed in, at least `min`. Empty leaves it unset. */
-	| { kind: "seconds"; min: number }
-	/**
-	 * A list of image URLs, edited as tiles. With `continuity`, the previous
-	 * visual's pictures and the toggle that links them show beneath.
-	 */
-	| { kind: "images"; continuity?: true }
+	| { kind: "seconds"; value: z.ZodType<string>; min: number }
+	/** Image URLs as tiles; `continuity` adds the previous visual's pictures and their link toggle. */
+	| { kind: "images"; value?: undefined; continuity?: true }
 	/** One picture to open on: the visual before, or an image URL. */
-	| { kind: "frame" };
+	| { kind: "frame"; value: z.ZodType<string> };
 
-export interface AttributeSpec {
+export interface AttributeDef {
+	key: string;
 	label: string;
-	/** When set, the badge shows this icon in place of the text label. */
-	icon?: IconComponent;
 	/** Unit suffix appended to the displayed value (e.g. `"s"` for seconds). */
 	unit?: string;
+	/** What sets it. Left out, nothing on screen does. */
 	edit?: AttributeEdit;
-}
-
-export interface AttributeDef extends AttributeSpec {
-	key: string;
 	/** Value seeded into the element's attributes when it is created. */
 	default?: string;
-	/** Rendered on the element header rather than inside the settings popover. */
-	badge?: boolean;
-	/** Carried on the element but shown nowhere: another attribute's control sets it. */
+	/** Kept out of the settings popover, for an attribute set from elsewhere. */
 	hidden?: boolean;
+	/** Holds for this provider and model alone. */
+	perModel?: boolean;
 }
-
-export type ModelPick = { key: string } & Extract<
-	AttributeEdit,
-	{ kind: "model" }
->;
-
-type SchemaOptions = {
-	/** Keeps the element's own model control off the header, for a type whose model is picked elsewhere. */
-	hideModel?: boolean;
-};
 
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {
-	private constructor(
-		private readonly defs: readonly AttributeDef[],
-		private readonly options: SchemaOptions,
-	) {}
+	private constructor(private readonly defs: readonly AttributeDef[]) {}
 
-	static from(
-		defs: readonly AttributeDef[],
-		options: SchemaOptions = {},
-	): AttributeSchema {
-		return new AttributeSchema(defs, options);
-	}
-
-	get hidesModel(): boolean {
-		return this.options.hideModel ?? false;
+	static from(defs: readonly AttributeDef[]): AttributeSchema {
+		return new AttributeSchema(defs);
 	}
 
 	get keys(): string[] {
 		return this.defs.map((def) => def.key);
 	}
 
-	/** The models the element carries beside its own, each naming the connector it resolves from. */
-	private get modelPicks(): ModelPick[] {
-		return this.defs.flatMap(({ key, edit }) =>
-			edit?.kind === "model" ? [{ key, ...edit }] : [],
-		);
+	get settingsDefs(): AttributeDef[] {
+		return this.defs.filter((def) => def.edit && !def.hidden);
 	}
 
-	/** The attributes shown on the element header, in def order. */
-	get badgeAttributes(): Record<string, AttributeSpec> {
-		return this.specsWhere((def) => def.badge ?? false);
+	get baseDefs(): AttributeDef[] {
+		return this.defs.filter((def) => !def.perModel);
 	}
 
-	/** The attributes shown in the settings popover, in def order. */
-	get settingsAttributes(): Record<string, AttributeSpec> {
-		return this.specsWhere((def) => !def.badge && !def.hidden);
-	}
-
-	get allAttributes(): Record<string, AttributeSpec> {
-		return this.specsWhere(() => true);
-	}
-
-	private specsWhere(
-		include: (def: AttributeDef) => boolean,
-	): Record<string, AttributeSpec> {
-		return Object.fromEntries(
-			this.defs
-				.filter(include)
-				.map(({ key, label, icon, unit, edit }): [string, AttributeSpec] => [
-					key,
-					{ label, icon, unit, edit },
-				]),
-		);
-	}
-
-	/** Whether the schema would let the settings popover produce this value. */
+	/** Whether the element can carry this value: a key outside the schema never can. */
 	offers(key: string, value: string): boolean {
-		const edit = this.defs.find((def) => def.key === key)?.edit;
-		if (edit?.kind === "enum") return edit.options.includes(value);
-		if (edit?.kind === "toggle") return TOGGLE_VALUES.includes(value);
-		if (edit?.kind === "seconds") return parseNumber(value) !== undefined;
-		return true;
+		const def = this.defs.find((candidate) => candidate.key === key);
+		return !!def && (def.edit?.value?.safeParse(value).success ?? true);
 	}
 
-	/**
-	 * The attributes an element carries: the caller's, with defaults standing in
-	 * wherever they name an option the schema doesn't offer (pasted OSML, a
-	 * saved project from an older catalog). A model the schema carries resolves
-	 * like the element's own: the caller's pair, else the scoped default, else
-	 * the recommendation.
-	 */
-	resolve(
-		attrs: Record<string, string>,
-		defaultModels: ConnectorModels = {},
-	): Record<string, string> {
-		const models = Object.fromEntries(
-			this.modelPicks.flatMap(({ key, providerAttr, type }) => {
-				const pick = resolveModel(
-					type,
-					{ provider: attrs[providerAttr], model: attrs[key] },
-					defaultModels[type],
-				);
-				return [
-					[providerAttr, pick.provider],
-					[key, pick.model],
-				];
-			}),
-		);
+	/** The offered attributes over the defaults: pasted OSML and saved projects can hold anything. */
+	resolve(attrs: Record<string, string>): Record<string, string> {
 		return {
 			...this.defaultAttributes,
-			...Object.fromEntries(
-				Object.entries(attrs).filter(([key, value]) => this.offers(key, value)),
-			),
-			...models,
+			...pickBy(attrs, (value, key) => this.offers(key, value)),
 		};
 	}
 

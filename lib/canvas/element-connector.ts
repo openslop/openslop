@@ -1,8 +1,5 @@
-import { ELEMENT_MODEL } from "@/lib/connectors/attributes/model";
-import {
-	AttributeSchema,
-	type ModelPick,
-} from "@/lib/connectors/attributes/schema";
+import { nameDef, OWN_MODEL_DEFS } from "@/lib/connectors/attributes/common";
+import { AttributeSchema } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
@@ -12,6 +9,7 @@ import type {
 	ConnectorConfig,
 	ModelRef,
 } from "@/lib/connectors/types";
+import { REFERENCE_URLS_ATTR } from "./assets";
 import { flatAttributes } from "./element-attributes";
 import { isAssetType } from "./guards";
 import {
@@ -49,19 +47,19 @@ export function resolveElementConnector(
 	};
 }
 
-const NO_ATTRIBUTES = AttributeSchema.from([]);
-
 /** An asset's attributes are its own; content takes its connector's. */
 const ASSET_ATTRIBUTES: Record<AssetType, AttributeSchema> = {
-	asset_avatar: NO_ATTRIBUTES,
+	asset_avatar: AttributeSchema.from([nameDef, ...OWN_MODEL_DEFS]),
 	asset_voice: VOICE_ATTRIBUTES,
-	asset_style: NO_ATTRIBUTES,
-	asset_references: NO_ATTRIBUTES,
+	asset_style: AttributeSchema.from([]),
+	asset_references: AttributeSchema.from([
+		{ key: REFERENCE_URLS_ATTR, label: "References" },
+	]),
 };
 
 export function attributeSchemaFor(
 	type: ElementType,
-	attributes: Record<string, string>,
+	attributes: Record<string, string> = {},
 ): AttributeSchema {
 	if (isAssetType(type)) return ASSET_ATTRIBUTES[type];
 	const { connector } = CONTENT_TYPES[type];
@@ -70,10 +68,3 @@ export function attributeSchemaFor(
 
 export const elementSchema = (element: CanvasElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
-
-/** The element's own model, picked from its connector type's. */
-export const elementModelPick = (element: GeneratedElement): ModelPick => ({
-	kind: "model",
-	type: connectorOf(element.type),
-	...ELEMENT_MODEL,
-});

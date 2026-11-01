@@ -16,7 +16,6 @@ interface TextAttributePopoverProps {
 	tooltip: string;
 	placeholder?: string;
 	rows?: number;
-	hideLabel?: boolean;
 }
 
 export function TextAttributePopover({
@@ -27,7 +26,6 @@ export function TextAttributePopover({
 	tooltip,
 	placeholder,
 	rows = 3,
-	hideLabel = false,
 }: TextAttributePopoverProps) {
 	const editor = useSlateStatic();
 	const [open, setOpen] = useState(false);
@@ -52,11 +50,6 @@ export function TextAttributePopover({
 	return (
 		<Popover open={open} onOpenChange={handleOpenChange}>
 			<AttributeTrigger tooltip={tooltip}>
-				{!hideLabel && (
-					<span className={value ? "opacity-70 mr-1" : "opacity-90"}>
-						{label}
-					</span>
-				)}
 				{value || <span className="opacity-50">— add</span>}
 			</AttributeTrigger>
 			<PopoverContent

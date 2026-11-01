@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createConnector, resolveAttributeSchema } from "../factory";
 import { DEFAULT_MODELS } from "../models";
-import { ASSET_CONNECTOR_TYPES, type ConnectorType } from "../types";
+import { CONTENT_TYPES } from "@/lib/canvas/types";
+import type { ConnectorType } from "../types";
 
 const stubConfig = {};
 
@@ -31,6 +32,9 @@ describe("resolveAttributeSchema", () => {
 	it("resolves the connector type's base schema, keyed by connector type not element type", () => {
 		// narration and character both resolve through "tts" and get the same schema.
 		expect(resolveAttributeSchema("tts", DEFAULT_MODELS.tts).keys).toEqual([
+			"name",
+			"provider",
+			"model",
 			"emotion",
 			"speed",
 			"volume",
@@ -41,12 +45,16 @@ describe("resolveAttributeSchema", () => {
 
 	it("resolves distinct schemas for image vs video", () => {
 		expect(resolveAttributeSchema("image", DEFAULT_MODELS.image).keys).toEqual([
+			"provider",
+			"model",
 			"referenceImagesOverride",
 			"resolution",
 			"format",
 			"motion",
 		]);
 		expect(resolveAttributeSchema("video", DEFAULT_MODELS.video).keys).toEqual([
+			"provider",
+			"model",
 			"startFrame",
 			"continuity",
 			"uploadedFrame",
@@ -61,21 +69,15 @@ describe("resolveAttributeSchema", () => {
 		]);
 	});
 
-	// An element's own pair is what picks the schema, so no schema carries it.
-	it("keeps the element's own model out of every schema", () => {
-		for (const type of ASSET_CONNECTOR_TYPES) {
-			const schema = resolveAttributeSchema(type, DEFAULT_MODELS[type]);
-			expect(schema.keys).not.toContain("provider");
-			expect(schema.keys).not.toContain("model");
-		}
-	});
-
-	// A voice picks its model in its own editor, so speech shows no control of its own.
-	it("hides the model control on speech alone", () => {
-		for (const type of ASSET_CONNECTOR_TYPES) {
-			expect(
-				resolveAttributeSchema(type, DEFAULT_MODELS[type]).hidesModel,
-			).toBe(type === "tts");
+	it("carries the model pair on every connector content generates with", () => {
+		for (const { connector } of Object.values(CONTENT_TYPES)) {
+			const schema = resolveAttributeSchema(
+				connector,
+				DEFAULT_MODELS[connector],
+			);
+			expect(schema.keys).toEqual(
+				expect.arrayContaining(["provider", "model"]),
+			);
 		}
 	});
 
