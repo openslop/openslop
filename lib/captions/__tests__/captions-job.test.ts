@@ -72,7 +72,7 @@ describe("captions jobs", () => {
 		]);
 	});
 
-	it("fails, leaving the element alone, when it was regenerated meanwhile", async () => {
+	it("is dropped, leaving the element alone, when it was regenerated meanwhile", async () => {
 		let land: (result: AssetResult) => void = () => {};
 		generateMock.mockReturnValue(new Promise((resolve) => (land = resolve)));
 		queue.enqueueGraph([stt()]);
@@ -84,8 +84,8 @@ describe("captions jobs", () => {
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("narration").result).toEqual(remade);
-		expect(queue.getElementSnapshot(captionsNodeId("narration")).error).toMatch(
-			/changed/,
+		expect(queue.getElementSnapshot(captionsNodeId("narration"))).toMatchObject(
+			{ status: "idle", error: null },
 		);
 	});
 
