@@ -65,8 +65,8 @@ export const editScript = defineTool({
 
 	  - insert: place a new element before or after \`anchor_id\`. Omit \`anchor_id\` to append,
 	    or to prepend with position "before". Each insert resolves independently, so several
-	    at one anchor must each repeat it; they stack in the order you emit them. Never send
-	    an \`id\` on an insert.
+	    at one anchor must each repeat it; they stack in the order you emit them. A script
+	    element needs its \`text\`. Never send an \`id\` on an insert.
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into

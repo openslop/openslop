@@ -230,6 +230,25 @@ describe("applyRefineOp — insert", () => {
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
+	it.each([undefined, "", "   "])(
+		"refuses a script element with no text: %j",
+		(text) => {
+			const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+			const result = applyRefineOp(
+				editor,
+				{ op: "insert", anchor_id: "n1", type: "narration", text },
+				{},
+			);
+
+			expect(result).toEqual({
+				ok: false,
+				reason: "insert: narration needs text",
+			});
+			expect(getContentTexts(editor)).toEqual(["hello"]);
+		},
+	);
+
 	it("uses custom attrs from the op", () => {
 		const editor = makeEditor([scene([content("narration", "n1")])]);
 		const anchorMap: Record<string, string> = {};

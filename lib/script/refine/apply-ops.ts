@@ -119,6 +119,9 @@ function applyInsert(
 		return OK;
 	}
 
+	if (!op.text?.trim())
+		return { ok: false, reason: `insert: ${op.type} needs text` };
+
 	const at = resolveInsertPath(editor, op, insertedAfter);
 	if (!at) {
 		return {
