@@ -9,7 +9,7 @@ import {
 	type RenderElementProps,
 } from "slate-react";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Pencil } from "@/components/ui/icon";
+import { AlertTriangle, Pencil, Plus, type IconComponent } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import type { CharacterRefElement } from "@/lib/canvas/types";
@@ -28,22 +28,27 @@ const useIsMac = () =>
 		() => false,
 	);
 
-function EditCharacterButton({ name }: { name: string }) {
-	const { editAsset } = useAssetEditors();
-	const hasAvatar = useHasAsset("asset_avatar", name);
+function CharacterActionButton({
+	label,
+	icon: Icon,
+	onClick,
+}: {
+	label: string;
+	icon: IconComponent;
+	onClick: () => void;
+}) {
 	return (
 		<button
 			type="button"
-			aria-label={`Edit ${name}`}
+			aria-label={label}
 			onMouseDown={keepFocus}
 			onClick={(e) => {
-				// Slate selects a void when a click inside it reaches the editor.
 				e.stopPropagation();
-				editAsset(hasAvatar ? "asset_avatar" : "asset_voice", name);
+				onClick();
 			}}
 			className="focus-ring absolute inset-y-0 start-0 flex aspect-square cursor-pointer items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/chip:opacity-100 hover:bg-background/90 focus-visible:opacity-100 focus-visible:ring-inset"
 		>
-			<Pencil size={10} />
+			<Icon size={10} />
 		</button>
 	);
 }
@@ -54,18 +59,35 @@ function KnownCharacter({ name }: { name: string }) {
 		<Badge variant="subtle" size="inline" className="group/chip relative">
 			<CharacterAvatar name={name} size="xs" className="rounded-none" />
 			<span className="min-w-0 self-baseline truncate">{name}</span>
-			{!readOnly && <EditCharacterButton name={name} />}
+			{!readOnly && (
+				<CharacterActionButton
+					label={`Edit ${name}`}
+					icon={Pencil}
+					onClick={() =>
+						editAsset(hasAvatar ? "asset_avatar" : "asset_voice", name)
+					}
+				/>
+			)}
 		</Badge>
 	);
 }
 
 function UnknownCharacter({ name }: { name: string }) {
+	const readOnly = useReadOnly();
+	const { createCharacter } = useAssetEditors();
 	return (
 		<SimpleTooltip label={`No character named ${name}`}>
-			<Badge variant="caution" size="inline">
+			<Badge variant="caution" size="inline" className="group/chip relative">
 				<AlertTriangle aria-hidden="true" />
 				<span className="sr-only">Unknown character: </span>
 				<span className="min-w-0 self-baseline truncate">{name}</span>
+				{!readOnly && (
+					<CharacterActionButton
+						label={`Create ${name}`}
+						icon={Plus}
+						onClick={() => createCharacter(name)}
+					/>
+				)}
 			</Badge>
 		</SimpleTooltip>
 	);
