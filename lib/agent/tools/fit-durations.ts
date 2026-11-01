@@ -6,9 +6,11 @@ import {
 	DURATION_FIT_LEEWAY_SEC,
 	durationFits,
 	fallsShort,
+	heldByTrim,
 	type DurationFit,
+	type TrimmedLength,
 } from "@/lib/render/duration-fit";
-import type { ElementLength } from "@/lib/render/element-lengths";
+import { hasDialogue, type ElementLength } from "@/lib/render/element-lengths";
 import { Hourglass } from "@/components/ui/icon";
 import { plural } from "@/lib/format";
 import { defineTool, seconds } from "./define-tool";
@@ -21,6 +23,9 @@ const changeLine = ({ length, duration, needed }: DurationFit) =>
 
 const shortLine = ({ length, needed }: DurationFit) =>
 	`${where(length)} needs ${seconds(needed)} but ${DURATION_MAX}s is the longest a video element can be generated at; split the dialogue after it across more visuals.`;
+
+const trimmedLine = (length: TrimmedLength) =>
+	`${where(length)} is trimmed to ${seconds(length.trimmedSec)} on the timeline, which \`duration\` cannot move; left alone until the user resets the trim.`;
 
 const report = (...lines: (string | false)[]) =>
 	lines.filter(Boolean).join("\n");
@@ -43,9 +48,14 @@ const scopeTo = (lengths: ElementLength[], ids?: string[]) => {
 	return { scoped, unknown: ids.filter((id) => !found.has(id)) };
 };
 
-type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
+type Counts = Record<
+	"fits" | "changes" | "short" | "applied" | "trimmed",
+	number
+>;
 
-const headline = ({ fits, changes, short, applied }: Counts) => {
+const headline = ({ fits, changes, short, applied, trimmed }: Counts) => {
+	if (fits === 0 && trimmed > 0)
+		return "Nothing to fit: every video with dialogue under it is trimmed on the timeline.";
 	if (fits === 0)
 		return "No video elements with dialogue under them in scope. Images already stretch to the dialogue under them.";
 	if (changes > 0)
@@ -84,7 +94,8 @@ export const fitDurations = defineTool({
 		const fits = durationFits(scoped);
 		const changes = fits.filter(isUnfitted);
 		const short = fits.filter(fallsShort);
-		const leftAlone = scoped.length - fits.length;
+		const trimmed = scoped.filter(heldByTrim).filter(hasDialogue);
+		const leftAlone = scoped.length - fits.length - trimmed.length;
 
 		const { applied, failures } = changes.length
 			? ctx.editScript(changes.map(toSetOp))
@@ -96,9 +107,11 @@ export const fitDurations = defineTool({
 				changes: changes.length,
 				short: short.length,
 				applied,
+				trimmed: trimmed.length,
 			}),
 			...changes.map(changeLine),
 			...short.map(shortLine),
+			...trimmed.map(trimmedLine),
 			leftAlone > 0 &&
 				`${leftAlone} ${plural(leftAlone, "image")} or ${plural(leftAlone, "video")} without dialogue left alone.`,
 			unknown.length > 0 &&
