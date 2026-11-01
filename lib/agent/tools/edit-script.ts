@@ -2,11 +2,7 @@ import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import {
-	ASSET_TYPES,
-	ContentTypeSchema,
-	ElementTypeSchema,
-} from "@/lib/canvas/types";
+import { ContentTypeSchema, ElementTypeSchema } from "@/lib/canvas/types";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
 	CONTINUITY_ATTR,
@@ -40,10 +36,7 @@ const ATTRIBUTES_BY_TYPE = ElementTypeSchema.options
 	.join("\n");
 
 const ASSETS = dedent`
-	Assets sit ahead of the first scene and are global to the project. They are edited the
-	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
-	asset already exists changes that one instead. The title is not an asset: change it with
-	set_title.
+	Insert an asset with no anchor; inserting one that already exists changes it.
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
 	lines and every {{Name}} in a prompt use, which never changes. A character has either or both.
 	- asset_avatar: what a character looks like, as its text, written like an image
@@ -60,13 +53,11 @@ const ASSETS = dedent`
 export const editScript = defineTool({
 	description: dedent`
 	  Change the canvas: add, remove, rewrite, retype or reorder the script's elements, and
-	  set up the assets it draws on. Every element carries an \`id\`. Reference ids you read;
-	  never invent one.
+	  set up the assets it draws on. Reference ids you read; never invent one.
 
 	  - insert: place a new element before or after \`anchor_id\`. Omit \`anchor_id\` to append,
-	    or to prepend with position "before". Each insert resolves independently, so several
-	    at one anchor must each repeat it; they stack in the order you emit them. A script
-	    element needs its \`text\`. Never send an \`id\` on an insert.
+	    or to prepend with position "before". To insert several in one spot, give each the same
+	    \`anchor_id\`; they land in the order you emit them.
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into
@@ -77,11 +68,10 @@ export const editScript = defineTool({
 	  element holding only what you send.
 
 	  Script types: ${ContentTypeSchema.options.join(", ")}
-	  Asset types: ${Object.keys(ASSET_TYPES).join(", ")}
 
 	  ${ASSETS}
 
-	  Attributes by type, all string values; a value the type does not offer fails the operation:
+	  Attributes by type:
 	  ${ATTRIBUTES_BY_TYPE}
 
 	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: an image's URL from
