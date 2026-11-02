@@ -57,7 +57,7 @@ const edit = (...elements: ContentElement[]) => {
 	graph = new GenerationGraph(contextNow(), graph);
 };
 
-const nodeOf = (of: ContentElement) => graph.resolve(of);
+const nodeOf = (content: ContentElement) => graph.resolve(content);
 
 beforeEach(() => {
 	assets = [];

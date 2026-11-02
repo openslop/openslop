@@ -8,7 +8,7 @@ describe("flattenGraph", () => {
 		const left = node("left", [shared]);
 		const right = node("right", [shared]);
 
-		expect(flattenGraph([left, right]).map((n) => n.id)).toEqual([
+		expect(flattenGraph([left, right]).map(({ id }) => id)).toEqual([
 			"shared",
 			"left",
 			"right",

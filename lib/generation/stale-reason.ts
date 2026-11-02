@@ -12,11 +12,11 @@ const MAX_NAMED = 3;
 const list = new Intl.ListFormat("en", { type: "conjunction" });
 
 const changedKeys = (
-	now: Record<string, unknown>,
-	then: Record<string, unknown>,
+	current: Record<string, unknown>,
+	previous: Record<string, unknown>,
 ) =>
-	union(Object.keys(now), Object.keys(then)).filter(
-		(key) => now[key] !== then[key],
+	union(Object.keys(current), Object.keys(previous)).filter(
+		(key) => current[key] !== previous[key],
 	);
 
 /** Everything about `node` that no longer matches the result it produced. */
