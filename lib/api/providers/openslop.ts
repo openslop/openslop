@@ -52,6 +52,7 @@ const OPENSLOP_PROVIDERS: {
 	image: {
 		"Slop Image v2": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 		"Slop Image v1": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
+		"Grok Imagine 2.0": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 	},
 	video: {
 		"Slop Video v2": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
