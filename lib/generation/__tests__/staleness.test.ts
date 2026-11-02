@@ -7,6 +7,9 @@ import { jobNode as node } from "./_graph";
 const commit = (queue: GenerationQueue, target: GenerationNode, url: string) =>
 	queue.commitResult(target, { imageUrl: url, durationSec: 0 });
 
+const framed = (aspectRatio: string) =>
+	node("image", [], { reads: { "the aspect ratio": aspectRatio } });
+
 describe("generationInputs", () => {
 	it("records each dependency's result, blank before it has one, and what the node read", () => {
 		const queue = new GenerationQueue();
@@ -54,8 +57,6 @@ describe("isNodeStale", () => {
 
 	it("is true once something it read changes", () => {
 		const queue = new GenerationQueue();
-		const framed = (aspectRatio: string) =>
-			node("image", [], { reads: { "the aspect ratio": aspectRatio } });
 		commit(queue, framed("16:9"), "image.png");
 
 		expect(isNodeStale(framed("16:9"), queue)).toBe(false);
@@ -76,8 +77,6 @@ describe("isNodeStale", () => {
 		expect(isNodeStale(image("watercolor"), queue)).toBe(true);
 	});
 
-	// commitResult is the "the queue did not generate this" path: uploads and
-	// template seeds. It pins, so project state drifting cannot overwrite them.
 	it("never marks a committed upload stale, however far its inputs drift", () => {
 		const queue = new GenerationQueue();
 		const uploaded = (style: string) =>
@@ -100,14 +99,11 @@ describe("isNodeStale", () => {
 
 	it("judges again when the result it holds is committed for other inputs", () => {
 		const queue = new GenerationQueue();
-		const result = { imageUrl: "image.png", durationSec: 0 };
-		const withRefs = (aspectRatio: string) =>
-			node("image", [], { reads: { "the aspect ratio": aspectRatio } });
-		const edited = withRefs("9:16");
-		queue.commitResult(withRefs("16:9"), result);
+		const edited = framed("9:16");
+		commit(queue, framed("16:9"), "image.png");
 		expect(needsGeneration(edited, queue)).toBe(true);
 
-		queue.commitResult(edited, result);
+		commit(queue, edited, "image.png");
 		expect(needsGeneration(edited, queue)).toBe(false);
 	});
 
