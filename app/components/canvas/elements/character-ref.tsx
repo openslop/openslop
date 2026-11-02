@@ -16,8 +16,8 @@ import type { CharacterRefElement } from "@/lib/canvas/types";
 import { isCharacter } from "@/lib/canvas/assets";
 import { useHasAsset } from "@/lib/canvas/use-assets";
 import { cn } from "@/lib/utils";
-import { CharacterAvatar } from "./character-pill";
 import { useAssetEditors } from "./asset-edit-context";
+import { CharacterAvatar } from "./character-pill";
 
 const noSubscription = () => () => {};
 
@@ -53,43 +53,51 @@ function CharacterActionButton({
 	);
 }
 
-function KnownCharacter({ name }: { name: string }) {
-	const readOnly = useReadOnly();
+function EditCharacterButton({ name }: { name: string }) {
 	const { editAsset } = useAssetEditors();
 	const hasAvatar = useHasAsset("asset_avatar", name);
+	return (
+		<CharacterActionButton
+			label={`Edit ${name}`}
+			icon={Pencil}
+			onClick={() =>
+				editAsset(hasAvatar ? "asset_avatar" : "asset_voice", name)
+			}
+		/>
+	);
+}
+
+function CreateCharacterButton({ name }: { name: string }) {
+	const { createCharacter } = useAssetEditors();
+	return (
+		<CharacterActionButton
+			label={`Create ${name}`}
+			icon={Plus}
+			onClick={() => createCharacter(name)}
+		/>
+	);
+}
+
+function KnownCharacter({ name }: { name: string }) {
+	const readOnly = useReadOnly();
 	return (
 		<Badge variant="subtle" size="inline" className="group/chip relative">
 			<CharacterAvatar name={name} size="xs" className="rounded-none" />
 			<span className="min-w-0 self-baseline truncate">{name}</span>
-			{!readOnly && (
-				<CharacterActionButton
-					label={`Edit ${name}`}
-					icon={Pencil}
-					onClick={() =>
-						editAsset(hasAvatar ? "asset_avatar" : "asset_voice", name)
-					}
-				/>
-			)}
+			{!readOnly && <EditCharacterButton name={name} />}
 		</Badge>
 	);
 }
 
 function UnknownCharacter({ name }: { name: string }) {
 	const readOnly = useReadOnly();
-	const { createCharacter } = useAssetEditors();
 	return (
 		<SimpleTooltip label={`No character named ${name}`}>
 			<Badge variant="caution" size="inline" className="group/chip relative">
 				<AlertTriangle aria-hidden="true" />
 				<span className="sr-only">Unknown character: </span>
 				<span className="min-w-0 self-baseline truncate">{name}</span>
-				{!readOnly && (
-					<CharacterActionButton
-						label={`Create ${name}`}
-						icon={Plus}
-						onClick={() => createCharacter(name)}
-					/>
-				)}
+				{!readOnly && <CreateCharacterButton name={name} />}
 			</Badge>
 		</SimpleTooltip>
 	);
