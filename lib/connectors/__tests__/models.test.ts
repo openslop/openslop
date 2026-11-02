@@ -98,7 +98,7 @@ describe("listModels", () => {
 			...modelEntry("image", ref),
 		});
 		expect(listModels("image")).toEqual([
-			row(SLOP_IMAGE),
+			row({ provider: "openslop", model: "Slop Image v2" }),
 			row({ provider: "openslop", model: "Slop Image v1" }),
 			row({ provider: "openslop", model: "Grok Imagine 2.0" }),
 			row({ provider: "runware", model: "Muse Image" }),
