@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import { BLOB_BASE_URL } from "../blob";
 
 const httpError = (response: Response, label: string) =>
 	new Error(`${label} (${response.status} ${response.statusText})`);
@@ -115,9 +116,11 @@ export class AssetBundle {
 		return `${AssetBundle.baseUrl}/assets/${type}/${provider}/${id}`;
 	}
 
-	/** Whether `url` points into our own store, so it is safe to fetch server side. */
+	/** Whether `url` points into our own store, or the fixtures store, so it is safe to fetch server side. */
 	static holds(url: string): boolean {
-		return url.startsWith(`${AssetBundle.baseUrl}/assets/`);
+		return [AssetBundle.baseUrl, BLOB_BASE_URL].some((base) =>
+			url.startsWith(`${base}/assets/`),
+		);
 	}
 
 	static fromResponse(response: BundleResponse): AssetBundle {

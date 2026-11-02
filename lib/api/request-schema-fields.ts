@@ -2,6 +2,7 @@ import { z } from "zod";
 import { BYOK_PROVIDERS } from "@/lib/connectors/provider-catalog";
 import { HostedVoicePreviewSchema } from "@/lib/connectors/types";
 import { MEDIA_RESOLUTIONS } from "@/lib/project/aspect-ratio";
+import { AssetBundle } from "./asset-bundle";
 import { parseImageSource } from "./image-source";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
@@ -51,11 +52,21 @@ export const optionalFrameImage = {
 	frameImage: referenceImageUrlOrDataUri.optional(),
 } as const;
 
+/** Media the server fetches itself comes only from our own store. */
+export const storedUrl = (noun: string) =>
+	z
+		.url({ error: `${noun} must be an HTTP(S) URL` })
+		.refine((url) => AssetBundle.holds(url), {
+			error: `${noun} must be a file in our store`,
+		});
+
 /** A character in the shot: the avatar it looks like and the voice it speaks in. */
 export const CharacterSchema = z.object({
 	name: z.string().min(1, { error: "A character must be named" }),
 	avatarUrl: referenceImageUrlOrDataUri.optional(),
-	voice: HostedVoicePreviewSchema.optional(),
+	voice: HostedVoicePreviewSchema.extend({
+		url: storedUrl("A character voice"),
+	}).optional(),
 });
 
 export const optionalCharacterAssets = {
