@@ -54,9 +54,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				}}
 			>
 				{editing?.kind === "create" && (
-					<NewCharacterDialog
-						onCreated={editors.createCharacter}
-					/>
+					<NewCharacterDialog onCreated={editors.createCharacter} />
 				)}
 				{editing?.kind === "character" && (
 					<CharacterEditModal
