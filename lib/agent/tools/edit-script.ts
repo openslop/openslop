@@ -61,8 +61,8 @@ export const editScript = defineTool({
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into
-	    another script type (an asset keeps its type) and resets its attributes, a character
-	    line's \`name\` included: send them again.
+	    another script type and clears its attributes, so send the ones to keep, like a
+	    character line's \`name\`, in the same op.
 
 	  To move an element, remove it and insert it again: the copy is a new, ungenerated
 	  element holding only what you send.
