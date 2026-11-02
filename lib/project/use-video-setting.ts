@@ -4,5 +4,5 @@ import type { VideoSettings } from "./video-settings";
 export function useVideoSetting<K extends keyof VideoSettings>(
 	key: K,
 ): VideoSettings[K] {
-	return useProject((s) => s.videoSettings[key]);
+	return useProject((state) => state.videoSettings[key]);
 }
