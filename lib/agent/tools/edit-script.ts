@@ -36,7 +36,7 @@ const ATTRIBUTES_BY_TYPE = ElementTypeSchema.options
 	.join("\n");
 
 const ASSETS = dedent`
-	Insert an asset with no anchor; inserting one that already exists changes it.
+	Assets take no anchor. Inserting an asset that already exists, by type and name, updates it.
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
 	lines and every {{Name}} in a prompt use, which never changes. A character has either or both.
 	- asset_avatar: what a character looks like, as its text, written like an image
