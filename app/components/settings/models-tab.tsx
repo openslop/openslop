@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalClaudeCard } from "./local-claude-card";
 import { Button } from "@/components/ui/button";
 import { Plus, RotateCcw } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
@@ -12,7 +13,10 @@ import {
 	differsFromRecommended,
 	modelEntry,
 } from "@/lib/connectors/models";
-import { MANAGED_PROVIDER } from "@/lib/connectors/provider-catalog";
+import {
+	MANAGED_PROVIDER,
+	LOCAL_PROVIDER,
+} from "@/lib/connectors/provider-catalog";
 import type { Provider } from "@/lib/connectors/types";
 import { toastError } from "@/lib/toast-error";
 import { useSettings } from "@/lib/settings/use-settings";
@@ -43,6 +47,7 @@ export function ModelsTab({
 	return (
 		<div className="flex flex-col gap-6">
 			<SectionTitle>Models</SectionTitle>
+			{process.env.NODE_ENV === "development" && <LocalClaudeCard />}
 
 			<SettingsSection
 				title="Providers"
@@ -60,7 +65,8 @@ export function ModelsTab({
 				) : (
 					<div className="flex flex-col gap-2">
 						{shown.map((provider) =>
-							provider === MANAGED_PROVIDER ? (
+							provider === LOCAL_PROVIDER ? null : provider ===
+							  MANAGED_PROVIDER ? (
 								<HostedProviderCard key={provider} />
 							) : (
 								<ProviderCard
