@@ -56,8 +56,8 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/composer-copilot.tsx"><img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%"></a>
-  <a href="../../app/components/copilot/composer-copilot.tsx"><img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%"></a>
+  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
+  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
 </td>
 </tr>
 <tr>
@@ -71,8 +71,8 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#sloppy"><img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#sloppy"><img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%"></a>
+  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
 </td>
 </tr>
 <tr>
@@ -86,8 +86,8 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 </td>
 <td width="50%">
-  <a href="../../lib/canvas"><img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%"></a>
-  <a href="../../lib/canvas"><img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%"></a>
+  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
+  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
 </td>
 </tr>
 <tr>
@@ -101,8 +101,8 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%"></a>
+  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
+  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
 </td>
 </tr>
 <tr>
@@ -116,8 +116,8 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <a href="../../app/components/player"><img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%"></a>
-  <a href="../../app/components/player"><img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%"></a>
+  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
+  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
 </td>
 </tr>
 <tr>
@@ -131,8 +131,8 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-keys"><img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#models-and-keys"><img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%"></a>
+  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
+  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
 </td>
 </tr>
 </table>
@@ -263,10 +263,8 @@ supabase/        データベースのマイグレーション
 ## スター履歴
 
 <p align="center">
-  <a href="https://star-history.com/#openslop/openslop&Date">
-    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="openslop/openslop の GitHub スター履歴グラフ" width="880">
-    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="openslop/openslop の GitHub スター履歴グラフ" width="880">
-  </a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="openslop/openslop の GitHub スター履歴グラフ" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="openslop/openslop の GitHub スター履歴グラフ" width="880"></a>
 </p>
 
 ## ライセンス

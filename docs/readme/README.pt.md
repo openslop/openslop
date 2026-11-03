@@ -56,8 +56,8 @@ Digite uma linha. Escolha 16:9 ou 9:16, um idioma, um modelo e uma duração, ou
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/composer-copilot.tsx"><img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%"></a>
-  <a href="../../app/components/copilot/composer-copilot.tsx"><img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%"></a>
+  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%">
+  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%">
 </td>
 </tr>
 <tr>
@@ -71,8 +71,8 @@ O copiloto mora no painel da esquerda. Ele lê o roteiro, esboça a história, e
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#sloppy"><img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy pensa, lê, esboça, escreve um roteiro e as cenas aparecem no canvas" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#sloppy"><img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy pensa, lê, esboça, escreve um roteiro e as cenas aparecem no canvas" width="100%"></a>
+  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy pensa, lê, esboça, escreve um roteiro e as cenas aparecem no canvas" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy pensa, lê, esboça, escreve um roteiro e as cenas aparecem no canvas" width="100%">
 </td>
 </tr>
 <tr>
@@ -86,8 +86,8 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, vídeo, som,
 
 </td>
 <td width="50%">
-  <a href="../../lib/canvas"><img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%"></a>
-  <a href="../../lib/canvas"><img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%"></a>
+  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%">
+  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%">
 </td>
 </tr>
 <tr>
@@ -101,8 +101,8 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, vídeo, som,
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all roda a fila, as prévias vão aparecendo e um prompt editado é marcado como Stale com um motivo" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all roda a fila, as prévias vão aparecendo e um prompt editado é marcado como Stale com um motivo" width="100%"></a>
+  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all roda a fila, as prévias vão aparecendo e um prompt editado é marcado como Stale com um motivo" width="100%">
+  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all roda a fila, as prévias vão aparecendo e um prompt editado é marcado como Stale com um motivo" width="100%">
 </td>
 </tr>
 <tr>
@@ -116,8 +116,8 @@ Assista ao corte enquanto ele vai sendo preenchido, com legendas palavra por pal
 
 </td>
 <td width="50%">
-  <a href="../../app/components/player"><img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%"></a>
-  <a href="../../app/components/player"><img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%"></a>
+  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%">
+  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%">
 </td>
 </tr>
 <tr>
@@ -131,8 +131,8 @@ Os modelos hospedados vêm com sua conta. Cole uma chave da Anthropic, Runware, 
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-keys"><img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Uma chave da Cartesia é colada e validada, passando de Unverified para Connected" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#models-and-keys"><img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Uma chave da Cartesia é colada e validada, passando de Unverified para Connected" width="100%"></a>
+  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Uma chave da Cartesia é colada e validada, passando de Unverified para Connected" width="100%">
+  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Uma chave da Cartesia é colada e validada, passando de Unverified para Connected" width="100%">
 </td>
 </tr>
 </table>
@@ -263,10 +263,8 @@ Todo mundo na comunidade deve seguir nosso [Código de Conduta](../../CODE_OF_CO
 ## Histórico de estrelas
 
 <p align="center">
-  <a href="https://star-history.com/#openslop/openslop&Date">
-    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="Gráfico do histórico de estrelas do GitHub para openslop/openslop" width="880">
-    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="Gráfico do histórico de estrelas do GitHub para openslop/openslop" width="880">
-  </a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="Gráfico do histórico de estrelas do GitHub para openslop/openslop" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="Gráfico do histórico de estrelas do GitHub para openslop/openslop" width="880"></a>
 </p>
 
 ## Licença
