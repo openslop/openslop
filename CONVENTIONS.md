@@ -1,6 +1,6 @@
 # Coding Conventions
 
-How we write code here, for humans and agents. The codebase is deliberately rigid and opinionated. These are strong defaults, not suggestions. Deviate only when you can clearly justify why.
+How we write code here, for humans and agents. The codebase is deliberately rigid and opinionated. These are strong defaults, not suggestions. Deviate only when you can clearly justify why. For the reasoning behind these rules, see [PHILOSOPHY.md](PHILOSOPHY.md).
 
 ## Principles
 

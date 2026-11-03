@@ -46,7 +46,7 @@ e2e needs a browser: `npx playwright install --with-deps chromium`
 
 ## How we write code
 
-Read [CONVENTIONS.md](CONVENTIONS.md). It's strict on purpose. Stuff that gets PRs bounced most:
+Read [CONVENTIONS.md](CONVENTIONS.md). It's strict on purpose, and [PHILOSOPHY.md](PHILOSOPHY.md) explains why. Stuff that gets PRs bounced most:
 
 - One way to do a thing. No one-off wiring
 - No `!` non-null assertions (lint fails)
