@@ -42,20 +42,20 @@ export type OwnLength = {
 	decidedBy: "duration" | "trim";
 };
 
-const isVideo = (element: ContentElement) =>
-	CONTENT_TYPES[element.type].outputKind === "video";
-
-/** A video plays for its trim where the user set one, else its duration. */
-const videoLength = (
+/** A video plays for its trim where the user set one, else its duration; a still has no length of its own. */
+const ownLength = (
 	element: ContentElement,
-	durationSec: number,
-): OwnLength => {
+): Pick<ElementLength, "durationSec" | "own"> => {
+	if (CONTENT_TYPES[element.type].outputKind !== "video") return {};
+	const durationSec = getDuration(element);
 	const trim = elementTrim(element, durationSec);
+	const trimmed = isTrimmed({ ...trim, mediaDurationSec: durationSec });
 	return {
-		seconds: trim.durationSec,
-		decidedBy: isTrimmed({ ...trim, mediaDurationSec: durationSec })
-			? "trim"
-			: "duration",
+		durationSec,
+		own: {
+			seconds: trim.durationSec,
+			decidedBy: trimmed ? "trim" : "duration",
+		},
 	};
 };
 
@@ -79,9 +79,7 @@ const toLength = ({
 	words,
 	dialogueIds,
 }: Span): ElementLength => {
-	const durationSec = isVideo(element) ? getDuration(element) : undefined;
-	const own =
-		durationSec === undefined ? undefined : videoLength(element, durationSec);
+	const { durationSec, own } = ownLength(element);
 	return {
 		id: element.id,
 		type: element.type,
