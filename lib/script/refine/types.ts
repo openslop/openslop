@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { ContentTypeSchema, ElementTypeSchema } from "@/lib/canvas/types";
+import { AssetTypeSchema, ContentTypeSchema } from "@/lib/canvas/types";
 
 const ELEMENT_TEXT =
 	"The element's content: the spoken line for narration and character; the prompt for image, video, sound and music; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.";
 
 const newElement = z.object({
-	type: ElementTypeSchema,
+	type: ContentTypeSchema,
 	attrs: z.record(z.string(), z.string()).optional(),
 	text: z.string().optional().describe(ELEMENT_TEXT),
 });
@@ -25,6 +25,13 @@ const insertOp = z.object({
 		.describe("The new elements, in the order they appear."),
 });
 
+const assetOp = z.object({
+	op: z.literal("asset"),
+	type: AssetTypeSchema,
+	attrs: z.record(z.string(), z.string()).optional(),
+	text: z.string().optional().describe(ELEMENT_TEXT),
+});
+
 const removeOp = z.object({
 	op: z.literal("remove"),
 	id: z.string(),
@@ -40,6 +47,7 @@ const setOp = z.object({
 
 export const refineOpSchema = z.discriminatedUnion("op", [
 	insertOp,
+	assetOp,
 	removeOp,
 	setOp,
 ]);

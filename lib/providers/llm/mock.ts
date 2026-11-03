@@ -28,10 +28,8 @@ import type { LLMProvider } from "./base";
 
 const MOCK_TITLE = "Little Red";
 
-const MOCK_ASSETS: RefineOp = {
-	op: "insert",
-	elements:
-		parseOSML(`<asset_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</asset_style>
+const MOCK_ASSETS: RefineOp[] =
+	parseOSML(`<asset_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</asset_style>
 
 <asset_voice name="Narrator" gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind" language="en"></asset_voice>
 
@@ -48,13 +46,13 @@ const MOCK_ASSETS: RefineOp = {
 <asset_voice name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en"></asset_voice>
 
 `)
-			.filter(isAssetElement)
-			.map((asset) => ({
-				type: asset.type,
-				attrs: omit(flatAttributes(asset), ["provider", "model"]),
-				text: getElementBodyText(asset),
-			})),
-};
+		.filter(isAssetElement)
+		.map((asset) => ({
+			op: "asset",
+			type: asset.type,
+			attrs: omit(flatAttributes(asset), ["provider", "model"]),
+			text: getElementBodyText(asset),
+		}));
 
 const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:40, warm and bright, under a narrator. Opens with a light flute melody over pizzicato strings and soft harp as the village wakes; at 0:25 a warm clarinet takes the tune for Mother and Red in the kitchen; at 0:50 the strings thin and slow as Owl watches from the oak; at 1:10 a low, kindly bassoon enters for Wolf picking berries. Ends on a held, curious string chord as Red and Wolf meet on the path. Mood: cheerful, cosy, a little mysterious. Key: G major. Tempo: 96 BPM, 4/4. Light orchestral film score, no lyrics.</music>
 
@@ -328,7 +326,7 @@ const NEXT_STEP: Record<string, NextStep> = {
 	set_title: () => ({
 		say: "Setting up the characters and the art style. ",
 		toolName: "edit_script",
-		input: { ops: [MOCK_ASSETS] },
+		input: { ops: MOCK_ASSETS },
 	}),
 	edit_script: (results) =>
 		results.at(-2)?.toolName === "set_title"

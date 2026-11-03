@@ -35,7 +35,6 @@ const ATTRIBUTES_BY_TYPE = ElementTypeSchema.options
 	.join("\n");
 
 const ASSETS = dedent`
-	Assets take no anchor. Inserting an asset that already exists, by type and name, updates it.
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
 	lines and every {{Name}} in a prompt use, which never changes. A character has either or both.
 	- asset_avatar: what a character looks like, as its text, written like an image
@@ -57,6 +56,8 @@ export const editScript = defineTool({
 	  - insert: place new \`elements\` before or after \`anchor_id\`, in the order you list them.
 	    Omit \`anchor_id\` to append, or to prepend with position "before". To add several
 	    elements in a row, send them as one insert: you cannot anchor on an element this call adds.
+	  - asset: create an asset, or update the one with the same \`type\` and \`name\`. Assets sit
+	    outside the script, so they take no anchor.
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into

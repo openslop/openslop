@@ -9,11 +9,7 @@ import {
 	updateElementText,
 	withAttrs,
 } from "@/lib/canvas/editor-ops";
-import {
-	isAssetElement,
-	isAssetType,
-	isContentElement,
-} from "@/lib/canvas/guards";
+import { isAssetElement, isContentElement } from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insert-element";
 import { isScene } from "@/lib/canvas/scenes";
 import type { AssetType, ElementType } from "@/lib/canvas/types";
@@ -46,6 +42,9 @@ export function applyRefineOp(editor: Editor, op: RefineOp): RefineOpResult {
 		switch (op.op) {
 			case "insert":
 				result = applyInsert(editor, op);
+				break;
+			case "asset":
+				result = applyAsset(editor, op);
 				break;
 			case "remove":
 				result = applyRemove(editor, op);
@@ -85,15 +84,11 @@ function resolveInsertPath(
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
 }
 
-function elementProblems(element: NewElement): string[] {
-	const unoffered = unofferedAttributes(element.type, {}, element.attrs ?? {});
-	const missing = isAssetType(element.type)
-		? CHARACTER_ASSETS.has(element.type) && !element.attrs?.name && "a name"
-		: !element.text?.trim() && "text";
+function elementProblems({ type, attrs, text }: NewElement): string[] {
 	return [
-		...(unoffered ? [unoffered] : []),
-		...(missing ? [`${element.type} needs ${missing}`] : []),
-	];
+		unofferedAttributes(type, {}, attrs ?? {}),
+		text?.trim() ? undefined : `${type} needs text`,
+	].filter((problem) => problem !== undefined);
 }
 
 function applyInsert(
@@ -112,15 +107,28 @@ function applyInsert(
 		};
 	}
 
-	const next = Editor.pathRef(editor, at);
+	let path = at;
 	for (const { type, attrs, text } of op.elements) {
-		if (isAssetType(type))
-			setAsset(editor, type, attrs?.name, { attrs, text: text || undefined });
-		else if (next.current)
-			insertElement(editor, type, next.current, { attrs, text });
-		else throw new Error(`insert: the spot at "${op.anchor_id}" went away`);
+		insertElement(editor, type, path, { attrs, text });
+		path = Path.next(path);
 	}
-	next.unref();
+	return OK;
+}
+
+function applyAsset(
+	editor: Editor,
+	{ type, attrs, text }: Extract<RefineOp, { op: "asset" }>,
+): RefineOpResult {
+	const problems = [
+		unofferedAttributes(type, {}, attrs ?? {}),
+		CHARACTER_ASSETS.has(type) && !attrs?.name
+			? `${type} needs a name`
+			: undefined,
+	].filter((problem) => problem !== undefined);
+	if (problems.length > 0)
+		return { ok: false, reason: `asset: ${problems.join("; ")}` };
+
+	setAsset(editor, type, attrs?.name, { attrs, text: text || undefined });
 	return OK;
 }
 

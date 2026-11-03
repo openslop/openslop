@@ -2,9 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Editor, Element } from "slate";
 import type { AssetElement, ContentElement, Scene } from "@/lib/canvas/types";
 
-// No connector model stamped here — these tests exercise refine-op mechanics
-// (insert/remove/set), not attribute-schema resolution, which
-// has its own tests under lib/connectors/attributes/.
+// Refine-op mechanics only; schema resolution is tested under lib/connectors/attributes/.
 const SCHEMA_DEFAULTS: Record<string, Record<string, string>> = {
 	sfx: { loops: "1" },
 	tts: { emotion: "neutral" },
@@ -551,13 +549,14 @@ describe("applyRefineOp — assets", () => {
 		const editor = makeCanvas([]);
 
 		const result = apply(editor, {
-			op: "insert",
-			elements: [{ type: "asset_avatar", text: "a girl in a yellow cardigan" }],
+			op: "asset",
+			type: "asset_avatar",
+			text: "a girl in a yellow cardigan",
 		});
 
 		expect(result).toEqual({
 			applied: 0,
-			failures: ["insert: asset_avatar needs a name"],
+			failures: ["asset: asset_avatar needs a name"],
 		});
 		expect(topLevelTypes(editor)).toEqual(["scene"]);
 	});
@@ -566,14 +565,10 @@ describe("applyRefineOp — assets", () => {
 		const editor = makeCanvas([asset("asset_style", { text: "noir" })]);
 
 		const result = apply(editor, {
-			op: "insert",
-			elements: [
-				{
-					type: "asset_avatar",
-					attrs: { name: "Mia" },
-					text: "a girl in a yellow cardigan",
-				},
-			],
+			op: "asset",
+			type: "asset_avatar",
+			attrs: { name: "Mia" },
+			text: "a girl in a yellow cardigan",
 		});
 
 		expect(result).toEqual({ applied: 1, failures: [] });
@@ -600,59 +595,36 @@ describe("applyRefineOp — assets", () => {
 
 		apply(
 			editor,
+			{ op: "asset", type: "asset_style", text: "muted watercolor" },
 			{
-				op: "insert",
-				elements: [{ type: "asset_style", text: "muted watercolor" }],
+				op: "asset",
+				type: "asset_references",
+				attrs: { images: "a.png,b.png" },
+				text: "",
 			},
 			{
-				op: "insert",
-				elements: [
-					{
-						type: "asset_references",
-						attrs: { images: "a.png,b.png" },
-						text: "",
-					},
-				],
+				op: "asset",
+				type: "asset_avatar",
+				attrs: { name: "Mia" },
+				text: "a girl in a yellow cardigan",
 			},
 			{
-				op: "insert",
-				elements: [
-					{
-						type: "asset_avatar",
-						attrs: { name: "Mia" },
-						text: "a girl in a yellow cardigan",
-					},
-				],
+				op: "asset",
+				type: "asset_voice",
+				attrs: { name: "Mia", pitch: "high" },
+				text: "",
 			},
 			{
-				op: "insert",
-				elements: [
-					{
-						type: "asset_voice",
-						attrs: { name: "Mia", pitch: "high" },
-						text: "",
-					},
-				],
+				op: "asset",
+				type: "asset_voice",
+				attrs: { name: NARRATOR, age: "adult" },
+				text: "",
 			},
 			{
-				op: "insert",
-				elements: [
-					{
-						type: "asset_voice",
-						attrs: { name: NARRATOR, age: "adult" },
-						text: "",
-					},
-				],
-			},
-			{
-				op: "insert",
-				elements: [
-					{
-						type: "asset_voice",
-						attrs: { name: NARRATOR, pitch: "low" },
-						text: "",
-					},
-				],
+				op: "asset",
+				type: "asset_voice",
+				attrs: { name: NARRATOR, pitch: "low" },
+				text: "",
 			},
 		);
 
@@ -707,8 +679,9 @@ describe("applyRefineOp — assets", () => {
 		const editor = makeCanvas([]);
 
 		const result = apply(editor, {
-			op: "insert",
-			elements: [{ type: "asset_voice", attrs: { name: "Mia", age: "child" } }],
+			op: "asset",
+			type: "asset_voice",
+			attrs: { name: "Mia", age: "child" },
 		});
 
 		expect(result).toEqual({ applied: 1, failures: [] });
@@ -721,15 +694,14 @@ describe("applyRefineOp — assets", () => {
 		const editor = makeCanvas([]);
 
 		const result = apply(editor, {
-			op: "insert",
-			elements: [
-				{ type: "asset_voice", attrs: { name: "Mia", age: "ageless" } },
-			],
+			op: "asset",
+			type: "asset_voice",
+			attrs: { name: "Mia", age: "ageless" },
 		});
 
 		expect(result).toEqual({
 			applied: 0,
-			failures: ['insert: asset_voice offers no age "ageless"'],
+			failures: ['asset: asset_voice offers no age "ageless"'],
 		});
 		expect(describeAssets(editor)).toEqual([]);
 	});
@@ -740,8 +712,10 @@ describe("applyRefineOp — assets", () => {
 		]);
 
 		apply(editor, {
-			op: "insert",
-			elements: [{ type: "asset_avatar", attrs: { name: "Mia" }, text: "" }],
+			op: "asset",
+			type: "asset_avatar",
+			attrs: { name: "Mia" },
+			text: "",
 		});
 
 		expect(describeAssets(editor)[0]?.[2]).toBe("a girl");
@@ -871,27 +845,6 @@ describe("applyRefineOp — assets", () => {
 			Element.isElement(first) &&
 				first.children.map((child) => "type" in child && child.type),
 		).toEqual(["sound", "narration"]);
-	});
-	it("adds a new asset without moving where the same insert's script elements land", () => {
-		const editor = makeCanvas([]);
-
-		apply(editor, {
-			op: "insert",
-			anchor_id: "n1",
-			elements: [
-				{ type: "sound", text: "rain" },
-				{ type: "asset_style", text: "noir" },
-				{ type: "sound", text: "thunder" },
-			],
-		});
-
-		expect(topLevelTypes(editor)).toEqual(["asset_style", "scene"]);
-		expect(getContentTexts(editor)).toEqual([
-			"noir",
-			"hello",
-			"rain",
-			"thunder",
-		]);
 	});
 });
 
