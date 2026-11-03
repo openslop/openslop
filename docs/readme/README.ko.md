@@ -263,8 +263,8 @@ supabase/        데이터베이스 마이그레이션
 ## 스타 히스토리
 
 <p align="center">
-  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="openslop/openslop의 GitHub 스타 히스토리 차트" width="880">
-  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="openslop/openslop의 GitHub 스타 히스토리 차트" width="880">
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="openslop/openslop의 GitHub 스타 히스토리 차트" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="openslop/openslop의 GitHub 스타 히스토리 차트" width="880"></a>
 </p>
 
 ## 라이선스

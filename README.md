@@ -275,8 +275,8 @@ Everyone in the community is expected to follow our [Code of Conduct](CODE_OF_CO
 ## Star history
 
 <p align="center">
-  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="GitHub star history chart for openslop/openslop" width="880">
-  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="GitHub star history chart for openslop/openslop" width="880">
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="GitHub star history chart for openslop/openslop" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="GitHub star history chart for openslop/openslop" width="880"></a>
 </p>
 
 ## License

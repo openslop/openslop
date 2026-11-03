@@ -263,8 +263,8 @@ Se espera que todos en la comunidad sigan nuestro [Código de conducta](../../CO
 ## Historial de estrellas
 
 <p align="center">
-  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="Gráfico del historial de estrellas de GitHub para openslop/openslop" width="880">
-  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="Gráfico del historial de estrellas de GitHub para openslop/openslop" width="880">
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="Gráfico del historial de estrellas de GitHub para openslop/openslop" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="Gráfico del historial de estrellas de GitHub para openslop/openslop" width="880"></a>
 </p>
 
 ## Licencia
