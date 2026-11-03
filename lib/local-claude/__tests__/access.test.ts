@@ -39,3 +39,24 @@ describe("local Claude access", () => {
 		).toBe(403);
 	});
 });
+
+it("rejects a forwarded remote hostname", () => {
+	vi.stubEnv("NODE_ENV", "development");
+	expect(
+		localClaudeAccess(
+			new NextRequest("http://localhost:5300/api/local/claude/account", {
+				headers: { "x-forwarded-host": "remote.example" },
+			}),
+		)?.status,
+	).toBe(403);
+});
+it("accepts a matching forwarded loopback hostname", () => {
+	vi.stubEnv("NODE_ENV", "development");
+	expect(
+		localClaudeAccess(
+			new NextRequest("http://localhost:5300/api/local/claude/account", {
+				headers: { "x-forwarded-host": "localhost:5300" },
+			}),
+		),
+	).toBeNull();
+});

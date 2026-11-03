@@ -50,3 +50,22 @@ it.each([{ is_error: true, result: "quota" }, { result: "" }])(
 		await expect(generateWithClaude("user", "hi", "system")).rejects.toThrow();
 	},
 );
+
+it("requires and validates the structured output envelope", async () => {
+	vi.mocked(runClaude).mockResolvedValue(
+		JSON.stringify({ structured_output: { text: "hello", calls: [] } }),
+	);
+	expect(
+		JSON.parse(
+			await generateWithClaude("user", "hi", "system", undefined, {
+				type: "object",
+			}),
+		),
+	).toEqual({ text: "hello", calls: [] });
+	vi.mocked(runClaude).mockResolvedValue(
+		JSON.stringify({ result: "no structure" }),
+	);
+	await expect(
+		generateWithClaude("user", "hi", "system", undefined, { type: "object" }),
+	).rejects.toThrow("structured response");
+});

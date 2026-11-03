@@ -29,6 +29,21 @@ export function LocalClaudeCard() {
 			pending.current?.abort();
 		};
 	}, []);
+	useEffect(() => {
+		if (!account?.loginUrl || account.connected) return;
+		const controller = new AbortController();
+		const timer = setInterval(() => {
+			apiJson(ENDPOINT, ClaudeAccountSchema, { signal: controller.signal })
+				.then(setAccount)
+				.catch((cause) => {
+					if (!controller.signal.aborted) setError(errorMessage(cause));
+				});
+		}, 2000);
+		return () => {
+			clearInterval(timer);
+			controller.abort();
+		};
+	}, [account?.loginUrl, account?.connected]);
 	const act = async (method: "GET" | "POST" | "DELETE") => {
 		const controller = new AbortController();
 		pending.current = controller;
@@ -55,21 +70,41 @@ export function LocalClaudeCard() {
 			</p>
 			<p role="status" className="text-label">
 				{busy
-					? "Waiting for Claude… Complete sign-in in the browser if prompted."
+					? "Contacting Claude…"
 					: account?.connected
 						? `Connected as ${account.email ?? "your Claude account"} (${account.subscription ?? "subscription"})`
-						: account?.installed === false
-							? "Install Claude Code, then refresh."
-							: "Not connected"}
+						: account?.loginUrl
+							? "Continue to Claude to finish signing in…"
+							: account?.installed === false
+								? "Install Claude Code, then refresh."
+								: "Not connected"}
 			</p>
 			<div className="flex flex-wrap gap-2">
+				{account?.loginUrl && (
+					<>
+						<Button asChild>
+							<a href={account.loginUrl} target="_blank" rel="noreferrer">
+								Continue to Claude
+							</a>
+						</Button>
+						<Button
+							variant="secondary"
+							disabled={busy}
+							onClick={() => void act("DELETE")}
+						>
+							Cancel sign-in
+						</Button>
+					</>
+				)}
 				{busy && (
 					<Button variant="secondary" onClick={() => pending.current?.abort()}>
 						Cancel
 					</Button>
 				)}
 				<Button
-					disabled={busy || account?.installed === false}
+					disabled={
+						busy || Boolean(account?.loginUrl) || account?.installed === false
+					}
 					onClick={() => void act(account?.connected ? "DELETE" : "POST")}
 				>
 					{account?.connected ? "Disconnect Claude" : "Sign in with Claude"}
@@ -82,9 +117,9 @@ export function LocalClaudeCard() {
 					Refresh connection
 				</Button>
 			</div>
-			{error && (
+			{(error || account?.loginError) && (
 				<p role="alert" className="text-label text-destructive">
-					{error}
+					{error ?? account?.loginError}
 				</p>
 			)}
 		</SettingsSection>
