@@ -18,6 +18,9 @@ it("returns tool requests to the app instead of executing them in Claude Code", 
 			{ type: "function", name: "set_title", inputSchema: { type: "object" } },
 		],
 	});
+	expect(vi.mocked(generateWithClaude).mock.calls[0][4]).toMatchObject({
+		$schema: "http://json-schema.org/draft-07/schema#",
+	});
 	expect(result.finishReason.unified).toBe("tool-calls");
 	expect(result.content[1]).toMatchObject({
 		type: "tool-call",
