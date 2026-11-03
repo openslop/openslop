@@ -427,6 +427,7 @@ describe("executeToolCall", () => {
 					{
 						...onScreen("v3", 30),
 						durationSec: 5,
+						own: { seconds: 5, decidedBy: "duration" },
 						words: 90,
 						dialogueIds: ["nar2"],
 						decidedBy: "dialogue",
@@ -454,13 +455,13 @@ describe("executeToolCall", () => {
 					{
 						...onScreen("v1", 5),
 						durationSec: 8,
-						trimmedSec: 5,
+						own: { seconds: 5, decidedBy: "trim" },
 						decidedBy: "trim",
 					},
 					{
 						...onScreen("v2", 30),
 						durationSec: 8,
-						trimmedSec: 5,
+						own: { seconds: 5, decidedBy: "trim" },
 						words: 90,
 						dialogueIds: ["nar1"],
 						decidedBy: "dialogue",

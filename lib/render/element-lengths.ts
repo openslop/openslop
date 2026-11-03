@@ -24,8 +24,8 @@ export type ElementLength = {
 	dialogueIds: string[];
 	/** The length it is generated at, where its type has one at all. */
 	durationSec?: number;
-	/** The length its timeline trim holds it to, where the user trimmed it. */
-	trimmedSec?: number;
+	/** The length it brings of its own, where it is a video. */
+	own?: OwnLength;
 	/** Which of its own duration, its trim, its dialogue or the minimum set `seconds`. */
 	decidedBy: "duration" | "trim" | "dialogue" | "minimum";
 };
@@ -37,43 +37,37 @@ type Span = {
 	dialogueIds: string[];
 };
 
-/** A generated video runs for its own length; a still has none of its own. */
-const ownDuration = (element: ContentElement): number | undefined =>
-	CONTENT_TYPES[element.type].outputKind === "video"
-		? getDuration(element)
-		: undefined;
-
-const trimmedDuration = (
-	element: ContentElement,
-	mediaDurationSec: number,
-): number | undefined => {
-	const trim = elementTrim(element, mediaDurationSec);
-	return isTrimmed({ ...trim, mediaDurationSec })
-		? trim.durationSec
-		: undefined;
+export type OwnLength = {
+	seconds: number;
+	decidedBy: "duration" | "trim";
 };
 
-type Own = Pick<ElementLength, "durationSec" | "trimmedSec">;
+const isVideo = (element: ContentElement) =>
+	CONTENT_TYPES[element.type].outputKind === "video";
 
-/** The length a video brings of its own: its trim where the user set one, else its duration. */
-export const ownLength = ({ durationSec, trimmedSec }: Own) => {
-	if (trimmedSec !== undefined)
-		return { seconds: trimmedSec, decidedBy: "trim" as const };
-	if (durationSec !== undefined)
-		return { seconds: durationSec, decidedBy: "duration" as const };
-	return undefined;
+/** A video plays for its trim where the user set one, else its duration. */
+const videoLength = (
+	element: ContentElement,
+	durationSec: number,
+): OwnLength => {
+	const trim = elementTrim(element, durationSec);
+	return {
+		seconds: trim.durationSec,
+		decidedBy: isTrimmed({ ...trim, mediaDurationSec: durationSec })
+			? "trim"
+			: "duration",
+	};
 };
 
 export const hasDialogue = ({ words }: Pick<ElementLength, "words">) =>
 	words > 0;
 
 const decide = (
-	own: Own,
+	own: OwnLength | undefined,
 	dialogueSec: number,
 ): Pick<ElementLength, "seconds" | "decidedBy"> => {
-	const held = ownLength(own);
-	if (held && held.seconds >= dialogueSec && held.seconds >= MIN_DURATION_SEC)
-		return held;
+	if (own && own.seconds >= dialogueSec && own.seconds >= MIN_DURATION_SEC)
+		return own;
 	if (dialogueSec >= MIN_DURATION_SEC)
 		return { seconds: dialogueSec, decidedBy: "dialogue" };
 	return { seconds: MIN_DURATION_SEC, decidedBy: "minimum" };
@@ -85,18 +79,17 @@ const toLength = ({
 	words,
 	dialogueIds,
 }: Span): ElementLength => {
-	const durationSec = ownDuration(element);
-	const own = {
-		durationSec,
-		trimmedSec: trimmedDuration(element, durationSec ?? 0),
-	};
+	const durationSec = isVideo(element) ? getDuration(element) : undefined;
+	const own =
+		durationSec === undefined ? undefined : videoLength(element, durationSec);
 	return {
 		id: element.id,
 		type: element.type,
 		sceneNumber,
 		words,
 		dialogueIds,
-		...own,
+		durationSec,
+		own,
 		...decide(own, secondsForWords(words)),
 	};
 };

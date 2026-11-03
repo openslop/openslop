@@ -83,12 +83,12 @@ describe("measureElementLengths", () => {
 		expect(cut).toMatchObject({
 			seconds: 5,
 			durationSec: 8,
-			trimmedSec: 5,
+			own: { seconds: 5, decidedBy: "trim" },
 			decidedBy: "trim",
 		});
 		expect(opened).toMatchObject({
 			seconds: 5,
-			trimmedSec: 5,
+			own: { seconds: 5, decidedBy: "trim" },
 			decidedBy: "trim",
 		});
 	});
@@ -103,17 +103,17 @@ describe("measureElementLengths", () => {
 
 		expect(held).toMatchObject({
 			seconds: 30,
-			trimmedSec: 5,
+			own: { seconds: 5, decidedBy: "trim" },
 			decidedBy: "dialogue",
 		});
 	});
 
-	it("carries no trimmed length for a video the user left whole", () => {
+	it("says a video the user left whole brings its duration", () => {
 		const [whole] = measureElementLengths([
 			scene(element("video", "A pan.", { duration: "8" })),
 		]);
 
-		expect(whole.trimmedSec).toBeUndefined();
+		expect(whole.own).toEqual({ seconds: 8, decidedBy: "duration" });
 	});
 
 	it("ignores silent elements and dialogue before the first visual", () => {

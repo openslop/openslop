@@ -1,11 +1,7 @@
 import { sceneLabel } from "@/lib/canvas/constants";
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
-import {
-	hasDialogue,
-	ownLength,
-	type ElementLength,
-} from "@/lib/render/element-lengths";
+import { hasDialogue, type ElementLength } from "@/lib/render/element-lengths";
 import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
 import {
 	NARRATION_WORDS_PER_MINUTE,
@@ -26,12 +22,10 @@ const REASONS: Record<
 > = {
 	duration: (length) => `its own length; ${after(length)}`,
 	trim: (length) => `its trim on the timeline; ${after(length)}`,
-	dialogue: (length) => {
-		const own = ownLength(length);
-		return own
-			? `${dialogue(length)} after it, longer than its ${seconds(own.seconds)} ${own.decidedBy}`
-			: `${dialogue(length)} after it`;
-	},
+	dialogue: (length) =>
+		length.own
+			? `${dialogue(length)} after it, longer than its ${seconds(length.own.seconds)} ${length.own.decidedBy}`
+			: `${dialogue(length)} after it`,
 	minimum: (length) =>
 		hasDialogue(length)
 			? `the minimum, longer than the ${dialogue(length)} after it`
