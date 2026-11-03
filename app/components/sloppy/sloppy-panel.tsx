@@ -41,11 +41,11 @@ const Row = memo(function Row({
 
 function Transcript({
 	messages,
-	working,
+	loading,
 	follow,
 }: {
 	messages: SloppyMessage[];
-	working: boolean;
+	loading: boolean;
 	follow: () => void;
 }) {
 	const [restoredCount] = useState(messages.length);
@@ -67,11 +67,11 @@ function Transcript({
 				<Row
 					key={message.id}
 					message={message}
-					streaming={working && index === messages.length - 1}
+					streaming={loading && index === messages.length - 1}
 					entering={index >= restoredCount}
 				/>
 			))}
-			{working && (
+			{loading && (
 				<li>
 					<WorkingStatus
 						status={turnStatus(trailingAssistant(messages)?.parts ?? [])}
@@ -104,7 +104,7 @@ export function SloppyPanel() {
 		>
 			<Transcript
 				messages={messages}
-				working={loading}
+				loading={loading}
 				follow={scrollToBottom}
 			/>
 			<div className="sticky bottom-2 flex h-0 justify-center">

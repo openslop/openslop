@@ -39,8 +39,8 @@ export function captionableSequences(layout: Layout): Sequence[] {
 function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 	const { element, start } = sequence;
 	if (!element.captions) return [];
-	const { firstWordIndex, words } = element.captions;
-	return groupIntoLines(words, lineMs, firstWordIndex).map((line) => ({
+	const { trimIndexOffset, words } = element.captions;
+	return groupIntoLines(words, lineMs, trimIndexOffset).map((line) => ({
 		element,
 		line,
 		start: start + line.startMs / 1000,

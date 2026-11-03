@@ -41,16 +41,15 @@ export function hasPendingToolCall(
 
 const UNANSWERED = "Stopped before the editor ran it";
 
-/** A stored call the editor never answered: the turn was stopped between the call and its result. */
+/** A call the editor never answered, settled with `errorText` so nothing waits on it. Covers a turn stopped mid-call, including one reloaded from storage. */
 export function settleUnansweredCalls(
 	messages: SloppyMessage[],
+	errorText = UNANSWERED,
 ): SloppyMessage[] {
 	return messages.map((message) => ({
 		...message,
 		parts: message.parts.map((part) =>
-			isUnanswered(part)
-				? { ...part, state: "output-error", errorText: UNANSWERED }
-				: part,
+			isUnanswered(part) ? { ...part, state: "output-error", errorText } : part,
 		),
 	}));
 }

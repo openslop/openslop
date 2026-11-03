@@ -9,5 +9,5 @@ export const IMAGE_MODELS = {
 
 export const DEFAULT_IMAGE_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Slop Image v2",
+	model: "Slop Image v1",
 };

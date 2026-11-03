@@ -15,4 +15,12 @@ export const RUNWARE_IMAGE_MODELS = {
 		description:
 			"A fast all-rounder that follows detailed prompts and renders at a higher resolution.",
 	},
+	"Grok Imagine 2.0": {
+		id: "xai:grok-imagine@image-2.0",
+		cost: "medium",
+		speed: "high",
+		resolutions: ["720p"],
+		description:
+			"xAI's image model, strong at prompt-faithful scenes and edits from a reference image.",
+	},
 } as const;

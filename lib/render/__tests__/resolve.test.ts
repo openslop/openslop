@@ -269,7 +269,7 @@ describe("resolveElements", () => {
 
 		it("captions an element with the words on its own result, until it ends", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
-				firstWordIndex: 0,
+				trimIndexOffset: 0,
 				words: heard,
 			});
 		});
@@ -284,8 +284,15 @@ describe("resolveElements", () => {
 			const { captions } = resolveOne(
 				makeElement("vid", "video", { trimStart: "1.5" }),
 			);
-			expect(captions?.firstWordIndex).toBe(1);
+			expect(captions?.trimIndexOffset).toBe(1);
 			expect(captions?.words).toEqual([toCaption("two", 0.5, 1.5)]);
+		});
+
+		it("starts the words at the element's first, though the end trim cuts the last", () => {
+			const { captions } = resolveOne(
+				makeElement("vid", "video", { timelineDuration: "1.5" }),
+			);
+			expect(captions).toEqual({ trimIndexOffset: 0, words: [heard[0]] });
 		});
 
 		it("captions nothing an element has no words for", () => {

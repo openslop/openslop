@@ -7,7 +7,7 @@ import type { TransitionType } from "./transitions";
 /** The words an element shows, from its trim start. */
 export type ResolvedCaptions = {
 	/** Where `words` start in the element's own word list, past those the trim cut. */
-	firstWordIndex: number;
+	trimIndexOffset: number;
 	words: Caption[];
 };
 

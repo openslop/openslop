@@ -6,6 +6,18 @@ export const START_FRAME_ATTR = "startFrame";
 export const PREVIOUS_VISUAL = "previous";
 export const NO_FRAME = "none";
 
+export type FrameSource =
+	| { kind: "none" }
+	| { kind: "previous" }
+	| { kind: "upload"; url: string };
+
+/** What a start frame value asks the video to open on. */
+export function frameSource(frame = NO_FRAME): FrameSource {
+	if (frame === PREVIOUS_VISUAL) return { kind: "previous" };
+	if (URL.canParse(frame)) return { kind: "upload", url: frame };
+	return { kind: "none" };
+}
+
 export const startFrameDef: AttributeDef = {
 	key: START_FRAME_ATTR,
 	label: "Start frame",

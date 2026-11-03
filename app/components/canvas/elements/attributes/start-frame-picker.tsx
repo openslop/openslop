@@ -5,53 +5,62 @@ import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Thumbnail,
+	ThumbnailCaption,
+	ThumbnailFace,
+} from "@/components/ui/thumbnail";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { ContentElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import {
+	type FrameSource,
+	frameSource,
 	NO_FRAME,
 	PREVIOUS_VISUAL,
 	START_FRAME,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
 import { useFileUpload } from "@/lib/upload/use-file-upload";
-import { cn } from "@/lib/utils";
 import { AddAssetTile } from "../add-asset-tile";
 import { RemoveCrossButton } from "../remove-cross-button";
 import { AttributeTrigger } from "./attribute-trigger";
 import { usePreviousPictures } from "./use-previous-pictures";
 
+const FRAME_SOURCE_LABEL: Record<FrameSource["kind"], string> = {
+	none: "None",
+	previous: "Previous scene",
+	upload: "Uploaded picture",
+};
+
 function FrameTile({
-	label,
-	selected,
+	kind,
+	current,
 	onSelect,
 	children,
 }: {
-	label: string;
-	selected: boolean;
+	kind: FrameSource["kind"];
+	current: FrameSource["kind"];
 	onSelect: () => void;
 	children: React.ReactNode;
 }) {
+	const selected = kind === current;
+	const label = FRAME_SOURCE_LABEL[kind];
 	return (
-		<button
-			type="button"
-			role="radio"
-			aria-checked={selected}
-			aria-label={label}
-			onMouseDown={keepFocus}
-			onClick={onSelect}
-			className="focus-ring flex w-16 flex-col gap-1 sm:w-20"
-		>
-			<div
-				className={cn(
-					"relative flex aspect-square items-center justify-center overflow-hidden rounded-md border bg-card text-muted-foreground",
-					selected ? "border-accent ring-2 ring-accent" : "border-border",
-				)}
+		<Thumbnail asChild>
+			<button
+				type="button"
+				role="radio"
+				aria-checked={selected}
+				aria-label={label}
+				onMouseDown={keepFocus}
+				onClick={onSelect}
+				className="focus-ring"
 			>
-				{children}
-			</div>
-			<span className="truncate text-badge text-muted-foreground">{label}</span>
-		</button>
+				<ThumbnailFace selected={selected}>{children}</ThumbnailFace>
+				<ThumbnailCaption>{label}</ThumbnailCaption>
+			</button>
+		</Thumbnail>
 	);
 }
 
@@ -77,13 +86,11 @@ export function StartFramePicker({
 	hideLabel?: boolean;
 }) {
 	const editor = useSlateStatic();
-	const frame = element.generationAttributes?.[attrKey] ?? NO_FRAME;
-	const usesPrevious = frame === PREVIOUS_VISUAL;
-	const usesUpload = URL.canParse(frame);
+	const opening = frameSource(element.generationAttributes?.[attrKey]);
 	// Sloppy sets a picture as the start frame without remembering it as the upload.
 	const uploaded =
 		element.layoutAttributes?.[UPLOADED_FRAME_ATTR] ??
-		(usesUpload ? frame : undefined);
+		(opening.kind === "upload" ? opening.url : undefined);
 	const setFrame = (next: string, upload = uploaded ?? null) =>
 		mergeAttrs(editor, element.id, {
 			[attrKey]: next,
@@ -95,11 +102,7 @@ export function StartFramePicker({
 			if (url) setFrame(url, url);
 		},
 	});
-	const summary = usesUpload
-		? "Uploaded picture"
-		: usesPrevious
-			? "Previous scene"
-			: "None";
+	const summary = FRAME_SOURCE_LABEL[opening.kind];
 
 	return (
 		<Popover>
@@ -110,15 +113,15 @@ export function StartFramePicker({
 			<PopoverContent align="end" className="w-auto">
 				<div role="radiogroup" aria-label={label} className="flex gap-3">
 					<FrameTile
-						label="None"
-						selected={!usesUpload && !usesPrevious}
+						kind="none"
+						current={opening.kind}
 						onSelect={() => setFrame(NO_FRAME)}
 					>
 						<Forbidden className="h-5 w-5" />
 					</FrameTile>
 					<FrameTile
-						label="Previous scene"
-						selected={usesPrevious}
+						kind="previous"
+						current={opening.kind}
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					>
 						<PreviousVisualPreview element={element} />
@@ -126,8 +129,8 @@ export function StartFramePicker({
 					{uploaded ? (
 						<div className="group/tile relative">
 							<FrameTile
-								label="Uploaded picture"
-								selected={usesUpload}
+								kind="upload"
+								current={opening.kind}
 								onSelect={() => setFrame(uploaded)}
 							>
 								<MediaWithSkeleton outputKind="image" src={uploaded} alt="" />

@@ -96,6 +96,24 @@ describe("settleUnansweredCalls", () => {
 		expect(hasPendingToolCall(settled)).toBe(false);
 	});
 
+	it("settles a call with the given reason when the user stops the turn", () => {
+		const settled = settleUnansweredCalls(
+			[asked, turn("input-available")],
+			"Stopped by you before the editor finished it",
+		);
+
+		expect(settled.at(-1)?.parts).toEqual([
+			{
+				type: "tool-read_script",
+				toolCallId: "call-0",
+				input: {},
+				state: "output-error",
+				errorText: "Stopped by you before the editor finished it",
+			},
+		]);
+		expect(hasPendingToolCall(settled)).toBe(false);
+	});
+
 	it("leaves answered calls and what the user said alone", () => {
 		const transcript = [asked, turn("output-available")];
 

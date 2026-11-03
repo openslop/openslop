@@ -26,7 +26,6 @@ export function generationInputs(
 function judge(node: GenerationNode, queue: GenerationQueue): boolean {
 	const snapshot: HeldResult = queue.getElementSnapshot(node.id);
 	if (!snapshot.result) return true;
-	// The user supplied this result; drifting project state must not replace it.
 	if (snapshot.pinned) return false;
 	return (
 		Object.values(node.dependsOn).some((dep) => needsGeneration(dep, queue)) ||

@@ -111,21 +111,13 @@ describe("CanvasHistory", () => {
 
 		it("folds into the version it created, not the top of a stale list", async () => {
 			storage.rows.set("old", content("old"));
-			let releaseList = () => {};
-			const listed = new Promise<void>((resolve) => {
-				releaseList = () => {
-					resolve();
-				};
-			});
-			vi.spyOn(storage, "list").mockImplementation(async () => {
-				await listed;
-				return [{ id: "old", updatedAt: "updated-old" }];
-			});
+			const listed = Promise.withResolvers<CanvasVersion[]>();
+			vi.spyOn(storage, "list").mockReturnValue(listed.promise);
 
 			// The list query runs before the create commits, but resolves after it.
 			const loading = history.load();
 			await history.record(content("a"));
-			releaseList();
+			listed.resolve([{ id: "old", updatedAt: "updated-old" }]);
 			await loading;
 
 			await history.record(content("b"));

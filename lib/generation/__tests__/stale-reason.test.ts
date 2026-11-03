@@ -115,14 +115,14 @@ describe("staleReason", () => {
 
 	it("counts off the causes past the first three", () => {
 		const queue = new GenerationQueue();
-		const withAttrs = (v: string) =>
+		const edited = (value: string) =>
 			node("a", {
-				prompt: v,
-				attributes: { model: v, duration: v, motion: v },
+				prompt: value,
+				attributes: { model: value, duration: value, motion: value },
 			});
-		commit(queue, withAttrs("1"), "a.png");
+		commit(queue, edited("1"), "a.png");
 
-		expect(staleReason(withAttrs("2"), queue)).toBe(
+		expect(staleReason(edited("2"), queue)).toBe(
 			"The prompt, model, duration, and 1 more changed — regenerate to update",
 		);
 	});

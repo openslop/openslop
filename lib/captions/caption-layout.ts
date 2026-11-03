@@ -36,7 +36,7 @@ export function wordsAt(
 export function groupIntoLines(
 	captions: Caption[],
 	lineMs: number,
-	firstWordIndex = 0,
+	indexOffset = 0,
 ): CaptionLine[] {
 	const { pages } = createTikTokStyleCaptions({
 		// Remotion starts a line only at a word with a leading space, regardless of language
@@ -47,10 +47,10 @@ export function groupIntoLines(
 		combineTokensWithinMilliseconds: lineMs,
 	});
 	const lines: CaptionLine[] = [];
-	let at = firstWordIndex;
+	let nextWordIndex = indexOffset;
 	for (const { startMs, durationMs, tokens } of pages) {
 		lines.push({
-			firstWordIndex: at,
+			firstWordIndex: nextWordIndex,
 			startMs,
 			durationMs,
 			tokens: tokens.map((token) => ({
@@ -58,7 +58,7 @@ export function groupIntoLines(
 				text: token.text.trimStart(),
 			})),
 		});
-		at += tokens.length;
+		nextWordIndex += tokens.length;
 	}
 	return lines;
 }

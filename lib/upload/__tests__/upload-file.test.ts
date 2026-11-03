@@ -11,7 +11,6 @@ const file = new File(["x"], "my clip.mp4", { type: "video/mp4" });
 
 describe("uploadFile", () => {
 	beforeEach(() => {
-		mockUpload.mockReset();
 		mockUpload.mockResolvedValue({ url: "https://blob/x.mp4" });
 	});
 

@@ -34,7 +34,7 @@ export default function AuthForm({
 	const [email, setEmail] = useState("");
 	const [sent, setSent] = useState(false);
 	const [error, setError] = useState("");
-	const [loading, startSending] = useTransition();
+	const [sending, startSending] = useTransition();
 
 	const handleMagicLink = (e?: React.FormEvent) => {
 		e?.preventDefault();
@@ -63,7 +63,7 @@ export default function AuthForm({
 			<EmailSentCard
 				subtitle={`We sent a ${sentKind} link to ${email}`}
 				resendLabel={`Send another ${sentKind} link`}
-				loading={loading}
+				loading={sending}
 				error={error}
 				onResend={() => handleMagicLink()}
 				onEditEmail={() => setSent(false)}
@@ -90,10 +90,10 @@ export default function AuthForm({
 					type="submit"
 					variant="accent"
 					size="cta"
-					disabled={loading}
+					disabled={sending}
 					className="mt-1 w-full"
 				>
-					{loading ? "Sending…" : submitLabel}
+					{sending ? "Sending…" : submitLabel}
 				</Button>
 			</form>
 
