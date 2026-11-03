@@ -4,7 +4,6 @@ import { useSlateStatic } from "slate-react";
 import { Trash2 } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { ensureAsset, removeAsset } from "@/lib/canvas/asset-ops";
-import { elementModelPick } from "@/lib/canvas/element-connector";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { useAsset } from "@/lib/canvas/use-assets";
 import { updateElementText } from "@/lib/canvas/editor-ops";
@@ -77,11 +76,7 @@ export function CharacterEditModal({
 								autoFocus
 								aside={
 									<div className="flex items-center gap-1">
-										<ModelAttribute
-											element={avatar}
-											pick={elementModelPick(avatar)}
-											label="Avatar model"
-										/>
+										<ModelAttribute element={avatar} label="Avatar model" />
 										<ElementHistoryButton element={avatar} />
 									</div>
 								}

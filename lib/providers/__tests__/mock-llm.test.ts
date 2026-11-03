@@ -6,6 +6,7 @@ import { MockLanguageModelV3 } from "ai/test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { outlinePrompt } from "@/lib/script/prompt/outline";
 import { NO_FINDINGS, reviewPrompt } from "@/lib/script/prompt/review";
+import type { RefineOp } from "@/lib/script/refine/types";
 import { MockLLM } from "../llm/mock";
 
 describe("MockLLM", () => {
@@ -136,19 +137,15 @@ describe("the mock agent model", () => {
 
 		const assets = await step(prompt);
 		expect(assets.toolName).toBe("edit_script");
-		const { ops } = assets.input as {
-			ops: { op: string; type: string; attrs: Record<string, string> }[];
-		};
-		expect(new Set(ops.map(({ op, type }) => `${op} ${type}`))).toEqual(
-			new Set([
-				"insert asset_style",
-				"insert asset_avatar",
-				"insert asset_voice",
-			]),
+		const { ops } = assets.input as { ops: RefineOp[] };
+		const assetOps = ops.flatMap((op) => (op.op === "asset" ? [op] : []));
+		expect(assetOps).toHaveLength(ops.length);
+		expect(new Set(assetOps.map(({ type }) => type))).toEqual(
+			new Set(["asset_style", "asset_avatar", "asset_voice"]),
 		);
-		expect(ops.flatMap(({ attrs }) => Object.keys(attrs))).not.toContain(
-			"model",
-		);
+		expect(
+			assetOps.flatMap(({ attrs }) => Object.keys(attrs ?? {})),
+		).not.toContain("model");
 		prompt.push(...ran("edit_script", `Applied ${ops.length} operations.`));
 
 		const written = await step(prompt);

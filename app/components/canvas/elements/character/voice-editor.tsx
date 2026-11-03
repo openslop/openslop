@@ -42,7 +42,7 @@ function VoiceFields({ element }: VoiceProps) {
 		>
 			<AttributeFields
 				element={element}
-				specs={elementSchema(element).settingsAttributes}
+				defs={elementSchema(element).settingsDefs}
 			/>
 			<VoicePicker
 				filters={filters}

@@ -41,6 +41,8 @@ interface ElementConfig extends ContentSpec {
 	placeholder: string;
 	/** Beside the type pill. */
 	lead?: ElementControl;
+	/** Speaks on its asset_voice's model, so shows none of its own. */
+	hidesModel?: boolean;
 	/** Beside the history button. */
 	tools?: ElementControl[];
 	/** Beside the generate button. */
@@ -52,6 +54,7 @@ type ElementPresentation = Omit<ElementConfig, keyof ContentSpec | "type">;
 const PRESENTATION: Record<ContentType, ElementPresentation> = {
 	narration: {
 		label: "Narration",
+		hidesModel: true,
 		Icon: Voice,
 		iconBgClass: "bg-media-narration/15",
 		colorClass: "text-media-narration",
@@ -60,6 +63,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 	},
 	character: {
 		label: "Character",
+		hidesModel: true,
 		Icon: User,
 		iconBgClass: "bg-media-character/15",
 		colorClass: "text-media-character",

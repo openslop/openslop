@@ -78,12 +78,10 @@ export function StartFramePicker({
 	element,
 	attrKey,
 	label,
-	hideLabel,
 }: {
 	element: ContentElement;
 	attrKey: string;
 	label: string;
-	hideLabel?: boolean;
 }) {
 	const editor = useSlateStatic();
 	const opening = frameSource(element.generationAttributes?.[attrKey]);
@@ -107,7 +105,6 @@ export function StartFramePicker({
 	return (
 		<Popover>
 			<AttributeTrigger tooltip={`${label}: ${summary}`}>
-				{!hideLabel && <span className="opacity-70 mr-1">{label}</span>}
 				{summary}
 			</AttributeTrigger>
 			<PopoverContent align="end" className="w-auto">

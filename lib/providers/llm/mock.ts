@@ -48,7 +48,7 @@ const MOCK_ASSETS: RefineOp[] =
 `)
 		.filter(isAssetElement)
 		.map((asset) => ({
-			op: "insert",
+			op: "asset",
 			type: asset.type,
 			attrs: omit(flatAttributes(asset), ["provider", "model"]),
 			text: getElementBodyText(asset),

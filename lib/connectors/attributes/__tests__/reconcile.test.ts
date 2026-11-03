@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { describe, expect, it } from "vitest";
 import { AttributeSchema } from "../schema";
 import { reconcileAttributes } from "../reconcile";
@@ -55,11 +56,13 @@ describe("reconcileAttributes", () => {
 		expect(reconcileAttributes(schema, schema, {})).toEqual({});
 	});
 
-	it("never touches attrs outside both schemas (e.g. provider metadata)", () => {
+	it("drops attrs the new schema does not carry, whichever schema had them", () => {
 		const oldSchema = AttributeSchema.from([
 			{ key: "volume", label: "Volume", default: "5" },
 		]);
-		const newSchema = AttributeSchema.from([]);
+		const newSchema = AttributeSchema.from([
+			{ key: "provider", label: "Provider" },
+		]);
 
 		const delta = reconcileAttributes(oldSchema, newSchema, {
 			volume: "8",
@@ -67,7 +70,7 @@ describe("reconcileAttributes", () => {
 			characters: "Red,Granny",
 		});
 
-		expect(delta).toEqual({ volume: null });
+		expect(delta).toEqual({ volume: null, characters: null });
 	});
 
 	it("resets a kept key to its default once the new schema stops offering its value", () => {
@@ -75,7 +78,7 @@ describe("reconcileAttributes", () => {
 			{
 				key: "resolution",
 				label: "Resolution",
-				edit: { kind: "enum", options: ["720p", "1080p"] },
+				edit: { kind: "enum", value: z.enum(["720p", "1080p"]) },
 				default: "720p",
 			},
 		]);
@@ -83,7 +86,7 @@ describe("reconcileAttributes", () => {
 			{
 				key: "resolution",
 				label: "Resolution",
-				edit: { kind: "enum", options: ["720p"] },
+				edit: { kind: "enum", value: z.enum(["720p"]) },
 				default: "720p",
 			},
 		]);

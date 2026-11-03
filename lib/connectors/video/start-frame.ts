@@ -1,5 +1,7 @@
+import { z } from "zod";
 import { LinkedOff, LinkedOn } from "@/components/ui/icon";
 import { TOGGLE_OFF } from "@/lib/canvas/types";
+import { toggleValue } from "../attributes/common";
 import type { AttributeDef } from "../attributes/schema";
 
 export const START_FRAME_ATTR = "startFrame";
@@ -21,18 +23,21 @@ export function frameSource(frame = NO_FRAME): FrameSource {
 export const startFrameDef: AttributeDef = {
 	key: START_FRAME_ATTR,
 	label: "Start frame",
-	edit: { kind: "frame" },
+	edit: {
+		kind: "frame",
+		value: z.union([z.enum([NO_FRAME, PREVIOUS_VISUAL]), z.url()]),
+	},
 	default: NO_FRAME,
 };
 
 export const CONTINUITY_ATTR = "continuity";
 
-/** Hidden because the reference images control sets it. */
 export const continuityDef: AttributeDef = {
 	key: CONTINUITY_ATTR,
 	label: "Continuity",
 	edit: {
 		kind: "toggle",
+		value: toggleValue,
 		off: { icon: LinkedOff, label: "Unlink for a fresh look" },
 		on: { icon: LinkedOn, label: "Link the previous scene's look" },
 	},
@@ -60,7 +65,6 @@ export const UPLOADED_FRAME_ATTR = "uploadedFrame";
 export const uploadedFrameDef: AttributeDef = {
 	key: UPLOADED_FRAME_ATTR,
 	label: "Uploaded picture",
-	hidden: true,
 };
 
 export const openingOn = (picture: string): Record<string, string> => ({

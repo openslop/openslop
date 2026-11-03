@@ -136,7 +136,7 @@ describe("parseOSML", () => {
 
 	it("parses voice and references tags with their attributes as written", () => {
 		const [voice, references] = parseOSML(
-			'<asset_voice name="Mia" gender="masculine" age="adult" voiceId="v1"></asset_voice>' +
+			'<asset_voice name="Mia" gender="masculine" age="adult" pickedVoiceId="v1"></asset_voice>' +
 				'<asset_references images="https://img/a.png,https://img/b.png"></asset_references>',
 		);
 
@@ -146,7 +146,7 @@ describe("parseOSML", () => {
 				name: "Mia",
 				gender: "masculine",
 				age: "adult",
-				voiceId: "v1",
+				pickedVoiceId: "v1",
 			},
 		});
 		expect(references).toMatchObject({
@@ -165,10 +165,10 @@ describe("parseOSML", () => {
 	});
 
 	it("parses attributes correctly", () => {
-		const [node] = parseOSML('<sound effect="thunder" volume="8">boom</sound>');
+		const [node] = parseOSML('<sound loops="3" volume="8">boom</sound>');
 
 		expect(flatAttributes(node)).toMatchObject({
-			effect: "thunder",
+			loops: "3",
 			volume: "8",
 		});
 	});
@@ -196,10 +196,12 @@ describe("parseOSML", () => {
 	});
 
 	it("parses <video> with a startFrame attribute", () => {
-		const [node] = parseOSML('<video startFrame="img1">a dark forest</video>');
+		const [node] = parseOSML(
+			'<video startFrame="previous">a dark forest</video>',
+		);
 
 		expect(node.type).toBe("video");
-		expect(flatAttributes(node).startFrame).toBe("img1");
+		expect(flatAttributes(node).startFrame).toBe("previous");
 		expect(getElementText(node)).toContain("a dark forest");
 	});
 

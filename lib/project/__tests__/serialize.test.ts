@@ -139,28 +139,31 @@ describe("deserializeWithScenes", () => {
 	it("round-trips quotes and angle brackets in attributes and text", () => {
 		const original = [
 			makeScene([
-				makeEl("image", "5 < 10 & 20 > 15", {
-					prompt: 'a 24" monitor & a <box>',
+				makeEl("character", "5 < 10 & 20 > 15", {
+					name: 'a 24" monitor & a <box>',
 				}),
 			]),
 		];
 
 		const scenes = scenesOf(serializeOSMLWithScenes(original));
 
-		const image = scenes[0].children[0];
-		expect(image.type).toBe("image");
-		expect(image.id).toBe("image-id");
-		expect(flatAttributes(image).prompt).toBe('a 24" monitor & a <box>');
-		expect(getElementText(image)).toContain("5 < 10 & 20 > 15");
+		const character = scenes[0].children[0];
+		expect(character.type).toBe("character");
+		expect(character.id).toBe("character-id");
+		expect(flatAttributes(character).name).toBe('a 24" monitor & a <box>');
+		expect(getElementText(character)).toContain("5 < 10 & 20 > 15");
 	});
 
 	it("round-trips with serializeWithScenes preserving attributes", () => {
 		const original = [
 			makeScene([
-				makeEl("image", "", { url: "https://cdn/a.png", durationSec: "3" }),
+				makeEl("image", "", {
+					referenceImagesOverride: "https://cdn/a.png",
+					motion: "pushIn",
+				}),
 				makeEl("narration", "hello"),
 			]),
-			makeScene([makeEl("video", "", { url: "https://cdn/b.mp4" })]),
+			makeScene([makeEl("video", "", { startFrame: "https://cdn/b.png" })]),
 		];
 
 		const osml = serializeOSMLWithScenes(original);
@@ -170,8 +173,10 @@ describe("deserializeWithScenes", () => {
 
 		const firstImage = scenes[0].children[0];
 		expect(firstImage.type).toBe("image");
-		expect(flatAttributes(firstImage).url).toBe("https://cdn/a.png");
-		expect(flatAttributes(firstImage).durationSec).toBe("3");
+		expect(flatAttributes(firstImage).referenceImagesOverride).toBe(
+			"https://cdn/a.png",
+		);
+		expect(flatAttributes(firstImage).motion).toBe("pushIn");
 
 		const firstNarration = scenes[0].children[1];
 		expect(firstNarration.type).toBe("narration");
@@ -179,6 +184,6 @@ describe("deserializeWithScenes", () => {
 
 		const secondVideo = scenes[1].children[0];
 		expect(secondVideo.type).toBe("video");
-		expect(flatAttributes(secondVideo).url).toBe("https://cdn/b.mp4");
+		expect(flatAttributes(secondVideo).startFrame).toBe("https://cdn/b.png");
 	});
 });

@@ -1,23 +1,18 @@
 import { useSlateStatic } from "slate-react";
-import { Badge } from "@/components/ui/badge";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
-import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
 	isToggleOn,
 	TOGGLE_OFF,
 	TOGGLE_ON,
 	type ContentElement,
 } from "@/lib/canvas/types";
-import {
-	CONTINUITY_ATTR,
-	continuityDef,
-} from "@/lib/connectors/video/start-frame";
+import { continuityDef } from "@/lib/connectors/video/start-frame";
 import { ContinuityReferencesPopover } from "./attributes/continuity-section";
 import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
-import { ModelAttribute } from "./attributes/model-attribute";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
 import { InputAttributeField } from "./attributes/input-attribute-field";
 import { clampedNumber, flatAttributes } from "@/lib/canvas/element-attributes";
@@ -33,106 +28,52 @@ const SECONDS_FIELD = "w-20 font-numeric";
 
 interface AttributeBadgeProps {
 	element: ContentElement;
-	attrKey: string;
-	spec: AttributeSpec;
-	hideLabel?: boolean;
-	className?: string;
+	def: AttributeDef;
 }
 
-export function AttributeBadge({
-	element,
-	attrKey,
-	spec,
-	hideLabel = false,
-	className,
-}: AttributeBadgeProps) {
+export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 	const editor = useSlateStatic();
+	const { key: attrKey, label, unit, edit } = def;
+	if (!edit) return null;
+
 	const value = flatAttributes(element)[attrKey] ?? "";
-	if (!value && !spec.edit) return null;
+	const shown = formatValue(value, unit);
+	const tooltip = `${label}: ${value || UNSET}`;
 
-	const SpecIcon = spec.icon;
-	const labeled = hideLabel ? (
-		formatValue(value, spec.unit)
-	) : (
-		<>
-			{SpecIcon ? (
-				<SpecIcon
-					className="mr-1 inline-block h-3 w-3 shrink-0 align-middle opacity-70"
-					aria-hidden="true"
-				/>
-			) : (
-				<span className="opacity-70 mr-1">{spec.label}</span>
-			)}
-			{formatValue(value, spec.unit)}
-		</>
-	);
-	const tooltip = `${spec.label}: ${value || UNSET}`;
-
-	if (!spec.edit) {
-		return (
-			<Badge size="attribute" className={className} title={tooltip}>
-				<span className="min-w-0 truncate">{labeled}</span>
-			</Badge>
-		);
-	}
-
-	if (spec.edit.kind === "images") {
-		const popover = { element, attrKey, label: spec.label, hideLabel };
-		return spec.edit.continuity ? (
+	if (edit.kind === "images") {
+		const popover = { element, attrKey, label };
+		return edit.continuity ? (
 			<ContinuityReferencesPopover
 				{...popover}
-				toggle={
-					<AttributeBadge
-						element={element}
-						attrKey={CONTINUITY_ATTR}
-						spec={continuityDef}
-					/>
-				}
+				toggle={<AttributeBadge element={element} def={continuityDef} />}
 			/>
 		) : (
 			<ReferenceImagesPopover {...popover} />
 		);
 	}
 
-	if (spec.edit.kind === "frame") {
+	if (edit.kind === "frame") {
 		return (
-			<StartFramePicker
-				element={element}
-				attrKey={attrKey}
-				label={spec.label}
-				hideLabel={hideLabel}
-			/>
+			<StartFramePicker element={element} attrKey={attrKey} label={label} />
 		);
 	}
 
-	if (spec.edit.kind === "model") {
-		return (
-			<ModelAttribute
-				element={element}
-				pick={{ key: attrKey, ...spec.edit }}
-				label={spec.label}
-				className={className}
-			/>
-		);
-	}
-
-	if (spec.edit.kind === "text") {
+	if (edit.kind === "text") {
 		return (
 			<TextAttributePopover
 				element={element}
 				attrKey={attrKey}
 				value={value}
-				label={spec.label}
+				label={label}
 				tooltip={tooltip}
-				placeholder={spec.edit.placeholder}
-				rows={spec.edit.rows}
-				hideLabel={hideLabel}
+				placeholder={edit.placeholder}
+				rows={edit.rows}
 			/>
 		);
 	}
 
-	if (spec.edit.kind === "seconds") {
-		const { min } = spec.edit;
+	if (edit.kind === "seconds") {
+		const { min } = edit;
 		return (
 			// Keyed on the value so a trim dragged on the timeline replaces the draft.
 			<InputAttributeField
@@ -140,11 +81,11 @@ export function AttributeBadge({
 				element={element}
 				attrKey={attrKey}
 				value={value}
-				label={spec.label}
+				label={label}
 				parse={(text) => clampedNumber(text, { min })?.toString()}
 				inputMode="decimal"
 				placeholder="Auto"
-				aria-label={`${spec.label} in seconds`}
+				aria-label={`${label} in seconds`}
 				className={SECONDS_FIELD}
 			/>
 		);
@@ -154,18 +95,17 @@ export function AttributeBadge({
 		mergeAttrs(editor, element.id, { [attrKey]: next });
 	};
 
-	if (spec.edit.kind === "toggle") {
-		const { on, off } = spec.edit;
+	if (edit.kind === "toggle") {
+		const { on, off } = edit;
 		return (
 			<MediaToggle
 				value={isToggleOn(value) ? TOGGLE_ON : TOGGLE_OFF}
 				onChange={handleSelect}
-				ariaLabel={spec.label}
+				ariaLabel={label}
 				options={[
 					{ value: TOGGLE_OFF, ...off },
 					{ value: TOGGLE_ON, ...on },
 				]}
-				className={className}
 			/>
 		);
 	}
@@ -174,15 +114,14 @@ export function AttributeBadge({
 		<SelectMenu
 			value={value}
 			onChange={handleSelect}
-			options={spec.edit.options.map((option) => ({
+			options={edit.value.options.map((option) => ({
 				value: option,
-				label: formatValue(option, spec.unit),
+				label: formatValue(option, unit),
 			}))}
 			contentClassName="max-h-64 min-w-24"
-			itemClassName={className}
 		>
-			<InlineMenuTrigger aria-label={tooltip} className={className}>
-				<span className="min-w-0 truncate">{labeled}</span>
+			<InlineMenuTrigger aria-label={tooltip}>
+				<span className="min-w-0 truncate">{shown}</span>
 			</InlineMenuTrigger>
 		</SelectMenu>
 	);

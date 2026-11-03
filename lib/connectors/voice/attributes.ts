@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { nameDef, OWN_MODEL_DEFS } from "../attributes/common";
 import { AttributeSchema } from "../attributes/schema";
 import {
 	TTS_ACCENTS,
@@ -10,11 +12,13 @@ import {
 const trait = (key: string, label: string, options: readonly string[]) => ({
 	key,
 	label,
-	edit: { kind: "enum" as const, options },
+	edit: { kind: "enum" as const, value: z.enum(options) },
 });
 
 /** A voice is described by its traits; the voice they find is picked beside them. */
 export const VOICE_ATTRIBUTES = AttributeSchema.from([
+	nameDef,
+	...OWN_MODEL_DEFS,
 	trait("gender", "Gender", TTS_GENDERS),
 	trait("language", "Language", TTS_LANGUAGES),
 	trait("age", "Age", TTS_AGES),
@@ -25,4 +29,5 @@ export const VOICE_ATTRIBUTES = AttributeSchema.from([
 		label: "Description",
 		edit: { kind: "text", placeholder: "How the voice sounds", rows: 2 },
 	},
+	{ key: "pickedVoiceId", label: "Picked voice" },
 ]);

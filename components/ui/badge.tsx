@@ -32,7 +32,6 @@ const badgeVariants = cva(
 				// `inline` at the 10px badge size, for chips set inside 10px text
 				inlineSm:
 					"h-4.5 max-w-48 rounded border-0 px-1 text-badge leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3",
-				attribute: "max-w-35 rounded-md px-1.5 py-0.5 text-label font-book",
 			},
 		},
 		defaultVariants: {

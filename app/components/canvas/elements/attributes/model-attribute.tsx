@@ -8,30 +8,24 @@ import {
 } from "@/app/components/models/model-select";
 import { MODEL_PROVENANCE } from "@/app/components/models/provenance";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
-import type { CanvasElement } from "@/lib/canvas/types";
-import type { ModelPick } from "@/lib/connectors/attributes/schema";
+import { connectorOf, type GeneratedElement } from "@/lib/canvas/types";
 import { modelSourceFor, resolveModel } from "@/lib/connectors/models";
 import { useModelChain } from "@/lib/connectors/use-default-models";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 
 export function ModelAttribute({
 	element,
-	pick: { key, providerAttr, type },
 	label,
 	className,
 }: {
-	element: CanvasElement;
-	pick: ModelPick;
+	element: GeneratedElement;
 	label: string;
 	className?: string;
 }) {
 	const editor = useSlateStatic();
 	const chain = useModelChain();
-	const attrs = flatAttributes(element);
-	const value = resolveModel(type, {
-		provider: attrs[providerAttr],
-		model: attrs[key],
-	});
+	const type = connectorOf(element.type);
+	const value = resolveModel(type, flatAttributes(element));
 
 	return (
 		<ModelSelect
@@ -41,8 +35,8 @@ export function ModelAttribute({
 			footer={<ConfigureModelsItem />}
 			onChange={(next) =>
 				mergeAttrs(editor, element.id, {
-					[providerAttr]: next.provider,
-					[key]: next.model,
+					provider: next.provider,
+					model: next.model,
 				})
 			}
 		>

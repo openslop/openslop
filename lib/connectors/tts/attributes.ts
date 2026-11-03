@@ -1,5 +1,8 @@
+import { z } from "zod";
 import { AttributeSchema } from "../attributes/schema";
 import {
+	nameDef,
+	OWN_MODEL_DEFS,
 	timelineDurationDef,
 	trimStartDef,
 	volumeDef,
@@ -11,23 +14,22 @@ import {
 	TTS_SPEEDS,
 } from "./enums";
 
-export const TTS_ATTRIBUTES = AttributeSchema.from(
-	[
-		{
-			key: "emotion",
-			label: "Emotion",
-			edit: { kind: "enum", options: TTS_EMOTIONS },
-			default: DEFAULT_TTS_EMOTION,
-		},
-		{
-			key: "speed",
-			label: "Speed",
-			edit: { kind: "enum", options: TTS_SPEEDS },
-			default: DEFAULT_TTS_SPEED,
-		},
-		volumeDef("10"),
-		trimStartDef,
-		timelineDurationDef,
-	],
-	{ hideModel: true },
-);
+export const TTS_ATTRIBUTES = AttributeSchema.from([
+	nameDef,
+	...OWN_MODEL_DEFS,
+	{
+		key: "emotion",
+		label: "Emotion",
+		edit: { kind: "enum", value: z.enum(TTS_EMOTIONS) },
+		default: DEFAULT_TTS_EMOTION,
+	},
+	{
+		key: "speed",
+		label: "Speed",
+		edit: { kind: "enum", value: z.enum(TTS_SPEEDS) },
+		default: DEFAULT_TTS_SPEED,
+	},
+	volumeDef("10"),
+	trimStartDef,
+	timelineDurationDef,
+]);

@@ -2,9 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Editor, Element } from "slate";
 import type { AssetElement, ContentElement, Scene } from "@/lib/canvas/types";
 
-// No connector model stamped here — these tests exercise refine-op mechanics
-// (insert/remove/set/anchor tracking), not attribute-schema resolution, which
-// has its own tests under lib/connectors/attributes/.
+// Refine-op mechanics only; schema resolution is tested under lib/connectors/attributes/.
 const SCHEMA_DEFAULTS: Record<string, Record<string, string>> = {
 	sfx: { loops: "1" },
 	tts: { emotion: "neutral" },
@@ -20,22 +18,11 @@ vi.mock("@/lib/connectors/factory", () => ({
 				...(type === "tts" ? [] : ["model"]),
 				...Object.keys(defaultAttributes),
 			],
-			modelPicks:
-				type === "tts"
-					? []
-					: [
-							{
-								kind: "model",
-								key: "model",
-								providerAttr: "provider",
-								type,
-							},
-						],
 			resolve: (attrs: Record<string, string>) => ({
 				...defaultAttributes,
 				...attrs,
 			}),
-			offers: () => true,
+			offers: (_key: string, value: string) => value !== "unoffered",
 		};
 	},
 }));
@@ -108,13 +95,11 @@ function getContentTexts(editor: Editor): string[] {
 describe("applyRefineOp — insert", () => {
 	it("appends to end when no anchor_id", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
-			editor,
-			{ op: "insert", type: "sound", text: "rain" },
-			anchorMap,
-		);
+		applyRefineOp(editor, {
+			op: "insert",
+			elements: [{ type: "sound", text: "rain" }],
+		});
 
 		const ids = getContentIds(editor);
 		expect(ids[0]).toBe("n1");
@@ -129,13 +114,12 @@ describe("applyRefineOp — insert", () => {
 				content("narration", "n2", "second"),
 			]),
 		]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "rain" },
-			anchorMap,
-		);
+		applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "n1",
+			elements: [{ type: "sound", text: "rain" }],
+		});
 
 		const texts = getContentTexts(editor);
 		expect(texts).toEqual(["first", "rain", "second"]);
@@ -143,57 +127,109 @@ describe("applyRefineOp — insert", () => {
 
 	it("inserts before an anchored element", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
-			editor,
-			{
-				op: "insert",
-				anchor_id: "n1",
-				position: "before",
-				type: "sound",
-				text: "rain",
-			},
-			anchorMap,
-		);
+		applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "n1",
+			position: "before",
+			elements: [{ type: "sound", text: "rain" }],
+		});
 
 		const texts = getContentTexts(editor);
 		expect(texts).toEqual(["rain", "first"]);
 	});
 
-	it("stacks consecutive inserts at the same anchor in order", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
-		const anchorMap: Record<string, string> = {};
+	it.each([
+		["after", ["first", "A", "B", "C", "last"]],
+		["before", ["A", "B", "C", "first", "last"]],
+	] as const)(
+		"places an insert's elements %s the anchor in the order listed",
+		(position, expected) => {
+			const editor = makeEditor([
+				scene([
+					content("narration", "n1", "first"),
+					content("narration", "n2", "last"),
+				]),
+			]);
 
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "A" },
-			anchorMap,
-		);
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "B" },
-			anchorMap,
-		);
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "C" },
-			anchorMap,
-		);
+			applyRefineOp(editor, {
+				op: "insert",
+				anchor_id: "n1",
+				position,
+				elements: ["A", "B", "C"].map((text) => ({ type: "sound", text })),
+			});
 
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["first", "A", "B", "C"]);
+			expect(getContentTexts(editor)).toEqual(expected);
+		},
+	);
+
+	it("inserts none of the elements when one is invalid", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "n1",
+			elements: [
+				{ type: "sound", text: "rain" },
+				{ type: "narration", text: " " },
+			],
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason: "insert: narration needs text",
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
+	});
+
+	it("refuses an attribute value the type does not offer", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOp(editor, {
+			op: "insert",
+			elements: [
+				{ type: "sound", text: "rain", attrs: { loops: "unoffered" } },
+			],
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason: 'insert: sound offers no loops "unoffered"',
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
+	});
+
+	it("reports every problem across an insert's elements at once", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOp(editor, {
+			op: "insert",
+			elements: [
+				{
+					type: "sound",
+					text: "rain",
+					attrs: { loops: "unoffered", model: "unoffered" },
+				},
+				{ type: "narration", text: "", attrs: { emotion: "unoffered" } },
+			],
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason:
+				'insert: sound offers no loops "unoffered", model "unoffered"; narration offers no emotion "unoffered"; narration needs text',
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
 	it("reports a missing anchor instead of appending somewhere else", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
-		const anchorMap: Record<string, string> = {};
 
-		const result = applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "nonexistent", type: "sound", text: "rain" },
-			anchorMap,
-		);
+		const result = applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "nonexistent",
+			elements: [{ type: "sound", text: "rain" }],
+		});
 
 		expect(result).toEqual({
 			ok: false,
@@ -202,20 +238,32 @@ describe("applyRefineOp — insert", () => {
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
+	it.each([undefined, "", "   "])(
+		"refuses a script element with no text: %j",
+		(text) => {
+			const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+			const result = applyRefineOp(editor, {
+				op: "insert",
+				anchor_id: "n1",
+				elements: [{ type: "narration", text }],
+			});
+
+			expect(result).toEqual({
+				ok: false,
+				reason: "insert: narration needs text",
+			});
+			expect(getContentTexts(editor)).toEqual(["hello"]);
+		},
+	);
+
 	it("uses custom attrs from the op", () => {
 		const editor = makeEditor([scene([content("narration", "n1")])]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
-			editor,
-			{
-				op: "insert",
-				type: "sound",
-				text: "rain",
-				attrs: { loops: "3" },
-			},
-			anchorMap,
-		);
+		applyRefineOp(editor, {
+			op: "insert",
+			elements: [{ type: "sound", text: "rain", attrs: { loops: "3" } }],
+		});
 
 		const nodes: ContentElement[] = [];
 		for (const [node] of Editor.nodes(editor, {
@@ -240,7 +288,7 @@ describe("applyRefineOp — remove", () => {
 			]),
 		]);
 
-		applyRefineOp(editor, { op: "remove", id: "n1" }, {});
+		applyRefineOp(editor, { op: "remove", id: "n1" });
 
 		expect(getContentIds(editor)).toEqual(["n2"]);
 	});
@@ -248,7 +296,7 @@ describe("applyRefineOp — remove", () => {
 	it("silently skips when id not found", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 
-		applyRefineOp(editor, { op: "remove", id: "nonexistent" }, {});
+		applyRefineOp(editor, { op: "remove", id: "nonexistent" });
 
 		expect(getContentIds(editor)).toEqual(["n1"]);
 	});
@@ -258,7 +306,7 @@ describe("applyRefineOp — set", () => {
 	it("updates text content", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "old")])]);
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" }, {});
+		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" });
 
 		expect(getContentTexts(editor)).toEqual(["new text"]);
 	});
@@ -273,11 +321,11 @@ describe("applyRefineOp — set", () => {
 			]),
 		]);
 
-		applyRefineOp(
-			editor,
-			{ op: "set", id: "n1", attrs: { emotion: "excited" } },
-			{},
-		);
+		applyRefineOp(editor, {
+			op: "set",
+			id: "n1",
+			attrs: { emotion: "excited" },
+		});
 
 		const el = getNode(editor, "n1");
 		expect(flatAttributes(el)).toEqual({
@@ -296,11 +344,7 @@ describe("applyRefineOp — set", () => {
 			]),
 		]);
 
-		applyRefineOp(
-			editor,
-			{ op: "set", id: "n1", attrs: { emotion: null } },
-			{},
-		);
+		applyRefineOp(editor, { op: "set", id: "n1", attrs: { emotion: null } });
 
 		const el = getNode(editor, "n1");
 		expect(flatAttributes(el)).toEqual({ name: "Lyra" });
@@ -311,36 +355,49 @@ describe("applyRefineOp — set", () => {
 			scene([content("character", "n1", "old", { name: "Lyra" })]),
 		]);
 
-		applyRefineOp(
-			editor,
-			{
-				op: "set",
-				id: "n1",
-				attrs: { name: "Alice", emotion: "happy" },
-				text: "Hello!",
-			},
-			{},
-		);
+		applyRefineOp(editor, {
+			op: "set",
+			id: "n1",
+			attrs: { name: "Alice", emotion: "happy" },
+			text: "Hello!",
+		});
 
 		const el = getNode(editor, "n1");
 		expect(flatAttributes(el)).toEqual({ name: "Alice", emotion: "happy" });
 		expect(getPromptText(el)).toBe("Hello!");
 	});
 
+	it("refuses an attribute value the type does not offer, changing nothing", () => {
+		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+
+		const result = applyRefineOp(editor, {
+			op: "set",
+			id: "n1",
+			attrs: { emotion: "unoffered" },
+			text: "changed",
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason: 'set: narration offers no emotion "unoffered"',
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
+	});
+
 	it("keeps the caret marker when text is replaced or cleared", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "old")])]);
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "new" }, {});
+		applyRefineOp(editor, { op: "set", id: "n1", text: "new" });
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZWSP}new`);
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "" }, {});
+		applyRefineOp(editor, { op: "set", id: "n1", text: "" });
 		expect(Editor.string(editor, [0, 0])).toBe(ZWSP);
 	});
 
 	it("silently skips when id not found", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 
-		applyRefineOp(editor, { op: "set", id: "nonexistent", text: "new" }, {});
+		applyRefineOp(editor, { op: "set", id: "nonexistent", text: "new" });
 
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
@@ -356,16 +413,12 @@ describe("applyRefineOp — set", () => {
 			]),
 		]);
 
-		applyRefineOp(
-			editor,
-			{
-				op: "set",
-				id: "n1",
-				type: "video",
-				attrs: { startFrame: "n0", motion: "kenBurnsIn" },
-			},
-			{},
-		);
+		applyRefineOp(editor, {
+			op: "set",
+			id: "n1",
+			type: "video",
+			attrs: { startFrame: "n0", motion: "kenBurnsIn" },
+		});
 
 		const el = getNode(editor, "n1");
 		expect(el.type).toBe("video");
@@ -384,7 +437,7 @@ describe("applyRefineOp — set", () => {
 			video: pinned,
 		});
 
-		applyRefineOp(editor, { op: "set", id: "n1", type: "video" }, {});
+		applyRefineOp(editor, { op: "set", id: "n1", type: "video" });
 
 		expect(flatAttributes(getNode(editor, "n1"))).toMatchObject(pinned);
 	});
@@ -399,71 +452,37 @@ describe("applyRefineOp — insert positioning edge cases", () => {
 				content("narration", "n3", "third"),
 			]),
 		]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "A" },
-			anchorMap,
-		);
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n3", type: "sound", text: "B" },
-			anchorMap,
-		);
+		applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "n1",
+			elements: [{ type: "sound", text: "A" }],
+		});
+		applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "n3",
+			elements: [{ type: "sound", text: "B" }],
+		});
 
 		const texts = getContentTexts(editor);
 		expect(texts).toEqual(["first", "A", "second", "third", "B"]);
 	});
 
-	it("stacking works across interleaved anchors", () => {
-		const editor = makeEditor([
-			scene([
-				content("narration", "n1", "first"),
-				content("narration", "n2", "second"),
-			]),
-		]);
-		const anchorMap: Record<string, string> = {};
-
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "A1" },
-			anchorMap,
-		);
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n2", type: "sound", text: "B1" },
-			anchorMap,
-		);
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "A2" },
-			anchorMap,
-		);
-
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["first", "A1", "A2", "second", "B1"]);
-	});
-
 	it("multiple appends to end stack in order", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
-			editor,
-			{ op: "insert", type: "sound", text: "A" },
-			anchorMap,
-		);
-		applyRefineOp(
-			editor,
-			{ op: "insert", type: "sound", text: "B" },
-			anchorMap,
-		);
-		applyRefineOp(
-			editor,
-			{ op: "insert", type: "sound", text: "C" },
-			anchorMap,
-		);
+		applyRefineOp(editor, {
+			op: "insert",
+			elements: [{ type: "sound", text: "A" }],
+		});
+		applyRefineOp(editor, {
+			op: "insert",
+			elements: [{ type: "sound", text: "B" }],
+		});
+		applyRefineOp(editor, {
+			op: "insert",
+			elements: [{ type: "sound", text: "C" }],
+		});
 
 		const texts = getContentTexts(editor);
 		expect(texts).toEqual(["first", "A", "B", "C"]);
@@ -473,14 +492,13 @@ describe("applyRefineOp — insert positioning edge cases", () => {
 describe("applyRefineOp — mixed operations", () => {
 	it("handles insert then remove sequence", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "rain" },
-			anchorMap,
-		);
-		applyRefineOp(editor, { op: "remove", id: "n1" }, anchorMap);
+		applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "n1",
+			elements: [{ type: "sound", text: "rain" }],
+		});
+		applyRefineOp(editor, { op: "remove", id: "n1" });
 
 		expect(getContentTexts(editor)).toEqual(["rain"]);
 	});
@@ -489,73 +507,15 @@ describe("applyRefineOp — mixed operations", () => {
 		const editor = makeEditor([
 			scene([content("narration", "n1", "old text")]),
 		]);
-		const anchorMap: Record<string, string> = {};
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" }, anchorMap);
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "rain" },
-			anchorMap,
-		);
+		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" });
+		applyRefineOp(editor, {
+			op: "insert",
+			anchor_id: "n1",
+			elements: [{ type: "sound", text: "rain" }],
+		});
 
 		expect(getContentTexts(editor)).toEqual(["new text", "rain"]);
-	});
-
-	it("falls back to original anchor when mapped node is removed", () => {
-		const editor = makeEditor([
-			scene([
-				content("narration", "n1", "first"),
-				content("narration", "n2", "second"),
-			]),
-		]);
-		const anchorMap: Record<string, string> = {};
-
-		// Insert after n1 — anchorMap now maps n1 → inserted node
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "A" },
-			anchorMap,
-		);
-		// Remove the inserted node — anchorMap["n1"] is now stale
-		const insertedId = anchorMap["n1"];
-		applyRefineOp(editor, { op: "remove", id: insertedId }, anchorMap);
-		// Insert after n1 again — should fall back to original n1, not append to end
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "B" },
-			anchorMap,
-		);
-
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["first", "B", "second"]);
-	});
-
-	it("clears stale anchor mapping after fallback", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
-		const anchorMap: Record<string, string> = {};
-
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "A" },
-			anchorMap,
-		);
-		const staleId = anchorMap["n1"];
-		applyRefineOp(editor, { op: "remove", id: staleId }, anchorMap);
-		// After fallback, the stale mapping should be cleared
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "B" },
-			anchorMap,
-		);
-		// Second insert at n1 should stack after B (new mapping)
-		applyRefineOp(
-			editor,
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "C" },
-			anchorMap,
-		);
-
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["first", "B", "C"]);
 	});
 });
 
@@ -589,14 +549,14 @@ describe("applyRefineOp — assets", () => {
 		const editor = makeCanvas([]);
 
 		const result = apply(editor, {
-			op: "insert",
+			op: "asset",
 			type: "asset_avatar",
 			text: "a girl in a yellow cardigan",
 		});
 
 		expect(result).toEqual({
 			applied: 0,
-			failures: ["insert: asset_avatar needs a name"],
+			failures: ["asset: asset_avatar needs a name"],
 		});
 		expect(topLevelTypes(editor)).toEqual(["scene"]);
 	});
@@ -605,7 +565,7 @@ describe("applyRefineOp — assets", () => {
 		const editor = makeCanvas([asset("asset_style", { text: "noir" })]);
 
 		const result = apply(editor, {
-			op: "insert",
+			op: "asset",
 			type: "asset_avatar",
 			attrs: { name: "Mia" },
 			text: "a girl in a yellow cardigan",
@@ -635,33 +595,33 @@ describe("applyRefineOp — assets", () => {
 
 		apply(
 			editor,
-			{ op: "insert", type: "asset_style", text: "muted watercolor" },
+			{ op: "asset", type: "asset_style", text: "muted watercolor" },
 			{
-				op: "insert",
+				op: "asset",
 				type: "asset_references",
 				attrs: { images: "a.png,b.png" },
 				text: "",
 			},
 			{
-				op: "insert",
+				op: "asset",
 				type: "asset_avatar",
 				attrs: { name: "Mia" },
 				text: "a girl in a yellow cardigan",
 			},
 			{
-				op: "insert",
+				op: "asset",
 				type: "asset_voice",
 				attrs: { name: "Mia", pitch: "high" },
 				text: "",
 			},
 			{
-				op: "insert",
+				op: "asset",
 				type: "asset_voice",
 				attrs: { name: NARRATOR, age: "adult" },
 				text: "",
 			},
 			{
-				op: "insert",
+				op: "asset",
 				type: "asset_voice",
 				attrs: { name: NARRATOR, pitch: "low" },
 				text: "",
@@ -715,13 +675,44 @@ describe("applyRefineOp — assets", () => {
 		]);
 	});
 
+	it("inserts a voice from its traits alone, with no text", () => {
+		const editor = makeCanvas([]);
+
+		const result = apply(editor, {
+			op: "asset",
+			type: "asset_voice",
+			attrs: { name: "Mia", age: "child" },
+		});
+
+		expect(result).toEqual({ applied: 1, failures: [] });
+		expect(describeAssets(editor)).toEqual([
+			["asset_voice:Mia", { name: "Mia", age: "child", ...VOICE }, ""],
+		]);
+	});
+
+	it("refuses a voice trait the voice schema does not offer", () => {
+		const editor = makeCanvas([]);
+
+		const result = apply(editor, {
+			op: "asset",
+			type: "asset_voice",
+			attrs: { name: "Mia", age: "ageless" },
+		});
+
+		expect(result).toEqual({
+			applied: 0,
+			failures: ['asset: asset_voice offers no age "ageless"'],
+		});
+		expect(describeAssets(editor)).toEqual([]);
+	});
+
 	it("keeps an asset's description when an insert rewrites it with no text", () => {
 		const editor = makeCanvas([
 			asset("asset_avatar", { name: "Mia", text: "a girl" }),
 		]);
 
 		apply(editor, {
-			op: "insert",
+			op: "asset",
 			type: "asset_avatar",
 			attrs: { name: "Mia" },
 			text: "",
@@ -746,6 +737,32 @@ describe("applyRefineOp — assets", () => {
 		).toEqual([
 			`set: an asset's name never changes; remove "${voice.id}" and insert it again`,
 		]);
+		expect(
+			apply(editor, { op: "set", id: voice.id, attrs: { name: null } })
+				.failures,
+		).toEqual([
+			`set: an asset's name never changes; remove "${voice.id}" and insert it again`,
+		]);
+	});
+
+	it("lets a set repeat an asset's unchanged name", () => {
+		const voice = asset("asset_voice", {
+			name: "Mia",
+			attrs: { age: "child" },
+		});
+		const editor = makeCanvas([voice]);
+
+		const result = apply(editor, {
+			op: "set",
+			id: voice.id,
+			attrs: { name: "Mia", age: "adult" },
+		});
+
+		expect(result).toEqual({ applied: 1, failures: [] });
+		expect(describeAssets(editor)[0]?.[1]).toMatchObject({
+			name: "Mia",
+			age: "adult",
+		});
 	});
 
 	it("refuses to anchor a script element on an asset", () => {
@@ -756,8 +773,7 @@ describe("applyRefineOp — assets", () => {
 			apply(editor, {
 				op: "insert",
 				anchor_id: style.id,
-				type: "sound",
-				text: "rain",
+				elements: [{ type: "sound", text: "rain" }],
 			}).failures,
 		).toEqual([`insert: no element "${style.id}" to anchor on`]);
 		expect(topLevelTypes(editor)).toEqual(["asset_style", "scene"]);
@@ -816,8 +832,7 @@ describe("applyRefineOp — assets", () => {
 		apply(editor, {
 			op: "insert",
 			position: "before",
-			type: "sound",
-			text: "rain",
+			elements: [{ type: "sound", text: "rain" }],
 		});
 
 		expect(topLevelTypes(editor)).toEqual([
@@ -839,7 +854,11 @@ describe("applyRefineOps", () => {
 
 		const result = applyRefineOps(editor, [
 			{ op: "set", id: "n1", text: "goodbye" },
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "rain" },
+			{
+				op: "insert",
+				anchor_id: "n1",
+				elements: [{ type: "sound", text: "rain" }],
+			},
 		]);
 
 		expect(result).toEqual({ applied: 2, failures: [] });
@@ -851,7 +870,11 @@ describe("applyRefineOps", () => {
 
 		const result = applyRefineOps(editor, [
 			{ op: "set", id: "gone", text: "nope" },
-			{ op: "insert", anchor_id: "n1", type: "sound", text: "rain" },
+			{
+				op: "insert",
+				anchor_id: "n1",
+				elements: [{ type: "sound", text: "rain" }],
+			},
 		]);
 
 		expect(result.applied).toBe(1);

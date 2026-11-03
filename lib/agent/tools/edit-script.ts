@@ -2,14 +2,9 @@ import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import { ElementTypeSchema, type ElementType } from "@/lib/canvas/types";
+import { ContentTypeSchema, ElementTypeSchema } from "@/lib/canvas/types";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
-	type AttributeEdit,
-	TOGGLE_VALUES,
-} from "@/lib/connectors/attributes/schema";
-import { EffectType } from "@/lib/connectors/image/enums";
-import {
-	CONTINUITY_ATTR,
 	NO_FRAME,
 	PREVIOUS_VISUAL,
 	START_FRAME_ATTR,
@@ -22,52 +17,24 @@ import { Pencil } from "@/components/ui/icon";
 import { plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
-const enumeration = (values: readonly string[]) => `(${values.join(" | ")})`;
-
-const PICTURE_ATTRIBUTES = [
-	`overlays ${enumeration(Object.values(EffectType))}`,
-];
-
-/** Attributes the OSML prompt teaches that no schema carries. */
-const SCRIPT_ATTRIBUTES: Partial<Record<ElementType, string[]>> = {
-	character: ["name"],
-	image: PICTURE_ATTRIBUTES,
-	video: [
-		...PICTURE_ATTRIBUTES,
-		`${START_FRAME_ATTR} (${NO_FRAME} | ${PREVIOUS_VISUAL}, or a picture URL: an image's URL from view_image, with ${CONTINUITY_ATTR}="false" so the look before it does not fight that picture; leave a URL already set alone)`,
-	],
-};
-
-/** Attributes Sloppy can write by hand: enums with their options, and free text. */
-const describeAttribute = (key: string, edit?: AttributeEdit): string[] => {
-	if (edit?.kind === "enum") return [`${key} ${enumeration(edit.options)}`];
-	if (edit?.kind === "toggle") return [`${key} ${enumeration(TOGGLE_VALUES)}`];
+/** Attributes Sloppy can write by hand: those limited to a list of options, and free text. */
+const describeAttribute = ({ key, edit }: AttributeDef): string[] => {
+	if (edit?.kind === "enum" || edit?.kind === "toggle")
+		return [`${key} (${edit.value.options.join(" | ")})`];
 	return edit?.kind === "text" ? [key] : [];
 };
 
-// TODO(#743): this reads each type's recommended model, which holds while a type
-// has one or two models. Once a canvas mixes providers/models within a type, Sloppy
-// needs a tool that resolves the schema for one element's own pair before editing it.
-const attributesFor = (type: ElementType): string[] =>
-	Object.entries(attributeSchemaFor(type, {}).allAttributes).flatMap(
-		([key, { edit }]) => describeAttribute(key, edit),
-	);
-
-const attributesByType = (types: readonly ElementType[]) =>
-	types
-		.map((type) => ({
-			type,
-			attributes: [...(SCRIPT_ATTRIBUTES[type] ?? []), ...attributesFor(type)],
-		}))
-		.filter(({ attributes }) => attributes.length > 0)
-		.map(({ type, attributes }) => `- ${type}: ${attributes.join(", ")}`)
-		.join("\n");
+// TODO(#743): an element's model-specific options show only as the value it already holds.
+// Sloppy needs a tool that resolves one element's schema.
+const ATTRIBUTES_BY_TYPE = ElementTypeSchema.options
+	.flatMap((type) => {
+		const attributes =
+			attributeSchemaFor(type).baseDefs.flatMap(describeAttribute);
+		return attributes.length > 0 ? [`- ${type}: ${attributes.join(", ")}`] : [];
+	})
+	.join("\n");
 
 const ASSETS = dedent`
-	Assets sit ahead of the first scene and are global to the project. They are edited the
-	same way: insert one with no anchor, and set or remove one by its \`id\`. An insert whose
-	asset already exists changes that one instead. The title is not an asset: change it with
-	set_title.
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
 	lines and every {{Name}} in a prompt use, which never changes. A character has either or both.
 	- asset_avatar: what a character looks like, as its text, written like an image
@@ -84,27 +51,37 @@ const ASSETS = dedent`
 export const editScript = defineTool({
 	description: dedent`
 	  Change the canvas: add, remove, rewrite, retype or reorder the script's elements, and
-	  set up the assets it draws on. Every element carries an \`id\`. Reference ids you read;
-	  never invent one.
+	  set up the assets it draws on. Reference ids you read; never invent one.
 
-	  - insert: place a new element before or after \`anchor_id\`. Omit \`anchor_id\` to append,
-	    or to prepend with position "before". Each insert resolves independently, so several
-	    at one anchor must each repeat it; they stack in the order you emit them. Never send
-	    an \`id\` on an insert.
+	  - insert: place new \`elements\` before or after \`anchor_id\`, in the order you list them.
+	    Omit \`anchor_id\` to append, or to prepend with position "before". To add several
+	    elements in a row, send them as one insert: you cannot anchor on an element this call adds.
+	  - asset: create an asset, or update the one with the same \`type\` and \`name\`. Assets sit
+	    outside the script, so they take no anchor.
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
-	    text changes. Set an attribute to null to drop it.
+	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into
+	    another script type and clears its attributes, so send the ones to keep, like a
+	    character line's \`name\`, in the same op.
 
-	  To move an element, remove it and insert it again.
+	  To move an element, remove it and insert it again: the copy is a new, ungenerated
+	  element holding only what you send.
 
-	  Element types: ${ElementTypeSchema.options.join(", ")}
+	  Script types: ${ContentTypeSchema.options.join(", ")}
 
 	  ${ASSETS}
 
-	  Attributes by type, all string values:
-	  ${attributesByType(ElementTypeSchema.options)}
+	  Attributes by type:
+	  ${ATTRIBUTES_BY_TYPE}
 
-	  To change a model, set provider and model to a pair from list_models.
+	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: an image's URL from
+	  view_image. Leave a URL already set alone.
+
+	  The attributes above work with every model. Some models have extra attributes of their own;
+	  read_script shows the ones an element already has.
+
+	  To change a model, set provider and model to a pair from list_models. Narration and
+	  character lines have none of their own: they speak with their asset_voice's.
 
 	  ${CHARACTER_REFS_RULE}
 

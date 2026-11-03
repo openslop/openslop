@@ -168,6 +168,10 @@ export const ElementTypeSchema = z.enum(
 	Object.keys(ELEMENT_TYPES) as [ElementType, ...ElementType[]],
 );
 
+export const AssetTypeSchema = z.enum(
+	Object.keys(ASSET_TYPES) as [AssetType, ...AssetType[]],
+);
+
 export type CanvasEditor = BaseEditor &
 	HistoryEditor &
 	ReactEditor & {

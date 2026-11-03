@@ -75,11 +75,11 @@ describe("writes by id", () => {
 			scene([content("narration", "n1"), content("image", "img1")]),
 		]);
 
-		mergeAttrs(editor, "img1", { style: "ink" });
+		mergeAttrs(editor, "img1", { format: "png" });
 		mergeAttrs(editor, voice.id, { age: "child" });
 
 		expect(findElementById(editor, "img1")?.[0].generationAttributes).toEqual({
-			style: "ink",
+			format: "png",
 		});
 		expect(findElementById(editor, voice.id)).toMatchObject([
 			{ generationAttributes: { name: "Mia", age: "child" } },

@@ -3,6 +3,7 @@ import {
 	durationDef,
 	loopDef,
 	motionDef,
+	OWN_MODEL_DEFS,
 	resolutionDef,
 	timelineDurationDef,
 	trimStartDef,
@@ -15,6 +16,7 @@ import { continuityDef, startFrameDef, uploadedFrameDef } from "./start-frame";
 
 export const videoAttributesFor = (model: ModelRef) =>
 	AttributeSchema.from([
+		...OWN_MODEL_DEFS,
 		startFrameDef,
 		continuityDef,
 		uploadedFrameDef,
