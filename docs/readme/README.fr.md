@@ -56,8 +56,8 @@ Tapez une ligne. Choisissez 16:9 ou 9:16, une langue, un modèle et une durée, 
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/composer-copilot.tsx"><img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="La zone de prompt fait défiler des exemples d'idées, puis une ligne est tapée et envoyée" width="100%"></a>
-  <a href="../../app/components/copilot/composer-copilot.tsx"><img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="La zone de prompt fait défiler des exemples d'idées, puis une ligne est tapée et envoyée" width="100%"></a>
+  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="La zone de prompt fait défiler des exemples d'idées, puis une ligne est tapée et envoyée" width="100%">
+  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="La zone de prompt fait défiler des exemples d'idées, puis une ligne est tapée et envoyée" width="100%">
 </td>
 </tr>
 <tr>
@@ -71,8 +71,8 @@ Le copilote vit dans le panneau de gauche. Il lit le script, structure l'histoir
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#sloppy"><img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy réfléchit, lit, structure, écrit un script, et des scènes apparaissent sur le canevas" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#sloppy"><img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy réfléchit, lit, structure, écrit un script, et des scènes apparaissent sur le canevas" width="100%"></a>
+  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy réfléchit, lit, structure, écrit un script, et des scènes apparaissent sur le canevas" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy réfléchit, lit, structure, écrit un script, et des scènes apparaissent sur le canevas" width="100%">
 </td>
 </tr>
 <tr>
@@ -86,8 +86,8 @@ Chaque scène est une pile de cartes : narration, personnage, image, vidéo, son
 
 </td>
 <td width="50%">
-  <a href="../../lib/canvas"><img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="Survoler une ligne ouvre le menu d'insertion avec les six types d'éléments et une nouvelle carte Sound apparaît" width="100%"></a>
-  <a href="../../lib/canvas"><img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Survoler une ligne ouvre le menu d'insertion avec les six types d'éléments et une nouvelle carte Sound apparaît" width="100%"></a>
+  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="Survoler une ligne ouvre le menu d'insertion avec les six types d'éléments et une nouvelle carte Sound apparaît" width="100%">
+  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Survoler une ligne ouvre le menu d'insertion avec les six types d'éléments et une nouvelle carte Sound apparaît" width="100%">
 </td>
 </tr>
 <tr>
@@ -101,8 +101,8 @@ Generate all (tout générer) met chaque élément en file d'attente et lance d'
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all lance la file, les aperçus se remplissent, et un prompt modifié est marqué Stale avec une raison" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all lance la file, les aperçus se remplissent, et un prompt modifié est marqué Stale avec une raison" width="100%"></a>
+  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all lance la file, les aperçus se remplissent, et un prompt modifié est marqué Stale avec une raison" width="100%">
+  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all lance la file, les aperçus se remplissent, et un prompt modifié est marqué Stale avec une raison" width="100%">
 </td>
 </tr>
 <tr>
@@ -116,8 +116,8 @@ Regardez le montage se remplir, sous-titres mot par mot. Quatre pistes en dessou
 
 </td>
 <td width="50%">
-  <a href="../../app/components/player"><img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="Le lecteur joue avec des sous-titres mot par mot pendant que la tête de lecture balaie une timeline à quatre pistes" width="100%"></a>
-  <a href="../../app/components/player"><img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="Le lecteur joue avec des sous-titres mot par mot pendant que la tête de lecture balaie une timeline à quatre pistes" width="100%"></a>
+  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="Le lecteur joue avec des sous-titres mot par mot pendant que la tête de lecture balaie une timeline à quatre pistes" width="100%">
+  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="Le lecteur joue avec des sous-titres mot par mot pendant que la tête de lecture balaie une timeline à quatre pistes" width="100%">
 </td>
 </tr>
 <tr>
@@ -131,8 +131,8 @@ Les modèles hébergés viennent avec votre compte. Collez une clé Anthropic, R
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-keys"><img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Une clé Cartesia est collée et validée, passant de Unverified à Connected" width="100%"></a>
-  <a href="../../ARCHITECTURE.md#models-and-keys"><img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Une clé Cartesia est collée et validée, passant de Unverified à Connected" width="100%"></a>
+  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Une clé Cartesia est collée et validée, passant de Unverified à Connected" width="100%">
+  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Une clé Cartesia est collée et validée, passant de Unverified à Connected" width="100%">
 </td>
 </tr>
 </table>
@@ -263,10 +263,8 @@ Tout le monde dans la communauté est tenu de suivre notre [Code de conduite](..
 ## Historique des étoiles
 
 <p align="center">
-  <a href="https://star-history.com/#openslop/openslop&Date">
-    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="Graphique de l'historique des étoiles GitHub pour openslop/openslop" width="880">
-    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="Graphique de l'historique des étoiles GitHub pour openslop/openslop" width="880">
-  </a>
+  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="Graphique de l'historique des étoiles GitHub pour openslop/openslop" width="880">
+  <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="Graphique de l'historique des étoiles GitHub pour openslop/openslop" width="880">
 </p>
 
 ## Licence
