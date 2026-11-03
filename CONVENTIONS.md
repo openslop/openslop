@@ -29,7 +29,7 @@ How we write code here, for humans and agents. The codebase is deliberately rigi
 - Presentational components stay dumb: declarative, composable, and explicit about what they render. Conditional logic only when it serves one clear presentational concern.
 - The design system is off the shelf and non-negotiable. Components ship it by default, with no one-off Tailwind in higher-level components. Honor the component and style hierarchy. See DESIGN.md.
 - Composition over context. Don't thread props through layers that don't use them; prefer composition with children. Reach for context only for genuinely cross-cutting state, never just to skip a level.
-- Accessible by default. Semantic HTML, labels, and keyboard support aren't optional.
+- Accessible by default. Semantic HTML, labels, and keyboard support aren't optional. See [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
 ## Backend
 

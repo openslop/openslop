@@ -58,7 +58,7 @@ Read [CONVENTIONS.md](CONVENTIONS.md). It's strict on purpose, and [PHILOSOPHY.m
 - Comments are a last resort. No history in comments, that's what commit messages are for
 - Use what's already in the stack (Next, React, Remotion, Zustand, Supabase) before adding a dep
 
-Anything visual/all front-end changes should follow these closely: [DESIGN.md](DESIGN.md).
+Anything visual/all front-end changes should follow these closely: [DESIGN.md](DESIGN.md). Accessibility: [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
 10k foot view: [ARCHITECTURE.md](ARCHITECTURE.md)
 
