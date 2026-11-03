@@ -2,23 +2,28 @@ import { act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { createEditor, type Descendant } from "slate";
 import { Slate, withReact } from "slate-react";
+import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
+import { createProjectStore } from "@/lib/project/store";
 
 /** A canvas with no editable surface, as an asset dialog sees it. */
 export function mountOnCanvas(children: Descendant[] = []) {
 	const editor = withReact(createEditor());
 	editor.defaultModels = () => ({});
-	editor.defaultLanguage = () => undefined;
 	editor.children = children;
+	const store = createProjectStore();
 	const container = document.body.appendChild(document.createElement("div"));
 	const root = createRoot(container);
 	return {
 		editor,
+		store,
 		render: (ui: ReactNode) =>
 			act(() =>
 				root.render(
-					<Slate editor={editor} initialValue={editor.children}>
-						{ui}
-					</Slate>,
+					<ProjectStoreProvider store={store}>
+						<Slate editor={editor} initialValue={editor.children}>
+							{ui}
+						</Slate>
+					</ProjectStoreProvider>,
 				),
 			),
 		unmount: () => {

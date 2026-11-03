@@ -9,6 +9,8 @@ import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { useAsset } from "@/lib/canvas/use-assets";
 import { updateElementText } from "@/lib/canvas/editor-ops";
 import type { AssetType } from "@/lib/canvas/types";
+import { projectLanguage } from "@/lib/project/language";
+import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { ModelAttribute } from "../attributes/model-attribute";
 import { ElementGenerationProvider } from "../element-generation-context";
 import {
@@ -31,10 +33,13 @@ export function CharacterEditModal({
 	onClose: () => void;
 }) {
 	const editor = useSlateStatic();
+	const store = useProjectStoreHandle();
 	const avatar = useAsset("asset_avatar", name);
 	const voice = useAsset("asset_voice", name);
 	const toggle = (type: AssetType) => (on: boolean) =>
-		on ? ensureAsset(editor, type, name) : removeAsset(editor, type, name);
+		on
+			? ensureAsset(editor, type, name, projectLanguage(store))
+			: removeAsset(editor, type, name);
 
 	return (
 		<AssetDialog

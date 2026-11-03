@@ -3,7 +3,6 @@ import type { HistoryEditor } from "slate-history";
 import type { ReactEditor } from "slate-react";
 import { z } from "zod";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import type { TTSLanguage } from "@/lib/connectors/tts/enums";
 import type { AssetConnectorType } from "@/lib/connectors/types";
 
 export type ResultKind = "image" | "video" | "audio";
@@ -175,8 +174,6 @@ export type CanvasEditor = BaseEditor &
 		id?: string;
 		/** Resolved per call, since the project's and account's pins change mid-session. */
 		defaultModels: () => ConnectorModels;
-		/** The language the project declares, resolved per call; nothing on auto. */
-		defaultLanguage: () => TTSLanguage | undefined;
 	};
 
 export type SplitAttributes = {

@@ -1,3 +1,4 @@
+import type { ProjectStore } from "./store";
 import { TTS_LANGUAGES, type TTSLanguage } from "@/lib/connectors/tts/enums";
 
 export const AUTO_LANGUAGE = "auto";
@@ -19,3 +20,6 @@ export function declaredLanguage(
 ): TTSLanguage | undefined {
 	return choice === AUTO_LANGUAGE ? undefined : choice;
 }
+
+export const projectLanguage = (store: ProjectStore): TTSLanguage | undefined =>
+	declaredLanguage(store.getState().scriptSettings.language);

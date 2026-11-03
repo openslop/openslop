@@ -16,11 +16,11 @@ import type { AssetType } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
-const creationDefaults = (
-	editor: Editor,
+/** A new voice starts in the project's declared language; nothing else carries one. */
+const startingAttrs = (
 	type: AssetType,
-): { language?: TTSLanguage } =>
-	type === "asset_voice" ? { language: editor.defaultLanguage() } : {};
+	language: TTSLanguage | undefined,
+): AttributeChanges => (type === "asset_voice" ? { language } : {});
 
 export function setAsset(
 	editor: Editor,
@@ -33,10 +33,7 @@ export function setAsset(
 		Transforms.insertNodes(
 			editor,
 			createCanvasElement(type, {
-				attrs: omitBy(
-					{ name, ...creationDefaults(editor, type), ...attrs },
-					isNil,
-				) as Record<string, string>,
+				attrs: omitBy({ name, ...attrs }, isNil) as Record<string, string>,
 				text: text?.trim(),
 				defaultModels: editor.defaultModels(),
 			}),
@@ -52,8 +49,10 @@ export function ensureAsset(
 	editor: Editor,
 	type: AssetType,
 	name?: string,
+	language?: TTSLanguage,
 ): void {
-	if (!findAsset(editor.children, type, name)) setAsset(editor, type, name);
+	if (!findAsset(editor.children, type, name))
+		setAsset(editor, type, name, { attrs: startingAttrs(type, language) });
 }
 
 export function setReferenceImages(editor: Editor, urls: string[]): void {
@@ -78,8 +77,12 @@ export function removeAsset(
 }
 
 /** A new character speaks, and is drawn unless they are the narrator. */
-export function addCharacter(editor: Editor, name: string): void {
-	ensureAsset(editor, "asset_voice", name);
+export function addCharacter(
+	editor: Editor,
+	name: string,
+	language?: TTSLanguage,
+): void {
+	ensureAsset(editor, "asset_voice", name, language);
 	if (name !== NARRATOR) ensureAsset(editor, "asset_avatar", name);
 }
 

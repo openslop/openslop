@@ -83,6 +83,17 @@ describe("AssetEditProvider", () => {
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
+	it("starts a new voice in the project's declared language", () => {
+		canvas.store.getState().updateScriptSettings({ language: "es" });
+
+		act(() => editors.editAsset("asset_voice", "Kai"));
+
+		expect(
+			findAsset(editor().children, "asset_voice", "Kai")?.generationAttributes
+				?.language,
+		).toBe("es");
+	});
+
 	it("adds only the asset it opens", () => {
 		act(() => editors.editAsset("asset_voice", "Kai"));
 

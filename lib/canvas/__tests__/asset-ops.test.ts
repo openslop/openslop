@@ -152,15 +152,15 @@ describe("setAsset", () => {
 	});
 });
 
-describe("setAsset language", () => {
+describe("new voice language", () => {
 	const language = (editor: ReturnType<typeof makeEditor>, name: string) =>
 		findAsset(editor.children, "asset_voice", name)?.generationAttributes
 			?.language;
 
-	it("starts a new voice in the project's declared language", () => {
-		const editor = makeEditor([], {}, "es");
+	it("starts a new character's voice in the given language, not their look", () => {
+		const editor = makeEditor();
 
-		addCharacter(editor, "Mia");
+		addCharacter(editor, "Mia", "es");
 
 		expect(language(editor, "Mia")).toBe("es");
 		expect(
@@ -168,30 +168,20 @@ describe("setAsset language", () => {
 		).not.toHaveProperty("language");
 	});
 
-	it("lets the caller's own language win", () => {
-		const editor = makeEditor([], {}, "es");
-
-		setAsset(editor, "asset_voice", "Mia", { attrs: { language: "fr" } });
-
-		expect(language(editor, "Mia")).toBe("fr");
-	});
-
 	it("leaves the language open while the project is on auto", () => {
 		const editor = makeEditor();
 
-		setAsset(editor, "asset_voice", "Mia");
+		ensureAsset(editor, "asset_voice", "Mia", undefined);
 
 		expect(language(editor, "Mia")).toBeUndefined();
 	});
 
-	it("keeps an existing voice's language when it changes again", () => {
-		const editor = makeEditor(
-			[asset("asset_voice", { name: "Mia", attrs: { language: "fr" } })],
-			{},
-			"es",
-		);
+	it("keeps an existing voice's language", () => {
+		const editor = makeEditor([
+			asset("asset_voice", { name: "Mia", attrs: { language: "fr" } }),
+		]);
 
-		setAsset(editor, "asset_voice", "Mia", { attrs: { pitch: "low" } });
+		ensureAsset(editor, "asset_voice", "Mia", "es");
 
 		expect(language(editor, "Mia")).toBe("fr");
 	});

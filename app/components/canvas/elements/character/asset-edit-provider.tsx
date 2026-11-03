@@ -5,6 +5,8 @@ import { Dialog } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
 import { addCharacter, ensureAsset } from "@/lib/canvas/asset-ops";
 import type { AssetType } from "@/lib/canvas/types";
+import { projectLanguage } from "@/lib/project/language";
+import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { AssetEditContext, type AssetEditors } from "../asset-edit-context";
 import { ArtStyleModal } from "../style/art-style-modal";
 import { CharacterEditModal } from "./character-edit-modal";
@@ -26,18 +28,19 @@ const DIALOG_OF: Record<AssetType, (name?: string) => AssetEdit> = {
 /** Mounts the asset dialogs once, so no view wires openers down to its tiles. */
 export function AssetEditProvider({ children }: { children: ReactNode }) {
 	const editor = useSlateStatic();
+	const store = useProjectStoreHandle();
 	const [editing, setEditing] = useState<AssetEdit | null>(null);
 	const close = () => setEditing(null);
 
 	const editors = useMemo<AssetEditors>(
 		() => ({
 			editAsset: (type, name) => {
-				ensureAsset(editor, type, name);
+				ensureAsset(editor, type, name, projectLanguage(store));
 				setEditing(DIALOG_OF[type](name));
 			},
 			openCreateCharacter: () => setEditing({ kind: "create" }),
 		}),
-		[editor],
+		[editor, store],
 	);
 
 	return (
@@ -52,7 +55,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				{editing?.kind === "create" && (
 					<NewCharacterDialog
 						onCreated={(name) => {
-							addCharacter(editor, name);
+							addCharacter(editor, name, projectLanguage(store));
 							setEditing({ kind: "character", name });
 						}}
 					/>
