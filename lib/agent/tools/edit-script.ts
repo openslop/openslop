@@ -54,9 +54,9 @@ export const editScript = defineTool({
 	  Change the canvas: add, remove, rewrite, retype or reorder the script's elements, and
 	  set up the assets it draws on. Reference ids you read; never invent one.
 
-	  - insert: place a new element before or after \`anchor_id\`. Omit \`anchor_id\` to append,
-	    or to prepend with position "before". To insert several in one spot, give each the same
-	    \`anchor_id\`; they land in the order you emit them.
+	  - insert: place new \`elements\` before or after \`anchor_id\`, in the order you list them.
+	    Omit \`anchor_id\` to append, or to prepend with position "before". To add several
+	    elements in a row, send them as one insert: you cannot anchor on an element this call adds.
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into

@@ -11,8 +11,12 @@ describe("edit_script", () => {
 			"asset_voice: how a speaker sounds, as its attributes and no text",
 		);
 		expect(
-			parses({ op: "insert", type: "asset_voice", attrs: { name: "Mia" } }),
+			parses({
+				op: "insert",
+				elements: [{ type: "asset_voice", attrs: { name: "Mia" } }],
+			}),
 		).toBe(true);
+		expect(parses({ op: "insert", elements: [] })).toBe(false);
 	});
 
 	it("parses every element type it lists as an insert, and every script type as a retype", () => {
@@ -20,7 +24,9 @@ describe("edit_script", () => {
 			`Script types: ${ContentTypeSchema.options.join(", ")}`,
 		);
 		for (const type of ElementTypeSchema.options) {
-			expect(parses({ op: "insert", type, attrs: { name: "Mia" } })).toBe(true);
+			expect(
+				parses({ op: "insert", elements: [{ type, attrs: { name: "Mia" } }] }),
+			).toBe(true);
 		}
 		for (const type of ContentTypeSchema.options) {
 			expect(parses({ op: "set", id: "n1", type })).toBe(true);

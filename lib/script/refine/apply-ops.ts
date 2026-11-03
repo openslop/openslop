@@ -17,7 +17,7 @@ import {
 import { insertElement } from "@/lib/canvas/insert-element";
 import { isScene } from "@/lib/canvas/scenes";
 import type { AssetType, ElementType } from "@/lib/canvas/types";
-import type { RefineOp } from "./types";
+import type { NewElement, RefineOp } from "./types";
 
 export type RefineOpResult = { ok: true } | { ok: false; reason: string };
 
@@ -25,29 +25,27 @@ const OK: RefineOpResult = { ok: true };
 
 const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
 
-/** The first of `edits` the element's own schema would never produce, or nothing. */
-function unofferedAttribute(
+/** Every one of `edits` the element's own schema would never produce, or nothing. */
+function unofferedAttributes(
 	type: ElementType,
 	attrs: Record<string, string>,
 	edits: Record<string, string>,
 ): string | undefined {
 	const schema = attributeSchemaFor(type, { ...attrs, ...edits });
-	const miss = Object.entries(edits).find(
-		([key, value]) => !schema.offers(key, value),
-	);
-	return miss && `${type} offers no ${miss[0]} "${miss[1]}"`;
+	const misses = Object.entries(edits)
+		.filter(([key, value]) => !schema.offers(key, value))
+		.map(([key, value]) => `${key} "${value}"`);
+	return misses.length > 0
+		? `${type} offers no ${misses.join(", ")}`
+		: undefined;
 }
 
-export function applyRefineOp(
-	editor: Editor,
-	op: RefineOp,
-	insertedAfter: Record<string, string>,
-): RefineOpResult {
+export function applyRefineOp(editor: Editor, op: RefineOp): RefineOpResult {
 	let result: RefineOpResult = OK;
 	Editor.withoutNormalizing(editor, () => {
 		switch (op.op) {
 			case "insert":
-				result = applyInsert(editor, op, insertedAfter);
+				result = applyInsert(editor, op);
 				break;
 			case "remove":
 				result = applyRemove(editor, op);
@@ -60,17 +58,12 @@ export function applyRefineOp(
 	return result;
 }
 
-/**
- * Applies a turn's ops in order. Ops are not rolled back on failure: a later op
- * may legitimately depend on an element an earlier one created, so each op is
- * judged on its own and every failure is reported back to the caller.
- */
+/** Applies a turn's ops in order; a failed op is reported, never rolled back. */
 export function applyRefineOps(
 	editor: Editor,
 	ops: RefineOp[],
 ): { applied: number; failures: string[] } {
-	const insertedAfter: Record<string, string> = {};
-	const results = ops.map((op) => applyRefineOp(editor, op, insertedAfter));
+	const results = ops.map((op) => applyRefineOp(editor, op));
 	return {
 		applied: results.filter((result) => result.ok).length,
 		failures: results.flatMap((result) => (result.ok ? [] : [result.reason])),
@@ -80,7 +73,6 @@ export function applyRefineOps(
 function resolveInsertPath(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
-	insertedAfter: Record<string, string>,
 ): Path | null {
 	if (!op.anchor_id) {
 		const firstScene = editor.children.findIndex(isScene);
@@ -88,41 +80,31 @@ function resolveInsertPath(
 			? [firstScene, 0]
 			: [editor.children.length];
 	}
-
-	const resolvedId =
-		op.position === "before"
-			? op.anchor_id
-			: (insertedAfter[op.anchor_id] ?? op.anchor_id);
-	const entry =
-		findElementById(editor, resolvedId) ??
-		findElementById(editor, op.anchor_id);
+	const entry = findElementById(editor, op.anchor_id);
 	if (!entry || !isContentElement(entry[0])) return null;
-
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
+}
+
+function elementProblems(element: NewElement): string[] {
+	const unoffered = unofferedAttributes(element.type, {}, element.attrs ?? {});
+	const missing = isAssetType(element.type)
+		? CHARACTER_ASSETS.has(element.type) && !element.attrs?.name && "a name"
+		: !element.text?.trim() && "text";
+	return [
+		...(unoffered ? [unoffered] : []),
+		...(missing ? [`${element.type} needs ${missing}`] : []),
+	];
 }
 
 function applyInsert(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
-	insertedAfter: Record<string, string>,
 ): RefineOpResult {
-	const unoffered = unofferedAttribute(op.type, {}, op.attrs ?? {});
-	if (unoffered) return { ok: false, reason: `insert: ${unoffered}` };
+	const problems = op.elements.flatMap(elementProblems);
+	if (problems.length > 0)
+		return { ok: false, reason: `insert: ${problems.join("; ")}` };
 
-	if (isAssetType(op.type)) {
-		if (CHARACTER_ASSETS.has(op.type) && !op.attrs?.name)
-			return { ok: false, reason: `insert: ${op.type} needs a name` };
-		setAsset(editor, op.type, op.attrs?.name, {
-			attrs: op.attrs,
-			text: op.text || undefined,
-		});
-		return OK;
-	}
-
-	if (!op.text?.trim())
-		return { ok: false, reason: `insert: ${op.type} needs text` };
-
-	const at = resolveInsertPath(editor, op, insertedAfter);
+	const at = resolveInsertPath(editor, op);
 	if (!at) {
 		return {
 			ok: false,
@@ -130,14 +112,15 @@ function applyInsert(
 		};
 	}
 
-	const id = insertElement(editor, op.type, at, {
-		attrs: op.attrs,
-		text: op.text,
-	});
-
-	if (op.anchor_id && op.position !== "before") {
-		insertedAfter[op.anchor_id] = id;
+	const next = Editor.pathRef(editor, at);
+	for (const { type, attrs, text } of op.elements) {
+		if (isAssetType(type))
+			setAsset(editor, type, attrs?.name, { attrs, text: text || undefined });
+		else if (next.current)
+			insertElement(editor, type, next.current, { attrs, text });
+		else throw new Error(`insert: the spot at "${op.anchor_id}" went away`);
 	}
+	next.unref();
 	return OK;
 }
 
@@ -174,11 +157,11 @@ function applySet(
 	if (op.type && op.type !== found.type) {
 		if (!isContentElement(found))
 			return { ok: false, reason: `set: asset "${op.id}" keeps its type` };
-		const unoffered = unofferedAttribute(op.type, {}, edits);
+		const unoffered = unofferedAttributes(op.type, {}, edits);
 		if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
 		retypeElement(editor, at, found, op.type);
 	} else {
-		const unoffered = unofferedAttribute(found.type, attrs, edits);
+		const unoffered = unofferedAttributes(found.type, attrs, edits);
 		if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
 	}
 	if (op.attrs) {
