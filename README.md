@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/openslop-lockup-animated-dark.svg">
-    <img src="./assets/openslop-lockup-animated-light.svg" alt="OpenSlop" width="560">
-  </picture>
+  <img src="./assets/openslop-lockup-animated-light.svg#gh-light-mode-only" alt="OpenSlop" width="560">
+  <img src="./assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
 <p align="center"><b>Free, open-source AI video creator.</b></p>
@@ -29,10 +27,8 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/openslop-demo-dark.svg">
-    <img src="./assets/openslop-demo-light.svg" alt="OpenSlop - your free AI video creator" width="100%">
-  </picture>
+  <img src="./assets/openslop-demo-light.svg#gh-light-mode-only" alt="OpenSlop - your free AI video creator" width="100%">
+  <img src="./assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="OpenSlop - your free AI video creator" width="100%">
 </p>
 
 ---
@@ -60,10 +56,8 @@ Type one line. Pick 16:9 or 9:16, a language, a model, and a length, or paste a 
 
 </td>
 <td width="50%">
-  <a href="app/components/copilot/composer-copilot.tsx"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/describe-dark.svg">
-    <img src="./assets/features/describe-light.svg" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%">
-  </picture></a>
+  <a href="app/components/copilot/composer-copilot.tsx"><img src="./assets/features/describe-light.svg#gh-light-mode-only" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%"></a>
+  <a href="app/components/copilot/composer-copilot.tsx"><img src="./assets/features/describe-dark.svg#gh-dark-mode-only" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%"></a>
 </td>
 </tr>
 <tr>
@@ -77,10 +71,8 @@ The copilot lives in the left panel. It reads the script, outlines the story, wr
 
 </td>
 <td width="50%">
-  <a href="ARCHITECTURE.md#sloppy"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/sloppy-dark.svg">
-    <img src="./assets/features/sloppy-light.svg" alt="Sloppy thinks, reads, outlines, writes a script, and scenes appear on the canvas" width="100%">
-  </picture></a>
+  <a href="ARCHITECTURE.md#sloppy"><img src="./assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy thinks, reads, outlines, writes a script, and scenes appear on the canvas" width="100%"></a>
+  <a href="ARCHITECTURE.md#sloppy"><img src="./assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy thinks, reads, outlines, writes a script, and scenes appear on the canvas" width="100%"></a>
 </td>
 </tr>
 <tr>
@@ -94,10 +86,8 @@ Every scene is a stack of cards: narration, character, image, video, sound, musi
 
 </td>
 <td width="50%">
-  <a href="lib/canvas"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/canvas-dark.svg">
-    <img src="./assets/features/canvas-light.svg" alt="Hovering a row opens the insert menu with the six element types and a new Sound card appears" width="100%">
-  </picture></a>
+  <a href="lib/canvas"><img src="./assets/features/canvas-light.svg#gh-light-mode-only" alt="Hovering a row opens the insert menu with the six element types and a new Sound card appears" width="100%"></a>
+  <a href="lib/canvas"><img src="./assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Hovering a row opens the insert menu with the six element types and a new Sound card appears" width="100%"></a>
 </td>
 </tr>
 <tr>
@@ -111,10 +101,8 @@ Generate all queues every element and runs dependencies first: the video card a 
 
 </td>
 <td width="50%">
-  <a href="ARCHITECTURE.md#canvas-and-generation"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/generate-dark.svg">
-    <img src="./assets/features/generate-light.svg" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%">
-  </picture></a>
+  <a href="ARCHITECTURE.md#canvas-and-generation"><img src="./assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%"></a>
+  <a href="ARCHITECTURE.md#canvas-and-generation"><img src="./assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%"></a>
 </td>
 </tr>
 <tr>
@@ -128,10 +116,8 @@ Watch the cut as it fills in, captions word by word. Four lanes underneath: visu
 
 </td>
 <td width="50%">
-  <a href="app/components/player"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/timeline-dark.svg">
-    <img src="./assets/features/timeline-light.svg" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%">
-  </picture></a>
+  <a href="app/components/player"><img src="./assets/features/timeline-light.svg#gh-light-mode-only" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%"></a>
+  <a href="app/components/player"><img src="./assets/features/timeline-dark.svg#gh-dark-mode-only" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%"></a>
 </td>
 </tr>
 <tr>
@@ -145,10 +131,8 @@ Hosted models come with your account. Paste a key for Anthropic, Runware, Cartes
 
 </td>
 <td width="50%">
-  <a href="ARCHITECTURE.md#models-and-keys"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/features/providers-dark.svg">
-    <img src="./assets/features/providers-light.svg" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%">
-  </picture></a>
+  <a href="ARCHITECTURE.md#models-and-keys"><img src="./assets/features/providers-light.svg#gh-light-mode-only" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%"></a>
+  <a href="ARCHITECTURE.md#models-and-keys"><img src="./assets/features/providers-dark.svg#gh-dark-mode-only" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%"></a>
 </td>
 </tr>
 </table>
@@ -292,10 +276,8 @@ Everyone in the community is expected to follow our [Code of Conduct](CODE_OF_CO
 
 <p align="center">
   <a href="https://star-history.com/#openslop/openslop&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark">
-      <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date" alt="GitHub star history chart for openslop/openslop" width="880">
-    </picture>
+    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="GitHub star history chart for openslop/openslop" width="880">
+    <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="GitHub star history chart for openslop/openslop" width="880">
   </a>
 </p>
 
