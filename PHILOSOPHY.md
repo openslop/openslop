@@ -18,7 +18,7 @@ We use agents every day and they're great, but they don't know the business, whi
 
 ## 04. A human understands every line that lands
 
-Agents can write code and leave review comments, but only people approve. Whoever approves a PR should be able to explain it, and whoever opens one should have read their own diff first, because "the agent wrote it" isn't an answer to "why is it like this?" People are the ones who connect the code to our users and the business, and that context lives in our heads, not in the repo.
+Agents can write code and leave review comments, but only people approve. Whoever approves a PR should be able to explain it, and whoever opens one should have read their own diff first, because "the agent wrote it" isn't an answer to "why is it like this?" People are the ones who connect the code to our users and the business, and that context lives in our heads, not in the repo. [AI_POLICY.md](AI_POLICY.md) spells out what this means for your PR.
 
 ## 05. Strategic, not tactical
 

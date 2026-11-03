@@ -76,7 +76,7 @@ Test behavior not internals. Pure helpers and module boundaries. Vitest for unit
 
 ## AI
 
-Agent written code is welcome, same bar as everything else. Run the checks, read the diff. [AGENTS.md](AGENTS.md) has the agent notes.
+Agent written code is welcome, same bar as everything else. Run the checks, read the diff. [AI_POLICY.md](AI_POLICY.md) has the rules, [AGENTS.md](AGENTS.md) has the agent notes.
 
 ## Questions
 
