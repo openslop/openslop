@@ -34,11 +34,11 @@ export function claudeAgentModel(
 				await generateWithClaude(
 					userId,
 					JSON.stringify({ messages: options.prompt, tools }),
-					"Continue the supplied conversation as the assistant, following its system instructions. Return text and any requested tool calls. Tools are executed by the caller, not by you. Each call input must be a JSON-encoded object matching the named tool's inputSchema. Only call supplied tools. When no tools are provided, calls must be empty.",
+					"Continue the supplied conversation as the assistant, following its system instructions. Return text and any requested tool calls. The supplied tools are available application operations: request them by returning entries in calls, never by invoking native Claude Code tools. The caller executes those entries and supplies the results in the next conversation turn. Do not report these application tools as unavailable merely because they are not native tools. Each call input must be a JSON-encoded object matching the named tool's inputSchema. Only call supplied tools. When no tools are provided, calls must be empty.",
 					signal && options.abortSignal
 						? AbortSignal.any([signal, options.abortSignal])
 						: (signal ?? options.abortSignal),
-					z.toJSONSchema(Reply),
+					z.toJSONSchema(Reply, { target: "draft-7" }),
 				),
 			),
 		);
