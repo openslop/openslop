@@ -1,4 +1,7 @@
-import { isByokProvider } from "@/lib/connectors/provider-catalog";
+import {
+	isByokProvider,
+	LOCAL_PROVIDER,
+} from "@/lib/connectors/provider-catalog";
 import type { Provider } from "@/lib/connectors/types";
 
 export const OPENSLOP_API_PREFIX = "/api/v1";
@@ -11,4 +14,8 @@ export const OPENSLOP_API_PREFIX = "/api/v1";
 export const THIRD_PARTY_API_PREFIX = "/api/third-party";
 
 export const apiPrefixFor = (provider: Provider): string =>
-	isByokProvider(provider) ? THIRD_PARTY_API_PREFIX : OPENSLOP_API_PREFIX;
+	provider === LOCAL_PROVIDER
+		? "/api/local/claude"
+		: isByokProvider(provider)
+			? THIRD_PARTY_API_PREFIX
+			: OPENSLOP_API_PREFIX;
