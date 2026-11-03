@@ -24,10 +24,10 @@ const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
 /** Every one of `edits` the element's own schema would never produce, or nothing. */
 function unofferedAttributes(
 	type: ElementType,
-	attrs: Record<string, string>,
 	edits: Record<string, string>,
+	current: Record<string, string> = {},
 ): string | undefined {
-	const schema = attributeSchemaFor(type, { ...attrs, ...edits });
+	const schema = attributeSchemaFor(type, { ...current, ...edits });
 	const misses = Object.entries(edits)
 		.filter(([key, value]) => !schema.offers(key, value))
 		.map(([key, value]) => `${key} "${value}"`);
@@ -86,7 +86,7 @@ function resolveInsertPath(
 
 function elementProblems({ type, attrs, text }: NewElement): string[] {
 	return [
-		unofferedAttributes(type, {}, attrs ?? {}),
+		unofferedAttributes(type, attrs ?? {}),
 		text?.trim() ? undefined : `${type} needs text`,
 	].filter((problem) => problem !== undefined);
 }
@@ -120,7 +120,7 @@ function applyAsset(
 	{ type, attrs, text }: Extract<RefineOp, { op: "asset" }>,
 ): RefineOpResult {
 	const problems = [
-		unofferedAttributes(type, {}, attrs ?? {}),
+		unofferedAttributes(type, attrs ?? {}),
 		CHARACTER_ASSETS.has(type) && !attrs?.name
 			? `${type} needs a name`
 			: undefined,
@@ -149,12 +149,12 @@ function applySet(
 	const entry = findElementById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
 	const [found, at] = entry;
-	const attrs = flatAttributes(found);
+	const current = flatAttributes(found);
 
 	if (
 		isAssetElement(found) &&
 		op.attrs?.name !== undefined &&
-		op.attrs.name !== attrs.name
+		op.attrs.name !== current.name
 	)
 		return {
 			ok: false,
@@ -165,19 +165,14 @@ function applySet(
 	if (op.type && op.type !== found.type) {
 		if (!isContentElement(found))
 			return { ok: false, reason: `set: asset "${op.id}" keeps its type` };
-		const unoffered = unofferedAttributes(op.type, {}, edits);
+		const unoffered = unofferedAttributes(op.type, edits);
 		if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
 		retypeElement(editor, at, found, op.type);
 	} else {
-		const unoffered = unofferedAttributes(found.type, attrs, edits);
+		const unoffered = unofferedAttributes(found.type, edits, current);
 		if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
 	}
-	if (op.attrs) {
-		mergeAttrs(editor, op.id, op.attrs);
-	}
-
-	if (op.text !== undefined) {
-		updateElementText(editor, op.id, op.text);
-	}
+	if (op.attrs) mergeAttrs(editor, op.id, op.attrs);
+	if (op.text !== undefined) updateElementText(editor, op.id, op.text);
 	return OK;
 }
