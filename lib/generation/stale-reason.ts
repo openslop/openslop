@@ -1,3 +1,4 @@
+import isEqual from "lodash/isEqual";
 import lowerCase from "lodash/lowerCase";
 import union from "lodash/union";
 import uniq from "lodash/uniq";
@@ -33,6 +34,21 @@ function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 			.filter(([, dep]) => needsGeneration(dep, queue))
 			.map(([label]) => label),
 	]);
+}
+
+/** Stale only through its own prompt or attributes, so putting those back clears the marker. */
+export function resettableEdits(
+	node: GenerationNode,
+	queue: GenerationQueue,
+): boolean {
+	const previous = queue.getElementSnapshot(node.id).resultInputs;
+	if (!previous || !isNodeStale(node, queue)) return false;
+	const current = generationInputs(node, queue);
+	return (
+		isEqual(current.reads, previous.reads) &&
+		isEqual(current.dependencies, previous.dependencies) &&
+		!Object.values(node.dependsOn).some((dep) => needsGeneration(dep, queue))
+	);
 }
 
 /**

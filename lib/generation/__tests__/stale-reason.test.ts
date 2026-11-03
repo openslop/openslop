@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { GenerationNode } from "../graph";
 import type { NodeInputs } from "../inputs";
 import { GenerationQueue } from "../queue";
-import { staleReason } from "../stale-reason";
+import { resettableEdits, staleReason } from "../stale-reason";
 import { jobNode } from "./_graph";
 
 const node = (
@@ -124,6 +124,92 @@ describe("staleReason", () => {
 
 		expect(staleReason(edited("2"), queue)).toBe(
 			"The prompt, model, duration, and 1 more changed — regenerate to update",
+		);
+	});
+});
+
+describe("resettableEdits", () => {
+	it("is false for a node that has never generated", () => {
+		expect(resettableEdits(node("a"), new GenerationQueue())).toBe(false);
+	});
+
+	it("is false when the node is not stale", () => {
+		const queue = new GenerationQueue();
+		commit(queue, node("a"), "a.png");
+
+		expect(resettableEdits(node("a"), queue)).toBe(false);
+	});
+
+	it("is true when only the prompt and attributes changed", () => {
+		const queue = new GenerationQueue();
+		commit(
+			queue,
+			node("a", { prompt: "a knight", attributes: { model: "fast" } }),
+			"a.png",
+		);
+
+		expect(
+			resettableEdits(
+				node("a", { prompt: "a wizard", attributes: { model: "slow" } }),
+				queue,
+			),
+		).toBe(true);
+	});
+
+	it("is false when only an upstream result changed", () => {
+		const queue = new GenerationQueue();
+		const avatar = node("avatar");
+		const image = node("a", { dependsOn: { "Red's avatar": avatar } });
+		commit(queue, avatar, "red.png");
+		commit(queue, image, "a.png");
+
+		commit(queue, avatar, "red-v2.png");
+		expect(resettableEdits(image, queue)).toBe(false);
+	});
+
+	it("is false when only a read changed", () => {
+		const queue = new GenerationQueue();
+		const withStyle = (style: string) =>
+			node("a", { reads: { "the art style": style } });
+		commit(queue, withStyle("noir"), "a.png");
+
+		expect(resettableEdits(withStyle("watercolor"), queue)).toBe(false);
+	});
+
+	it("is false when an upstream dependency is itself stale", () => {
+		const queue = new GenerationQueue();
+		const avatar = (style: string) =>
+			node("avatar", { reads: { "the art style": style } });
+		const image = (style: string) =>
+			node("a", { dependsOn: { "Red's avatar": avatar(style) } });
+		commit(queue, avatar("noir"), "red.png");
+		commit(queue, image("noir"), "a.png");
+
+		expect(resettableEdits(image("watercolor"), queue)).toBe(false);
+	});
+
+	it("is false when local edits mix with an upstream change", () => {
+		const queue = new GenerationQueue();
+		const avatar = node("avatar");
+		const image = (prompt: string) =>
+			node("a", { prompt, dependsOn: { "Red's avatar": avatar } });
+		commit(queue, avatar, "red.png");
+		commit(queue, image("a knight"), "a.png");
+
+		commit(queue, avatar, "red-v2.png");
+		expect(resettableEdits(image("a wizard"), queue)).toBe(false);
+	});
+
+	it("is false for a pinned result", () => {
+		const queue = new GenerationQueue();
+		queue.commitResult(
+			node("a", { prompt: "a knight" }),
+			{ imageUrl: "a.png", durationSec: 0 },
+			{ pinned: true },
+		);
+
+		expect(resettableEdits(node("a", { prompt: "a wizard" }), queue)).toBe(
+			false,
 		);
 	});
 });
