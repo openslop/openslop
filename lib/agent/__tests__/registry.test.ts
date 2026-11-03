@@ -427,6 +427,7 @@ describe("executeToolCall", () => {
 					{
 						...onScreen("v3", 30),
 						durationSec: 5,
+						own: { seconds: 5, decidedBy: "duration" },
 						words: 90,
 						dialogueIds: ["nar2"],
 						decidedBy: "dialogue",
@@ -443,6 +444,37 @@ describe("executeToolCall", () => {
 		);
 		expect(outcome.ok && outcome.output).toContain(
 			"Scene 1 video v3: 30.0s, 90 words of dialogue (nar2) after it, longer than its 5.0s duration.",
+		);
+	});
+
+	it("says when the user's trim sets a video's length", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "measure_element_lengths", input: {} },
+			context({
+				measureElementLengths: () => [
+					{
+						...onScreen("v1", 5),
+						durationSec: 8,
+						own: { seconds: 5, decidedBy: "trim" },
+						decidedBy: "trim",
+					},
+					{
+						...onScreen("v2", 30),
+						durationSec: 8,
+						own: { seconds: 5, decidedBy: "trim" },
+						words: 90,
+						dialogueIds: ["nar1"],
+						decidedBy: "dialogue",
+					},
+				],
+			}),
+		);
+
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v1: 5.0s, its trim on the timeline; no dialogue after it.",
+		);
+		expect(outcome.ok && outcome.output).toContain(
+			"Scene 1 video v2: 30.0s, 90 words of dialogue (nar1) after it, longer than its 5.0s trim.",
 		);
 	});
 
