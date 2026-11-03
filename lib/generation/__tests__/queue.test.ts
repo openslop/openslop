@@ -1266,6 +1266,43 @@ describe("GenerationQueue", () => {
 			);
 		});
 
+		it("names the dependency a dependent is blocked by when it fails", async () => {
+			generateMock.mockImplementation(({ id }) =>
+				id === "alice"
+					? Promise.reject(new Error("avatar boom"))
+					: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
+			);
+			vi.spyOn(console, "error").mockImplementation(() => {});
+
+			generationQueue.enqueueGraph([makeJob("image", [makeJob("alice")])]);
+			await vi.runAllTimersAsync();
+
+			expect(generationQueue.getElementSnapshot("image").error).toBe(
+				"alice failed: avatar boom",
+			);
+			expect(generationQueue.getElementSnapshot("alice").error).toBe(
+				"avatar boom",
+			);
+		});
+
+		it("names each dependency a failure passes through, outermost first", async () => {
+			generateMock.mockImplementation(({ id }) =>
+				id === "c"
+					? Promise.reject(new Error("root boom"))
+					: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
+			);
+			vi.spyOn(console, "error").mockImplementation(() => {});
+
+			generationQueue.enqueueGraph([
+				makeJob("a", [makeJob("b", [makeJob("c")])]),
+			]);
+			await vi.runAllTimersAsync();
+
+			expect(generationQueue.getElementSnapshot("a").error).toBe(
+				"b failed: c failed: root boom",
+			);
+		});
+
 		it("leaves no error on a dependent released for a reason other than failure", async () => {
 			generateMock.mockResolvedValue({ imageUrl: "x.png", durationSec: 0 });
 
