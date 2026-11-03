@@ -46,7 +46,7 @@ e2e needs a browser: `npx playwright install --with-deps chromium`
 
 ## How we write code
 
-Read [CONVENTIONS.md](CONVENTIONS.md). It's strict on purpose. Stuff that gets PRs bounced most:
+Read [CONVENTIONS.md](CONVENTIONS.md). It's strict on purpose, and [PHILOSOPHY.md](PHILOSOPHY.md) explains why. Stuff that gets PRs bounced most:
 
 - One way to do a thing. No one-off wiring
 - No `!` non-null assertions (lint fails)
@@ -58,7 +58,7 @@ Read [CONVENTIONS.md](CONVENTIONS.md). It's strict on purpose. Stuff that gets P
 - Comments are a last resort. No history in comments, that's what commit messages are for
 - Use what's already in the stack (Next, React, Remotion, Zustand, Supabase) before adding a dep
 
-Anything visual/all front-end changes should follow these closely: [DESIGN.md](DESIGN.md).
+Anything visual/all front-end changes should follow these closely: [DESIGN.md](DESIGN.md). Accessibility: [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
 10k foot view: [ARCHITECTURE.md](ARCHITECTURE.md)
 
@@ -76,7 +76,7 @@ Test behavior not internals. Pure helpers and module boundaries. Vitest for unit
 
 ## AI
 
-Agent written code is welcome, same bar as everything else. Run the checks, read the diff. [AGENTS.md](AGENTS.md) has the agent notes.
+Agent written code is welcome, same bar as everything else. Run the checks, read the diff. [AI_POLICY.md](AI_POLICY.md) has the rules, [AGENTS.md](AGENTS.md) has the agent notes.
 
 ## Questions
 
