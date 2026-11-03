@@ -3,7 +3,7 @@
 Run `npm run dev -- --hostname 127.0.0.1` and open the app on localhost. Install
 [Claude Code](https://code.claude.com/docs/en/setup) on the same computer first.
 In the account menu, open **Settings → Models → Claude subscription · Local only**.
-Click **Sign in with Claude**, finish the browser sign-in with your personal Claude
+Click **Sign in with Claude**, then **Continue to Claude**. Finish the browser sign-in with your personal Claude
 account, then select **Claude subscription** in a text model picker. The account
 Text default also applies to Sloppy. Disconnect removes only this OpenSlop login.
 

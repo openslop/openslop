@@ -9,6 +9,7 @@ export async function runClaude(
 	args: string[],
 	input = "",
 	signal?: AbortSignal,
+	onOutput?: (chunk: string) => void,
 ): Promise<string> {
 	const project = createHash("sha256")
 		.update(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "local")
@@ -62,6 +63,7 @@ export async function runClaude(
 				} else resolve(stdout);
 			},
 		);
+		if (onOutput) child.stdout?.on("data", (chunk) => onOutput(String(chunk)));
 		child.stdin?.on("error", () =>
 			reject(new Error("Claude Code closed its input unexpectedly.")),
 		);

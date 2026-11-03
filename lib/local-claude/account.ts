@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { pendingClaudeLogin } from "./login";
 import { runClaude } from "./process";
 
 const AuthStatus = z.object({
@@ -22,14 +23,10 @@ export async function claudeAccount(userId: string) {
 	}
 	const status = AuthStatus.parse(JSON.parse(output));
 	return {
+		...pendingClaudeLogin(userId),
 		installed: true,
 		connected: status.loggedIn && status.authMethod === "claude.ai",
 		email: status.email,
 		subscription: status.subscriptionType ?? undefined,
 	};
-}
-
-export async function signInClaude(userId: string, signal: AbortSignal) {
-	await runClaude(userId, ["auth", "login", "--claudeai"], "", signal);
-	return claudeAccount(userId);
 }
