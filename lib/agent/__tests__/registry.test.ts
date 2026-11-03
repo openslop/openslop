@@ -48,7 +48,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	measureElementLengths: () => [],
 	measureRuntime: () => 0,
 	generateText: async () => "an outline",
-	elementImage: () => undefined,
+	elementResult: async () => undefined,
 	elementStates: () => [],
 	isScriptEmpty: () => false,
 	readAssets: () => [],
@@ -639,28 +639,32 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("hands over an element's pictures with their prompt", async () => {
-		const urls = ["https://example.com/a.jpg", "https://example.com/b.jpg"];
+	it("hands over an element's result with its prompt", async () => {
+		const view = {
+			prompt: "a wolf",
+			durationSec: 0,
+			pictures: [{ url: "https://example.com/a.jpg" }],
+			words: [],
+		};
 		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "img-1" } },
+			{ toolName: "view_result", input: { id: "img-1" } },
 			context({
-				elementImage: (id) =>
-					id === "img-1" ? { ok: true, prompt: "a wolf", urls } : undefined,
+				elementResult: async (id) =>
+					id === "img-1" ? { ok: true, view } : undefined,
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toEqual({
-			id: "img-1",
-			prompt: "a wolf",
-			urls,
-		});
+		expect(outcome.ok && outcome.output).toEqual({ id: "img-1", ...view });
 	});
 
-	it("refuses with the reason an element has no pictures", async () => {
+	it("refuses with the reason an element has no result", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "img-1" } },
+			{ toolName: "view_result", input: { id: "img-1" } },
 			context({
-				elementImage: () => ({ ok: false, reason: "is still generating" }),
+				elementResult: async () => ({
+					ok: false,
+					reason: "is still generating",
+				}),
 			}),
 		);
 
@@ -671,7 +675,7 @@ describe("executeToolCall", () => {
 
 	it("says an element id is not on the canvas rather than inventing a result", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "view_image", input: { id: "nope" } },
+			{ toolName: "view_result", input: { id: "nope" } },
 			context(),
 		);
 
@@ -814,7 +818,7 @@ describe("SLOPPY_TOOLS", () => {
 			"review_script",
 			"update_script_settings",
 			"update_video_settings",
-			"view_image",
+			"view_result",
 			"outline_story",
 			"measure_total_length",
 			"measure_element_lengths",
@@ -879,7 +883,7 @@ describe("tool flags", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
 			"read_script",
 			"review_script",
-			"view_image",
+			"view_result",
 		]);
 	});
 

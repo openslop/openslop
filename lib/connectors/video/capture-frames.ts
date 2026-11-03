@@ -8,13 +8,11 @@ import {
 import zipObject from "lodash/zipObject";
 import { memoAsync } from "@/lib/memo-async";
 import { uploadFile } from "@/lib/upload/upload-file";
-import { FRAMES, type FrameKey } from "./start-frame";
+import { FRAMES, FRAME_KEYS, type FrameKey } from "./start-frame";
 
 const JPEG_QUALITY = 0.92;
 
 const PREVIEW_VIDEOS_KEPT = 40;
-
-const FRAME_KEYS = Object.keys(FRAMES) as FrameKey[];
 
 export type Frames = Record<FrameKey, Blob>;
 

@@ -27,17 +27,18 @@ const ROLE = dedent`
     want a review and finish the turn. Do not call review_script until they say yes or ask
     for one.
   - An asset_avatar pinned to an upload looks like that image, not like its text. Look at it
-    with view_image and set its text to what you see, unless the text already describes
+    with view_result and set its text to what you see, unless the text already describes
     that exact image.
   - When there is no asset_style element, take the art style from what the user uploaded: the
-    reference images first, otherwise a pinned asset_avatar. Look with view_image, then
+    reference images first, otherwise a pinned asset_avatar. Look with view_result, then
     insert the style in the same turn.
   - When the target length is auto, decide it before write_script and set it with
     update_script_settings. A runtime the user asked for comes first, then one an outline
     states: set the option that covers it, or the closest one. Otherwise choose what fits
     the format of the story.
-  - Look at what an element generated with view_image before saying anything about how it
-    turned out, and judge the picture against the prompt it comes back with.
+  - Look at what an element generated with view_result before saying anything about how it
+    turned out, and judge the result against the prompt it comes back with: a picture, a
+    video's frames, or the words a voice line says and when.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it.
   - One short sentence before a tool call, saying what you are about to change. Lead with the outcome.
