@@ -1,62 +1,55 @@
 # Philosophy
 
-Why we write code the way we do here.
+Why we write code the way we do. [CONVENTIONS.md](CONVENTIONS.md) is the what. This is the why.
 
-**We don't want OpenSlop to turn into a big ball of mud.**
+## 01. Writing is cheap. Review isn't.
 
-Writing code is cheaper than it's ever been. An agent can write a thousand lines before you finish your coffee. Reading those lines, understanding them, and deciding if they belong is not any cheaper. So the bottleneck has moved. It's not writing anymore. It's good review.
+An agent writes a thousand lines before your coffee cools. Someone still has to read them. The bottleneck isn't writing code anymore. It's reviewing it well.
 
-That changes what kills a project. It used to be running out of people to write code. Now it's code piling up faster than anyone can understand it. Merging a pile of unreviewed, agent-written code is the fastest way we know to kill a codebase today.
+## 02. Mud is the default
 
-Agents are great, and we use them every day. But they don't hold the full picture. They don't know the business context, which keeps changing. They don't know why a module boundary sits where it does, how a user actually moves through the editor, or what the next person will need to understand when they open the file. Each change looks fine on its own. The damage only shows up across a hundred of them.
+Left alone, every codebase turns into a big ball of mud. Agents just get there faster. Merging unreviewed agent code is the quickest way to kill a project that we know of.
 
-[CONVENTIONS.md](CONVENTIONS.md) is the what. This doc is the why. There are eight principles that govern how we work:
+## 03. Agents don't know what we know
 
-1. _Review is the bottleneck, so we write for the reviewer._ Code gets written once and read many times, and now it gets written by agents faster than ever. Every choice should make the next review faster: small diffs, one change per PR, one obvious way to do things. If a PR takes an hour to understand, it's too big or too clever, even if it works.
+They don't know the business, which changes every week. Or why a boundary sits where it does. Or how a user actually moves through the editor. Or what the next person needs to understand. We do.
 
-2. _A human understands every line that lands._ An agent can write the code and leave review comments. Only a person approves. Whoever approves a PR should be able to explain it, and the author should have read their own diff first. "The agent wrote it" isn't an answer to "why is it like this?" People are the ones who connect the code to the users and the business, and that context lives in our heads, not in the repo.
+## 04. A human understands every line
 
-3. _Be strategic, not tactical._ This comes from John Ousterhout's _A Philosophy of Software Design_. Tactical programming means getting this feature working right now. Strategic programming means spending a bit more time so the next ten changes stay cheap. Tactical is faster at first, then it stalls. Agents are tactical by default, and they write a lot of code, so a team that only works tactically gets to the mud a lot sooner.
+Agents write and comment. People approve. If you can't explain a line, don't ship it. "The agent wrote it" isn't a reason.
 
-4. _Complexity creeps in one shortcut at a time._ No single PR makes a codebase hard to work in. It's the one-off flag, the copied helper, the extra `if` for one caller, each one small and reasonable. Ousterhout calls this out directly: complexity is incremental. So we say no to each small shortcut, even when it's "just this once."
+## 05. Strategic, not tactical
 
-5. _Watch for the three symptoms._ Ousterhout names three signs that code is getting too complex. **Change amplification**: one simple change has to touch many files. **Cognitive load**: you have to hold too much in your head to make a change safely. **Unknown unknowns**: it's not even clear what you need to change, because something is coupled in a way you can't see. Most of our rules exist to keep one of these three down.
+Tactical code gets this feature working today. Strategic code keeps the next ten changes cheap. Tactical feels faster. Then it stalls. Agents are tactical by default.
 
-6. _Deep modules, nothing leaks._ A good module has a simple interface and does a lot behind it. A shallow module has an interface almost as complicated as what it does, so it hides nothing. We pull complexity down into the module so callers don't have to deal with it. When the same design decision shows up in two places (Ousterhout calls this information leakage), the next change will have to find both.
+## 06. Complexity is incremental
 
-7. _Write the rules down._ Rules that live in someone's head don't get followed, by people or by agents. Written rules make review faster, because "this breaks rule X" is a quick conversation and "I don't like this" is a long one. They also make agents a lot better. Our nightly bot, [Nightshift](https://github.com/openslop/nightshift), has opened over 500 PRs here since March 2026. Jobs that follow written rules, like conventions and readability, get approved over 90% of the time. Open-ended jobs, like "go find bugs," land under 50%.
+No single PR ruins a codebase. One flag, one copied helper, one extra `if`. Each is reasonable. Together they're the mud. So we say no to "just this once."
 
-8. _Keep it boring._ Simple, flat, declarative code that reads like config. One canonical way to build each thing. Popular libraries over hand-rolled ones. Boring code is easy to review, easy to delete, and easy for the next person (or agent) to copy correctly. Clever code gets copied wrong.
+## 07. Three symptoms
 
-None of this is about being anti-agent. It's the opposite. Agents copy whatever patterns they find. A clean, consistent codebase teaches them good habits, and a messy one teaches them bad ones, at scale. Keeping the codebase simple is how we get to keep using agents without losing control of it.
+Change amplification: one change, many files. Cognitive load: too much to hold in your head. Unknown unknowns: you can't see what will break. Every rule we have exists to keep one of these down.
 
-Each diff gets checked when it comes in, but some problems only show up across many diffs: dead code, the same logic in three places, two modules that slowly grew into each other. So we also sweep the whole codebase on a schedule. The nightly bot runs one narrow job at a time and opens a PR. Same as everyone else's, a human approves it or it doesn't land, and rejected ideas get logged so they don't come back.
+## 08. Deep, not shallow
 
-## Why CONVENTIONS.md is so strict
+A simple interface with a lot of work behind it. Pull complexity down so callers don't carry it. If one decision lives in two places, it leaks.
 
-CONVENTIONS.md says it's "deliberately rigid and opinionated." That's on purpose. Every rule there is a strong default that keeps review fast and one of the three symptoms down. Here's the reasoning behind the big ones.
+## 09. Written rules > taste
 
-- **One canonical way to build each feature.** If there are two ways to do something, every reviewer has to check which one you picked and why, and every agent picks one at random. One way means less to think about (cognitive load) and fewer surprises.
-- **No special-case, one-off wiring.** One-offs are where complexity creeps in. Each one is small, and together they're the mud. If a feature needs special wiring, that's a sign the design should change so it fits what's already there.
-- **Prefer deep modules, keep handlers thin.** Straight from Ousterhout. Complexity pushed down into a module is handled once. Complexity left in the callers gets handled everywhere, and changes ripple out (change amplification).
-- **Separate policy from mechanism.** Low-level helpers that don't have opinions can be reused anywhere. The opinions live in one place up top, so changing a decision is one edit, not a hunt.
-- **Grow out, not down.** Adding a sister module is easy to review. Adding another layer of nesting hides bugs and makes every reader dig.
-- **Wait for the third use before extracting.** The wrong abstraction is worse than a little duplication (Sandi Metz). Agents love to abstract early, and a bad shared helper couples things that shouldn't be coupled (unknown unknowns).
-- **Nothing leaks, dependencies point one way.** `lib/` never imports from `app/`, and imports never cycle. When coupling is visible and one-directional, you can see what a change will break. Hidden coupling is exactly what unknown unknowns are.
-- **Define errors out of existence, fail loudly.** Another Ousterhout idea. Design the API so the bad case can't happen. When something unexpected does happen, throw. Swallowed errors are bugs nobody sees until a user does.
-- **Parse, don't validate.** Check outside input once, at the edge, then trust the types. Otherwise every function re-checks the same thing in a slightly different way.
-- **Comments are a smell.** If code needs a comment to make sense, a better name, type, or structure usually does the job and can't go stale. History goes in the commit message, not the file.
-- **Use what's in the stack before adding a dependency.** Every new library is something else for reviewers and agents to learn. Next.js, React, Remotion, Zustand, and Supabase already do a lot.
-- **Lint-enforced where we can.** A rule a machine checks is a rule nobody has to argue about in review.
+Rules in someone's head don't get followed, by people or agents. "This breaks rule X" is a short review. "I don't like this" is a long one. Our nightly bot, [Nightshift](https://github.com/openslop/nightshift), shows it: jobs that follow written rules get approved over 90% of the time. Open-ended ones, under 50%.
 
-## What this means when you open a PR
+## 10. Boring on purpose
 
-- Agent-written code is welcome. The bar is the same as for everything else.
-- Read your own diff before you push. If you can't explain a line, don't send it.
-- Keep it small. One change per PR. Smaller PRs get reviewed faster and more carefully.
-- Fit what's there. If the conventions get in your way, open an issue and let's talk about changing the rule, rather than working around it.
-- Deleting code counts as progress. Often it's the best kind.
+One obvious way to do each thing. Boring code is easy to review, easy to delete, and easy to copy right. Agents copy whatever they see, so give them something good to copy. That's how we keep using them without losing the codebase.
 
-If you want to go deeper, read _A Philosophy of Software Design_ by John Ousterhout. Most of this doc is borrowed from it.
+## 11. Small PRs, every time
 
-_The OpenSlop maintainers_
+One change per PR. Small diffs get read. Big ones get skimmed.
+
+## 12. Deleting is progress
+
+The best PR often removes more than it adds.
+
+---
+
+Most of this comes from John Ousterhout's _A Philosophy of Software Design_. Read it.
