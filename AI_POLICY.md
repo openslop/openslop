@@ -1,9 +1,11 @@
 # AI Policy
 
-Use AI tools as much as you like. Just don't send code you haven't read.
+Use AI tools as much as you like. You don't have to read every line you send, but you're responsible for all of it.
 
-1. **You own it.** Read, run, and understand every line before you open a PR.
-2. **Answer review yourself.** Don't paste review comments into an LLM and paste the reply back.
-3. **Big changes start with an issue.** Agree on the approach before writing the code.
-4. **One change, one PR.** Don't split a big change up to skip rule 3.
-5. **No unattended bot PRs.** They get closed. Our own bot, [Nightshift](https://github.com/openslop/nightshift), is run by maintainers, and a maintainer approves every PR it opens.
+1. **Make sure it works.** Run the checks and try the change yourself before you open a PR.
+2. **Small PRs can go unread.** `size: XS` and `size: S` PRs are fine even if an agent wrote most of it and you skimmed it.
+3. **Big unread PRs mean long reviews.** A `size: M` or bigger PR with code you haven't read is still welcome, but expect a lot of review rounds. Some of our own have gone through hundreds, like [#857](https://github.com/openslop/openslop/pull/857), our largest and most reviewed PR so far (+12k / -8k lines across 354 files).
+4. **Answer review yourself.** Don't paste review comments into an LLM and paste the reply back without checking it.
+5. **Big changes start with an issue.** Agree on the approach before writing the code.
+6. **One change, one PR.** Don't split a big change up to skip rule 5.
+7. **No unattended bot PRs.** They get closed. Our own bot, [Nightshift](https://github.com/openslop/nightshift), is run by maintainers, and a maintainer approves every PR it opens.
