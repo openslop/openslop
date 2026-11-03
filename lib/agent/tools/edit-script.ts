@@ -5,7 +5,6 @@ import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import { ContentTypeSchema, ElementTypeSchema } from "@/lib/canvas/types";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
-	CONTINUITY_ATTR,
 	NO_FRAME,
 	PREVIOUS_VISUAL,
 	START_FRAME_ATTR,
@@ -75,11 +74,10 @@ export const editScript = defineTool({
 	  ${ATTRIBUTES_BY_TYPE}
 
 	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: an image's URL from
-	  view_image, with ${CONTINUITY_ATTR}="false" so the look before it does not fight that picture;
-	  leave a URL already set alone.
+	  view_image. Leave a URL already set alone.
 
-	  These hold for every model. An element also carries what its own provider and model offer,
-	  shown when you read it.
+	  The attributes above work with every model. Some models have extra attributes of their own;
+	  read_script shows the ones an element already has.
 
 	  To change a model, set provider and model to a pair from list_models. Narration and
 	  character lines have none of their own: they speak with their asset_voice's.

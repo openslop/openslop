@@ -41,7 +41,9 @@ describe("edit_script", () => {
 	});
 
 	it("leaves a model's own options off the attributes every model has", () => {
-		expect(editScript.spec.description).toContain("These hold for every model");
+		expect(editScript.spec.description).toContain(
+			"The attributes above work with every model",
+		);
 		expect(editScript.spec.description).not.toContain("resolution (");
 	});
 
