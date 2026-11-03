@@ -45,7 +45,8 @@ const ROLE = dedent`
   # How long a visual is on screen
   - A visual (image or video element) is on screen for its own length or the dialogue after it,
     up to the next visual, whichever is longer. An image has no length of its own; a video
-    element's is its \`duration\`, the length it is generated for.
+    element's is its \`duration\`, the length it is generated for, or its trim when the user
+    trimmed it on the timeline.
   - Never guess a length. measure_element_lengths reads them off the canvas and says how to
     change one.
   - fit_durations sets every video element with dialogue under it to a \`duration\` that covers

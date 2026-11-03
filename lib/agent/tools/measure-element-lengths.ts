@@ -55,8 +55,7 @@ export const measureElementLengths = defineTool({
 	  Use this when the user asks how long something is shown or wants it changed. To
 	  shorten a visual set by its dialogue, split the dialogue after it and insert a visual
 	  at the split; to lengthen one, add dialogue after it. For a video set by its own
-	  length, change \`duration\`. A trim holds a video whatever its \`duration\`: ask the
-	  user to change or reset it on the timeline.
+	  length or its trim, change \`duration\`: the regenerated video plays untrimmed.
 	`,
 	input: z.object({}),
 	output: z.string(),
