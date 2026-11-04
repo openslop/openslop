@@ -220,10 +220,6 @@ export class GenerationQueue {
 		this.releaseBlocked();
 	}
 
-	/**
-	 * The failure that kept `node` waiting, naming each dependency it passed through
-	 * on the way, outermost first, so the source of a cascade can be traced.
-	 */
 	private blockedByError(node: GenerationNode): string | null {
 		const entry = this.blockingDependency(node);
 		if (!entry) return null;
