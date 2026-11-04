@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { Editor, Element } from "slate";
-import type { AssetElement, ContentElement, Scene } from "@/lib/canvas/types";
+import { Editor } from "slate";
+import type {
+	AssetElement,
+	CanvasElement,
+	ContentElement,
+	Scene,
+} from "@/lib/canvas/types";
 
 // Refine-op mechanics only; schema resolution is tested under lib/connectors/attributes/.
 const SCHEMA_DEFAULTS: Record<string, Record<string, string>> = {
@@ -30,6 +35,8 @@ vi.mock("@/lib/connectors/factory", () => ({
 import { applyRefineOp, applyRefineOps } from "../apply-ops";
 import type { RefineOp } from "../types";
 import { getAssets, NARRATOR } from "@/lib/canvas/assets";
+import { findElementById } from "@/lib/canvas/editor-ops";
+import { isContentElement } from "@/lib/canvas/guards";
 import { asset, label, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { getPromptText } from "@/lib/generation/inputs";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
@@ -61,35 +68,22 @@ function scene(children: ContentElement[], id = "s1"): Scene {
 	return { id, type: "scene", children };
 }
 
-function getContentIds(editor: Editor): string[] {
-	const ids: string[] = [];
-	for (const [node] of Editor.nodes(editor, {
-		at: [],
-		match: (n) => Element.isElement(n) && n.type !== "scene",
-	})) {
-		ids.push((node as ContentElement).id);
-	}
-	return ids;
-}
+const contentElements = (editor: Editor): ContentElement[] =>
+	Array.from(
+		Editor.nodes(editor, { at: [], match: isContentElement }),
+		([node]) => node,
+	);
 
-function getNode(editor: Editor, id: string): ContentElement {
-	const [node] = Editor.nodes(editor, {
-		at: [],
-		match: (n) => Element.isElement(n) && n.id === id,
-	});
-	return node[0] as ContentElement;
-}
+const getContentIds = (editor: Editor) =>
+	contentElements(editor).map(({ id }) => id);
 
-function getContentTexts(editor: Editor): string[] {
-	const texts: string[] = [];
-	for (const [node] of Editor.nodes(editor, {
-		at: [],
-		match: (n) => Element.isElement(n) && n.type !== "scene",
-	})) {
-		const el = node as ContentElement;
-		texts.push(getPromptText(el));
-	}
-	return texts;
+const getContentTexts = (editor: Editor) =>
+	contentElements(editor).map(getPromptText);
+
+function getNode(editor: Editor, id: string): CanvasElement {
+	const entry = findElementById(editor, id);
+	if (!entry) throw new Error(`no element "${id}"`);
+	return entry[0];
 }
 
 describe("applyRefineOp — insert", () => {
@@ -101,10 +95,7 @@ describe("applyRefineOp — insert", () => {
 			elements: [{ type: "sound", text: "rain" }],
 		});
 
-		const ids = getContentIds(editor);
-		expect(ids[0]).toBe("n1");
-		expect(ids).toHaveLength(2);
-		expect(getContentTexts(editor)[1]).toBe("rain");
+		expect(getContentTexts(editor)).toEqual(["hello", "rain"]);
 	});
 
 	it("inserts after an anchored element", () => {
@@ -265,14 +256,8 @@ describe("applyRefineOp — insert", () => {
 			elements: [{ type: "sound", text: "rain", attrs: { loops: "3" } }],
 		});
 
-		const nodes: ContentElement[] = [];
-		for (const [node] of Editor.nodes(editor, {
-			at: [],
-			match: (n) => Element.isElement(n) && n.type === "sound",
-		})) {
-			nodes.push(node as ContentElement);
-		}
-		expect(flatAttributes(nodes[0])).toEqual({
+		const [, sound] = contentElements(editor);
+		expect(flatAttributes(sound)).toEqual({
 			loops: "3",
 			...DEFAULT_MODELS.sfx,
 		});
@@ -293,7 +278,7 @@ describe("applyRefineOp — remove", () => {
 		expect(getContentIds(editor)).toEqual(["n2"]);
 	});
 
-	it("silently skips when id not found", () => {
+	it("leaves the canvas alone when no element has the id", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 
 		applyRefineOp(editor, { op: "remove", id: "nonexistent" });
@@ -327,8 +312,7 @@ describe("applyRefineOp — set", () => {
 			attrs: { emotion: "excited" },
 		});
 
-		const el = getNode(editor, "n1");
-		expect(flatAttributes(el)).toEqual({
+		expect(flatAttributes(getNode(editor, "n1"))).toEqual({
 			name: "Lyra",
 			emotion: "excited",
 		});
@@ -346,8 +330,7 @@ describe("applyRefineOp — set", () => {
 
 		applyRefineOp(editor, { op: "set", id: "n1", attrs: { emotion: null } });
 
-		const el = getNode(editor, "n1");
-		expect(flatAttributes(el)).toEqual({ name: "Lyra" });
+		expect(flatAttributes(getNode(editor, "n1"))).toEqual({ name: "Lyra" });
 	});
 
 	it("applies attrs and text together", () => {
@@ -362,9 +345,9 @@ describe("applyRefineOp — set", () => {
 			text: "Hello!",
 		});
 
-		const el = getNode(editor, "n1");
-		expect(flatAttributes(el)).toEqual({ name: "Alice", emotion: "happy" });
-		expect(getPromptText(el)).toBe("Hello!");
+		const line = getNode(editor, "n1");
+		expect(flatAttributes(line)).toEqual({ name: "Alice", emotion: "happy" });
+		expect(getPromptText(line)).toBe("Hello!");
 	});
 
 	it("refuses an attribute value the type does not offer, changing nothing", () => {
@@ -394,7 +377,7 @@ describe("applyRefineOp — set", () => {
 		expect(Editor.string(editor, [0, 0])).toBe(ZWSP);
 	});
 
-	it("silently skips when id not found", () => {
+	it("leaves the canvas alone when no element has the id", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 
 		applyRefineOp(editor, { op: "set", id: "nonexistent", text: "new" });
@@ -420,9 +403,9 @@ describe("applyRefineOp — set", () => {
 			attrs: { startFrame: "n0", motion: "kenBurnsIn" },
 		});
 
-		const el = getNode(editor, "n1");
-		expect(el.type).toBe("video");
-		expect(flatAttributes(el)).toEqual({
+		const video = getNode(editor, "n1");
+		expect(video.type).toBe("video");
+		expect(flatAttributes(video)).toEqual({
 			...DEFAULT_MODELS.video,
 			referenceImagesOverride: "https://img/red.png",
 			duration: "5",
@@ -540,7 +523,7 @@ describe("applyRefineOp — assets", () => {
 	};
 
 	const topLevelTypes = (editor: Editor) =>
-		editor.children.map((node) => "type" in node && node.type);
+		editor.children.map((node) => node.type);
 
 	const apply = (editor: Editor, ...ops: RefineOp[]) =>
 		applyRefineOps(editor, ops);
@@ -840,11 +823,10 @@ describe("applyRefineOp — assets", () => {
 			"asset_avatar",
 			"scene",
 		]);
-		const [, , first] = editor.children;
-		expect(
-			Element.isElement(first) &&
-				first.children.map((child) => "type" in child && child.type),
-		).toEqual(["sound", "narration"]);
+		expect(contentElements(editor).map(({ type }) => type)).toEqual([
+			"sound",
+			"narration",
+		]);
 	});
 });
 
