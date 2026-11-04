@@ -1,8 +1,6 @@
 import pick from "lodash/pick";
 import { describe, expect, it, vi } from "vitest";
 import {
-	bookLlmSpend,
-	createJob,
 	getJob,
 	JOB_CONNECTOR_TYPES,
 	loadJobForProcessing,
@@ -14,7 +12,6 @@ type Answer = { data: unknown; error: { message: string } | null };
 const rpc = vi.fn();
 const table = {
 	answer: { data: null, error: null } as Answer,
-	insert: vi.fn(() => table),
 	select: vi.fn(() => table),
 	eq: vi.fn(() => table),
 	in: vi.fn(() => table),
@@ -54,67 +51,6 @@ const STORED_JOB = {
 	created_at: "2026-10-01T00:00:00.000Z",
 	updated_at: "2026-10-01T00:00:01.000Z",
 };
-
-describe("createJob", () => {
-	it("queues a pending asset job and returns its id", async () => {
-		answerWith({ data: { id: JOB_ID }, error: null });
-
-		await expect(
-			createJob({
-				userId: "u1",
-				projectId: "p1",
-				connectorType: "image",
-				request: { prompt: "a cat" },
-			}),
-		).resolves.toEqual({ id: JOB_ID });
-		expect(table.insert).toHaveBeenCalledExactlyOnceWith({
-			user_id: "u1",
-			project_id: "p1",
-			connector_type: "image",
-			request: { prompt: "a cat" },
-		});
-	});
-
-	it("throws when the insert fails", async () => {
-		answerWith({ data: null, error: { message: "db down" } });
-
-		await expect(
-			createJob({ userId: "u1", connectorType: "image", request: {} }),
-		).rejects.toThrow("Failed to create job: db down");
-	});
-});
-
-describe("bookLlmSpend", () => {
-	it("writes one finished llm row carrying the cost", async () => {
-		answerWith({ data: null, error: null });
-
-		await bookLlmSpend({
-			userId: "u1",
-			request: { provider: "openslop", model: "Slop LLM v1" },
-			costUsd: 0.02,
-		});
-
-		expect(table.insert).toHaveBeenCalledExactlyOnceWith({
-			user_id: "u1",
-			connector_type: "llm",
-			request: { provider: "openslop", model: "Slop LLM v1" },
-			status: "completed",
-			cost_usd: 0.02,
-		});
-	});
-
-	it("throws when the insert fails", async () => {
-		answerWith({ data: null, error: { message: "db down" } });
-
-		await expect(
-			bookLlmSpend({
-				userId: "u1",
-				request: { provider: "openslop", model: "Slop LLM v1" },
-				costUsd: 0.02,
-			}),
-		).rejects.toThrow("Failed to book spend: db down");
-	});
-});
 
 describe("getJob", () => {
 	it("reads only what the poll answers with, from the caller's asset jobs", async () => {

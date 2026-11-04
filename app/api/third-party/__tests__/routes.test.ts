@@ -2,12 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockCreateJob = vi.fn();
-const mockBookLlmSpend = vi.fn();
 const mockEnqueueJob = vi.fn();
 const mockUpdateJob = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
-	bookLlmSpend: (...args: unknown[]) => mockBookLlmSpend(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
 	getJob: vi.fn(),
@@ -110,6 +108,6 @@ describe("POST /api/third-party/llm", () => {
 		});
 
 		expect(res.status).toBe(200);
-		expect(mockBookLlmSpend).not.toHaveBeenCalled();
+		expect(mockCreateJob).not.toHaveBeenCalled();
 	});
 });

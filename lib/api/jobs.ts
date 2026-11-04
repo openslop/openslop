@@ -3,7 +3,7 @@ import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
 import { z } from "zod";
 import { BundleResponseSchema, type BundleResponse } from "./asset-bundle";
-import type { ModelRef } from "@/lib/connectors/types";
+import type { ConnectorType } from "@/lib/connectors/types";
 import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { selectColumns } from "@/lib/supabase/select-columns";
 import { createClient } from "@/lib/supabase/server";
@@ -56,8 +56,10 @@ const JOB_POLL_COLUMNS = selectColumns(JobPollRowSchema);
 export async function createJob(input: {
 	userId: string;
 	projectId?: string | null;
-	connectorType: JobConnectorType;
+	connectorType: ConnectorType;
 	request: Record<string, unknown>;
+	status?: JobStatus;
+	costUsd?: number;
 }): Promise<{ id: string }> {
 	const supabase = createServiceClient();
 	const { data, error } = await supabase
@@ -67,28 +69,13 @@ export async function createJob(input: {
 			project_id: input.projectId ?? null,
 			connector_type: input.connectorType,
 			request: input.request,
+			status: input.status,
+			cost_usd: input.costUsd,
 		})
 		.select("id")
 		.single();
 	if (error) throw new Error(`Failed to create job: ${error.message}`);
 	return { id: data.id };
-}
-
-/** A streamed LLM call is never queued or polled; its spend is one finished row in the same ledger. */
-export async function bookLlmSpend(input: {
-	userId: string;
-	request: ModelRef;
-	costUsd: number;
-}): Promise<void> {
-	const supabase = createServiceClient();
-	const { error } = await supabase.from("jobs").insert({
-		user_id: input.userId,
-		connector_type: "llm",
-		request: input.request,
-		status: "completed",
-		cost_usd: input.costUsd,
-	});
-	if (error) throw new Error(`Failed to book spend: ${error.message}`);
 }
 
 export async function spentSince(
