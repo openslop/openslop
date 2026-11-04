@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, memo } from "react";
+import { memo } from "react";
 import {
 	History,
 	Home,
@@ -22,16 +22,12 @@ import {
 	TextBox,
 	TextBoxFill,
 } from "@/components/ui/icon";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/sloppy-composer";
 import { SloppyPanel } from "@/app/components/sloppy/sloppy-panel";
 import { useEditorPanel } from "./editor-panel-context";
-import {
-	PINNED_PANEL_KEYS,
-	RAIL_PANEL_GROUPS,
-	type PanelKey,
-} from "./panel-keys";
+import type { PanelKey } from "./panel-keys";
+import { Rail } from "./rail";
 import { AssetsPanel } from "./assets-panel";
 import { CanvasHistoryPanel } from "./canvas-history-panel";
 import { ModelsPanel } from "./models-panel";
@@ -181,27 +177,10 @@ function EditorSidebarComponent() {
 
 	return (
 		<div className="flex shrink-0">
-			<nav
-				aria-label="Panels"
-				className="flex w-14 shrink-0 flex-col items-center gap-1 pt-4 mr-2 pl-1 lg:w-[72px]"
-			>
-				<RailItem icon={Home} label="Home" href="/" />
-				{RAIL_PANEL_GROUPS.map((group) => (
-					<Fragment key={group.join()}>
-						<Separator className="my-1" />
-						{group.map((key) => (
-							<PanelRailItem key={key} panelKey={key} />
-						))}
-					</Fragment>
-				))}
-
-				<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
-					<Separator className="my-1" />
-					{PINNED_PANEL_KEYS.map((key) => (
-						<PanelRailItem key={key} panelKey={key} />
-					))}
-				</div>
-			</nav>
+			<Rail
+				home={<RailItem icon={Home} label="Home" href="/" />}
+				Item={PanelRailItem}
+			/>
 
 			{current && (
 				<div className="flex w-64 shrink-0 flex-col gap-3 pr-1 pb-3 text-panel-fg">

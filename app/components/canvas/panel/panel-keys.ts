@@ -1,4 +1,4 @@
-/** The rail's panels in draw order; the loading skeleton reads it too. */
+/** The rail's panels in draw order. */
 export const RAIL_PANEL_GROUPS = [
 	["assets", "captions"],
 	["layout", "properties", "effects"],
