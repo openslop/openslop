@@ -21,9 +21,9 @@ export type ResolvedElement = {
 	sceneNumber: number;
 	prompt: string;
 	url: string;
-	/** How long it plays once trimmed, never past its media; a scene can hold a visual longer. */
-	durationSec: number;
-	mediaDurationSec: number;
+	/** How long it plays once trimmed, never past its media; a scene can extend past a visual. */
+	timelineDurationSec: number;
+	originalDurationSec: number;
 	trimStartSec: number;
 	loops: number;
 	/** Whether a video restarts when it ends, instead of holding its last frame. */

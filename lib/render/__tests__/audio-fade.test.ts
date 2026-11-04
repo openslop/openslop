@@ -21,8 +21,8 @@ function el(overrides: Partial<ResolvedElement>): ResolvedElement {
 		sceneNumber: 1,
 		prompt: "",
 		url: "https://example.com/e1",
-		durationSec: 4,
-		mediaDurationSec: 0,
+		timelineDurationSec: 4,
+		originalDurationSec: 0,
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,
@@ -48,7 +48,9 @@ describe("loopCrossfadeSec", () => {
 	});
 
 	it("never overlaps more than half a copy", () => {
-		expect(loopCrossfadeSec(el({ loops: 3, durationSec: 0.1 }))).toBe(0.05);
+		expect(loopCrossfadeSec(el({ loops: 3, timelineDurationSec: 0.1 }))).toBe(
+			0.05,
+		);
 	});
 });
 
@@ -84,16 +86,20 @@ describe("audioFadeSec", () => {
 
 describe("audioEnvelopeFrames", () => {
 	it("spans the audio file when the sequence window outlasts it", () => {
-		expect(audioEnvelopeFrames(el({ durationSec: 0.5 }), 24, 24)).toBe(12);
+		expect(audioEnvelopeFrames(el({ timelineDurationSec: 0.5 }), 24, 24)).toBe(
+			12,
+		);
 	});
 
 	it("spans the sequence window when the audio outlasts it", () => {
-		expect(audioEnvelopeFrames(el({ durationSec: 4 }), 48, 24)).toBe(48);
+		expect(audioEnvelopeFrames(el({ timelineDurationSec: 4 }), 48, 24)).toBe(
+			48,
+		);
 	});
 
 	it("sums a looping effect's copies to a constant across the seam", () => {
 		const fps = 24;
-		const element = el({ durationSec: 0.5, loops: 2 });
+		const element = el({ timelineDurationSec: 0.5, loops: 2 });
 		const window = audioEnvelopeFrames(element, toFrames(1, fps), fps);
 		const volume = audioVolume(1, window, toFrames(audioFadeSec(element), fps));
 		if (typeof volume !== "function") throw new Error("Expected function");

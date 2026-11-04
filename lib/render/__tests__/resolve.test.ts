@@ -81,8 +81,8 @@ describe("resolveElements", () => {
 			sceneNumber: 1,
 			prompt: "test",
 			url: "https://example.com/img.png",
-			durationSec: 3,
-			mediaDurationSec: 3,
+			timelineDurationSec: 3,
+			originalDurationSec: 3,
 			trimStartSec: 0,
 			loops: 1,
 			loop: false,
@@ -98,8 +98,8 @@ describe("resolveElements", () => {
 			sceneNumber: 1,
 			prompt: "test",
 			url: "https://example.com/nar.mp3",
-			durationSec: 8,
-			mediaDurationSec: 8,
+			timelineDurationSec: 8,
+			originalDurationSec: 8,
 			trimStartSec: 0,
 			loops: 1,
 			loop: false,
@@ -314,7 +314,7 @@ describe("resolveElements", () => {
 				() => makeSnapshot(),
 				{ captionsEnabled: false },
 			);
-			expect(video).toMatchObject({ trimStartSec: 1, durationSec: 3 });
+			expect(video).toMatchObject({ trimStartSec: 1, timelineDurationSec: 3 });
 		});
 	});
 });

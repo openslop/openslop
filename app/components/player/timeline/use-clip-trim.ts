@@ -9,7 +9,7 @@ import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
 	isTrimmed,
-	playedSec,
+	previewSpan,
 	trimEdge,
 	type Trim,
 	type TrimEdge,
@@ -36,24 +36,21 @@ function useEdgeDrag(
 }
 
 /** A drag previews the new length and commits it on release: one layout rebuild, one undo step. */
-export function useClipTrim(
-	{ element, duration }: TimelineClip,
-	pxPerSec: number,
-	floorSec: number,
-) {
+export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
+	const { element } = clip;
 	const editor = useSlateStatic();
 	const [preview, setPreview] = useState<Trim | null>(null);
-	const resting = trimEdge(element, "end", 0, floorSec);
+	const resting = trimEdge(element, "end", 0);
 
 	const trimBy = (edge: TrimEdge) => (deltaSec: number) =>
-		setPreview(trimEdge(element, edge, deltaSec, floorSec));
+		setPreview(trimEdge(element, edge, deltaSec));
 
 	const commit = () => {
 		setPreview(null);
 		if (!preview || isMatch(resting, preview)) return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),
-			timelineDuration: toAttr(preview.durationSec),
+			timelineDuration: toAttr(preview.timelineDurationSec),
 		});
 	};
 
@@ -63,17 +60,9 @@ export function useClipTrim(
 	};
 
 	const trim = preview ?? resting;
-	// The drawn span can differ from the clip's own length (overlays, cross-fades), so preview the change.
-	const durationSec =
-		duration + (preview ? preview.durationSec - resting.durationSec : 0);
 
 	return {
-		durationSec,
-		/** How much of the span the footage covers; a scene can hold a video past it. */
-		playedSec: Math.min(
-			playedSec({ mediaDurationSec: element.mediaDurationSec, ...trim }),
-			durationSec,
-		),
+		...previewSpan(element, clip, resting, trim),
 		trim,
 		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(element)

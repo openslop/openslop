@@ -19,7 +19,7 @@ import { useLayout } from "../render-layout-context";
 import {
 	TimelineCaptionClip,
 	TimelineClip,
-	TimelineHold,
+	TimelineExtension,
 } from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
@@ -117,11 +117,13 @@ function Clip({
 	selected,
 	onSelect,
 }: ClipProps<TimelineClipData> & { numbered: boolean }) {
-	const trim = useClipTrim(clip, pxPerSec, clip.overlaySec ?? 0);
-	const width = Math.max(trim.playedSec * pxPerSec, MIN_CLIP_WIDTH_PX);
-	const holdSec = trim.durationSec - trim.playedSec;
-	const holdWidth = holdSec * pxPerSec;
-	const holdStart = clip.start + trim.playedSec;
+	const trim = useClipTrim(clip, pxPerSec);
+	const width = Math.max(
+		trim.timelineDurationSec * pxPerSec,
+		MIN_CLIP_WIDTH_PX,
+	);
+	const extensionWidth = trim.extensionSec * pxPerSec;
+	const extensionStart = clip.start + trim.timelineDurationSec;
 	return (
 		<>
 			<ClipSlot start={clip.start * pxPerSec} width={width}>
@@ -151,15 +153,15 @@ function Clip({
 				<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
 				<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
 			</ClipSlot>
-			{holdWidth >= MIN_CLIP_WIDTH_PX ? (
-				<ClipSlot start={holdStart * pxPerSec} width={holdWidth}>
+			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
+				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>
 					<SelectButton selected={selected} onClick={() => onSelect(clip)}>
-						<TimelineHold
+						<TimelineExtension
 							element={clip.element}
-							start={holdStart}
-							duration={holdSec}
-							playedWidth={width}
-							width={holdWidth}
+							start={extensionStart}
+							duration={trim.extensionSec}
+							clipWidth={width}
+							width={extensionWidth}
 							selected={selected}
 						/>
 					</SelectButton>

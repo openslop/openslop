@@ -12,7 +12,6 @@ import {
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import type { RenderLayout, ResolvedElement } from "@/lib/render/types";
 import { layoutCaptions } from "@/lib/render/caption-rule";
-import { playedSec } from "@/lib/render/clip-trim";
 import { toFrames } from "@/lib/render/frames";
 import {
 	LAYER_PREMOUNT_SEC,
@@ -58,19 +57,19 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	);
 }
 
-/** A looping video restarts at its out-point; a single pass holds its last frame, silent, for the rest of the scene. */
+/** A looping video restarts at its out-point; a single pass freezes on its last frame, silent, for the rest of the scene. */
 function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	const { fps } = useVideoConfig();
 	const frame = useCurrentFrame();
-	const playFrames = Math.max(1, toFrames(playedSec(element), fps));
-	const held = !element.loop && frame >= playFrames;
+	const playFrames = Math.max(1, toFrames(element.timelineDurationSec, fps));
+	const frozen = !element.loop && frame >= playFrames;
 	const video = (
 		<OffthreadVideo
 			src={element.url}
 			trimBefore={toFrames(element.trimStartSec, fps)}
 			style={coverStyle}
 			volume={volumeToGain(element.volume)}
-			muted={held}
+			muted={frozen}
 		/>
 	);
 	if (element.loop)
@@ -80,7 +79,7 @@ function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 			</Loop>
 		);
 	return (
-		<Freeze frame={playFrames - 1} active={held}>
+		<Freeze frame={playFrames - 1} active={frozen}>
 			{video}
 		</Freeze>
 	);

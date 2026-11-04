@@ -34,22 +34,22 @@ const fit = (text: string, width: number) =>
 
 const urlAt = (url: string, sec: number) => (sec > 0 ? `${url}#t=${sec}` : url);
 
-/** A frozen scene holds its last frame; a looping one plays the footage again until the scene ends. */
-function holdSources(
+/** A frozen extension shows the last frame; a looping one plays the footage again until the scene ends. */
+function extensionSources(
 	{
 		url,
 		loop,
 		trimStartSec,
-		mediaDurationSec,
+		originalDurationSec,
 	}: Pick<
 		ResolvedElement,
-		"url" | "loop" | "trimStartSec" | "mediaDurationSec"
+		"url" | "loop" | "trimStartSec" | "originalDurationSec"
 	>,
-	playedWidth: number,
+	clipWidth: number,
 	width: number,
 ): string[] {
-	if (!loop) return [urlAt(url, mediaDurationSec)];
-	return Array<string>(Math.ceil(width / playedWidth)).fill(
+	if (!loop) return [urlAt(url, originalDurationSec)];
+	return Array<string>(Math.ceil(width / clipWidth)).fill(
 		urlAt(url, trimStartSec),
 	);
 }
@@ -194,7 +194,7 @@ export function TimelineClip({
 					<Preview>
 						<ClipWaveform
 							src={element.url}
-							width={element.mediaDurationSec * pxPerSec}
+							width={element.originalDurationSec * pxPerSec}
 							offset={trim.trimStartSec * pxPerSec}
 						/>
 					</Preview>
@@ -224,12 +224,12 @@ export function TimelineClip({
 	);
 }
 
-/** The rest of a scene once its video has played out, drawn apart from the clip and never trimmed. */
-export function TimelineHold({
+/** Where a scene runs on past its video, drawn apart from the clip and never trimmed. */
+export function TimelineExtension({
 	element,
 	start,
 	duration,
-	playedWidth,
+	clipWidth,
 	width,
 	selected,
 }: {
@@ -237,7 +237,7 @@ export function TimelineHold({
 	start: number;
 	duration: number;
 	/** How wide the footage before it is drawn, so loop passes match it. */
-	playedWidth: number;
+	clipWidth: number;
 	width: number;
 	selected: boolean;
 }) {
@@ -261,8 +261,8 @@ export function TimelineHold({
 				className="text-muted-foreground"
 			/>
 			<div className="flex min-h-0 flex-1 opacity-60">
-				{holdSources(element, playedWidth, width).map((src, i) => (
-					<Preview key={i} width={element.loop ? playedWidth : undefined}>
+				{extensionSources(element, clipWidth, width).map((src, i) => (
+					<Preview key={i} width={element.loop ? clipWidth : undefined}>
 						<Footage outputKind={config.outputKind} src={src} />
 					</Preview>
 				))}

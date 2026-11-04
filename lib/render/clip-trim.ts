@@ -6,32 +6,34 @@ import type { ContentElement } from "@/lib/canvas/types";
 import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
 import { MIN_DURATION_SEC } from "./scene-builder";
-import type { ResolvedCaptions, ResolvedElement } from "./types";
+import type { ResolvedCaptions, ResolvedElement, Sequence } from "./types";
 
 export type TrimEdge = "start" | "end";
 
-/** Where a clip opens in its media, and how long it holds the timeline from there. */
-export type Trim = Pick<ResolvedElement, "trimStartSec" | "durationSec">;
+/** Where a clip opens in its media, and how long it runs on the timeline from there. */
+export type Trim = Pick<
+	ResolvedElement,
+	"trimStartSec" | "timelineDurationSec"
+>;
 
-type Media = Pick<ResolvedElement, "mediaDurationSec">;
+type Media = Pick<ResolvedElement, "originalDurationSec">;
 
 type Trimmable = Trim & Media;
 
 /** A still has no media length to trim. */
-export const isTrimmable = ({ mediaDurationSec }: Media): boolean =>
-	mediaDurationSec > 0;
+export const isTrimmable = ({ originalDurationSec }: Media): boolean =>
+	originalDurationSec > 0;
 
-/** A clip ends with its media; a still holds for as long as it is asked to. */
-const longestSec = (clip: Media & Pick<Trim, "trimStartSec">): number =>
-	isTrimmable(clip) ? clip.mediaDurationSec - clip.trimStartSec : Infinity;
+/** A clip runs out at the end of its media; a still never does. */
+const maxTimelineDurationSec = (
+	clip: Media & Pick<Trim, "trimStartSec">,
+): number =>
+	isTrimmable(clip) ? clip.originalDurationSec - clip.trimStartSec : Infinity;
 
 export const isTrimmed = (clip: Trimmable): boolean =>
 	isTrimmable(clip) &&
-	(clip.trimStartSec > 0 || clip.durationSec !== clip.mediaDurationSec);
-
-/** How long the media itself plays before the scene loops or freezes it. */
-export const playedSec = (clip: Trimmable): number =>
-	Math.min(clip.durationSec, longestSec(clip));
+	(clip.trimStartSec > 0 ||
+		clip.timelineDurationSec !== clip.originalDurationSec);
 
 /** A clip plays from its trim start for its timeline duration, or to the end of its media by default. */
 export function trimClip(
@@ -39,27 +41,27 @@ export function trimClip(
 	startSec: number,
 	timelineDurationSec?: number,
 ): Trim {
-	const { mediaDurationSec } = media;
+	const { originalDurationSec } = media;
 	const trimStartSec = clamp(
 		startSec,
 		0,
-		Math.max(0, mediaDurationSec - MIN_DURATION_SEC),
+		Math.max(0, originalDurationSec - MIN_DURATION_SEC),
 	);
 	return {
 		trimStartSec,
-		durationSec: Math.min(
-			timelineDurationSec ?? mediaDurationSec - trimStartSec,
-			longestSec({ ...media, trimStartSec }),
+		timelineDurationSec: Math.min(
+			timelineDurationSec ?? originalDurationSec - trimStartSec,
+			maxTimelineDurationSec({ ...media, trimStartSec }),
 		),
 	};
 }
 
 export const elementTrim = (
 	element: ContentElement,
-	mediaDurationSec: number,
+	originalDurationSec: number,
 ): Trim =>
 	trimClip(
-		{ mediaDurationSec },
+		{ originalDurationSec },
 		getTrimStart(element),
 		getTimelineDuration(element),
 	);
@@ -67,10 +69,10 @@ export const elementTrim = (
 /** The words spoken whole inside the clip, timed from its trim start, and where they sit among the element's own. */
 export function trimCaptions(
 	captions: Caption[],
-	{ trimStartSec, durationSec }: Trim,
+	{ trimStartSec, timelineDurationSec }: Trim,
 ): ResolvedCaptions {
 	const trimStartMs = trimStartSec * 1000;
-	const trimEndMs = trimStartMs + durationSec * 1000;
+	const trimEndMs = trimStartMs + timelineDurationSec * 1000;
 	const start = captions.filter(
 		(caption) => caption.startMs < trimStartMs,
 	).length;
@@ -85,41 +87,53 @@ export function trimCaptions(
 	};
 }
 
-/**
- * The clip's start stays put and what follows ripples. The clip holds at least
- * `floorSec` before the drag and after it, so a zero drag is where it rests.
- */
+/** The clip's start stays put and what follows ripples; it never runs under the minimum or past its media. */
 export function trimEdge(
 	clip: Trimmable,
 	edge: TrimEdge,
 	deltaSec: number,
-	floorSec = 0,
 ): Trim {
-	const { trimStartSec, mediaDurationSec } = clip;
-	const minSec = Math.max(MIN_DURATION_SEC, floorSec);
-	const heldSec = Math.max(clip.durationSec, minSec);
+	const { trimStartSec, timelineDurationSec } = clip;
 	if (edge === "end")
 		return {
 			trimStartSec,
-			durationSec: clamp(
-				heldSec + deltaSec,
-				minSec,
-				Math.max(minSec, longestSec(clip)),
+			timelineDurationSec: clamp(
+				timelineDurationSec + deltaSec,
+				MIN_DURATION_SEC,
+				Math.max(MIN_DURATION_SEC, maxTimelineDurationSec(clip)),
 			),
 		};
 	const shift = clamp(
 		deltaSec,
 		-trimStartSec,
-		Math.max(
-			0,
-			Math.min(
-				mediaDurationSec - trimStartSec - MIN_DURATION_SEC,
-				heldSec - minSec,
-			),
-		),
+		Math.max(0, timelineDurationSec - MIN_DURATION_SEC),
 	);
 	return {
 		trimStartSec: trimStartSec + shift,
-		durationSec: heldSec - shift,
+		timelineDurationSec: timelineDurationSec - shift,
 	};
+}
+
+/** How a clip's footage and the scene's extension past it split its span. */
+type Span = { timelineDurationSec: number; extensionSec: number };
+
+/**
+ * A scene runs as long as its video or its dialogue, whichever is longer, less
+ * any cross-fade; the video covers what it can and the scene extends past it.
+ */
+export function previewSpan(
+	media: Media,
+	{ duration, overlaySec = 0 }: Pick<Sequence, "duration" | "overlaySec">,
+	resting: Trim,
+	trim: Trim,
+): Span {
+	const sceneSec = (sec: number) => Math.max(sec, overlaySec);
+	const spanSec =
+		duration +
+		sceneSec(trim.timelineDurationSec) -
+		sceneSec(resting.timelineDurationSec);
+	const timelineDurationSec = isTrimmable(media)
+		? Math.min(trim.timelineDurationSec, spanSec)
+		: spanSec;
+	return { timelineDurationSec, extensionSec: spanSec - timelineDurationSec };
 }
