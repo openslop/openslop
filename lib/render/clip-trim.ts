@@ -5,7 +5,7 @@ import {
 import type { ContentElement } from "@/lib/canvas/types";
 import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
-import { MIN_DURATION_SEC } from "./scene-builder";
+import { MIN_DURATION_SEC, sceneDurationSec } from "./scene-builder";
 import type { ResolvedCaptions, ResolvedElement, Sequence } from "./types";
 
 export type TrimEdge = "start" | "end";
@@ -31,9 +31,7 @@ const maxTimelineDurationSec = (
 	isTrimmable(clip) ? clip.originalDurationSec - clip.trimStartSec : Infinity;
 
 export const isTrimmed = (clip: Trimmable): boolean =>
-	isTrimmable(clip) &&
-	(clip.trimStartSec > 0 ||
-		clip.timelineDurationSec !== clip.originalDurationSec);
+	clip.timelineDurationSec < clip.originalDurationSec;
 
 /** A clip plays from its trim start for its timeline duration, or to the end of its media by default. */
 export function trimClip(
@@ -114,25 +112,20 @@ export function trimEdge(
 	};
 }
 
-/** How a clip's footage and the scene's extension past it split its span. */
-type Span = { timelineDurationSec: number; extensionSec: number };
-
-/**
- * A scene runs as long as its video or its dialogue, whichever is longer, less
- * any cross-fade; the video covers what it can and the scene extends past it.
- */
+/** A clip previews the span the layout gives it, less any cross-fade; a scene extends past a video that runs out inside it. */
 export function previewSpan(
-	media: Media,
-	{ duration, overlaySec = 0 }: Pick<Sequence, "duration" | "overlaySec">,
-	resting: Trim,
+	element: Trimmable,
+	{ duration, overlaySec }: Pick<Sequence, "duration" | "overlaySec">,
 	trim: Trim,
-): Span {
-	const sceneSec = (sec: number) => Math.max(sec, overlaySec);
+) {
+	const deltaSec = trim.timelineDurationSec - element.timelineDurationSec;
+	if (overlaySec === undefined)
+		return { timelineDurationSec: duration + deltaSec, extensionSec: 0 };
 	const spanSec =
 		duration +
-		sceneSec(trim.timelineDurationSec) -
-		sceneSec(resting.timelineDurationSec);
-	const timelineDurationSec = isTrimmable(media)
+		sceneDurationSec(trim.timelineDurationSec, overlaySec) -
+		sceneDurationSec(element.timelineDurationSec, overlaySec);
+	const timelineDurationSec = isTrimmable(element)
 		? Math.min(trim.timelineDurationSec, spanSec)
 		: spanSec;
 	return { timelineDurationSec, extensionSec: spanSec - timelineDurationSec };

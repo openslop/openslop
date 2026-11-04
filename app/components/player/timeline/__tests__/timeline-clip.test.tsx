@@ -82,28 +82,27 @@ const extension = (el: ResolvedElement, start: number, duration: number) =>
 	);
 
 describe("TimelineExtension", () => {
-	it("holds the frame a frozen clip ends on", () => {
+	it("freezes on the frame the trimmed clip ends on", () => {
 		const html = extension(
-			element({ trimStartSec: 1, timelineDurationSec: 4 }),
-			4,
+			element({
+				trimStartSec: 1,
+				timelineDurationSec: 3,
+				originalDurationSec: 10,
+			}),
+			3,
 			4,
 		);
-		expect(sources(html)).toEqual(["https://vid/a.mp4#t=5"]);
-		expect(html).toContain('aria-label="Freeze on last frame, 0:04–0:08"');
+		expect(sources(html)).toEqual(["https://vid/a.mp4#t=4"]);
+		expect(html).toContain('aria-label="Freeze on last frame, 0:03–0:07"');
 	});
 
-	it("restarts the footage at its trim start each time a looping clip does", () => {
+	it("restarts the footage at its trim start each pass, filling a partial last one", () => {
 		const html = extension(
 			element({ loop: true, trimStartSec: 1, timelineDurationSec: 4 }),
 			4,
-			8,
+			6,
 		);
 		expect(sources(html)).toEqual(Array(2).fill("https://vid/a.mp4#t=1"));
-		expect(html).toContain('aria-label="Loop, 0:04–0:12"');
-	});
-
-	it("fills a partial last pass rather than leaving the band short", () => {
-		const clip = element({ loop: true, timelineDurationSec: 5 });
-		expect(sources(extension(clip, 5, 7))).toHaveLength(2);
+		expect(html).toContain('aria-label="Loop, 0:04–0:10"');
 	});
 });

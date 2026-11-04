@@ -17,16 +17,17 @@ describe("isTrimmable", () => {
 });
 
 describe("isTrimmed", () => {
-	it("is trimmed once it opens late, ends early or runs long", () => {
+	it("is trimmed once it opens late or ends early", () => {
 		const full = {
 			trimStartSec: 0,
 			timelineDurationSec: 10,
 			originalDurationSec: 10,
 		};
 		expect(isTrimmed(full)).toBe(false);
-		expect(isTrimmed({ ...full, trimStartSec: 1 })).toBe(true);
+		expect(
+			isTrimmed({ ...full, trimStartSec: 1, timelineDurationSec: 9 }),
+		).toBe(true);
 		expect(isTrimmed({ ...full, timelineDurationSec: 4 })).toBe(true);
-		expect(isTrimmed({ ...full, timelineDurationSec: 12 })).toBe(true);
 	});
 
 	it("is never trimmed without media, like a still or the blank opener", () => {
@@ -159,46 +160,57 @@ describe("trimCaptions", () => {
 });
 
 describe("previewSpan", () => {
-	const video = { originalDurationSec: 10 };
-	const at = (timelineDurationSec: number) => ({
+	const video = {
+		originalDurationSec: 10,
+		trimStartSec: 0,
+		timelineDurationSec: 5,
+	};
+	const to = (timelineDurationSec: number) => ({
 		trimStartSec: 0,
 		timelineDurationSec,
 	});
+	const scene = { duration: 8, overlaySec: 8 };
 
-	it("shortens the clip with the trim when nothing runs past it", () => {
-		expect(previewSpan(video, { duration: 5 }, at(5), at(3))).toEqual({
+	it("moves a clip's end with the trim", () => {
+		expect(previewSpan(video, { duration: 5 }, to(3))).toEqual({
 			timelineDurationSec: 3,
 			extensionSec: 0,
 		});
 	});
 
+	it("never extends an audio clip the layout pads past its sound", () => {
+		const sound = { ...video, timelineDurationSec: 0.5 };
+		expect(previewSpan(sound, { duration: 1 }, to(0.5))).toEqual({
+			timelineDurationSec: 1,
+			extensionSec: 0,
+		});
+	});
+
 	it("extends the scene past a video trimmed under its dialogue", () => {
-		const scene = { duration: 8, overlaySec: 8 };
-		expect(previewSpan(video, scene, at(5), at(3))).toEqual({
+		expect(previewSpan(video, scene, to(3))).toEqual({
 			timelineDurationSec: 3,
 			extensionSec: 5,
 		});
 	});
 
 	it("lengthens the scene once the video outruns its dialogue", () => {
-		const scene = { duration: 8, overlaySec: 8 };
-		expect(previewSpan(video, scene, at(5), at(10))).toEqual({
+		expect(previewSpan(video, scene, to(10))).toEqual({
 			timelineDurationSec: 10,
 			extensionSec: 0,
 		});
 	});
 
 	it("keeps the cross-fade the next scene cuts off", () => {
-		expect(previewSpan(video, { duration: 4.5 }, at(5), at(5))).toEqual({
-			timelineDurationSec: 4.5,
-			extensionSec: 0,
-		});
+		expect(previewSpan(video, { duration: 4.5, overlaySec: 0 }, to(5))).toEqual(
+			{ timelineDurationSec: 4.5, extensionSec: 0 },
+		);
 	});
 
 	it("stretches a still across the whole scene", () => {
-		const scene = { duration: 8, overlaySec: 8 };
-		expect(
-			previewSpan({ originalDurationSec: 0 }, scene, at(0), at(0)),
-		).toEqual({ timelineDurationSec: 8, extensionSec: 0 });
+		const still = { originalDurationSec: 0, ...to(0) };
+		expect(previewSpan(still, scene, to(0))).toEqual({
+			timelineDurationSec: 8,
+			extensionSec: 0,
+		});
 	});
 });

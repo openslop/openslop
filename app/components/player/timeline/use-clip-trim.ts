@@ -40,14 +40,13 @@ export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
 	const { element } = clip;
 	const editor = useSlateStatic();
 	const [preview, setPreview] = useState<Trim | null>(null);
-	const resting = trimEdge(element, "end", 0);
 
 	const trimBy = (edge: TrimEdge) => (deltaSec: number) =>
 		setPreview(trimEdge(element, edge, deltaSec));
 
 	const commit = () => {
 		setPreview(null);
-		if (!preview || isMatch(resting, preview)) return;
+		if (!preview || isMatch(trimEdge(element, "end", 0), preview)) return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),
 			timelineDuration: toAttr(preview.timelineDurationSec),
@@ -59,10 +58,10 @@ export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
 		end: useEdgeDrag(pxPerSec, trimBy("end"), commit),
 	};
 
-	const trim = preview ?? resting;
+	const trim = preview ?? element;
 
 	return {
-		...previewSpan(element, clip, resting, trim),
+		...previewSpan(element, clip, trim),
 		trim,
 		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(element)

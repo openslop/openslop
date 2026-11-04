@@ -34,26 +34,6 @@ const fit = (text: string, width: number) =>
 
 const urlAt = (url: string, sec: number) => (sec > 0 ? `${url}#t=${sec}` : url);
 
-/** A frozen extension shows the last frame; a looping one plays the footage again until the scene ends. */
-function extensionSources(
-	{
-		url,
-		loop,
-		trimStartSec,
-		originalDurationSec,
-	}: Pick<
-		ResolvedElement,
-		"url" | "loop" | "trimStartSec" | "originalDurationSec"
-	>,
-	clipWidth: number,
-	width: number,
-): string[] {
-	if (!loop) return [urlAt(url, originalDurationSec)];
-	return Array<string>(Math.ceil(width / clipWidth)).fill(
-		urlAt(url, trimStartSec),
-	);
-}
-
 function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
 	return (
 		<div className="relative aspect-square h-full overflow-hidden">
@@ -122,23 +102,48 @@ function ClipHeader({
 	icon: Icon,
 	label,
 	width,
-	className,
 }: {
 	icon: IconComponent;
 	label: string;
 	width: number;
-	className?: string;
 }) {
 	return (
 		<span className="relative z-10 flex h-3.5 shrink-0 items-center gap-1 px-1">
 			<Icon size={HEADER_ICON_SIZE} className="shrink-0" />
-			<span
-				dir="auto"
-				className={cn("truncate text-badge-xs text-foreground", className)}
-			>
+			<span dir="auto" className="truncate text-badge-xs text-foreground">
 				{fit(label, width)}
 			</span>
 		</span>
+	);
+}
+
+function ClipFrame({
+	label,
+	colorClass,
+	selected,
+	className,
+	children,
+}: {
+	label: string;
+	colorClass: string;
+	selected: boolean;
+	className: string;
+	children: ReactNode;
+}) {
+	return (
+		<div
+			role="img"
+			aria-label={label}
+			className={cn(
+				FRAME,
+				className,
+				colorClass,
+				selected ? SELECTED_EDGE : "border-border",
+			)}
+		>
+			{children}
+			{selected ? <SelectedWash /> : null}
+		</div>
 	);
 }
 
@@ -174,15 +179,11 @@ export function TimelineClip({
 		.join(", ");
 
 	return (
-		<div
-			role="img"
-			aria-label={accessibleLabel}
-			className={cn(
-				FRAME,
-				"timeline-clip-surface",
-				config.colorClass,
-				selected ? SELECTED_EDGE : "border-border",
-			)}
+		<ClipFrame
+			label={accessibleLabel}
+			colorClass={config.colorClass}
+			selected={selected}
+			className="timeline-clip-surface"
 		>
 			<ClipHeader
 				icon={config.Icon}
@@ -219,8 +220,7 @@ export function TimelineClip({
 					<CaptionsFill size={HEADER_ICON_SIZE} />
 				</CornerChip>
 			) : null}
-			{selected ? <SelectedWash /> : null}
-		</div>
+		</ClipFrame>
 	);
 }
 
@@ -241,34 +241,37 @@ export function TimelineExtension({
 	width: number;
 	selected: boolean;
 }) {
+	const { url, loop, trimStartSec, timelineDurationSec } = element;
 	const config = ELEMENT_CONFIGS[element.type];
-	const face = LOOP_FACES[element.loop ? "on" : "off"];
+	const face = LOOP_FACES[loop ? "on" : "off"];
 	return (
-		<div
-			role="img"
-			aria-label={`${face.label}, ${formatTimeRange(start, duration)}`}
-			className={cn(
-				FRAME,
-				"timeline-preview-surface border-dashed",
-				config.colorClass,
-				selected ? SELECTED_EDGE : "border-border",
-			)}
+		<ClipFrame
+			label={`${face.label}, ${formatTimeRange(start, duration)}`}
+			colorClass={config.colorClass}
+			selected={selected}
+			className="timeline-preview-surface border-dashed"
 		>
-			<ClipHeader
-				icon={face.icon}
-				label={face.label}
-				width={width}
-				className="text-muted-foreground"
-			/>
+			<ClipHeader icon={face.icon} label={face.label} width={width} />
 			<div className="flex min-h-0 flex-1 opacity-60">
-				{extensionSources(element, clipWidth, width).map((src, i) => (
-					<Preview key={i} width={element.loop ? clipWidth : undefined}>
-						<Footage outputKind={config.outputKind} src={src} />
+				{loop ? (
+					Array.from({ length: Math.ceil(width / clipWidth) }, (_, i) => (
+						<Preview key={i} width={clipWidth}>
+							<Footage
+								outputKind={config.outputKind}
+								src={urlAt(url, trimStartSec)}
+							/>
+						</Preview>
+					))
+				) : (
+					<Preview>
+						<Footage
+							outputKind={config.outputKind}
+							src={urlAt(url, trimStartSec + timelineDurationSec)}
+						/>
 					</Preview>
-				))}
+				)}
 			</div>
-			{selected ? <SelectedWash /> : null}
-		</div>
+		</ClipFrame>
 	);
 }
 
@@ -283,18 +286,13 @@ export function TimelineCaptionClip({
 }) {
 	const text = lineText(clip.line);
 	return (
-		<div
-			role="img"
-			aria-label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${text}`}
-			className={cn(
-				FRAME,
-				"timeline-clip-surface justify-center",
-				ELEMENT_CONFIGS[clip.element.type].colorClass,
-				selected ? SELECTED_EDGE : "border-border",
-			)}
+		<ClipFrame
+			label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${text}`}
+			colorClass={ELEMENT_CONFIGS[clip.element.type].colorClass}
+			selected={selected}
+			className="timeline-clip-surface justify-center"
 		>
 			<ClipHeader icon={Captions} label={text} width={width} />
-			{selected ? <SelectedWash /> : null}
-		</div>
+		</ClipFrame>
 	);
 }
