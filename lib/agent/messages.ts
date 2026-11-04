@@ -78,7 +78,7 @@ const pruneFinished = (message: ModelMessage): ModelMessage => {
 
 /**
  * Before the last user message is history: snapshot calls stay but their output
- * goes, and so does reasoning, which no model reads back from an earlier turn.
+ * goes, and so does reasoning, the bulk of a finished turn the next one doesn't need.
  */
 export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
 	const inFlightFrom = messages.findLastIndex(
