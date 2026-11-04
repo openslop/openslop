@@ -81,6 +81,7 @@ export async function streamAgentTurn(
 				ignoreIncompleteToolCalls: true,
 			}),
 		),
+		emptyMessages: "remove",
 	});
 
 	const startedAt = Date.now();
