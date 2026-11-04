@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import {
+	useMemo,
+	useRef,
+	useState,
+	type ComponentProps,
+	type ReactNode,
+} from "react";
 import {
 	RotateCcw,
 	Timeline as TimelineIcon,
@@ -89,24 +95,20 @@ function ClipSlot({
 
 function SelectButton({
 	selected,
-	onClick,
-	children,
-}: {
-	selected: boolean;
-	onClick: () => void;
-	children: ReactNode;
-}) {
+	...props
+}: { selected: boolean } & Pick<
+	ComponentProps<"button">,
+	"onClick" | "tabIndex" | "children"
+>) {
 	return (
 		<button
+			{...props}
 			type="button"
 			aria-current={selected ? "true" : undefined}
-			onClick={onClick}
 			// Inline buttons sit on the list item's text baseline, which
 			// drops the clip past its lane.
 			className="block h-full w-full rounded-md focus-ring"
-		>
-			{children}
-		</button>
+		/>
 	);
 }
 
@@ -155,7 +157,12 @@ function Clip({
 			</ClipSlot>
 			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
 				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>
-					<SelectButton selected={selected} onClick={() => onSelect(clip)}>
+					{/* The clip before it already selects the scene from the keyboard. */}
+					<SelectButton
+						selected={selected}
+						onClick={() => onSelect(clip)}
+						tabIndex={-1}
+					>
 						<TimelineExtension
 							element={clip.element}
 							start={extensionStart}
