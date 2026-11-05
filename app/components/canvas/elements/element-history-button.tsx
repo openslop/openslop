@@ -11,7 +11,7 @@ export function ElementHistoryButton({ element }: { element: CanvasElement }) {
 	const editor = useSlateStatic();
 	const restore = useCallback(
 		(version: ElementVersion) =>
-			applyElementVersion(editor, element.id, version),
+			applyElementVersion(editor, element.id, version.inputs),
 		[editor, element.id],
 	);
 
