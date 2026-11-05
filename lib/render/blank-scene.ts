@@ -15,7 +15,7 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 		sceneNumber: opener.sceneNumber,
 		prompt: "",
 		url: BLACK_PIXEL,
-		durationSec: opener.durationSec,
+		trimDurationSec: opener.trimDurationSec,
 		mediaDurationSec: 0,
 		trimStartSec: 0,
 		loops: 1,

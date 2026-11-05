@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import {
+	useMemo,
+	useRef,
+	useState,
+	type ComponentProps,
+	type ReactNode,
+} from "react";
 import {
 	RotateCcw,
 	Timeline as TimelineIcon,
@@ -9,14 +15,18 @@ import {
 } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
-import { renderCharacterRefs } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/character-refs";
 import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
 import { usePlayerControl } from "../player-control-context";
 import { usePlayerScrub } from "../use-player-scrub";
 import { useSelectScene } from "../use-select-scene";
 import { useLayout } from "../render-layout-context";
-import { TimelineCaptionClip, TimelineClip } from "./timeline-clip";
+import {
+	TimelineCaptionClip,
+	TimelineClip,
+	TimelineExtension,
+} from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
 import { GUTTER_PX, LANE_HEIGHT, RULER_HEIGHT } from "../dock-layout";
@@ -85,24 +95,20 @@ function ClipSlot({
 
 function SelectButton({
 	selected,
-	onClick,
-	children,
-}: {
-	selected: boolean;
-	onClick: () => void;
-	children: ReactNode;
-}) {
+	...props
+}: { selected: boolean } & Pick<
+	ComponentProps<"button">,
+	"onClick" | "tabIndex" | "children"
+>) {
 	return (
 		<button
+			{...props}
 			type="button"
 			aria-current={selected ? "true" : undefined}
-			onClick={onClick}
 			// Inline buttons sit on the list item's text baseline, which
 			// drops the clip past its lane.
 			className="block h-full w-full rounded-md focus-ring"
-		>
-			{children}
-		</button>
+		/>
 	);
 }
 
@@ -113,36 +119,62 @@ function Clip({
 	selected,
 	onSelect,
 }: ClipProps<TimelineClipData> & { numbered: boolean }) {
-	const trim = useClipTrim(clip, pxPerSec, clip.overlaySec ?? 0);
-	const width = Math.max(trim.durationSec * pxPerSec, MIN_CLIP_WIDTH_PX);
+	const trim = useClipTrim(clip, pxPerSec);
+	const width = Math.max(
+		trim.timelineDurationSec * pxPerSec,
+		MIN_CLIP_WIDTH_PX,
+	);
+	const extensionWidth = trim.extensionSec * pxPerSec;
+	const extensionStart = clip.start + trim.timelineDurationSec;
 	return (
-		<ClipSlot start={clip.start * pxPerSec} width={width}>
-			<SelectButton selected={selected} onClick={() => onSelect(clip)}>
-				<TimelineClip
-					clip={clip}
-					width={width}
-					label={renderCharacterRefs(clip.element.prompt)}
-					selected={selected}
-					sceneNumber={numbered ? clip.element.sceneNumber : undefined}
-					pxPerSec={pxPerSec}
-					trim={trim.trim}
-				/>
-			</SelectButton>
-			{trim.reset ? (
-				<TooltipIconButton
-					label="Reset trim"
-					side="bottom"
-					size="sm"
-					variant="quiet"
-					onClick={trim.reset}
-					className="absolute top-0.5 right-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
-				>
-					<RotateCcw size={12} />
-				</TooltipIconButton>
+		<>
+			<ClipSlot start={clip.start * pxPerSec} width={width}>
+				<SelectButton selected={selected} onClick={() => onSelect(clip)}>
+					<TimelineClip
+						clip={clip}
+						width={width}
+						label={renderPrompt(clip.element.prompt)}
+						selected={selected}
+						sceneNumber={numbered ? clip.element.sceneNumber : undefined}
+						pxPerSec={pxPerSec}
+						trim={trim.trim}
+					/>
+				</SelectButton>
+				{trim.reset ? (
+					<TooltipIconButton
+						label="Reset trim"
+						side="bottom"
+						size="sm"
+						variant="quiet"
+						onClick={trim.reset}
+						className="absolute top-0.5 right-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
+					>
+						<RotateCcw size={12} />
+					</TooltipIconButton>
+				) : null}
+				<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
+				<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
+			</ClipSlot>
+			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
+				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>
+					{/* The clip before it already selects the scene from the keyboard. */}
+					<SelectButton
+						selected={selected}
+						onClick={() => onSelect(clip)}
+						tabIndex={-1}
+					>
+						<TimelineExtension
+							element={clip.element}
+							start={extensionStart}
+							duration={trim.extensionSec}
+							clipWidth={width}
+							width={extensionWidth}
+							selected={selected}
+						/>
+					</SelectButton>
+				</ClipSlot>
 			) : null}
-			<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
-			<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
-		</ClipSlot>
+		</>
 	);
 }
 

@@ -19,7 +19,7 @@ import {
 	TTS_FIELDS,
 	VIDEO_FIELDS,
 } from "./generation-schema";
-import { ownsProject } from "./projects";
+import { withOwnedProject } from "./with-owned-project";
 import { notFound } from "./response";
 import type { RouteFamily } from "./route-families";
 
@@ -47,9 +47,8 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 		// Every route's body is this shape; the fields only add optional keys.
 		schema: bodySchema(family.model(type), fields) as z.ZodType<AssetBody>,
 		label,
-		handle: async ({ user, input }) => {
+		handle: withOwnedProject(async ({ user, input }) => {
 			const { projectId, ...request } = input;
-			if (projectId && !(await ownsProject(projectId))) return notFound();
 			const { id } = await createJob({
 				userId: user.id,
 				projectId,
@@ -66,7 +65,7 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 				throw error;
 			}
 			return NextResponse.json<JobSubmission>({ jobId: id, status: "pending" });
-		},
+		}),
 	});
 };
 

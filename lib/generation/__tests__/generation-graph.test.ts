@@ -14,13 +14,13 @@ import {
 	type ConnectorRegistry,
 } from "@/lib/connectors/registry";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
-import type { BuildContext } from "../graph";
+import { flattenGraph, type BuildContext } from "../graph";
 import {
 	generatedById,
 	GenerationGraph,
 	pluginRecords,
 } from "../generation-graph";
-import { buildCtx, EMPTY_CONTEXT } from "./_context";
+import { buildCtx, EMPTY_CONTEXT, PROJECT_ID } from "./_context";
 
 const linked = { continuity: "true" };
 const PREVIOUS = "the previous visual";
@@ -67,6 +67,16 @@ beforeEach(() => {
 });
 
 describe("GenerationGraph", () => {
+	it("books every job, dependencies included, to the project it is built for", () => {
+		const image = element("img", "image", "a sunset");
+		const video = element("vid", "video", "a pan", linked);
+		edit(image, video);
+
+		expect(
+			flattenGraph([nodeOf(video)]).map(({ job }) => job.projectId),
+		).toEqual([PROJECT_ID, PROJECT_ID]);
+	});
+
 	it("builds a node once, however many read it", () => {
 		const image = element("img", "image", "a sunset");
 		const video = element("vid", "video", "a pan");

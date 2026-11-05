@@ -63,6 +63,7 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 }
 
 const config: ResolvedConnectorConfig = {
+	projectId: "project-1",
 	model: { provider: "openslop", model: "Slop Image v1" },
 };
 

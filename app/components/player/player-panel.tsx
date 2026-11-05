@@ -10,13 +10,8 @@ import { PreviewPanel } from "./preview-panel";
 
 const TOP_DEFAULT = 300;
 
-function FitToAspectRatio({
-	ratio,
-	children,
-}: {
-	ratio: number;
-	children: ReactNode;
-}) {
+function FitToAspectRatio({ children }: { children: ReactNode }) {
+	const ratio = getAspectRatioValue(useVideoSetting("aspectRatio"));
 	return (
 		<div className="@container-size flex h-full w-full items-center justify-center">
 			<div
@@ -32,8 +27,6 @@ function FitToAspectRatio({
 }
 
 function TopPlayerPanelComponent() {
-	const aspectRatio = useVideoSetting("aspectRatio");
-
 	const { size, handleProps, resizing } = useResize({
 		axis: "vertical",
 		defaultSize: TOP_DEFAULT,
@@ -44,7 +37,7 @@ function TopPlayerPanelComponent() {
 	return (
 		<div className="shrink-0" style={{ height: size }}>
 			<div className="relative mx-auto h-[calc(100%-0.5rem)] max-w-6xl p-2">
-				<FitToAspectRatio ratio={getAspectRatioValue(aspectRatio)}>
+				<FitToAspectRatio>
 					<PreviewPanel />
 				</FitToAspectRatio>
 			</div>
@@ -59,8 +52,6 @@ function TopPlayerPanelComponent() {
 }
 
 function SidePlayerPanelComponent() {
-	const aspectRatio = useVideoSetting("aspectRatio");
-
 	const { size, handleProps, resizing } = useResize({
 		axis: "horizontal",
 		defaultSize: SIDE_PLAYER_DEFAULT_WIDTH,
@@ -77,7 +68,7 @@ function SidePlayerPanelComponent() {
 				handleProps={handleProps}
 			/>
 			<div className="flex flex-1 flex-col justify-center overflow-hidden p-4">
-				<FitToAspectRatio ratio={getAspectRatioValue(aspectRatio)}>
+				<FitToAspectRatio>
 					<PreviewPanel />
 				</FitToAspectRatio>
 			</div>

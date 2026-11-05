@@ -54,8 +54,8 @@ const BREAK_HALF_WIDTH_PX = 1;
 // Chrome misplaces hard stops in a gradient with more than ~128 stops (4 per break).
 const BREAKS_PER_MASK_LAYER = 30;
 
-const fillTo = (ratio: string): CSSProperties => ({
-	width: `calc(var(${ratio}) * 100%)`,
+const fillTo = (token: string): CSSProperties => ({
+	width: `calc(var(${token}) * 100%)`,
 });
 
 const previewFill = fillTo("--scrub-preview");

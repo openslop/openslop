@@ -21,7 +21,7 @@ export class HttpVoiceConnector extends BaseConnector<
 
 	constructor(config: ResolvedConnectorConfig) {
 		super(config);
-		this.tts = new HttpTTSGateway(config.model);
+		this.tts = new HttpTTSGateway(config);
 	}
 
 	protected async _generate(params: VoiceGenerateParams): Promise<AssetResult> {

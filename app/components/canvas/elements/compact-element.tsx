@@ -1,6 +1,6 @@
 import { RenderElementProps } from "slate-react";
 import type { ContentElement } from "@/lib/canvas/types";
-import { renderCharacterRefs } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/character-refs";
 import { getPromptText } from "@/lib/generation/inputs";
 import { ELEMENT_CONFIGS } from "./element-configs";
 import { splitTextDirection } from "../utils/text-direction";
@@ -15,7 +15,7 @@ export function CompactElement({
 	children: React.ReactNode;
 }) {
 	const config = ELEMENT_CONFIGS[element.type];
-	const text = renderCharacterRefs(getPromptText(element));
+	const text = renderPrompt(getPromptText(element));
 	const { dir, nodeAttributes } = splitTextDirection(attributes);
 
 	return (

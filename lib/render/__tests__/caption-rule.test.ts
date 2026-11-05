@@ -22,7 +22,7 @@ function el(
 		sceneNumber: 1,
 		prompt: "",
 		url: `https://example.com/${id}`,
-		durationSec,
+		trimDurationSec: durationSec,
 		mediaDurationSec: durationSec,
 		trimStartSec: 0,
 		loops: 1,

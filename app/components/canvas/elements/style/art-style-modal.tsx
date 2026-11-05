@@ -8,7 +8,7 @@ import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
-import { createConnector } from "@/lib/connectors/factory";
+import { useCreateConnector } from "@/lib/connectors/use-create-connector";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import {
 	artStyleReferences,
@@ -34,6 +34,7 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 
 	const [deriving, startDeriving] = useTransition();
 	const model = useDefaultModels().llm;
+	const createConnector = useCreateConnector();
 
 	const hasReferences = useQueueSelector(
 		(q) => artStyleReferences(assets, q).length > 0,

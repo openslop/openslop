@@ -21,6 +21,7 @@ export type GenerationJob = {
 	connectorType: AssetConnectorType;
 	model: ModelRef;
 	config: ConnectorConfig;
+	projectId: string;
 };
 
 /** A node that lands keeps no result of its own. */
@@ -44,6 +45,7 @@ export const buildSettings = ({ videoSettings }: ProjectData) => ({
 });
 
 export type BuildContext = {
+	projectId: string;
 	settings: ReturnType<typeof buildSettings>;
 	canvas: CanvasElement[];
 	registry: ConnectorRegistry;

@@ -3,6 +3,8 @@ import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { ProjectDataSchema, type ProjectStore } from "@/lib/project/store";
 import { buildSettings, type BuildContext } from "../graph";
 
+export const PROJECT_ID = "project-1";
+
 export const projectSettings = (
 	overrides: Partial<BuildContext["settings"]> = {},
 ): BuildContext["settings"] => ({
@@ -16,7 +18,7 @@ export const buildCtx = (
 		settings = projectSettings(),
 		registry = DEFAULT_CONNECTOR_REGISTRY,
 	}: Partial<Omit<BuildContext, "canvas">> = {},
-): BuildContext => ({ settings, canvas, registry });
+): BuildContext => ({ projectId: PROJECT_ID, settings, canvas, registry });
 
 export const storeCtx = (
 	store: ProjectStore,

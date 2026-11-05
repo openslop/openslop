@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Scene } from "@/lib/canvas/types";
 import type { SceneSegment } from "@/lib/render/scene-segments";
-import { buildStoryboardScenes } from "../storyboard/storyboard-scenes";
+import { buildStoryboardItems } from "../storyboard/storyboard-scenes";
 
 const scene = (id: string, childTypes: string[]): Scene => ({
 	id,
@@ -22,9 +22,9 @@ const segment = (sceneId: string, start: number): SceneSegment => ({
 	thumbnail: null,
 });
 
-describe("buildStoryboardScenes", () => {
+describe("buildStoryboardItems", () => {
 	it("numbers scenes by document order", () => {
-		const items = buildStoryboardScenes(
+		const items = buildStoryboardItems(
 			[scene("a", ["image"]), scene("b", ["video"])],
 			[],
 		);
@@ -32,7 +32,7 @@ describe("buildStoryboardScenes", () => {
 	});
 
 	it("takes the seek target from the matching segment", () => {
-		const items = buildStoryboardScenes(
+		const items = buildStoryboardItems(
 			[scene("a", ["image"]), scene("b", ["image"])],
 			[segment("b", 4.5)],
 		);
@@ -40,13 +40,13 @@ describe("buildStoryboardScenes", () => {
 	});
 
 	it("keeps scenes that have no segment yet", () => {
-		const items = buildStoryboardScenes([scene("a", ["narration"])], []);
+		const items = buildStoryboardItems([scene("a", ["narration"])], []);
 		expect(items).toHaveLength(1);
 		expect(items[0].foreground).toBeNull();
 	});
 
 	it("picks the scene's foreground element", () => {
-		const items = buildStoryboardScenes(
+		const items = buildStoryboardItems(
 			[scene("a", ["narration", "image"])],
 			[],
 		);

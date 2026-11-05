@@ -1,6 +1,6 @@
 "use client";
 
-import { renderCharacterRefs } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/character-refs";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, History, Pin, RotateCcw } from "@/components/ui/icon";
@@ -90,7 +90,7 @@ function ElementVersionRow({
 					<span className="w-full truncate text-label-xs text-muted-foreground">
 						{version.inputs.prompt
 							? truncateMiddle(
-									renderCharacterRefs(version.inputs.prompt),
+									renderPrompt(version.inputs.prompt),
 									PROMPT_LENGTH,
 								)
 							: "No prompt"}

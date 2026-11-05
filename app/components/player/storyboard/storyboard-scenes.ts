@@ -2,7 +2,7 @@ import { isForeground } from "@/lib/canvas/guards";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
 import type { SceneSegment } from "@/lib/render/scene-segments";
 
-export type StoryboardScene = {
+export type StoryboardItem = {
 	scene: Scene;
 	sceneIndex: number;
 	foreground: ContentElement | null;
@@ -11,10 +11,10 @@ export type StoryboardScene = {
 };
 
 /** Unlike the seek bar, a scene with no segment yet is kept as a placeholder. */
-export function buildStoryboardScenes(
+export function buildStoryboardItems(
 	scenes: Scene[],
 	segments: SceneSegment[],
-): StoryboardScene[] {
+): StoryboardItem[] {
 	const startBySceneId = new Map(
 		segments.map(({ sceneId, start }) => [sceneId, start]),
 	);

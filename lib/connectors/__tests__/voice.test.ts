@@ -4,6 +4,7 @@ import { mockGatewaySequence } from "./_gateway-mock";
 
 const connector = () =>
 	new HttpVoiceConnector({
+		projectId: "project-1",
 		model: { provider: "cartesia", model: "Sonic 3.6" },
 	});
 

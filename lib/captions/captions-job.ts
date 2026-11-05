@@ -13,6 +13,7 @@ export function captionsNode(
 	element: ElementRef,
 	result: AssetResult,
 	model: ModelRef,
+	projectId: string,
 ): GenerationNode {
 	const mediaUrl = soundOf(result);
 	if (!mediaUrl) throw new Error("This clip has no sound to caption");
@@ -25,6 +26,7 @@ export function captionsNode(
 			connectorType: "stt",
 			model,
 			config: {},
+			projectId,
 		},
 		lands: {
 			on: element,

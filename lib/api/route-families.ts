@@ -34,7 +34,7 @@ export type RouteFamily<TPicked extends ModelRef> = {
 	) => Promise<Providers[K]>;
 	recordSpend: (
 		userId: string,
-		picked: TPicked,
+		picked: TPicked & { projectId?: string },
 		costUsd: number,
 	) => Promise<unknown>;
 };
@@ -50,6 +50,7 @@ export const HOSTED: RouteFamily<ModelRef> = {
 	recordSpend: (userId, picked, costUsd) =>
 		createJob({
 			userId,
+			projectId: picked.projectId,
 			connectorType: "llm",
 			request: pick(picked, "provider", "model"),
 			status: "completed",

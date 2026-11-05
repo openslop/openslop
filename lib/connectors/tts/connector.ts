@@ -23,7 +23,7 @@ export class HttpTTSConnector
 	readonly assetKey = "audio" as const;
 
 	constructor(config: ResolvedConnectorConfig) {
-		super(new HttpTTSGateway(config.model), config);
+		super(new HttpTTSGateway(config), config);
 	}
 
 	static attributesFor(_model: ModelRef): AttributeSchema {
