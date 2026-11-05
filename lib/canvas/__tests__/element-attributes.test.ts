@@ -4,7 +4,6 @@ import {
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
 	VOLUME_OPTIONS,
-	type ContentElement,
 } from "@/lib/canvas/types";
 import {
 	LAYOUT_ATTRIBUTE_KEYS,
@@ -19,15 +18,10 @@ import {
 	layoutAttributeSignature,
 	splitAttributes,
 } from "../element-attributes";
+import { element } from "./_assets";
 
-function el(customAttributes?: Record<string, string>): ContentElement {
-	return {
-		id: "e1",
-		type: "music",
-		...splitAttributes(customAttributes ?? {}),
-		children: [{ id: "e1-t", type: "music", text: "" }],
-	};
-}
+const el = (attributes: Record<string, string> = {}) =>
+	element("e1", "music", "", attributes);
 
 describe("splitAttributes", () => {
 	it("sorts layout keys out of what the generator sees", () => {
@@ -215,7 +209,7 @@ describe("trim attributes", () => {
 		expect(getTrimDuration(el({ trimDuration: "nope" }))).toBeUndefined();
 	});
 
-	it("raises a timeline duration below the minimum to it", () => {
+	it("raises a trim duration below the minimum to it", () => {
 		expect(getTrimDuration(el({ trimDuration: "0.5" }))).toBe(MIN_DURATION_SEC);
 	});
 

@@ -4,7 +4,9 @@ import { Editor } from "slate";
 import { insertElement } from "../insert-element";
 import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
-import { makeEditor } from "./_assets";
+import { ZERO_WIDTH_SPACE } from "../constants";
+import { getContentElements } from "../scenes";
+import { element, makeEditor } from "./_assets";
 
 const seededEditor = (defaultModels: ConnectorModels = {}) =>
 	makeEditor(
@@ -12,17 +14,13 @@ const seededEditor = (defaultModels: ConnectorModels = {}) =>
 			{
 				id: "scene-1",
 				type: "scene",
-				children: [
-					{
-						id: "nar-1",
-						type: "narration",
-						children: [{ id: "t1", type: "narration", text: "hello" }],
-					},
-				],
+				children: [element("nar-1", "narration", "hello")],
 			},
 		],
 		defaultModels,
 	);
+
+const inserted = (editor: Editor) => getContentElements(editor.children)[1];
 
 describe("insertElement", () => {
 	it("inserts a node with correct type", () => {
@@ -31,13 +29,10 @@ describe("insertElement", () => {
 			insertElement(editor, "narration", [0, 1]);
 		});
 
-		const scene = editor.children[0] as {
-			children: Array<Record<string, unknown>>;
-		};
-		const inserted = scene.children[1];
-		expect(inserted.type).toBe("narration");
-		expect(inserted.id).toBeDefined();
-		expect(inserted.children).toBeDefined();
+		const node = inserted(editor);
+		expect(node.type).toBe("narration");
+		expect(node.id).toBeDefined();
+		expect(node.children).toBeDefined();
 	});
 
 	it("applies default attributes from element config", () => {
@@ -46,12 +41,7 @@ describe("insertElement", () => {
 			insertElement(editor, "narration", [0, 1]);
 		});
 
-		const scene = editor.children[0] as {
-			children: Array<Record<string, unknown>>;
-		};
-		const inserted = scene.children[1];
-		const attrs = flatAttributes(inserted) as Record<string, string>;
-		expect(attrs.emotion).toBe("neutral");
+		expect(flatAttributes(inserted(editor)).emotion).toBe("neutral");
 	});
 
 	it("hydrates the model a new element generates with", () => {
@@ -60,11 +50,9 @@ describe("insertElement", () => {
 			insertElement(editor, "image", [0, 1]);
 		});
 
-		const scene = editor.children[0] as {
-			children: Array<Record<string, unknown>>;
-		};
-		const inserted = scene.children[1];
-		expect(flatAttributes(inserted)).toMatchObject(DEFAULT_MODELS.image);
+		expect(flatAttributes(inserted(editor))).toMatchObject(
+			DEFAULT_MODELS.image,
+		);
 	});
 
 	it("gives the new element the editor's default model", () => {
@@ -74,10 +62,7 @@ describe("insertElement", () => {
 			insertElement(editor, "image", [0, 1]);
 		});
 
-		const scene = editor.children[0] as {
-			children: Array<Record<string, unknown>>;
-		};
-		expect(flatAttributes(scene.children[1])).toMatchObject(pinned);
+		expect(flatAttributes(inserted(editor))).toMatchObject(pinned);
 	});
 
 	it("trims the text it is given", () => {
@@ -86,12 +71,6 @@ describe("insertElement", () => {
 			insertElement(editor, "narration", [0, 1], { text: "  hello  " });
 		});
 
-		const scene = editor.children[0] as {
-			children: Array<{ children: Array<{ text: string }> }>;
-		};
-		expect(scene.children[1].children.map((leaf) => leaf.text)).toEqual([
-			"\u200B",
-			"hello",
-		]);
+		expect(Editor.string(editor, [0, 1])).toBe(`${ZERO_WIDTH_SPACE}hello`);
 	});
 });

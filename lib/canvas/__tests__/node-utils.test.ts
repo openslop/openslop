@@ -59,7 +59,6 @@ describe("assignIdRecursively", () => {
 	it("skips text nodes", () => {
 		const textNode = { text: "hello", type: "narration" as const, id: "t1" };
 		assignIdRecursively(textNode);
-		// text nodes are not Elements, so no id is assigned beyond what exists
 		expect(textNode.id).toBe("t1");
 	});
 });
@@ -102,7 +101,6 @@ describe("stripIds", () => {
 
 		const stripped = stripIds(node) as Element;
 		const textChild = stripped.children[0] as Record<string, unknown>;
-		// Text nodes are shallow-cloned, not stripped
 		expect(textChild.text).toBe("hi");
 		expect(textChild.id).toBe("t1");
 	});

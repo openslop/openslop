@@ -12,12 +12,12 @@ import { toCaption } from "@/lib/captions/word-captions";
 function makeElement(
 	id: string,
 	type: ContentElement["type"],
-	customAttributes?: Record<string, string>,
+	attributes: Record<string, string> = {},
 ): ContentElement {
 	return {
 		id,
 		type,
-		...splitAttributes(customAttributes ?? {}),
+		...splitAttributes(attributes),
 		children: [{ id: `${id}-text`, type, text: "test" }],
 	};
 }
@@ -173,7 +173,7 @@ describe("resolveElements", () => {
 		});
 	});
 
-	it("reads loops from customAttributes (default 1)", () => {
+	it("reads loops from the attributes (default 1)", () => {
 		const elements = [
 			makeElement("s1", "sound", { loops: "4" }),
 			makeElement("s2", "sound"),
@@ -197,7 +197,7 @@ describe("resolveElements", () => {
 		expect(resolved[1].loops).toBe(1);
 	});
 
-	it("reads volume from customAttributes (default 10)", () => {
+	it("reads volume from the attributes (default 10)", () => {
 		const elements = [
 			makeElement("s1", "music", { volume: "3" }),
 			makeElement("s2", "music", { volume: "0" }),

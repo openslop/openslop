@@ -33,8 +33,8 @@ const avatar = (name: string, appearance: string) =>
 const element = (
 	id: string,
 	type: "image" | "video" | "narration",
-	customAttributes?: Record<string, string>,
-) => elementWithText(id, type, "a sunset", customAttributes);
+	attributes?: Record<string, string>,
+) => elementWithText(id, type, "a sunset", attributes);
 
 const resolveOn = (el: GeneratedElement, canvas: CanvasElement[]) =>
 	buildNode(el, storeCtx(store, [...assets, ...canvas]));
