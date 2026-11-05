@@ -16,7 +16,7 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 		prompt: "",
 		url: BLACK_PIXEL,
 		timelineDurationSec: opener.timelineDurationSec,
-		originalDurationSec: 0,
+		mediaDurationSec: 0,
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,

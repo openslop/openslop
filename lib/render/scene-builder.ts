@@ -104,7 +104,7 @@ export function buildRenderLayout(
 		const element = {
 			...raw,
 			timelineDurationSec: onGrid(raw.timelineDurationSec),
-			originalDurationSec: onGrid(raw.originalDurationSec),
+			mediaDurationSec: onGrid(raw.mediaDurationSec),
 		};
 		const stride = onGrid(loopStrideSec(element));
 		const current = series.at(-1);

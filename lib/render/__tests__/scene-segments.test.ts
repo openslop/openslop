@@ -111,7 +111,7 @@ const resolved = (
 	prompt: "",
 	url,
 	timelineDurationSec: 0,
-	originalDurationSec: 0,
+	mediaDurationSec: 0,
 	trimStartSec: 0,
 	loops: 1,
 	loop: false,

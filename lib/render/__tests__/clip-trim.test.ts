@@ -11,8 +11,8 @@ import { toCaption } from "@/lib/captions/word-captions";
 
 describe("isTrimmable", () => {
 	it("trims only what has a media length", () => {
-		expect(isTrimmable({ originalDurationSec: 5 })).toBe(true);
-		expect(isTrimmable({ originalDurationSec: 0 })).toBe(false);
+		expect(isTrimmable({ mediaDurationSec: 5 })).toBe(true);
+		expect(isTrimmable({ mediaDurationSec: 0 })).toBe(false);
 	});
 });
 
@@ -21,7 +21,7 @@ describe("isTrimmed", () => {
 		const full = {
 			trimStartSec: 0,
 			timelineDurationSec: 10,
-			originalDurationSec: 10,
+			mediaDurationSec: 10,
 		};
 		expect(isTrimmed(full)).toBe(false);
 		expect(
@@ -35,13 +35,13 @@ describe("isTrimmed", () => {
 			isTrimmed({
 				trimStartSec: 0,
 				timelineDurationSec: 4,
-				originalDurationSec: 0,
+				mediaDurationSec: 0,
 			}),
 		).toBe(false);
 	});
 });
 
-const media = { originalDurationSec: 10 };
+const media = { mediaDurationSec: 10 };
 
 describe("trimClip", () => {
 	it("plays from its trim start to the end of its media", () => {
@@ -161,7 +161,7 @@ describe("trimCaptions", () => {
 
 describe("previewSpan", () => {
 	const video = {
-		originalDurationSec: 10,
+		mediaDurationSec: 10,
 		trimStartSec: 0,
 		timelineDurationSec: 5,
 	};
@@ -207,7 +207,7 @@ describe("previewSpan", () => {
 	});
 
 	it("stretches a still across the whole scene", () => {
-		const still = { originalDurationSec: 0, ...to(0) };
+		const still = { mediaDurationSec: 0, ...to(0) };
 		expect(previewSpan(still, scene, to(0))).toEqual({
 			timelineDurationSec: 8,
 			extensionSec: 0,

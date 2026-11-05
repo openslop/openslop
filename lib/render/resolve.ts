@@ -32,9 +32,8 @@ export function resolveElements(
 			const url = getPrimaryUrl(snapshot.result, spec.outputKind);
 			if (!url) continue;
 
-			const { durationSec: originalDurationSec, textTimestamps } =
-				snapshot.result;
-			const trim = elementTrim(element, originalDurationSec);
+			const { durationSec: mediaDurationSec, textTimestamps } = snapshot.result;
+			const trim = elementTrim(element, mediaDurationSec);
 
 			resolved.push({
 				id: element.id,
@@ -46,7 +45,7 @@ export function resolveElements(
 				prompt: getPromptText(element),
 				url,
 				...trim,
-				originalDurationSec,
+				mediaDurationSec,
 				loops: getLoops(element),
 				loop: getLoop(element),
 				volume: getVolume(element),

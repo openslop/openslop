@@ -177,7 +177,7 @@ describe("against buildRenderLayout", () => {
 			prompt: "",
 			url: `https://example.com/${node.id}`,
 			timelineDurationSec: durationSec,
-			originalDurationSec: 0,
+			mediaDurationSec: 0,
 			trimStartSec: 0,
 			loops: 1,
 			loop: false,

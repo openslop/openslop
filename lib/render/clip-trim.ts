@@ -16,22 +16,22 @@ export type Trim = Pick<
 	"trimStartSec" | "timelineDurationSec"
 >;
 
-type Media = Pick<ResolvedElement, "originalDurationSec">;
+type Media = Pick<ResolvedElement, "mediaDurationSec">;
 
 type Trimmable = Trim & Media;
 
 /** A still has no media length to trim. */
-export const isTrimmable = ({ originalDurationSec }: Media): boolean =>
-	originalDurationSec > 0;
+export const isTrimmable = ({ mediaDurationSec }: Media): boolean =>
+	mediaDurationSec > 0;
 
 /** A clip runs out at the end of its media; a still never does. */
 const maxTimelineDurationSec = (
 	clip: Media & Pick<Trim, "trimStartSec">,
 ): number =>
-	isTrimmable(clip) ? clip.originalDurationSec - clip.trimStartSec : Infinity;
+	isTrimmable(clip) ? clip.mediaDurationSec - clip.trimStartSec : Infinity;
 
 export const isTrimmed = (clip: Trimmable): boolean =>
-	clip.timelineDurationSec < clip.originalDurationSec;
+	clip.timelineDurationSec < clip.mediaDurationSec;
 
 /** A clip plays from its trim start for its timeline duration, or to the end of its media by default. */
 export function trimClip(
@@ -39,16 +39,16 @@ export function trimClip(
 	startSec: number,
 	timelineDurationSec?: number,
 ): Trim {
-	const { originalDurationSec } = media;
+	const { mediaDurationSec } = media;
 	const trimStartSec = clamp(
 		startSec,
 		0,
-		Math.max(0, originalDurationSec - MIN_DURATION_SEC),
+		Math.max(0, mediaDurationSec - MIN_DURATION_SEC),
 	);
 	return {
 		trimStartSec,
 		timelineDurationSec: Math.min(
-			timelineDurationSec ?? originalDurationSec - trimStartSec,
+			timelineDurationSec ?? mediaDurationSec - trimStartSec,
 			maxTimelineDurationSec({ ...media, trimStartSec }),
 		),
 	};
@@ -56,10 +56,10 @@ export function trimClip(
 
 export const elementTrim = (
 	element: ContentElement,
-	originalDurationSec: number,
+	mediaDurationSec: number,
 ): Trim =>
 	trimClip(
-		{ originalDurationSec },
+		{ mediaDurationSec },
 		getTrimStart(element),
 		getTimelineDuration(element),
 	);

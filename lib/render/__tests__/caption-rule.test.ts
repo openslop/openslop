@@ -23,7 +23,7 @@ function el(
 		prompt: "",
 		url: `https://example.com/${id}`,
 		timelineDurationSec: durationSec,
-		originalDurationSec: durationSec,
+		mediaDurationSec: durationSec,
 		trimStartSec: 0,
 		loops: 1,
 		loop: false,

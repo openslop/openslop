@@ -16,7 +16,7 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 	prompt: "slow pan",
 	url: "https://vid/a.mp4",
 	timelineDurationSec: 5,
-	originalDurationSec: 5,
+	mediaDurationSec: 5,
 	trimStartSec: 0,
 	loops: 1,
 	loop: false,
@@ -62,7 +62,7 @@ describe("TimelineClip footage", () => {
 	it("draws a still once, since it has no media length", () => {
 		const still = element({
 			type: "image",
-			originalDurationSec: 0,
+			mediaDurationSec: 0,
 			timelineDurationSec: 0,
 		});
 		expect(markup(still, 8).match(/<img /g)).toHaveLength(1);
@@ -87,7 +87,7 @@ describe("TimelineExtension", () => {
 			element({
 				trimStartSec: 1,
 				timelineDurationSec: 3,
-				originalDurationSec: 10,
+				mediaDurationSec: 10,
 			}),
 			3,
 			4,
