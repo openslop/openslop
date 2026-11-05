@@ -4,7 +4,7 @@ import {
 	loopDef,
 	motionDef,
 	resolutionDef,
-	timelineDurationDef,
+	trimDurationDef,
 	trimStartDef,
 	volumeDef,
 } from "../attributes/common";
@@ -25,5 +25,5 @@ export const videoAttributesFor = (model: ModelRef) =>
 		volumeDef("5"),
 		motionDef,
 		trimStartDef,
-		timelineDurationDef,
+		trimDurationDef,
 	]);

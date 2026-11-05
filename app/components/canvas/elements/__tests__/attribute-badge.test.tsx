@@ -80,23 +80,23 @@ describe("AttributeBadge", () => {
 
 	describe("seconds", () => {
 		const secondsSpec: AttributeSpec = {
-			label: "Timeline duration",
+			label: "Trim duration",
 			edit: { kind: "seconds", min: 1 },
 		};
 		const reset = (html: string) =>
-			html.match(/<button[^>]*aria-label="Reset timeline duration"[^>]*>/)?.[0];
+			html.match(/<button[^>]*aria-label="Reset trim duration"[^>]*>/)?.[0];
 
 		it("offers a reset once the field holds a value", () => {
 			const html = render(
-				elementWith({ timelineDuration: "4" }),
+				elementWith({ trimDuration: "4" }),
 				secondsSpec,
-				"timelineDuration",
+				"trimDuration",
 			);
 			expect(reset(html)).toBeDefined();
 		});
 
 		it("has nothing to reset while the field is on Auto", () => {
-			const html = render(elementWith({}), secondsSpec, "timelineDuration");
+			const html = render(elementWith({}), secondsSpec, "trimDuration");
 			expect(reset(html)).toBeUndefined();
 		});
 	});

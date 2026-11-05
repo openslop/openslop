@@ -61,7 +61,7 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 function VideoElementPlayer({ element }: { element: ResolvedElement }) {
 	const { fps } = useVideoConfig();
 	const frame = useCurrentFrame();
-	const playFrames = Math.max(1, toFrames(element.timelineDurationSec, fps));
+	const playFrames = Math.max(1, toFrames(element.trimDurationSec, fps));
 	const frozen = !element.loop && frame >= playFrames;
 	const video = (
 		<OffthreadVideo

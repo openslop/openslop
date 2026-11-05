@@ -15,7 +15,7 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 	sceneNumber: 1,
 	prompt: "slow pan",
 	url: "https://vid/a.mp4",
-	timelineDurationSec: 5,
+	trimDurationSec: 5,
 	mediaDurationSec: 5,
 	trimStartSec: 0,
 	loops: 1,
@@ -53,7 +53,7 @@ describe("TimelineClip footage", () => {
 			sources(
 				markup(element(), 8, {
 					trimStartSec: 0.30000000000000004,
-					timelineDurationSec: 7.7,
+					trimDurationSec: 7.7,
 				}),
 			),
 		).toEqual(["https://vid/a.mp4"]);
@@ -63,7 +63,7 @@ describe("TimelineClip footage", () => {
 		const still = element({
 			type: "image",
 			mediaDurationSec: 0,
-			timelineDurationSec: 0,
+			trimDurationSec: 0,
 		});
 		expect(markup(still, 8).match(/<img /g)).toHaveLength(1);
 	});
@@ -86,7 +86,7 @@ describe("TimelineExtension", () => {
 		const html = extension(
 			element({
 				trimStartSec: 1,
-				timelineDurationSec: 3,
+				trimDurationSec: 3,
 				mediaDurationSec: 10,
 			}),
 			3,
@@ -98,7 +98,7 @@ describe("TimelineExtension", () => {
 
 	it("restarts the footage at its trim start each pass, filling a partial last one", () => {
 		const html = extension(
-			element({ loop: true, trimStartSec: 1, timelineDurationSec: 4 }),
+			element({ loop: true, trimStartSec: 1, trimDurationSec: 4 }),
 			4,
 			6,
 		);

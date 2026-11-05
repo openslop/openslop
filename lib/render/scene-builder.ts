@@ -49,7 +49,7 @@ function pushSequence(
 	const list = (sequences[element.type] ??= []);
 	for (let i = 0; i < element.loops; i++) {
 		list.push(
-			createSequence(element, start + i * stride, element.timelineDurationSec),
+			createSequence(element, start + i * stride, element.trimDurationSec),
 		);
 	}
 }
@@ -99,7 +99,7 @@ export function buildRenderLayout(
 	for (const raw of elements) {
 		const element = {
 			...raw,
-			timelineDurationSec: onGrid(raw.timelineDurationSec),
+			trimDurationSec: onGrid(raw.trimDurationSec),
 			mediaDurationSec: onGrid(raw.mediaDurationSec),
 		};
 		const stride = onGrid(loopStrideSec(element));
@@ -125,7 +125,7 @@ export function buildRenderLayout(
 					cursor -= transitionDurationSec;
 				}
 				series.push({
-					...createSequence(element, cursor, element.timelineDurationSec),
+					...createSequence(element, cursor, element.trimDurationSec),
 					overlaySec: 0,
 				});
 				break;
@@ -136,16 +136,16 @@ export function buildRenderLayout(
 						...createSequence(
 							blankScene(element),
 							cursor,
-							element.timelineDurationSec,
+							element.trimDurationSec,
 						),
-						overlaySec: element.timelineDurationSec,
+						overlaySec: element.trimDurationSec,
 					});
 				} else {
-					current.overlaySec += element.timelineDurationSec;
+					current.overlaySec += element.trimDurationSec;
 					current.duration = Math.max(current.duration, current.overlaySec);
 				}
 				pushSequence(sequences, element, cursor, stride);
-				cursor += element.timelineDurationSec;
+				cursor += element.trimDurationSec;
 				break;
 			}
 		}

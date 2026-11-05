@@ -16,12 +16,12 @@ export const LOOP_CROSSFADE_SEC = 0.15;
  */
 export function loopCrossfadeSec(element: ResolvedElement): number {
 	if (element.role !== "effect" || element.loops < 2) return 0;
-	return Math.min(LOOP_CROSSFADE_SEC, element.timelineDurationSec / 2);
+	return Math.min(LOOP_CROSSFADE_SEC, element.trimDurationSec / 2);
 }
 
 /** How far apart consecutive copies of `element` start. */
 export function loopStrideSec(element: ResolvedElement): number {
-	return element.timelineDurationSec - loopCrossfadeSec(element);
+	return element.trimDurationSec - loopCrossfadeSec(element);
 }
 
 /**
@@ -45,5 +45,5 @@ export function audioEnvelopeFrames(
 	sequenceFrames: number,
 	fps: number,
 ): number {
-	return Math.min(sequenceFrames, toFrames(element.timelineDurationSec, fps));
+	return Math.min(sequenceFrames, toFrames(element.trimDurationSec, fps));
 }

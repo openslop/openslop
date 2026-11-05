@@ -110,7 +110,7 @@ const resolved = (
 	sceneNumber: scene.number,
 	prompt: "",
 	url,
-	timelineDurationSec: 0,
+	trimDurationSec: 0,
 	mediaDurationSec: 0,
 	trimStartSec: 0,
 	loops: 1,

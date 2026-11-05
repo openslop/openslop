@@ -241,7 +241,7 @@ export function TimelineExtension({
 	width: number;
 	selected: boolean;
 }) {
-	const { url, loop, trimStartSec, timelineDurationSec } = element;
+	const { url, loop, trimStartSec, trimDurationSec } = element;
 	const config = ELEMENT_CONFIGS[element.type];
 	const face = LOOP_FACES[loop ? "on" : "off"];
 	return (
@@ -266,7 +266,7 @@ export function TimelineExtension({
 					<Preview>
 						<Footage
 							outputKind={config.outputKind}
-							src={urlAt(url, trimStartSec + timelineDurationSec)}
+							src={urlAt(url, trimStartSec + trimDurationSec)}
 						/>
 					</Preview>
 				)}

@@ -81,9 +81,9 @@ export const trimStartDef: AttributeDef = {
 	edit: { kind: "seconds", min: 0 },
 };
 
-export const timelineDurationDef: AttributeDef = {
-	key: "timelineDuration",
-	label: "Timeline duration",
+export const trimDurationDef: AttributeDef = {
+	key: "trimDuration",
+	label: "Trim duration",
 	unit: "s",
 	edit: { kind: "seconds", min: MIN_DURATION_SEC },
 };

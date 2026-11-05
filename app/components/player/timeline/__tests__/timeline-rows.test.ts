@@ -27,7 +27,7 @@ function el(
 		sceneNumber: 1,
 		prompt: "",
 		url: `https://example.com/${id}`,
-		timelineDurationSec: 4,
+		trimDurationSec: 4,
 		mediaDurationSec: 0,
 		trimStartSec: 0,
 		loops: 1,
@@ -102,9 +102,9 @@ describe("buildTimelineRows", () => {
 
 	it("merges narration and character into the voice lane, ordered by start", () => {
 		const layout = layoutOf([
-			el("n1", "narration", { timelineDurationSec: 2 }),
-			el("c1", "character", { timelineDurationSec: 3 }),
-			el("n2", "narration", { timelineDurationSec: 1 }),
+			el("n1", "narration", { trimDurationSec: 2 }),
+			el("c1", "character", { trimDurationSec: 3 }),
+			el("n2", "narration", { trimDurationSec: 1 }),
 		]);
 		const voice = buildTimelineRows(layout).find((row) => row.id === "overlay");
 		expect(voice?.clips.map((clip) => clip.element?.id)).toEqual([
@@ -117,8 +117,8 @@ describe("buildTimelineRows", () => {
 
 	it("expands a looped element into one clip per loop", () => {
 		const layout = layoutOf([
-			el("bgm", "music", { timelineDurationSec: 3, loops: 3 }),
-			el("img", "image", { timelineDurationSec: 9 }),
+			el("bgm", "music", { trimDurationSec: 3, loops: 3 }),
+			el("img", "image", { trimDurationSec: 9 }),
 		]);
 		const music = buildTimelineRows(layout).find(
 			(row) => row.id === "background",
@@ -134,9 +134,9 @@ describe("buildTimelineRows", () => {
 	it("keeps scenes on one lane, overlapping by the cross-fade", () => {
 		const layout = layoutOf(
 			[
-				el("a", "image", { timelineDurationSec: 5 }),
-				el("b", "image", { timelineDurationSec: 5 }),
-				el("c", "image", { timelineDurationSec: 5 }),
+				el("a", "image", { trimDurationSec: 5 }),
+				el("b", "image", { trimDurationSec: 5 }),
+				el("c", "image", { trimDurationSec: 5 }),
 			],
 			{ transitionType: "fade" },
 		);
@@ -150,10 +150,10 @@ describe("buildTimelineRows", () => {
 
 	it("keeps voices on one lane across a scene transition", () => {
 		const layout = layoutOf([
-			el("n1", "narration", { timelineDurationSec: 3 }),
-			el("a", "image", { timelineDurationSec: 3 }),
-			el("n2", "narration", { timelineDurationSec: 3 }),
-			el("b", "image", { timelineDurationSec: 3 }),
+			el("n1", "narration", { trimDurationSec: 3 }),
+			el("a", "image", { trimDurationSec: 3 }),
+			el("n2", "narration", { trimDurationSec: 3 }),
+			el("b", "image", { trimDurationSec: 3 }),
 		]);
 		const voice = buildTimelineRows(layout).filter(
 			(row) => row.id === "overlay",
@@ -164,8 +164,8 @@ describe("buildTimelineRows", () => {
 
 	it("drops a clip that starts after the video ends", () => {
 		const layout = layoutOf([
-			el("img", "image", { timelineDurationSec: 5 }),
-			el("sfx", "sound", { timelineDurationSec: 4, loops: 3 }),
+			el("img", "image", { trimDurationSec: 5 }),
+			el("sfx", "sound", { trimDurationSec: 4, loops: 3 }),
 		]);
 		const effects = buildTimelineRows(layout).filter(
 			(row) => row.id === "effect",
@@ -182,8 +182,8 @@ describe("buildTimelineRows", () => {
 
 	it("draws a clip that overruns the end only as far as the video goes", () => {
 		const layout = layoutOf([
-			el("img", "image", { timelineDurationSec: 5 }),
-			el("sfx", "sound", { timelineDurationSec: 4, loops: 2 }),
+			el("img", "image", { trimDurationSec: 5 }),
+			el("sfx", "sound", { trimDurationSec: 4, loops: 2 }),
 		]);
 		const clips = buildTimelineRows(layout)
 			.filter((row) => row.id === "effect")
@@ -193,9 +193,9 @@ describe("buildTimelineRows", () => {
 
 	it("splits overlapping sounds into a lane each", () => {
 		const layout = layoutOf([
-			el("img", "image", { timelineDurationSec: 10 }),
-			el("s1", "sound", { timelineDurationSec: 6 }),
-			el("s2", "sound", { timelineDurationSec: 6 }),
+			el("img", "image", { trimDurationSec: 10 }),
+			el("s1", "sound", { trimDurationSec: 6 }),
+			el("s2", "sound", { trimDurationSec: 6 }),
 		]);
 		const effects = buildTimelineRows(layout).filter(
 			(row) => row.id === "effect",

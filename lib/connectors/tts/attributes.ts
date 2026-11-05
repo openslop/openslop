@@ -1,9 +1,5 @@
 import { AttributeSchema } from "../attributes/schema";
-import {
-	timelineDurationDef,
-	trimStartDef,
-	volumeDef,
-} from "../attributes/common";
+import { trimDurationDef, trimStartDef, volumeDef } from "../attributes/common";
 import {
 	DEFAULT_TTS_EMOTION,
 	DEFAULT_TTS_SPEED,
@@ -27,7 +23,7 @@ export const TTS_ATTRIBUTES = AttributeSchema.from(
 		},
 		volumeDef("10"),
 		trimStartDef,
-		timelineDurationDef,
+		trimDurationDef,
 	],
 	{ hideModel: true },
 );

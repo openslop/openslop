@@ -11,7 +11,7 @@ import {
 	getDuration,
 	getLoops,
 	getMotion,
-	getTimelineDuration,
+	getTrimDuration,
 	getTrimStart,
 	getVolume,
 	getVolumeGain,
@@ -184,7 +184,7 @@ describe("layoutAttributeSignature", () => {
 			"motion",
 			"uploadedFrame",
 			"trimStart",
-			"timelineDuration",
+			"trimDuration",
 		]);
 		expect(
 			layoutAttributeSignature(
@@ -211,20 +211,16 @@ describe("trim attributes", () => {
 	it("reads an unset or invalid trim as none", () => {
 		expect(getTrimStart(el())).toBe(0);
 		expect(getTrimStart(el({ trimStart: "-1" }))).toBe(0);
-		expect(getTimelineDuration(el())).toBeUndefined();
-		expect(
-			getTimelineDuration(el({ timelineDuration: "nope" })),
-		).toBeUndefined();
+		expect(getTrimDuration(el())).toBeUndefined();
+		expect(getTrimDuration(el({ trimDuration: "nope" }))).toBeUndefined();
 	});
 
 	it("raises a timeline duration below the minimum to it", () => {
-		expect(getTimelineDuration(el({ timelineDuration: "0.5" }))).toBe(
-			MIN_DURATION_SEC,
-		);
+		expect(getTrimDuration(el({ trimDuration: "0.5" }))).toBe(MIN_DURATION_SEC);
 	});
 
 	it("reads valid seconds", () => {
 		expect(getTrimStart(el({ trimStart: "1.25" }))).toBe(1.25);
-		expect(getTimelineDuration(el({ timelineDuration: " 4 " }))).toBe(4);
+		expect(getTrimDuration(el({ trimDuration: " 4 " }))).toBe(4);
 	});
 });

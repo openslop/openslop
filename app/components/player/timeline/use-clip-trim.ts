@@ -9,6 +9,7 @@ import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
 	isTrimmed,
+	laidOut,
 	previewSpan,
 	trimEdge,
 	type Trim,
@@ -37,7 +38,7 @@ function useEdgeDrag(
 
 /** A drag previews the new length and commits it on release: one layout rebuild, one undo step. */
 export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
-	const { element } = clip;
+	const element = laidOut(clip);
 	const editor = useSlateStatic();
 	const [preview, setPreview] = useState<Trim | null>(null);
 
@@ -49,7 +50,7 @@ export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
 		if (!preview || isMatch(element, preview)) return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),
-			timelineDuration: toAttr(preview.timelineDurationSec),
+			trimDuration: toAttr(preview.trimDurationSec),
 		});
 	};
 
@@ -64,11 +65,11 @@ export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
 		...previewSpan(element, clip, trim),
 		trim,
 		handleProps: isTrimmable(element) ? handles : null,
-		reset: isTrimmed(element)
+		reset: isTrimmed(clip.element)
 			? () =>
 					mergeAttrs(editor, element.id, {
 						trimStart: null,
-						timelineDuration: null,
+						trimDuration: null,
 					})
 			: null,
 	};

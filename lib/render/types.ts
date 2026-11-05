@@ -22,7 +22,7 @@ export type ResolvedElement = {
 	prompt: string;
 	url: string;
 	/** How long it plays once trimmed, never past its media; a scene can extend past a visual. */
-	timelineDurationSec: number;
+	trimDurationSec: number;
 	mediaDurationSec: number;
 	trimStartSec: number;
 	loops: number;

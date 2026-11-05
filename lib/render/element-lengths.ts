@@ -67,7 +67,7 @@ const toLength = ({
 		dialogueIds,
 		durationSec,
 		...decide(
-			elementTrim(element, durationSec ?? 0).timelineDurationSec,
+			elementTrim(element, durationSec ?? 0).trimDurationSec,
 			secondsForWords(words),
 		),
 	};

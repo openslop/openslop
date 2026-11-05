@@ -74,9 +74,7 @@ describe("measureElementLengths", () => {
 
 	it("holds a trimmed video for its trimmed length", () => {
 		const [trimmed] = measureElementLengths([
-			scene(
-				element("video", "A pan.", { duration: "8", timelineDuration: "5" }),
-			),
+			scene(element("video", "A pan.", { duration: "8", trimDuration: "5" })),
 		]);
 
 		expect(trimmed.seconds).toBe(5);
@@ -176,7 +174,7 @@ describe("against buildRenderLayout", () => {
 			sceneNumber: 1,
 			prompt: "",
 			url: `https://example.com/${node.id}`,
-			timelineDurationSec: durationSec,
+			trimDurationSec: durationSec,
 			mediaDurationSec: 0,
 			trimStartSec: 0,
 			loops: 1,
