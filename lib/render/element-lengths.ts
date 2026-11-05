@@ -53,7 +53,7 @@ const ownLength = (
 	return {
 		durationSec,
 		own: {
-			seconds: trim.durationSec,
+			seconds: trim.trimDurationSec,
 			decidedBy: trimmed ? "trim" : "duration",
 		},
 	};

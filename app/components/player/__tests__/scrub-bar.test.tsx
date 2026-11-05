@@ -47,9 +47,7 @@ describe("ScrubBar", () => {
 		calls.length = 0;
 	});
 
-	afterEach(() => {
-		act(() => root.unmount());
-	});
+	afterEach(() => act(() => root.unmount()));
 
 	const render = (
 		props: {

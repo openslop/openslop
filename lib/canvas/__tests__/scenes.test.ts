@@ -8,6 +8,7 @@ import {
 	previousVisual,
 	sceneIndexOf,
 } from "../scenes";
+import { element } from "./_assets";
 
 const scene = (id: string, children: ContentElement[] = []): Scene => ({
 	id,
@@ -89,13 +90,11 @@ describe("parentSceneId", () => {
 });
 
 describe("previousVisual", () => {
-	const el = (id: string, type: "image" | "video" | "narration") =>
-		({ id, type, children: [{ id: `${id}-t`, type, text: "" }] }) as never;
 	const elements = [
-		el("a", "image"),
-		el("n", "narration"),
-		el("b", "video"),
-		el("c", "video"),
+		element("a", "image"),
+		element("n", "narration"),
+		element("b", "video"),
+		element("c", "video"),
 	];
 
 	it("skips dialogue to the visual before", () => {

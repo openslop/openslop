@@ -5,6 +5,7 @@ import { z } from "zod";
 import { BundleResponseSchema, type BundleResponse } from "./asset-bundle";
 import type { ConnectorType } from "@/lib/connectors/types";
 import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
+import { selectColumns } from "@/lib/supabase/select-columns";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -37,6 +38,20 @@ const JobRowSchema = z.object({
 });
 
 export type JobRow = z.infer<typeof JobRowSchema>;
+
+/** What the poll answers with, plus what the deadline reads. */
+const JobPollRowSchema = JobRowSchema.pick({
+	id: true,
+	connector_type: true,
+	status: true,
+	result: true,
+	error: true,
+	created_at: true,
+});
+
+export type JobPollRow = z.infer<typeof JobPollRowSchema>;
+
+const JOB_POLL_COLUMNS = selectColumns(JobPollRowSchema);
 
 export async function createJob(input: {
 	userId: string;
@@ -80,16 +95,17 @@ export async function spentSince(
 export async function getJob(
 	jobId: string,
 	userId: string,
-): Promise<JobRow | null> {
+): Promise<JobPollRow | null> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("jobs")
-		.select("*")
+		.select(JOB_POLL_COLUMNS)
 		.eq("id", jobId)
 		.eq("user_id", userId)
+		.in("connector_type", JOB_CONNECTOR_TYPES)
 		.maybeSingle();
 	if (error) throw new Error(`Failed to load job: ${error.message}`);
-	return data ? JobRowSchema.parse(data) : null;
+	return data ? JobPollRowSchema.parse(data) : null;
 }
 
 export async function loadJobForProcessing(

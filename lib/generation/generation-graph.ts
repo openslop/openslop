@@ -83,6 +83,7 @@ export class GenerationGraph {
 					connectorType: connector.type,
 					model: connector.model,
 					config: connector.config,
+					projectId: this.ctx.projectId,
 				},
 			});
 		} finally {

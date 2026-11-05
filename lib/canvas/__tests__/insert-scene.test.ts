@@ -1,13 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Editor } from "slate";
-
-vi.mock("@/lib/connectors/factory", () => ({
-	resolveAttributeSchema: () => ({
-		defaultAttributes: {},
-		keys: [],
-		resolve: (attrs: Record<string, string>) => attrs,
-	}),
-}));
 
 import type { ConnectorModels } from "@/lib/connectors/models";
 import { isScene } from "../scenes";

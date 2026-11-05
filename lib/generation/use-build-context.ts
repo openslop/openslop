@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import { getCanvasElements } from "@/lib/canvas/assets";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
+import { useProjectId } from "@/lib/project/project-provider";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { buildSettings, type BuildContext } from "./graph";
 
@@ -11,12 +12,14 @@ import { buildSettings, type BuildContext } from "./graph";
 export function useBuildContext(): () => BuildContext {
 	const store = useProjectStoreHandle();
 	const editor = useSlateStatic();
+	const projectId = useProjectId();
 	return useCallback(
 		() => ({
+			projectId,
 			settings: buildSettings(store.getState()),
 			canvas: getCanvasElements(editor.children),
 			registry: DEFAULT_CONNECTOR_REGISTRY,
 		}),
-		[store, editor],
+		[store, editor, projectId],
 	);
 }

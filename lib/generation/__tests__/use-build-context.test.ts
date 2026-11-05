@@ -51,6 +51,9 @@ let store: ProjectStore;
 vi.mock("@/lib/project/project-store-provider", () => ({
 	useProjectStoreHandle: () => store,
 }));
+vi.mock("@/lib/project/project-provider", () => ({
+	useProjectId: () => "project-1",
+}));
 
 const { useBuildContext } = await import("../use-build-context");
 

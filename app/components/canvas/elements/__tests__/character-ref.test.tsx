@@ -3,7 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Editor, Transforms } from "slate";
 import { Editable, type RenderElementProps } from "slate-react";
-import { findAsset } from "@/lib/canvas/assets";
+import { findAsset, isCharacter } from "@/lib/canvas/assets";
 import { createCharacterRef } from "@/lib/canvas/character-refs";
 import { isCharacterRef } from "@/lib/canvas/guards";
 import type { ContentElement } from "@/lib/canvas/types";
@@ -76,12 +76,17 @@ const mount = (readOnly = false) => {
 		image,
 	]);
 	withCharacterRefs(canvas.editor);
+	const editable = (
+		<Editable readOnly={readOnly} renderElement={renderElement} />
+	);
 	return canvas.render(
 		<GenerationQueueProvider initialState={{}} storage={noHistory}>
 			<TooltipProvider>
-				<AssetEditProvider>
-					<Editable readOnly={readOnly} renderElement={renderElement} />
-				</AssetEditProvider>
+				{readOnly ? (
+					editable
+				) : (
+					<AssetEditProvider>{editable}</AssetEditProvider>
+				)}
 			</TooltipProvider>
 		</GenerationQueueProvider>,
 	);
@@ -90,6 +95,10 @@ const mount = (readOnly = false) => {
 const editButton = (name: string) =>
 	document.body.querySelector<HTMLButtonElement>(
 		`button[aria-label="Edit ${name}"]`,
+	);
+const createButton = (name: string) =>
+	document.body.querySelector<HTMLButtonElement>(
+		`button[aria-label="Create ${name}"]`,
 	);
 const openDialogs = () =>
 	Array.from(
@@ -125,6 +134,15 @@ describe("CharacterRef", () => {
 			expect(editButton("Ghost")).toBeNull();
 		});
 
+		it("creates an unknown character from its chip and opens its edit dialog", async () => {
+			expect(createButton("Ghost")).not.toBeNull();
+
+			await click('button[aria-label="Create Ghost"]');
+
+			expect(isCharacter(canvas.editor.children, "Ghost")).toBe(true);
+			expect(openDialogs()).toEqual(["character Ghost"]);
+		});
+
 		it("leaves the selection alone when the edit button is clicked", async () => {
 			const editor = canvas.editor;
 			Transforms.select(editor, Editor.start(editor, [3]));
@@ -145,10 +163,12 @@ describe("CharacterRef", () => {
 		});
 	});
 
-	it("offers no edit button in a read-only preview", async () => {
+	it("renders read-only chips without asset editor actions or a provider", async () => {
 		await mount(true);
 
 		expect(editButton("Mia")).toBeNull();
+		expect(createButton("Ghost")).toBeNull();
 		expect(document.body.textContent).toContain("Mia");
+		expect(document.body.textContent).toContain("Ghost");
 	});
 });

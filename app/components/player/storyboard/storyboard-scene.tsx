@@ -6,7 +6,7 @@ import {
 import { ForegroundPreview } from "@/app/components/canvas/elements/foreground-preview";
 import { sceneLabel } from "@/lib/canvas/constants";
 import { cn } from "@/lib/utils";
-import type { StoryboardScene as StoryboardSceneData } from "./storyboard-scenes";
+import type { StoryboardItem } from "./storyboard-scenes";
 
 export function StoryboardScene({
 	item,
@@ -14,7 +14,7 @@ export function StoryboardScene({
 	onSelect,
 	onRequestDelete,
 }: {
-	item: StoryboardSceneData;
+	item: StoryboardItem;
 	aspectRatio: string;
 	onSelect: () => void;
 	onRequestDelete: () => void;

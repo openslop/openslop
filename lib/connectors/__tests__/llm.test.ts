@@ -29,6 +29,7 @@ describe("BaseLLMConnector", () => {
 			},
 		};
 		const connector = new HttpLLMConnector({
+			projectId: "project-1",
 			model,
 			plugins: [plugin],
 		});
@@ -45,6 +46,7 @@ describe("BaseLLMConnector", () => {
 			}),
 		};
 		const connector = new HttpLLMConnector({
+			projectId: "project-1",
 			model,
 			plugins: [plugin],
 		});
@@ -61,6 +63,7 @@ describe("BaseLLMConnector", () => {
 		};
 
 		const connector = new HttpLLMConnector({
+			projectId: "project-1",
 			model,
 			plugins: [plugin],
 		});
@@ -91,6 +94,7 @@ describe("BaseLLMConnector", () => {
 			},
 		];
 		const connector = new HttpLLMConnector({
+			projectId: "project-1",
 			model,
 			plugins,
 		});
@@ -100,7 +104,7 @@ describe("BaseLLMConnector", () => {
 
 	it("hands the caller's abort signal to the stream request", async () => {
 		const fetchMock = vi.mocked(fetch);
-		const connector = new HttpLLMConnector({ model });
+		const connector = new HttpLLMConnector({ projectId: "project-1", model });
 		const controller = new AbortController();
 
 		await connector.stream({ prompt: "test" }, controller.signal).next();
@@ -114,6 +118,7 @@ describe("BaseLLMConnector", () => {
 	it("runs onError when transformPrompt throws during stream", async () => {
 		const onError = vi.fn();
 		const connector = new HttpLLMConnector({
+			projectId: "project-1",
 			model,
 			plugins: [
 				{
@@ -136,6 +141,7 @@ describe("BaseLLMConnector", () => {
 	it("runs onError when beforeGenerate throws during stream", async () => {
 		const onError = vi.fn();
 		const connector = new HttpLLMConnector({
+			projectId: "project-1",
 			model,
 			plugins: [
 				{

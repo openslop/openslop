@@ -7,7 +7,12 @@ export function generateForElement(
 	dependencies: Record<string, AssetResult>,
 	signal?: AbortSignal,
 ): Promise<AssetResult> {
-	return createConnector(job.connectorType, job.model, job.config).generate(
+	return createConnector(
+		job.connectorType,
+		job.model,
+		job.projectId,
+		job.config,
+	).generate(
 		{ prompt: inputs.prompt, ...inputs.attributes },
 		{ dependencies, reads: inputs.reads, signal },
 	);

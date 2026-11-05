@@ -167,6 +167,7 @@ export const Translate = icon("translate");
 export const Trim = icon("trim");
 export const Trash2 = icon("trash");
 export const Underline = icon("underline");
+export const Undo = icon("undo");
 export const User = icon("user");
 export const UserPlus = icon("user-plus");
 export const Video = icon("video");

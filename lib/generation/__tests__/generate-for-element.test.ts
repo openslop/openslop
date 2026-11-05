@@ -20,7 +20,7 @@ const node = jobNode("a sunset", [], {
 });
 
 describe("generateForElement", () => {
-	it("generates on the job's connector with the node's inputs, dependency results and signal", async () => {
+	it("generates on the job's connector, booked to its project, with the node's inputs, dependency results and signal", async () => {
 		const expected: AssetResult = { imageUrl: "img.png", durationSec: 0 };
 		mockGenerate.mockResolvedValue(expected);
 		const dependencies = {
@@ -33,6 +33,7 @@ describe("generateForElement", () => {
 		expect(createConnector).toHaveBeenCalledWith(
 			"image",
 			DEFAULT_MODELS.image,
+			"project-1",
 			{},
 		);
 		expect(mockGenerate).toHaveBeenCalledWith(

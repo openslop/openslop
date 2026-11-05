@@ -1,5 +1,5 @@
 import { apiFetch, apiJson } from "@/lib/clients/http";
-import { readSSE } from "@/lib/api/sse";
+import { readSSE } from "@/lib/clients/sse";
 import {
 	LLMGenerateResultSchema,
 	LLMStreamChunkSchema,
@@ -9,7 +9,7 @@ import {
 	type LLMGenerateParams,
 	type LLMGenerateResult,
 	type LLMStreamChunk,
-	type ModelRef,
+	type ResolvedConnectorConfig,
 	type TTSGenerateParams,
 	type VoiceInfo,
 	type VoiceSearchParams,
@@ -34,17 +34,17 @@ export class HttpAssetGateway<TParams> extends AssetGateway<TParams> {
 	protected readonly route: string;
 
 	constructor(
-		protected readonly model: ModelRef,
+		protected readonly config: ResolvedConnectorConfig,
 		path: string,
 	) {
 		super();
-		this.route = `${apiPrefixFor(model.provider)}/${path}`;
+		this.route = `${apiPrefixFor(config.model.provider)}/${path}`;
 	}
 
 	async generate(params: TParams): Promise<JobSubmission> {
 		return apiJson(this.route, JobSubmissionSchema, {
 			method: "POST",
-			body: params,
+			body: { ...params, projectId: this.config.projectId },
 		});
 	}
 
@@ -60,15 +60,15 @@ export class HttpLLMGateway extends GatewayClient<
 > {
 	private readonly route: string;
 
-	constructor(model: ModelRef) {
+	constructor(private readonly config: ResolvedConnectorConfig) {
 		super();
-		this.route = `${apiPrefixFor(model.provider)}/llm`;
+		this.route = `${apiPrefixFor(config.model.provider)}/llm`;
 	}
 
 	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
 		return apiJson(this.route, LLMGenerateResultSchema, {
 			method: "POST",
-			body: params,
+			body: { ...params, projectId: this.config.projectId },
 		});
 	}
 
@@ -78,7 +78,7 @@ export class HttpLLMGateway extends GatewayClient<
 	): AsyncGenerator<LLMStreamChunk> {
 		const response = await apiFetch(this.route, {
 			method: "POST",
-			body: { ...params, stream: true },
+			body: { ...params, projectId: this.config.projectId, stream: true },
 			signal,
 		});
 		if (!response.body) throw new Error("No response body");
@@ -87,8 +87,8 @@ export class HttpLLMGateway extends GatewayClient<
 }
 
 export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
-	constructor(model: ModelRef) {
-		super(model, "tts");
+	constructor(config: ResolvedConnectorConfig) {
+		super(config, "tts");
 	}
 
 	/** A voice search names its model like a generation does, so the route knows whose key to read. */
@@ -96,7 +96,7 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 		const { voices } = await apiJson(
 			`${this.route}/voices`,
 			VoiceSearchResponseSchema,
-			{ params: { ...params, ...this.model } },
+			{ params: { ...params, ...this.config.model } },
 		);
 		return voices;
 	}
@@ -105,7 +105,7 @@ export class HttpTTSGateway extends HttpAssetGateway<TTSGenerateParams> {
 		const { preview } = await apiJson(
 			`${this.route}/voices/preview`,
 			VoicePreviewResponseSchema,
-			{ params: { voiceId, ...this.model } },
+			{ params: { voiceId, ...this.config.model } },
 		);
 		return preview;
 	}

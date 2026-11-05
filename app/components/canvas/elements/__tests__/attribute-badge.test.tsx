@@ -3,15 +3,15 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
-import { timelineDurationDef } from "@/lib/connectors/attributes/common";
+import { trimDurationDef } from "@/lib/connectors/attributes/common";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import type { ContentElement } from "@/lib/canvas/types";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AttributeBadge } from "../attribute-badge";
 import { element } from "@/lib/canvas/__tests__/_assets";
 
-const elementWith = (customAttributes: Record<string, string>) =>
-	element("el", "video", "", customAttributes);
+const elementWith = (attributes: Record<string, string>) =>
+	element("el", "video", "", attributes);
 
 const motionDef: AttributeDef = {
 	key: "motion",
@@ -74,18 +74,15 @@ describe("AttributeBadge", () => {
 
 	describe("seconds", () => {
 		const reset = (html: string) =>
-			html.match(/<button[^>]*aria-label="Reset timeline duration"[^>]*>/)?.[0];
+			html.match(/<button[^>]*aria-label="Reset trim duration"[^>]*>/)?.[0];
 
 		it("offers a reset once the field holds a value", () => {
-			const html = render(
-				elementWith({ timelineDuration: "4" }),
-				timelineDurationDef,
-			);
+			const html = render(elementWith({ trimDuration: "4" }), trimDurationDef);
 			expect(reset(html)).toBeDefined();
 		});
 
 		it("has nothing to reset while the field is on Auto", () => {
-			const html = render(elementWith({}), timelineDurationDef);
+			const html = render(elementWith({}), trimDurationDef);
 			expect(reset(html)).toBeUndefined();
 		});
 	});

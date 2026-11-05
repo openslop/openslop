@@ -8,7 +8,12 @@ const stubConfig = {};
 
 describe("createConnector", () => {
 	it("creates a valid LLM connector", () => {
-		const connector = createConnector("llm", DEFAULT_MODELS.llm, stubConfig);
+		const connector = createConnector(
+			"llm",
+			DEFAULT_MODELS.llm,
+			"project-1",
+			stubConfig,
+		);
 		expect(connector.type).toBe("llm");
 	});
 
@@ -22,7 +27,12 @@ describe("createConnector", () => {
 			"video",
 		];
 		for (const type of types) {
-			const connector = createConnector(type, DEFAULT_MODELS[type], stubConfig);
+			const connector = createConnector(
+				type,
+				DEFAULT_MODELS[type],
+				"project-1",
+				stubConfig,
+			);
 			expect(connector.type).toBe(type);
 		}
 	});
@@ -39,7 +49,7 @@ describe("resolveAttributeSchema", () => {
 			"speed",
 			"volume",
 			"trimStart",
-			"timelineDuration",
+			"trimDuration",
 		]);
 	});
 
@@ -65,7 +75,7 @@ describe("resolveAttributeSchema", () => {
 			"volume",
 			"motion",
 			"trimStart",
-			"timelineDuration",
+			"trimDuration",
 		]);
 	});
 

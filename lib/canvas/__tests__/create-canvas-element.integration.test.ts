@@ -37,8 +37,7 @@ describe("createCanvasElement — schema defaults (integration)", () => {
 
 	it("applies video defaults, cutting rather than continuing", () => {
 		const node = createCanvasElement("video");
-		const attributes = flatAttributes(node);
-		expect(attributes).toMatchObject({
+		expect(flatAttributes(node)).toMatchObject({
 			duration: "10",
 			startFrame: "none",
 			motion: "none",

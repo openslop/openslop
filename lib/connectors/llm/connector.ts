@@ -19,7 +19,7 @@ export class HttpLLMConnector
 
 	constructor(config: ResolvedConnectorConfig) {
 		super(config);
-		this.gateway = new HttpLLMGateway(config.model);
+		this.gateway = new HttpLLMGateway(config);
 	}
 
 	protected async _generate(

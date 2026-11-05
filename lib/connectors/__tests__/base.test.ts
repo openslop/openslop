@@ -16,6 +16,7 @@ class TestConnector extends BaseConnector {
 describe("BaseConnector", () => {
 	const model = { provider: "openslop", model: "Slop LLM v1" } as const;
 	const config: ResolvedConnectorConfig = {
+		projectId: "project-1",
 		model,
 		plugins: [{ name: "p1" }],
 	};
@@ -28,6 +29,7 @@ describe("BaseConnector", () => {
 	it("stamps its own model onto every generation", async () => {
 		const seen: unknown[] = [];
 		const c = new TestConnector({
+			projectId: "project-1",
 			model,
 			plugins: [{ name: "spy", beforeGenerate: (p) => (seen.push(p), p) }],
 		});
@@ -36,7 +38,7 @@ describe("BaseConnector", () => {
 	});
 
 	it("defaults plugins to empty array", () => {
-		const c = new TestConnector({ model });
+		const c = new TestConnector({ projectId: "project-1", model });
 		expect((c as unknown as { plugins: unknown[] }).plugins).toEqual([]);
 	});
 
@@ -51,7 +53,7 @@ describe("BaseConnector", () => {
 				onError,
 			},
 		];
-		const c = new TestConnector({ model, plugins });
+		const c = new TestConnector({ projectId: "project-1", model, plugins });
 		await expect(c.generate({ prompt: "hi" })).rejects.toThrow(
 			"transform failed",
 		);
@@ -72,7 +74,7 @@ describe("BaseConnector", () => {
 				onError,
 			},
 		];
-		const c = new TestConnector({ model, plugins });
+		const c = new TestConnector({ projectId: "project-1", model, plugins });
 		await expect(c.generate({ prompt: "hi" })).rejects.toThrow("before failed");
 		expect(onError).toHaveBeenCalledWith(
 			expect.stringContaining("before failed"),

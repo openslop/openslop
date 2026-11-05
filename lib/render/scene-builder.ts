@@ -48,7 +48,9 @@ function pushSequence(
 ) {
 	const list = (sequences[element.type] ??= []);
 	for (let i = 0; i < element.loops; i++) {
-		list.push(createSequence(element, start + i * stride, element.durationSec));
+		list.push(
+			createSequence(element, start + i * stride, element.trimDurationSec),
+		);
 	}
 }
 
@@ -97,7 +99,7 @@ export function buildRenderLayout(
 	for (const raw of elements) {
 		const element = {
 			...raw,
-			durationSec: onGrid(raw.durationSec),
+			trimDurationSec: onGrid(raw.trimDurationSec),
 			mediaDurationSec: onGrid(raw.mediaDurationSec),
 		};
 		const stride = onGrid(loopStrideSec(element));
@@ -123,7 +125,7 @@ export function buildRenderLayout(
 					cursor -= transitionDurationSec;
 				}
 				series.push({
-					...createSequence(element, cursor, element.durationSec),
+					...createSequence(element, cursor, element.trimDurationSec),
 					overlaySec: 0,
 				});
 				break;
@@ -131,15 +133,19 @@ export function buildRenderLayout(
 			case "overlay": {
 				if (!current) {
 					series.push({
-						...createSequence(blankScene(element), cursor, element.durationSec),
-						overlaySec: element.durationSec,
+						...createSequence(
+							blankScene(element),
+							cursor,
+							element.trimDurationSec,
+						),
+						overlaySec: element.trimDurationSec,
 					});
 				} else {
-					current.overlaySec += element.durationSec;
+					current.overlaySec += element.trimDurationSec;
 					current.duration = Math.max(current.duration, current.overlaySec);
 				}
 				pushSequence(sequences, element, cursor, stride);
-				cursor += element.durationSec;
+				cursor += element.trimDurationSec;
 				break;
 			}
 		}

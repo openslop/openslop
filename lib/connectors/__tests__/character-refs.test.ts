@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-	renderCharacterRefs,
+	renderPrompt,
 	characterRef,
 	findCharacterRef,
 	referencedNames,
@@ -33,7 +33,7 @@ describe("character references", () => {
 	it("puts each seated character as the provider's token, and anyone else by name", () => {
 		const cast = [{ name: "Red" }, { name: "Granny" }];
 		expect(
-			renderCharacterRefs(
+			renderPrompt(
 				"{{Granny}} and {{Wolf}}",
 				seats(cast, (seat) => `<<<element_${seat}>>>`),
 			),
@@ -43,6 +43,6 @@ describe("character references", () => {
 	it("names characters plainly by default, and round trips what it writes", () => {
 		const prompt = `${characterRef("Red")}'s basket`;
 		expect(referencedNames(prompt)).toEqual(["Red"]);
-		expect(renderCharacterRefs(prompt)).toBe("Red's basket");
+		expect(renderPrompt(prompt)).toBe("Red's basket");
 	});
 });

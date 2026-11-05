@@ -130,7 +130,10 @@ export interface ConnectorConfig {
 	plugins?: ConnectorPlugin[];
 }
 
-export type ResolvedConnectorConfig = ConnectorConfig & { model: ModelRef };
+export type ResolvedConnectorConfig = ConnectorConfig & {
+	model: ModelRef;
+	projectId: string;
+};
 
 /**
  * The connector stamps its own model onto every generation, so a caller only

@@ -12,12 +12,12 @@ import { toCaption } from "@/lib/captions/word-captions";
 function makeElement(
 	id: string,
 	type: ContentElement["type"],
-	customAttributes?: Record<string, string>,
+	attributes: Record<string, string> = {},
 ): ContentElement {
 	return {
 		id,
 		type,
-		...splitAttributes(customAttributes ?? {}),
+		...splitAttributes(attributes),
 		children: [{ id: `${id}-text`, type, text: "test" }],
 	};
 }
@@ -81,7 +81,7 @@ describe("resolveElements", () => {
 			sceneNumber: 1,
 			prompt: "test",
 			url: "https://example.com/img.png",
-			durationSec: 3,
+			trimDurationSec: 3,
 			mediaDurationSec: 3,
 			trimStartSec: 0,
 			loops: 1,
@@ -98,7 +98,7 @@ describe("resolveElements", () => {
 			sceneNumber: 1,
 			prompt: "test",
 			url: "https://example.com/nar.mp3",
-			durationSec: 8,
+			trimDurationSec: 8,
 			mediaDurationSec: 8,
 			trimStartSec: 0,
 			loops: 1,
@@ -173,7 +173,7 @@ describe("resolveElements", () => {
 		});
 	});
 
-	it("reads loops from customAttributes (default 1)", () => {
+	it("reads loops from the attributes (default 1)", () => {
 		const elements = [
 			makeElement("s1", "sound", { loops: "4" }),
 			makeElement("s2", "sound"),
@@ -197,7 +197,7 @@ describe("resolveElements", () => {
 		expect(resolved[1].loops).toBe(1);
 	});
 
-	it("reads volume from customAttributes (default 10)", () => {
+	it("reads volume from the attributes (default 10)", () => {
 		const elements = [
 			makeElement("s1", "music", { volume: "3" }),
 			makeElement("s2", "music", { volume: "0" }),
@@ -290,7 +290,7 @@ describe("resolveElements", () => {
 
 		it("starts the words at the element's first, though the end trim cuts the last", () => {
 			const { captions } = resolveOne(
-				makeElement("vid", "video", { timelineDuration: "1.5" }),
+				makeElement("vid", "video", { trimDuration: "1.5" }),
 			);
 			expect(captions).toEqual({ trimIndexOffset: 0, words: [heard[0]] });
 		});
@@ -307,14 +307,14 @@ describe("resolveElements", () => {
 					wrap([
 						makeElement("v1", "video", {
 							trimStart: "1",
-							timelineDuration: "3",
+							trimDuration: "3",
 						}),
 					]),
 				],
 				() => makeSnapshot(),
 				{ captionsEnabled: false },
 			);
-			expect(video).toMatchObject({ trimStartSec: 1, durationSec: 3 });
+			expect(video).toMatchObject({ trimStartSec: 1, trimDurationSec: 3 });
 		});
 	});
 });

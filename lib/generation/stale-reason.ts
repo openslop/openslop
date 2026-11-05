@@ -1,3 +1,4 @@
+import isEqual from "lodash/isEqual";
 import lowerCase from "lodash/lowerCase";
 import union from "lodash/union";
 import uniq from "lodash/uniq";
@@ -33,6 +34,19 @@ function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 			.filter(([, dep]) => needsGeneration(dep, queue))
 			.map(([label]) => label),
 	]);
+}
+
+/** The prompt or attributes moved off the ones that produced the current result. */
+export function hasEditsSinceResult(
+	{ id, inputs }: GenerationNode,
+	queue: GenerationQueue,
+): boolean {
+	const previous = queue.getElementSnapshot(id).resultInputs;
+	if (!previous) return false;
+	return (
+		inputs.prompt !== previous.prompt ||
+		!isEqual(inputs.attributes, previous.attributes)
+	);
 }
 
 /**

@@ -6,7 +6,7 @@ import {
 	type ImageFormat,
 } from "@/lib/connectors/image/enums";
 import { BaseProvider, type RawResult } from "../base";
-import { renderCharacterRefs } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/character-refs";
 import { characterAvatars } from "@/lib/connectors/characters";
 import { validateRunwareKey, withRunware } from "../runware";
 import { renderSize, type VendorParams } from "@/lib/connectors/models";
@@ -57,7 +57,7 @@ export class RunwareImage
 		];
 		return withRunware(this.apiKey, async (runware) => {
 			const results = await runware.imageInference({
-				positivePrompt: renderCharacterRefs(params.prompt),
+				positivePrompt: renderPrompt(params.prompt),
 				model: params.model,
 				width: params.width ?? size.width,
 				height: params.height ?? size.height,

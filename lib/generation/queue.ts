@@ -191,10 +191,10 @@ export class GenerationQueue {
 		this.pending = this.pending.filter((node) => node.id !== id);
 	}
 
-	/** The dependency holding `node` back, if any: it gates until it settles. */
+	/** The dependency holding `node` back, if any, with the label it was declared under. */
 	private blockingDependency(node: GenerationNode) {
-		return Object.values(node.dependsOn).find(
-			(dep) =>
+		return Object.entries(node.dependsOn).find(
+			([, dep]) =>
 				this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result,
 		);
 	}
@@ -220,11 +220,12 @@ export class GenerationQueue {
 		this.releaseBlocked();
 	}
 
-	/** The failure that kept `node` waiting, following the chain of blocked dependencies. */
 	private blockedByError(node: GenerationNode): string | null {
-		const dep = this.blockingDependency(node);
-		if (!dep) return null;
-		return this.snapshots.get(dep.id).error ?? this.blockedByError(dep);
+		const entry = this.blockingDependency(node);
+		if (!entry) return null;
+		const [label, dep] = entry;
+		const cause = this.snapshots.get(dep.id).error ?? this.blockedByError(dep);
+		return cause ? `${label} failed: ${cause}` : null;
 	}
 
 	/** Nothing running or runnable means a dependency never arrived: release the rest, its error on each dependent. */

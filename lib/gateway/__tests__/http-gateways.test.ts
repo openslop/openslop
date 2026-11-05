@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { ZodError } from "zod";
+import type { ModelRef } from "@/lib/connectors/types";
 import { HttpAssetGateway, HttpLLMGateway, HttpTTSGateway } from "../http";
 
 /** Routes are app-relative, so they parse against any origin. */
@@ -27,6 +28,7 @@ const HOSTED_TTS = { provider: "openslop", model: "Slop TTS v1" } as const;
 const BYOK_TTS = { provider: "cartesia", model: "Sonic 3.6" } as const;
 const HOSTED_LLM = { provider: "openslop", model: "Slop LLM v1" } as const;
 const BYOK_LLM = { provider: "anthropic", model: "Claude Sonnet 5" } as const;
+const config = (model: ModelRef) => ({ model, projectId: "project-1" });
 
 describe("HTTP gateways", () => {
 	let fetchMock: ReturnType<typeof vi.fn>;
@@ -46,13 +48,28 @@ describe("HTTP gateways", () => {
 			const submission = { jobId: "job-1", status: "pending" };
 			fetchMock.mockResolvedValue(jsonResponse(submission));
 
-			const gateway = new HttpAssetGateway(model, "image");
+			const gateway = new HttpAssetGateway(config(model), "image");
 
 			expect(await gateway.generate({ prompt: "a cat" })).toEqual(submission);
 			expect(fetchMock).toHaveBeenCalledWith(
 				`${prefix}/image`,
 				expect.objectContaining({ method: "POST" }),
 			);
+		});
+
+		it("books the generation to its project", async () => {
+			fetchMock.mockResolvedValue(
+				jsonResponse({ jobId: "job-1", status: "pending" }),
+			);
+
+			await new HttpAssetGateway(config(HOSTED_IMAGE), "image").generate({
+				prompt: "a cat",
+			});
+
+			expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+				prompt: "a cat",
+				projectId: "project-1",
+			});
 		});
 
 		it("polls the job it submitted", async () => {
@@ -64,7 +81,7 @@ describe("HTTP gateways", () => {
 			};
 			fetchMock.mockResolvedValue(jsonResponse(poll));
 
-			const gateway = new HttpAssetGateway(HOSTED_VIDEO, "video");
+			const gateway = new HttpAssetGateway(config(HOSTED_VIDEO), "video");
 
 			expect(await gateway.poll("job-1")).toEqual(poll);
 			expect(fetchMock).toHaveBeenCalledWith(
@@ -77,7 +94,7 @@ describe("HTTP gateways", () => {
 			fetchMock.mockResolvedValue(jsonResponse({ jobId: "job-1" }));
 
 			await expect(
-				new HttpAssetGateway(HOSTED_VIDEO, "video").poll("job-1"),
+				new HttpAssetGateway(config(HOSTED_VIDEO), "video").poll("job-1"),
 			).rejects.toThrow(ZodError);
 		});
 
@@ -92,7 +109,10 @@ describe("HTTP gateways", () => {
 			);
 			const { signal } = new AbortController();
 
-			await new HttpAssetGateway(HOSTED_VIDEO, "video").poll("job-1", signal);
+			await new HttpAssetGateway(config(HOSTED_VIDEO), "video").poll(
+				"job-1",
+				signal,
+			);
 
 			expect(fetchMock).toHaveBeenCalledWith(
 				`/api/v1/video/job-1`,
@@ -108,7 +128,7 @@ describe("HTTP gateways", () => {
 			];
 			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 
-			const gateway = new HttpTTSGateway(HOSTED_TTS);
+			const gateway = new HttpTTSGateway(config(HOSTED_TTS));
 
 			expect(
 				await gateway.searchVoices({ gender: "feminine", limit: 5 }),
@@ -133,7 +153,7 @@ describe("HTTP gateways", () => {
 			fetchMock.mockResolvedValue(jsonResponse({ voices }));
 
 			await expect(
-				new HttpTTSGateway(BYOK_TTS).searchVoices({}),
+				new HttpTTSGateway(config(BYOK_TTS)).searchVoices({}),
 			).resolves.toEqual(voices);
 		});
 
@@ -142,7 +162,7 @@ describe("HTTP gateways", () => {
 			fetchMock.mockResolvedValue(jsonResponse({ preview }));
 
 			await expect(
-				new HttpTTSGateway(BYOK_TTS).voicePreview("v-sol"),
+				new HttpTTSGateway(config(BYOK_TTS)).voicePreview("v-sol"),
 			).resolves.toEqual(preview);
 
 			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
@@ -157,7 +177,7 @@ describe("HTTP gateways", () => {
 		it("names its model when the key is the user's own", async () => {
 			fetchMock.mockResolvedValue(jsonResponse({ voices: [] }));
 
-			await new HttpTTSGateway(BYOK_TTS).searchVoices({
+			await new HttpTTSGateway(config(BYOK_TTS)).searchVoices({
 				query: undefined,
 			});
 
@@ -174,13 +194,35 @@ describe("HTTP gateways", () => {
 			const response = { text: "Hello!", model: "claude-3" };
 			fetchMock.mockResolvedValue(jsonResponse(response));
 
-			const gateway = new HttpLLMGateway(HOSTED_LLM);
+			const gateway = new HttpLLMGateway(config(HOSTED_LLM));
 
 			expect(await gateway.generate({ prompt: "hi" })).toEqual(response);
 			expect(fetchMock).toHaveBeenCalledWith(
 				`/api/v1/llm`,
 				expect.objectContaining({ method: "POST" }),
 			);
+		});
+
+		it.each([
+			[
+				"generation",
+				(gateway: HttpLLMGateway) => gateway.generate({ prompt: "hi" }),
+				jsonResponse({ text: "Hello!", model: "x" }),
+			],
+			[
+				"stream",
+				(gateway: HttpLLMGateway) =>
+					Array.fromAsync(gateway.stream({ prompt: "hi" })),
+				sseResponse([{ text: "Hi", done: true }]),
+			],
+		] as const)("books a %s to its project", async (_, call, response) => {
+			fetchMock.mockResolvedValue(response);
+
+			await call(new HttpLLMGateway(config(HOSTED_LLM)));
+
+			expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+				projectId: "project-1",
+			});
 		});
 
 		it("streams SSE chunks", async () => {
@@ -190,7 +232,7 @@ describe("HTTP gateways", () => {
 			];
 			fetchMock.mockResolvedValue(sseResponse(chunks));
 
-			const gateway = new HttpLLMGateway(BYOK_LLM);
+			const gateway = new HttpLLMGateway(config(BYOK_LLM));
 			const results: unknown[] = [];
 			for await (const chunk of gateway.stream({ prompt: "hi" })) {
 				results.push(chunk);
@@ -207,7 +249,7 @@ describe("HTTP gateways", () => {
 		it("throws on a stream chunk of the wrong shape", async () => {
 			fetchMock.mockResolvedValue(sseResponse([{ text: 1, done: false }]));
 
-			const gateway = new HttpLLMGateway(HOSTED_LLM);
+			const gateway = new HttpLLMGateway(config(HOSTED_LLM));
 			await expect(
 				Array.fromAsync(gateway.stream({ prompt: "hi" })),
 			).rejects.toThrow(ZodError);
@@ -218,7 +260,7 @@ describe("HTTP gateways", () => {
 				new Response(null, { status: 200, headers: {} }),
 			);
 
-			const gateway = new HttpLLMGateway(HOSTED_LLM);
+			const gateway = new HttpLLMGateway(config(HOSTED_LLM));
 			await expect(async () => {
 				for await (const _ of gateway.stream({ prompt: "hi" })) {
 					// consume

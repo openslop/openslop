@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-lockup-animated-dark.svg">
-    <img src="../../assets/openslop-lockup-animated-light.svg" alt="OpenSlop" width="560">
-  </picture>
+  <img src="../../assets/openslop-lockup-animated-light.svg#gh-light-mode-only" alt="OpenSlop" width="560">
+  <img src="../../assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
 <p align="center"><b>免费、开源的 AI 视频创作工具。</b></p>
@@ -29,10 +27,8 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-demo-dark.svg">
-    <img src="../../assets/openslop-demo-light.svg" alt="OpenSlop - 你的免费 AI 视频创作工具" width="100%">
-  </picture>
+  <img src="../../assets/openslop-demo-light.svg#gh-light-mode-only" alt="OpenSlop - 你的免费 AI 视频创作工具" width="100%">
+  <img src="../../assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="OpenSlop - 你的免费 AI 视频创作工具" width="100%">
 </p>
 
 ---
@@ -60,10 +56,8 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
-    <img src="../../assets/features/describe-light.svg" alt="提示框轮流展示示例创意，然后输入一行字并发送" width="100%">
-  </picture></a>
+  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="提示框轮流展示示例创意，然后输入一行字并发送" width="100%">
+  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="提示框轮流展示示例创意，然后输入一行字并发送" width="100%">
 </td>
 </tr>
 <tr>
@@ -77,10 +71,8 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#sloppy"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/sloppy-dark.svg">
-    <img src="../../assets/features/sloppy-light.svg" alt="Sloppy 思考、阅读、列大纲、写脚本，场景在画布上出现" width="100%">
-  </picture></a>
+  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy 思考、阅读、列大纲、写脚本，场景在画布上出现" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy 思考、阅读、列大纲、写脚本，场景在画布上出现" width="100%">
 </td>
 </tr>
 <tr>
@@ -94,10 +86,8 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 </td>
 <td width="50%">
-  <a href="../../lib/canvas"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
-  </picture></a>
+  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
+  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,10 +101,8 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
-    <img src="../../assets/features/generate-light.svg" alt="Generate all 跑完队列，预览逐个填上，一条改过的提示词被标为 Stale 并附上原因" width="100%">
-  </picture></a>
+  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all 跑完队列，预览逐个填上，一条改过的提示词被标为 Stale 并附上原因" width="100%">
+  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all 跑完队列，预览逐个填上，一条改过的提示词被标为 Stale 并附上原因" width="100%">
 </td>
 </tr>
 <tr>
@@ -128,10 +116,8 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 </td>
 <td width="50%">
-  <a href="../../app/components/player"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
-    <img src="../../assets/features/timeline-light.svg" alt="播放器逐词显示字幕，播放头扫过四条轨道的时间线" width="100%">
-  </picture></a>
+  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="播放器逐词显示字幕，播放头扫过四条轨道的时间线" width="100%">
+  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="播放器逐词显示字幕，播放头扫过四条轨道的时间线" width="100%">
 </td>
 </tr>
 <tr>
@@ -145,10 +131,8 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
-    <img src="../../assets/features/providers-light.svg" alt="粘贴并验证一个 Cartesia 密钥，状态从 Unverified 变为 Connected" width="100%">
-  </picture></a>
+  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="粘贴并验证一个 Cartesia 密钥，状态从 Unverified 变为 Connected" width="100%">
+  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="粘贴并验证一个 Cartesia 密钥，状态从 Unverified 变为 Connected" width="100%">
 </td>
 </tr>
 </table>
@@ -279,12 +263,8 @@ supabase/        数据库迁移
 ## Star 历史
 
 <p align="center">
-  <a href="https://star-history.com/#openslop/openslop&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark">
-      <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date" alt="openslop/openslop 的 GitHub star 历史图" width="880">
-    </picture>
-  </a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="openslop/openslop 的 GitHub star 历史图" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="openslop/openslop 的 GitHub star 历史图" width="880"></a>
 </p>
 
 ## 许可证

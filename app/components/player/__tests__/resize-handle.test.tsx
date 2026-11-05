@@ -37,9 +37,7 @@ describe("ResizeHandle", () => {
 		root = createRoot(container);
 	});
 
-	afterEach(() => {
-		act(() => root.unmount());
-	});
+	afterEach(() => act(() => root.unmount()));
 
 	const render = () => {
 		act(() => root.render(<Harness />));

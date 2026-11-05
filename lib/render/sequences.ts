@@ -7,12 +7,3 @@ export const allSequences = ({
 	...series,
 	...Object.values(sequences).flatMap((list) => list ?? []),
 ];
-
-export const secUntilNextScene = (
-	{ start, duration }: Pick<Sequence, "start" | "duration">,
-	series: readonly Pick<Sequence, "start">[],
-): number =>
-	Math.min(
-		duration,
-		(series.find((scene) => scene.start > start)?.start ?? Infinity) - start,
-	);

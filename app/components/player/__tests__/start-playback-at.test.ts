@@ -5,15 +5,15 @@ let frameCallbacks: FrameRequestCallback[] = [];
 
 beforeEach(() => {
 	frameCallbacks = [];
-	vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) =>
-		frameCallbacks.push(cb),
+	vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) =>
+		frameCallbacks.push(callback),
 	);
 });
 
 function nextFrame() {
 	const due = frameCallbacks;
 	frameCallbacks = [];
-	for (const cb of due) cb(0);
+	for (const callback of due) callback(0);
 }
 
 function makePlayer(containerNode: HTMLDivElement | null = null) {

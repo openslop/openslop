@@ -26,7 +26,7 @@ export const LAYOUT_ATTRIBUTE_KEYS = [
 	"motion",
 	"uploadedFrame",
 	"trimStart",
-	"timelineDuration",
+	"trimDuration",
 ] as const;
 
 export const splitAttributes = (
@@ -102,10 +102,8 @@ export const getLoop = (element: ContentElement): boolean =>
 export const getTrimStart = (element: ContentElement): number =>
 	clampedNumber(element.layoutAttributes?.trimStart, { min: 0 }) ?? 0;
 
-export const getTimelineDuration = (
-	element: ContentElement,
-): number | undefined =>
-	clampedNumber(element.layoutAttributes?.timelineDuration, {
+export const getTrimDuration = (element: ContentElement): number | undefined =>
+	clampedNumber(element.layoutAttributes?.trimDuration, {
 		min: MIN_DURATION_SEC,
 	});
 

@@ -15,7 +15,7 @@ export class HttpSTTConnector extends BaseJobConnector<
 	readonly type = "stt" as const;
 
 	constructor(config: ResolvedConnectorConfig) {
-		super(new HttpAssetGateway(config.model, "stt"), config);
+		super(new HttpAssetGateway(config, "stt"), config);
 	}
 
 	async resolveBundle(bundle: AssetBundle): Promise<STTResult> {
