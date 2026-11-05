@@ -120,7 +120,7 @@ function RailItem({
 }) {
 	const name = notice ? `${label}, ${notice}` : label;
 	const className = cn(
-		"flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center text-label-xs font-medium transition-colors",
+		"flex w-full flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center text-label-xs font-medium transition-colors focus-ring focus-visible:ring-inset",
 		selected
 			? "bg-secondary font-semibold text-panel-label"
 			: "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
