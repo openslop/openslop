@@ -1,5 +1,5 @@
 import compact from "lodash/compact";
-import { renderCharacterRefs, seats } from "@/lib/connectors/character-refs";
+import { renderPrompt, seats } from "@/lib/connectors/character-refs";
 import { pictured, type Voiced, voiced } from "@/lib/connectors/characters";
 import { cutVoice, secondsCap } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";
@@ -69,7 +69,7 @@ export const seedance =
 			...heard.map(voiceCue(refOf)),
 		]);
 		return {
-			positivePrompt: [...cues, renderCharacterRefs(prompt, refOf)].join(" "),
+			positivePrompt: [...cues, renderPrompt(prompt, refOf)].join(" "),
 			...inputsOf({
 				referenceImages,
 				referenceAudios: heard.map(({ voice }) => voice.url),

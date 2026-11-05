@@ -27,7 +27,7 @@ export const seats =
 		return at < 0 ? name : token(at + 1);
 	};
 
-export const renderCharacterRefs = (
+export const renderPrompt = (
 	prompt: string,
 	refOf: (name: string) => string = (name) => name,
 ): string => prompt.replace(CHARACTER_REFS, (_, name: string) => refOf(name));

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
-import { renderCharacterRefs } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/character-refs";
 import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
 import { usePlayerControl } from "../player-control-context";
@@ -133,7 +133,7 @@ function Clip({
 					<TimelineClip
 						clip={clip}
 						width={width}
-						label={renderCharacterRefs(clip.element.prompt)}
+						label={renderPrompt(clip.element.prompt)}
 						selected={selected}
 						sceneNumber={numbered ? clip.element.sceneNumber : undefined}
 						pxPerSec={pxPerSec}
