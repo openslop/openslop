@@ -17,7 +17,7 @@ export class HttpSFXConnector extends BaseAssetConnector<
 	readonly assetKey = "audio" as const;
 
 	constructor(config: ResolvedConnectorConfig) {
-		super(new HttpAssetGateway(config.model, "sfx"), config);
+		super(new HttpAssetGateway(config, "sfx"), config);
 	}
 
 	static attributesFor(_model: ModelRef): AttributeSchema {

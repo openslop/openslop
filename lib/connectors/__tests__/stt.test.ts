@@ -22,6 +22,7 @@ describe("HttpSTTConnector", () => {
 		]);
 
 		const result = await new HttpSTTConnector({
+			projectId: "project-1",
 			model: { provider: "openslop", model: "Slop STT v1" },
 		}).generate({ prompt: "", mediaUrl: "https://blob/v.mp4" });
 

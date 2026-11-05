@@ -9,7 +9,7 @@ import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
 import { toCaption } from "@/lib/captions/word-captions";
 
 const config = (model: string) =>
-	({ model: { provider: "openslop", model } }) as const;
+	({ model: { provider: "openslop", model }, projectId: "project-1" }) as const;
 
 function jsonResponse(data: unknown, status = 200) {
 	return new Response(JSON.stringify(data), {

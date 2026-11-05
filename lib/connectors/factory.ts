@@ -46,11 +46,13 @@ const CONNECTORS: Record<ConnectorType, ProviderConstructor> = {
 export function createConnector<T extends ConnectorType>(
 	type: T,
 	model: ModelRef,
+	projectId: string,
 	config: ConnectorConfig = {},
 ): ConnectorTypeMap[T] {
 	return new CONNECTORS[type]({
 		...config,
 		model: { provider: model.provider, model: model.model },
+		projectId,
 	}) as ConnectorTypeMap[T];
 }
 

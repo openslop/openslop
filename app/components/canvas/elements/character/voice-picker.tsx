@@ -16,7 +16,7 @@ import type {
 	VoiceInfo,
 	VoiceSearchParams,
 } from "@/lib/connectors/types";
-import { createConnector } from "@/lib/connectors/factory";
+import { useCreateConnector } from "@/lib/connectors/use-create-connector";
 import { useVoiceSearch } from "@/lib/connectors/tts/use-voice-search";
 import { toastError } from "@/lib/toast-error";
 import { cn } from "@/lib/utils";
@@ -141,9 +141,10 @@ export function VoicePicker({
 	onModelChange: (model: ModelRef) => void;
 }) {
 	const { provider, model: modelName } = model;
+	const createConnector = useCreateConnector();
 	const connector = useMemo(
 		() => createConnector("tts", { provider, model: modelName }),
-		[provider, modelName],
+		[createConnector, provider, modelName],
 	);
 	const search = useVoiceSearch(filters, connector);
 

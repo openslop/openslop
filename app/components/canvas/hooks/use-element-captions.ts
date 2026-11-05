@@ -9,6 +9,7 @@ import {
 import type { ElementRef, GeneratedElement } from "@/lib/canvas/types";
 import { resolveModel } from "@/lib/connectors/models";
 import type { AssetResult } from "@/lib/connectors/types";
+import { useProjectId } from "@/lib/project/project-provider";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -18,6 +19,7 @@ import {
 export function useGenerateSTT() {
 	const queue = useGenerationQueue();
 	const editor = useSlateStatic();
+	const projectId = useProjectId();
 	return useCallback(
 		(elements: ElementRef[]) => {
 			const model = resolveModel("stt", editor.defaultModels().stt);
@@ -26,11 +28,11 @@ export function useGenerateSTT() {
 					const { result } = queue.getElementSnapshot(element.id);
 					if (!result)
 						throw new Error(`Element "${element.id}" has nothing to caption`);
-					return captionsNode(element, result, model);
+					return captionsNode(element, result, model, projectId);
 				}),
 			);
 		},
-		[queue, editor],
+		[queue, editor, projectId],
 	);
 }
 

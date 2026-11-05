@@ -7,6 +7,7 @@ const TEST_ID = "test-id";
 const AUDIO_URL = `/assets/sfx/openslop/${TEST_ID}/output.mp3`;
 
 const config = {
+	projectId: "project-1",
 	model: { provider: "openslop", model: "Slop SFX v1" },
 } as const;
 
