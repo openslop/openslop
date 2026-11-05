@@ -15,7 +15,7 @@ import { setDefaultModel } from "./set-default-model";
 import { setTitle } from "./set-title";
 import { updateScriptSettings } from "./update-script-settings";
 import { updateVideoSettings } from "./update-video-settings";
-import { viewImage } from "./view-image";
+import { viewResult } from "./view-result";
 import { writeScript } from "./write-script";
 
 /** Registration is the contract: one entry is a tool's whole definition. */
@@ -27,7 +27,7 @@ const TOOLS = {
 	review_script: reviewScript,
 	update_script_settings: updateScriptSettings,
 	update_video_settings: updateVideoSettings,
-	view_image: viewImage,
+	view_result: viewResult,
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,
 	measure_element_lengths: measureElementLengths,

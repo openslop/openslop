@@ -24,7 +24,7 @@ import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
 import { streamScript } from "@/lib/script/stream-script";
-import { elementImage } from "../element-image";
+import { elementResult } from "../element-result";
 import { elementState } from "../element-state";
 import { PROJECT_SETTERS, type AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
@@ -54,9 +54,11 @@ export function useAgentTools() {
 				countSpokenWords: () => countSpokenWords(editor.children),
 				measureElementLengths: () => measureElementLengths(editor.children),
 				measureRuntime: () => measureRuntime(editor.children),
-				elementImage: (id) => {
+				elementResult: async (id) => {
 					const element = findElementById(editor, id)?.[0];
-					return element && elementImage(element, queue.getElementSnapshot(id));
+					return (
+						element && elementResult(element, queue.getElementSnapshot(id))
+					);
 				},
 				elementStates: () => {
 					const context = buildContext();

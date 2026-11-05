@@ -1,0 +1,61 @@
+import { dedent } from "@/lib/dedent";
+import { z } from "zod";
+import { Eye } from "@/components/ui/icon";
+import { ResultViewSchema, type ResultView } from "../element-result";
+import { defineTool, imageOutput, seconds } from "./define-tool";
+
+const picture = ({ url, at }: ResultView["pictures"][number]) =>
+	at === undefined ? `picture: ${url}` : `frame at ${seconds(at)}: ${url}`;
+
+const word = ({ text, startMs, endMs }: ResultView["words"][number]) =>
+	`[${seconds(startMs / 1000)}-${seconds(endMs / 1000)}] ${text}`;
+
+/** What the model is about to see, URL by URL, then every word with its time. */
+export const describeResult = ({
+	id,
+	durationSec,
+	pictures,
+	words,
+}: ResultView & { id: string }) =>
+	[
+		`${id}${durationSec > 0 ? `, ${seconds(durationSec)} long` : ""}:`,
+		...pictures.map(picture),
+		...words.map(word),
+	].join("\n");
+
+export const viewResult = defineTool({
+	description: dedent`
+	  Look at what an element holds, generated or uploaded, so you can say whether a result
+	  matches what its text asks for. Pictures come back as the images themselves. A video
+	  comes back as frames from its beginning, middle and end, each with its time, and its
+	  length. A voice line, sound or music comes back as its length, with every word and when
+	  it is said where there are words. Take the id from read_script.
+	`,
+	input: z.object({
+		id: z
+			.string()
+			.min(1)
+			.describe("The element's id, exactly as read_script gives it."),
+	}),
+	output: ResultViewSchema.extend({ id: z.string() }),
+	icon: Eye,
+	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a result"),
+	toModelOutput: ({ output }) =>
+		imageOutput(
+			describeResult(output),
+			...output.pictures.map(({ url }) => url),
+		),
+	execute: async ({ id }, ctx) => {
+		const result = await ctx.elementResult(id);
+		if (!result)
+			throw new Error(
+				`There is no element ${id} on the canvas. Read the script for the ids there are.`,
+			);
+		if (!result.ok)
+			throw new Error(
+				`${id} ${result.reason}, so there is nothing to look at.`,
+			);
+		return { id, ...result.view };
+	},
+	snapshot: true,
+});

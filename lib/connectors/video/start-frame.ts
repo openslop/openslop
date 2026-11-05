@@ -54,6 +54,8 @@ export const FRAMES = {
 
 export type FrameKey = keyof typeof FRAMES;
 
+export const FRAME_KEYS = Object.keys(FRAMES) as FrameKey[];
+
 export const START_FRAME: FrameKey = "last";
 
 /** The end is left to the start frame. */
