@@ -639,9 +639,8 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("hands over an element's result with its prompt", async () => {
+	it("hands over an element's result", async () => {
 		const view = {
-			prompt: "a wolf",
 			durationSec: 0,
 			pictures: [{ url: "https://example.com/a.jpg" }],
 			words: [],

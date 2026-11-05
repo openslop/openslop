@@ -3,23 +3,21 @@ import { toCaption } from "@/lib/captions/word-captions";
 import { describeResult } from "../tools/view-result";
 
 describe("describeResult", () => {
-	it("names a picture by its URL after the prompt", () => {
+	it("names a picture by its URL", () => {
 		expect(
 			describeResult({
 				id: "img-1",
-				prompt: "a wolf",
 				durationSec: 0,
 				pictures: [{ url: "https://example.com/wolf.jpg" }],
 				words: [],
 			}),
-		).toBe('img-1, from "a wolf":\npicture: https://example.com/wolf.jpg');
+		).toBe("img-1:\npicture: https://example.com/wolf.jpg");
 	});
 
 	it("gives a video its length and each frame its time", () => {
 		expect(
 			describeResult({
 				id: "vid-1",
-				prompt: "a wolf runs",
 				durationSec: 6,
 				pictures: [
 					{ url: "https://example.com/first.jpg", at: 0 },
@@ -29,7 +27,7 @@ describe("describeResult", () => {
 			}),
 		).toBe(
 			[
-				'vid-1, from "a wolf runs", 6.0s long:',
+				"vid-1, 6.0s long:",
 				"frame at 0.0s: https://example.com/first.jpg",
 				"frame at 6.0s: https://example.com/last.jpg",
 			].join("\n"),
@@ -40,17 +38,14 @@ describe("describeResult", () => {
 		expect(
 			describeResult({
 				id: "nar-1",
-				prompt: "hello there",
 				durationSec: 1.2,
 				pictures: [],
 				words: [toCaption("hello", 0, 0.4), toCaption("there", 0.5, 1.1)],
 			}),
 		).toBe(
-			[
-				'nar-1, from "hello there", 1.2s long:',
-				"[0.0s-0.4s] hello",
-				"[0.5s-1.1s] there",
-			].join("\n"),
+			["nar-1, 1.2s long:", "[0.0s-0.4s] hello", "[0.5s-1.1s] there"].join(
+				"\n",
+			),
 		);
 	});
 });

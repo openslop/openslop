@@ -13,25 +13,23 @@ const word = ({ text, startMs, endMs }: ResultView["words"][number]) =>
 /** What the model is about to see, URL by URL, then every word with its time. */
 export const describeResult = ({
 	id,
-	prompt,
 	durationSec,
 	pictures,
 	words,
 }: ResultView & { id: string }) =>
 	[
-		`${id}, from "${prompt}"${durationSec > 0 ? `, ${seconds(durationSec)} long` : ""}:`,
+		`${id}${durationSec > 0 ? `, ${seconds(durationSec)} long` : ""}:`,
 		...pictures.map(picture),
 		...words.map(word),
 	].join("\n");
 
 export const viewResult = defineTool({
 	description: dedent`
-	  Look at what an element holds, generated or uploaded, alongside the prompt behind it, so
-	  you can say whether a result matches what was asked for. Pictures come back as the images
-	  themselves. A video comes back as frames from its beginning, middle and end, each with
-	  its time, and its length. A voice line, sound or music comes back as its length, with every
-	  word and when it is said where there are words. Take the id from read_script.
-	  What you see is gone next turn, so act on it in this one.
+	  Look at what an element holds, generated or uploaded, so you can say whether a result
+	  matches what its text asks for. Pictures come back as the images themselves. A video
+	  comes back as frames from its beginning, middle and end, each with its time, and its
+	  length. A voice line, sound or music comes back as its length, with every word and when
+	  it is said where there are words. Take the id from read_script.
 	`,
 	input: z.object({
 		id: z

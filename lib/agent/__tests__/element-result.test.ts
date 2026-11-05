@@ -23,7 +23,7 @@ const snapshot = (fields: Partial<ElementSnapshot> = {}): ElementSnapshot => ({
 	...fields,
 });
 
-const image = createCanvasElement("image", { text: "a wolf" });
+const image = createCanvasElement("image");
 const wolf = "https://example.com/wolf.jpg";
 
 describe("elementResult", () => {
@@ -35,14 +35,13 @@ describe("elementResult", () => {
 		],
 		[
 			"an uploaded avatar",
-			createCanvasElement("asset_avatar", { text: "a wolf" }),
+			createCanvasElement("asset_avatar"),
 			snapshot({ result: { imageUrl: wolf, durationSec: 0 }, pinned: true }),
 		],
-	] as const)("hands over %s with its prompt", async (_, element, state) => {
+	] as const)("hands over %s", async (_, element, state) => {
 		await expect(elementResult(element, state)).resolves.toEqual({
 			ok: true,
 			view: {
-				prompt: "a wolf",
 				durationSec: 0,
 				pictures: [{ url: wolf }],
 				words: [],
@@ -62,7 +61,7 @@ describe("elementResult", () => {
 	});
 
 	it("shows a video as frames with their times across its length", async () => {
-		const video = createCanvasElement("video", { text: "a wolf runs" });
+		const video = createCanvasElement("video");
 		const videoUrl = "https://example.com/wolf.mp4";
 
 		await expect(
@@ -70,7 +69,6 @@ describe("elementResult", () => {
 		).resolves.toEqual({
 			ok: true,
 			view: {
-				prompt: "a wolf runs",
 				durationSec: 6,
 				pictures: [
 					{ url: "https://img/first.jpg", at: 0 },
@@ -86,14 +84,10 @@ describe("elementResult", () => {
 	it.each([
 		[
 			"a voice line with every word and when it is said",
-			createCanvasElement("narration", { text: "hello there" }),
+			createCanvasElement("narration"),
 			[toCaption("hello", 0, 0.4), toCaption("there", 0.5, 1.1)],
 		],
-		[
-			"music with no words",
-			createCanvasElement("music", { text: "hello there" }),
-			undefined,
-		],
+		["music with no words", createCanvasElement("music"), undefined],
 	] as const)("shows %s as its length", async (_, element, words) => {
 		await expect(
 			elementResult(
@@ -109,7 +103,6 @@ describe("elementResult", () => {
 		).resolves.toEqual({
 			ok: true,
 			view: {
-				prompt: "hello there",
 				durationSec: 1.2,
 				pictures: [],
 				words: words ?? [],

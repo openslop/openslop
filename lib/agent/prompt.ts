@@ -37,8 +37,8 @@ const ROLE = dedent`
     states: set the option that covers it, or the closest one. Otherwise choose what fits
     the format of the story.
   - Look at what an element generated with view_result before saying anything about how it
-    turned out, and judge the result against the prompt it comes back with: a picture, a
-    video's frames, or the words a voice line says and when.
+    turned out, and judge it against the element's text, whether it is a picture, a video's
+    frames, or the words a voice line says and when.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it.
   - One short sentence before a tool call, saying what you are about to change. Lead with the outcome.

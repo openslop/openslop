@@ -6,7 +6,6 @@ import { ASSET_URL_FIELDS } from "@/lib/connectors/asset-url";
 import { type AssetResult, CaptionSchema } from "@/lib/connectors/types";
 import { captureFrames } from "@/lib/connectors/video/capture-frames";
 import { FRAME_KEYS, FRAMES } from "@/lib/connectors/video/start-frame";
-import { getPromptText } from "@/lib/generation/inputs";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { elementState, type ElementState } from "./element-state";
 
@@ -14,7 +13,6 @@ import { elementState, type ElementState } from "./element-state";
 const PictureSchema = z.object({ url: z.string(), at: z.number().optional() });
 
 export const ResultViewSchema = z.object({
-	prompt: z.string(),
 	durationSec: z.number(),
 	pictures: z.array(PictureSchema),
 	words: z.array(CaptionSchema),
@@ -50,14 +48,6 @@ async function pictures(result: AssetResult): Promise<ResultView["pictures"]> {
 	}));
 }
 
-const shown = (
-	element: CanvasElement,
-	view: Omit<ResultView, "prompt">,
-): ElementResult => ({
-	ok: true,
-	view: { prompt: getPromptText(element), ...view },
-});
-
 export async function elementResult(
 	element: CanvasElement,
 	snapshot: ElementSnapshot,
@@ -65,11 +55,14 @@ export async function elementResult(
 	if (element.type === "asset_references") {
 		const urls = referenceUrls([element]);
 		return urls.length > 0
-			? shown(element, {
-					durationSec: 0,
-					pictures: urls.map((url) => ({ url })),
-					words: [],
-				})
+			? {
+					ok: true,
+					view: {
+						durationSec: 0,
+						pictures: urls.map((url) => ({ url })),
+						words: [],
+					},
+				}
 			: { ok: false, reason: "has no reference images uploaded" };
 	}
 	if (!isGenerated(element))
@@ -85,9 +78,12 @@ export async function elementResult(
 			reason: compact([NO_RESULT[state], detail]).join(": "),
 		};
 	}
-	return shown(element, {
-		durationSec: result.durationSec,
-		pictures: await pictures(result),
-		words: result.textTimestamps ?? [],
-	});
+	return {
+		ok: true,
+		view: {
+			durationSec: result.durationSec,
+			pictures: await pictures(result),
+			words: result.textTimestamps ?? [],
+		},
+	};
 }
