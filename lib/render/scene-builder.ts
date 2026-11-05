@@ -19,10 +19,6 @@ export type BuildLayoutOptions = Pick<
 
 /** No sequence is ever shorter than this, however little content it holds. */
 export const MIN_DURATION_SEC = 1;
-
-/** A scene runs as long as its video or its dialogue, whichever is longer. */
-export const sceneDurationSec = (videoSec: number, overlaySec: number) =>
-	Math.max(videoSec, overlaySec);
 // Durations accumulated on the frame grid land a few ULPs above a whole frame.
 // Without this slack the total ceils into a trailing frame with no content.
 const FRAME_EPSILON = 1e-6;
@@ -146,10 +142,7 @@ export function buildRenderLayout(
 					});
 				} else {
 					current.overlaySec += element.timelineDurationSec;
-					current.duration = sceneDurationSec(
-						current.duration,
-						current.overlaySec,
-					);
+					current.duration = Math.max(current.duration, current.overlaySec);
 				}
 				pushSequence(sequences, element, cursor, stride);
 				cursor += element.timelineDurationSec;

@@ -131,7 +131,7 @@ describe("buildTimelineRows", () => {
 		]);
 	});
 
-	it("trims the transition overlap so scenes abut instead of running over", () => {
+	it("keeps scenes on one lane, overlapping by the cross-fade", () => {
 		const layout = layoutOf(
 			[
 				el("a", "image", { timelineDurationSec: 5 }),
@@ -140,13 +140,12 @@ describe("buildTimelineRows", () => {
 			],
 			{ transitionType: "fade" },
 		);
-		const clips = buildTimelineRows(layout)[0].clips;
-		for (const [i, clip] of clips.entries()) {
-			const next = clips[i + 1];
-			if (next) expect(clip.start + clip.duration).toBeCloseTo(next.start);
-		}
-		const last = clips[clips.length - 1];
-		expect(last.start + last.duration).toBeCloseTo(layout.totalDurationSec);
+		const rows = buildTimelineRows(layout);
+		expect(rows.filter((row) => row.id === "foreground")).toHaveLength(1);
+		const [a, b] = rows[0].clips;
+		expect(a.start + a.duration - b.start).toBeCloseTo(
+			layout.transitionDurationSec,
+		);
 	});
 
 	it("keeps voices on one lane across a scene transition", () => {

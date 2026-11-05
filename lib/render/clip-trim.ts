@@ -5,7 +5,7 @@ import {
 import type { ContentElement } from "@/lib/canvas/types";
 import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
-import { MIN_DURATION_SEC, sceneDurationSec } from "./scene-builder";
+import { MIN_DURATION_SEC } from "./scene-builder";
 import type { ResolvedCaptions, ResolvedElement, Sequence } from "./types";
 
 export type TrimEdge = "start" | "end";
@@ -109,21 +109,20 @@ export function trimEdge(
 	};
 }
 
-/** A clip previews the span the layout gives it, less any cross-fade; a scene extends past a video that runs out inside it. */
+/** A scene's video runs as trimmed and the scene extends past it to the end of its dialogue; any other clip keeps the span the layout gives it. */
 export function previewSpan(
 	element: ResolvedElement,
 	{ duration, overlaySec }: Pick<Sequence, "duration" | "overlaySec">,
 	trim: Trim,
 ) {
-	const deltaSec = trim.timelineDurationSec - element.timelineDurationSec;
-	if (overlaySec === undefined)
-		return { timelineDurationSec: duration + deltaSec, extensionSec: 0 };
-	const spanSec =
-		duration +
-		sceneDurationSec(trim.timelineDurationSec, overlaySec) -
-		sceneDurationSec(element.timelineDurationSec, overlaySec);
-	const timelineDurationSec = isTrimmable(element)
-		? Math.min(trim.timelineDurationSec, spanSec)
-		: spanSec;
-	return { timelineDurationSec, extensionSec: spanSec - timelineDurationSec };
+	if (overlaySec === undefined || !isTrimmable(element))
+		return {
+			timelineDurationSec:
+				duration + trim.timelineDurationSec - element.timelineDurationSec,
+			extensionSec: 0,
+		};
+	return {
+		timelineDurationSec: trim.timelineDurationSec,
+		extensionSec: Math.max(0, overlaySec - trim.timelineDurationSec),
+	};
 }

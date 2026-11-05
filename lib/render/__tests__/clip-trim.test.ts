@@ -213,12 +213,6 @@ describe("previewSpan", () => {
 		});
 	});
 
-	it("keeps the cross-fade the next scene cuts off", () => {
-		expect(previewSpan(video, { duration: 4.5, overlaySec: 0 }, to(5))).toEqual(
-			{ timelineDurationSec: 4.5, extensionSec: 0 },
-		);
-	});
-
 	it("stretches a still across the whole scene", () => {
 		const still = el({ type: "image", mediaDurationSec: 0, ...to(0) });
 		expect(previewSpan(still, scene, to(0))).toEqual({
