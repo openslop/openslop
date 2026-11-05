@@ -10,8 +10,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AttributeBadge } from "../attribute-badge";
 import { element } from "@/lib/canvas/__tests__/_assets";
 
-const elementWith = (customAttributes: Record<string, string>) =>
-	element("el", "video", "", customAttributes);
+const elementWith = (attributes: Record<string, string>) =>
+	element("el", "video", "", attributes);
 
 const motionDef: AttributeDef = {
 	key: "motion",

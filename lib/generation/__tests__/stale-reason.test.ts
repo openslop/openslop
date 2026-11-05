@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { GenerationNode } from "../graph";
 import type { NodeInputs } from "../inputs";
 import { GenerationQueue } from "../queue";
-import { staleReason } from "../stale-reason";
+import { hasEditsSinceResult, staleReason } from "../stale-reason";
 import { jobNode } from "./_graph";
 
 const node = (
@@ -125,5 +125,68 @@ describe("staleReason", () => {
 		expect(staleReason(edited("2"), queue)).toBe(
 			"The prompt, model, duration, and 1 more changed — regenerate to update",
 		);
+	});
+});
+
+describe("hasEditsSinceResult", () => {
+	it("is false for a node that has never generated", () => {
+		expect(hasEditsSinceResult(node("a"), new GenerationQueue())).toBe(false);
+	});
+
+	it("is false right after a result is committed", () => {
+		const queue = new GenerationQueue();
+		commit(queue, node("a"), "a.png");
+
+		expect(hasEditsSinceResult(node("a"), queue)).toBe(false);
+	});
+
+	it("is true when the prompt changed", () => {
+		const queue = new GenerationQueue();
+		commit(queue, node("a", { prompt: "a knight" }), "a.png");
+
+		expect(hasEditsSinceResult(node("a", { prompt: "a wizard" }), queue)).toBe(
+			true,
+		);
+	});
+
+	it("is true when an attribute changed", () => {
+		const queue = new GenerationQueue();
+		commit(queue, node("a", { attributes: { model: "fast" } }), "a.png");
+
+		expect(
+			hasEditsSinceResult(node("a", { attributes: { model: "slow" } }), queue),
+		).toBe(true);
+	});
+
+	it("is false when only a read changed", () => {
+		const queue = new GenerationQueue();
+		const withStyle = (style: string) =>
+			node("a", { reads: { "the art style": style } });
+		commit(queue, withStyle("noir"), "a.png");
+
+		expect(hasEditsSinceResult(withStyle("watercolor"), queue)).toBe(false);
+	});
+
+	it("is false when only an upstream result changed", () => {
+		const queue = new GenerationQueue();
+		const avatar = node("avatar");
+		const image = node("a", { dependsOn: { "Red's avatar": avatar } });
+		commit(queue, avatar, "red.png");
+		commit(queue, image, "a.png");
+
+		commit(queue, avatar, "red-v2.png");
+		expect(hasEditsSinceResult(image, queue)).toBe(false);
+	});
+
+	it("is true for local edits even when an upstream result changed too", () => {
+		const queue = new GenerationQueue();
+		const avatar = node("avatar");
+		const image = (prompt: string) =>
+			node("a", { prompt, dependsOn: { "Red's avatar": avatar } });
+		commit(queue, avatar, "red.png");
+		commit(queue, image("a knight"), "a.png");
+
+		commit(queue, avatar, "red-v2.png");
+		expect(hasEditsSinceResult(image("a wizard"), queue)).toBe(true);
 	});
 });

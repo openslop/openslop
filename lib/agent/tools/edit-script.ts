@@ -73,8 +73,8 @@ export const editScript = defineTool({
 	  Attributes by type:
 	  ${ATTRIBUTES_BY_TYPE}
 
-	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: an image's URL from
-	  view_image. Leave a URL already set alone.
+	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: a picture's URL from
+	  view_result. Leave a URL already set alone.
 
 	  The attributes above work with every model. Some models have extra attributes of their own;
 	  read_script shows the ones an element already has.

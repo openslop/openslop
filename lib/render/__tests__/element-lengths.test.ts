@@ -12,13 +12,13 @@ let nextId = 0;
 const element = (
 	type: ContentType,
 	text: string,
-	customAttributes?: Record<string, string>,
+	attributes: Record<string, string> = {},
 ) => {
 	const id = `e${nextId++}`;
 	return {
 		id,
 		type,
-		...splitAttributes(customAttributes ?? {}),
+		...splitAttributes(attributes),
 		children: [{ id: `${id}-t`, type, text }],
 	};
 };

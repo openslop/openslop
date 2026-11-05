@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { AssetBundle } from "../asset-bundle";
 import {
 	bodySchema,
 	byokModel,
 	hostedModel,
 	LLM_FIELDS,
+	STT_FIELDS,
 	VIDEO_FIELDS,
 } from "../generation-schema";
+
+const STORE = "https://assets.test";
+AssetBundle.baseUrl = STORE;
 
 describe("bodySchema with a hosted model", () => {
 	const schema = bodySchema(hostedModel("image"), {});
@@ -113,7 +118,10 @@ describe("video fields", () => {
 			{
 				name: "Sol",
 				avatarUrl: "https://img/sol.png",
-				voice: { url: "https://audio/sol.mp3", durationSec: 6 },
+				voice: {
+					url: `${STORE}/assets/preview/voice/sol/audio`,
+					durationSec: 6,
+				},
 			},
 			{ name: "Mira" },
 		];
@@ -126,5 +134,40 @@ describe("video fields", () => {
 			video({ characterAssets: [{ name: "Sol", avatarUrl: "not a url" }] })
 				.success,
 		).toBe(false);
+	});
+
+	it("refuses a character whose voice is outside our store", () => {
+		const voice = { url: "https://audio/sol.mp3", durationSec: 6 };
+		expect(
+			video({ characterAssets: [{ name: "Sol", voice }] }).error?.issues[0]
+				?.message,
+		).toBe("A character voice must be a file in our store");
+	});
+});
+
+describe("STT fields", () => {
+	const schema = bodySchema(hostedModel("stt"), STT_FIELDS);
+	const stt = (mediaUrl: unknown) =>
+		schema.safeParse({ model: "Slop STT v1", mediaUrl });
+
+	it("takes a clip from our store, with no prompt", () => {
+		const mediaUrl = `${STORE}/assets/upload/user/abc/clip.mp4`;
+		expect(stt(mediaUrl).data).toMatchObject({ prompt: "", mediaUrl });
+	});
+
+	it.each([
+		"http://169.254.169.254/latest/meta-data",
+		"https://assets.test.evil.com/assets/video/mock/1/video.mp4",
+		`${STORE}/other/clip.mp4`,
+	])("refuses to transcribe media outside our store: %s", (mediaUrl) => {
+		expect(stt(mediaUrl).error?.issues[0]?.message).toBe(
+			"mediaUrl must be a file in our store",
+		);
+	});
+
+	it("refuses media that is not a URL", () => {
+		expect(stt("clip.mp4").error?.issues[0]?.message).toBe(
+			"mediaUrl must be an HTTP(S) URL",
+		);
 	});
 });

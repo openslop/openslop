@@ -59,11 +59,11 @@ describe("trimClip", () => {
 		});
 	});
 
-	it("cuts at its timeline duration", () => {
+	it("cuts at its trim duration", () => {
 		expect(trimClip(10, 2, 4).trimDurationSec).toBe(4);
 	});
 
-	it("resolves a timeline duration stored past the media to the media's end", () => {
+	it("resolves a trim duration stored past the media to the media's end", () => {
 		expect(trimClip(10, 2, 20).trimDurationSec).toBe(8);
 	});
 
@@ -93,7 +93,7 @@ describe("trimEdge", () => {
 
 	it("stops the end at the last frame from the in-point, not from the media's start", () => {
 		expect(
-			trimEdge(el({ ...clip, trimStartSec: 6 }), "end", 50).trimDurationSec,
+			trimEdge({ ...clip, trimStartSec: 6 }, "end", 50).trimDurationSec,
 		).toBe(4);
 	});
 
@@ -177,14 +177,14 @@ describe("trimCaptions", () => {
 
 describe("previewSpan", () => {
 	const video = el({ trimDurationSec: 5 });
-	const to = (trimDurationSec: number) => ({
+	const trimmedTo = (trimDurationSec: number) => ({
 		trimStartSec: 0,
 		trimDurationSec,
 	});
 	const scene = { duration: 8, overlaySec: 8 };
 
 	it("moves a clip's end with the trim", () => {
-		expect(previewSpan(video, { duration: 5 }, to(3))).toEqual({
+		expect(previewSpan(video, { duration: 5 }, trimmedTo(3))).toEqual({
 			timelineDurationSec: 3,
 			extensionSec: 0,
 		});
@@ -192,29 +192,29 @@ describe("previewSpan", () => {
 
 	it("draws a sound the layout pads at its own length, with no extension", () => {
 		const sound = el({ trimDurationSec: 0.5 });
-		expect(previewSpan(sound, { duration: 1 }, to(0.5))).toEqual({
+		expect(previewSpan(sound, { duration: 1 }, trimmedTo(0.5))).toEqual({
 			timelineDurationSec: 0.5,
 			extensionSec: 0,
 		});
 	});
 
 	it("extends the scene past a video trimmed under its dialogue", () => {
-		expect(previewSpan(video, scene, to(3))).toEqual({
+		expect(previewSpan(video, scene, trimmedTo(3))).toEqual({
 			timelineDurationSec: 3,
 			extensionSec: 5,
 		});
 	});
 
 	it("lengthens the scene once the video outruns its dialogue", () => {
-		expect(previewSpan(video, scene, to(10))).toEqual({
+		expect(previewSpan(video, scene, trimmedTo(10))).toEqual({
 			timelineDurationSec: 10,
 			extensionSec: 0,
 		});
 	});
 
 	it("stretches a still across the whole scene", () => {
-		const still = el({ type: "image", mediaDurationSec: 0, ...to(0) });
-		expect(previewSpan(still, scene, to(0))).toEqual({
+		const still = el({ type: "image", mediaDurationSec: 0, ...trimmedTo(0) });
+		expect(previewSpan(still, scene, trimmedTo(0))).toEqual({
 			timelineDurationSec: 8,
 			extensionSec: 0,
 		});

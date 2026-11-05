@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import type { User } from "@supabase/supabase-js";
 import { ZodError } from "zod";
-import { listProviderKeys } from "../provider-keys";
+import {
+	deleteProviderKey,
+	listProviderKeys,
+	readProviderKey,
+	setKeyStatus,
+} from "../provider-keys";
 
 const rows = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
@@ -13,7 +18,10 @@ vi.mock("@/lib/supabase/server", () => ({
 		}),
 	}),
 }));
-vi.mock("@/lib/supabase/service", () => ({ createServiceClient: vi.fn() }));
+const rpc = vi.fn();
+vi.mock("@/lib/supabase/service", () => ({
+	createServiceClient: () => ({ rpc }),
+}));
 
 const user = (app_metadata: Record<string, unknown>) =>
 	({ id: "u1", app_metadata }) as unknown as User;
@@ -48,5 +56,19 @@ describe("listProviderKeys", () => {
 		await expect(
 			listProviderKeys(user({ api_access: "true" })),
 		).rejects.toThrow(ZodError);
+	});
+});
+
+describe("the vault functions", () => {
+	it.each([
+		["readProviderKey", () => readProviderKey("u1", "anthropic")],
+		["deleteProviderKey", () => deleteProviderKey("u1", "anthropic")],
+		["setKeyStatus", () => setKeyStatus("u1", "anthropic", "valid")],
+	])("%s throws with the vault's reason", async (_name, run) => {
+		rpc.mockResolvedValue({
+			data: null,
+			error: { message: "vault unavailable" },
+		});
+		await expect(run()).rejects.toThrow("vault unavailable");
 	});
 });

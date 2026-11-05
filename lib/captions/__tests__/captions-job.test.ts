@@ -73,14 +73,14 @@ describe("captions jobs", () => {
 	});
 
 	it("fails, leaving the element alone, when it was regenerated meanwhile", async () => {
-		let land: (result: AssetResult) => void = () => {};
-		generateMock.mockReturnValue(new Promise((resolve) => (land = resolve)));
+		const landing = Promise.withResolvers<AssetResult>();
+		generateMock.mockReturnValue(landing.promise);
 		queue.enqueueGraph([stt()]);
 		await vi.advanceTimersByTimeAsync(0);
 		const remade = { ...spoken, audioUrl: "https://example.com/b.wav" };
 		queue.commitResult(jobNode("narration"), remade);
 
-		land({ durationSec: 2, textTimestamps: heard });
+		landing.resolve({ durationSec: 2, textTimestamps: heard });
 		await vi.runAllTimersAsync();
 
 		expect(queue.getElementSnapshot("narration").result).toEqual(remade);

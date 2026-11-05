@@ -15,6 +15,7 @@ import {
 	ElementStaleIndicator,
 } from "./generate-button";
 import { ElementHistoryButton } from "./element-history-button";
+import { ResetEditsButton } from "./reset-edits-button";
 import { HeaderIconButton } from "./header-icon-button";
 import { ElementGenerationProvider } from "./element-generation-context";
 import { ELEMENT_CONFIGS } from "./element-configs";
@@ -137,6 +138,7 @@ export function ElementContainer({
 							contentEditable={false}
 						>
 							<ElementStaleIndicator />
+							<ResetEditsButton />
 							{config.actions?.map((Action, index) => (
 								<Action key={index} element={element} />
 							))}
