@@ -16,7 +16,7 @@ import {
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
 import { renderPrompt } from "@/lib/connectors/character-refs";
-import { toFrames } from "@/lib/render/frames";
+import { toFrames, toSeconds } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
 import { usePlayerControl } from "../player-control-context";
 import { usePlayerScrub } from "../use-player-scrub";
@@ -29,17 +29,19 @@ import {
 } from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
+import { TimelineSnapGuide } from "./timeline-snap-guide";
 import { GUTTER_PX, LANE_HEIGHT, RULER_HEIGHT } from "../dock-layout";
 import { TimelineRuler } from "./timeline-ruler";
 import {
 	buildCaptionRows,
 	buildTimelineRows,
+	snapEdges,
 	type CaptionClip as CaptionClipData,
 	type TimelineClip as TimelineClipData,
 } from "./timeline-rows";
 import { useTimelineZoom } from "./use-timeline-zoom";
 import { TimelineTrimHandle } from "./timeline-trim-handle";
-import { useClipTrim } from "./use-clip-trim";
+import { useClipTrim, type TrimSnap } from "./use-clip-trim";
 
 /** Runway past the last tick, so its label isn't cut off by the end. */
 const RULER_TAIL_PX = 32;
@@ -116,10 +118,11 @@ function Clip({
 	clip,
 	pxPerSec,
 	numbered,
+	snap,
 	selected,
 	onSelect,
-}: ClipProps<TimelineClipData> & { numbered: boolean }) {
-	const trim = useClipTrim(clip, pxPerSec);
+}: ClipProps<TimelineClipData> & { numbered: boolean; snap: TrimSnap }) {
+	const trim = useClipTrim(clip, pxPerSec, snap);
 	const width = Math.max(
 		trim.timelineDurationSec * pxPerSec,
 		MIN_CLIP_WIDTH_PX,
@@ -227,6 +230,7 @@ export function Timeline() {
 	const selectScene = useSelectScene();
 	const [selectedKey, setSelectedKey] = useState<string | null>(null);
 	const hoverHead = useRef<HoverHeadHandle>(null);
+	const snapGuide = useRef<HoverHeadHandle>(null);
 	const {
 		ref: viewportRef,
 		node: viewport,
@@ -234,6 +238,19 @@ export function Timeline() {
 	} = useElementWidth<HTMLDivElement>();
 	const rows = useMemo(() => buildTimelineRows(layout), [layout]);
 	const captionRows = useMemo(() => buildCaptionRows(layout), [layout]);
+	const snap = useMemo<TrimSnap>(() => {
+		const edges = snapEdges(rows);
+		return {
+			targets: (exceptElementId) => [
+				...(player ? [toSeconds(player.getCurrentFrame(), layout.fps)] : []),
+				...edges
+					.filter((edge) => edge.elementId !== exceptElementId)
+					.map((edge) => edge.sec),
+			],
+			onSnap: (sec) =>
+				sec === null ? snapGuide.current?.hide() : snapGuide.current?.show(sec),
+		};
+	}, [rows, player, layout.fps]);
 	const { zoom, pxPerSec, zoomIn, zoomOut, canZoomIn, canZoomOut } =
 		useTimelineZoom(
 			layout.totalDurationSec,
@@ -347,6 +364,7 @@ export function Timeline() {
 										clip={clip}
 										pxPerSec={pxPerSec}
 										numbered={row.numbered}
+										snap={snap}
 										selected={selectedKey === clip.key}
 										onSelect={select}
 									/>
@@ -361,6 +379,7 @@ export function Timeline() {
 						className="pointer-events-none relative z-20"
 					>
 						<TimelineHoverHead ref={hoverHead} pxPerSec={pxPerSec} />
+						<TimelineSnapGuide ref={snapGuide} pxPerSec={pxPerSec} />
 						<TimelinePlayhead
 							pxPerSec={pxPerSec}
 							viewport={viewport}

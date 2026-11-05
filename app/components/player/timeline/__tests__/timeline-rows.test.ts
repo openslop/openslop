@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { CONTENT_TYPES, type ContentType } from "@/lib/canvas/types";
 import { isBlankScene } from "@/lib/render/blank-scene";
-import type { ResolvedElement } from "@/lib/render/types";
+import type { RenderLayout, ResolvedElement } from "@/lib/render/types";
 import { layoutOf } from "@/lib/render/__tests__/_layout";
 import {
 	buildCaptionRows,
 	buildTimelineRows,
 	packLanes,
+	snapEdges,
 } from "../timeline-rows";
 import { toCaption } from "@/lib/captions/word-captions";
 import { lineText } from "@/lib/captions/caption-layout";
@@ -240,5 +241,31 @@ describe("buildCaptionRows", () => {
 			{ start: 0, duration: 2, text: "one two" },
 			{ start: 2, duration: 1, text: "three" },
 		]);
+	});
+});
+
+describe("snapEdges", () => {
+	const secsOf = (layout: RenderLayout, id: string) =>
+		new Set(
+			snapEdges(buildTimelineRows(layout))
+				.filter((edge) => edge.elementId === id)
+				.map((edge) => edge.sec),
+		);
+
+	it("marks where each clip starts and ends", () => {
+		const layout = layoutOf([
+			el("img", "image", { trimDurationSec: 5 }),
+			el("n1", "narration", { trimDurationSec: 3 }),
+		]);
+		expect(secsOf(layout, "img")).toEqual(new Set([0, 5]));
+		expect(secsOf(layout, "n1")).toEqual(new Set([0, 3]));
+	});
+
+	it("marks where a video's media stops as well as where its scene ends", () => {
+		const layout = layoutOf([
+			el("v", "video", { mediaDurationSec: 10, trimDurationSec: 4 }),
+			el("n1", "narration", { trimDurationSec: 6 }),
+		]);
+		expect(secsOf(layout, "v")).toEqual(new Set([0, 4, 6]));
 	});
 });

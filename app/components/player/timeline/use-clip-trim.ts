@@ -11,18 +11,27 @@ import {
 	isTrimmed,
 	laidOut,
 	previewSpan,
-	trimEdge,
 	type Trim,
 	type TrimEdge,
 } from "@/lib/render/clip-trim";
+import { snapTrimEdge } from "@/lib/render/snap";
 import type { TimelineClip } from "./timeline-rows";
 
 // The layout snaps whatever is stored onto the frame grid.
 const toAttr = (sec: number) => String(round(sec, 2));
 
+/** How close on screen a handle comes to a target before it sticks, at any zoom. */
+const SNAP_PX = 8;
+
+export type TrimSnap = {
+	/** The times a handle can stick to, apart from the dragged element's own edges. */
+	targets: (exceptElementId: string) => number[];
+	onSnap: (sec: number | null) => void;
+};
+
 function useEdgeDrag(
 	pxPerSec: number,
-	onTrim: (deltaSec: number) => void,
+	onTrim: (deltaSec: number, snapping: boolean) => void,
 	onEnd: () => void,
 ) {
 	const originX = useRef(0);
@@ -31,22 +40,37 @@ function useEdgeDrag(
 			event.preventDefault();
 			originX.current = event.clientX;
 		},
-		onMove: (event) => onTrim((event.clientX - originX.current) / pxPerSec),
+		onMove: (event) =>
+			onTrim((event.clientX - originX.current) / pxPerSec, !event.altKey),
 		onEnd,
 	});
 }
 
-/** A drag previews the new length and commits it on release: one layout rebuild, one undo step. */
-export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
+/** A drag previews the new length and commits it on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets. */
+export function useClipTrim(
+	clip: TimelineClip,
+	pxPerSec: number,
+	snap: TrimSnap,
+) {
 	const element = laidOut(clip);
 	const editor = useSlateStatic();
 	const [preview, setPreview] = useState<Trim | null>(null);
 
-	const trimBy = (edge: TrimEdge) => (deltaSec: number) =>
-		setPreview(trimEdge(element, edge, deltaSec));
+	const trimBy = (edge: TrimEdge) => (deltaSec: number, snapping: boolean) => {
+		const snapped = snapTrimEdge(
+			{ element, start: clip.start },
+			edge,
+			deltaSec,
+			snapping ? snap.targets(element.id) : [],
+			SNAP_PX / pxPerSec,
+		);
+		setPreview(snapped.trim);
+		snap.onSnap(snapped.snappedSec);
+	};
 
 	const commit = () => {
 		setPreview(null);
+		snap.onSnap(null);
 		if (!preview || isMatch(element, preview)) return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),

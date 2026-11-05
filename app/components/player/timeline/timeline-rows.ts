@@ -7,6 +7,7 @@ import {
 	type IconComponent,
 } from "@/components/ui/icon";
 import type { ElementRole, LayerType } from "@/lib/canvas/types";
+import { laidOut, previewSpan } from "@/lib/render/clip-trim";
 import {
 	layoutCaptions,
 	type CaptionSequence,
@@ -107,6 +108,23 @@ export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
 			})),
 		}));
 	});
+}
+
+export type SnapEdge = { elementId: string; sec: number };
+
+/** Every drawn clip edge: where it starts, where its media stops, and where its span ends. */
+export function snapEdges(rows: TimelineRow[]): SnapEdge[] {
+	return rows.flatMap((row) =>
+		row.clips.flatMap((clip) => {
+			const element = laidOut(clip);
+			const { timelineDurationSec } = previewSpan(element, clip, element);
+			return [
+				clip.start,
+				clip.start + timelineDurationSec,
+				clip.start + clip.duration,
+			].map((sec) => ({ elementId: element.id, sec }));
+		}),
+	);
 }
 
 export type CaptionClip = CaptionSequence & { key: string };
