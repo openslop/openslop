@@ -4,7 +4,7 @@ import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasBlock, CanvasElement } from "./types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
-import type { GenerationInputs } from "@/lib/generation/inputs";
+import type { ElementVersion } from "@/lib/generation/versions";
 import { flatAttributes, splitAttributes } from "./element-attributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { attributeSchemaFor } from "./element-connector";
@@ -108,7 +108,7 @@ export function replaceGenerationAttrs(
 export function applyElementVersion(
 	editor: Editor,
 	id: string,
-	inputs: GenerationInputs,
+	{ inputs }: Pick<ElementVersion, "inputs">,
 ): void {
 	const [, path] = requireElement(editor, id);
 	replaceGenerationAttrs(editor, path, inputs.attributes);

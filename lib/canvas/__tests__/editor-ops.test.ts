@@ -322,7 +322,9 @@ describe("applyElementVersion", () => {
 		const el = content("image", "n1", "a fox", { style: "ink", mood: "dark" });
 		const editor = makeEditor([scene([el])]);
 
-		applyElementVersion(editor, "n1", inputsFor("a wolf", { style: "oil" }));
+		applyElementVersion(editor, "n1", {
+			inputs: inputsFor("a wolf", { style: "oil" }),
+		});
 
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}a wolf`);
 		const node = (editor.children[0] as Scene).children[0];
