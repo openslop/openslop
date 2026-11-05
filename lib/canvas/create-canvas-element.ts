@@ -15,22 +15,22 @@ export type CreateElementOptions = {
 
 export function createCanvasElement<T extends ElementType>(
 	type: T,
-	opts: CreateElementOptions = {},
+	options: CreateElementOptions = {},
 ): ElementOf<T> {
 	const connector = connectorOf(type);
-	const defaults = opts.defaultModels ?? {};
-	const attrs = {
-		...opts.attrs,
-		...(connector && resolveModel(connector, opts.attrs, defaults[connector])),
+	const { id = makeNodeId(), attrs, text = "", defaultModels = {} } = options;
+	const given = {
+		...attrs,
+		...(connector && resolveModel(connector, attrs, defaultModels[connector])),
 	};
-	const attributes = attributeSchemaFor(type, attrs).resolve(attrs);
+	const attributes = attributeSchemaFor(type, given).resolve(given);
 	return {
-		id: opts.id ?? makeNodeId(),
+		id,
 		type,
 		...splitAttributes(attributes),
 		children: [
 			{ id: makeNodeId(), type, text: ZERO_WIDTH_SPACE },
-			{ id: makeNodeId(), type, text: opts.text ?? "" },
+			{ id: makeNodeId(), type, text },
 		],
 	};
 }

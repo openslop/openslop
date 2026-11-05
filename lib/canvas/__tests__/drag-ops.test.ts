@@ -1,15 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { crossSceneTransfer, moveDraggedElement } from "../drag-ops";
-import { makeEditor } from "./_assets";
+import { element, makeEditor } from "./_assets";
 
-function content(id: string): ContentElement {
-	return {
-		id,
-		type: "narration",
-		children: [{ id: `${id}-t`, type: "narration", text: "" }],
-	};
-}
+const content = (id: string) => element(id, "narration");
 
 function scene(id: string, children: ContentElement[]): Scene {
 	return { id, type: "scene", children };

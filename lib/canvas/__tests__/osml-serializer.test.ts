@@ -13,21 +13,13 @@ import {
 	type ContentElement,
 	type Scene,
 } from "@/lib/canvas/types";
-import { splitAttributes } from "@/lib/canvas/element-attributes";
-import { asset } from "./_assets";
+import { asset, element } from "./_assets";
 
-function el(
+const el = (
 	type: ContentElement["type"],
 	text: string,
-	customAttributes?: Record<string, string>,
-): ContentElement {
-	return {
-		id: "e1",
-		type,
-		...splitAttributes(customAttributes ?? {}),
-		children: [{ id: "t1", type, text }],
-	};
-}
+	attributes: Record<string, string> = {},
+) => element("e1", type, text, attributes);
 
 const wrap = (...children: ContentElement[]): Scene => ({
 	id: "scene-1",
@@ -77,7 +69,7 @@ describe("serializeOSMLWithScenes", () => {
 
 describe("getElementText", () => {
 	it("extracts joined text from children", () => {
-		const element: ContentElement = {
+		const narration: ContentElement = {
 			id: "e1",
 			type: "narration",
 			children: [
@@ -85,7 +77,7 @@ describe("getElementText", () => {
 				{ id: "t2", type: "narration", text: "world" },
 			],
 		};
-		expect(getElementText(element)).toBe("Hello world");
+		expect(getElementText(narration)).toBe("Hello world");
 	});
 });
 

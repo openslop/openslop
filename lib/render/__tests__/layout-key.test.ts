@@ -9,12 +9,12 @@ import { splitAttributes } from "@/lib/canvas/element-attributes";
 
 function el(
 	id: string,
-	customAttributes?: Record<string, string>,
+	attributes: Record<string, string> = {},
 ): ContentElement {
 	return {
 		id,
 		type: "sound",
-		...splitAttributes(customAttributes ?? {}),
+		...splitAttributes(attributes),
 		children: [{ id: `${id}-t`, type: "sound", text: "" }],
 	};
 }

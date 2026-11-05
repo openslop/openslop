@@ -13,39 +13,29 @@ import {
 	resolveElementConnector,
 } from "../element-connector";
 import { ElementTypeSchema, type ContentElement } from "../types";
-import {
-	flatAttributes,
-	splitAttributes,
-} from "@/lib/canvas/element-attributes";
-import { asset } from "./_assets";
+import { flatAttributes } from "@/lib/canvas/element-attributes";
+import { asset, element } from "./_assets";
 
-function element(
+const el = (
 	type: ContentElement["type"],
-	customAttributes?: Record<string, string>,
-): ContentElement {
-	return {
-		id: "n1",
-		type,
-		...splitAttributes(customAttributes ?? {}),
-		children: [],
-	};
-}
+	attributes: Record<string, string> = {},
+) => element("n1", type, "", attributes);
 
 const registry = DEFAULT_CONNECTOR_REGISTRY;
 const imageDefaults = registry.image;
 
 describe("resolveElementConnector", () => {
 	it("maps the element type to its connector type", () => {
-		expect(
-			resolveElementConnector(element("narration"), registry, []).type,
-		).toBe("tts");
-		expect(resolveElementConnector(element("video"), registry, []).type).toBe(
+		expect(resolveElementConnector(el("narration"), registry, []).type).toBe(
+			"tts",
+		);
+		expect(resolveElementConnector(el("video"), registry, []).type).toBe(
 			"video",
 		);
 	});
 
 	it("falls back to the recommendation when nothing is pinned", () => {
-		expect(resolveElementConnector(element("image"), registry, [])).toEqual({
+		expect(resolveElementConnector(el("image"), registry, [])).toEqual({
 			type: "image",
 			model: DEFAULT_IMAGE_MODEL,
 			config: imageDefaults,
@@ -55,13 +45,13 @@ describe("resolveElementConnector", () => {
 	it("keeps a pinned model over the recommendation", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" };
 		expect(
-			resolveElementConnector(element("image", pinned), registry, []).model,
+			resolveElementConnector(el("image", pinned), registry, []).model,
 		).toEqual(pinned);
 	});
 
 	it("falls back when the pinned provider no longer serves the model", () => {
 		const connector = resolveElementConnector(
-			element("image", { provider: "retired-vendor", model: "Slop Image v1" }),
+			el("image", { provider: "retired-vendor", model: "Slop Image v1" }),
 			registry,
 			[],
 		);
@@ -79,7 +69,7 @@ describe("resolveElementConnector for speech", () => {
 	it("speaks with the pair its voice picked, over its own", () => {
 		expect(
 			resolveElementConnector(
-				element("narration", own),
+				el("narration", own),
 				registry,
 				voiced(DEFAULT_MODELS.tts),
 			).model,
@@ -88,11 +78,11 @@ describe("resolveElementConnector for speech", () => {
 
 	it("speaks with its own pair while its speaker has no voice", () => {
 		expect(
-			resolveElementConnector(element("narration", own), registry, []).model,
+			resolveElementConnector(el("narration", own), registry, []).model,
 		).toEqual(own);
 		expect(
 			resolveElementConnector(
-				element("character", { name: "Red", ...own }),
+				el("character", { name: "Red", ...own }),
 				registry,
 				voiced(DEFAULT_MODELS.tts),
 			).model,
@@ -101,7 +91,7 @@ describe("resolveElementConnector for speech", () => {
 
 	it("falls back to the recommendation when neither names a model", () => {
 		expect(
-			resolveElementConnector(element("character"), registry, []).model,
+			resolveElementConnector(el("character"), registry, []).model,
 		).toEqual(DEFAULT_MODELS.tts);
 	});
 });
@@ -136,13 +126,13 @@ describe("createCanvasElement", () => {
 
 describe("elementSchema", () => {
 	it("resolves the connector type's schema from the element's own attributes", () => {
-		expect(elementSchema(element("image")).keys).toEqual(
+		expect(elementSchema(el("image")).keys).toEqual(
 			expect.arrayContaining(imageAttributesFor(DEFAULT_MODELS.image).keys),
 		);
-		expect(elementSchema(element("video")).keys).toEqual(
+		expect(elementSchema(el("video")).keys).toEqual(
 			expect.arrayContaining(videoAttributesFor(DEFAULT_MODELS.video).keys),
 		);
-		expect(elementSchema(element("narration")).keys).toEqual(
+		expect(elementSchema(el("narration")).keys).toEqual(
 			expect.arrayContaining(TTS_ATTRIBUTES.keys),
 		);
 	});
