@@ -102,18 +102,14 @@ export function trimEdge(
 	};
 }
 
-/** A scene's video runs as trimmed and the scene extends past it to the end of its dialogue; any other clip keeps the span the layout gives it. */
+/** A still fills the span the layout gives it; anything else runs as trimmed, and a scene extends past its video to the end of its dialogue. */
 export function previewSpan(
 	element: ResolvedElement,
-	{ duration, overlaySec }: Pick<Sequence, "duration" | "overlaySec">,
+	{ duration, overlaySec = 0 }: Pick<Sequence, "duration" | "overlaySec">,
 	trim: Trim,
 ) {
-	if (overlaySec === undefined || !isTrimmable(element))
-		return {
-			timelineDurationSec:
-				duration + trim.trimDurationSec - element.trimDurationSec,
-			extensionSec: 0,
-		};
+	if (!isTrimmable(element))
+		return { timelineDurationSec: duration, extensionSec: 0 };
 	return {
 		timelineDurationSec: trim.trimDurationSec,
 		extensionSec: Math.max(0, overlaySec - trim.trimDurationSec),

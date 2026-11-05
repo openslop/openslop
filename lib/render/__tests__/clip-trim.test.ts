@@ -190,10 +190,10 @@ describe("previewSpan", () => {
 		});
 	});
 
-	it("never extends an audio clip the layout pads past its sound", () => {
+	it("draws a sound the layout pads at its own length, with no extension", () => {
 		const sound = el({ trimDurationSec: 0.5 });
 		expect(previewSpan(sound, { duration: 1 }, to(0.5))).toEqual({
-			timelineDurationSec: 1,
+			timelineDurationSec: 0.5,
 			extensionSec: 0,
 		});
 	});
