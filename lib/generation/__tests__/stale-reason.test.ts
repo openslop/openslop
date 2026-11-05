@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { GenerationNode } from "../graph";
 import type { NodeInputs } from "../inputs";
 import { GenerationQueue } from "../queue";
-import { resettableEdits, staleReason } from "../stale-reason";
+import { hasEditsSinceResult, staleReason } from "../stale-reason";
 import { jobNode } from "./_graph";
 
 const node = (
@@ -128,32 +128,43 @@ describe("staleReason", () => {
 	});
 });
 
-describe("resettableEdits", () => {
+describe("hasEditsSinceResult", () => {
 	it("is false for a node that has never generated", () => {
-		expect(resettableEdits(node("a"), new GenerationQueue())).toBe(false);
+		expect(hasEditsSinceResult(node("a"), new GenerationQueue())).toBe(false);
 	});
 
-	it("is false when the node is not stale", () => {
+	it("is false right after a result is committed", () => {
 		const queue = new GenerationQueue();
 		commit(queue, node("a"), "a.png");
 
-		expect(resettableEdits(node("a"), queue)).toBe(false);
+		expect(hasEditsSinceResult(node("a"), queue)).toBe(false);
 	});
 
-	it("is true when only the prompt and attributes changed", () => {
+	it("is true when the prompt changed", () => {
 		const queue = new GenerationQueue();
-		commit(
-			queue,
-			node("a", { prompt: "a knight", attributes: { model: "fast" } }),
-			"a.png",
+		commit(queue, node("a", { prompt: "a knight" }), "a.png");
+
+		expect(hasEditsSinceResult(node("a", { prompt: "a wizard" }), queue)).toBe(
+			true,
 		);
+	});
+
+	it("is true when an attribute changed", () => {
+		const queue = new GenerationQueue();
+		commit(queue, node("a", { attributes: { model: "fast" } }), "a.png");
 
 		expect(
-			resettableEdits(
-				node("a", { prompt: "a wizard", attributes: { model: "slow" } }),
-				queue,
-			),
+			hasEditsSinceResult(node("a", { attributes: { model: "slow" } }), queue),
 		).toBe(true);
+	});
+
+	it("is false when only a read changed", () => {
+		const queue = new GenerationQueue();
+		const withStyle = (style: string) =>
+			node("a", { reads: { "the art style": style } });
+		commit(queue, withStyle("noir"), "a.png");
+
+		expect(hasEditsSinceResult(withStyle("watercolor"), queue)).toBe(false);
 	});
 
 	it("is false when only an upstream result changed", () => {
@@ -164,31 +175,10 @@ describe("resettableEdits", () => {
 		commit(queue, image, "a.png");
 
 		commit(queue, avatar, "red-v2.png");
-		expect(resettableEdits(image, queue)).toBe(false);
+		expect(hasEditsSinceResult(image, queue)).toBe(false);
 	});
 
-	it("is false when only a read changed", () => {
-		const queue = new GenerationQueue();
-		const withStyle = (style: string) =>
-			node("a", { reads: { "the art style": style } });
-		commit(queue, withStyle("noir"), "a.png");
-
-		expect(resettableEdits(withStyle("watercolor"), queue)).toBe(false);
-	});
-
-	it("is false when an upstream dependency is itself stale", () => {
-		const queue = new GenerationQueue();
-		const avatar = (style: string) =>
-			node("avatar", { reads: { "the art style": style } });
-		const image = (style: string) =>
-			node("a", { dependsOn: { "Red's avatar": avatar(style) } });
-		commit(queue, avatar("noir"), "red.png");
-		commit(queue, image("noir"), "a.png");
-
-		expect(resettableEdits(image("watercolor"), queue)).toBe(false);
-	});
-
-	it("is false when local edits mix with an upstream change", () => {
+	it("is true for local edits even when an upstream result changed too", () => {
 		const queue = new GenerationQueue();
 		const avatar = node("avatar");
 		const image = (prompt: string) =>
@@ -197,19 +187,6 @@ describe("resettableEdits", () => {
 		commit(queue, image("a knight"), "a.png");
 
 		commit(queue, avatar, "red-v2.png");
-		expect(resettableEdits(image("a wizard"), queue)).toBe(false);
-	});
-
-	it("is false for a pinned result", () => {
-		const queue = new GenerationQueue();
-		queue.commitResult(
-			node("a", { prompt: "a knight" }),
-			{ imageUrl: "a.png", durationSec: 0 },
-			{ pinned: true },
-		);
-
-		expect(resettableEdits(node("a", { prompt: "a wizard" }), queue)).toBe(
-			false,
-		);
+		expect(hasEditsSinceResult(image("a wizard"), queue)).toBe(true);
 	});
 });

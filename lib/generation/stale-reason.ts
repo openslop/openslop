@@ -36,18 +36,16 @@ function changedInputs(node: GenerationNode, queue: GenerationQueue): string[] {
 	]);
 }
 
-/** Stale only through its own prompt or attributes, so putting those back clears the marker. */
-export function resettableEdits(
-	node: GenerationNode,
+/** The prompt or attributes moved off the ones that produced the current result. */
+export function hasEditsSinceResult(
+	{ id, inputs }: GenerationNode,
 	queue: GenerationQueue,
 ): boolean {
-	const previous = queue.getElementSnapshot(node.id).resultInputs;
-	if (!previous || !isNodeStale(node, queue)) return false;
-	const current = generationInputs(node, queue);
+	const previous = queue.getElementSnapshot(id).resultInputs;
+	if (!previous) return false;
 	return (
-		isEqual(current.reads, previous.reads) &&
-		isEqual(current.dependencies, previous.dependencies) &&
-		!Object.values(node.dependsOn).some((dep) => needsGeneration(dep, queue))
+		inputs.prompt !== previous.prompt ||
+		!isEqual(inputs.attributes, previous.attributes)
 	);
 }
 
