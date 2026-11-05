@@ -9,7 +9,12 @@ import {
 	type RenderElementProps,
 } from "slate-react";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Pencil, Plus, type IconComponent } from "@/components/ui/icon";
+import {
+	AlertTriangle,
+	Pencil,
+	Plus,
+	type IconComponent,
+} from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import type { CharacterRefElement } from "@/lib/canvas/types";
