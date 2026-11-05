@@ -1,9 +1,5 @@
 import type { ReactNode } from "react";
-import {
-	Captions,
-	CaptionsFill,
-	type IconComponent,
-} from "@/components/ui/icon";
+import { Captions, type IconComponent } from "@/components/ui/icon";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
@@ -71,25 +67,17 @@ function SelectedWash() {
 	);
 }
 
-const CORNERS = {
-	left: "left-0.5 rounded-tr-sm rounded-bl-sm",
-	right: "right-0.5 rounded-tl-sm rounded-br-sm",
-} as const;
-
 function CornerChip({
-	corner,
 	className,
 	children,
 }: {
-	corner: keyof typeof CORNERS;
 	className?: string;
 	children: ReactNode;
 }) {
 	return (
 		<span
 			className={cn(
-				"absolute bottom-0.5 flex h-3.5 max-w-full items-center bg-on-media/65 px-1 text-badge-xs text-on-media-foreground",
-				CORNERS[corner],
+				"absolute bottom-0.5 left-0.5 flex h-3.5 max-w-full items-center rounded-tr-sm rounded-bl-sm bg-on-media/65 px-1 text-badge-xs text-on-media-foreground",
 				className,
 			)}
 		>
@@ -209,15 +197,10 @@ export function TimelineClip({
 				)}
 			</div>
 			{sceneNumber ? (
-				<CornerChip corner="left" className="font-numeric">
+				<CornerChip className="font-numeric">
 					<span className="truncate">
 						{fit(sceneLabel(sceneNumber), width)}
 					</span>
-				</CornerChip>
-			) : null}
-			{element.captions ? (
-				<CornerChip corner="right">
-					<CaptionsFill size={HEADER_ICON_SIZE} />
 				</CornerChip>
 			) : null}
 		</ClipFrame>
