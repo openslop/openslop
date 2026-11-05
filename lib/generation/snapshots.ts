@@ -39,9 +39,9 @@ const EMPTY_SNAPSHOT: ElementSnapshot = {
 
 const settled = (state: Record<string, ElementSnapshot>) =>
 	new Map(
-		Object.entries(state).map(([id, snap]) => [
+		Object.entries(state).map(([id, snapshot]) => [
 			id,
-			{ ...snap, status: "idle" as const, startedAt: null },
+			{ ...snapshot, status: "idle" as const, startedAt: null },
 		]),
 	);
 
@@ -55,8 +55,7 @@ export type ActiveGenerationStatus = Exclude<GenerationStatus, "idle">;
 /** A generation is active from the moment it is queued until it settles. */
 export const isGenerationActive = (
 	status: GenerationStatus,
-): status is ActiveGenerationStatus =>
-	status === "queued" || status === "generating";
+): status is ActiveGenerationStatus => status !== "idle";
 
 /**
  * Per-element generation state and the results already seen for it, with a
@@ -95,15 +94,14 @@ export class SnapshotStore {
 
 	isBusy = (): boolean => this.getActiveCount() > 0;
 
-	private count(predicate: (snap: ElementSnapshot) => boolean): number {
-		return Array.from(this.state.values()).filter(predicate).length;
-	}
+	private count = (predicate: (snapshot: ElementSnapshot) => boolean): number =>
+		Array.from(this.state.values()).filter(predicate).length;
 
 	getActiveCount = (): number =>
-		this.count((s) => isGenerationActive(s.status));
+		this.count(({ status }) => isGenerationActive(status));
 
 	getGeneratedCount = (): number =>
-		this.count((s) => !isGenerationActive(s.status) && s.result != null);
+		this.count(({ status, result }) => status === "idle" && result != null);
 
 	update(id: string, patch: Partial<ElementSnapshot>) {
 		const current = this.get(id);

@@ -23,7 +23,7 @@ export function createCanvasElement<T extends ElementType>(
 		...opts.attrs,
 		...(connector && resolveModel(connector, opts.attrs, defaults[connector])),
 	};
-	const attributes = attributeSchemaFor(type, attrs).resolve(attrs, defaults);
+	const attributes = attributeSchemaFor(type, attrs).resolve(attrs);
 	return {
 		id: opts.id ?? makeNodeId(),
 		type,

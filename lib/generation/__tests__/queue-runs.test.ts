@@ -16,8 +16,8 @@ import { buildCtx } from "./_context";
 
 const mediaGenerate =
 	vi.fn<(params: object, context: PluginContext) => Promise<AssetResult>>();
-vi.mock("@/lib/connectors/factory", async (original) => ({
-	...(await original<typeof import("@/lib/connectors/factory")>()),
+vi.mock("@/lib/connectors/factory", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/connectors/factory")>()),
 	createConnector: () => ({ generate: mediaGenerate }),
 }));
 
@@ -84,15 +84,13 @@ describe("running a graph", () => {
 		const queue = new GenerationQueue();
 		const avatar = nodeOf(canvas[0].id);
 		queue.commitResult(avatar, { imageUrl: "red.png", durationSec: 0 });
-		let finish = (_: AssetResult) => {};
-		mediaGenerate.mockImplementation(
-			() => new Promise((resolve) => (finish = resolve)),
-		);
+		const image = Promise.withResolvers<AssetResult>();
+		mediaGenerate.mockReturnValue(image.promise);
 
 		queue.enqueueGraph([nodeOf("img")]);
 		await vi.waitFor(() => expect(mediaGenerate).toHaveBeenCalledOnce());
 		queue.commitResult(avatar, { imageUrl: "red-2.png", durationSec: 0 });
-		finish({ imageUrl: "img.png", durationSec: 0 });
+		image.resolve({ imageUrl: "img.png", durationSec: 0 });
 
 		await vi.waitFor(() =>
 			expect(queue.getElementSnapshot("img").result).toBeTruthy(),

@@ -18,8 +18,9 @@ const maxTrimDurationSec = (mediaDurationSec: number, trimStartSec: number) =>
 export const isTrimmable = (element: ResolvedElement): boolean =>
 	element.mediaDurationSec > 0;
 
-export const isTrimmed = (element: ResolvedElement): boolean =>
-	element.trimDurationSec < element.mediaDurationSec;
+export const isTrimmed = (
+	element: Pick<ResolvedElement, "trimDurationSec" | "mediaDurationSec">,
+): boolean => element.trimDurationSec < element.mediaDurationSec;
 
 /** A clip plays from its trim start for its timeline duration, or to the end of its media by default. */
 export function trimClip(

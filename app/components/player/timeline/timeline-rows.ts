@@ -92,8 +92,7 @@ function withinVideo(sequences: Sequence[], totalSec: number): Sequence[] {
 
 /** Roles with nothing to show are dropped. */
 export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
-	const roles = Object.keys(ROWS) as ElementRole[];
-	return roles.flatMap((role) => {
+	return (Object.keys(ROWS) as ElementRole[]).flatMap((role) => {
 		const lanes = packLanes(
 			withinVideo(sequencesForRole(layout, role), layout.totalDurationSec),
 			layout.transitionDurationSec,

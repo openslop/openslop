@@ -9,7 +9,7 @@ import {
 	type ContentType,
 } from "@/lib/canvas/types";
 import { getDuration } from "../canvas/element-attributes";
-import { elementTrim } from "./clip-trim";
+import { elementTrim, isTrimmed } from "./clip-trim";
 import { MIN_DURATION_SEC } from "./scene-builder";
 import { secondsForWords } from "../project/video-length";
 
@@ -24,8 +24,10 @@ export type ElementLength = {
 	dialogueIds: string[];
 	/** The length it is generated at, where its type has one at all. */
 	durationSec?: number;
-	/** Which of its own duration, its dialogue or the minimum set `seconds`. */
-	decidedBy: "duration" | "dialogue" | "minimum";
+	/** The length it brings of its own, where it is a video. */
+	own?: OwnLength;
+	/** Which of its own duration, its trim, its dialogue or the minimum set `seconds`. */
+	decidedBy: "duration" | "trim" | "dialogue" | "minimum";
 };
 
 type Span = {
@@ -35,18 +37,37 @@ type Span = {
 	dialogueIds: string[];
 };
 
-/** A generated video runs for its own length; a still has none of its own. */
-const ownDuration = (element: ContentElement): number | undefined =>
-	CONTENT_TYPES[element.type].outputKind === "video"
-		? getDuration(element)
-		: undefined;
+export type OwnLength = {
+	seconds: number;
+	decidedBy: "duration" | "trim";
+};
+
+/** A video plays for its trim where the user set one, else its duration; a still has no length of its own. */
+const ownLength = (
+	element: ContentElement,
+): Pick<ElementLength, "durationSec" | "own"> => {
+	if (CONTENT_TYPES[element.type].outputKind !== "video") return {};
+	const durationSec = getDuration(element);
+	const trim = elementTrim(element, durationSec);
+	const trimmed = isTrimmed({ ...trim, mediaDurationSec: durationSec });
+	return {
+		durationSec,
+		own: {
+			seconds: trim.trimDurationSec,
+			decidedBy: trimmed ? "trim" : "duration",
+		},
+	};
+};
+
+export const hasDialogue = ({ words }: Pick<ElementLength, "words">) =>
+	words > 0;
 
 const decide = (
-	ownSec: number,
+	own: OwnLength | undefined,
 	dialogueSec: number,
 ): Pick<ElementLength, "seconds" | "decidedBy"> => {
-	if (ownSec >= dialogueSec && ownSec >= MIN_DURATION_SEC)
-		return { seconds: ownSec, decidedBy: "duration" };
+	if (own && own.seconds >= dialogueSec && own.seconds >= MIN_DURATION_SEC)
+		return own;
 	if (dialogueSec >= MIN_DURATION_SEC)
 		return { seconds: dialogueSec, decidedBy: "dialogue" };
 	return { seconds: MIN_DURATION_SEC, decidedBy: "minimum" };
@@ -58,7 +79,7 @@ const toLength = ({
 	words,
 	dialogueIds,
 }: Span): ElementLength => {
-	const durationSec = ownDuration(element);
+	const { durationSec, own } = ownLength(element);
 	return {
 		id: element.id,
 		type: element.type,
@@ -66,10 +87,8 @@ const toLength = ({
 		words,
 		dialogueIds,
 		durationSec,
-		...decide(
-			elementTrim(element, durationSec ?? 0).trimDurationSec,
-			secondsForWords(words),
-		),
+		own,
+		...decide(own, secondsForWords(words)),
 	};
 };
 

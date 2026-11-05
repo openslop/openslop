@@ -1,12 +1,4 @@
-import {
-	afterEach,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mock,
-	vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { AUTOSAVE_DEBOUNCE_MS, createAutosaver } from "../autosave";
 import type { SavedProject } from "../saved-project";
@@ -37,12 +29,13 @@ const content = (
 ): SavedProject => ({ script, store, generation });
 
 describe("createAutosaver", () => {
-	let projectId: string;
+	const projectId = "p1";
 	let store: ProjectStore;
-	let onSaved: Mock<() => void>;
-	let onError: Mock<(error: unknown) => void>;
+	const onSaved = vi.fn<() => void>();
+	const onError = vi.fn<(error: unknown) => void>();
 	let name: string;
 	let thumbnailUrl: string | null;
+	let edits: number;
 	const meta = () => ({ name, thumbnail_url: thumbnailUrl });
 
 	const build = (
@@ -58,10 +51,6 @@ describe("createAutosaver", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.spyOn(console, "error").mockImplementation(() => {});
-		saveProject.mockReset().mockResolvedValue(undefined);
-		onSaved = vi.fn<() => void>();
-		onError = vi.fn<(error: unknown) => void>();
-		projectId = `p-${saveProject.mock.calls.length}-${Math.random()}`;
 		store = createProjectStore();
 		edits = 0;
 		name = "Moon Rabbit";
@@ -72,7 +61,6 @@ describe("createAutosaver", () => {
 		vi.useRealTimers();
 	});
 
-	let edits = 0;
 	const edit = () => {
 		edits += 1;
 		store
@@ -225,10 +213,8 @@ describe("createAutosaver", () => {
 
 	it("saves the document as it stood when suspend was called", async () => {
 		let script = "live";
-		let release = () => {};
-		saveProject.mockImplementationOnce(
-			() => new Promise<void>((resolve) => (release = () => resolve())),
-		);
+		const firstSave = Promise.withResolvers<void>();
+		saveProject.mockReturnValueOnce(firstSave.promise);
 		const autosaver = build(() => content(extractStoreSnapshot(store), script));
 
 		edit();
@@ -241,7 +227,7 @@ describe("createAutosaver", () => {
 		autosaver.schedule();
 		autosaver.suspend();
 		script = "an older version on screen";
-		release();
+		firstSave.resolve();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 
 		expect(saveProject).toHaveBeenCalledTimes(2);
@@ -254,14 +240,16 @@ describe("createAutosaver", () => {
 	it("reports every save to its subscribers until they unsubscribe", async () => {
 		const autosaver = build();
 		const seen: string[] = [];
-		const stop = autosaver.onProjectSaved(({ script }) => seen.push(script));
+		const unsubscribe = autosaver.onProjectSaved(({ script }) =>
+			seen.push(script),
+		);
 
 		edit();
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
 		expect(seen).toEqual(["<osml/>"]);
 
-		stop();
+		unsubscribe();
 		edit();
 		autosaver.schedule();
 		await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS);
@@ -272,7 +260,7 @@ describe("createAutosaver", () => {
 
 	it("reports a failed save instead of throwing", async () => {
 		const boom = new Error("offline");
-		saveProject.mockRejectedValue(boom);
+		saveProject.mockRejectedValueOnce(boom);
 		const autosaver = build();
 		edit();
 		autosaver.schedule();

@@ -133,7 +133,6 @@ describe("createCanvasElement", () => {
 		["asset_avatar", {}, DEFAULT_MODELS.image],
 		["asset_voice", { voice: CARTESIA }, CARTESIA],
 		["asset_voice", {}, DEFAULT_MODELS.voice],
-		["asset_style", { image: PINNED }, {}],
 	] as const)(
 		"puts a new %s on the default model %o, or the recommended one",
 		(type, defaultModels, model) => {
@@ -144,4 +143,11 @@ describe("createCanvasElement", () => {
 			expect(flatAttributes(node)).toEqual({ name: "Mia", ...model });
 		},
 	);
+
+	it("leaves a style on no model, whatever the default", () => {
+		const node = createCanvasElement("asset_style", {
+			defaultModels: { image: PINNED },
+		});
+		expect(flatAttributes(node)).toEqual({});
+	});
 });

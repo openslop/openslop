@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Palette } from "@/components/ui/icon";
+import { Thumbnail, ThumbnailFace } from "@/components/ui/thumbnail";
 import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
 import { truncateMiddle } from "@/lib/format";
 import { ART_STYLE_PRESETS, type ArtStyle } from "@/lib/project/art-styles";
@@ -22,38 +23,40 @@ function PresetTile({
 }) {
 	const [broken, setBroken] = useState(false);
 	return (
-		<button
-			type="button"
-			onClick={onSelect}
-			aria-pressed={selected}
-			title={description}
-			className="focus-ring flex w-full flex-col gap-1 rounded-md text-left"
-		>
-			<div
-				className={cn(
-					"relative flex aspect-square items-center justify-center overflow-hidden rounded-md border bg-muted text-muted-foreground transition-colors",
-					selected
-						? "border-accent ring-2 ring-accent"
-						: "border-border hover:border-accent/40",
-				)}
+		<Thumbnail asChild fill>
+			<button
+				type="button"
+				onClick={onSelect}
+				aria-pressed={selected}
+				title={description}
+				className="focus-ring w-full rounded-md text-left"
 			>
-				{thumbnail && !broken ? (
-					<ImageWithShimmer
-						src={thumbnail}
-						alt=""
-						fill
-						sizes="(min-width: 640px) 220px, 50vw"
-						className="object-cover"
-						onError={() => setBroken(true)}
-					/>
-				) : (
-					<Palette className="h-5 w-5" />
-				)}
-			</div>
-			<span className="text-label text-muted-foreground">
-				{truncateMiddle(description, DESCRIPTION_LENGTH)}
-			</span>
-		</button>
+				<ThumbnailFace
+					look="muted"
+					selected={selected}
+					className={cn(
+						"transition-colors",
+						!selected && "hover:border-accent/40",
+					)}
+				>
+					{thumbnail && !broken ? (
+						<ImageWithShimmer
+							src={thumbnail}
+							alt=""
+							fill
+							sizes="(min-width: 640px) 220px, 50vw"
+							className="object-cover"
+							onError={() => setBroken(true)}
+						/>
+					) : (
+						<Palette className="h-5 w-5" />
+					)}
+				</ThumbnailFace>
+				<span className="text-label text-muted-foreground">
+					{truncateMiddle(description, DESCRIPTION_LENGTH)}
+				</span>
+			</button>
+		</Thumbnail>
 	);
 }
 

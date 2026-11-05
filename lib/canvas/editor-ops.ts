@@ -151,7 +151,7 @@ export function applyElementVersion(
 /** A nil value deletes its key. */
 export type AttributeChanges = Record<string, string | null | undefined>;
 
-const withAttrs = (
+export const withAttrs = (
 	attributes: Record<string, string>,
 	changes: AttributeChanges,
 ): Record<string, string> =>

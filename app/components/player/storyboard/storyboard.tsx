@@ -8,20 +8,17 @@ import { insertScene } from "@/lib/canvas/insert-scene";
 import { useLayout } from "../render-layout-context";
 import { useSelectScene } from "../use-select-scene";
 import { SceneInsertHandle } from "./scene-insert-handle";
-import {
-	buildStoryboardScenes,
-	type StoryboardScene as StoryboardSceneData,
-} from "./storyboard-scenes";
+import { buildStoryboardItems, type StoryboardItem } from "./storyboard-scenes";
 import { StoryboardScene } from "./storyboard-scene";
 
 export function Storyboard() {
 	const editor = useSlateStatic();
 	const { layout, segments, scenes } = useLayout();
 	const selectScene = useSelectScene();
-	const [deleting, setDeleting] = useState<StoryboardSceneData>();
+	const [deleting, setDeleting] = useState<StoryboardItem>();
 
 	const items = useMemo(
-		() => buildStoryboardScenes(scenes, segments),
+		() => buildStoryboardItems(scenes, segments),
 		[scenes, segments],
 	);
 

@@ -30,7 +30,7 @@ function job(overrides: Partial<JobRow> & { ageMs: number }): JobRow {
 
 describe("failIfExpired", () => {
 	beforeEach(() => {
-		mockUpdateJob.mockReset().mockResolvedValue(undefined);
+		mockUpdateJob.mockResolvedValue(undefined);
 	});
 
 	it("leaves a job inside its deadline alone", async () => {

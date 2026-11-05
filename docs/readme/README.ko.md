@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-lockup-animated-dark.svg">
-    <img src="../../assets/openslop-lockup-animated-light.svg" alt="OpenSlop" width="560">
-  </picture>
+  <img src="../../assets/openslop-lockup-animated-light.svg#gh-light-mode-only" alt="OpenSlop" width="560">
+  <img src="../../assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
 <p align="center"><b>무료 오픈 소스 AI 비디오 제작 도구.</b></p>
@@ -29,10 +27,8 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-demo-dark.svg">
-    <img src="../../assets/openslop-demo-light.svg" alt="OpenSlop - 무료 AI 비디오 제작 도구" width="100%">
-  </picture>
+  <img src="../../assets/openslop-demo-light.svg#gh-light-mode-only" alt="OpenSlop - 무료 AI 비디오 제작 도구" width="100%">
+  <img src="../../assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="OpenSlop - 무료 AI 비디오 제작 도구" width="100%">
 </p>
 
 ---
@@ -60,10 +56,8 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
-    <img src="../../assets/features/describe-light.svg" alt="프롬프트 상자에 예시 아이디어가 차례로 지나가고, 한 줄을 입력해 보냅니다" width="100%">
-  </picture></a>
+  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="프롬프트 상자에 예시 아이디어가 차례로 지나가고, 한 줄을 입력해 보냅니다" width="100%">
+  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="프롬프트 상자에 예시 아이디어가 차례로 지나가고, 한 줄을 입력해 보냅니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -77,10 +71,8 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#sloppy"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/sloppy-dark.svg">
-    <img src="../../assets/features/sloppy-light.svg" alt="Sloppy가 생각하고, 읽고, 뼈대를 잡고, 스크립트를 쓰면 캔버스에 장면이 나타납니다" width="100%">
-  </picture></a>
+  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy가 생각하고, 읽고, 뼈대를 잡고, 스크립트를 쓰면 캔버스에 장면이 나타납니다" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy가 생각하고, 읽고, 뼈대를 잡고, 스크립트를 쓰면 캔버스에 장면이 나타납니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -94,10 +86,8 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 
 </td>
 <td width="50%">
-  <a href="../../lib/canvas"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
-  </picture></a>
+  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
+  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,10 +101,8 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
-    <img src="../../assets/features/generate-light.svg" alt="Generate all이 큐를 돌리고, 미리보기가 채워지고, 고친 프롬프트는 이유와 함께 Stale로 표시됩니다" width="100%">
-  </picture></a>
+  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all이 큐를 돌리고, 미리보기가 채워지고, 고친 프롬프트는 이유와 함께 Stale로 표시됩니다" width="100%">
+  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all이 큐를 돌리고, 미리보기가 채워지고, 고친 프롬프트는 이유와 함께 Stale로 표시됩니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -128,10 +116,8 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 </td>
 <td width="50%">
-  <a href="../../app/components/player"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
-    <img src="../../assets/features/timeline-light.svg" alt="플레이어가 단어 단위 자막과 함께 재생되고, 재생 헤드가 네 레인짜리 타임라인을 지나갑니다" width="100%">
-  </picture></a>
+  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="플레이어가 단어 단위 자막과 함께 재생되고, 재생 헤드가 네 레인짜리 타임라인을 지나갑니다" width="100%">
+  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="플레이어가 단어 단위 자막과 함께 재생되고, 재생 헤드가 네 레인짜리 타임라인을 지나갑니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -145,10 +131,8 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
-    <img src="../../assets/features/providers-light.svg" alt="Cartesia 키를 붙여 넣고 검증하면 Unverified(미확인)에서 Connected(연결됨)로 바뀝니다" width="100%">
-  </picture></a>
+  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Cartesia 키를 붙여 넣고 검증하면 Unverified(미확인)에서 Connected(연결됨)로 바뀝니다" width="100%">
+  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Cartesia 키를 붙여 넣고 검증하면 Unverified(미확인)에서 Connected(연결됨)로 바뀝니다" width="100%">
 </td>
 </tr>
 </table>
@@ -279,12 +263,8 @@ supabase/        데이터베이스 마이그레이션
 ## 스타 히스토리
 
 <p align="center">
-  <a href="https://star-history.com/#openslop/openslop&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark">
-      <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date" alt="openslop/openslop의 GitHub 스타 히스토리 차트" width="880">
-    </picture>
-  </a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="openslop/openslop의 GitHub 스타 히스토리 차트" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="openslop/openslop의 GitHub 스타 히스토리 차트" width="880"></a>
 </p>
 
 ## 라이선스

@@ -2,11 +2,8 @@ import { RenderElementProps } from "slate-react";
 import type { ContentElement } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { getElementText } from "@/lib/canvas/osml-serializer";
-import {
-	elementModelPick,
-	elementSchema,
-} from "@/lib/canvas/element-connector";
-import type { AttributeSpec } from "@/lib/connectors/attributes/schema";
+import { elementSchema } from "@/lib/canvas/element-connector";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { splitTextDirection } from "../utils/text-direction";
 import { OutputPreview } from "./output-preview";
 import { DeleteButton } from "./delete-button";
@@ -30,33 +27,14 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
 
-function ElementAttributeBadges({
-	element,
-	specs,
-}: {
-	element: ContentElement;
-	specs: Record<string, AttributeSpec>;
-}) {
-	return Object.entries(specs).map(([key, spec]) => (
-		<AttributeBadge
-			key={key}
-			element={element}
-			attrKey={key}
-			spec={spec}
-			className="text-label-xs"
-		/>
-	));
-}
-
 function ElementSettings({
 	element,
-	specs,
+	defs,
 }: {
 	element: ContentElement;
-	specs: Record<string, AttributeSpec>;
+	defs: AttributeDef[];
 }) {
-	const entries = Object.entries(specs);
-	if (entries.length === 0) return null;
+	if (defs.length === 0) return null;
 	return (
 		<Popover>
 			<SimpleTooltip label="Settings">
@@ -69,15 +47,13 @@ function ElementSettings({
 			<PopoverContent align="start" className="w-64 border border-border">
 				<SectionTitle className="mb-2">Settings</SectionTitle>
 				<div className="flex flex-col gap-2">
-					{entries.map(([key, spec]) => (
-						<div key={key} className="flex items-center justify-between gap-3">
-							<span className="shrink-0 text-label">{spec.label}</span>
-							<AttributeBadge
-								element={element}
-								attrKey={key}
-								spec={spec}
-								hideLabel
-							/>
+					{defs.map((def) => (
+						<div
+							key={def.key}
+							className="flex items-center justify-between gap-3"
+						>
+							<span className="shrink-0 text-label">{def.label}</span>
+							<AttributeBadge element={element} def={def} />
 						</div>
 					))}
 				</div>
@@ -125,22 +101,14 @@ export function ElementContainer({
 									</span>
 								</span>
 								{config.lead && <config.lead element={element} />}
-								{!schema.hidesModel && (
+								{!config.hidesModel && (
 									<ModelAttribute
 										element={element}
-										pick={elementModelPick(element)}
 										label="Model"
 										className="text-label-xs"
 									/>
 								)}
-								<ElementAttributeBadges
-									element={element}
-									specs={schema.badgeAttributes}
-								/>
-								<ElementSettings
-									element={element}
-									specs={schema.settingsAttributes}
-								/>
+								<ElementSettings element={element} defs={schema.settingsDefs} />
 								{config.tools?.map((Tool, index) => (
 									<Tool key={index} element={element} />
 								))}

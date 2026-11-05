@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-lockup-animated-dark.svg">
-    <img src="../../assets/openslop-lockup-animated-light.svg" alt="OpenSlop" width="560">
-  </picture>
+  <img src="../../assets/openslop-lockup-animated-light.svg#gh-light-mode-only" alt="OpenSlop" width="560">
+  <img src="../../assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
 <p align="center"><b>Criador de vídeo com IA, gratuito e de código aberto.</b></p>
@@ -29,10 +27,8 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-demo-dark.svg">
-    <img src="../../assets/openslop-demo-light.svg" alt="OpenSlop - seu criador de vídeo com IA gratuito" width="100%">
-  </picture>
+  <img src="../../assets/openslop-demo-light.svg#gh-light-mode-only" alt="OpenSlop - seu criador de vídeo com IA gratuito" width="100%">
+  <img src="../../assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="OpenSlop - seu criador de vídeo com IA gratuito" width="100%">
 </p>
 
 ---
@@ -60,10 +56,8 @@ Digite uma linha. Escolha 16:9 ou 9:16, um idioma, um modelo e uma duração, ou
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
-    <img src="../../assets/features/describe-light.svg" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%">
-  </picture></a>
+  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%">
+  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="A caixa de prompt passa por ideias de exemplo, depois uma linha é digitada e enviada" width="100%">
 </td>
 </tr>
 <tr>
@@ -77,10 +71,8 @@ O copiloto mora no painel da esquerda. Ele lê o roteiro, esboça a história, e
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#sloppy"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/sloppy-dark.svg">
-    <img src="../../assets/features/sloppy-light.svg" alt="Sloppy pensa, lê, esboça, escreve um roteiro e as cenas aparecem no canvas" width="100%">
-  </picture></a>
+  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy pensa, lê, esboça, escreve um roteiro e as cenas aparecem no canvas" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy pensa, lê, esboça, escreve um roteiro e as cenas aparecem no canvas" width="100%">
 </td>
 </tr>
 <tr>
@@ -94,10 +86,8 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, vídeo, som,
 
 </td>
 <td width="50%">
-  <a href="../../lib/canvas"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%">
-  </picture></a>
+  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%">
+  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Passar o mouse sobre uma linha abre o menu de inserção com os seis tipos de elemento e um novo cartão Sound aparece" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,10 +101,8 @@ Cada cena é uma pilha de cartões: narração, personagem, imagem, vídeo, som,
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
-    <img src="../../assets/features/generate-light.svg" alt="Generate all roda a fila, as prévias vão aparecendo e um prompt editado é marcado como Stale com um motivo" width="100%">
-  </picture></a>
+  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all roda a fila, as prévias vão aparecendo e um prompt editado é marcado como Stale com um motivo" width="100%">
+  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all roda a fila, as prévias vão aparecendo e um prompt editado é marcado como Stale com um motivo" width="100%">
 </td>
 </tr>
 <tr>
@@ -128,10 +116,8 @@ Assista ao corte enquanto ele vai sendo preenchido, com legendas palavra por pal
 
 </td>
 <td width="50%">
-  <a href="../../app/components/player"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
-    <img src="../../assets/features/timeline-light.svg" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%">
-  </picture></a>
+  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%">
+  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="O player toca com legendas palavra por palavra enquanto o cursor de reprodução percorre uma linha do tempo de quatro faixas" width="100%">
 </td>
 </tr>
 <tr>
@@ -145,10 +131,8 @@ Os modelos hospedados vêm com sua conta. Cole uma chave da Anthropic, Runware, 
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
-    <img src="../../assets/features/providers-light.svg" alt="Uma chave da Cartesia é colada e validada, passando de Unverified para Connected" width="100%">
-  </picture></a>
+  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Uma chave da Cartesia é colada e validada, passando de Unverified para Connected" width="100%">
+  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Uma chave da Cartesia é colada e validada, passando de Unverified para Connected" width="100%">
 </td>
 </tr>
 </table>
@@ -279,12 +263,8 @@ Todo mundo na comunidade deve seguir nosso [Código de Conduta](../../CODE_OF_CO
 ## Histórico de estrelas
 
 <p align="center">
-  <a href="https://star-history.com/#openslop/openslop&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark">
-      <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date" alt="Gráfico do histórico de estrelas do GitHub para openslop/openslop" width="880">
-    </picture>
-  </a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="Gráfico do histórico de estrelas do GitHub para openslop/openslop" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="Gráfico do histórico de estrelas do GitHub para openslop/openslop" width="880"></a>
 </p>
 
 ## Licença

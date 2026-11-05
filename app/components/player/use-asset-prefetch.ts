@@ -62,9 +62,8 @@ export function useAssetPrefetch(layout: RenderLayout): boolean {
 			.then(async (prefetch) => {
 				if (cancelled) return;
 				const active = activeRef.current;
-				if (reconcilePrefetch(collectUrls(layout), active, prefetch)) {
+				if (reconcilePrefetch(collectUrls(layout), active, prefetch))
 					setReady(false);
-				}
 				await awaitPrefetch([...active.values()]);
 				if (!cancelled) setReady(true);
 			})

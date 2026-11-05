@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-lockup-animated-dark.svg">
-    <img src="../../assets/openslop-lockup-animated-light.svg" alt="OpenSlop" width="560">
-  </picture>
+  <img src="../../assets/openslop-lockup-animated-light.svg#gh-light-mode-only" alt="OpenSlop" width="560">
+  <img src="../../assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
 <p align="center"><b>無料でオープンソースの AI 動画クリエイター。</b></p>
@@ -29,10 +27,8 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/openslop-demo-dark.svg">
-    <img src="../../assets/openslop-demo-light.svg" alt="OpenSlop - あなたの無料 AI 動画クリエイター" width="100%">
-  </picture>
+  <img src="../../assets/openslop-demo-light.svg#gh-light-mode-only" alt="OpenSlop - あなたの無料 AI 動画クリエイター" width="100%">
+  <img src="../../assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="OpenSlop - あなたの無料 AI 動画クリエイター" width="100%">
 </p>
 
 ---
@@ -60,10 +56,8 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 </td>
 <td width="50%">
-  <a href="../../app/components/copilot/composer-copilot.tsx"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/describe-dark.svg">
-    <img src="../../assets/features/describe-light.svg" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
-  </picture></a>
+  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
+  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
 </td>
 </tr>
 <tr>
@@ -77,10 +71,8 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#sloppy"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/sloppy-dark.svg">
-    <img src="../../assets/features/sloppy-light.svg" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
-  </picture></a>
+  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
 </td>
 </tr>
 <tr>
@@ -94,10 +86,8 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 </td>
 <td width="50%">
-  <a href="../../lib/canvas"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/canvas-dark.svg">
-    <img src="../../assets/features/canvas-light.svg" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
-  </picture></a>
+  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
+  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,10 +101,8 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#canvas-and-generation"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/generate-dark.svg">
-    <img src="../../assets/features/generate-light.svg" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
-  </picture></a>
+  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
+  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
 </td>
 </tr>
 <tr>
@@ -128,10 +116,8 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <a href="../../app/components/player"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/timeline-dark.svg">
-    <img src="../../assets/features/timeline-light.svg" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
-  </picture></a>
+  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
+  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
 </td>
 </tr>
 <tr>
@@ -145,10 +131,8 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <a href="../../ARCHITECTURE.md#models-and-keys"><picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../../assets/features/providers-dark.svg">
-    <img src="../../assets/features/providers-light.svg" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
-  </picture></a>
+  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
+  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
 </td>
 </tr>
 </table>
@@ -279,12 +263,8 @@ supabase/        データベースのマイグレーション
 ## スター履歴
 
 <p align="center">
-  <a href="https://star-history.com/#openslop/openslop&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark">
-      <img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date" alt="openslop/openslop の GitHub スター履歴グラフ" width="880">
-    </picture>
-  </a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date#gh-light-mode-only" alt="openslop/openslop の GitHub スター履歴グラフ" width="880"></a>
+  <a href="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only"><img src="https://api.star-history.com/svg?repos=openslop/openslop&type=Date&theme=dark#gh-dark-mode-only" alt="openslop/openslop の GitHub スター履歴グラフ" width="880"></a>
 </p>
 
 ## ライセンス

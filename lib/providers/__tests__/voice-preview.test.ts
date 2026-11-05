@@ -13,7 +13,7 @@ describe("fetchAllowedVoicePreview", () => {
 	const fetchMock = vi.fn();
 
 	beforeEach(() => {
-		fetchMock.mockReset().mockResolvedValue(new Response("ok"));
+		fetchMock.mockResolvedValue(new Response("ok"));
 		vi.stubGlobal("fetch", fetchMock);
 	});
 
