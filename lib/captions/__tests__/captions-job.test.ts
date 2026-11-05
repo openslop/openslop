@@ -27,7 +27,7 @@ const spoken = { audioUrl: "https://example.com/a.wav", durationSec: 2 };
 const heard = [toCaption("hi", 0, 1)];
 const element = { id: "narration", type: "narration" } as const;
 const stt = (result: AssetResult = spoken) =>
-	captionsNode(element, result, DEFAULT_MODELS.stt);
+	captionsNode(element, result, DEFAULT_MODELS.stt, "project-1");
 
 describe("captions jobs", () => {
 	let queue: GenerationQueue;

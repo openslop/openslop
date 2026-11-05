@@ -27,6 +27,7 @@ export const jobNode = (
 		connectorType,
 		model: DEFAULT_MODELS.image,
 		config: {},
+		projectId: "project-1",
 	},
 });
 

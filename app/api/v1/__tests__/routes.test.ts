@@ -25,6 +25,12 @@ vi.mock("@/lib/api/jobs", () => ({
 	getJob: (...args: unknown[]) => mockGetJob(...args),
 }));
 
+const mockStreamAgentTurn = vi.fn();
+vi.mock("@/lib/api/agent-turn", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/api/agent-turn")>()),
+	streamAgentTurn: (...args: unknown[]) => mockStreamAgentTurn(...args),
+}));
+
 vi.mock("@/lib/api/logger", () => ({
 	logger: { error: vi.fn(), warn: vi.fn() },
 }));
@@ -536,6 +542,37 @@ describe("API routes", () => {
 			});
 		});
 
+		it("books what the call cost to the project it names", async () => {
+			const { POST } = await import("@/app/api/v1/llm/route");
+			mockLLMGenerate.mockResolvedValue({
+				output: { text: "Hello", model: "x" },
+				costUsd: 0.02,
+			});
+
+			await POST(
+				makeRequest("/api/v1/llm", { prompt: "hi", projectId: PROJECT_ID }),
+			);
+
+			expect(mockCreateJob).toHaveBeenCalledWith(
+				expect.objectContaining({ projectId: PROJECT_ID, costUsd: 0.02 }),
+			);
+			expect(mockLLMGenerate).toHaveBeenCalledWith(
+				expect.not.objectContaining({ projectId: PROJECT_ID }),
+			);
+		});
+
+		it("returns 404 without calling the model for a project the caller cannot see", async () => {
+			mockOwnsProject.mockResolvedValue(false);
+			const { POST } = await import("@/app/api/v1/llm/route");
+
+			const res = await POST(
+				makeRequest("/api/v1/llm", { prompt: "hi", projectId: PROJECT_ID }),
+			);
+
+			expect(res.status).toBe(404);
+			expect(mockLLMGenerate).not.toHaveBeenCalled();
+		});
+
 		it("returns 402 without calling the model once the budget is spent", async () => {
 			mockSpentSince.mockResolvedValue(100);
 			const { POST } = await import("@/app/api/v1/llm/route");
@@ -589,6 +626,30 @@ describe("API routes", () => {
 			mockSpentSince.mockResolvedValue(120);
 
 			expect((await turn()).status).toBe(402);
+		});
+
+		it("books what the turn cost to its project", async () => {
+			mockStreamAgentTurn.mockImplementation(
+				async ({
+					recordSpend,
+				}: {
+					recordSpend: (costUsd: number) => Promise<unknown>;
+				}) => {
+					await recordSpend(0.5);
+					return new Response();
+				},
+			);
+
+			await turn();
+
+			expect(mockCreateJob).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					userId: "user-1",
+					projectId: PROJECT_ID,
+					connectorType: "llm",
+					costUsd: 0.5,
+				}),
+			);
 		});
 
 		it("returns 404 before the turn starts for a project the caller cannot see", async () => {

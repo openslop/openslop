@@ -17,7 +17,7 @@ import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
-import { createConnector } from "@/lib/connectors/factory";
+import { useCreateConnector } from "@/lib/connectors/use-create-connector";
 import { findProviderKey } from "@/lib/connectors/provider-key";
 import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
@@ -35,6 +35,7 @@ export function useAgentTools() {
 	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
+	const createConnector = useCreateConnector();
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
@@ -88,6 +89,6 @@ export function useAgentTools() {
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, store, account, queue, buildContext],
+		[editor, store, account, queue, buildContext, createConnector],
 	);
 }

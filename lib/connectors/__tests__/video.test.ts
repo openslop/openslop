@@ -7,6 +7,7 @@ const TEST_ID = "test-id";
 const VIDEO_URL = "https://cdn.example.com/v.mp4";
 
 const config = {
+	projectId: "project-1",
 	model: { provider: "openslop", model: "Slop Video v1" },
 } as const;
 
