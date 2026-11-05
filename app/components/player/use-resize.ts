@@ -77,7 +77,7 @@ export function useResize({
 	const maxSize = useViewportLength(axis) * maxViewportFraction;
 	const size = clamp(requested, minSize, maxSize);
 	// Where the grab started, so a move is a delta rather than a running total.
-	const origin = useRef({ pos: 0, size: defaultSize });
+	const origin = useRef({ position: 0, size: defaultSize });
 
 	const along = (event: { clientX: number; clientY: number }) =>
 		axis === "vertical" ? event.clientY : event.clientX;
@@ -91,11 +91,11 @@ export function useResize({
 		onStart: (event) => {
 			// Otherwise the browser starts a text selection under the pointer.
 			event.preventDefault();
-			origin.current = { pos: along(event), size };
+			origin.current = { position: along(event), size };
 			setResizing(true);
 		},
 		onMove: (event) =>
-			resizeBy(origin.current.size, along(event) - origin.current.pos),
+			resizeBy(origin.current.size, along(event) - origin.current.position),
 		onEnd: () => setResizing(false),
 	});
 
