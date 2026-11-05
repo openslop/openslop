@@ -1,7 +1,4 @@
-import {
-	PINNED_PANEL_KEYS,
-	RAIL_PANEL_GROUPS,
-} from "@/app/components/canvas/panel/panel-keys";
+import { Rail } from "@/app/components/canvas/panel/rail";
 import {
 	DOCK_DEFAULT_HEIGHT,
 	GUTTER_PX,
@@ -10,9 +7,7 @@ import {
 	RULER_LABEL_OFFSET,
 	SIDE_PLAYER_DEFAULT_WIDTH,
 } from "@/app/components/player/dock-layout";
-import { Fragment } from "react";
 import { DotGrid } from "@/components/ui/dot-grid";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const SCENES = [3, 2, 4];
@@ -144,23 +139,7 @@ export default function Loading() {
 
 			{/* Left rail + canvas card */}
 			<div className="flex min-h-0 flex-1 overflow-hidden">
-				<nav className="mr-2 flex w-14 shrink-0 flex-col items-center gap-1 pt-4 pr-0.5 pl-1 lg:w-[72px]">
-					<RailItemSkeleton />
-					{RAIL_PANEL_GROUPS.map((group) => (
-						<Fragment key={group.join()}>
-							<Separator className="my-1" />
-							{group.map((key) => (
-								<RailItemSkeleton key={key} />
-							))}
-						</Fragment>
-					))}
-					<div className="mt-auto flex w-full flex-col items-center gap-1 pb-3">
-						<Separator className="my-1" />
-						{PINNED_PANEL_KEYS.map((key) => (
-							<RailItemSkeleton key={key} />
-						))}
-					</div>
-				</nav>
+				<Rail home={<RailItemSkeleton />} Item={RailItemSkeleton} />
 
 				<div className="relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">
 					<div className="flex min-h-0 flex-1 overflow-hidden">
