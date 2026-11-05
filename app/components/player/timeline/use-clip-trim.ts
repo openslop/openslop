@@ -46,7 +46,7 @@ export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
 
 	const commit = () => {
 		setPreview(null);
-		if (!preview || isMatch(trimEdge(element, "end", 0), preview)) return;
+		if (!preview || isMatch(element, preview)) return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),
 			timelineDuration: toAttr(preview.timelineDurationSec),

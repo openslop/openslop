@@ -100,6 +100,14 @@ describe("trimEdge", () => {
 		});
 	});
 
+	it("leaves a clip shorter than the minimum as it is when neither edge moves", () => {
+		const trim = { trimStartSec: 0, timelineDurationSec: 0.5 };
+		const short = { ...trim, mediaDurationSec: 0.5 };
+		expect(trimEdge(short, "end", 0)).toEqual(trim);
+		expect(trimEdge(short, "start", 0)).toEqual(trim);
+		expect(trimEdge(short, "end", 5)).toEqual(trim);
+	});
+
 	it("uncovers no more than was trimmed off, and keeps the minimum", () => {
 		expect(trimEdge(clip, "start", -50)).toEqual({
 			trimStartSec: 0,

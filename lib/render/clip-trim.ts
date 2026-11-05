@@ -92,19 +92,21 @@ export function trimEdge(
 	deltaSec: number,
 ): Trim {
 	const { trimStartSec, timelineDurationSec } = clip;
+	const maxSec = maxTimelineDurationSec(clip);
+	const minSec = Math.min(MIN_DURATION_SEC, maxSec);
 	if (edge === "end")
 		return {
 			trimStartSec,
 			timelineDurationSec: clamp(
 				timelineDurationSec + deltaSec,
-				MIN_DURATION_SEC,
-				Math.max(MIN_DURATION_SEC, maxTimelineDurationSec(clip)),
+				minSec,
+				maxSec,
 			),
 		};
 	const shift = clamp(
 		deltaSec,
 		-trimStartSec,
-		Math.max(0, timelineDurationSec - MIN_DURATION_SEC),
+		Math.max(0, timelineDurationSec - minSec),
 	);
 	return {
 		trimStartSec: trimStartSec + shift,
