@@ -1,3 +1,4 @@
+import partition from "lodash/partition";
 import type { ElementRef } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
@@ -220,25 +221,35 @@ export class GenerationQueue {
 		this.releaseBlocked();
 	}
 
+	private deadDependency(node: GenerationNode) {
+		return Object.entries(node.dependsOn).find(
+			([, dep]) =>
+				!this.snapshots.isActive(dep.id) && !this.snapshots.get(dep.id).result,
+		);
+	}
+
 	private blockedByError(node: GenerationNode): string | null {
-		const entry = this.blockingDependency(node);
+		const entry = this.deadDependency(node);
 		if (!entry) return null;
 		const [label, dep] = entry;
-		const cause = this.snapshots.get(dep.id).error ?? this.blockedByError(dep);
+		const cause = this.snapshots.get(dep.id).error;
 		return cause ? `${label} failed: ${cause}` : null;
 	}
 
-	/** Nothing running or runnable means a dependency never arrived: release the rest, its error on each dependent. */
+	/** A dependency nothing will produce releases what waits on it, its error on each dependent. */
 	private releaseBlocked() {
-		if (this.active.size > 0 || this.pending.length === 0) return;
-		const blocked = this.pending;
-		this.pending = [];
-		for (const node of blocked) {
+		const [dead, waiting] = partition(this.pending, (node) =>
+			this.deadDependency(node),
+		);
+		if (dead.length === 0) return;
+		this.pending = waiting;
+		for (const node of dead) {
 			const error = this.blockedByError(node);
 			this.snapshots.resetToIdle(node.id);
 			if (error) this.snapshots.update(node.id, { error });
 		}
 		this.snapshots.notify();
+		this.releaseBlocked();
 	}
 
 	private dependencyResults(node: GenerationNode): Record<string, AssetResult> {
