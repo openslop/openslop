@@ -29,6 +29,9 @@ vi.mock("../../generate-button", () => ({
 vi.mock("../../element-history-button", () => ({
 	ElementHistoryButton: Nothing,
 }));
+vi.mock("../../reset-edits-button", () => ({
+	ResetEditsButton: Nothing,
+}));
 vi.mock("../../element-upload-button", () => ({
 	ImageUploadButton: Nothing,
 }));
