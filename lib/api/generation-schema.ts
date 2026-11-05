@@ -20,6 +20,7 @@ import {
 	optionalVideoDuration,
 	optionalResolution,
 	requiredVoiceId,
+	storedUrl,
 } from "./request-schema-fields";
 
 const hostedModelNames = (type: ConnectorType) =>
@@ -102,7 +103,7 @@ export const AUDIO_FIELDS = optionalDurationSeconds;
 /** Speech to text reads its media alone, so it takes no prompt. */
 export const STT_FIELDS = {
 	prompt: z.string().default(""),
-	mediaUrl: z.url({ error: "mediaUrl must be an HTTP(S) URL" }),
+	mediaUrl: storedUrl("mediaUrl"),
 } as const;
 
 const INVALID_MAX_TOKENS = "maxTokens must be a positive integer";
