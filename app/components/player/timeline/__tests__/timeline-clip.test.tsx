@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Trim } from "@/lib/render/clip-trim";
 import type { ResolvedElement } from "@/lib/render/types";
-import { TimelineClip } from "../timeline-clip";
+import { TimelineClip, TimelineExtension } from "../timeline-clip";
 
 const PX_PER_SEC = 10;
 
@@ -15,7 +15,7 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 	sceneNumber: 1,
 	prompt: "slow pan",
 	url: "https://vid/a.mp4",
-	durationSec: 5,
+	trimDurationSec: 5,
 	mediaDurationSec: 5,
 	trimStartSec: 0,
 	loops: 1,
@@ -37,44 +37,72 @@ const markup = (el: ResolvedElement, duration: number, trim: Trim = el) =>
 		/>,
 	);
 
-const sources = (el: ResolvedElement, duration: number, trim: Trim = el) =>
-	[...markup(el, duration, trim).matchAll(/<video src="([^"]*)"/g)].map(
-		([, src]) => src,
-	);
+const sources = (markup: string) =>
+	[...markup.matchAll(/<video src="([^"]*)"/g)].map(([, src]) => src);
 
 describe("TimelineClip footage", () => {
-	it("draws the footage once while the media covers the clip", () => {
-		expect(sources(element(), 5)).toEqual(["https://vid/a.mp4"]);
-	});
-
-	it("holds the frame a frozen clip ends on", () => {
-		expect(sources(element({ trimStartSec: 1, durationSec: 4 }), 8)).toEqual([
+	it("draws the footage once, from its in-point", () => {
+		expect(sources(markup(element(), 5))).toEqual(["https://vid/a.mp4"]);
+		expect(sources(markup(element({ trimStartSec: 1 }), 5))).toEqual([
 			"https://vid/a.mp4#t=1",
-			"https://vid/a.mp4#t=5",
 		]);
-	});
-
-	it("restarts the footage at its trim start each time a looping clip does", () => {
-		expect(
-			sources(element({ loop: true, trimStartSec: 1, durationSec: 4 }), 12),
-		).toEqual(Array(3).fill("https://vid/a.mp4#t=1"));
 	});
 
 	it("draws from the committed trim while a drag previews another", () => {
 		expect(
-			sources(element(), 8, {
-				trimStartSec: 0.30000000000000004,
-				durationSec: 7.7,
-			}),
-		).toEqual(["https://vid/a.mp4", "https://vid/a.mp4#t=5"]);
+			sources(
+				markup(element(), 8, {
+					trimStartSec: 0.30000000000000004,
+					trimDurationSec: 7.7,
+				}),
+			),
+		).toEqual(["https://vid/a.mp4"]);
 	});
 
 	it("draws a still once, since it has no media length", () => {
 		const still = element({
 			type: "image",
 			mediaDurationSec: 0,
-			durationSec: 0,
+			trimDurationSec: 0,
 		});
 		expect(markup(still, 8).match(/<img /g)).toHaveLength(1);
+	});
+});
+
+const extension = (el: ResolvedElement, start: number, duration: number) =>
+	renderToStaticMarkup(
+		<TimelineExtension
+			element={el}
+			start={start}
+			duration={duration}
+			clipWidth={start * PX_PER_SEC}
+			width={duration * PX_PER_SEC}
+			selected={false}
+		/>,
+	);
+
+describe("TimelineExtension", () => {
+	it("freezes on the frame the trimmed clip ends on", () => {
+		const html = extension(
+			element({
+				trimStartSec: 1,
+				trimDurationSec: 3,
+				mediaDurationSec: 10,
+			}),
+			3,
+			4,
+		);
+		expect(sources(html)).toEqual(["https://vid/a.mp4#t=4"]);
+		expect(html).toContain('aria-label="Freeze on last frame, 0:03–0:07"');
+	});
+
+	it("restarts the footage at its trim start each pass, filling a partial last one", () => {
+		const html = extension(
+			element({ loop: true, trimStartSec: 1, trimDurationSec: 4 }),
+			4,
+			6,
+		);
+		expect(sources(html)).toEqual(Array(2).fill("https://vid/a.mp4#t=1"));
+		expect(html).toContain('aria-label="Loop, 0:04–0:10"');
 	});
 });

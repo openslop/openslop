@@ -2,7 +2,7 @@ import { AttributeSchema } from "../attributes/schema";
 import {
 	loopsDef,
 	OWN_MODEL_DEFS,
-	timelineDurationDef,
+	trimDurationDef,
 	trimStartDef,
 	volumeDef,
 } from "../attributes/common";
@@ -12,5 +12,5 @@ export const SFX_ATTRIBUTES = AttributeSchema.from([
 	loopsDef,
 	volumeDef("2"),
 	trimStartDef,
-	timelineDurationDef,
+	trimDurationDef,
 ]);

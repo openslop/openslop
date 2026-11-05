@@ -7,11 +7,11 @@ import {
 	type IconComponent,
 } from "@/components/ui/icon";
 import type { ElementRole, LayerType } from "@/lib/canvas/types";
-import { secUntilNextScene } from "@/lib/render/sequences";
 import {
 	layoutCaptions,
 	type CaptionSequence,
 } from "@/lib/render/caption-rule";
+import { allSequences } from "@/lib/render/sequences";
 import type { Sequence, RenderLayout } from "@/lib/render/types";
 
 export type TimelineClip = Sequence & { key: string };
@@ -48,17 +48,8 @@ const CAPTION_ROW = {
 // overlap still counts as a touch.
 const TOUCH_EPSILON = 1e-6;
 
-function endScenesWhereNextBegins(series: Sequence[]): Sequence[] {
-	return series.map((sequence) => ({
-		...sequence,
-		duration: secUntilNextScene(sequence, series),
-	}));
-}
-
 function sequencesForRole(layout: RenderLayout, role: ElementRole): Sequence[] {
-	if (role === "foreground") return endScenesWhereNextBegins(layout.series);
-	return Object.values(layout.sequences)
-		.flat()
+	return allSequences(layout)
 		.filter((sequence) => sequence.element.role === role)
 		.sort((a, b) => a.start - b.start);
 }

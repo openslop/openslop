@@ -21,8 +21,8 @@ export type ResolvedElement = {
 	sceneNumber: number;
 	prompt: string;
 	url: string;
-	/** How long it holds the timeline once trimmed; a visual can outlast its media. */
-	durationSec: number;
+	/** How long it plays once trimmed, never past its media; a scene can extend past a visual. */
+	trimDurationSec: number;
 	mediaDurationSec: number;
 	trimStartSec: number;
 	loops: number;

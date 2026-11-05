@@ -81,7 +81,7 @@ describe("resolveElements", () => {
 			sceneNumber: 1,
 			prompt: "test",
 			url: "https://example.com/img.png",
-			durationSec: 3,
+			trimDurationSec: 3,
 			mediaDurationSec: 3,
 			trimStartSec: 0,
 			loops: 1,
@@ -98,7 +98,7 @@ describe("resolveElements", () => {
 			sceneNumber: 1,
 			prompt: "test",
 			url: "https://example.com/nar.mp3",
-			durationSec: 8,
+			trimDurationSec: 8,
 			mediaDurationSec: 8,
 			trimStartSec: 0,
 			loops: 1,
@@ -290,7 +290,7 @@ describe("resolveElements", () => {
 
 		it("starts the words at the element's first, though the end trim cuts the last", () => {
 			const { captions } = resolveOne(
-				makeElement("vid", "video", { timelineDuration: "1.5" }),
+				makeElement("vid", "video", { trimDuration: "1.5" }),
 			);
 			expect(captions).toEqual({ trimIndexOffset: 0, words: [heard[0]] });
 		});
@@ -307,14 +307,14 @@ describe("resolveElements", () => {
 					wrap([
 						makeElement("v1", "video", {
 							trimStart: "1",
-							timelineDuration: "3",
+							trimDuration: "3",
 						}),
 					]),
 				],
 				() => makeSnapshot(),
 				{ captionsEnabled: false },
 			);
-			expect(video).toMatchObject({ trimStartSec: 1, durationSec: 3 });
+			expect(video).toMatchObject({ trimStartSec: 1, trimDurationSec: 3 });
 		});
 	});
 });

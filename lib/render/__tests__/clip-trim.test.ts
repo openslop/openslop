@@ -2,161 +2,128 @@ import { describe, expect, it } from "vitest";
 import {
 	isTrimmable,
 	isTrimmed,
-	playedSec,
+	laidOut,
+	previewSpan,
 	trimClip,
 	trimEdge,
 	trimCaptions,
 } from "../clip-trim";
 import { toCaption } from "@/lib/captions/word-captions";
+import type { ResolvedElement } from "../types";
+
+const el = (over: Partial<ResolvedElement>): ResolvedElement => ({
+	id: "v1",
+	type: "video",
+	role: "foreground",
+	layer: "visual",
+	sceneId: "s1",
+	sceneNumber: 1,
+	prompt: "",
+	url: "https://example.com/v1.mp4",
+	trimDurationSec: 10,
+	mediaDurationSec: 10,
+	trimStartSec: 0,
+	loops: 1,
+	loop: false,
+	volume: 10,
+	motion: "none",
+	...over,
+});
 
 describe("isTrimmable", () => {
 	it("trims only what has a media length", () => {
-		expect(isTrimmable({ mediaDurationSec: 5 })).toBe(true);
-		expect(isTrimmable({ mediaDurationSec: 0 })).toBe(false);
+		expect(isTrimmable(el({ mediaDurationSec: 5 }))).toBe(true);
+		expect(isTrimmable(el({ mediaDurationSec: 0 }))).toBe(false);
 	});
 });
 
 describe("isTrimmed", () => {
-	it("is trimmed once it opens late, ends early or runs long", () => {
-		const full = { trimStartSec: 0, durationSec: 10, mediaDurationSec: 10 };
-		expect(isTrimmed(full)).toBe(false);
-		expect(isTrimmed({ ...full, trimStartSec: 1 })).toBe(true);
-		expect(isTrimmed({ ...full, durationSec: 4 })).toBe(true);
-		expect(isTrimmed({ ...full, durationSec: 12 })).toBe(true);
+	it("is trimmed once it opens late or ends early", () => {
+		expect(isTrimmed(el({}))).toBe(false);
+		expect(isTrimmed(el({ trimStartSec: 1, trimDurationSec: 9 }))).toBe(true);
+		expect(isTrimmed(el({ trimDurationSec: 4 }))).toBe(true);
 	});
 
 	it("is never trimmed without media, like a still or the blank opener", () => {
-		expect(
-			isTrimmed({ trimStartSec: 0, durationSec: 4, mediaDurationSec: 0 }),
-		).toBe(false);
+		expect(isTrimmed(el({ trimDurationSec: 4, mediaDurationSec: 0 }))).toBe(
+			false,
+		);
 	});
 });
-
-describe("playedSec", () => {
-	it("plays the media up to the clip's end, or to the media's own if that comes first", () => {
-		const clip = { trimStartSec: 2, durationSec: 5, mediaDurationSec: 10 };
-		expect(playedSec(clip)).toBe(5);
-		expect(playedSec({ ...clip, durationSec: 20 })).toBe(8);
-	});
-});
-
-const audio = { layer: "audio", mediaDurationSec: 10 } as const;
-const video = { layer: "visual", mediaDurationSec: 10 } as const;
 
 describe("trimClip", () => {
 	it("plays from its trim start to the end of its media", () => {
-		expect(trimClip(audio, 3)).toEqual({ trimStartSec: 3, durationSec: 7 });
-		expect(trimClip(video, 3)).toEqual({ trimStartSec: 3, durationSec: 7 });
+		expect(trimClip(10, 3)).toEqual({
+			trimStartSec: 3,
+			trimDurationSec: 7,
+		});
 	});
 
-	it("cuts audio at its timeline duration, but never past its media", () => {
-		expect(trimClip(audio, 2, 4).durationSec).toBe(4);
-		expect(trimClip(audio, 2, 20).durationSec).toBe(8);
+	it("cuts at its timeline duration", () => {
+		expect(trimClip(10, 2, 4).trimDurationSec).toBe(4);
 	});
 
-	it("runs a visual past its media for as long as its timeline duration", () => {
-		expect(trimClip(video, 2, 20).durationSec).toBe(20);
+	it("resolves a timeline duration stored past the media to the media's end", () => {
+		expect(trimClip(10, 2, 20).trimDurationSec).toBe(8);
 	});
 
 	it("keeps a trim start inside the media, at least the minimum from its end", () => {
-		expect(trimClip(audio, 50).trimStartSec).toBe(9);
-		expect(trimClip(video, 50).trimStartSec).toBe(9);
+		expect(trimClip(10, 50).trimStartSec).toBe(9);
 	});
 });
 
 describe("trimEdge", () => {
-	const clip = { ...audio, trimStartSec: 2, durationSec: 5 };
-	const extended = { ...video, trimStartSec: 2, durationSec: 30 };
+	const clip = el({ trimStartSec: 2, trimDurationSec: 5 });
 
 	it("lengthens and shortens from the end, keeping the start", () => {
 		expect(trimEdge(clip, "end", -2)).toEqual({
 			trimStartSec: 2,
-			durationSec: 3,
+			trimDurationSec: 3,
 		});
 		expect(trimEdge(clip, "end", 1)).toEqual({
 			trimStartSec: 2,
-			durationSec: 6,
+			trimDurationSec: 6,
 		});
 	});
 
-	it("stops audio's end at its media and at the minimum", () => {
-		expect(trimEdge(clip, "end", 50).durationSec).toBe(8);
-		expect(trimEdge(clip, "end", -50).durationSec).toBe(1);
+	it("stops the end at the media's last frame and at the minimum", () => {
+		expect(trimEdge(clip, "end", 50).trimDurationSec).toBe(8);
+		expect(trimEdge(clip, "end", -50).trimDurationSec).toBe(1);
 	});
 
-	it("drags a visual's end past its media", () => {
-		expect(trimEdge({ ...clip, ...video }, "end", 50).durationSec).toBe(55);
-	});
-
-	it("keeps an extended visual's in-point inside its media", () => {
-		expect(trimEdge(extended, "start", 50)).toEqual({
-			trimStartSec: 9,
-			durationSec: 23,
-		});
+	it("stops the end at the last frame from the in-point, not from the media's start", () => {
+		expect(
+			trimEdge(el({ ...clip, trimStartSec: 6 }), "end", 50).trimDurationSec,
+		).toBe(4);
 	});
 
 	it("moves the in-point with the start edge, shortening the clip as much", () => {
 		expect(trimEdge(clip, "start", 1)).toEqual({
 			trimStartSec: 3,
-			durationSec: 4,
+			trimDurationSec: 4,
 		});
 		expect(trimEdge(clip, "start", -1)).toEqual({
 			trimStartSec: 1,
-			durationSec: 6,
+			trimDurationSec: 6,
 		});
+	});
+
+	it("leaves a clip shorter than the minimum as it is when neither edge moves", () => {
+		const trim = { trimStartSec: 0, trimDurationSec: 0.5 };
+		const short = el({ ...trim, mediaDurationSec: 0.5 });
+		expect(trimEdge(short, "end", 0)).toEqual(trim);
+		expect(trimEdge(short, "start", 0)).toEqual(trim);
+		expect(trimEdge(short, "end", 5)).toEqual(trim);
 	});
 
 	it("uncovers no more than was trimmed off, and keeps the minimum", () => {
 		expect(trimEdge(clip, "start", -50)).toEqual({
 			trimStartSec: 0,
-			durationSec: 7,
+			trimDurationSec: 7,
 		});
 		expect(trimEdge(clip, "start", 50)).toEqual({
 			trimStartSec: 6,
-			durationSec: 1,
-		});
-	});
-
-	describe("with a floor", () => {
-		const scene = { ...video, trimStartSec: 2, durationSec: 8 };
-
-		it("stops the end at the floor instead of cutting the visual short", () => {
-			expect(trimEdge(scene, "end", -50, 4).durationSec).toBe(4);
-			expect(trimEdge(scene, "end", -3, 4).durationSec).toBe(5);
-		});
-
-		it("stops the start where the clip would dip under the floor", () => {
-			expect(trimEdge(scene, "start", 50, 4)).toEqual({
-				trimStartSec: 6,
-				durationSec: 4,
-			});
-			expect(trimEdge(scene, "start", 50, 6)).toEqual({
-				trimStartSec: 4,
-				durationSec: 6,
-			});
-		});
-
-		it("rests at the floor when the visual is shorter than the dialogue", () => {
-			const short = { ...video, trimStartSec: 0, durationSec: 5 };
-			expect(trimEdge(short, "end", 0, 8).durationSec).toBe(8);
-			expect(trimEdge(short, "end", -1, 8).durationSec).toBe(8);
-			expect(trimEdge(short, "end", 1, 8).durationSec).toBe(9);
-			expect(trimEdge(short, "start", 1, 8)).toEqual({
-				trimStartSec: 0,
-				durationSec: 8,
-			});
-		});
-
-		it("never goes under the minimum, however short the floor", () => {
-			expect(trimEdge(scene, "end", -50, 0.3).durationSec).toBe(1);
-			expect(trimEdge(scene, "start", 50, 0.3).durationSec).toBe(1);
-		});
-
-		it("still keeps the in-point inside the media", () => {
-			expect(trimEdge(extended, "start", 50, 4)).toEqual({
-				trimStartSec: 9,
-				durationSec: 23,
-			});
+			trimDurationSec: 1,
 		});
 	});
 });
@@ -166,7 +133,7 @@ describe("trimCaptions", () => {
 		expect(
 			trimCaptions([toCaption("cut", 0, 1), toCaption("kept", 1.5, 2)], {
 				trimStartSec: 1.25,
-				durationSec: 10,
+				trimDurationSec: 10,
 			}),
 		).toEqual({ trimIndexOffset: 1, words: [toCaption("kept", 0.25, 0.75)] });
 	});
@@ -175,7 +142,7 @@ describe("trimCaptions", () => {
 		expect(
 			trimCaptions([toCaption("halved", 0.2, 0.6), toCaption("kept", 1, 1.5)], {
 				trimStartSec: 0.3,
-				durationSec: 10,
+				trimDurationSec: 10,
 			}),
 		).toEqual({ trimIndexOffset: 1, words: [toCaption("kept", 0.7, 1.2)] });
 	});
@@ -188,7 +155,7 @@ describe("trimCaptions", () => {
 					toCaption("halved", 1.5, 2.5),
 					toCaption("after", 3, 4),
 				],
-				{ trimStartSec: 0, durationSec: 2 },
+				{ trimStartSec: 0, trimDurationSec: 2 },
 			),
 		).toEqual({ trimIndexOffset: 0, words: [toCaption("kept", 0, 1)] });
 	});
@@ -202,8 +169,71 @@ describe("trimCaptions", () => {
 					toCaption("after", 2, 3),
 					toCaption("last", 3, 4),
 				],
-				{ trimStartSec: 1, durationSec: 1 },
+				{ trimStartSec: 1, trimDurationSec: 1 },
 			),
 		).toEqual({ trimIndexOffset: 1, words: [toCaption("kept", 0, 1)] });
+	});
+});
+
+describe("previewSpan", () => {
+	const video = el({ trimDurationSec: 5 });
+	const to = (trimDurationSec: number) => ({
+		trimStartSec: 0,
+		trimDurationSec,
+	});
+	const scene = { duration: 8, overlaySec: 8 };
+
+	it("moves a clip's end with the trim", () => {
+		expect(previewSpan(video, { duration: 5 }, to(3))).toEqual({
+			timelineDurationSec: 3,
+			extensionSec: 0,
+		});
+	});
+
+	it("draws a sound the layout pads at its own length, with no extension", () => {
+		const sound = el({ trimDurationSec: 0.5 });
+		expect(previewSpan(sound, { duration: 1 }, to(0.5))).toEqual({
+			timelineDurationSec: 0.5,
+			extensionSec: 0,
+		});
+	});
+
+	it("extends the scene past a video trimmed under its dialogue", () => {
+		expect(previewSpan(video, scene, to(3))).toEqual({
+			timelineDurationSec: 3,
+			extensionSec: 5,
+		});
+	});
+
+	it("lengthens the scene once the video outruns its dialogue", () => {
+		expect(previewSpan(video, scene, to(10))).toEqual({
+			timelineDurationSec: 10,
+			extensionSec: 0,
+		});
+	});
+
+	it("stretches a still across the whole scene", () => {
+		const still = el({ type: "image", mediaDurationSec: 0, ...to(0) });
+		expect(previewSpan(still, scene, to(0))).toEqual({
+			timelineDurationSec: 8,
+			extensionSec: 0,
+		});
+	});
+});
+
+describe("laidOut", () => {
+	const music = el({ trimDurationSec: 60, mediaDurationSec: 60 });
+
+	it("runs a clip the layout cuts short only as far as it's drawn", () => {
+		expect(laidOut({ element: music, duration: 30 }).trimDurationSec).toBe(30);
+	});
+
+	it("keeps the trim of a clip the layout gives as much room or more", () => {
+		expect(laidOut({ element: music, duration: 80 }).trimDurationSec).toBe(60);
+	});
+
+	it("trims a cut clip's end from where it's drawn, not past the cut", () => {
+		const cut = laidOut({ element: music, duration: 30 });
+		expect(trimEdge(cut, "end", -10).trimDurationSec).toBe(20);
 	});
 });

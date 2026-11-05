@@ -44,7 +44,7 @@ function el(url: string): ResolvedElement {
 		sceneNumber: 1,
 		prompt: "",
 		url,
-		durationSec: 1,
+		trimDurationSec: 1,
 		mediaDurationSec: 0,
 		trimStartSec: 0,
 		loops: 1,

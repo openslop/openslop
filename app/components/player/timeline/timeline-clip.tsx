@@ -7,9 +7,11 @@ import {
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
+import type { ResultKind } from "@/lib/canvas/types";
+import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
-import { isTrimmable, playedSec, type Trim } from "@/lib/render/clip-trim";
+import type { Trim } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import type { ResolvedElement } from "@/lib/render/types";
 import { cn } from "@/lib/utils";
@@ -22,7 +24,6 @@ import type {
 const HEADER_ICON_SIZE = 9;
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
-const ROUNDING_SLACK_PX = 1;
 
 const FRAME =
 	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
@@ -31,27 +32,13 @@ const SELECTED_EDGE = "border-current/60";
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
 
-type PreviewBox = { src: string; width?: number };
-
 const urlAt = (url: string, sec: number) => (sec > 0 ? `${url}#t=${sec}` : url);
 
-function visualPreviews(
-	element: Pick<
-		ResolvedElement,
-		"url" | "loop" | "trimStartSec" | "mediaDurationSec"
-	>,
-	playedWidth: number,
-	width: number,
-): PreviewBox[] {
-	const { url, loop, trimStartSec, mediaDurationSec } = element;
-	const inPoint = urlAt(url, trimStartSec);
-	if (!isTrimmable(element) || playedWidth >= width - ROUNDING_SLACK_PX)
-		return [{ src: inPoint }];
-	const playthrough = { src: inPoint, width: playedWidth };
-	if (!loop) return [playthrough, { src: urlAt(url, mediaDurationSec) }];
-	return Array.from(
-		{ length: Math.ceil(width / playedWidth) },
-		() => playthrough,
+function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
+	return (
+		<div className="relative aspect-square h-full overflow-hidden">
+			<MediaWithSkeleton outputKind={outputKind} src={src} alt="" />
+		</div>
 	);
 }
 
@@ -130,6 +117,36 @@ function ClipHeader({
 	);
 }
 
+function ClipFrame({
+	label,
+	colorClass,
+	selected,
+	className,
+	children,
+}: {
+	label: string;
+	colorClass: string;
+	selected: boolean;
+	className: string;
+	children: ReactNode;
+}) {
+	return (
+		<div
+			role="img"
+			aria-label={label}
+			className={cn(
+				FRAME,
+				className,
+				colorClass,
+				selected ? SELECTED_EDGE : "border-border",
+			)}
+		>
+			{children}
+			{selected ? <SelectedWash /> : null}
+		</div>
+	);
+}
+
 export function TimelineClip({
 	clip,
 	width,
@@ -162,15 +179,11 @@ export function TimelineClip({
 		.join(", ");
 
 	return (
-		<div
-			role="img"
-			aria-label={accessibleLabel}
-			className={cn(
-				FRAME,
-				"timeline-clip-surface",
-				config.colorClass,
-				selected ? SELECTED_EDGE : "border-border",
-			)}
+		<ClipFrame
+			label={accessibleLabel}
+			colorClass={config.colorClass}
+			selected={selected}
+			className="timeline-clip-surface"
 		>
 			<ClipHeader
 				icon={config.Icon}
@@ -187,21 +200,12 @@ export function TimelineClip({
 						/>
 					</Preview>
 				) : (
-					visualPreviews(
-						element,
-						playedSec({ ...element, ...trim }) * pxPerSec,
-						width,
-					).map((box, i) => (
-						<Preview key={i} width={box.width}>
-							<div className="relative aspect-square h-full overflow-hidden">
-								<MediaWithSkeleton
-									outputKind={config.outputKind}
-									src={box.src}
-									alt=""
-								/>
-							</div>
-						</Preview>
-					))
+					<Preview>
+						<Footage
+							outputKind={config.outputKind}
+							src={urlAt(element.url, element.trimStartSec)}
+						/>
+					</Preview>
 				)}
 			</div>
 			{sceneNumber ? (
@@ -216,8 +220,58 @@ export function TimelineClip({
 					<CaptionsFill size={HEADER_ICON_SIZE} />
 				</CornerChip>
 			) : null}
-			{selected ? <SelectedWash /> : null}
-		</div>
+		</ClipFrame>
+	);
+}
+
+/** Where a scene runs on past its video, drawn apart from the clip and never trimmed. */
+export function TimelineExtension({
+	element,
+	start,
+	duration,
+	clipWidth,
+	width,
+	selected,
+}: {
+	element: ResolvedElement;
+	start: number;
+	duration: number;
+	/** How wide the footage before it is drawn, so loop passes match it. */
+	clipWidth: number;
+	width: number;
+	selected: boolean;
+}) {
+	const { url, loop, trimStartSec, trimDurationSec } = element;
+	const config = ELEMENT_CONFIGS[element.type];
+	const face = LOOP_FACES[loop ? "on" : "off"];
+	return (
+		<ClipFrame
+			label={`${face.label}, ${formatTimeRange(start, duration)}`}
+			colorClass={config.colorClass}
+			selected={selected}
+			className="timeline-preview-surface border-dashed"
+		>
+			<ClipHeader icon={face.icon} label={face.label} width={width} />
+			<div className="flex min-h-0 flex-1 opacity-60">
+				{loop ? (
+					Array.from({ length: Math.ceil(width / clipWidth) }, (_, i) => (
+						<Preview key={i} width={clipWidth}>
+							<Footage
+								outputKind={config.outputKind}
+								src={urlAt(url, trimStartSec)}
+							/>
+						</Preview>
+					))
+				) : (
+					<Preview>
+						<Footage
+							outputKind={config.outputKind}
+							src={urlAt(url, trimStartSec + trimDurationSec)}
+						/>
+					</Preview>
+				)}
+			</div>
+		</ClipFrame>
 	);
 }
 
@@ -232,18 +286,13 @@ export function TimelineCaptionClip({
 }) {
 	const text = lineText(clip.line);
 	return (
-		<div
-			role="img"
-			aria-label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${text}`}
-			className={cn(
-				FRAME,
-				"timeline-clip-surface justify-center",
-				ELEMENT_CONFIGS[clip.element.type].colorClass,
-				selected ? SELECTED_EDGE : "border-border",
-			)}
+		<ClipFrame
+			label={`Caption, ${formatTimeRange(clip.start, clip.duration)}: ${text}`}
+			colorClass={ELEMENT_CONFIGS[clip.element.type].colorClass}
+			selected={selected}
+			className="timeline-clip-surface justify-center"
 		>
 			<ClipHeader icon={Captions} label={text} width={width} />
-			{selected ? <SelectedWash /> : null}
-		</div>
+		</ClipFrame>
 	);
 }
