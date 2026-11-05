@@ -1,18 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Editor } from "slate";
-
-vi.mock("@/lib/connectors/factory", () => ({
-	resolveAttributeSchema: (type: string) => {
-		const defaultAttributes = type === "tts" ? { emotion: "neutral" } : {};
-		return {
-			defaultAttributes,
-			resolve: (attrs: Record<string, string>) => ({
-				...defaultAttributes,
-				...attrs,
-			}),
-		};
-	},
-}));
 
 import { insertElement } from "../insert-element";
 import { DEFAULT_MODELS, type ConnectorModels } from "@/lib/connectors/models";
@@ -106,20 +93,5 @@ describe("insertElement", () => {
 			"\u200B",
 			"hello",
 		]);
-	});
-
-	it("element without defaultAttributes gets undefined customAttributes base", () => {
-		const editor = seededEditor();
-		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "image", [0, 1]);
-		});
-
-		const scene = editor.children[0] as {
-			children: Array<Record<string, unknown>>;
-		};
-		const inserted = scene.children[1];
-		const attrs = flatAttributes(inserted) as Record<string, string>;
-		expect(attrs).toMatchObject(DEFAULT_MODELS.image);
-		expect(attrs.emotion).toBeUndefined();
 	});
 });

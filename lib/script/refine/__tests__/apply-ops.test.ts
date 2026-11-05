@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Editor } from "slate";
 import type {
 	AssetElement,
@@ -6,31 +6,6 @@ import type {
 	ContentElement,
 	Scene,
 } from "@/lib/canvas/types";
-
-// Refine-op mechanics only; schema resolution is tested under lib/connectors/attributes/.
-const SCHEMA_DEFAULTS: Record<string, Record<string, string>> = {
-	sfx: { loops: "1" },
-	tts: { emotion: "neutral" },
-	video: { duration: "5" },
-};
-
-vi.mock("@/lib/connectors/factory", () => ({
-	resolveAttributeSchema: (type: string) => {
-		const defaultAttributes = SCHEMA_DEFAULTS[type] ?? {};
-		return {
-			defaultAttributes,
-			keys: [
-				...(type === "tts" ? [] : ["model"]),
-				...Object.keys(defaultAttributes),
-			],
-			resolve: (attrs: Record<string, string>) => ({
-				...defaultAttributes,
-				...attrs,
-			}),
-			offers: (_key: string, value: string) => value !== "unoffered",
-		};
-	},
-}));
 
 import { applyRefineOp, applyRefineOps } from "../apply-ops";
 import type { RefineOp } from "../types";
@@ -40,6 +15,7 @@ import { isContentElement } from "@/lib/canvas/guards";
 import { asset, label, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { getPromptText } from "@/lib/generation/inputs";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import { videoAttributesFor } from "@/lib/connectors/video/attributes";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -199,7 +175,7 @@ describe("applyRefineOp — insert", () => {
 				{
 					type: "sound",
 					text: "rain",
-					attrs: { loops: "unoffered", model: "unoffered" },
+					attrs: { loops: "unoffered", trimStart: "unoffered" },
 				},
 				{ type: "narration", text: "", attrs: { emotion: "unoffered" } },
 			],
@@ -208,7 +184,7 @@ describe("applyRefineOp — insert", () => {
 		expect(result).toEqual({
 			ok: false,
 			reason:
-				'insert: sound offers no loops "unoffered", model "unoffered"; narration offers no emotion "unoffered"; narration needs text',
+				'insert: sound offers no loops "unoffered", trimStart "unoffered"; narration offers no emotion "unoffered"; narration needs text',
 		});
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
@@ -259,6 +235,7 @@ describe("applyRefineOp — insert", () => {
 		const [, sound] = contentElements(editor);
 		expect(flatAttributes(sound)).toEqual({
 			loops: "3",
+			volume: "2",
 			...DEFAULT_MODELS.sfx,
 		});
 	});
@@ -400,16 +377,16 @@ describe("applyRefineOp — set", () => {
 			op: "set",
 			id: "n1",
 			type: "video",
-			attrs: { startFrame: "n0", motion: "kenBurnsIn" },
+			attrs: { startFrame: "previous", motion: "kenBurnsIn" },
 		});
 
 		const video = getNode(editor, "n1");
 		expect(video.type).toBe("video");
 		expect(flatAttributes(video)).toEqual({
+			...videoAttributesFor(DEFAULT_MODELS.video).defaultAttributes,
 			...DEFAULT_MODELS.video,
 			referenceImagesOverride: "https://img/red.png",
-			duration: "5",
-			startFrame: "n0",
+			startFrame: "previous",
 			motion: "kenBurnsIn",
 		});
 	});

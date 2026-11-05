@@ -1,20 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("@/lib/connectors/factory", () => ({
-	resolveAttributeSchema: (type: string) => {
-		const defaultAttributes = type === "sfx" ? { loops: "1" } : {};
-		return {
-			defaultAttributes,
-			resolve: (attrs: Record<string, string>) => ({
-				...defaultAttributes,
-				...attrs,
-			}),
-		};
-	},
-}));
+import { describe, expect, it } from "vitest";
 
 import { createCanvasElement } from "../create-canvas-element";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
+import { SFX_ATTRIBUTES } from "@/lib/connectors/sfx/attributes";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 
 const ZWSP = "​";
@@ -36,11 +24,21 @@ describe("createCanvasElement", () => {
 
 	it("merges defaults under caller attrs (caller wins, defaults fill gaps)", () => {
 		const node = createCanvasElement("sound", {
-			attrs: { effect: "thunder" },
+			attrs: { trimStart: "2" },
 		});
 		expect(flatAttributes(node)).toMatchObject({
 			loops: "1",
-			effect: "thunder",
+			trimStart: "2",
+		});
+	});
+
+	it("drops an attribute the type does not offer", () => {
+		const node = createCanvasElement("sound", {
+			attrs: { effect: "thunder" },
+		});
+		expect(flatAttributes(node)).toEqual({
+			...SFX_ATTRIBUTES.defaultAttributes,
+			...DEFAULT_MODELS.sfx,
 		});
 	});
 
