@@ -16,30 +16,25 @@ export type Trim = Pick<
 	"trimStartSec" | "timelineDurationSec"
 >;
 
-type Media = Pick<ResolvedElement, "mediaDurationSec">;
-
-type Trimmable = Trim & Media;
+/** A clip runs out at the end of its media; a still, having none, never does. */
+const maxTimelineDurationSec = (
+	mediaDurationSec: number,
+	trimStartSec: number,
+) => (mediaDurationSec > 0 ? mediaDurationSec - trimStartSec : Infinity);
 
 /** A still has no media length to trim. */
-export const isTrimmable = ({ mediaDurationSec }: Media): boolean =>
-	mediaDurationSec > 0;
+export const isTrimmable = (element: ResolvedElement): boolean =>
+	element.mediaDurationSec > 0;
 
-/** A clip runs out at the end of its media; a still never does. */
-const maxTimelineDurationSec = (
-	clip: Media & Pick<Trim, "trimStartSec">,
-): number =>
-	isTrimmable(clip) ? clip.mediaDurationSec - clip.trimStartSec : Infinity;
-
-export const isTrimmed = (clip: Trimmable): boolean =>
-	clip.timelineDurationSec < clip.mediaDurationSec;
+export const isTrimmed = (element: ResolvedElement): boolean =>
+	element.timelineDurationSec < element.mediaDurationSec;
 
 /** A clip plays from its trim start for its timeline duration, or to the end of its media by default. */
 export function trimClip(
-	media: Media,
+	mediaDurationSec: number,
 	startSec: number,
 	timelineDurationSec?: number,
 ): Trim {
-	const { mediaDurationSec } = media;
 	const trimStartSec = clamp(
 		startSec,
 		0,
@@ -49,7 +44,7 @@ export function trimClip(
 		trimStartSec,
 		timelineDurationSec: Math.min(
 			timelineDurationSec ?? mediaDurationSec - trimStartSec,
-			maxTimelineDurationSec({ ...media, trimStartSec }),
+			maxTimelineDurationSec(mediaDurationSec, trimStartSec),
 		),
 	};
 }
@@ -59,7 +54,7 @@ export const elementTrim = (
 	mediaDurationSec: number,
 ): Trim =>
 	trimClip(
-		{ mediaDurationSec },
+		mediaDurationSec,
 		getTrimStart(element),
 		getTimelineDuration(element),
 	);
@@ -87,12 +82,12 @@ export function trimCaptions(
 
 /** The clip's start stays put and what follows ripples; it never runs under the minimum or past its media. */
 export function trimEdge(
-	clip: Trimmable,
+	element: ResolvedElement,
 	edge: TrimEdge,
 	deltaSec: number,
 ): Trim {
-	const { trimStartSec, timelineDurationSec } = clip;
-	const maxSec = maxTimelineDurationSec(clip);
+	const { trimStartSec, timelineDurationSec, mediaDurationSec } = element;
+	const maxSec = maxTimelineDurationSec(mediaDurationSec, trimStartSec);
 	const minSec = Math.min(MIN_DURATION_SEC, maxSec);
 	if (edge === "end")
 		return {
@@ -116,7 +111,7 @@ export function trimEdge(
 
 /** A clip previews the span the layout gives it, less any cross-fade; a scene extends past a video that runs out inside it. */
 export function previewSpan(
-	element: Trimmable,
+	element: ResolvedElement,
 	{ duration, overlaySec }: Pick<Sequence, "duration" | "overlaySec">,
 	trim: Trim,
 ) {
