@@ -43,7 +43,7 @@ function useEdgeDrag(
 	return { ...drag, onDoubleClick };
 }
 
-/** A drag previews the new length and commits it on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets; a double-click runs the edge back out to the media's. */
+/** A drag previews the new length and commits it on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets. */
 export function useClipTrim(
 	clip: TimelineClip,
 	pxPerSec: number,
@@ -85,7 +85,10 @@ export function useClipTrim(
 		if (isTrimmed({ ...element, ...next })) save(next);
 		else resetTrim(editor, element.id);
 	};
-	const untrimEnd = () => resetTrim(editor, element.id, ["trimDuration"]);
+	const untrimEnd = () =>
+		element.trimStartSec > 0
+			? resetTrim(editor, element.id, ["trimDuration"])
+			: resetTrim(editor, element.id);
 
 	const handles = {
 		start: useEdgeDrag(pxPerSec, trimBy("start"), commit, untrimStart),

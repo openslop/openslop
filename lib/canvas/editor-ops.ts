@@ -147,7 +147,7 @@ export function mergeAttrs(
 
 const TRIM_KEYS = ["trimStart", "trimDuration"];
 
-/** An element no longer on the canvas has no trim to reset. Dropping just `trimDuration` runs the clip out to its media's end. */
+/** An element no longer on the canvas has no trim to reset. */
 export function resetTrim(editor: Editor, id: string, keys = TRIM_KEYS): void {
 	const found = findElementById(editor, id);
 	if (!found) return;
