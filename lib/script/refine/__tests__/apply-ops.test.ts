@@ -15,7 +15,6 @@ import { isContentElement } from "@/lib/canvas/guards";
 import { asset, label, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { getPromptText } from "@/lib/generation/inputs";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
-import { videoAttributesFor } from "@/lib/connectors/video/attributes";
 import {
 	flatAttributes,
 	splitAttributes,
@@ -361,46 +360,6 @@ describe("applyRefineOp — set", () => {
 
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
-
-	it("preserves shared attributes across a type change, dropping stale ones", () => {
-		const editor = makeEditor([
-			scene([
-				content("image", "n1", "a red riding hood", {
-					referenceImagesOverride: "https://img/red.png",
-					url: "https://example.com/old.png",
-					motion: "none",
-				}),
-			]),
-		]);
-
-		applyRefineOp(editor, {
-			op: "set",
-			id: "n1",
-			type: "video",
-			attrs: { startFrame: "previous", motion: "kenBurnsIn" },
-		});
-
-		const video = getNode(editor, "n1");
-		expect(video.type).toBe("video");
-		expect(flatAttributes(video)).toEqual({
-			...videoAttributesFor(DEFAULT_MODELS.video).defaultAttributes,
-			...DEFAULT_MODELS.video,
-			referenceImagesOverride: "https://img/red.png",
-			startFrame: "previous",
-			motion: "kenBurnsIn",
-		});
-	});
-
-	it("puts a retyped element on the editor's default model for its new type", () => {
-		const pinned = { provider: "runware", model: "Seedance 2 Fast" } as const;
-		const editor = makeEditor([scene([content("image", "n1", "a wolf")])], {
-			video: pinned,
-		});
-
-		applyRefineOp(editor, { op: "set", id: "n1", type: "video" });
-
-		expect(flatAttributes(getNode(editor, "n1"))).toMatchObject(pinned);
-	});
 });
 
 describe("applyRefineOp — insert positioning edge cases", () => {
@@ -737,24 +696,6 @@ describe("applyRefineOp — assets", () => {
 			}).failures,
 		).toEqual([`insert: no element "${style.id}" to anchor on`]);
 		expect(topLevelTypes(editor)).toEqual(["asset_style", "scene"]);
-	});
-
-	it("refuses to retype an asset, and says why", () => {
-		const style = asset("asset_style", { text: "noir" });
-		const editor = makeCanvas([style]);
-
-		expect(
-			apply(editor, {
-				op: "set",
-				id: style.id,
-				type: "narration",
-				text: "x",
-			}),
-		).toEqual({
-			applied: 0,
-			failures: [`set: asset "${style.id}" keeps its type`],
-		});
-		expect(describeAssets(editor)).toEqual([["asset_style", {}, "noir"]]);
 	});
 
 	it("removes only the avatar, leaving their voice and every list that names them", () => {

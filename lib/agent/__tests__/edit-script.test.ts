@@ -15,7 +15,7 @@ describe("edit_script", () => {
 		).toBe(true);
 	});
 
-	it("inserts and retypes every script type it lists, and sets up every asset type as an asset op", () => {
+	it("inserts every script type it lists, and sets up every asset type as an asset op", () => {
 		expect(editScript.spec.description).toContain(
 			`Script types: ${ContentTypeSchema.options.join(", ")}`,
 		);
@@ -23,14 +23,12 @@ describe("edit_script", () => {
 			expect(parses({ op: "insert", elements: [{ type, text: "x" }] })).toBe(
 				true,
 			);
-			expect(parses({ op: "set", id: "n1", type })).toBe(true);
 		}
 		for (const type of AssetTypeSchema.options) {
 			expect(parses({ op: "asset", type, attrs: { name: "Mia" } })).toBe(true);
 			expect(parses({ op: "insert", elements: [{ type }] })).toBe(false);
 		}
 		expect(parses({ op: "insert", elements: [] })).toBe(false);
-		expect(parses({ op: "set", id: "n1", type: "asset_avatar" })).toBe(false);
 	});
 
 	it("offers attributes whose control lives inside another's, like a video's continuity", () => {

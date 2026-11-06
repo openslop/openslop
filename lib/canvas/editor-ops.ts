@@ -2,17 +2,15 @@ import isNil from "lodash/isNil";
 import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
-import type { ContentElement, CanvasBlock, CanvasElement } from "./types";
+import type { CanvasBlock, CanvasElement } from "./types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { ElementVersion } from "@/lib/generation/versions";
 import { flatAttributes, splitAttributes } from "./element-attributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
-import { createCanvasElement } from "./create-canvas-element";
 import { attributeSchemaFor } from "./element-connector";
 import { isCanvasElement } from "./guards";
 import { getElementText } from "./osml-serializer";
 import { makeNodeId } from "./node-utils";
-import { preservedAttributes } from "./preserved-attributes";
 
 /** Any block by id, a scene or an element. Use {@link findElementById} when a scene will not do. */
 export function findBlockById(
@@ -94,31 +92,6 @@ export function updateElementText(
 	});
 }
 
-/**
- * Makes an element another type in place, keeping its id and text.
- */
-export function retypeElement(
-	editor: Editor,
-	path: Path,
-	element: ContentElement,
-	type: ContentElement["type"],
-): void {
-	const replacement = createCanvasElement(type, {
-		id: element.id,
-		attrs: preservedAttributes(element, type),
-		defaultModels: editor.defaultModels(),
-	});
-	Transforms.setNodes(
-		editor,
-		{
-			type,
-			generationAttributes: replacement.generationAttributes,
-			layoutAttributes: replacement.layoutAttributes,
-		},
-		{ at: path },
-	);
-}
-
 export function replaceGenerationAttrs(
 	editor: Editor,
 	path: Path,
@@ -131,19 +104,13 @@ export function replaceGenerationAttrs(
 	);
 }
 
-/**
- * Puts an element back into the state that produced a version: the type it was
- * generated as, and the prompt and attributes it was generated from. Restoring
- * the inputs alone would leave an element of one type holding another type's
- * attributes.
- */
+/** Puts an element back on the prompt and attributes a version was generated from. */
 export function applyElementVersion(
 	editor: Editor,
 	id: string,
-	{ elementType, inputs }: Pick<ElementVersion, "elementType" | "inputs">,
+	{ inputs }: Pick<ElementVersion, "inputs">,
 ): void {
 	const [, path] = requireElement(editor, id);
-	Transforms.setNodes(editor, { type: elementType }, { at: path });
 	replaceGenerationAttrs(editor, path, inputs.attributes);
 	updateElementText(editor, id, inputs.prompt);
 }

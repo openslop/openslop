@@ -5,7 +5,6 @@ import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
 	findElementById,
 	mergeAttrs,
-	retypeElement,
 	updateElementText,
 	withAttrs,
 } from "@/lib/canvas/editor-ops";
@@ -148,7 +147,7 @@ function applySet(
 ): RefineOpResult {
 	const entry = findElementById(editor, op.id);
 	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
-	const [found, at] = entry;
+	const [found] = entry;
 	const current = flatAttributes(found);
 
 	if (
@@ -161,17 +160,12 @@ function applySet(
 			reason: `set: an asset's name never changes; remove "${op.id}" and insert it again`,
 		};
 
-	const edits = withAttrs({}, op.attrs ?? {});
-	if (op.type && op.type !== found.type) {
-		if (!isContentElement(found))
-			return { ok: false, reason: `set: asset "${op.id}" keeps its type` };
-		const unoffered = unofferedAttributes(op.type, edits);
-		if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
-		retypeElement(editor, at, found, op.type);
-	} else {
-		const unoffered = unofferedAttributes(found.type, edits, current);
-		if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
-	}
+	const unoffered = unofferedAttributes(
+		found.type,
+		withAttrs({}, op.attrs ?? {}),
+		current,
+	);
+	if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
 	if (op.attrs) mergeAttrs(editor, op.id, op.attrs);
 	if (op.text !== undefined) updateElementText(editor, op.id, op.text);
 	return OK;

@@ -22,11 +22,8 @@ export function ResetEditsButton() {
 	const reset = useCallback(() => {
 		const { resultInputs } = queue.getElementSnapshot(node.id);
 		if (!resultInputs) return;
-		applyElementVersion(editor, element.id, {
-			elementType: element.type,
-			inputs: resultInputs,
-		});
-	}, [queue, editor, node.id, element.id, element.type]);
+		applyElementVersion(editor, element.id, { inputs: resultInputs });
+	}, [queue, editor, node.id, element.id]);
 
 	if (!edited) return null;
 	return (
