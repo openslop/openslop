@@ -1,3 +1,4 @@
+import partition from "lodash/partition";
 import type { ElementRef } from "@/lib/canvas/types";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { errorMessage } from "../errors";
@@ -206,32 +207,49 @@ export class GenerationQueue {
 		return running < this.limits[connectorType];
 	}
 
-	/** A node runs once its dependencies have results, and is released once one settles without. */
 	private processQueue() {
 		for (;;) {
-			const node = this.pending.find((candidate) => {
-				const blocker = this.blockingDependency(candidate);
-				return blocker
-					? !this.snapshots.isActive(blocker[1].id)
-					: this.hasCapacity(candidate.job.connectorType);
-			});
-			if (!node) return;
-			this.pending = this.pending.filter((candidate) => candidate !== node);
-			const blocker = this.blockingDependency(node);
-			if (blocker) this.release(node, blocker);
-			else void this.runJob(node);
+			const index = this.pending.findIndex(
+				(candidate) =>
+					this.hasCapacity(candidate.job.connectorType) &&
+					!this.blockingDependency(candidate),
+			);
+			if (index === -1) break;
+			const [node] = this.pending.splice(index, 1);
+			if (node) void this.runJob(node);
 		}
+		this.releaseBlocked();
 	}
 
-	private release(
-		node: GenerationNode,
-		[label, dep]: [string, GenerationNode],
-	) {
+	private deadDependency(node: GenerationNode) {
+		return Object.entries(node.dependsOn).find(
+			([, dep]) =>
+				!this.snapshots.isActive(dep.id) && !this.snapshots.get(dep.id).result,
+		);
+	}
+
+	private blockedByError(node: GenerationNode): string | null {
+		const entry = this.deadDependency(node);
+		if (!entry) return null;
+		const [label, dep] = entry;
 		const cause = this.snapshots.get(dep.id).error;
-		this.snapshots.resetToIdle(node.id);
-		if (cause)
-			this.snapshots.update(node.id, { error: `${label} failed: ${cause}` });
+		return cause ? `${label} failed: ${cause}` : null;
+	}
+
+	/** A dependency nothing will produce releases what waits on it, its error on each dependent. */
+	private releaseBlocked() {
+		const [dead, waiting] = partition(this.pending, (node) =>
+			this.deadDependency(node),
+		);
+		if (dead.length === 0) return;
+		this.pending = waiting;
+		for (const node of dead) {
+			const error = this.blockedByError(node);
+			this.snapshots.resetToIdle(node.id);
+			if (error) this.snapshots.update(node.id, { error });
+		}
 		this.snapshots.notify();
+		this.releaseBlocked();
 	}
 
 	private dependencyResults(node: GenerationNode): Record<string, AssetResult> {
