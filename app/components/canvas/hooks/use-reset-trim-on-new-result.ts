@@ -1,13 +1,17 @@
 import { useEffect } from "react";
-import type { Editor } from "slate";
+import { HistoryEditor } from "slate-history";
 import { resetTrim } from "@/lib/canvas/editor-ops";
+import type { CanvasEditor } from "@/lib/canvas/types";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 
-/** A trim is picked for one result, so a new or restored one plays in full. */
-export function useResetTrimOnNewResult(editor: Editor): void {
+/** Kept out of undo, which would put the old trim back on the new result. */
+export function useResetTrimOnNewResult(editor: CanvasEditor): void {
 	const queue = useGenerationQueue();
 	useEffect(
-		() => queue.onResultReplaced((id) => resetTrim(editor, id)),
+		() =>
+			queue.onResultReplaced((id) =>
+				HistoryEditor.withoutSaving(editor, () => resetTrim(editor, id)),
+			),
 		[queue, editor],
 	);
 }
