@@ -4,7 +4,7 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import isMatch from "lodash/isMatch";
 import round from "lodash/round";
 import { useSlateStatic } from "slate-react";
-import { mergeAttrs } from "@/lib/canvas/editor-ops";
+import { mergeAttrs, resetTrim } from "@/lib/canvas/editor-ops";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
@@ -87,12 +87,6 @@ export function useClipTrim(
 		trim,
 		extensionSec: extensionSec(clip, trim),
 		handleProps: isTrimmable(element) ? handles : null,
-		reset: isTrimmed(clip.element)
-			? () =>
-					mergeAttrs(editor, element.id, {
-						trimStart: null,
-						trimDuration: null,
-					})
-			: null,
+		reset: isTrimmed(clip.element) ? () => resetTrim(editor, element.id) : null,
 	};
 }

@@ -1,5 +1,6 @@
 import isNil from "lodash/isNil";
 import mapValues from "lodash/mapValues";
+import omit from "lodash/omit";
 import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasBlock, CanvasElement } from "./types";
@@ -142,4 +143,20 @@ export function mergeAttrs(
 		),
 	);
 	Transforms.setNodes(editor, splitAttributes(reconciled), { at: path });
+}
+
+const TRIM_KEYS = ["trimStart", "trimDuration"];
+
+/** An element no longer on the canvas has no trim to reset. */
+export function resetTrim(editor: Editor, id: string): void {
+	const found = findElementById(editor, id);
+	if (!found) return;
+	const [element, path] = found;
+	const layout = element.layoutAttributes ?? {};
+	if (!TRIM_KEYS.some((key) => key in layout)) return;
+	Transforms.setNodes(
+		editor,
+		{ layoutAttributes: omit(layout, TRIM_KEYS) },
+		{ at: path },
+	);
 }

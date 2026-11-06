@@ -4,6 +4,7 @@ import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import {
 	applyElementVersion,
+	resetTrim,
 	duplicateElement,
 	findBlockById,
 	findElementById,
@@ -329,5 +330,31 @@ describe("applyElementVersion", () => {
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}a wolf`);
 		const node = (editor.children[0] as Scene).children[0];
 		expect(node.generationAttributes).toEqual({ style: "oil" });
+	});
+});
+
+describe("resetTrim", () => {
+	it("drops the trim and keeps the rest of the layout", () => {
+		const el = content("video", "v1", "a fox", {
+			trimStart: "1",
+			trimDuration: "3",
+			volume: "5",
+		});
+		const editor = makeEditor([scene([el])]);
+
+		resetTrim(editor, "v1");
+
+		const node = (editor.children[0] as Scene).children[0];
+		expect(node.layoutAttributes).toEqual({ volume: "5" });
+	});
+
+	it("leaves the document untouched when there is no trim", () => {
+		const editor = makeEditor([scene([content("video", "v1", "a fox")])]);
+		const before = editor.children;
+
+		resetTrim(editor, "v1");
+		resetTrim(editor, "gone");
+
+		expect(editor.children).toBe(before);
 	});
 });
