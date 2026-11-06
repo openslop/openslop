@@ -4,8 +4,11 @@ import { useRef, useState } from "react";
 import isMatch from "lodash/isMatch";
 import round from "lodash/round";
 import { useSlateStatic } from "slate-react";
-import { mergeAttrs } from "@/lib/canvas/editor-ops";
+import { findElementById, mergeAttrs } from "@/lib/canvas/editor-ops";
+import { writeActiveResultTrim } from "@/lib/canvas/result-trims";
+import { resultIdentity } from "@/lib/connectors/asset-url";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
+import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import {
 	isTrimmable,
 	isTrimmed,
@@ -40,15 +43,30 @@ function useEdgeDrag(
 export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
 	const element = laidOut(clip);
 	const editor = useSlateStatic();
+	const queue = useGenerationQueue();
 	const [preview, setPreview] = useState<Trim | null>(null);
 
 	const trimBy = (edge: TrimEdge) => (deltaSec: number) =>
 		setPreview(trimEdge(element, edge, deltaSec));
 
+	const writeTrim = (
+		trim: { trimStart: string; trimDuration: string } | null,
+	) => {
+		const result = queue.getElementSnapshot(element.id).result;
+		if (!result) return;
+		const found = findElementById(editor, element.id);
+		if (!found) return;
+		mergeAttrs(
+			editor,
+			element.id,
+			writeActiveResultTrim(found[0], resultIdentity(result), trim),
+		);
+	};
+
 	const commit = () => {
 		setPreview(null);
 		if (!preview || isMatch(element, preview)) return;
-		mergeAttrs(editor, element.id, {
+		writeTrim({
 			trimStart: toAttr(preview.trimStartSec),
 			trimDuration: toAttr(preview.trimDurationSec),
 		});
@@ -65,12 +83,6 @@ export function useClipTrim(clip: TimelineClip, pxPerSec: number) {
 		...previewSpan(element, clip, trim),
 		trim,
 		handleProps: isTrimmable(element) ? handles : null,
-		reset: isTrimmed(clip.element)
-			? () =>
-					mergeAttrs(editor, element.id, {
-						trimStart: null,
-						trimDuration: null,
-					})
-			: null,
+		reset: isTrimmed(clip.element) ? () => writeTrim(null) : null,
 	};
 }

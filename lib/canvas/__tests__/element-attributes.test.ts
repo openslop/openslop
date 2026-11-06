@@ -179,6 +179,7 @@ describe("layoutAttributeSignature", () => {
 			"uploadedFrame",
 			"trimStart",
 			"trimDuration",
+			"resultTrims",
 		]);
 		expect(
 			layoutAttributeSignature(
@@ -188,15 +189,15 @@ describe("layoutAttributeSignature", () => {
 					motion: "kenBurnsIn",
 				}),
 			),
-		).toBe("2::5:kenBurnsIn:::");
+		).toBe("2::5:kenBurnsIn::::");
 	});
 
 	it("uses empty segments for absent attributes (raw, uncoerced)", () => {
-		expect(layoutAttributeSignature(el())).toBe("::::::");
-		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0::::::");
-		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10::::");
+		expect(layoutAttributeSignature(el())).toBe(":::::::");
+		expect(layoutAttributeSignature(el({ loops: "0" }))).toBe("0:::::::");
+		expect(layoutAttributeSignature(el({ volume: "10" }))).toBe("::10:::::");
 		expect(layoutAttributeSignature(el({ motion: "shake" }))).toBe(
-			":::shake:::",
+			":::shake::::",
 		);
 	});
 });

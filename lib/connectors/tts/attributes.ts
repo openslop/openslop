@@ -3,6 +3,7 @@ import { AttributeSchema } from "../attributes/schema";
 import {
 	nameDef,
 	OWN_MODEL_DEFS,
+	resultTrimsDef,
 	trimDurationDef,
 	trimStartDef,
 	volumeDef,
@@ -32,4 +33,5 @@ export const TTS_ATTRIBUTES = AttributeSchema.from([
 	volumeDef("10"),
 	trimStartDef,
 	trimDurationDef,
+	resultTrimsDef,
 ]);

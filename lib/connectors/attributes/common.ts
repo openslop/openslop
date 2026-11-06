@@ -110,3 +110,9 @@ export const trimDurationDef: AttributeDef = {
 	unit: "s",
 	edit: { kind: "seconds", value: secondsValue, min: MIN_DURATION_SEC },
 };
+
+export const resultTrimsDef: AttributeDef = {
+	key: "resultTrims",
+	label: "Result trims",
+	hidden: true,
+};
