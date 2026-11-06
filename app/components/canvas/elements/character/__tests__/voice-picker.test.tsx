@@ -47,9 +47,9 @@ const render = (selected: boolean, voice: VoiceInfo = VOICE) =>
 		),
 	);
 
-const button = (name: string) => {
-	const found = container.querySelector<HTMLButtonElement>(name);
-	if (!found) throw new Error(`no ${name}`);
+const button = (selector: string) => {
+	const found = container.querySelector<HTMLButtonElement>(selector);
+	if (!found) throw new Error(`no ${selector}`);
 	return found;
 };
 const selectButton = () => button("button[aria-pressed]");

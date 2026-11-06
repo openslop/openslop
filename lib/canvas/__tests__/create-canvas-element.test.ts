@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createCanvasElement } from "../create-canvas-element";
+import { ZERO_WIDTH_SPACE } from "../constants";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { SFX_ATTRIBUTES } from "@/lib/connectors/sfx/attributes";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 
-const ZWSP = "​";
 const PINNED = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
 
@@ -116,7 +116,7 @@ describe("createCanvasElement", () => {
 			text: "  hello  ",
 		});
 		expect(node.children).toMatchObject([
-			{ text: ZWSP },
+			{ text: ZERO_WIDTH_SPACE },
 			{ text: "  hello  " },
 		]);
 	});

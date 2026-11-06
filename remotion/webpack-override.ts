@@ -9,7 +9,7 @@ export const webpackOverride: WebpackOverrideFn = (currentConfig) => {
 		resolve: {
 			...withTailwind.resolve,
 			alias: {
-				...(withTailwind.resolve?.alias ?? {}),
+				...withTailwind.resolve?.alias,
 				"@": path.resolve(process.cwd()),
 			},
 		},
