@@ -29,6 +29,7 @@ import {
 } from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
+import { TimelineSnapGuide } from "./timeline-snap-guide";
 import { GUTTER_PX, LANE_HEIGHT, RULER_HEIGHT } from "../dock-layout";
 import { TimelineRuler } from "./timeline-ruler";
 import {
@@ -40,6 +41,7 @@ import {
 import { useTimelineZoom } from "./use-timeline-zoom";
 import { TimelineTrimHandle } from "./timeline-trim-handle";
 import { useClipTrim } from "./use-clip-trim";
+import { useTrimSnap, type TrimSnap } from "./use-trim-snap";
 
 /** Runway past the last tick, so its label isn't cut off by the end. */
 const RULER_TAIL_PX = 32;
@@ -116,16 +118,18 @@ function Clip({
 	clip,
 	pxPerSec,
 	numbered,
+	snap,
 	selected,
 	onSelect,
-}: ClipProps<TimelineClipData> & { numbered: boolean }) {
-	const trim = useClipTrim(clip, pxPerSec);
-	const width = Math.max(
-		trim.timelineDurationSec * pxPerSec,
-		MIN_CLIP_WIDTH_PX,
+}: ClipProps<TimelineClipData> & { numbered: boolean; snap: TrimSnap }) {
+	const { trim, extensionSec, handleProps, reset } = useClipTrim(
+		clip,
+		pxPerSec,
+		snap,
 	);
-	const extensionWidth = trim.extensionSec * pxPerSec;
-	const extensionStart = clip.start + trim.timelineDurationSec;
+	const width = Math.max(trim.trimDurationSec * pxPerSec, MIN_CLIP_WIDTH_PX);
+	const extensionWidth = extensionSec * pxPerSec;
+	const extensionStart = clip.start + trim.trimDurationSec;
 	return (
 		<>
 			<ClipSlot start={clip.start * pxPerSec} width={width}>
@@ -137,23 +141,23 @@ function Clip({
 						selected={selected}
 						sceneNumber={numbered ? clip.element.sceneNumber : undefined}
 						pxPerSec={pxPerSec}
-						trim={trim.trim}
+						trim={trim}
 					/>
 				</SelectButton>
-				{trim.reset ? (
+				{reset ? (
 					<TooltipIconButton
 						label="Reset trim"
 						side="bottom"
 						size="sm"
 						variant="quiet"
-						onClick={trim.reset}
-						className="absolute top-0.5 right-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
+						onClick={reset}
+						className="absolute right-2 bottom-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 					>
 						<RotateCcw size={12} />
 					</TooltipIconButton>
 				) : null}
-				<TimelineTrimHandle edge="start" dragProps={trim.handleProps?.start} />
-				<TimelineTrimHandle edge="end" dragProps={trim.handleProps?.end} />
+				<TimelineTrimHandle edge="start" dragProps={handleProps?.start} />
+				<TimelineTrimHandle edge="end" dragProps={handleProps?.end} />
 			</ClipSlot>
 			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
 				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>
@@ -166,7 +170,7 @@ function Clip({
 						<TimelineExtension
 							element={clip.element}
 							start={extensionStart}
-							duration={trim.extensionSec}
+							duration={extensionSec}
 							clipWidth={width}
 							width={extensionWidth}
 							selected={selected}
@@ -234,6 +238,7 @@ export function Timeline() {
 	} = useElementWidth<HTMLDivElement>();
 	const rows = useMemo(() => buildTimelineRows(layout), [layout]);
 	const captionRows = useMemo(() => buildCaptionRows(layout), [layout]);
+	const { snap, guide: snapGuide } = useTrimSnap(rows, layout.fps);
 	const { zoom, pxPerSec, zoomIn, zoomOut, canZoomIn, canZoomOut } =
 		useTimelineZoom(
 			layout.totalDurationSec,
@@ -347,6 +352,7 @@ export function Timeline() {
 										clip={clip}
 										pxPerSec={pxPerSec}
 										numbered={row.numbered}
+										snap={snap}
 										selected={selectedKey === clip.key}
 										onSelect={select}
 									/>
@@ -361,6 +367,7 @@ export function Timeline() {
 						className="pointer-events-none relative z-20"
 					>
 						<TimelineHoverHead ref={hoverHead} pxPerSec={pxPerSec} />
+						<TimelineSnapGuide ref={snapGuide} pxPerSec={pxPerSec} />
 						<TimelinePlayhead
 							pxPerSec={pxPerSec}
 							viewport={viewport}
