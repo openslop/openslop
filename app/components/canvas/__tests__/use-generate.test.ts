@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { element, makeEditor } from "@/lib/canvas/__tests__/_assets";
-import { scene } from "./fixtures";
+import { element } from "@/lib/canvas/__tests__/_assets";
 import type { ContentElement, GeneratedElement } from "@/lib/canvas/types";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { GenerationQueue } from "@/lib/generation/queue";
@@ -26,9 +25,8 @@ vi.mock("react", () => ({
 	},
 }));
 
-const editor = makeEditor();
 vi.mock("slate-react", () => ({
-	useSlateStatic: () => editor,
+	useSlateStatic: () => ({}),
 	useSlateSelector: <T>(selector: () => T) => selector(),
 }));
 
@@ -84,7 +82,6 @@ beforeEach(() => {
 	queue = new GenerationQueue();
 	enqueue = vi.spyOn(queue, "enqueueGraph").mockImplementation(() => {});
 	canvas = [image, video];
-	editor.children = [scene(canvas)];
 });
 
 describe("generating after the element it depends on changed", () => {

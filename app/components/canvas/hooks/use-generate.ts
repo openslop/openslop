@@ -1,6 +1,4 @@
 import { useCallback } from "react";
-import { useSlateStatic } from "slate-react";
-import { resetTrim } from "@/lib/canvas/editor-ops";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -14,7 +12,6 @@ import type { GeneratedElement } from "@/lib/canvas/types";
 
 export function useGenerate(element: GeneratedElement) {
 	const queue = useGenerationQueue();
-	const editor = useSlateStatic();
 	const buildContext = useBuildContext();
 	const node = useLiveNode(element);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
@@ -27,9 +24,8 @@ export function useGenerate(element: GeneratedElement) {
 			queue.setError(current.id, "Enter a prompt first");
 			return;
 		}
-		resetTrim(editor, current.id);
 		queue.enqueueGraph([current]);
-	}, [queue, editor, element, buildContext]);
+	}, [queue, element, buildContext]);
 
 	const discard = useCallback(() => {
 		queue.discard(node.id);

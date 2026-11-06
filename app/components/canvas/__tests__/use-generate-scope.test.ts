@@ -9,7 +9,7 @@ import { buildCtx } from "@/lib/generation/__tests__/_context";
 import type { GenerationNode } from "@/lib/generation/graph";
 import { buildNode, GenerationGraph } from "@/lib/generation/generation-graph";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
-import { element, makeEditor } from "@/lib/canvas/__tests__/_assets";
+import { element } from "@/lib/canvas/__tests__/_assets";
 
 // No plugins, so no element depends on another and each is judged alone.
 const registry = Object.fromEntries(
@@ -72,8 +72,9 @@ const { useGenerateScope } = await import("../hooks/use-generate-scope");
 
 function useScopeForAll(elements: ContentElement[]) {
 	const children: Descendant[] = [wrapInScene(elements)];
+	// Stands in for Slate's provider by seeding the document the selector reads.
 	// eslint-disable-next-line react-hooks/globals
-	editorUnderTest = makeEditor(children);
+	editorUnderTest = { children } as unknown as Editor;
 	return useGenerateAll();
 }
 
@@ -121,20 +122,6 @@ describe("useGenerateAll", () => {
 			makeElement("b", "narration", "hello"),
 		]);
 		expect(ids).toEqual(["a", "b"]);
-	});
-
-	it("plays each regenerated take untrimmed", () => {
-		commitCurrent(makeElement("a", "music", "old score"));
-
-		useGenerateAllFor([
-			makeElement("a", "music", "new score", {
-				trimStart: "1",
-				trimDuration: "3",
-			}),
-		]);
-
-		const [scene] = editorUnderTest.children as Scene[];
-		expect(scene.children[0].layoutAttributes).toEqual({});
 	});
 
 	it("re-generates an element whose attributes drifted", async () => {

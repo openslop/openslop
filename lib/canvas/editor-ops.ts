@@ -114,7 +114,6 @@ export function applyElementVersion(
 	const [, path] = requireElement(editor, id);
 	replaceGenerationAttrs(editor, path, inputs.attributes);
 	updateElementText(editor, id, inputs.prompt);
-	resetTrim(editor, id);
 }
 
 /** A nil value deletes its key. */
@@ -148,9 +147,11 @@ export function mergeAttrs(
 
 const TRIM_KEYS = ["trimStart", "trimDuration"];
 
-/** A trim is picked for one take, so a new or restored take plays in full. */
+/** An element no longer on the canvas has no trim to reset. */
 export function resetTrim(editor: Editor, id: string): void {
-	const [element, path] = requireElement(editor, id);
+	const found = findElementById(editor, id);
+	if (!found) return;
+	const [element, path] = found;
 	const layout = element.layoutAttributes ?? {};
 	if (!TRIM_KEYS.some((key) => key in layout)) return;
 	Transforms.setNodes(
