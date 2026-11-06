@@ -17,16 +17,17 @@ export function snapTarget(
 
 type SnappedTrim = { trim: Trim; snappedSec: number | null };
 
-type Clip = Pick<Sequence, "element" | "start" | "duration">;
-
 /** Where the handle sits on the timeline: the end handle moves the end, the start handle cuts the in-point from where the clip starts. */
-const edgeSec = ({ element, start }: Clip, edge: TrimEdge, trim: Trim) =>
+const edgeSec = ({ element, start }: Sequence, edge: TrimEdge, trim: Trim) =>
 	edge === "end"
 		? start + trim.trimDurationSec
 		: start + trim.trimStartSec - element.trimStartSec;
 
 /** Every drawn edge of the other clips: where each starts, where its media stops, and where its span ends. */
-export const snapTargets = (clips: Clip[], exceptElementId: string): number[] =>
+export const snapTargets = (
+	clips: Sequence[],
+	exceptElementId: string,
+): number[] =>
 	clips
 		.filter((clip) => clip.element.id !== exceptElementId)
 		.flatMap((clip) => [
@@ -37,7 +38,7 @@ export const snapTargets = (clips: Clip[], exceptElementId: string): number[] =>
 
 /** The dragged handle sticks to a target within reach, unless the media runs out before it. */
 export function snapTrimEdge(
-	clip: Clip,
+	clip: Sequence,
 	edge: TrimEdge,
 	deltaSec: number,
 	targets: readonly number[],

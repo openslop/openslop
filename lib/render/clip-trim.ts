@@ -44,13 +44,8 @@ export const elementTrim = (
 ): Trim =>
 	trimClip(mediaDurationSec, getTrimStart(element), getTrimEnd(element));
 
-type LaidOutClip = Pick<Sequence, "element" | "duration">;
-
 /** The element as drawn: a still fills its span, and one the layout stops short of its trim, as music stops where the next begins, runs only as far as it's drawn. */
-export const laidOut = ({
-	element,
-	duration,
-}: LaidOutClip): ResolvedElement => ({
+export const laidOut = ({ element, duration }: Sequence): ResolvedElement => ({
 	...element,
 	trimDurationSec: isTrimmable(element)
 		? Math.min(element.trimDurationSec, duration)
@@ -80,7 +75,7 @@ export function trimCaptions(
 
 /** One edge moves, inside the media and the minimum from the other; a clip the layout cuts short stays cut. */
 export function trimEdge(
-	clip: LaidOutClip,
+	clip: Sequence,
 	edge: TrimEdge,
 	deltaSec: number,
 ): Trim {

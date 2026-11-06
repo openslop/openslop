@@ -85,7 +85,7 @@ describe("trimClip", () => {
 describe("trimEdge", () => {
 	const uncut = (over: Partial<ResolvedElement>) => {
 		const element = el(over);
-		return { element, duration: element.trimDurationSec };
+		return { start: 0, element, duration: element.trimDurationSec };
 	};
 	const clip = uncut({ trimStartSec: 2, trimDurationSec: 5 });
 
@@ -145,6 +145,7 @@ describe("trimEdge", () => {
 
 describe("trimEdge on a clip the layout cuts short", () => {
 	const cut = {
+		start: 0,
 		element: el({ trimDurationSec: 60, mediaDurationSec: 60 }),
 		duration: 30,
 	};
@@ -249,19 +250,27 @@ describe("laidOut", () => {
 			mediaDurationSec: 0,
 			trimDurationSec: 0,
 		});
-		expect(laidOut({ element: still, duration: 8 }).trimDurationSec).toBe(8);
+		expect(
+			laidOut({ start: 0, element: still, duration: 8 }).trimDurationSec,
+		).toBe(8);
 	});
 
 	it("draws a sound the layout pads at its own length", () => {
 		const sound = el({ trimDurationSec: 0.5 });
-		expect(laidOut({ element: sound, duration: 1 }).trimDurationSec).toBe(0.5);
+		expect(
+			laidOut({ start: 0, element: sound, duration: 1 }).trimDurationSec,
+		).toBe(0.5);
 	});
 
 	it("runs a clip the layout cuts short only as far as it's drawn", () => {
-		expect(laidOut({ element: music, duration: 30 }).trimDurationSec).toBe(30);
+		expect(
+			laidOut({ start: 0, element: music, duration: 30 }).trimDurationSec,
+		).toBe(30);
 	});
 
 	it("keeps the trim of a clip the layout gives as much room or more", () => {
-		expect(laidOut({ element: music, duration: 80 }).trimDurationSec).toBe(60);
+		expect(
+			laidOut({ start: 0, element: music, duration: 80 }).trimDurationSec,
+		).toBe(60);
 	});
 });
