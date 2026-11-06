@@ -597,10 +597,10 @@ describe("buildRenderLayout", () => {
 	});
 
 	describe("a scene's length", () => {
-		const video = (durationSec: number) =>
-			el({ id: "video1", type: "video", trimDurationSec: durationSec });
-		const narration = (durationSec: number) =>
-			el({ id: "n1", type: "narration", trimDurationSec: durationSec });
+		const video = (trimDurationSec: number) =>
+			el({ id: "video1", type: "video", trimDurationSec });
+		const narration = (trimDurationSec: number) =>
+			el({ id: "n1", type: "narration", trimDurationSec });
 
 		it("plays a video out in full past shorter dialogue", () => {
 			const layout = layoutOf([video(10), narration(3)]);

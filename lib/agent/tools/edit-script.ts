@@ -50,7 +50,7 @@ const ASSETS = dedent`
 
 export const editScript = defineTool({
 	description: dedent`
-	  Change the canvas: add, remove, rewrite, retype or reorder the script's elements, and
+	  Change the canvas: add, remove, rewrite or reorder the script's elements, and
 	  set up the assets it draws on. Reference ids you read; never invent one.
 
 	  - insert: place new \`elements\` before or after \`anchor_id\`, in the order you list them.
@@ -60,12 +60,11 @@ export const editScript = defineTool({
 	    outside the script, so they take no anchor.
 	  - remove: delete the element with \`id\`.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
-	    text changes. Set an attribute to null to drop it. \`type\` turns a script element into
-	    another script type and clears its attributes, so send the ones to keep, like a
-	    character line's \`name\`, in the same op.
+	    text changes. Set an attribute to null to drop it.
 
-	  To move an element, remove it and insert it again: the copy is a new, ungenerated
-	  element holding only what you send.
+	  To move an element or change its type, insert the new one before it, then remove it:
+	  that is a new, ungenerated element holding only what you send. To animate an image,
+	  insert a video that starts from it before the image, then remove the image.
 
 	  Script types: ${ContentTypeSchema.options.join(", ")}
 
@@ -74,8 +73,8 @@ export const editScript = defineTool({
 	  Attributes by type:
 	  ${ATTRIBUTES_BY_TYPE}
 
-	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: an image's URL from
-	  view_image. Leave a URL already set alone.
+	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: a picture's URL from
+	  view_result. Leave a URL already set alone.
 
 	  The attributes above work with every model. Some models have extra attributes of their own;
 	  read_script shows the ones an element already has.

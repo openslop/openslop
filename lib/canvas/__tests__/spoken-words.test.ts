@@ -1,26 +1,23 @@
 import { describe, expect, it } from "vitest";
-import type { Descendant } from "slate";
-import type { ContentType } from "../types";
+import type { ContentElement, Scene } from "../types";
 import { countSpokenWords } from "../spoken-words";
+import { element } from "./_assets";
 
-let nextId = 0;
-const element = (type: ContentType, text: string) => {
-	const id = `e${nextId++}`;
-	return { id, type, children: [{ id: `${id}-t`, type, text }] };
-};
-
-const scene = (...children: ReturnType<typeof element>[]): Descendant =>
-	({ id: `s${nextId++}`, type: "scene", children }) as unknown as Descendant;
+const scene = (...children: ContentElement[]): Scene => ({
+	id: "s",
+	type: "scene",
+	children,
+});
 
 describe("countSpokenWords", () => {
 	it("counts narration and dialogue and nothing else", () => {
 		const nodes = [
 			scene(
-				element("narration", "The sun was setting in the west."),
-				element("character", "Truce?"),
-				element("image", "A dark forest with a clearing in the center."),
-				element("music", "Soft, slow, sad piano music."),
-				element("sound", "Wind"),
+				element("n", "narration", "The sun was setting in the west."),
+				element("c", "character", "Truce?"),
+				element("i", "image", "A dark forest with a clearing in the center."),
+				element("m", "music", "Soft, slow, sad piano music."),
+				element("s", "sound", "Wind"),
 			),
 		];
 
@@ -29,8 +26,8 @@ describe("countSpokenWords", () => {
 
 	it("counts across scenes", () => {
 		const nodes = [
-			scene(element("narration", "One two three.")),
-			scene(element("character", "Four five.")),
+			scene(element("n", "narration", "One two three.")),
+			scene(element("c", "character", "Four five.")),
 		];
 
 		expect(countSpokenWords(nodes)).toBe(5);
@@ -38,6 +35,6 @@ describe("countSpokenWords", () => {
 
 	it("counts an empty canvas as zero", () => {
 		expect(countSpokenWords([])).toBe(0);
-		expect(countSpokenWords([scene(element("narration", "  "))])).toBe(0);
+		expect(countSpokenWords([scene(element("n", "narration", "  "))])).toBe(0);
 	});
 });

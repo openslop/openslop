@@ -59,11 +59,11 @@ describe("trimClip", () => {
 		});
 	});
 
-	it("cuts at its timeline duration", () => {
+	it("cuts at its trim duration", () => {
 		expect(trimClip(10, 2, 4).trimDurationSec).toBe(4);
 	});
 
-	it("resolves a timeline duration stored past the media to the media's end", () => {
+	it("resolves a trim duration stored past the media to the media's end", () => {
 		expect(trimClip(10, 2, 20).trimDurationSec).toBe(8);
 	});
 
@@ -93,7 +93,7 @@ describe("trimEdge", () => {
 
 	it("stops the end at the last frame from the in-point, not from the media's start", () => {
 		expect(
-			trimEdge(el({ ...clip, trimStartSec: 6 }), "end", 50).trimDurationSec,
+			trimEdge({ ...clip, trimStartSec: 6 }, "end", 50).trimDurationSec,
 		).toBe(4);
 	});
 
@@ -176,22 +176,22 @@ describe("trimCaptions", () => {
 });
 
 describe("extensionSec", () => {
-	const to = (trimDurationSec: number) => ({
+	const trimmedTo = (trimDurationSec: number) => ({
 		trimStartSec: 0,
 		trimDurationSec,
 	});
 	const scene = { overlaySec: 8 };
 
 	it("has none outside a scene's dialogue", () => {
-		expect(extensionSec({}, to(3))).toBe(0);
+		expect(extensionSec({}, trimmedTo(3))).toBe(0);
 	});
 
 	it("extends the scene past a video trimmed under its dialogue", () => {
-		expect(extensionSec(scene, to(3))).toBe(5);
+		expect(extensionSec(scene, trimmedTo(3))).toBe(5);
 	});
 
 	it("has none once the video outruns its dialogue", () => {
-		expect(extensionSec(scene, to(10))).toBe(0);
+		expect(extensionSec(scene, trimmedTo(10))).toBe(0);
 	});
 });
 

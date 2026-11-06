@@ -1,9 +1,37 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { z } from "zod";
+import { BLOB_BASE_URL } from "../../blob";
 import { AssetBundle, EmptyRemoteFileError } from "../asset-bundle";
 import type { BundleResponse } from "../asset-bundle";
 
 describe("AssetBundle", () => {
+	describe("holds", () => {
+		beforeEach(() => {
+			AssetBundle.baseUrl = "https://blob.example.com";
+		});
+
+		it.each([
+			"https://blob.example.com/assets/upload/user/abc/clip.mp4",
+			`${BLOB_BASE_URL}/assets/video/mock/1/video.mp4`,
+		])("holds a file in our store or the fixtures store: %s", (url) => {
+			expect(AssetBundle.holds(url)).toBe(true);
+		});
+
+		it.each([
+			"http://169.254.169.254/latest/meta-data",
+			"https://blob.example.com.evil.com/assets/video/clip.mp4",
+			"https://blob.example.com/other/clip.mp4",
+		])("refuses a url outside them: %s", (url) => {
+			expect(AssetBundle.holds(url)).toBe(false);
+		});
+
+		it("holds only the fixtures store with no store configured", () => {
+			AssetBundle.baseUrl = "";
+			expect(AssetBundle.holds("https://x.test/assets/a/b/c")).toBe(false);
+			expect(AssetBundle.holds(`${BLOB_BASE_URL}/assets/a/b/c`)).toBe(true);
+		});
+	});
+
 	describe("buildUrl", () => {
 		beforeEach(() => {
 			AssetBundle.baseUrl = "https://blob.example.com";

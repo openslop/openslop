@@ -49,13 +49,13 @@ export function TimelinePlayhead({
 			style={{ transform: `translateX(${x}px)` }}
 		>
 			<svg
-				viewBox="0 0 9 12"
-				width="9"
-				height="12"
+				viewBox="0 0 14 17"
+				width="7"
+				height="8.5"
 				fill="currentColor"
-				className="absolute -left-1 top-0 text-scrub-progress"
+				className="absolute top-0 left-1/2 -translate-x-1/2 text-scrub-progress"
 			>
-				<path d="M8 1v5L4.5 10 1 6V1h7z" fillRule="nonzero" />
+				<path d="M0 0h14v10l-6 7H6l-6-7z" />
 			</svg>
 		</div>
 	);

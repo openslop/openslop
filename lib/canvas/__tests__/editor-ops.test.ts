@@ -318,41 +318,16 @@ describe("mergeAttrs", () => {
 });
 
 describe("applyElementVersion", () => {
-	const version = (
-		elementType: ContentElement["type"],
-		attributes: Record<string, string>,
-		prompt: string,
-	) => ({
-		elementType,
-		inputs: inputsFor(prompt, attributes),
-	});
+	it("restores the prompt and attributes the version was generated from", () => {
+		const el = content("image", "n1", "a fox", { style: "ink", mood: "dark" });
+		const editor = makeEditor([scene([el])]);
 
-	// A video restored to an image version it once was goes back to being an
-	// image, without the start frame the video alone had.
-	it("restores the type the version was generated as", () => {
-		const el = content("video", "n1", "a fox", {
-			style: "ink",
-			startFrame: "img0",
+		applyElementVersion(editor, "n1", {
+			inputs: inputsFor("a wolf", { style: "oil" }),
 		});
-		const editor = makeEditor([scene([el])]);
-
-		applyElementVersion(
-			editor,
-			"n1",
-			version("image", { style: "ink" }, "a fox"),
-		);
-
-		const node = (editor.children[0] as Scene).children[0];
-		expect(node.type).toBe("image");
-		expect(node.generationAttributes).toEqual({ style: "ink" });
-	});
-
-	it("restores the prompt the version was generated from", () => {
-		const el = content("image", "n1", "a fox");
-		const editor = makeEditor([scene([el])]);
-
-		applyElementVersion(editor, "n1", version("image", {}, "a wolf"));
 
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}a wolf`);
+		const node = (editor.children[0] as Scene).children[0];
+		expect(node.generationAttributes).toEqual({ style: "oil" });
 	});
 });

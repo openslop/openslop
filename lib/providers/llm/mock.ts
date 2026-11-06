@@ -296,25 +296,33 @@ function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 		};
 	}
 
+	const ops =
+		scene === null
+			? [
+					{
+						op: "set",
+						id: elementId,
+						text: "A mock edit, from the agent running without an API key.",
+					},
+				]
+			: [
+					{
+						op: "insert",
+						anchor_id: elementId,
+						position: "before",
+						elements: [
+							{
+								type: "video",
+								text: "Shot 1: Slow cinematic push-in, the light shifting gently across the frame.",
+							},
+						],
+					},
+					{ op: "remove", id: elementId },
+				];
 	return {
 		say: "Rewriting an element. ",
 		toolName: "edit_script",
-		input: {
-			ops: [
-				{
-					op: "set",
-					id: elementId,
-					...(scene === null
-						? {
-								text: "A mock edit, from the agent running without an API key.",
-							}
-						: {
-								type: "video",
-								text: "Shot 1: Slow cinematic push-in, the light shifting gently across the frame.",
-							}),
-				},
-			],
-		},
+		input: { ops },
 	};
 }
 

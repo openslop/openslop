@@ -137,11 +137,16 @@ describe("pruneTranscript", () => {
 		}) as const;
 
 	const look: SloppyMessage["parts"][number] = {
-		type: "tool-view_image",
+		type: "tool-view_result",
 		toolCallId: "v1",
 		state: "output-available",
 		input: { id: "img1" },
-		output: { id: "img1", prompt: "a cat", urls: ["https://cdn.test/cat.png"] },
+		output: {
+			id: "img1",
+			durationSec: 0,
+			pictures: [{ url: "https://cdn.test/cat.png" }],
+			words: [],
+		},
 	};
 
 	const edit: SloppyMessage["parts"][number] = {
@@ -223,7 +228,9 @@ describe("pruneTranscript", () => {
 
 		expect(result).toMatchObject({
 			role: "tool",
-			content: [{ type: "tool-result", toolName: "view_image", output: stale }],
+			content: [
+				{ type: "tool-result", toolName: "view_result", output: stale },
+			],
 		});
 	});
 

@@ -1,5 +1,5 @@
 import type { AssetElement } from "@/lib/canvas/types";
-import type { ElementImage } from "../element-image";
+import type { ElementResult } from "../element-result";
 import type { ElementState } from "../element-state";
 import type { ElementLength } from "@/lib/render/element-lengths";
 import type { RefineOp } from "@/lib/script/refine/types";
@@ -23,7 +23,7 @@ export type AgentToolContext = Pick<
 	countSpokenWords: () => number;
 	measureElementLengths: () => ElementLength[];
 	measureRuntime: () => number;
-	elementImage: (id: string) => ElementImage | undefined;
+	elementResult: (id: string) => Promise<ElementResult | undefined>;
 	elementStates: () => ElementState[];
 	/** One focused LLM call, for tools whose whole job is a generation. */
 	generateText: (

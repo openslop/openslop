@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createEditor, Editor, Transforms } from "slate";
 import { withReact } from "slate-react";
-import { insertCharacterRef, mentionAt } from "@/lib/canvas/character-refs";
-import { retypeElement, updateElementText } from "@/lib/canvas/editor-ops";
+import {
+	createCharacterRef,
+	insertCharacterRef,
+	mentionAt,
+} from "@/lib/canvas/character-refs";
+import { updateElementText } from "@/lib/canvas/editor-ops";
 import { isCharacterRef } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { getContentElements } from "@/lib/canvas/scenes";
@@ -49,10 +53,12 @@ describe("withCharacterRefs", () => {
 		expect(refNames(editor)).toEqual([]);
 	});
 
-	it("names a character plainly once their visual becomes speech", () => {
-		const editor = editorWith(content("image", "i", "Hi {{Red}}!"));
+	it("names a character plainly in speech", () => {
+		const editor = editorWith(content("narration", "n", "Hi !"));
 
-		retypeElement(editor, [0, 0], only(editor), "narration");
+		Transforms.insertNodes(editor, createCharacterRef("Red"), {
+			at: { path: [0, 0, 0], offset: 3 },
+		});
 
 		expect(refNames(editor)).toEqual([]);
 		expect(getElementBodyText(only(editor))).toBe("Hi Red!");

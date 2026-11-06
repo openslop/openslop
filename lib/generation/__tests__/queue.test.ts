@@ -1303,6 +1303,49 @@ describe("GenerationQueue", () => {
 			);
 		});
 
+		it("releases a dependent the moment its dependency fails, while unrelated jobs still run", async () => {
+			const bob = Promise.withResolvers<AssetResult>();
+			generateMock.mockImplementation(({ id }) => {
+				if (id === "alice") return Promise.reject(new Error("avatar boom"));
+				if (id === "bob") return bob.promise;
+				return Promise.resolve({ imageUrl: `${id}.png`, durationSec: 0 });
+			});
+			vi.spyOn(console, "error").mockImplementation(() => {});
+
+			generationQueue.enqueueGraph([
+				makeJob("image", [makeJob("alice")]),
+				makeJob("bob"),
+			]);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(generationQueue.getElementSnapshot("bob").status).toBe(
+				"generating",
+			);
+			expect(generationQueue.getElementSnapshot("image")).toMatchObject({
+				status: "idle",
+				error: "alice failed: avatar boom",
+			});
+
+			bob.resolve({ imageUrl: "bob.png", durationSec: 0 });
+			await vi.runAllTimersAsync();
+			expect(generationQueue.isBusy()).toBe(false);
+		});
+
+		it("keeps a dependent queued while its dependency waits for a slot", async () => {
+			generationQueue = new GenerationQueue({ limits: { image: 1 } });
+			generateMock.mockImplementation(() => new Promise<AssetResult>(() => {}));
+
+			generationQueue.enqueueGraph([
+				makeJob("bob"),
+				makeJob("image", [makeJob("alice")]),
+			]);
+			await vi.advanceTimersByTimeAsync(0);
+
+			expect(startedIds()).toEqual(["bob"]);
+			expect(generationQueue.getElementSnapshot("alice").status).toBe("queued");
+			expect(generationQueue.getElementSnapshot("image").status).toBe("queued");
+		});
+
 		it("leaves no error on a dependent released for a reason other than failure", async () => {
 			generateMock.mockResolvedValue({ imageUrl: "x.png", durationSec: 0 });
 

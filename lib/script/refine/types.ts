@@ -40,7 +40,6 @@ const removeOp = z.object({
 const setOp = z.object({
 	op: z.literal("set"),
 	id: z.string(),
-	type: ContentTypeSchema.optional(),
 	attrs: z.record(z.string(), z.string().nullable()).optional().nullable(),
 	text: z.string().optional().describe(ELEMENT_TEXT),
 });

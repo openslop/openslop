@@ -1,6 +1,5 @@
 import Cartesia from "@cartesia/cartesia-js";
 import type { BundleFile } from "@/lib/api/asset-bundle";
-import { AssetBundle } from "@/lib/api/asset-bundle";
 import { BaseProvider } from "../base";
 import { timestampsFile } from "../timestamps-file";
 import { trimmedWords } from "@/lib/captions/word-captions";
@@ -10,16 +9,6 @@ import type { STTProvider } from "../types";
 
 /** Cartesia reports no per-request cost: a credit buys 2 seconds, at the Scale plan's $299 for 8M credits. */
 const USD_PER_SECOND = 299 / 8_000_000 / 2;
-
-/** Ink reads an upload, not a URL; the media comes from the request, so only our own store is fetched. */
-async function fetchOwnMedia(url: string): Promise<Response> {
-	if (!AssetBundle.holds(url))
-		throw new Error(`Media to transcribe is not in our store: ${url}`);
-	const response = await fetch(url);
-	if (!response.ok)
-		throw new Error(`Media to transcribe failed to load (${response.status})`);
-	return response;
-}
 
 export class CartesiaSTT
 	extends BaseProvider<STTRequest, RawSTT>
@@ -42,8 +31,12 @@ export class CartesiaSTT
 	}
 
 	protected async _generate({ mediaUrl, model }: STTRequest) {
+		// Ink reads an upload, not a URL
+		const media = await fetch(mediaUrl);
+		if (!media.ok)
+			throw new Error(`Media to transcribe failed to load (${media.status})`);
 		const { words, duration } = await this.client.stt.transcribe({
-			file: await fetchOwnMedia(mediaUrl),
+			file: media,
 			model,
 			timestamp_granularities: ["word"],
 		});

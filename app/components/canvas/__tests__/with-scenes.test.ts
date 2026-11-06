@@ -216,6 +216,17 @@ describe("withScenes", () => {
 			expect(shape(editor)).toEqual([["image", "character"]]);
 		});
 
+		it("replacing a foreground before removing it keeps the scene's overlays with the replacement", () => {
+			const editor = makeEditor();
+			setChildren(editor, [
+				scene([content("image", "i1")], "s1"),
+				scene([content("narration", "n1"), content("image", "i2")], "s2"),
+			]);
+			Transforms.insertNodes(editor, content("video", "v1"), { at: [1, 1] });
+			Transforms.removeNodes(editor, { at: [2, 0] });
+			expect(shape(editor)).toEqual([["image"], ["narration", "video"]]);
+		});
+
 		it("streaming inserts collect overlays into the correct scenes", () => {
 			const editor = makeEditor();
 			const sequence: ContentElement[] = [
