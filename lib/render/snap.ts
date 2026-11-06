@@ -1,5 +1,5 @@
 import minBy from "lodash/minBy";
-import { trimEdge, type Trim, type TrimEdge } from "./clip-trim";
+import { laidOut, trimEdge, type Trim, type TrimEdge } from "./clip-trim";
 import type { Sequence } from "./types";
 
 // A trim that lands on its target comes back a few ULPs off it.
@@ -27,6 +27,19 @@ const edgeSec = ({ element, start }: Clip, edge: TrimEdge, trim: Trim) =>
 		? start + trim.trimDurationSec
 		: start + trim.trimStartSec - element.trimStartSec;
 
+/** Every drawn edge of the other clips: where each starts, where its media stops, and where its span ends. */
+export const snapTargets = (
+	clips: Pick<Sequence, "element" | "start" | "duration">[],
+	exceptElementId: string,
+): number[] =>
+	clips
+		.filter((clip) => clip.element.id !== exceptElementId)
+		.flatMap((clip) => [
+			clip.start,
+			clip.start + laidOut(clip).trimDurationSec,
+			clip.start + clip.duration,
+		]);
+
 /** The dragged handle sticks to a target within reach, unless the media runs out before it. */
 export function snapTrimEdge(
 	clip: Clip,
@@ -35,15 +48,12 @@ export function snapTrimEdge(
 	targets: readonly number[],
 	thresholdSec: number,
 ): SnappedTrim {
-	const free = {
-		trim: trimEdge(clip.element, edge, deltaSec),
-		snappedSec: null,
-	};
 	const restSec = edgeSec(clip, edge, clip.element);
 	const target = snapTarget(restSec + deltaSec, targets, thresholdSec);
-	if (target === null) return free;
-	const trim = trimEdge(clip.element, edge, target - restSec);
-	return Math.abs(edgeSec(clip, edge, trim) - target) < EPSILON_SEC
-		? { trim, snappedSec: target }
-		: free;
+	if (target !== null) {
+		const trim = trimEdge(clip.element, edge, target - restSec);
+		if (Math.abs(edgeSec(clip, edge, trim) - target) < EPSILON_SEC)
+			return { trim, snappedSec: target };
+	}
+	return { trim: trimEdge(clip.element, edge, deltaSec), snappedSec: null };
 }

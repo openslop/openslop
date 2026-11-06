@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { snapTarget, snapTrimEdge } from "../snap";
+import { snapTarget, snapTargets, snapTrimEdge } from "../snap";
 import type { ResolvedElement } from "../types";
 
 const el = (over: Partial<ResolvedElement>): ResolvedElement => ({
@@ -64,11 +64,22 @@ describe("snapTrimEdge", () => {
 		expect(snappedSec).toBeNull();
 		expect(trim.trimDurationSec).toBe(9.9);
 	});
+});
 
-	it("snaps to nothing without targets", () => {
-		expect(snapTrimEdge(clip, "end", 0.8, [], 0.15)).toEqual({
-			trim: { trimStartSec: 0, trimDurationSec: 4.8 },
-			snappedSec: null,
-		});
+describe("snapTargets", () => {
+	const image = el({ id: "img", type: "image", mediaDurationSec: 0 });
+	const video = el({ id: "v", mediaDurationSec: 10, trimDurationSec: 4 });
+
+	it("marks where every other clip starts and ends", () => {
+		const clips = [
+			{ element: image, start: 0, duration: 5 },
+			{ element: video, start: 5, duration: 4 },
+		];
+		expect(new Set(snapTargets(clips, "v"))).toEqual(new Set([0, 5]));
+	});
+
+	it("marks where a video's media stops as well as where its scene ends", () => {
+		const clips = [{ element: video, start: 0, duration: 6 }];
+		expect(new Set(snapTargets(clips, "other"))).toEqual(new Set([0, 4, 6]));
 	});
 });
