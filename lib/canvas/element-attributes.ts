@@ -27,7 +27,6 @@ export const LAYOUT_ATTRIBUTE_KEYS = [
 	"uploadedFrame",
 	"trimStart",
 	"trimDuration",
-	"resultTrims",
 ] as const;
 
 export const splitAttributes = (

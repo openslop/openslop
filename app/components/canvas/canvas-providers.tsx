@@ -19,7 +19,6 @@ import { SloppyUnread } from "../sloppy/sloppy-unread";
 import { EditorPanelProvider } from "./panel/editor-panel-context";
 import { AssetEditProvider } from "./elements/character/asset-edit-provider";
 import { useEditorSession } from "./hooks/use-editor-session";
-import { SyncResultTrims } from "./sync-result-trims";
 import { useProjectHistoryHotkeys } from "./project-history-keymap";
 
 const CanvasScopedProviders = composeProviders(
@@ -57,7 +56,6 @@ export function CanvasProviders({ children }: { children: ReactNode }) {
 			<CanvasHistoryProvider history={history}>
 				<CanvasScopedProviders>
 					<ActiveCaptionFont />
-					<SyncResultTrims />
 					<SloppyUnread />
 					{children}
 				</CanvasScopedProviders>

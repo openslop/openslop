@@ -2,7 +2,6 @@ import { AttributeSchema } from "../attributes/schema";
 import {
 	loopsDef,
 	OWN_MODEL_DEFS,
-	resultTrimsDef,
 	trimDurationDef,
 	trimStartDef,
 	volumeDef,
@@ -14,5 +13,4 @@ export const MUSIC_ATTRIBUTES = AttributeSchema.from([
 	volumeDef("2"),
 	trimStartDef,
 	trimDurationDef,
-	resultTrimsDef,
 ]);

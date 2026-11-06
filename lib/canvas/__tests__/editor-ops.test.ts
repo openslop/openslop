@@ -330,4 +330,18 @@ describe("applyElementVersion", () => {
 		const node = (editor.children[0] as Scene).children[0];
 		expect(node.generationAttributes).toEqual({ style: "oil" });
 	});
+
+	it("plays the restored take untrimmed", () => {
+		const el = content("video", "v1", "a fox", {
+			trimStart: "1",
+			trimDuration: "3",
+			volume: "5",
+		});
+		const editor = makeEditor([scene([el])]);
+
+		applyElementVersion(editor, "v1", { inputs: inputsFor("a fox", {}) });
+
+		const node = (editor.children[0] as Scene).children[0];
+		expect(node.layoutAttributes).toEqual({ volume: "5" });
+	});
 });

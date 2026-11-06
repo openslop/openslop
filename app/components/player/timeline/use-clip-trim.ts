@@ -4,11 +4,8 @@ import { useEffect, useEffectEvent, useRef, useState } from "react";
 import isMatch from "lodash/isMatch";
 import round from "lodash/round";
 import { useSlateStatic } from "slate-react";
-import { findElementById, mergeAttrs } from "@/lib/canvas/editor-ops";
-import { writeActiveResultTrim } from "@/lib/canvas/result-trims";
-import { resultIdentity } from "@/lib/connectors/asset-url";
+import { mergeAttrs, resetTrim } from "@/lib/canvas/editor-ops";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
-import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import {
 	isTrimmable,
 	isTrimmed,
@@ -51,7 +48,6 @@ export function useClipTrim(
 ) {
 	const element = laidOut(clip);
 	const editor = useSlateStatic();
-	const queue = useGenerationQueue();
 	const [preview, setPreview] = useState<Trim | null>(null);
 
 	const trimBy = (edge: TrimEdge) => (deltaSec: number, snapping: boolean) => {
@@ -71,24 +67,10 @@ export function useClipTrim(
 	// A layout rebuilt mid-drag can remount the clip, ending the drag without a release.
 	useEffect(() => (previewing ? () => hideGuide() : undefined), [previewing]);
 
-	const writeTrim = (
-		trim: { trimStart: string; trimDuration: string } | null,
-	) => {
-		const result = queue.getElementSnapshot(element.id).result;
-		if (!result) return;
-		const found = findElementById(editor, element.id);
-		if (!found) return;
-		mergeAttrs(
-			editor,
-			element.id,
-			writeActiveResultTrim(found[0], resultIdentity(result), trim),
-		);
-	};
-
 	const commit = () => {
 		setPreview(null);
 		if (!preview || isMatch(element, preview)) return;
-		writeTrim({
+		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),
 			trimDuration: toAttr(preview.trimDurationSec),
 		});
@@ -105,6 +87,6 @@ export function useClipTrim(
 		trim,
 		extensionSec: extensionSec(clip, trim),
 		handleProps: isTrimmable(element) ? handles : null,
-		reset: isTrimmed(clip.element) ? () => writeTrim(null) : null,
+		reset: isTrimmed(clip.element) ? () => resetTrim(editor, element.id) : null,
 	};
 }

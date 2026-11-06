@@ -1,5 +1,6 @@
 import isNil from "lodash/isNil";
 import mapValues from "lodash/mapValues";
+import omit from "lodash/omit";
 import omitBy from "lodash/omitBy";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasBlock, CanvasElement } from "./types";
@@ -113,6 +114,7 @@ export function applyElementVersion(
 	const [, path] = requireElement(editor, id);
 	replaceGenerationAttrs(editor, path, inputs.attributes);
 	updateElementText(editor, id, inputs.prompt);
+	resetTrim(editor, id);
 }
 
 /** A nil value deletes its key. */
@@ -142,4 +144,18 @@ export function mergeAttrs(
 		),
 	);
 	Transforms.setNodes(editor, splitAttributes(reconciled), { at: path });
+}
+
+const TRIM_KEYS = ["trimStart", "trimDuration"];
+
+/** A trim is picked for one take, so a new or restored take plays in full. */
+export function resetTrim(editor: Editor, id: string): void {
+	const [element, path] = requireElement(editor, id);
+	const layout = element.layoutAttributes ?? {};
+	if (!TRIM_KEYS.some((key) => key in layout)) return;
+	Transforms.setNodes(
+		editor,
+		{ layoutAttributes: omit(layout, TRIM_KEYS) },
+		{ at: path },
+	);
 }

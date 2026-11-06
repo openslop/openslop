@@ -50,7 +50,6 @@ describe("resolveAttributeSchema", () => {
 			"volume",
 			"trimStart",
 			"trimDuration",
-			"resultTrims",
 		]);
 	});
 
@@ -77,7 +76,6 @@ describe("resolveAttributeSchema", () => {
 			"motion",
 			"trimStart",
 			"trimDuration",
-			"resultTrims",
 		]);
 	});
 

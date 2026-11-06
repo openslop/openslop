@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useSlateStatic } from "slate-react";
+import { resetTrim } from "@/lib/canvas/editor-ops";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -92,12 +93,12 @@ export function useGenerateScope(
 
 	// Built again at the click, for the same reason as a single element's generate.
 	const run = useCallback(() => {
-		queue.enqueueGraph(
-			buildNodes(elements(), buildContext()).filter(
-				(node) => hasPrompt(node) && needsGeneration(node, queue),
-			),
+		const due = buildNodes(elements(), buildContext()).filter(
+			(node) => hasPrompt(node) && needsGeneration(node, queue),
 		);
-	}, [queue, elements, buildContext]);
+		for (const node of due) resetTrim(editor, node.id);
+		queue.enqueueGraph(due);
+	}, [queue, editor, elements, buildContext]);
 
 	const counts = { empty: nodes.length === 0, active, pending, stale };
 
