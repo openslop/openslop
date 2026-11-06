@@ -151,7 +151,7 @@ function Clip({
 						size="sm"
 						variant="quiet"
 						onClick={reset}
-						className="absolute top-0.5 right-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
+						className="absolute right-2 bottom-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 					>
 						<RotateCcw size={12} />
 					</TooltipIconButton>
