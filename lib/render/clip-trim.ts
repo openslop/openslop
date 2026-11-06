@@ -84,13 +84,17 @@ export function trimEdge(
 	const drawnSec = laidOut(clip).trimDurationSec;
 	// If the layout cuts the clip short (e.g. music stops where the next begins)
 	// then we should cap the trim to that drawn duration.
-	const maxSec =
-		drawnSec < trimDurationSec ? drawnSec : mediaDurationSec - trimStartSec;
-	if (edge === "end")
+	const cutSec = drawnSec < trimDurationSec ? drawnSec : Infinity;
+	if (edge === "end") {
+		const maxSec = mediaDurationSec - trimStartSec;
 		return {
 			trimStartSec,
-			trimDurationSec: clamp(drawnSec + deltaSec, minSec, maxSec),
+			trimDurationSec: Math.min(
+				clamp(drawnSec + deltaSec, minSec, maxSec),
+				cutSec,
+			),
 		};
+	}
 	const shift = clamp(
 		deltaSec,
 		-trimStartSec,
@@ -98,7 +102,7 @@ export function trimEdge(
 	);
 	return {
 		trimStartSec: trimStartSec + shift,
-		trimDurationSec: Math.min(trimDurationSec - shift, maxSec),
+		trimDurationSec: Math.min(trimDurationSec - shift, cutSec),
 	};
 }
 

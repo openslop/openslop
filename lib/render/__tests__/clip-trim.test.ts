@@ -131,6 +131,12 @@ describe("trimEdge", () => {
 		expect(trimEdge(short, "end", 5)).toEqual(trim);
 	});
 
+	it("grows a clip that plays to the media's end when its start moves back", () => {
+		expect(
+			trimEdge(uncut({ trimStartSec: 2, trimDurationSec: 8 }), "start", -1),
+		).toEqual({ trimStartSec: 1, trimDurationSec: 9 });
+	});
+
 	it("uncovers no more than was trimmed off, and keeps the minimum", () => {
 		expect(trimEdge(clip, "start", -50)).toEqual({
 			trimStartSec: 0,
@@ -156,6 +162,11 @@ describe("trimEdge on a clip the layout cuts short", () => {
 
 	it("can't run the end past the cut", () => {
 		expect(trimEdge(cut, "end", 10).trimDurationSec).toBe(30);
+	});
+
+	it("keeps a clip cut under the minimum where it's drawn", () => {
+		const short = { ...cut, duration: 0.6 };
+		expect(trimEdge(short, "end", 0).trimDurationSec).toBe(0.6);
 	});
 
 	it("moves the in-point and still fills the span, as the layout will", () => {
