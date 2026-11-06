@@ -16,7 +16,7 @@ import {
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
 import { renderPrompt } from "@/lib/connectors/character-refs";
-import { toFrames, toSeconds } from "@/lib/render/frames";
+import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
 import { usePlayerControl } from "../player-control-context";
 import { usePlayerScrub } from "../use-player-scrub";
@@ -35,13 +35,13 @@ import { TimelineRuler } from "./timeline-ruler";
 import {
 	buildCaptionRows,
 	buildTimelineRows,
-	snapEdges,
 	type CaptionClip as CaptionClipData,
 	type TimelineClip as TimelineClipData,
 } from "./timeline-rows";
 import { useTimelineZoom } from "./use-timeline-zoom";
 import { TimelineTrimHandle } from "./timeline-trim-handle";
-import { useClipTrim, type TrimSnap } from "./use-clip-trim";
+import { useClipTrim } from "./use-clip-trim";
+import { useTrimSnap, type TrimSnap } from "./use-trim-snap";
 
 /** Runway past the last tick, so its label isn't cut off by the end. */
 const RULER_TAIL_PX = 32;
@@ -231,7 +231,6 @@ export function Timeline() {
 	const selectScene = useSelectScene();
 	const [selectedKey, setSelectedKey] = useState<string | null>(null);
 	const hoverHead = useRef<HoverHeadHandle>(null);
-	const snapGuide = useRef<HoverHeadHandle>(null);
 	const {
 		ref: viewportRef,
 		node: viewport,
@@ -239,19 +238,7 @@ export function Timeline() {
 	} = useElementWidth<HTMLDivElement>();
 	const rows = useMemo(() => buildTimelineRows(layout), [layout]);
 	const captionRows = useMemo(() => buildCaptionRows(layout), [layout]);
-	const snap = useMemo<TrimSnap>(() => {
-		const edges = snapEdges(rows);
-		return {
-			targets: (exceptElementId) => [
-				...(player ? [toSeconds(player.getCurrentFrame(), layout.fps)] : []),
-				...edges
-					.filter((edge) => edge.elementId !== exceptElementId)
-					.map((edge) => edge.sec),
-			],
-			onSnap: (sec) =>
-				sec === null ? snapGuide.current?.hide() : snapGuide.current?.show(sec),
-		};
-	}, [rows, player, layout.fps]);
+	const { snap, guide: snapGuide } = useTrimSnap(rows, layout.fps);
 	const { zoom, pxPerSec, zoomIn, zoomOut, canZoomIn, canZoomOut } =
 		useTimelineZoom(
 			layout.totalDurationSec,

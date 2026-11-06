@@ -16,18 +16,13 @@ import {
 } from "@/lib/render/clip-trim";
 import { snapTrimEdge } from "@/lib/render/snap";
 import type { TimelineClip } from "./timeline-rows";
+import type { TrimSnap } from "./use-trim-snap";
 
 // The layout snaps whatever is stored onto the frame grid.
 const toAttr = (sec: number) => String(round(sec, 2));
 
 /** How close on screen a handle comes to a target before it sticks, at any zoom. */
 const SNAP_PX = 8;
-
-export type TrimSnap = {
-	/** The times a handle can stick to, apart from the dragged element's own edges. */
-	targets: (exceptElementId: string) => number[];
-	onSnap: (sec: number | null) => void;
-};
 
 function useEdgeDrag(
 	pxPerSec: number,
