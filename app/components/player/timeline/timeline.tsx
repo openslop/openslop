@@ -23,6 +23,7 @@ import { usePlayerScrub } from "../use-player-scrub";
 import { useSelectScene } from "../use-select-scene";
 import { useLayout } from "../render-layout-context";
 import {
+	ClipAction,
 	TimelineCaptionClip,
 	TimelineClip,
 	TimelineExtension,
@@ -39,7 +40,7 @@ import {
 	type TimelineClip as TimelineClipData,
 } from "./timeline-rows";
 import { useTimelineZoom } from "./use-timeline-zoom";
-import { TimelineTrimHandle } from "./timeline-trim-handle";
+import { TimelineTrimHandles } from "./timeline-trim-handle";
 import { useClipTrim } from "./use-clip-trim";
 import { useTrimSnap, type TrimSnap } from "./use-trim-snap";
 
@@ -145,19 +146,20 @@ function Clip({
 					/>
 				</SelectButton>
 				{reset ? (
-					<TooltipIconButton
-						label="Reset trim"
-						side="bottom"
-						size="sm"
-						variant="quiet"
-						onClick={reset}
-						className="absolute top-1/2 right-2 z-10 -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
-					>
-						<RotateCcw size={ICON_SIZES.sm} />
-					</TooltipIconButton>
+					<ClipAction>
+						<TooltipIconButton
+							label="Reset trim"
+							side="bottom"
+							size="sm"
+							variant="quiet"
+							onClick={reset}
+							className="opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
+						>
+							<RotateCcw size={ICON_SIZES.sm} />
+						</TooltipIconButton>
+					</ClipAction>
 				) : null}
-				<TimelineTrimHandle edge="start" handleProps={handleProps?.start} />
-				<TimelineTrimHandle edge="end" handleProps={handleProps?.end} />
+				<TimelineTrimHandles handleProps={handleProps} />
 			</ClipSlot>
 			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
 				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>

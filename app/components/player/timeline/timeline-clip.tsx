@@ -18,6 +18,7 @@ import type {
 } from "./timeline-rows";
 
 const HEADER_ICON_SIZE = 9;
+const HEADER_HEIGHT = "h-3.5";
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 
@@ -96,7 +97,12 @@ function ClipHeader({
 	width: number;
 }) {
 	return (
-		<span className="relative z-10 flex h-3.5 shrink-0 items-center gap-1 px-1">
+		<span
+			className={cn(
+				"relative z-10 flex shrink-0 items-center gap-1 px-1",
+				HEADER_HEIGHT,
+			)}
+		>
 			<Icon size={HEADER_ICON_SIZE} className="shrink-0" />
 			<span dir="auto" className="truncate text-badge-xs text-foreground">
 				{fit(label, width)}
@@ -131,6 +137,18 @@ function ClipFrame({
 		>
 			{children}
 			{selected ? <SelectedWash /> : null}
+		</div>
+	);
+}
+
+/** A control drawn over a clip, at the right of its body below the header. */
+export function ClipAction({ children }: { children: ReactNode }) {
+	return (
+		<div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
+			<span className={cn("shrink-0", HEADER_HEIGHT)} />
+			<div className="flex flex-1 items-center justify-end px-2 *:pointer-events-auto">
+				{children}
+			</div>
 		</div>
 	);
 }

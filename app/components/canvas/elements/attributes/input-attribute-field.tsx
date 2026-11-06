@@ -3,7 +3,7 @@
 import { useState, type ComponentProps } from "react";
 import { useSlateStatic } from "slate-react";
 import { RotateCcw } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { ContentElement } from "@/lib/canvas/types";
@@ -42,6 +42,16 @@ export function InputAttributeField({
 
 	return (
 		<div className="flex items-center gap-1">
+			{value ? (
+				<TooltipIconButton
+					label={`Reset ${label.toLowerCase()}`}
+					size="sm"
+					variant="quiet"
+					onClick={() => mergeAttrs(editor, element.id, { [attrKey]: null })}
+				>
+					<RotateCcw size={ICON_SIZES.sm} />
+				</TooltipIconButton>
+			) : null}
 			<Input
 				size="sm"
 				autoComplete="off"
@@ -54,16 +64,6 @@ export function InputAttributeField({
 					if (event.key === "Enter") event.currentTarget.blur();
 				}}
 			/>
-			{value ? (
-				<TooltipIconButton
-					label={`Reset ${label.toLowerCase()}`}
-					size="sm"
-					variant="quiet"
-					onClick={() => mergeAttrs(editor, element.id, { [attrKey]: null })}
-				>
-					<RotateCcw size={12} />
-				</TooltipIconButton>
-			) : null}
 		</div>
 	);
 }
