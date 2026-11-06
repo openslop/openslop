@@ -5,7 +5,6 @@ import type { Sequence } from "./types";
 // A trim that lands on its target comes back a few ULPs off it.
 const EPSILON_SEC = 1e-6;
 
-/** The nearest target within reach of the time, or null when none is. */
 export function snapTarget(
 	sec: number,
 	targets: readonly number[],

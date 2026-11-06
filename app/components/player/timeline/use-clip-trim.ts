@@ -21,7 +21,6 @@ import type { TrimSnap } from "./use-trim-snap";
 // The layout snaps whatever is stored onto the frame grid.
 const toAttr = (sec: number) => String(round(sec, 2));
 
-/** How close on screen a handle comes to a target before it sticks, at any zoom. */
 const SNAP_PX = 8;
 
 function useEdgeDrag(

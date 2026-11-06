@@ -8,12 +8,10 @@ import type { HoverHeadHandle } from "./timeline-hover-head";
 import type { TimelineRow } from "./timeline-rows";
 
 export type TrimSnap = {
-	/** The times a handle can stick to, apart from the dragged element's own edges. */
 	targets: (exceptElementId: string) => number[];
 	onSnap: (sec: number | null) => void;
 };
 
-/** A trim handle sticks to the other clips' edges and the playhead, and the guide marks where it's held. */
 export function useTrimSnap(rows: TimelineRow[], fps: number) {
 	const { player } = usePlayerControl();
 	const guide = useRef<HoverHeadHandle>(null);

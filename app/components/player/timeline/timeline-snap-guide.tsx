@@ -3,7 +3,7 @@
 import { useImperativeHandle, useRef, type Ref } from "react";
 import type { HoverHeadHandle } from "./timeline-hover-head";
 
-/** Marks the edge a dragged trim handle is held on. A handle, like the hover head: a pointer move must not re-render every clip. */
+/** Driven through a handle, like the hover head: a pointer move must not re-render every clip. */
 export function TimelineSnapGuide({
 	pxPerSec,
 	ref,

@@ -105,7 +105,6 @@ export function trimEdge(
 	};
 }
 
-/** How far a scene runs on past its trimmed video to the end of its dialogue. */
 export const extensionSec = (
 	{ overlaySec = 0 }: Pick<Sequence, "overlaySec">,
 	trim: Trim,
