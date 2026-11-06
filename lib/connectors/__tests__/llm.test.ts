@@ -102,18 +102,31 @@ describe("BaseLLMConnector", () => {
 		expect(order).toEqual(["transform", "before", "after"]);
 	});
 
-	it("hands the caller's abort signal to the stream request", async () => {
-		const fetchMock = vi.mocked(fetch);
-		const connector = new HttpLLMConnector({ projectId: "project-1", model });
-		const controller = new AbortController();
+	it.each([
+		[
+			"generate",
+			(connector: HttpLLMConnector, signal: AbortSignal) =>
+				connector.generate({ prompt: "test" }, { signal }),
+		],
+		[
+			"stream",
+			(connector: HttpLLMConnector, signal: AbortSignal) =>
+				connector.stream({ prompt: "test" }, signal).next(),
+		],
+	] as const)(
+		"hands the caller's abort signal to the %s request",
+		async (_, call) => {
+			const connector = new HttpLLMConnector({ projectId: "project-1", model });
+			const { signal } = new AbortController();
 
-		await connector.stream({ prompt: "test" }, controller.signal).next();
+			await call(connector, signal);
 
-		expect(fetchMock).toHaveBeenCalledWith(
-			expect.any(String),
-			expect.objectContaining({ signal: controller.signal }),
-		);
-	});
+			expect(fetch).toHaveBeenCalledWith(
+				expect.any(String),
+				expect.objectContaining({ signal }),
+			);
+		},
+	);
 
 	it("runs onError when transformPrompt throws during stream", async () => {
 		const onError = vi.fn();

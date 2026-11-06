@@ -72,7 +72,10 @@ export function useAgentTools() {
 					);
 				},
 				generateText: async (prompt, options) => {
-					const { text } = await llm().generate({ prompt, ...options });
+					const { text } = await llm().generate(
+						{ prompt, ...options },
+						{ signal },
+					);
 					if (!text.trim())
 						throw new Error(
 							"The model spent its whole output budget thinking and replied with nothing. Ask for less thinking, or for a shorter answer.",

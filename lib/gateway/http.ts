@@ -65,10 +65,14 @@ export class HttpLLMGateway extends GatewayClient<
 		this.route = `${apiPrefixFor(config.model.provider)}/llm`;
 	}
 
-	async generate(params: LLMGenerateParams): Promise<LLMGenerateResult> {
+	async generate(
+		params: LLMGenerateParams,
+		signal?: AbortSignal,
+	): Promise<LLMGenerateResult> {
 		return apiJson(this.route, LLMGenerateResultSchema, {
 			method: "POST",
 			body: { ...params, projectId: this.config.projectId },
+			signal,
 		});
 	}
 

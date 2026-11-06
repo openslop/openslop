@@ -78,7 +78,9 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 				!turn.current?.signal.aborted &&
 				lastAssistantMessageIsCompleteWithToolCalls(options),
 			onToolCall: async ({ toolCall }) => {
-				const outcome = await runTool(toolCall, turn.current?.signal);
+				const signal = turn.current?.signal;
+				const outcome = await runTool(toolCall, signal);
+				if (signal?.aborted) return;
 				const call = {
 					tool: toolCall.toolName as AgentToolName,
 					toolCallId: toolCall.toolCallId,

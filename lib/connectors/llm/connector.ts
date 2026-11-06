@@ -24,8 +24,9 @@ export class HttpLLMConnector
 
 	protected async _generate(
 		params: LLMGenerateParams,
+		signal?: AbortSignal,
 	): Promise<LLMGenerateResult> {
-		return this.gateway.generate(params);
+		return this.gateway.generate(params, signal);
 	}
 
 	async *stream(
