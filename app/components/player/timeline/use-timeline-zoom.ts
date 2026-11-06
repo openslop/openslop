@@ -3,7 +3,9 @@
 import { useState } from "react";
 
 /** Multiples of fit-to-width; the timeline never zooms below the whole video. */
-const ZOOM_LEVELS = [1, 1.5, 2, 3, 4, 6, 8];
+export const ZOOM_LEVELS = [
+	1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 48, 64,
+];
 
 export function useTimelineZoom(
 	totalDurationSec: number,
