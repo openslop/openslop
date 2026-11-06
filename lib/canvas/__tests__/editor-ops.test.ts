@@ -5,6 +5,7 @@ import { ZERO_WIDTH_SPACE } from "../constants";
 import {
 	applyElementVersion,
 	resetTrim,
+	setTrimPoint,
 	duplicateElement,
 	findBlockById,
 	findElementById,
@@ -337,7 +338,7 @@ describe("resetTrim", () => {
 	it("drops the trim and keeps the rest of the layout", () => {
 		const el = content("video", "v1", "a fox", {
 			trimStart: "1",
-			trimDuration: "3",
+			trimEnd: "4",
 			volume: "5",
 		});
 		const editor = makeEditor([scene([el])]);
@@ -348,13 +349,39 @@ describe("resetTrim", () => {
 		expect(node.layoutAttributes).toEqual({ volume: "5" });
 	});
 
+	it("drops only the edges it is given", () => {
+		const el = content("video", "v1", "a fox", {
+			trimStart: "1",
+			trimEnd: "4",
+		});
+		const editor = makeEditor([scene([el])]);
+
+		resetTrim(editor, "v1", ["end"]);
+
+		const node = (editor.children[0] as Scene).children[0];
+		expect(node.layoutAttributes).toEqual({ trimStart: "1" });
+	});
+
 	it("leaves the document untouched when there is no trim", () => {
 		const editor = makeEditor([scene([content("video", "v1", "a fox")])]);
 		const before = editor.children;
 
 		resetTrim(editor, "v1");
 		resetTrim(editor, "gone");
+		resetTrim(editor, "v1", ["start"]);
 
 		expect(editor.children).toBe(before);
+	});
+});
+
+describe("setTrimPoint", () => {
+	it("stores one edge to the hundredth, leaving the other as it was", () => {
+		const el = content("video", "v1", "a fox", { trimEnd: "4" });
+		const editor = makeEditor([scene([el])]);
+
+		setTrimPoint(editor, "v1", "start", 1.236);
+
+		const node = (editor.children[0] as Scene).children[0];
+		expect(node.layoutAttributes).toEqual({ trimStart: "1.24", trimEnd: "4" });
 	});
 });

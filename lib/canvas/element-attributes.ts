@@ -16,7 +16,6 @@ import {
 	isMotionEffect,
 	type MotionEffect,
 } from "../render/motion-effect-names";
-import { MIN_DURATION_SEC } from "../render/scene-builder";
 
 /** Raw attribute keys omitted from generation inputs: layout knobs, and what the card remembers for the user. */
 export const LAYOUT_ATTRIBUTE_KEYS = [
@@ -26,7 +25,7 @@ export const LAYOUT_ATTRIBUTE_KEYS = [
 	"motion",
 	"uploadedFrame",
 	"trimStart",
-	"trimDuration",
+	"trimEnd",
 ] as const;
 
 export const splitAttributes = (
@@ -102,10 +101,8 @@ export const getLoop = (element: ContentElement): boolean =>
 export const getTrimStart = (element: ContentElement): number =>
 	clampedNumber(element.layoutAttributes?.trimStart, { min: 0 }) ?? 0;
 
-export const getTrimDuration = (element: ContentElement): number | undefined =>
-	clampedNumber(element.layoutAttributes?.trimDuration, {
-		min: MIN_DURATION_SEC,
-	});
+export const getTrimEnd = (element: ContentElement): number | undefined =>
+	clampedNumber(element.layoutAttributes?.trimEnd, { min: 0 });
 
 export function getMotion(element: ContentElement): MotionEffect {
 	const raw = element.layoutAttributes?.motion;

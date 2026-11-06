@@ -17,7 +17,7 @@ export function snapTarget(
 
 type SnappedTrim = { trim: Trim; snappedSec: number | null };
 
-type Clip = Pick<Sequence, "element" | "start">;
+type Clip = Pick<Sequence, "element" | "start" | "duration">;
 
 /** Where the handle sits on the timeline: the end handle moves the end, the start handle cuts the in-point from where the clip starts. */
 const edgeSec = ({ element, start }: Clip, edge: TrimEdge, trim: Trim) =>
@@ -26,10 +26,7 @@ const edgeSec = ({ element, start }: Clip, edge: TrimEdge, trim: Trim) =>
 		: start + trim.trimStartSec - element.trimStartSec;
 
 /** Every drawn edge of the other clips: where each starts, where its media stops, and where its span ends. */
-export const snapTargets = (
-	clips: Pick<Sequence, "element" | "start" | "duration">[],
-	exceptElementId: string,
-): number[] =>
+export const snapTargets = (clips: Clip[], exceptElementId: string): number[] =>
 	clips
 		.filter((clip) => clip.element.id !== exceptElementId)
 		.flatMap((clip) => [
@@ -46,12 +43,12 @@ export function snapTrimEdge(
 	targets: readonly number[],
 	thresholdSec: number,
 ): SnappedTrim {
-	const restSec = edgeSec(clip, edge, clip.element);
+	const restSec = edgeSec(clip, edge, laidOut(clip));
 	const target = snapTarget(restSec + deltaSec, targets, thresholdSec);
 	if (target !== null) {
-		const trim = trimEdge(clip.element, edge, target - restSec);
+		const trim = trimEdge(clip, edge, target - restSec);
 		if (Math.abs(edgeSec(clip, edge, trim) - target) < EPSILON_SEC)
 			return { trim, snappedSec: target };
 	}
-	return { trim: trimEdge(clip.element, edge, deltaSec), snappedSec: null };
+	return { trim: trimEdge(clip, edge, deltaSec), snappedSec: null };
 }

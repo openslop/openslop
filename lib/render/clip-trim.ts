@@ -1,4 +1,4 @@
-import { getTrimDuration, getTrimStart } from "@/lib/canvas/element-attributes";
+import { getTrimEnd, getTrimStart } from "@/lib/canvas/element-attributes";
 import type { ContentElement } from "@/lib/canvas/types";
 import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
@@ -10,10 +10,6 @@ export type TrimEdge = "start" | "end";
 /** Where a clip opens in its media, and how long it runs on the timeline from there. */
 export type Trim = Pick<ResolvedElement, "trimStartSec" | "trimDurationSec">;
 
-/** A clip runs out at the end of its media; a still, having none, never does. */
-const maxTrimDurationSec = (mediaDurationSec: number, trimStartSec: number) =>
-	mediaDurationSec > 0 ? mediaDurationSec - trimStartSec : Infinity;
-
 /** A still has no media length to trim. */
 export const isTrimmable = (element: ResolvedElement): boolean =>
 	element.mediaDurationSec > 0;
@@ -22,37 +18,37 @@ export const isTrimmed = (
 	element: Pick<ResolvedElement, "trimDurationSec" | "mediaDurationSec">,
 ): boolean => element.trimDurationSec < element.mediaDurationSec;
 
-/** A clip plays from its trim start for its timeline duration, or to the end of its media by default. */
+/** A clip plays from its in-point to its out-point, or to the end of its media by default. */
 export function trimClip(
 	mediaDurationSec: number,
 	startSec: number,
-	trimDurationSec?: number,
+	endSec?: number,
 ): Trim {
 	const trimStartSec = clamp(
 		startSec,
 		0,
 		Math.max(0, mediaDurationSec - MIN_DURATION_SEC),
 	);
-	return {
-		trimStartSec,
-		trimDurationSec: Math.min(
-			trimDurationSec ?? mediaDurationSec - trimStartSec,
-			maxTrimDurationSec(mediaDurationSec, trimStartSec),
-		),
-	};
+	const trimEndSec = Math.min(
+		Math.max(endSec ?? mediaDurationSec, trimStartSec + MIN_DURATION_SEC),
+		mediaDurationSec,
+	);
+	return { trimStartSec, trimDurationSec: trimEndSec - trimStartSec };
 }
 
 export const elementTrim = (
 	element: ContentElement,
 	mediaDurationSec: number,
 ): Trim =>
-	trimClip(mediaDurationSec, getTrimStart(element), getTrimDuration(element));
+	trimClip(mediaDurationSec, getTrimStart(element), getTrimEnd(element));
+
+type LaidOutClip = Pick<Sequence, "element" | "duration">;
 
 /** The element as drawn: a still fills its span, and one the layout stops short of its trim, as music stops where the next begins, runs only as far as it's drawn. */
 export const laidOut = ({
 	element,
 	duration,
-}: Pick<Sequence, "element" | "duration">): ResolvedElement => ({
+}: LaidOutClip): ResolvedElement => ({
 	...element,
 	trimDurationSec: isTrimmable(element)
 		? Math.min(element.trimDurationSec, duration)
@@ -80,19 +76,22 @@ export function trimCaptions(
 	};
 }
 
-/** The clip's start stays put and what follows ripples; it never runs under the minimum or past its media. */
+/** One edge moves, inside the media and the minimum from the other; a clip the layout cuts short stays cut. */
 export function trimEdge(
-	element: ResolvedElement,
+	clip: LaidOutClip,
 	edge: TrimEdge,
 	deltaSec: number,
 ): Trim {
-	const { trimStartSec, trimDurationSec, mediaDurationSec } = element;
-	const maxSec = maxTrimDurationSec(mediaDurationSec, trimStartSec);
+	const { trimStartSec, trimDurationSec, mediaDurationSec } = clip.element;
+	const maxSec = mediaDurationSec - trimStartSec;
 	const minSec = Math.min(MIN_DURATION_SEC, maxSec);
+	const drawnSec = laidOut(clip).trimDurationSec;
+	const fit = (sec: number) =>
+		drawnSec < trimDurationSec ? Math.min(sec, drawnSec) : sec;
 	if (edge === "end")
 		return {
 			trimStartSec,
-			trimDurationSec: clamp(trimDurationSec + deltaSec, minSec, maxSec),
+			trimDurationSec: fit(clamp(drawnSec + deltaSec, minSec, maxSec)),
 		};
 	const shift = clamp(
 		deltaSec,
@@ -101,9 +100,14 @@ export function trimEdge(
 	);
 	return {
 		trimStartSec: trimStartSec + shift,
-		trimDurationSec: trimDurationSec - shift,
+		trimDurationSec: fit(trimDurationSec - shift),
 	};
 }
+
+export const trimPointSec = (
+	{ trimStartSec, trimDurationSec }: Trim,
+	edge: TrimEdge,
+): number => (edge === "start" ? trimStartSec : trimStartSec + trimDurationSec);
 
 export const extensionSec = (
 	{ overlaySec = 0 }: Pick<Sequence, "overlaySec">,

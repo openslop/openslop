@@ -16,7 +16,6 @@ import {
 	DEFAULT_MOTION,
 	MOTION_EFFECTS,
 } from "@/lib/render/motion-effect-names";
-import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
 import type { AttributeDef } from "./schema";
 
 const volumeValue = z.enum(VOLUME_OPTIONS);
@@ -104,9 +103,9 @@ export const trimStartDef: AttributeDef = {
 	edit: { kind: "seconds", value: secondsValue, min: 0 },
 };
 
-export const trimDurationDef: AttributeDef = {
-	key: "trimDuration",
-	label: "Trim duration",
+export const trimEndDef: AttributeDef = {
+	key: "trimEnd",
+	label: "Trim end",
 	unit: "s",
-	edit: { kind: "seconds", value: secondsValue, min: MIN_DURATION_SEC },
+	edit: { kind: "seconds", value: secondsValue, min: 0 },
 };

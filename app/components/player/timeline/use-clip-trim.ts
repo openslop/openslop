@@ -2,25 +2,21 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import isMatch from "lodash/isMatch";
-import round from "lodash/round";
 import { useSlateStatic } from "slate-react";
-import { mergeAttrs, resetTrim } from "@/lib/canvas/editor-ops";
+import { resetTrim, setTrimPoint } from "@/lib/canvas/editor-ops";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
 	isTrimmed,
 	extensionSec,
 	laidOut,
-	trimEdge,
+	trimPointSec,
 	type Trim,
 	type TrimEdge,
 } from "@/lib/render/clip-trim";
 import { snapTrimEdge } from "@/lib/render/snap";
 import type { TimelineClip } from "./timeline-rows";
 import type { TrimSnap } from "./use-trim-snap";
-
-// The layout snaps whatever is stored onto the frame grid.
-const toAttr = (sec: number) => String(round(sec, 2));
 
 const SNAP_PX = 8;
 
@@ -41,7 +37,7 @@ function useEdgeDrag(
 	});
 }
 
-/** A drag previews the new length and commits it on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets. */
+/** A drag previews the moved edge and stores only that edge on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets. */
 export function useClipTrim(
 	clip: TimelineClip,
 	pxPerSec: number,
@@ -53,7 +49,7 @@ export function useClipTrim(
 
 	const trimBy = (edge: TrimEdge) => (deltaSec: number, snapping: boolean) => {
 		const snapped = snapTrimEdge(
-			{ element, start: clip.start },
+			clip,
 			edge,
 			deltaSec,
 			snapping ? snap.targets(element.id) : [],
@@ -66,29 +62,21 @@ export function useClipTrim(
 	const hideGuide = useEffectEvent(() => snap.onSnap(null));
 	useEffect(() => () => hideGuide(), []);
 
-	const save = (next: Trim | null) => {
-		setPreview(null);
-		if (!next || isMatch(element, next)) return;
-		mergeAttrs(editor, element.id, {
-			trimStart: toAttr(next.trimStartSec),
-			trimDuration: toAttr(next.trimDurationSec),
-		});
-	};
-
-	const commit = () => {
+	const commit = (edge: TrimEdge) => () => {
 		snap.onSnap(null);
-		save(preview);
+		setPreview(null);
+		if (!preview || isMatch(element, preview)) return;
+		setTrimPoint(editor, element.id, edge, trimPointSec(preview, edge));
 	};
 
 	const handles = {
 		start: {
-			...useEdgeDrag(pxPerSec, trimBy("start"), commit),
-			onDoubleClick: () => save(trimEdge(element, "start", -Infinity)),
+			...useEdgeDrag(pxPerSec, trimBy("start"), commit("start")),
+			onDoubleClick: () => resetTrim(editor, element.id, ["start"]),
 		},
 		end: {
-			...useEdgeDrag(pxPerSec, trimBy("end"), commit),
-			onDoubleClick: () =>
-				mergeAttrs(editor, element.id, { trimDuration: null }),
+			...useEdgeDrag(pxPerSec, trimBy("end"), commit("end")),
+			onDoubleClick: () => resetTrim(editor, element.id, ["end"]),
 		},
 	};
 

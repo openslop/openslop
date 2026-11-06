@@ -39,7 +39,7 @@ describe("snapTarget", () => {
 });
 
 describe("snapTrimEdge", () => {
-	const clip = { element: el({}), start: 2 };
+	const clip = { element: el({}), start: 2, duration: 4 };
 
 	it("holds the end on a target it comes near", () => {
 		const { trim, snappedSec } = snapTrimEdge(clip, "end", 0.8, [6.9], 0.15);
@@ -59,8 +59,19 @@ describe("snapTrimEdge", () => {
 		expect(trim).toEqual({ trimStartSec: 1, trimDurationSec: 3 });
 	});
 
+	it("snaps a cut clip's end from where it's drawn", () => {
+		const cut = { element: el({ trimDurationSec: 10 }), start: 0, duration: 6 };
+		const { trim, snappedSec } = snapTrimEdge(cut, "end", -0.9, [5], 0.15);
+		expect(snappedSec).toBe(5);
+		expect(trim.trimDurationSec).toBe(5);
+	});
+
 	it("moves freely toward a target the media can't reach", () => {
-		const short = { element: el({ trimDurationSec: 9.9 }), start: 0 };
+		const short = {
+			element: el({ trimDurationSec: 9.9 }),
+			start: 0,
+			duration: 9.9,
+		};
 		const { trim, snappedSec } = snapTrimEdge(short, "end", 0, [10.02], 0.2);
 		expect(snappedSec).toBeNull();
 		expect(trim.trimDurationSec).toBe(9.9);

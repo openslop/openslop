@@ -75,7 +75,7 @@ describe("measureElementLengths", () => {
 	it("holds a trimmed video for its trimmed length, and says the trim set it", () => {
 		const [cut, opened] = measureElementLengths([
 			scene(
-				element("video", "A pan.", { duration: "8", trimDuration: "5" }),
+				element("video", "A pan.", { duration: "8", trimEnd: "5" }),
 				element("video", "A zoom.", { duration: "8", trimStart: "3" }),
 			),
 		]);
@@ -96,7 +96,7 @@ describe("measureElementLengths", () => {
 	it("lets dialogue run past a trim, carrying the trimmed length it beat", () => {
 		const [held] = measureElementLengths([
 			scene(
-				element("video", "A pan.", { duration: "8", trimDuration: "5" }),
+				element("video", "A pan.", { duration: "8", trimEnd: "5" }),
 				element("narration", words(90)),
 			),
 		]);
