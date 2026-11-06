@@ -18,18 +18,18 @@ export const isTrimmed = (
 	element: Pick<ResolvedElement, "trimDurationSec" | "mediaDurationSec">,
 ): boolean => element.trimDurationSec < element.mediaDurationSec;
 
+/** The shortest a trim leaves a clip: the minimum, or the whole of media shorter than that. */
+const minTrimSec = (mediaDurationSec: number) =>
+	Math.min(MIN_DURATION_SEC, mediaDurationSec);
+
 /** A clip plays from its in-point to its out-point, or to the end of its media by default. */
 export function trimClip(
 	mediaDurationSec: number,
 	startSec: number,
 	endSec?: number,
 ): Trim {
-	const trimStartSec = clamp(
-		startSec,
-		0,
-		Math.max(0, mediaDurationSec - MIN_DURATION_SEC),
-	);
-	const minSec = Math.min(MIN_DURATION_SEC, mediaDurationSec - trimStartSec);
+	const minSec = minTrimSec(mediaDurationSec);
+	const trimStartSec = clamp(startSec, 0, mediaDurationSec - minSec);
 	const trimEndSec = clamp(
 		endSec ?? mediaDurationSec,
 		trimStartSec + minSec,
@@ -86,7 +86,7 @@ export function trimEdge(
 ): Trim {
 	const { trimStartSec, trimDurationSec, mediaDurationSec } = clip.element;
 	const maxSec = mediaDurationSec - trimStartSec;
-	const minSec = Math.min(MIN_DURATION_SEC, maxSec);
+	const minSec = minTrimSec(mediaDurationSec);
 	const drawnSec = laidOut(clip).trimDurationSec;
 	const fit = (sec: number) =>
 		drawnSec < trimDurationSec ? Math.min(sec, drawnSec) : sec;
