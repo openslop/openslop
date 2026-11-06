@@ -20,8 +20,17 @@ export type BYOKProviderMeta = ProviderMeta & { keysUrl: string };
  * one and needs no key; the rest are the user's own, reached with the key they
  * store on their account.
  */
-export const PROVIDER_CATALOG: Record<typeof MANAGED_PROVIDER, ProviderMeta> &
+export const PROVIDER_CATALOG: Record<
+	typeof MANAGED_PROVIDER | typeof LOCAL_PROVIDER,
+	ProviderMeta
+> &
 	Record<BYOKProvider, BYOKProviderMeta> = {
+	"claude-code": {
+		name: "Claude subscription",
+		description:
+			"Your personal Claude Code subscription, on this computer only.",
+		mark: { src: "/icons/claude.svg", masked: false },
+	},
 	openslop: {
 		name: "OpenSlop",
 		description: "Hosted models, included with your account. No key needed.",
@@ -53,14 +62,19 @@ export const PROVIDER_CATALOG: Record<typeof MANAGED_PROVIDER, ProviderMeta> &
 	},
 };
 
+export const LOCAL_PROVIDER = "claude-code" as const;
+
 export const MANAGED_PROVIDER = "openslop" as const;
 
-export type BYOKProvider = Exclude<Provider, typeof MANAGED_PROVIDER>;
+export type BYOKProvider = Exclude<
+	Provider,
+	typeof MANAGED_PROVIDER | typeof LOCAL_PROVIDER
+>;
 
 export const isProvider = (value: string | undefined): value is Provider =>
 	PROVIDERS.some((provider) => provider === value);
 
 export const isByokProvider = (provider: Provider): provider is BYOKProvider =>
-	provider !== MANAGED_PROVIDER;
+	provider !== MANAGED_PROVIDER && provider !== LOCAL_PROVIDER;
 
 export const BYOK_PROVIDERS = PROVIDERS.filter(isByokProvider);

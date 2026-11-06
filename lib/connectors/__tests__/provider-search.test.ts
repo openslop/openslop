@@ -19,6 +19,7 @@ describe("searchProviders", () => {
 			"runware",
 			"cartesia",
 			"elevenlabs",
+			"claude-code",
 		]);
 	});
 
@@ -39,6 +40,7 @@ describe("searchProviders", () => {
 				provider: "anthropic",
 				models: ["Claude Opus 5", "Claude Sonnet 5", "Claude Haiku 4.5"],
 			},
+			{ provider: "claude-code", models: ["Claude subscription"] },
 		]);
 	});
 

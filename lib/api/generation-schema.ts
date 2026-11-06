@@ -5,6 +5,7 @@ import { hasModel, listModels } from "@/lib/connectors/models";
 import {
 	isByokProvider,
 	MANAGED_PROVIDER,
+	LOCAL_PROVIDER,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
 import { TTS_SPEEDS } from "@/lib/connectors/tts/enums";
@@ -25,7 +26,10 @@ import {
 
 const hostedModelNames = (type: ConnectorType) =>
 	listModels(type)
-		.filter(({ provider }) => !isByokProvider(provider))
+		.filter(
+			({ provider }) =>
+				!isByokProvider(provider) && provider !== LOCAL_PROVIDER,
+		)
 		.map(({ model }) => model);
 
 const byokModelNames = (type: ConnectorType) =>
