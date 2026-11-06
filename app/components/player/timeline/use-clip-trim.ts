@@ -78,15 +78,8 @@ export function useClipTrim(
 	};
 
 	const commit = () => save(preview);
-	const untrimStart = () => {
-		const next = trimEdge(element, "start", -Infinity);
-		if (isTrimmed({ ...element, ...next })) save(next);
-		else resetTrim(editor, element.id);
-	};
-	const untrimEnd = () =>
-		element.trimStartSec > 0
-			? resetTrim(editor, element.id, ["trimDuration"])
-			: resetTrim(editor, element.id);
+	const untrimStart = () => save(trimEdge(element, "start", -Infinity));
+	const untrimEnd = () => resetTrim(editor, element.id, ["trimDuration"]);
 
 	const handles = {
 		start: {
