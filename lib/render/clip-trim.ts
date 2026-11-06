@@ -82,7 +82,8 @@ export function trimEdge(
 	const { trimStartSec, trimDurationSec, mediaDurationSec } = clip.element;
 	const minSec = minTrimSec(mediaDurationSec);
 	const drawnSec = laidOut(clip).trimDurationSec;
-	// The layout cuts it at the next clip, so it can't play past where it's drawn.
+	// If the layout cuts the clip short (e.g. music stops where the next begins)
+	// then we should cap the trim to that drawn duration.
 	const maxSec =
 		drawnSec < trimDurationSec ? drawnSec : mediaDurationSec - trimStartSec;
 	if (edge === "end")
