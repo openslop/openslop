@@ -28,10 +28,9 @@ function useEdgeDrag(
 	pxPerSec: number,
 	onTrim: (deltaSec: number, snapping: boolean) => void,
 	onEnd: () => void,
-	onDoubleClick: () => void,
 ) {
 	const originX = useRef(0);
-	const drag = usePointerDrag({
+	return usePointerDrag({
 		onStart: (event) => {
 			event.preventDefault();
 			originX.current = event.clientX;
@@ -40,7 +39,6 @@ function useEdgeDrag(
 			onTrim((event.clientX - originX.current) / pxPerSec, !event.altKey),
 		onEnd,
 	});
-	return { ...drag, onDoubleClick };
 }
 
 /** A drag previews the new length and commits it on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets. */
@@ -91,8 +89,14 @@ export function useClipTrim(
 			: resetTrim(editor, element.id);
 
 	const handles = {
-		start: useEdgeDrag(pxPerSec, trimBy("start"), commit, untrimStart),
-		end: useEdgeDrag(pxPerSec, trimBy("end"), commit, untrimEnd),
+		start: {
+			...useEdgeDrag(pxPerSec, trimBy("start"), commit),
+			onDoubleClick: untrimStart,
+		},
+		end: {
+			...useEdgeDrag(pxPerSec, trimBy("end"), commit),
+			onDoubleClick: untrimEnd,
+		},
 	};
 
 	const trim = preview ?? element;
