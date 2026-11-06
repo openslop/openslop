@@ -80,15 +80,15 @@ export function trimEdge(
 	deltaSec: number,
 ): Trim {
 	const { trimStartSec, trimDurationSec, mediaDurationSec } = clip.element;
-	const maxSec = mediaDurationSec - trimStartSec;
 	const minSec = minTrimSec(mediaDurationSec);
 	const drawnSec = laidOut(clip).trimDurationSec;
-	const fit = (sec: number) =>
-		drawnSec < trimDurationSec ? Math.min(sec, drawnSec) : sec;
+	// The layout cuts it at the next clip, so it can't play past where it's drawn.
+	const maxSec =
+		drawnSec < trimDurationSec ? drawnSec : mediaDurationSec - trimStartSec;
 	if (edge === "end")
 		return {
 			trimStartSec,
-			trimDurationSec: fit(clamp(drawnSec + deltaSec, minSec, maxSec)),
+			trimDurationSec: clamp(drawnSec + deltaSec, minSec, maxSec),
 		};
 	const shift = clamp(
 		deltaSec,
@@ -97,7 +97,7 @@ export function trimEdge(
 	);
 	return {
 		trimStartSec: trimStartSec + shift,
-		trimDurationSec: fit(trimDurationSec - shift),
+		trimDurationSec: Math.min(trimDurationSec - shift, maxSec),
 	};
 }
 
