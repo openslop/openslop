@@ -206,7 +206,6 @@ export class GenerationQueue {
 		return running < this.limits[connectorType];
 	}
 
-	/** The first pending node that can move: ready to run in a free slot, or held by a dependency that settled without a result. */
 	private nextReady() {
 		for (const node of this.pending) {
 			const blocker = this.blockingDependency(node);
