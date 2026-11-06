@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import isMatch from "lodash/isMatch";
 import round from "lodash/round";
 import { useSlateStatic } from "slate-react";
@@ -63,9 +63,13 @@ export function useClipTrim(
 		snap.onSnap(snapped.snappedSec);
 	};
 
+	const hideGuide = useEffectEvent(() => snap.onSnap(null));
+	const previewing = preview !== null;
+	// A layout rebuilt mid-drag can remount the clip, ending the drag without a release.
+	useEffect(() => (previewing ? () => hideGuide() : undefined), [previewing]);
+
 	const commit = () => {
 		setPreview(null);
-		snap.onSnap(null);
 		if (!preview || isMatch(element, preview)) return;
 		mergeAttrs(editor, element.id, {
 			trimStart: toAttr(preview.trimStartSec),

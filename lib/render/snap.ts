@@ -11,10 +11,9 @@ export function snapTarget(
 	targets: readonly number[],
 	thresholdSec: number,
 ): number | null {
-	const nearest = minBy(targets, (target) => Math.abs(target - sec));
-	return nearest !== undefined && Math.abs(nearest - sec) <= thresholdSec
-		? nearest
-		: null;
+	const nearest =
+		minBy(targets, (target) => Math.abs(target - sec)) ?? Infinity;
+	return Math.abs(nearest - sec) <= thresholdSec ? nearest : null;
 }
 
 type SnappedTrim = { trim: Trim; snappedSec: number | null };

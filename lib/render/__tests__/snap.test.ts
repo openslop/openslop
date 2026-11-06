@@ -25,6 +25,7 @@ describe("snapTarget", () => {
 	it("picks a target within reach", () => {
 		expect(snapTarget(6.8, [6.9], 0.2)).toBe(6.9);
 		expect(snapTarget(7.1, [6.9], 0.2)).toBe(6.9);
+		expect(snapTarget(0.1, [0], 0.2)).toBe(0);
 	});
 
 	it("leaves a time with nothing in reach alone", () => {
