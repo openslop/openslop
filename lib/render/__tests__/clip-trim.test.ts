@@ -73,6 +73,10 @@ describe("trimClip", () => {
 		expect(trimClip(10, 2, 20).trimDurationSec).toBe(8);
 	});
 
+	it("plays media shorter than the minimum to its own end", () => {
+		expect(trimClip(0.5, 0, 0.2).trimDurationSec).toBe(0.5);
+	});
+
 	it("keeps a trim start inside the media, at least the minimum from its end", () => {
 		expect(trimClip(10, 50).trimStartSec).toBe(9);
 	});

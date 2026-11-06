@@ -29,8 +29,10 @@ export function trimClip(
 		0,
 		Math.max(0, mediaDurationSec - MIN_DURATION_SEC),
 	);
-	const trimEndSec = Math.min(
-		Math.max(endSec ?? mediaDurationSec, trimStartSec + MIN_DURATION_SEC),
+	const minSec = Math.min(MIN_DURATION_SEC, mediaDurationSec - trimStartSec);
+	const trimEndSec = clamp(
+		endSec ?? mediaDurationSec,
+		trimStartSec + minSec,
 		mediaDurationSec,
 	);
 	return { trimStartSec, trimDurationSec: trimEndSec - trimStartSec };
