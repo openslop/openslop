@@ -24,7 +24,8 @@ const MIN_CHARS = 4;
 
 const FRAME =
 	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
-const SELECTED_EDGE = "border-current/60";
+const edge = (selected: boolean) =>
+	selected ? "border-current/60" : "border-border";
 
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
@@ -128,16 +129,30 @@ function ClipFrame({
 		<div
 			role="img"
 			aria-label={label}
-			className={cn(
-				FRAME,
-				className,
-				colorClass,
-				selected ? SELECTED_EDGE : "border-border",
-			)}
+			className={cn(FRAME, className, colorClass, edge(selected))}
 		>
 			{children}
 			{selected ? <SelectedWash /> : null}
 		</div>
+	);
+}
+
+/** A clip's edge alone, for drawing over the clips it overlaps. */
+export function ClipOutline({
+	element,
+	selected,
+}: {
+	element: ResolvedElement;
+	selected: boolean;
+}) {
+	return (
+		<span
+			className={cn(
+				"absolute inset-0 rounded-md border",
+				ELEMENT_CONFIGS[element.type].colorClass,
+				edge(selected),
+			)}
+		/>
 	);
 }
 

@@ -84,6 +84,7 @@ export function useClipTrim(
 
 	return {
 		trim,
+		trimming: preview !== null,
 		extensionSec: extensionSec(clip, trim),
 		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(clip.element) ? () => resetTrim(editor, element.id) : null,

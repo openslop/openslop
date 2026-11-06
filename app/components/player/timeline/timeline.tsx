@@ -24,6 +24,7 @@ import { useSelectScene } from "../use-select-scene";
 import { useLayout } from "../render-layout-context";
 import {
 	ClipAction,
+	ClipOutline,
 	TimelineCaptionClip,
 	TimelineClip,
 	TimelineExtension,
@@ -77,22 +78,19 @@ type ClipProps<T> = {
 	onSelect: (clip: T) => void;
 };
 
+/** Each clip stacks as one, so a later clip covers everything an earlier one draws. */
 function ClipSlot({
 	start,
 	width,
-	children,
-}: {
-	start: number;
-	width: number;
-	children: ReactNode;
-}) {
+	className,
+	...props
+}: { start: number; width: number } & ComponentProps<"li">) {
 	return (
 		<li
-			className="group/clip absolute inset-y-0.5"
+			{...props}
+			className={cn("group/clip absolute inset-y-0.5 isolate", className)}
 			style={{ left: start, width }}
-		>
-			{children}
-		</li>
+		/>
 	);
 }
 
@@ -123,7 +121,7 @@ function Clip({
 	selected,
 	onSelect,
 }: ClipProps<TimelineClipData> & { numbered: boolean; snap: TrimSnap }) {
-	const { trim, extensionSec, handleProps, reset } = useClipTrim(
+	const { trim, trimming, extensionSec, handleProps, reset } = useClipTrim(
 		clip,
 		pxPerSec,
 		snap,
@@ -161,6 +159,16 @@ function Clip({
 				) : null}
 				<TimelineTrimHandles handleProps={handleProps} />
 			</ClipSlot>
+			{trimming ? (
+				<ClipSlot
+					start={clip.start * pxPerSec}
+					width={width}
+					aria-hidden="true"
+					className="pointer-events-none z-10"
+				>
+					<ClipOutline element={clip.element} selected={selected} />
+				</ClipSlot>
+			) : null}
 			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
 				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>
 					{/* The clip before it already selects the scene from the keyboard. */}
