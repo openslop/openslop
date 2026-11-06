@@ -62,9 +62,9 @@ export const editScript = defineTool({
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it.
 
-	  To move an element or change its type, remove it and insert the new one in its place:
+	  To move an element or change its type, insert the new one before it, then remove it:
 	  that is a new, ungenerated element holding only what you send. To animate an image,
-	  insert a video that starts from it, then remove the image.
+	  insert a video that starts from it before the image, then remove the image.
 
 	  Script types: ${ContentTypeSchema.options.join(", ")}
 

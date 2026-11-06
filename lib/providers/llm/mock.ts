@@ -309,6 +309,7 @@ function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 					{
 						op: "insert",
 						anchor_id: elementId,
+						position: "before",
 						elements: [
 							{
 								type: "video",
