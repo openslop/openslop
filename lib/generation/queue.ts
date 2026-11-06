@@ -206,38 +206,32 @@ export class GenerationQueue {
 		return running < this.limits[connectorType];
 	}
 
+	private nextReady() {
+		for (const node of this.pending) {
+			const blocker = this.blockingDependency(node);
+			const runnable = !blocker && this.hasCapacity(node.job.connectorType);
+			const releasable = blocker && !this.snapshots.isActive(blocker[1].id);
+			if (runnable || releasable) return { node, blocker };
+		}
+	}
+
 	private processQueue() {
-		for (;;) {
-			const index = this.pending.findIndex(
-				(candidate) =>
-					this.hasCapacity(candidate.job.connectorType) &&
-					!this.blockingDependency(candidate),
-			);
-			if (index === -1) break;
-			const [node] = this.pending.splice(index, 1);
-			if (node) void this.runJob(node);
+		for (let next = this.nextReady(); next; next = this.nextReady()) {
+			const { node, blocker } = next;
+			this.pending = this.pending.filter((candidate) => candidate !== node);
+			if (blocker) this.release(node, blocker);
+			else void this.runJob(node);
 		}
-		this.releaseBlocked();
 	}
 
-	private blockedByError(node: GenerationNode): string | null {
-		const entry = this.blockingDependency(node);
-		if (!entry) return null;
-		const [label, dep] = entry;
-		const cause = this.snapshots.get(dep.id).error ?? this.blockedByError(dep);
-		return cause ? `${label} failed: ${cause}` : null;
-	}
-
-	/** Nothing running or runnable means a dependency never arrived: release the rest, its error on each dependent. */
-	private releaseBlocked() {
-		if (this.active.size > 0 || this.pending.length === 0) return;
-		const blocked = this.pending;
-		this.pending = [];
-		for (const node of blocked) {
-			const error = this.blockedByError(node);
-			this.snapshots.resetToIdle(node.id);
-			if (error) this.snapshots.update(node.id, { error });
-		}
+	private release(
+		node: GenerationNode,
+		[label, dep]: [string, GenerationNode],
+	) {
+		const cause = this.snapshots.get(dep.id).error;
+		this.snapshots.resetToIdle(node.id);
+		if (cause)
+			this.snapshots.update(node.id, { error: `${label} failed: ${cause}` });
 		this.snapshots.notify();
 	}
 
