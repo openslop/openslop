@@ -48,13 +48,15 @@ export const elementTrim = (
 ): Trim =>
 	trimClip(mediaDurationSec, getTrimStart(element), getTrimDuration(element));
 
-/** The element as laid out: one the layout stops short of its trim, as music stops where the next begins, runs only as far as it's drawn. */
+/** The element as drawn: a still fills its span, and one the layout stops short of its trim, as music stops where the next begins, runs only as far as it's drawn. */
 export const laidOut = ({
 	element,
 	duration,
 }: Pick<Sequence, "element" | "duration">): ResolvedElement => ({
 	...element,
-	trimDurationSec: Math.min(element.trimDurationSec, duration),
+	trimDurationSec: isTrimmable(element)
+		? Math.min(element.trimDurationSec, duration)
+		: duration,
 });
 
 /** The words spoken whole inside the clip, timed from its trim start, and where they sit among the element's own. */
@@ -103,16 +105,8 @@ export function trimEdge(
 	};
 }
 
-/** A still fills the span the layout gives it; anything else runs as trimmed, and a scene extends past its video to the end of its dialogue. */
-export function previewSpan(
-	element: ResolvedElement,
-	{ duration, overlaySec = 0 }: Pick<Sequence, "duration" | "overlaySec">,
+/** How far a scene runs on past its trimmed video to the end of its dialogue. */
+export const extensionSec = (
+	{ overlaySec = 0 }: Pick<Sequence, "overlaySec">,
 	trim: Trim,
-) {
-	if (!isTrimmable(element))
-		return { timelineDurationSec: duration, extensionSec: 0 };
-	return {
-		timelineDurationSec: trim.trimDurationSec,
-		extensionSec: Math.max(0, overlaySec - trim.trimDurationSec),
-	};
-}
+): number => Math.max(0, overlaySec - trim.trimDurationSec);

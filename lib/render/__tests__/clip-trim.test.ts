@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
 	isTrimmable,
 	isTrimmed,
+	extensionSec,
 	laidOut,
-	previewSpan,
 	trimClip,
 	trimEdge,
 	trimCaptions,
@@ -175,54 +175,42 @@ describe("trimCaptions", () => {
 	});
 });
 
-describe("previewSpan", () => {
-	const video = el({ trimDurationSec: 5 });
+describe("extensionSec", () => {
 	const to = (trimDurationSec: number) => ({
 		trimStartSec: 0,
 		trimDurationSec,
 	});
-	const scene = { duration: 8, overlaySec: 8 };
+	const scene = { overlaySec: 8 };
 
-	it("moves a clip's end with the trim", () => {
-		expect(previewSpan(video, { duration: 5 }, to(3))).toEqual({
-			timelineDurationSec: 3,
-			extensionSec: 0,
-		});
-	});
-
-	it("draws a sound the layout pads at its own length, with no extension", () => {
-		const sound = el({ trimDurationSec: 0.5 });
-		expect(previewSpan(sound, { duration: 1 }, to(0.5))).toEqual({
-			timelineDurationSec: 0.5,
-			extensionSec: 0,
-		});
+	it("has none outside a scene's dialogue", () => {
+		expect(extensionSec({}, to(3))).toBe(0);
 	});
 
 	it("extends the scene past a video trimmed under its dialogue", () => {
-		expect(previewSpan(video, scene, to(3))).toEqual({
-			timelineDurationSec: 3,
-			extensionSec: 5,
-		});
+		expect(extensionSec(scene, to(3))).toBe(5);
 	});
 
-	it("lengthens the scene once the video outruns its dialogue", () => {
-		expect(previewSpan(video, scene, to(10))).toEqual({
-			timelineDurationSec: 10,
-			extensionSec: 0,
-		});
-	});
-
-	it("stretches a still across the whole scene", () => {
-		const still = el({ type: "image", mediaDurationSec: 0, ...to(0) });
-		expect(previewSpan(still, scene, to(0))).toEqual({
-			timelineDurationSec: 8,
-			extensionSec: 0,
-		});
+	it("has none once the video outruns its dialogue", () => {
+		expect(extensionSec(scene, to(10))).toBe(0);
 	});
 });
 
 describe("laidOut", () => {
 	const music = el({ trimDurationSec: 60, mediaDurationSec: 60 });
+
+	it("stretches a still across its whole span", () => {
+		const still = el({
+			type: "image",
+			mediaDurationSec: 0,
+			trimDurationSec: 0,
+		});
+		expect(laidOut({ element: still, duration: 8 }).trimDurationSec).toBe(8);
+	});
+
+	it("draws a sound the layout pads at its own length", () => {
+		const sound = el({ trimDurationSec: 0.5 });
+		expect(laidOut({ element: sound, duration: 1 }).trimDurationSec).toBe(0.5);
+	});
 
 	it("runs a clip the layout cuts short only as far as it's drawn", () => {
 		expect(laidOut({ element: music, duration: 30 }).trimDurationSec).toBe(30);

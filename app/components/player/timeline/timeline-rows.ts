@@ -7,7 +7,7 @@ import {
 	type IconComponent,
 } from "@/components/ui/icon";
 import type { ElementRole, LayerType } from "@/lib/canvas/types";
-import { laidOut, previewSpan } from "@/lib/render/clip-trim";
+import { laidOut } from "@/lib/render/clip-trim";
 import {
 	layoutCaptions,
 	type CaptionSequence,
@@ -115,15 +115,13 @@ export type SnapEdge = { elementId: string; sec: number };
 /** Every drawn clip edge: where it starts, where its media stops, and where its span ends. */
 export function snapEdges(rows: TimelineRow[]): SnapEdge[] {
 	return rows.flatMap((row) =>
-		row.clips.flatMap((clip) => {
-			const element = laidOut(clip);
-			const { timelineDurationSec } = previewSpan(element, clip, element);
-			return [
+		row.clips.flatMap((clip) =>
+			[
 				clip.start,
-				clip.start + timelineDurationSec,
+				clip.start + laidOut(clip).trimDurationSec,
 				clip.start + clip.duration,
-			].map((sec) => ({ elementId: element.id, sec }));
-		}),
+			].map((sec) => ({ elementId: clip.element.id, sec })),
+		),
 	);
 }
 

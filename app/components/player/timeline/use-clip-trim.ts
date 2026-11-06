@@ -9,8 +9,8 @@ import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
 	isTrimmed,
+	extensionSec,
 	laidOut,
-	previewSpan,
 	type Trim,
 	type TrimEdge,
 } from "@/lib/render/clip-trim";
@@ -86,8 +86,8 @@ export function useClipTrim(
 	const trim = preview ?? element;
 
 	return {
-		...previewSpan(element, clip, trim),
 		trim,
+		extensionSec: extensionSec(clip, trim),
 		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(clip.element)
 			? () =>
