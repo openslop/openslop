@@ -9,7 +9,7 @@ export function useResetTrimOnNewResult(editor: CanvasEditor): void {
 	const queue = useGenerationQueue();
 	useEffect(
 		() =>
-			queue.onResultReplaced((id) =>
+			queue.onNewResult((id) =>
 				HistoryEditor.withoutSaving(editor, () => resetTrim(editor, id)),
 			),
 		[queue, editor],

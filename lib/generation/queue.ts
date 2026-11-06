@@ -37,7 +37,7 @@ export class GenerationQueue {
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
 	private readonly committed = createEmitter<CommittedVersion>();
-	private readonly replaced = createEmitter<string>();
+	private readonly newResult = createEmitter<string>();
 
 	constructor({
 		limits,
@@ -51,8 +51,8 @@ export class GenerationQueue {
 	}
 
 	onCommitted = this.committed.subscribe;
-	/** An element got a different result, not a revision of the one it has. */
-	onResultReplaced = this.replaced.subscribe;
+	/** Generated, uploaded or restored; revising the held result is not new. */
+	onNewResult = this.newResult.subscribe;
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
 	getElementSnapshot = (id: string): ElementSnapshot => this.snapshots.get(id);
@@ -175,7 +175,7 @@ export class GenerationQueue {
 			pinned,
 		});
 		this.snapshots.notify();
-		this.replaced.notify(elementId);
+		this.newResult.notify(elementId);
 	}
 
 	private record(version: CommittedVersion): void {
@@ -186,7 +186,7 @@ export class GenerationQueue {
 
 	private commit(version: CommittedVersion): void {
 		this.record(version);
-		this.replaced.notify(version.elementId);
+		this.newResult.notify(version.elementId);
 	}
 
 	private land(id: NodeId, { on, revise }: Landing, result: AssetResult) {
