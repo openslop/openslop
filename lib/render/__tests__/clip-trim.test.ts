@@ -91,6 +91,13 @@ describe("trimEdge", () => {
 		expect(trimEdge(clip, "end", -50).trimDurationSec).toBe(1);
 	});
 
+	it("runs the start out to the media's own on an unbounded delta, keeping the end", () => {
+		expect(trimEdge(clip, "start", -Infinity)).toEqual({
+			trimStartSec: 0,
+			trimDurationSec: 7,
+		});
+	});
+
 	it("stops the end at the last frame from the in-point, not from the media's start", () => {
 		expect(
 			trimEdge({ ...clip, trimStartSec: 6 }, "end", 50).trimDurationSec,

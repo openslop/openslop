@@ -13,7 +13,7 @@ import {
 	ZoomIn,
 	ZoomOut,
 } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
 import { renderPrompt } from "@/lib/connectors/character-refs";
 import { toFrames } from "@/lib/render/frames";
@@ -151,13 +151,13 @@ function Clip({
 						size="sm"
 						variant="quiet"
 						onClick={reset}
-						className="absolute right-2 bottom-0.5 z-10 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
+						className="absolute top-1/2 right-2 z-10 -translate-y-1/2 opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 					>
-						<RotateCcw size={12} />
+						<RotateCcw size={ICON_SIZES.sm} />
 					</TooltipIconButton>
 				) : null}
-				<TimelineTrimHandle edge="start" dragProps={handleProps?.start} />
-				<TimelineTrimHandle edge="end" dragProps={handleProps?.end} />
+				<TimelineTrimHandle edge="start" handleProps={handleProps?.start} />
+				<TimelineTrimHandle edge="end" handleProps={handleProps?.end} />
 			</ClipSlot>
 			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
 				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>

@@ -11,6 +11,7 @@ import {
 	isTrimmed,
 	extensionSec,
 	laidOut,
+	trimEdge,
 	type Trim,
 	type TrimEdge,
 } from "@/lib/render/clip-trim";
@@ -27,9 +28,10 @@ function useEdgeDrag(
 	pxPerSec: number,
 	onTrim: (deltaSec: number, snapping: boolean) => void,
 	onEnd: () => void,
+	onDoubleClick: () => void,
 ) {
 	const originX = useRef(0);
-	return usePointerDrag({
+	const drag = usePointerDrag({
 		onStart: (event) => {
 			event.preventDefault();
 			originX.current = event.clientX;
@@ -38,9 +40,10 @@ function useEdgeDrag(
 			onTrim((event.clientX - originX.current) / pxPerSec, !event.altKey),
 		onEnd,
 	});
+	return { ...drag, onDoubleClick };
 }
 
-/** A drag previews the new length and commits it on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets. */
+/** A drag previews the new length and commits it on release: one layout rebuild, one undo step. Alt holds the handle free of the snap targets; a double-click runs the edge back out to the media's. */
 export function useClipTrim(
 	clip: TimelineClip,
 	pxPerSec: number,
@@ -67,18 +70,26 @@ export function useClipTrim(
 	// A layout rebuilt mid-drag can remount the clip, ending the drag without a release.
 	useEffect(() => (previewing ? () => hideGuide() : undefined), [previewing]);
 
-	const commit = () => {
+	const save = (next: Trim | null) => {
 		setPreview(null);
-		if (!preview || isMatch(element, preview)) return;
+		if (!next || isMatch(element, next)) return;
 		mergeAttrs(editor, element.id, {
-			trimStart: toAttr(preview.trimStartSec),
-			trimDuration: toAttr(preview.trimDurationSec),
+			trimStart: toAttr(next.trimStartSec),
+			trimDuration: toAttr(next.trimDurationSec),
 		});
 	};
 
+	const commit = () => save(preview);
+	const untrimStart = () => {
+		const next = trimEdge(element, "start", -Infinity);
+		if (isTrimmed({ ...element, ...next })) save(next);
+		else resetTrim(editor, element.id);
+	};
+	const untrimEnd = () => resetTrim(editor, element.id, ["trimDuration"]);
+
 	const handles = {
-		start: useEdgeDrag(pxPerSec, trimBy("start"), commit),
-		end: useEdgeDrag(pxPerSec, trimBy("end"), commit),
+		start: useEdgeDrag(pxPerSec, trimBy("start"), commit, untrimStart),
+		end: useEdgeDrag(pxPerSec, trimBy("end"), commit, untrimEnd),
 	};
 
 	const trim = preview ?? element;

@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import type { PointerDragProps } from "@/lib/components/use-pointer-drag";
 import type { TrimEdge } from "@/lib/render/clip-trim";
 import { cn } from "@/lib/utils";
@@ -7,13 +8,13 @@ const EDGES = {
 	end: { side: "right-0", cursor: "cursor-trim-end" },
 } as const satisfies Record<TrimEdge, { side: string; cursor: string }>;
 
-/** Pointer only: keyboard users trim from the element's settings. */
+/** Pointer only: keyboard users reset the trim from the clip's button. */
 export function TimelineTrimHandle({
 	edge,
-	dragProps,
+	handleProps,
 }: {
 	edge: TrimEdge;
-	dragProps?: PointerDragProps;
+	handleProps?: PointerDragProps & Pick<ComponentProps<"div">, "onDoubleClick">;
 }) {
 	const { side, cursor } = EDGES[edge];
 	return (
@@ -22,9 +23,9 @@ export function TimelineTrimHandle({
 			className={cn(
 				"absolute inset-y-0 z-10 w-1.5 touch-none rounded-md",
 				side,
-				dragProps ? [cursor, "hover:bg-foreground/25"] : "cursor-not-allowed",
+				handleProps ? [cursor, "hover:bg-foreground/25"] : "cursor-not-allowed",
 			)}
-			{...dragProps}
+			{...handleProps}
 		/>
 	);
 }

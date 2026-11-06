@@ -147,16 +147,16 @@ export function mergeAttrs(
 
 const TRIM_KEYS = ["trimStart", "trimDuration"];
 
-/** An element no longer on the canvas has no trim to reset. */
-export function resetTrim(editor: Editor, id: string): void {
+/** An element no longer on the canvas has no trim to reset. Dropping just `trimDuration` runs the clip out to its media's end. */
+export function resetTrim(editor: Editor, id: string, keys = TRIM_KEYS): void {
 	const found = findElementById(editor, id);
 	if (!found) return;
 	const [element, path] = found;
 	const layout = element.layoutAttributes ?? {};
-	if (!TRIM_KEYS.some((key) => key in layout)) return;
+	if (!keys.some((key) => key in layout)) return;
 	Transforms.setNodes(
 		editor,
-		{ layoutAttributes: omit(layout, TRIM_KEYS) },
+		{ layoutAttributes: omit(layout, keys) },
 		{ at: path },
 	);
 }
