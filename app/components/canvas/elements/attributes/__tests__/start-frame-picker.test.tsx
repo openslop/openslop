@@ -2,10 +2,11 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { element } from "@/lib/canvas/__tests__/_assets";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { findElementById } from "@/lib/canvas/editor-ops";
-import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
+import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { StartFramePicker } from "../start-frame-picker";
 
 vi.mock("../use-previous-pictures", () => ({
@@ -27,15 +28,20 @@ let canvas: ReturnType<typeof mountOnCanvas>;
 
 afterEach(() => canvas.unmount());
 
-function openPicker(startFrame: string) {
-	const video = element("v1", "video", "", { startFrame });
+function openPicker(startFrame: string, uploadedFrame?: string) {
+	const video = element("v1", "video", "", {
+		startFrame,
+		...(uploadedFrame && { uploadedFrame }),
+	});
 	canvas = mountOnCanvas([video]);
 	canvas.render(
-		<StartFramePicker
-			element={video}
-			attrKey="startFrame"
-			label="Start frame"
-		/>,
+		<TooltipProvider>
+			<StartFramePicker
+				element={video}
+				attrKey="startFrame"
+				label="Start frame"
+			/>
+		</TooltipProvider>,
 	);
 	const trigger = document.body.querySelector<HTMLButtonElement>(
 		'[aria-label^="Start frame:"]',
@@ -71,6 +77,16 @@ describe("StartFramePicker", () => {
 			startFrame: "previous",
 			uploadedFrame: PICTURE,
 		});
+	});
+
+	it("opens the uploaded picture full size without choosing it", async () => {
+		openPicker("previous", PICTURE);
+
+		await click('[aria-label="View Uploaded picture larger"]');
+
+		const viewer = document.body.querySelectorAll('[role="dialog"]')[1];
+		expect(viewer?.querySelector("img")?.src).toBe(PICTURE);
+		expect(tile("Previous scene")?.getAttribute("aria-checked")).toBe("true");
 	});
 
 	it("offers an upload when the start frame is not a picture", () => {

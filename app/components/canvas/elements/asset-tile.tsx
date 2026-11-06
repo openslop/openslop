@@ -13,6 +13,7 @@ import {
 } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
 import { GenerationIndicator } from "./generation-indicator";
+import { MediaViewer } from "./media-viewer";
 import { RemoveCrossButton } from "./remove-cross-button";
 
 export function AssetTile({
@@ -82,6 +83,14 @@ export function AssetTile({
 					>
 						<Pencil className="h-3.5 w-3.5" />
 					</button>
+				)}
+				{previewUrl && (
+					<MediaViewer
+						src={previewUrl}
+						kind="image"
+						name={name}
+						className="opacity-0 group-hover/tile:opacity-100"
+					/>
 				)}
 			</ThumbnailFace>
 			{onRemove && status !== "generating" && (

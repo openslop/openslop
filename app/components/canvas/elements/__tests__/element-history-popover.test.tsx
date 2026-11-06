@@ -55,6 +55,13 @@ const audioTake = (prompt: string): ElementVersion => ({
 	pinned: false,
 });
 
+const videoTake = (prompt: string): ElementVersion => ({
+	...audioTake(prompt),
+	connectorType: "video",
+	elementType: "video",
+	result: { videoUrl: `https://video/${prompt}.mp4`, durationSec: 5 },
+});
+
 afterEach(() => canvas.unmount());
 
 describe("ElementHistoryPopover", () => {
@@ -89,5 +96,24 @@ describe("ElementHistoryPopover", () => {
 		element = { layoutAttributes: { volume: "8" } };
 		renderPopover();
 		expect(takes().map((audio) => audio.volume)).toEqual([0.8, 0.8]);
+	});
+
+	it("plays a take full size over the history, which stays open behind it", async () => {
+		history = {
+			versions: [videoTake("harbor"), videoTake("harbor at dusk")],
+			status: "ready",
+			activeIndex: 1,
+		};
+		renderPopover();
+		await click('button[aria-label="Generation history"]');
+		await click('button[aria-label="View version 1 larger"]');
+
+		const [popover, viewer] = Array.from(
+			document.body.querySelectorAll('[role="dialog"]'),
+		);
+		expect(popover?.getAttribute("aria-label")).toBe("Generation history");
+		const take = viewer?.querySelector("video");
+		expect(take?.getAttribute("src")).toBe("https://video/harbor.mp4");
+		expect(take?.controls).toBe(true);
 	});
 });

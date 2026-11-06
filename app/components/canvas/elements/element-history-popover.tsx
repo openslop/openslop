@@ -25,6 +25,7 @@ import {
 import { AudioPlayer } from "./audio-player";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
+import { MediaViewer } from "./media-viewer";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 
 const PROMPT_LENGTH = 72;
@@ -39,17 +40,22 @@ const Dot = () => (
 
 function ElementVersionThumbnail({
 	result,
+	name,
 }: {
 	result: ElementVersion["result"];
+	name: string;
 }) {
 	const src = result.videoUrl ?? result.imageUrl;
 	if (!src) return null;
+	const kind = result.videoUrl ? "video" : "image";
 	return (
 		<div className="relative aspect-video w-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
-			<MediaWithSkeleton
-				outputKind={result.videoUrl ? "video" : "image"}
+			<MediaWithSkeleton outputKind={kind} src={src} alt="" />
+			<MediaViewer
 				src={src}
-				alt=""
+				kind={kind}
+				name={name}
+				className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
 			/>
 		</div>
 	);
@@ -77,7 +83,10 @@ function ElementVersionRow({
 			)}
 		>
 			<div className="flex items-center gap-2.5">
-				<ElementVersionThumbnail result={version.result} />
+				<ElementVersionThumbnail
+					result={version.result}
+					name={`version ${label}`}
+				/>
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
 						<span
