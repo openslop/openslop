@@ -348,19 +348,6 @@ describe("resetTrim", () => {
 		expect(node.layoutAttributes).toEqual({ volume: "5" });
 	});
 
-	it("drops only the keys it is given", () => {
-		const el = content("video", "v1", "a fox", {
-			trimStart: "1",
-			trimDuration: "3",
-		});
-		const editor = makeEditor([scene([el])]);
-
-		resetTrim(editor, "v1", ["trimDuration"]);
-
-		const node = (editor.children[0] as Scene).children[0];
-		expect(node.layoutAttributes).toEqual({ trimStart: "1" });
-	});
-
 	it("leaves the document untouched when there is no trim", () => {
 		const editor = makeEditor([scene([content("video", "v1", "a fox")])]);
 		const before = editor.children;

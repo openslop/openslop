@@ -64,9 +64,7 @@ export function useClipTrim(
 	};
 
 	const hideGuide = useEffectEvent(() => snap.onSnap(null));
-	const previewing = preview !== null;
-	// A layout rebuilt mid-drag can remount the clip, ending the drag without a release.
-	useEffect(() => (previewing ? () => hideGuide() : undefined), [previewing]);
+	useEffect(() => () => hideGuide(), []);
 
 	const save = (next: Trim | null) => {
 		setPreview(null);
@@ -77,18 +75,20 @@ export function useClipTrim(
 		});
 	};
 
-	const commit = () => save(preview);
-	const untrimStart = () => save(trimEdge(element, "start", -Infinity));
-	const untrimEnd = () => resetTrim(editor, element.id, ["trimDuration"]);
+	const commit = () => {
+		snap.onSnap(null);
+		save(preview);
+	};
 
 	const handles = {
 		start: {
 			...useEdgeDrag(pxPerSec, trimBy("start"), commit),
-			onDoubleClick: untrimStart,
+			onDoubleClick: () => save(trimEdge(element, "start", -Infinity)),
 		},
 		end: {
 			...useEdgeDrag(pxPerSec, trimBy("end"), commit),
-			onDoubleClick: untrimEnd,
+			onDoubleClick: () =>
+				mergeAttrs(editor, element.id, { trimDuration: null }),
 		},
 	};
 

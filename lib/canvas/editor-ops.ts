@@ -148,15 +148,15 @@ export function mergeAttrs(
 const TRIM_KEYS = ["trimStart", "trimDuration"];
 
 /** An element no longer on the canvas has no trim to reset. */
-export function resetTrim(editor: Editor, id: string, keys = TRIM_KEYS): void {
+export function resetTrim(editor: Editor, id: string): void {
 	const found = findElementById(editor, id);
 	if (!found) return;
 	const [element, path] = found;
 	const layout = element.layoutAttributes ?? {};
-	if (!keys.some((key) => key in layout)) return;
+	if (!TRIM_KEYS.some((key) => key in layout)) return;
 	Transforms.setNodes(
 		editor,
-		{ layoutAttributes: omit(layout, keys) },
+		{ layoutAttributes: omit(layout, TRIM_KEYS) },
 		{ at: path },
 	);
 }
