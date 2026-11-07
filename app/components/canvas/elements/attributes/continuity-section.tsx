@@ -52,13 +52,7 @@ export function ContinuityReferencesPopover({
 						)}
 					>
 						{pictures.map(({ name, url }) => (
-							<AssetTile
-								key={url}
-								name={name}
-								previewUrl={url}
-								Icon={Image}
-								type="image"
-							/>
+							<AssetTile key={url} name={name} previewUrl={url} Icon={Image} />
 						))}
 					</div>
 				)}

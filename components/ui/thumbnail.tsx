@@ -52,7 +52,6 @@ function ThumbnailFace({
 	);
 }
 
-/** The name under a thumbnail, led by an optional type icon. */
 function ThumbnailCaption({
 	icon,
 	className,

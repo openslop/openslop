@@ -12,7 +12,6 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { cn } from "@/lib/utils";
 
-/** A thumbnail's full size, opened from its top-left corner. Callers pass the reveal classes. */
 export function MediaViewer({
 	src,
 	kind,

@@ -12,10 +12,7 @@ import {
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
-import type { ContentType } from "@/lib/canvas/types";
-import { cn } from "@/lib/utils";
 import { GenerationIndicator } from "./generation-indicator";
-import { ELEMENT_CONFIGS } from "./element-configs";
 import { MediaViewer } from "./media-viewer";
 import { RemoveCrossButton } from "./remove-cross-button";
 
@@ -23,7 +20,6 @@ export function AssetTile({
 	name,
 	previewUrl,
 	Icon,
-	type,
 	status = "idle",
 	startedAt = null,
 	onEdit,
@@ -34,8 +30,6 @@ export function AssetTile({
 	name: string;
 	previewUrl?: string;
 	Icon: IconComponent;
-	/** Badges the caption with this type's colors. */
-	type?: ContentType;
 	status?: GenerationStatus;
 	startedAt?: number | null;
 	onEdit?: () => void;
@@ -101,27 +95,9 @@ export function AssetTile({
 					className="z-10 opacity-0 group-hover/tile:opacity-100"
 				/>
 			)}
-			<ThumbnailCaption
-				title={name}
-				icon={type && <TypeBadge type={type} Icon={Icon} />}
-			>
+			<ThumbnailCaption title={name} icon={<Icon size={10} />}>
 				{name}
 			</ThumbnailCaption>
 		</Thumbnail>
-	);
-}
-
-function TypeBadge({ type, Icon }: { type: ContentType; Icon: IconComponent }) {
-	const { iconBgClass, colorClass } = ELEMENT_CONFIGS[type];
-	return (
-		<span
-			className={cn(
-				"flex h-4 shrink-0 items-center justify-center rounded-sm px-1",
-				iconBgClass,
-				colorClass,
-			)}
-		>
-			<Icon size={10} />
-		</span>
 	);
 }

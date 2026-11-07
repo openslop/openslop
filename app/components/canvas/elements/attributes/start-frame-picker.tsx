@@ -47,7 +47,7 @@ function FrameTile({
 	onSelect: () => void;
 	picture?: string;
 	onRemove?: () => void;
-	children: React.ReactNode;
+	children?: React.ReactNode;
 }) {
 	const selected = kind === current;
 	const label = FRAME_SOURCE_LABEL[kind];
@@ -63,7 +63,13 @@ function FrameTile({
 					onClick={onSelect}
 					className="focus-ring"
 				>
-					<ThumbnailFace selected={selected}>{children}</ThumbnailFace>
+					<ThumbnailFace selected={selected}>
+						{picture ? (
+							<MediaWithSkeleton outputKind="image" src={picture} alt="" />
+						) : (
+							children
+						)}
+					</ThumbnailFace>
 					<ThumbnailCaption>{label}</ThumbnailCaption>
 				</button>
 			</Thumbnail>
@@ -83,14 +89,6 @@ function FrameTile({
 				/>
 			)}
 		</div>
-	);
-}
-
-function PictureFace({ url }: { url?: string }) {
-	return url ? (
-		<MediaWithSkeleton outputKind="image" src={url} alt="" />
-	) : (
-		<Transition className="h-5 w-5" />
 	);
 }
 
@@ -115,7 +113,7 @@ function PreviousFrameTile({
 			{previous.kind === "loading" ? (
 				<Skeleton className="absolute inset-0" />
 			) : (
-				<PictureFace url={opening?.url} />
+				<Transition className="h-5 w-5" />
 			)}
 		</FrameTile>
 	);
@@ -176,9 +174,7 @@ export function StartFramePicker({
 							onSelect={() => setFrame(uploaded)}
 							picture={uploaded}
 							onRemove={() => setFrame(NO_FRAME, null)}
-						>
-							<PictureFace url={uploaded} />
-						</FrameTile>
+						/>
 					) : (
 						<AddAssetTile
 							label="Upload picture"
