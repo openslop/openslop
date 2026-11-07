@@ -2,10 +2,14 @@
 
 import { useMemo, type CSSProperties } from "react";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
-import { formatTime } from "@/lib/render/timestamps";
 import { cn } from "@/lib/utils";
 import { RULER_HEIGHT, RULER_LABEL } from "../dock-layout";
-import { buildTicks, subdivision, tickInterval } from "./timeline-ticks";
+import {
+	buildTicks,
+	subdivision,
+	tickInterval,
+	tickLabel,
+} from "./timeline-ticks";
 
 const dots = (spacing: number): CSSProperties => ({
 	backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
@@ -30,9 +34,10 @@ export function TimelineRuler({
 	onScrubStart: () => void;
 	onScrubEnd: () => void;
 }) {
-	const { ticks, spacing } = useMemo(() => {
+	const { interval, ticks, spacing } = useMemo(() => {
 		const interval = tickInterval(pxPerSec);
 		return {
+			interval,
 			ticks: buildTicks(totalDurationSec, interval),
 			spacing: subdivision(interval * pxPerSec),
 		};
@@ -65,7 +70,7 @@ export function TimelineRuler({
 							index === 0 ? "translateY(-50%)" : "translate(-50%, -50%)",
 					}}
 				>
-					{formatTime(seconds)}
+					{tickLabel(seconds, interval)}
 				</span>
 			))}
 		</div>

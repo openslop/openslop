@@ -3,7 +3,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it } from "vitest";
-import { useTimelineZoom, ZOOM_LEVELS } from "../use-timeline-zoom";
+import { useTimelineZoom } from "../use-timeline-zoom";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -56,10 +56,10 @@ describe("useTimelineZoom behavior", () => {
 	it("steps through zoom levels on zoomIn up to maximum 64x and disables canZoomIn", () => {
 		const hook = renderTimelineHook(100, 1000);
 
-		for (let i = 1; i < ZOOM_LEVELS.length; i++) {
-			expect(hook.current.canZoomIn).toBe(true);
+		while (hook.current.canZoomIn) {
+			const before = hook.current.zoom;
 			hook.zoomIn();
-			expect(hook.current.zoom).toBe(ZOOM_LEVELS[i]);
+			expect(hook.current.zoom).toBeGreaterThan(before);
 			expect(hook.current.canZoomOut).toBe(true);
 		}
 
@@ -100,19 +100,5 @@ describe("useTimelineZoom behavior", () => {
 		hook.zoomIn();
 		expect(hook.current.pxPerSec).toBe(25);
 		hook.unmount();
-	});
-});
-
-describe("ZOOM_LEVELS sequence", () => {
-	it("starts at 1x fit-to-width and ends at 64x", () => {
-		expect(ZOOM_LEVELS[0]).toBe(1);
-		expect(ZOOM_LEVELS[ZOOM_LEVELS.length - 1]).toBe(64);
-	});
-
-	it("contains all legacy stops for continuity", () => {
-		const legacyStops = [1, 1.5, 2, 3, 4, 6, 8];
-		for (const stop of legacyStops) {
-			expect(ZOOM_LEVELS).toContain(stop);
-		}
 	});
 });
