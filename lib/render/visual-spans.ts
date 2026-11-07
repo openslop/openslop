@@ -1,8 +1,7 @@
 import type { Descendant } from "slate";
-import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { isSpeech } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
-import { countWords } from "@/lib/canvas/spoken-words";
+import { spokenWords } from "@/lib/canvas/spoken-words";
 import {
 	CONTENT_TYPES,
 	type ContentElement,
@@ -79,7 +78,7 @@ const walk = (descendants: Descendant[]): Walk => {
 				continue;
 			}
 			if (!isSpeech(element)) continue;
-			const words = countWords(getElementBodyText(element));
+			const words = spokenWords(element);
 			const open = spans.at(-1);
 			if (!open) {
 				leadingWords += words;

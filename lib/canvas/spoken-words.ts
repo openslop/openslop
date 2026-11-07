@@ -9,7 +9,7 @@ import { secondsForWords } from "../project/video-length";
 export const countWords = (text: string) =>
 	text.split(/\s+/).filter(Boolean).length;
 
-const spokenWords = (element: ContentElement) =>
+export const spokenWords = (element: ContentElement) =>
 	countWords(getElementBodyText(element));
 
 /** Words the TTS engine will speak: narration and dialogue, nothing else. */
