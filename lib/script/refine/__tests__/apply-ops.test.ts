@@ -12,6 +12,7 @@ import type { RefineOp } from "../types";
 import { getAssets, NARRATOR } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import { isContentElement } from "@/lib/canvas/guards";
+import { isScene } from "@/lib/canvas/scenes";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { asset, label, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { getPromptText } from "@/lib/generation/inputs";
@@ -259,6 +260,151 @@ describe("applyRefineOp — remove", () => {
 		applyRefineOp(editor, { op: "remove", id: "nonexistent" });
 
 		expect(getContentIds(editor)).toEqual(["n1"]);
+	});
+});
+
+describe("applyRefineOp — move", () => {
+	type Move = Omit<Extract<RefineOp, { op: "move" }>, "op">;
+
+	const twoScenes = () =>
+		makeEditor([
+			scene(
+				[
+					content("image", "i1", "a", { model: "flux" }),
+					content("narration", "n1", "one"),
+					content("narration", "n2", "two"),
+				],
+				"s1",
+			),
+			scene(
+				[content("image", "i2", "b"), content("narration", "n3", "three")],
+				"s2",
+			),
+		]);
+
+	const layout = (editor: Editor) =>
+		editor.children
+			.filter(isScene)
+			.map((node) => [node.id, ...node.children.map(({ id }) => id)]);
+
+	it.each<[string, Move, string[][]]>([
+		[
+			"later in its scene",
+			{ id: "n1", anchor_id: "n2" },
+			[
+				["s1", "i1", "n2", "n1"],
+				["s2", "i2", "n3"],
+			],
+		],
+		[
+			"earlier in its scene",
+			{ id: "n2", anchor_id: "n1", position: "before" },
+			[
+				["s1", "i1", "n2", "n1"],
+				["s2", "i2", "n3"],
+			],
+		],
+		[
+			"into a later scene",
+			{ id: "n1", anchor_id: "n3" },
+			[
+				["s1", "i1", "n2"],
+				["s2", "i2", "n3", "n1"],
+			],
+		],
+		[
+			"into an earlier scene",
+			{ id: "n3", anchor_id: "n1", position: "before" },
+			[
+				["s1", "i1", "n3", "n1", "n2"],
+				["s2", "i2"],
+			],
+		],
+		[
+			"to the start",
+			{ id: "n3", position: "before" },
+			[
+				["s1", "n3", "i1", "n1", "n2"],
+				["s2", "i2"],
+			],
+		],
+		[
+			"a scene after another",
+			{ id: "n1", anchor_id: "n3", scene: true },
+			[
+				["s2", "i2", "n3"],
+				["s1", "i1", "n1", "n2"],
+			],
+		],
+		[
+			"a scene before another",
+			{ id: "i2", anchor_id: "n2", position: "before", scene: true },
+			[
+				["s2", "i2", "n3"],
+				["s1", "i1", "n1", "n2"],
+			],
+		],
+		[
+			"a scene to the end",
+			{ id: "i1", scene: true },
+			[
+				["s2", "i2", "n3"],
+				["s1", "i1", "n1", "n2"],
+			],
+		],
+		[
+			"a scene to the start",
+			{ id: "n3", position: "before", scene: true },
+			[
+				["s2", "i2", "n3"],
+				["s1", "i1", "n1", "n2"],
+			],
+		],
+		[
+			"a scene next to itself",
+			{ id: "n1", anchor_id: "n2", scene: true },
+			[
+				["s1", "i1", "n1", "n2"],
+				["s2", "i2", "n3"],
+			],
+		],
+	])("moves %s", (_, move, expected) => {
+		const editor = twoScenes();
+
+		const result = applyRefineOp(editor, { op: "move", ...move });
+
+		expect(result).toEqual({ ok: true });
+		expect(layout(editor)).toEqual(expected);
+	});
+
+	it("keeps the moved element itself, with its id and attributes", () => {
+		const editor = twoScenes();
+		const image = getNode(editor, "i1");
+
+		applyRefineOp(editor, { op: "move", id: "i1", anchor_id: "n3" });
+
+		expect(getNode(editor, "i1")).toBe(image);
+		expect(flatAttributes(image)).toEqual({ model: "flux" });
+	});
+
+	it.each<[string, Move, string]>([
+		[
+			"an unknown id",
+			{ id: "gone", anchor_id: "n1" },
+			'move: no script element "gone"',
+		],
+		[
+			"an unknown anchor",
+			{ id: "n1", anchor_id: "gone" },
+			'move: no element "gone" to anchor on',
+		],
+	])("fails loudly on %s and moves nothing", (_, move, reason) => {
+		const editor = twoScenes();
+
+		const result = applyRefineOp(editor, { op: "move", ...move });
+
+		expect(result).toEqual({ ok: false, reason });
+		expect(layout(editor)).toEqual(layout(twoScenes()));
 	});
 });
 
