@@ -59,6 +59,16 @@ function el(
 	};
 }
 
+/** Canvas scenes in order, each holding the elements it lists. */
+const scenes = (...lists: ResolvedElement[][]): ResolvedElement[] =>
+	lists.flatMap((list, index) =>
+		list.map((element) => ({
+			...element,
+			sceneId: `s${index + 1}`,
+			sceneNumber: index + 1,
+		})),
+	);
+
 // A cut leaves scenes abutting; only a cross-fade overlaps them, so the layouts
 // that assert the overlap ask for one.
 const crossfaded = (
@@ -235,11 +245,51 @@ describe("buildRenderLayout", () => {
 			expect(layout.series.map((scene) => scene.duration)).toEqual([10, 6, 4]);
 		});
 
-		it("plays a foreground after the overlay that leads it", () => {
+		it("plays a scene's overlay over its visual, whichever the canvas lists first", () => {
 			const layout = crossfaded([
 				el({ id: "n1", type: "narration", trimDurationSec: 9 }),
 				el({ id: "img1", type: "image", trimDurationSec: 5 }),
 			]);
+			expect(layout.series).toHaveLength(1);
+			expect(layout.series[0].element.id).toBe("img1");
+			expect(layout.series[0].duration).toBe(9);
+			expect(seqs(layout, "narration")[0].start).toBe(0);
+		});
+
+		it("never extends an earlier scene with a later scene's overlay", () => {
+			const layout = crossfaded(
+				scenes(
+					[el({ id: "img1", type: "image", trimDurationSec: 5 })],
+					[
+						el({ id: "n1", type: "narration", trimDurationSec: 9 }),
+						el({ id: "video1", type: "video", trimDurationSec: 3 }),
+					],
+				),
+			);
+			expect(layout.series.map((scene) => scene.duration)).toEqual([5, 9]);
+			expect(seqs(layout, "narration")[0].start).toBe(layout.series[1].start);
+		});
+
+		it("opens each scene with no visual on a blank of its own", () => {
+			const layout = crossfaded(
+				scenes(
+					[el({ id: "img1", type: "image", trimDurationSec: 5 })],
+					[el({ id: "n1", type: "narration", trimDurationSec: 4 })],
+				),
+			);
+			expect(layout.series).toHaveLength(2);
+			expect(isBlankScene(layout.series[1].element)).toBe(true);
+			expect(layout.series[1].start).toBeCloseTo(5 - OVERLAP, 5);
+			expect(layout.series[1].duration).toBe(4);
+		});
+
+		it("plays a scene with a visual after a scene of only dialogue", () => {
+			const layout = crossfaded(
+				scenes(
+					[el({ id: "n1", type: "narration", trimDurationSec: 9 })],
+					[el({ id: "img1", type: "image", trimDurationSec: 5 })],
+				),
+			);
 			expect(layout.series).toHaveLength(2);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(9);
@@ -274,13 +324,19 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("stretches the blank scene over the overlays that open the video, before the first visual", () => {
-			const layout = crossfaded([
-				el({ id: "n1", type: "narration", trimDurationSec: 9 }),
-				el({ id: "c1", type: "character", trimDurationSec: 3 }),
-				el({ id: "img1", type: "image", trimDurationSec: 4 }),
-				el({ id: "n2", type: "narration", trimDurationSec: 2 }),
-				el({ id: "n3", type: "narration", trimDurationSec: 3 }),
-			]);
+			const layout = crossfaded(
+				scenes(
+					[
+						el({ id: "n1", type: "narration", trimDurationSec: 9 }),
+						el({ id: "c1", type: "character", trimDurationSec: 3 }),
+					],
+					[
+						el({ id: "img1", type: "image", trimDurationSec: 4 }),
+						el({ id: "n2", type: "narration", trimDurationSec: 2 }),
+						el({ id: "n3", type: "narration", trimDurationSec: 3 }),
+					],
+				),
+			);
 			expect(layout.series).toHaveLength(2);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(12);
@@ -303,22 +359,38 @@ describe("buildRenderLayout", () => {
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 		});
 
-		it("clamps a background placed after a foreground to the minimum duration", () => {
+		it("starts a scene's background with the scene, whichever the canvas lists first", () => {
 			const layout = layoutOf([
 				el({ id: "img1", type: "image", trimDurationSec: 10 }),
 				el({ id: "m1", type: "music", trimDurationSec: 30 }),
 			]);
+			expect(seqs(layout, "music")).toHaveLength(1);
+			expect(seqs(layout, "music")[0].start).toBe(0);
+			expect(seqs(layout, "music")[0].duration).toBe(10);
+		});
+
+		it("clamps the background of a scene with nothing to show to the minimum duration", () => {
+			const layout = layoutOf(
+				scenes(
+					[el({ id: "img1", type: "image", trimDurationSec: 10 })],
+					[el({ id: "m1", type: "music", trimDurationSec: 30 })],
+				),
+			);
 			expect(seqs(layout, "music")).toHaveLength(1);
 			expect(seqs(layout, "music")[0].start).toBe(10);
 			expect(seqs(layout, "music")[0].duration).toBe(1);
 		});
 
 		it("caps the previous background when a new background of the same type starts", () => {
-			const layout = layoutOf([
-				el({ id: "m1", type: "music", trimDurationSec: 30 }),
-				el({ id: "img1", type: "image", trimDurationSec: 10 }),
-				el({ id: "m2", type: "music", trimDurationSec: 20 }),
-			]);
+			const layout = layoutOf(
+				scenes(
+					[
+						el({ id: "m1", type: "music", trimDurationSec: 30 }),
+						el({ id: "img1", type: "image", trimDurationSec: 10 }),
+					],
+					[el({ id: "m2", type: "music", trimDurationSec: 20 })],
+				),
+			);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].duration).toBe(10);
 			expect(seqs(layout, "music")[1].start).toBe(10);
@@ -326,40 +398,53 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("leaves an earlier background untouched when it ends before its replacement", () => {
-			const layout = crossfaded([
-				el({ id: "m1", type: "music", trimDurationSec: 10 }),
-				el({ id: "video1", type: "video", trimDurationSec: 10 }),
-				el({ id: "c1", type: "character", trimDurationSec: 5 }),
-				el({ id: "m2", type: "music", trimDurationSec: 20 }),
-				el({ id: "c2", type: "character", trimDurationSec: 5 }),
-				el({ id: "img1", type: "image", trimDurationSec: 6 }),
-			]);
+			const layout = crossfaded(
+				scenes(
+					[
+						el({ id: "m1", type: "music", trimDurationSec: 8 }),
+						el({ id: "video1", type: "video", trimDurationSec: 10 }),
+						el({ id: "c1", type: "character", trimDurationSec: 5 }),
+					],
+					[
+						el({ id: "m2", type: "music", trimDurationSec: 20 }),
+						el({ id: "c2", type: "character", trimDurationSec: 5 }),
+						el({ id: "img1", type: "image", trimDurationSec: 6 }),
+					],
+				),
+			);
 			expect(layout.totalDurationSec).toBeCloseTo(16 - OVERLAP, 5);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(seqs(layout, "music")[0].duration).toBe(10);
-			expect(seqs(layout, "music")[1].start).toBe(10);
-			// m2 trimmed to the rendered total since img1 is overlapped by one transition.
-			expect(seqs(layout, "music")[1].duration).toBeCloseTo(6 - OVERLAP, 5);
+			expect(seqs(layout, "music")[0].duration).toBe(8);
+			expect(seqs(layout, "music")[1].start).toBeCloseTo(10 - OVERLAP, 5);
+			expect(seqs(layout, "music")[1].duration).toBeCloseTo(6, 5);
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
-			const layout = crossfaded([
-				el({ id: "m1", type: "music", trimDurationSec: 10 }),
-				el({ id: "m2", type: "music", trimDurationSec: 20 }),
-				el({ id: "m3", type: "music", trimDurationSec: 30 }),
-				el({ id: "img1", type: "image", trimDurationSec: 10 }),
-				el({ id: "m4", type: "music", trimDurationSec: 40 }),
-				el({ id: "m5", type: "music", trimDurationSec: 50 }),
-				el({ id: "video1", type: "video", trimDurationSec: 20 }),
-			]);
+			const layout = crossfaded(
+				scenes(
+					[
+						el({ id: "m1", type: "music", trimDurationSec: 10 }),
+						el({ id: "m2", type: "music", trimDurationSec: 20 }),
+						el({ id: "m3", type: "music", trimDurationSec: 30 }),
+						el({ id: "img1", type: "image", trimDurationSec: 10 }),
+					],
+					[
+						el({ id: "m4", type: "music", trimDurationSec: 40 }),
+						el({ id: "m5", type: "music", trimDurationSec: 50 }),
+						el({ id: "video1", type: "video", trimDurationSec: 20 }),
+					],
+				),
+			);
 			expect(layout.totalDurationSec).toBeCloseTo(30 - OVERLAP, 5);
-			expect(seqs(layout, "music")).toHaveLength(2);
+			expect(seqs(layout, "music").map((music) => music.element.id)).toEqual([
+				"m3",
+				"m5",
+			]);
 			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(seqs(layout, "music")[0].duration).toBe(10);
-			expect(seqs(layout, "music")[1].start).toBe(10);
-			// m5 trimmed to the rendered total since video1 is overlapped by one transition.
-			expect(seqs(layout, "music")[1].duration).toBeCloseTo(20 - OVERLAP, 5);
+			expect(seqs(layout, "music")[0].duration).toBeCloseTo(10 - OVERLAP, 5);
+			expect(seqs(layout, "music")[1].start).toBeCloseTo(10 - OVERLAP, 5);
+			expect(seqs(layout, "music")[1].duration).toBeCloseTo(20, 5);
 		});
 
 		it("emits N consecutive copies for a looped background, trimmed to the foreground span", () => {
@@ -378,19 +463,25 @@ describe("buildRenderLayout", () => {
 		});
 
 		it("drops looped background copies that fall after a replacement background", () => {
-			const layout = crossfaded([
-				el({ id: "m1", type: "music", trimDurationSec: 10, loops: 4 }),
-				el({ id: "img1", type: "image", trimDurationSec: 15 }),
-				el({ id: "m2", type: "music", trimDurationSec: 20 }),
-				el({ id: "img2", type: "image", trimDurationSec: 10 }),
-			]);
+			const layout = crossfaded(
+				scenes(
+					[
+						el({ id: "m1", type: "music", trimDurationSec: 10, loops: 4 }),
+						el({ id: "img1", type: "image", trimDurationSec: 15 }),
+					],
+					[
+						el({ id: "m2", type: "music", trimDurationSec: 20 }),
+						el({ id: "img2", type: "image", trimDurationSec: 10 }),
+					],
+				),
+			);
 			const music = seqs(layout, "music");
 			expect(music).toHaveLength(3);
 			expect(music[0]).toMatchObject({ start: 0, duration: 10 });
-			expect(music[1]).toMatchObject({ start: 10, duration: 5 });
-			// m2 trimmed to the rendered total since img2 is overlapped by one transition.
-			expect(music[2].start).toBe(15);
-			expect(music[2].duration).toBeCloseTo(10 - OVERLAP, 5);
+			expect(music[1].start).toBe(10);
+			expect(music[1].duration).toBeCloseTo(5 - OVERLAP, 5);
+			expect(music[2].start).toBeCloseTo(15 - OVERLAP, 5);
+			expect(music[2].duration).toBeCloseTo(10, 5);
 			expect(layout.totalDurationSec).toBeCloseTo(25 - OVERLAP, 5);
 		});
 
@@ -487,15 +578,21 @@ describe("buildRenderLayout", () => {
 
 	describe("mixed scenes", () => {
 		it("coagulates leading non-foreground elements into the first scene", () => {
-			const layout = layoutOf([
-				el({ id: "m1", type: "music", trimDurationSec: 10 }),
-				el({ id: "s1", type: "sound", trimDurationSec: 5 }),
-				el({ id: "n1", type: "narration", trimDurationSec: 4 }),
-				el({ id: "s2", type: "sound", trimDurationSec: 3 }),
-				el({ id: "c1", type: "character", trimDurationSec: 7 }),
-				el({ id: "video1", type: "video", trimDurationSec: 2 }),
-				el({ id: "m2", type: "music", trimDurationSec: 4 }),
-			]);
+			const layout = layoutOf(
+				scenes(
+					[
+						el({ id: "m1", type: "music", trimDurationSec: 10 }),
+						el({ id: "s1", type: "sound", trimDurationSec: 5 }),
+						el({ id: "n1", type: "narration", trimDurationSec: 4 }),
+						el({ id: "s2", type: "sound", trimDurationSec: 3 }),
+						el({ id: "c1", type: "character", trimDurationSec: 7 }),
+					],
+					[
+						el({ id: "video1", type: "video", trimDurationSec: 2 }),
+						el({ id: "m2", type: "music", trimDurationSec: 4 }),
+					],
+				),
+			);
 			expect(layout.series).toHaveLength(2);
 			expect(isBlankScene(layout.series[0].element)).toBe(true);
 			expect(layout.series[0].duration).toBe(11);
@@ -510,6 +607,28 @@ describe("buildRenderLayout", () => {
 			expect(seqs(layout, "sound")[0].start).toBe(0);
 			expect(seqs(layout, "sound")[1].start).toBe(4);
 			expect(seqs(layout, "music")).toHaveLength(2);
+		});
+
+		it("plays each scene on its own visual, whatever order its elements are listed in", () => {
+			const layout = crossfaded(
+				scenes(
+					[
+						el({ id: "m1", type: "music", trimDurationSec: 60 }),
+						el({ id: "n1", type: "narration", trimDurationSec: 17 }),
+						el({ id: "img1", type: "image", trimDurationSec: 0 }),
+					],
+					[
+						el({ id: "video1", type: "video", trimDurationSec: 29 }),
+						el({ id: "n2", type: "narration", trimDurationSec: 20 }),
+					],
+				),
+			);
+			expect(layout.series.map((scene) => scene.element.id)).toEqual([
+				"img1",
+				"video1",
+			]);
+			expect(layout.series[0].duration).toBe(17);
+			expect(seqs(layout, "music")[0].start).toBe(0);
 		});
 
 		it("composes foreground, overlay, and background within a single layout", () => {

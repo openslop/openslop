@@ -1,3 +1,5 @@
+import sortBy from "lodash/sortBy";
+import uniqBy from "lodash/uniqBy";
 import {
 	DEFAULT_FPS,
 	type ResolvedElement,
@@ -65,15 +67,28 @@ function getForegroundCursor(current: Sequence | undefined, cursor: number) {
 	return current ? Math.max(cursor, current.start + current.duration) : cursor;
 }
 
+/** A scene opens on its first visual, whatever the canvas lists before it. */
+function visualsFirst(elements: ResolvedElement[]): ResolvedElement[] {
+	const openers = new Set(
+		uniqBy(
+			elements.filter((element) => element.role === "foreground"),
+			"sceneId",
+		),
+	);
+	return sortBy(elements, [
+		"sceneNumber",
+		(element) => (openers.has(element) ? 0 : 1),
+	]);
+}
+
 /**
- * Walks the element list and assembles scenes with these rules:
+ * Walks each scene's elements and assembles the timeline with these rules,
+ * never letting one scene's elements land in another:
  *
- *  1. Foreground → starts a new scene.
- *  2. Overlay    → extends the current scene's duration; opens a blank scene if none exists.
- *  3. Background → updates the active background layer for that element type. Exclusive (one at a time per type).
- *  4. Effect     → same as background but additive (can overlap).
- *
- * A scene is a consecutive, blocking sequence containing an element within a series.
+ *  1. Foreground → starts a new shot.
+ *  2. Overlay    → extends the scene's current shot; a scene with no visual opens on a blank one.
+ *  3. Background → starts with the scene's current shot. Exclusive (one at a time per type).
+ *  4. Effect     → plays at the cursor, additive (can overlap).
  */
 export function buildRenderLayout(
 	elements: ResolvedElement[],
@@ -96,7 +111,22 @@ export function buildRenderLayout(
 	const sequences: SequenceMap = {};
 	let cursor = 0;
 
-	for (const raw of elements) {
+	const open = (element: ResolvedElement): SceneSequence => {
+		const previous = series.at(-1);
+		// TransitionSeries overlaps each scene with the one before by the transition,
+		// so every layer after it lands on the rendered timeline.
+		cursor =
+			getForegroundCursor(previous, cursor) -
+			(previous ? transitionDurationSec : 0);
+		const scene = {
+			...createSequence(element, cursor, element.trimDurationSec),
+			overlaySec: 0,
+		};
+		series.push(scene);
+		return scene;
+	};
+
+	for (const raw of visualsFirst(elements)) {
 		const element = {
 			...raw,
 			trimDurationSec: onGrid(raw.trimDurationSec),
@@ -104,7 +134,8 @@ export function buildRenderLayout(
 		};
 		const stride = onGrid(loopStrideSec(element));
 		const current = series.at(-1);
-		const foregroundCursor = getForegroundCursor(current, cursor);
+		const shot =
+			current?.element.sceneId === element.sceneId ? current : undefined;
 
 		switch (element.role) {
 			case "effect": {
@@ -112,38 +143,19 @@ export function buildRenderLayout(
 				break;
 			}
 			case "background": {
-				trimSequencesAt(sequences[element.type], foregroundCursor);
-				pushSequence(sequences, element, foregroundCursor, stride);
+				const start = shot ? shot.start : getForegroundCursor(current, cursor);
+				trimSequencesAt(sequences[element.type], start);
+				pushSequence(sequences, element, start, stride);
 				break;
 			}
 			case "foreground": {
-				cursor = foregroundCursor;
-				if (series.length > 0) {
-					// TransitionSeries.Sequence overlap the previous
-					// ones by transitionDurationSec. Bake that into the cursor so every
-					// subsequent overlay/background/effect lands on the rendered timeline.
-					cursor -= transitionDurationSec;
-				}
-				series.push({
-					...createSequence(element, cursor, element.trimDurationSec),
-					overlaySec: 0,
-				});
+				open(element);
 				break;
 			}
 			case "overlay": {
-				if (!current) {
-					series.push({
-						...createSequence(
-							blankScene(element),
-							cursor,
-							element.trimDurationSec,
-						),
-						overlaySec: element.trimDurationSec,
-					});
-				} else {
-					current.overlaySec += element.trimDurationSec;
-					current.duration = Math.max(current.duration, current.overlaySec);
-				}
+				const scene = shot ?? open(blankScene(element));
+				scene.overlaySec += element.trimDurationSec;
+				scene.duration = Math.max(scene.duration, scene.overlaySec);
 				pushSequence(sequences, element, cursor, stride);
 				cursor += element.trimDurationSec;
 				break;
