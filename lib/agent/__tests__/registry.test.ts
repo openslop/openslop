@@ -45,7 +45,8 @@ const project = (
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<narration>hi</narration>",
 	countSpokenWords: () => 1,
-	measureElementLengths: () => [],
+	measureDialogueLengths: () => [],
+	measureVisualSpans: () => [],
 	measureRuntime: () => 0,
 	generateText: async () => "an outline",
 	elementResult: async () => undefined,
@@ -355,126 +356,19 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).not.toContain("over by");
 	});
 
-	const onScreen = (id: string, seconds: number) => ({
-		id,
-		type: "video" as const,
-		sceneNumber: 1,
-		seconds,
-		words: 0,
-		dialogueIds: [],
-		durationSec: seconds,
-		decidedBy: "duration" as const,
-	});
-
-	it("reports what each visual is on screen for, and the dialogue holding it", async () => {
+	it("estimates how long each line of dialogue runs", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "measure_element_lengths", input: {} },
+			{ toolName: "measure_dialogue_lengths", input: {} },
 			context({
-				measureElementLengths: () => [
-					{
-						id: "img1",
-						type: "image",
-						sceneNumber: 1,
-						seconds: 30,
-						words: 90,
-						dialogueIds: ["nar1"],
-						decidedBy: "dialogue",
-					},
-					{
-						id: "ai1",
-						type: "video",
-						sceneNumber: 2,
-						seconds: 1,
-						words: 0,
-						dialogueIds: [],
-						decidedBy: "minimum",
-					},
-					{
-						id: "img2",
-						type: "image",
-						sceneNumber: 3,
-						seconds: 1,
-						words: 2,
-						dialogueIds: ["nar2"],
-						decidedBy: "minimum",
-					},
+				measureDialogueLengths: () => [
+					{ id: "nar1", type: "narration", words: 90, seconds: 30 },
+					{ id: "chr1", type: "character", words: 6, seconds: 2 },
 				],
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 image img1: 30.0s, 90 words of dialogue (nar1) after it.",
-		);
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 2 video ai1: 1.0s, the minimum, no dialogue after it.",
-		);
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 3 image img2: 1.0s, the minimum, longer than the 2 words of dialogue (nar2) after it.",
-		);
-	});
-
-	it("says when a video's own duration sets its length", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "measure_element_lengths", input: {} },
-			context({
-				measureElementLengths: () => [
-					{
-						...onScreen("v1", 8),
-						words: 6,
-						dialogueIds: ["nar1"],
-					},
-					onScreen("v2", 5),
-					{
-						...onScreen("v3", 30),
-						durationSec: 5,
-						own: { seconds: 5, decidedBy: "duration" },
-						words: 90,
-						dialogueIds: ["nar2"],
-						decidedBy: "dialogue",
-					},
-				],
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video v1: 8.0s, its own length; 6 words of dialogue (nar1) after it.",
-		);
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video v2: 5.0s, its own length; no dialogue after it.",
-		);
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video v3: 30.0s, 90 words of dialogue (nar2) after it, longer than its 5.0s duration.",
-		);
-	});
-
-	it("says when the user's trim sets a video's length", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "measure_element_lengths", input: {} },
-			context({
-				measureElementLengths: () => [
-					{
-						...onScreen("v1", 5),
-						durationSec: 8,
-						own: { seconds: 5, decidedBy: "trim" },
-						decidedBy: "trim",
-					},
-					{
-						...onScreen("v2", 30),
-						durationSec: 8,
-						own: { seconds: 5, decidedBy: "trim" },
-						words: 90,
-						dialogueIds: ["nar1"],
-						decidedBy: "dialogue",
-					},
-				],
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video v1: 5.0s, its trim on the timeline; no dialogue after it.",
-		);
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video v2: 30.0s, 90 words of dialogue (nar1) after it, longer than its 5.0s trim.",
+		expect(outcome.ok && outcome.output).toBe(
+			"narration nar1: 90 words, about 30.0s\ncharacter chr1: 6 words, about 2.0s",
 		);
 	});
 
@@ -483,7 +377,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
 			context({
-				measureElementLengths: () => [
+				measureVisualSpans: () => [
 					{
 						id: "ai1",
 						type: "video",
@@ -492,7 +386,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 10,
-						decidedBy: "dialogue",
 					},
 					{
 						id: "img1",
@@ -501,7 +394,6 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar2"],
-						decidedBy: "dialogue",
 					},
 				],
 				editScript: (applied) => {
@@ -525,7 +417,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
-				measureElementLengths: () => [
+				measureVisualSpans: () => [
 					{
 						id: "ai1",
 						type: "video",
@@ -534,7 +426,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: [],
 						durationSec: 10,
-						decidedBy: "dialogue",
 					},
 					{
 						id: "vid1",
@@ -544,7 +435,6 @@ describe("executeToolCall", () => {
 						words: 180,
 						dialogueIds: ["nar2"],
 						durationSec: 15,
-						decidedBy: "dialogue",
 					},
 				],
 			}),
@@ -560,7 +450,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
-				measureElementLengths: () => [
+				measureVisualSpans: () => [
 					{
 						id: "vid1",
 						type: "video",
@@ -569,7 +459,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
-						decidedBy: "dialogue",
 					},
 				],
 				editScript: () => {
@@ -585,7 +474,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1", "nope"] } },
 			context({
-				measureElementLengths: () => [
+				measureVisualSpans: () => [
 					{
 						id: "vid1",
 						type: "video",
@@ -594,7 +483,6 @@ describe("executeToolCall", () => {
 						words: 12,
 						dialogueIds: ["nar1"],
 						durationSec: 5,
-						decidedBy: "dialogue",
 					},
 				],
 			}),
@@ -609,7 +497,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
 			context({
-				measureElementLengths: () => [
+				measureVisualSpans: () => [
 					{
 						id: "img1",
 						type: "image",
@@ -617,7 +505,6 @@ describe("executeToolCall", () => {
 						seconds: 30,
 						words: 90,
 						dialogueIds: ["nar1"],
-						decidedBy: "dialogue",
 					},
 				],
 			}),
@@ -628,15 +515,13 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("says the canvas has no visuals rather than reporting an empty table", async () => {
+	it("says the canvas has no dialogue rather than reporting an empty table", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "measure_element_lengths", input: {} },
+			{ toolName: "measure_dialogue_lengths", input: {} },
 			context(),
 		);
 
-		expect(outcome.ok && outcome.output).toBe(
-			"No images or videos on the canvas yet.",
-		);
+		expect(outcome.ok && outcome.output).toBe("No dialogue on the canvas yet.");
 	});
 
 	it("hands over an element's result", async () => {
@@ -820,7 +705,7 @@ describe("SLOPPY_TOOLS", () => {
 			"view_result",
 			"outline_story",
 			"measure_total_length",
-			"measure_element_lengths",
+			"measure_dialogue_lengths",
 			"fit_durations",
 			"set_title",
 			"list_models",

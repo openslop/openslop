@@ -45,13 +45,9 @@ const ROLE = dedent`
   - Finish by replying to the user. Keep replies brief.
   - Ask only when the answer would change the work. Otherwise decide and say what you chose.
 
-  # How long a visual is on screen
-  - A visual (image or video element) is on screen for its own length or the dialogue after it,
-    up to the next visual, whichever is longer. An image has no length of its own; a video
-    element's is its \`duration\`, the length it is generated for, or its trim when the user
-    trimmed it on the timeline.
-  - Never guess a length. measure_element_lengths reads them off the canvas and says how to
-    change one.
+  # Lengths
+  - Never guess how long dialogue runs. measure_dialogue_lengths estimates each line from its
+    words.
   - fit_durations sets every video element with dialogue under it to a \`duration\` that covers
     that dialogue, so none runs out mid-line and none holds the next line back.
     Call it as the last tool call of the turn after any change to the script, but only when

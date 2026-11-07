@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import type { ContentType } from "@/lib/canvas/types";
-import { measureElementLengths, measureRuntime } from "../element-lengths";
+import { measureRuntime, measureVisualSpans } from "../visual-spans";
 import type { ResolvedElement } from "../types";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { secondsForWords } from "@/lib/project/video-length";
@@ -28,13 +28,13 @@ const scene = (...children: ReturnType<typeof element>[]): Descendant =>
 
 const words = (count: number) => Array(count).fill("word").join(" ");
 
-describe("measureElementLengths", () => {
+describe("measureVisualSpans", () => {
 	it("holds a still for the dialogue that follows it, up to the next visual", () => {
 		const image = element("image", "A forest.");
 		const narration = element("narration", words(90));
 		const next = element("image", "A clearing.");
 
-		const [first, second] = measureElementLengths([
+		const [first, second] = measureVisualSpans([
 			scene(image, narration, next, element("narration", words(180))),
 		]);
 
@@ -50,7 +50,7 @@ describe("measureElementLengths", () => {
 	it("counts dialogue across scene boundaries, since only a visual ends a span", () => {
 		const image = element("image", "A forest.");
 
-		const [only] = measureElementLengths([
+		const [only] = measureVisualSpans([
 			scene(image, element("narration", words(90))),
 			scene(element("character", words(90))),
 		]);
@@ -59,7 +59,7 @@ describe("measureElementLengths", () => {
 	});
 
 	it("holds a video for its generated length, or longer for the dialogue after it", () => {
-		const [held, extended] = measureElementLengths([
+		const [held, extended] = measureVisualSpans([
 			scene(
 				element("video", "A pan.", { duration: "8" }),
 				element("narration", words(9)),
@@ -72,54 +72,33 @@ describe("measureElementLengths", () => {
 		expect(extended.seconds).toBe(30);
 	});
 
-	it("holds a trimmed video for its trimmed length, and says the trim set it", () => {
-		const [cut, opened] = measureElementLengths([
+	it("holds a trimmed video for its trimmed length", () => {
+		const [cut, opened] = measureVisualSpans([
 			scene(
 				element("video", "A pan.", { duration: "8", trimEnd: "5" }),
 				element("video", "A zoom.", { duration: "8", trimStart: "3" }),
 			),
 		]);
 
-		expect(cut).toMatchObject({
-			seconds: 5,
-			durationSec: 8,
-			own: { seconds: 5, decidedBy: "trim" },
-			decidedBy: "trim",
-		});
-		expect(opened).toMatchObject({
-			seconds: 5,
-			own: { seconds: 5, decidedBy: "trim" },
-			decidedBy: "trim",
-		});
+		expect(cut).toMatchObject({ seconds: 5, durationSec: 8 });
+		expect(opened.seconds).toBe(5);
 	});
 
-	it("lets dialogue run past a trim, carrying the trimmed length it beat", () => {
-		const [held] = measureElementLengths([
+	it("lets dialogue run past a trim", () => {
+		const [held] = measureVisualSpans([
 			scene(
 				element("video", "A pan.", { duration: "8", trimEnd: "5" }),
 				element("narration", words(90)),
 			),
 		]);
 
-		expect(held).toMatchObject({
-			seconds: 30,
-			own: { seconds: 5, decidedBy: "trim" },
-			decidedBy: "dialogue",
-		});
-	});
-
-	it("says a video the user left whole brings its duration", () => {
-		const [whole] = measureElementLengths([
-			scene(element("video", "A pan.", { duration: "8" })),
-		]);
-
-		expect(whole.own).toEqual({ seconds: 8, decidedBy: "duration" });
+		expect(held.seconds).toBe(30);
 	});
 
 	it("ignores silent elements and dialogue before the first visual", () => {
 		const image = element("image", "A forest.");
 
-		const lengths = measureElementLengths([
+		const lengths = measureVisualSpans([
 			scene(
 				element("narration", words(180)),
 				image,
@@ -132,34 +111,8 @@ describe("measureElementLengths", () => {
 		expect(lengths[0]).toMatchObject({ id: image.id, words: 0, seconds: 1 });
 	});
 
-	it("names which of the duration, the dialogue and the minimum set each length", () => {
-		const generated = { duration: "8" };
-
-		const lengths = measureElementLengths([
-			scene(
-				element("video", "A pan.", generated),
-				element("narration", words(9)),
-				element("video", "A zoom.", generated),
-				element("narration", words(90)),
-				element("image", "A forest."),
-				element("narration", words(9)),
-				element("image", "A clearing."),
-				element("narration", words(2)),
-				element("image", "A river."),
-			),
-		]);
-
-		expect(lengths.map(({ decidedBy }) => decidedBy)).toEqual([
-			"duration",
-			"dialogue",
-			"dialogue",
-			"minimum",
-			"minimum",
-		]);
-	});
-
 	it("measures an empty canvas as nothing", () => {
-		expect(measureElementLengths([])).toEqual([]);
+		expect(measureVisualSpans([])).toEqual([]);
 	});
 });
 
@@ -191,7 +144,7 @@ describe("measureRuntime", () => {
 });
 
 /**
- * `measureElementLengths` mirrors the scene-builder rule off the unrendered
+ * `measureVisualSpans` mirrors the scene-builder rule off the unrendered
  * script, so the two have to agree once the assets exist. Nothing else enforces
  * that: the layout skips ungenerated elements, which is why the estimate exists.
  */
@@ -228,7 +181,7 @@ describe("against buildRenderLayout", () => {
 		const third = element("video", "A zoom.", { duration: "8" });
 		const lastLine = element("character", words(15));
 
-		const lengths = measureElementLengths([
+		const lengths = measureVisualSpans([
 			scene(first, line),
 			scene(second, shortLine, element("music", "Soft piano.")),
 			scene(third, lastLine),

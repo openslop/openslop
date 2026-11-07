@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
-import type { ElementLength } from "../element-lengths";
-import { measureElementLengths } from "../element-lengths";
+import { measureVisualSpans, type VisualSpan } from "../visual-spans";
 import {
 	DURATION_FIT_LEEWAY_SEC,
 	durationFits,
 	fallsShort,
 } from "../duration-fit";
 
-const length = (over: Partial<ElementLength> = {}): ElementLength => ({
+const length = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	id: "e1",
 	type: "video",
 	sceneNumber: 1,
@@ -16,7 +15,6 @@ const length = (over: Partial<ElementLength> = {}): ElementLength => ({
 	words: 30,
 	dialogueIds: ["n1"],
 	durationSec: 10,
-	decidedBy: "dialogue",
 	...over,
 });
 
@@ -83,7 +81,7 @@ describe("durationFits over a measured canvas", () => {
 			},
 		] as unknown as Descendant[];
 
-		const [fit] = durationFits(measureElementLengths(script));
+		const [fit] = durationFits(measureVisualSpans(script));
 
 		expect(fit.length.id).toBe("video1");
 		expect(fit.duration).toBe(11);
