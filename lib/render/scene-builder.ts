@@ -1,4 +1,5 @@
-import mapValues from "lodash/mapValues";
+import remove from "lodash/remove";
+import { CONTENT_TYPES } from "@/lib/canvas/types";
 import {
 	DEFAULT_FPS,
 	MIN_DURATION_SEC,
@@ -9,7 +10,6 @@ import {
 import { ASPECT_RATIO_DIMENSIONS } from "../project/aspect-ratio";
 import type { VideoSettings } from "../project/video-settings";
 import { blankScene } from "./blank-scene";
-import { isTrimmable } from "./clip-trim";
 import { totalDuration } from "./sequences";
 import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
@@ -55,17 +55,15 @@ function pushSequence(
 	}
 }
 
-const cutAt = (sequence: Sequence, cutoff: number): Sequence => ({
-	...sequence,
-	duration: Math.min(sequence.duration, cutoff - sequence.start),
-	maxDuration: cutoff - sequence.start,
-});
-
-function trimSequencesAt(list: Sequence[] | undefined, cutoff: number) {
-	if (!list) return;
-	while (list.length > 0 && list[list.length - 1].start >= cutoff) list.pop();
-	const last = list.at(-1);
-	if (last) list[list.length - 1] = cutAt(last, cutoff);
+/** Drops what starts at `cutoff` or later and cuts what runs past it. */
+function cutAt(list: Sequence[] = [], cutoff: number) {
+	remove(list, ({ start }) => start > cutoff - FRAME_EPSILON);
+	for (const sequence of list) {
+		if (sequence.start + sequence.duration > cutoff) {
+			sequence.duration = cutoff - sequence.start;
+			sequence.maxDuration = sequence.duration;
+		}
+	}
 }
 
 function getForegroundCursor(current: Sequence | undefined, cursor: number) {
@@ -74,23 +72,8 @@ function getForegroundCursor(current: Sequence | undefined, cursor: number) {
 		: cursor;
 }
 
-/** A still has no length of its own, so it plays for its whole slot. */
-const fillStill = (scene: Sequence): Sequence =>
-	isTrimmable(scene.element)
-		? scene
-		: { ...scene, duration: totalDuration(scene) };
-
-/** Layers stop with the video. */
-const cutToVideo = (sequences: SequenceMap, totalDurationSec: number) =>
-	mapValues(sequences, (list = []) =>
-		list
-			.filter(({ start }) => start < totalDurationSec - FRAME_EPSILON)
-			.map((sequence) =>
-				sequence.start + sequence.duration > totalDurationSec
-					? cutAt(sequence, totalDurationSec)
-					: sequence,
-			),
-	);
+const isStill = ({ element }: Sequence) =>
+	CONTENT_TYPES[element.type].outputKind === "image";
 
 /**
  * Walks the element list and assembles scenes with these rules:
@@ -140,7 +123,7 @@ export function buildRenderLayout(
 				break;
 			}
 			case "background": {
-				trimSequencesAt(sequences[element.type], foregroundCursor);
+				cutAt(sequences[element.type], foregroundCursor);
 				pushSequence(sequences, element, foregroundCursor, stride);
 				break;
 			}
@@ -172,10 +155,14 @@ export function buildRenderLayout(
 	const last = series.at(-1);
 	const totalDurationSec = last ? last.start + totalDuration(last) : 0;
 
+	for (const list of Object.values(sequences)) cutAt(list, totalDurationSec);
+	for (const still of series.filter(isStill))
+		still.duration = totalDuration(still);
+
 	return {
 		...config,
-		series: series.map(fillStill),
-		sequences: cutToVideo(sequences, totalDurationSec),
+		series,
+		sequences,
 		totalDurationSec,
 		totalFrames: Math.max(
 			2,

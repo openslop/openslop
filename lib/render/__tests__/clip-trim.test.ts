@@ -237,20 +237,6 @@ describe("trimCaptions", () => {
 	});
 });
 
-describe("trimEdge on a clip with room before the layout cuts it", () => {
-	const roomy = {
-		start: 0,
-		element: el({ trimDurationSec: 20, mediaDurationSec: 60 }),
-		duration: 20,
-		minDuration: 0,
-		maxDuration: 25,
-	};
-
-	it("runs the end only as far as the room", () => {
-		expect(trimEdge(roomy, "end", 10).trimDurationSec).toBe(25);
-	});
-});
-
 describe("playedTrim", () => {
 	it("opens at the element's in-point and runs as long as it plays", () => {
 		const element = el({ trimStartSec: 2, trimDurationSec: 60 });

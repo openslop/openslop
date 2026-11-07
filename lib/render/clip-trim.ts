@@ -75,7 +75,7 @@ export function trimCaptions(
 	};
 }
 
-/** One edge moves, inside the media and the minimum from the other, and never past where the layout cuts the clip. */
+/** One edge moves, inside the media and the minimum from the other, and never past where the layout cuts it. */
 export function trimEdge(
 	{ element, duration, maxDuration = Infinity }: Sequence,
 	edge: TrimEdge,

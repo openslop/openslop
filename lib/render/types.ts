@@ -36,11 +36,11 @@ export type ResolvedElement = {
 export type Sequence = {
 	element: ResolvedElement;
 	start: number;
-	/** How long it plays, as far as the layout lets it: what the trim handles sit on. */
+	/** How long it plays: what the trim handles sit on. */
 	duration: number;
-	/** Its slot stays open at least this long, holding past what plays: the minimum, and the overlays under a scene. */
+	/** Its slot stays open at least this long, holding past what plays. */
 	minDuration: number;
-	/** Where the layout cuts it, as music stops where the next begins. */
+	/** Where the layout cuts it short. */
 	maxDuration?: number;
 };
 
