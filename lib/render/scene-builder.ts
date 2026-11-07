@@ -1,5 +1,7 @@
+import mapValues from "lodash/mapValues";
 import {
 	DEFAULT_FPS,
+	MIN_DURATION_SEC,
 	type ResolvedElement,
 	type Sequence,
 	type RenderLayout,
@@ -7,6 +9,8 @@ import {
 import { ASPECT_RATIO_DIMENSIONS } from "../project/aspect-ratio";
 import type { VideoSettings } from "../project/video-settings";
 import { blankScene } from "./blank-scene";
+import { isTrimmable } from "./clip-trim";
+import { totalDuration } from "./sequences";
 import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
 import { transitionOverlapSec } from "./transitions";
@@ -17,23 +21,22 @@ export type BuildLayoutOptions = Pick<
 > &
 	Partial<Pick<RenderLayout, "fps">>;
 
-/** No sequence is ever shorter than this, however little content it holds. */
-export const MIN_DURATION_SEC = 1;
 // Durations accumulated on the frame grid land a few ULPs above a whole frame.
 // Without this slack the total ceils into a trailing frame with no content.
 const FRAME_EPSILON = 1e-6;
 
-function createSequence(
+const sequenceAt = (
 	element: ResolvedElement,
 	start: number,
-	duration: number,
-): Sequence {
-	return { element, start, duration: Math.max(duration, MIN_DURATION_SEC) };
-}
+	minDuration: number,
+): Sequence => ({
+	element,
+	start,
+	duration: element.trimDurationSec,
+	minDuration,
+});
 
 type SequenceMap = RenderLayout["sequences"];
-
-type SceneSequence = Sequence & { overlaySec: number };
 
 /**
  * Lays down `element.loops` copies, each `stride` after the last. A stride
@@ -48,22 +51,46 @@ function pushSequence(
 ) {
 	const list = (sequences[element.type] ??= []);
 	for (let i = 0; i < element.loops; i++) {
-		list.push(
-			createSequence(element, start + i * stride, element.trimDurationSec),
-		);
+		list.push(sequenceAt(element, start + i * stride, 0));
 	}
 }
+
+const cutAt = (sequence: Sequence, cutoff: number): Sequence => ({
+	...sequence,
+	duration: Math.min(sequence.duration, cutoff - sequence.start),
+	maxDuration: cutoff - sequence.start,
+});
 
 function trimSequencesAt(list: Sequence[] | undefined, cutoff: number) {
 	if (!list) return;
 	while (list.length > 0 && list[list.length - 1].start >= cutoff) list.pop();
 	const last = list.at(-1);
-	if (last) last.duration = Math.min(last.duration, cutoff - last.start);
+	if (last) list[list.length - 1] = cutAt(last, cutoff);
 }
 
 function getForegroundCursor(current: Sequence | undefined, cursor: number) {
-	return current ? Math.max(cursor, current.start + current.duration) : cursor;
+	return current
+		? Math.max(cursor, current.start + totalDuration(current))
+		: cursor;
 }
+
+/** A still has no length of its own, so it plays for its whole slot. */
+const fillStill = (scene: Sequence): Sequence =>
+	isTrimmable(scene.element)
+		? scene
+		: { ...scene, duration: totalDuration(scene) };
+
+/** Layers stop with the video. */
+const cutToVideo = (sequences: SequenceMap, totalDurationSec: number) =>
+	mapValues(sequences, (list = []) =>
+		list
+			.filter(({ start }) => start < totalDurationSec - FRAME_EPSILON)
+			.map((sequence) =>
+				sequence.start + sequence.duration > totalDurationSec
+					? cutAt(sequence, totalDurationSec)
+					: sequence,
+			),
+	);
 
 /**
  * Walks the element list and assembles scenes with these rules:
@@ -92,9 +119,10 @@ export function buildRenderLayout(
 	const onGrid = (sec: number) =>
 		toSeconds(toFrames(sec, config.fps), config.fps);
 	const transitionDurationSec = onGrid(transitionOverlapSec(transitionType));
-	const series: SceneSequence[] = [];
+	const series: Sequence[] = [];
 	const sequences: SequenceMap = {};
 	let cursor = 0;
+	let overlaySec = 0;
 
 	for (const raw of elements) {
 		const element = {
@@ -124,26 +152,16 @@ export function buildRenderLayout(
 					// subsequent overlay/background/effect lands on the rendered timeline.
 					cursor -= transitionDurationSec;
 				}
-				series.push({
-					...createSequence(element, cursor, element.trimDurationSec),
-					overlaySec: 0,
-				});
+				series.push(sequenceAt(element, cursor, MIN_DURATION_SEC));
+				overlaySec = 0;
 				break;
 			}
 			case "overlay": {
-				if (!current) {
-					series.push({
-						...createSequence(
-							blankScene(element),
-							cursor,
-							element.trimDurationSec,
-						),
-						overlaySec: element.trimDurationSec,
-					});
-				} else {
-					current.overlaySec += element.trimDurationSec;
-					current.duration = Math.max(current.duration, current.overlaySec);
-				}
+				const scene =
+					current ?? sequenceAt(blankScene(element), cursor, MIN_DURATION_SEC);
+				if (!current) series.push(scene);
+				overlaySec += element.trimDurationSec;
+				scene.minDuration = Math.max(scene.minDuration, overlaySec);
 				pushSequence(sequences, element, cursor, stride);
 				cursor += element.trimDurationSec;
 				break;
@@ -152,19 +170,12 @@ export function buildRenderLayout(
 	}
 
 	const last = series.at(-1);
-	const totalDurationSec = last ? last.start + last.duration : 0;
-
-	for (const sequence of Object.values(sequences).flat()) {
-		const { start } = sequence;
-		if (start + sequence.duration > totalDurationSec) {
-			sequence.duration = Math.max(MIN_DURATION_SEC, totalDurationSec - start);
-		}
-	}
+	const totalDurationSec = last ? last.start + totalDuration(last) : 0;
 
 	return {
 		...config,
-		series,
-		sequences,
+		series: series.map(fillStill),
+		sequences: cutToVideo(sequences, totalDurationSec),
 		totalDurationSec,
 		totalFrames: Math.max(
 			2,

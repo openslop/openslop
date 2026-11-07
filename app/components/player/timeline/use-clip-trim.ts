@@ -8,12 +8,12 @@ import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
 	isTrimmed,
-	extensionSec,
-	laidOut,
+	playedTrim,
 	trimPointSec,
 	type Trim,
 	type TrimEdge,
 } from "@/lib/render/clip-trim";
+import { holdDuration } from "@/lib/render/sequences";
 import { snapTrimEdge } from "@/lib/render/snap";
 import type { TimelineClip } from "./timeline-rows";
 import type { TrimSnap } from "./use-trim-snap";
@@ -43,7 +43,8 @@ export function useClipTrim(
 	pxPerSec: number,
 	snap: TrimSnap,
 ) {
-	const element = laidOut(clip);
+	const { element } = clip;
+	const played = playedTrim(clip);
 	const editor = useSlateStatic();
 	const [preview, setPreview] = useState<Trim | null>(null);
 
@@ -65,7 +66,7 @@ export function useClipTrim(
 	const commit = (edge: TrimEdge) => () => {
 		snap.onSnap(null);
 		setPreview(null);
-		if (!preview || isMatch(element, preview)) return;
+		if (!preview || isMatch(played, preview)) return;
 		setTrimPoint(editor, element.id, edge, trimPointSec(preview, edge));
 	};
 
@@ -80,13 +81,13 @@ export function useClipTrim(
 		},
 	};
 
-	const trim = preview ?? element;
+	const trim = preview ?? played;
 
 	return {
 		trim,
 		trimming: preview !== null,
-		extensionSec: extensionSec(clip, trim),
+		holdSec: holdDuration(clip, trim.trimDurationSec),
 		handleProps: isTrimmable(element) ? handles : null,
-		reset: isTrimmed(clip.element) ? () => resetTrim(editor, element.id) : null,
+		reset: isTrimmed(element) ? () => resetTrim(editor, element.id) : null,
 	};
 }

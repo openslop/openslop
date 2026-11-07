@@ -2,16 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
 	isTrimmable,
 	isTrimmed,
-	extensionSec,
-	laidOut,
 	trimClip,
+	playedTrim,
 	trimEdge,
 	trimPointSec,
 	trimCaptions,
 } from "../clip-trim";
 import { toCaption } from "@/lib/captions/word-captions";
-import { MIN_DURATION_SEC } from "../scene-builder";
-import type { ResolvedElement } from "../types";
+import { MIN_DURATION_SEC, type ResolvedElement } from "../types";
 
 const el = (over: Partial<ResolvedElement>): ResolvedElement => ({
 	id: "v1",
@@ -85,7 +83,12 @@ describe("trimClip", () => {
 describe("trimEdge", () => {
 	const uncut = (over: Partial<ResolvedElement>) => {
 		const element = el(over);
-		return { start: 0, element, duration: element.trimDurationSec };
+		return {
+			start: 0,
+			element,
+			duration: element.trimDurationSec,
+			minDuration: 0,
+		};
 	};
 	const clip = uncut({ trimStartSec: 2, trimDurationSec: 5 });
 
@@ -154,6 +157,8 @@ describe("trimEdge on a clip the layout cuts short", () => {
 		start: 0,
 		element: el({ trimDurationSec: 60, mediaDurationSec: 60 }),
 		duration: 30,
+		minDuration: 0,
+		maxDuration: 30,
 	};
 
 	it("trims the end from where it's drawn, not past the cut", () => {
@@ -165,7 +170,7 @@ describe("trimEdge on a clip the layout cuts short", () => {
 	});
 
 	it("keeps a clip cut under the minimum where it's drawn", () => {
-		const short = { ...cut, duration: 0.6 };
+		const short = { ...cut, duration: 0.6, maxDuration: 0.6 };
 		expect(trimEdge(short, "end", 0).trimDurationSec).toBe(0.6);
 	});
 
@@ -232,56 +237,25 @@ describe("trimCaptions", () => {
 	});
 });
 
-describe("extensionSec", () => {
-	const trimmedTo = (trimDurationSec: number) => ({
-		trimStartSec: 0,
-		trimDurationSec,
-	});
-	const scene = { overlaySec: 8 };
+describe("trimEdge on a clip with room before the layout cuts it", () => {
+	const roomy = {
+		start: 0,
+		element: el({ trimDurationSec: 20, mediaDurationSec: 60 }),
+		duration: 20,
+		minDuration: 0,
+		maxDuration: 25,
+	};
 
-	it("has none outside a scene's dialogue", () => {
-		expect(extensionSec({}, trimmedTo(3))).toBe(0);
-	});
-
-	it("extends the scene past a video trimmed under its dialogue", () => {
-		expect(extensionSec(scene, trimmedTo(3))).toBe(5);
-	});
-
-	it("has none once the video outruns its dialogue", () => {
-		expect(extensionSec(scene, trimmedTo(10))).toBe(0);
+	it("runs the end only as far as the room", () => {
+		expect(trimEdge(roomy, "end", 10).trimDurationSec).toBe(25);
 	});
 });
 
-describe("laidOut", () => {
-	const music = el({ trimDurationSec: 60, mediaDurationSec: 60 });
-
-	it("stretches a still across its whole span", () => {
-		const still = el({
-			type: "image",
-			mediaDurationSec: 0,
-			trimDurationSec: 0,
-		});
+describe("playedTrim", () => {
+	it("opens at the element's in-point and runs as long as it plays", () => {
+		const element = el({ trimStartSec: 2, trimDurationSec: 60 });
 		expect(
-			laidOut({ start: 0, element: still, duration: 8 }).trimDurationSec,
-		).toBe(8);
-	});
-
-	it("draws a sound the layout pads at its own length", () => {
-		const sound = el({ trimDurationSec: 0.5 });
-		expect(
-			laidOut({ start: 0, element: sound, duration: 1 }).trimDurationSec,
-		).toBe(0.5);
-	});
-
-	it("runs a clip the layout cuts short only as far as it's drawn", () => {
-		expect(
-			laidOut({ start: 0, element: music, duration: 30 }).trimDurationSec,
-		).toBe(30);
-	});
-
-	it("keeps the trim of a clip the layout gives as much room or more", () => {
-		expect(
-			laidOut({ start: 0, element: music, duration: 80 }).trimDurationSec,
-		).toBe(60);
+			playedTrim({ start: 0, element, duration: 30, minDuration: 0 }),
+		).toEqual({ trimStartSec: 2, trimDurationSec: 30 });
 	});
 });

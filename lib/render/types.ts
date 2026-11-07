@@ -36,9 +36,12 @@ export type ResolvedElement = {
 export type Sequence = {
 	element: ResolvedElement;
 	start: number;
+	/** How long it plays, as far as the layout lets it: what the trim handles sit on. */
 	duration: number;
-	/** A scene says how long the overlays under it run; it holds at least that long. */
-	overlaySec?: number;
+	/** Its slot stays open at least this long, holding past what plays: the minimum, and the overlays under a scene. */
+	minDuration: number;
+	/** Where the layout cuts it, as music stops where the next begins. */
+	maxDuration?: number;
 };
 
 export type RenderLayout = {
@@ -59,3 +62,6 @@ export type RenderLayout = {
 export const COMPOSITION_ID = "VideoComposition";
 
 export const DEFAULT_FPS = 24;
+
+/** No scene is ever shorter than this, however little content it holds. */
+export const MIN_DURATION_SEC = 1;

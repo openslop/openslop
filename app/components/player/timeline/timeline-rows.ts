@@ -11,7 +11,7 @@ import {
 	layoutCaptions,
 	type CaptionSequence,
 } from "@/lib/render/caption-rule";
-import { allSequences } from "@/lib/render/sequences";
+import { allSequences, totalDuration } from "@/lib/render/sequences";
 import type { Sequence, RenderLayout } from "@/lib/render/types";
 
 export type TimelineClip = Sequence & { key: string };
@@ -62,16 +62,16 @@ function sequencesForRole(layout: RenderLayout, role: ElementRole): Sequence[] {
  * a scene boundary runs into its neighbour by the cross-fade without ever
  * really playing over it.
  */
-export function packLanes<T extends Pick<Sequence, "start" | "duration">>(
-	clips: T[],
-	toleranceSec = 0,
-): T[][] {
+export function packLanes<
+	T extends Pick<Sequence, "start" | "duration" | "minDuration">,
+>(clips: T[], toleranceSec = 0): T[][] {
 	const lanes: T[][] = [];
 	for (const clip of clips) {
 		const lane = lanes.find((candidate) => {
 			const last = candidate[candidate.length - 1];
 			return (
-				last.start + last.duration - toleranceSec - TOUCH_EPSILON <= clip.start
+				last.start + totalDuration(last) - toleranceSec - TOUCH_EPSILON <=
+				clip.start
 			);
 		});
 		if (lane) lane.push(clip);
@@ -80,21 +80,11 @@ export function packLanes<T extends Pick<Sequence, "start" | "duration">>(
 	return lanes;
 }
 
-/** Effects and music can outrun the last scene; the timeline draws the video, not the layout. */
-function withinVideo(sequences: Sequence[], totalSec: number): Sequence[] {
-	return sequences
-		.filter((sequence) => sequence.start < totalSec)
-		.map((sequence) => ({
-			...sequence,
-			duration: Math.min(sequence.duration, totalSec - sequence.start),
-		}));
-}
-
 /** Roles with nothing to show are dropped. */
 export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
 	return (Object.keys(ROWS) as ElementRole[]).flatMap((role) => {
 		const lanes = packLanes(
-			withinVideo(sequencesForRole(layout, role), layout.totalDurationSec),
+			sequencesForRole(layout, role),
 			layout.transitionDurationSec,
 		);
 		return lanes.map((lane, index) => ({

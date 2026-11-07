@@ -121,14 +121,14 @@ function Clip({
 	selected,
 	onSelect,
 }: ClipProps<TimelineClipData> & { numbered: boolean; snap: TrimSnap }) {
-	const { trim, trimming, extensionSec, handleProps, reset } = useClipTrim(
+	const { trim, trimming, holdSec, handleProps, reset } = useClipTrim(
 		clip,
 		pxPerSec,
 		snap,
 	);
 	const width = Math.max(trim.trimDurationSec * pxPerSec, MIN_CLIP_WIDTH_PX);
-	const extensionWidth = extensionSec * pxPerSec;
-	const extensionStart = clip.start + trim.trimDurationSec;
+	const holdWidth = holdSec * pxPerSec;
+	const holdStart = clip.start + trim.trimDurationSec;
 	return (
 		<>
 			<ClipSlot
@@ -173,8 +173,8 @@ function Clip({
 					<ClipOutline element={clip.element} selected={selected} />
 				</ClipSlot>
 			) : null}
-			{extensionWidth >= MIN_CLIP_WIDTH_PX ? (
-				<ClipSlot start={extensionStart * pxPerSec} width={extensionWidth}>
+			{holdWidth >= MIN_CLIP_WIDTH_PX ? (
+				<ClipSlot start={holdStart * pxPerSec} width={holdWidth}>
 					{/* The clip before it already selects the scene from the keyboard. */}
 					<SelectButton
 						selected={selected}
@@ -183,10 +183,10 @@ function Clip({
 					>
 						<TimelineExtension
 							element={clip.element}
-							start={extensionStart}
-							duration={extensionSec}
+							start={holdStart}
+							duration={holdSec}
 							clipWidth={width}
-							width={extensionWidth}
+							width={holdWidth}
 							selected={selected}
 						/>
 					</SelectButton>

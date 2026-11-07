@@ -97,9 +97,9 @@ describe("layoutCaptions", () => {
 	});
 
 	it("lays out a music track's captions", () => {
-		expect(spans(layoutOf([el("song", "music", heard)]))).toEqual([
-			{ id: "song", start: 0, duration: 1 },
-		]);
+		expect(
+			spans(layoutOf([el("song", "music", heard), el("img", "image")])),
+		).toEqual([{ id: "song", start: 0, duration: 1 }]);
 	});
 });
 

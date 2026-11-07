@@ -43,6 +43,7 @@ describe("packLanes", () => {
 		element: el("sfx", "sound"),
 		start,
 		duration,
+		minDuration: 0,
 	});
 
 	it("keeps clips that never overlap in one lane", () => {

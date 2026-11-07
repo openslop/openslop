@@ -28,7 +28,7 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 const markup = (el: ResolvedElement, duration: number, trim: Trim = el) =>
 	renderToStaticMarkup(
 		<TimelineClip
-			clip={{ key: "clip", element: el, start: 0, duration }}
+			clip={{ key: "clip", element: el, start: 0, duration, minDuration: 0 }}
 			width={duration * PX_PER_SEC}
 			label="slow pan"
 			selected={false}

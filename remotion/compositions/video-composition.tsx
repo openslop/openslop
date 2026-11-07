@@ -13,11 +13,12 @@ import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import type { RenderLayout, ResolvedElement } from "@/lib/render/types";
 import { layoutCaptions } from "@/lib/render/caption-rule";
 import { toFrames } from "@/lib/render/frames";
+import { totalDuration } from "@/lib/render/sequences";
 import {
 	LAYER_PREMOUNT_SEC,
 	FOREGROUND_PREMOUNT_SEC,
 } from "@/lib/render/transitions";
-import { audioEnvelopeFrames, audioFadeSec } from "@/lib/render/audio-fade";
+import { audioFadeSec } from "@/lib/render/audio-fade";
 import { getPresentation } from "@/lib/render/transition-presentations";
 import { audioVolume } from "@/lib/render/audio-volume";
 import { volumeToGain } from "@/lib/canvas/element-attributes";
@@ -42,10 +43,9 @@ function AudioSequence({ element }: { element: ResolvedElement }) {
 	const { durationInFrames, fps } = useVideoConfig();
 	const gain = volumeToGain(element.volume);
 	const fadeFrames = toFrames(audioFadeSec(element), fps);
-	const envelopeFrames = audioEnvelopeFrames(element, durationInFrames, fps);
 	const volume = useMemo(
-		() => audioVolume(gain, envelopeFrames, fadeFrames),
-		[gain, envelopeFrames, fadeFrames],
+		() => audioVolume(gain, durationInFrames, fadeFrames),
+		[gain, durationInFrames, fadeFrames],
 	);
 	return (
 		<Audio
@@ -125,7 +125,7 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	);
 	const transitionSeriesNodes = useMemo(
 		() =>
-			series.map(({ element, duration }, index) => (
+			series.map(({ element, ...slot }, index) => (
 				<Fragment key={element.id}>
 					{index > 0 && transitionFrames > 0 && (
 						<TransitionSeries.Transition
@@ -134,7 +134,7 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 						/>
 					)}
 					<TransitionSeries.Sequence
-						durationInFrames={toFrames(duration, fps)}
+						durationInFrames={toFrames(totalDuration(slot), fps)}
 						premountFor={toFrames(FOREGROUND_PREMOUNT_SEC, fps)}
 					>
 						<SequenceContent element={element} />
@@ -146,11 +146,11 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	const layeredSequenceNodes = useMemo(
 		() =>
 			Object.entries(sequences).flatMap(([type, sequencesOfType]) =>
-				(sequencesOfType ?? []).map(({ element, start, duration }, index) => (
+				(sequencesOfType ?? []).map(({ element, start, ...slot }, index) => (
 					<Sequence
 						key={`${type}-${element.id}-${index}`}
 						from={toFrames(start, fps)}
-						durationInFrames={toFrames(duration, fps)}
+						durationInFrames={toFrames(totalDuration(slot), fps)}
 						premountFor={toFrames(LAYER_PREMOUNT_SEC, fps)}
 					>
 						<SequenceContent element={element} />
