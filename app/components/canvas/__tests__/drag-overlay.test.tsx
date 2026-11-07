@@ -24,10 +24,10 @@ const image = (...cast: string[]): ContentElement => ({
 	id: "i",
 	type: "image",
 	children: [
-		{ id: "i-t", type: "image", text: "" },
+		{ id: "i-t", text: "" },
 		...cast.flatMap((name) => [
 			createCharacterRef(name),
-			{ id: `${name}-t`, type: "image" as const, text: "" },
+			{ id: `${name}-t`, text: "" },
 		]),
 	],
 });

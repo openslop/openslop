@@ -60,7 +60,7 @@ const node = (
 	id,
 	type,
 	generationAttributes,
-	children: [{ id: `${id}-t`, type, text }],
+	children: [{ id: `${id}-t`, text }],
 });
 
 describe("durationFits over a measured canvas", () => {

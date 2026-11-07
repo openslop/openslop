@@ -39,8 +39,6 @@ describe("HTTP gateways", () => {
 	});
 
 	describe("HttpAssetGateway", () => {
-		// The model's provider is the whole choice of route family: same protocol,
-		// and the prefix says whose key pays for the generation.
 		it.each([
 			[HOSTED_IMAGE, "/api/v1"],
 			[BYOK_IMAGE, "/api/third-party"],
@@ -172,8 +170,6 @@ describe("HTTP gateways", () => {
 			expect(url.searchParams.get("model")).toBe("Sonic 3.6");
 		});
 
-		// A voice search names its model like a generation does, so the route
-		// knows whose key to read.
 		it("names its model when the key is the user's own", async () => {
 			fetchMock.mockResolvedValue(jsonResponse({ voices: [] }));
 
@@ -261,17 +257,14 @@ describe("HTTP gateways", () => {
 			fetchMock.mockResolvedValue(sseResponse(chunks));
 
 			const gateway = new HttpLLMGateway(config(BYOK_LLM));
-			const results: unknown[] = [];
-			for await (const chunk of gateway.stream({ prompt: "hi" })) {
-				results.push(chunk);
-			}
 
-			expect(results).toEqual(chunks);
+			expect(await Array.fromAsync(gateway.stream({ prompt: "hi" }))).toEqual(
+				chunks,
+			);
 			expect(fetchMock.mock.calls[0][0]).toBe(`/api/third-party/llm`);
-			const body = JSON.parse(
-				fetchMock.mock.calls[0][1].body as string,
-			) as Record<string, unknown>;
-			expect(body.stream).toBe(true);
+			expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+				stream: true,
+			});
 		});
 
 		it("throws on a stream chunk of the wrong shape", async () => {
@@ -284,16 +277,12 @@ describe("HTTP gateways", () => {
 		});
 
 		it("throws when a stream response has no body", async () => {
-			fetchMock.mockResolvedValue(
-				new Response(null, { status: 200, headers: {} }),
-			);
+			fetchMock.mockResolvedValue(new Response(null));
 
 			const gateway = new HttpLLMGateway(config(HOSTED_LLM));
-			await expect(async () => {
-				for await (const _ of gateway.stream({ prompt: "hi" })) {
-					// consume
-				}
-			}).rejects.toThrow("No response body");
+			await expect(
+				Array.fromAsync(gateway.stream({ prompt: "hi" })),
+			).rejects.toThrow("No response body");
 		});
 	});
 });

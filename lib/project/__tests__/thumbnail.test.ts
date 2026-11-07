@@ -9,7 +9,7 @@ const element = (
 ): ContentElement => ({
 	id,
 	type,
-	children: [{ id: `${id}-t`, type, text: "" }],
+	children: [{ id: `${id}-t`, text: "" }],
 });
 
 const SCRIPT = [element("1", "narration"), element("2", "video"), element("3")];

@@ -57,7 +57,7 @@ const render = () =>
 const element = (id: string, text: string): ContentElement => ({
 	id,
 	type: "image",
-	children: [{ id: `${id}-t`, type: "image", text }],
+	children: [{ id: `${id}-t`, text }],
 });
 
 const edit = (...elements: ContentElement[]) => {

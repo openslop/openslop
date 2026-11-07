@@ -20,8 +20,8 @@ const narration = (id: string, body = ""): ContentElement => ({
 	id,
 	type: "narration",
 	children: [
-		{ id: `${id}-marker`, type: "narration", text: ZERO_WIDTH_SPACE },
-		{ id: `${id}-body`, type: "narration", text: body },
+		{ id: `${id}-marker`, text: ZERO_WIDTH_SPACE },
+		{ id: `${id}-body`, text: body },
 	],
 });
 

@@ -9,7 +9,7 @@ function makeEditor() {
 		{
 			id: "root",
 			type: "narration",
-			children: [{ id: "t0", type: "narration", text: "Hello" }],
+			children: [{ id: "t0", text: "Hello" }],
 		},
 	];
 	return editor;
@@ -21,7 +21,7 @@ describe("withNodeId", () => {
 			const editor = makeEditor();
 			const node = {
 				type: "image" as const,
-				children: [{ type: "image" as const, text: "test" }],
+				children: [{ text: "test" }],
 			} as Element;
 
 			Transforms.insertNodes(editor, node, { at: [1] });
@@ -36,7 +36,7 @@ describe("withNodeId", () => {
 			const node = {
 				id: "keep-me",
 				type: "character" as const,
-				children: [{ id: "ct", type: "character" as const, text: "line" }],
+				children: [{ id: "ct", text: "line" }],
 			} as Element;
 
 			Transforms.insertNodes(editor, node, { at: [1] });
@@ -72,9 +72,7 @@ describe("withNodeId", () => {
 				{
 					id: originalId,
 					type: "music" as const,
-					children: [
-						{ id: "orig-child", type: "music" as const, text: "pasted" },
-					],
+					children: [{ id: "orig-child", text: "pasted" }],
 				},
 			];
 

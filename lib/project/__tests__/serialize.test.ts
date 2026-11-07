@@ -25,7 +25,7 @@ const makeEl = (
 	id: `${type}-id`,
 	type,
 	...splitAttributes(attrs ?? {}),
-	children: [{ id: `${type}-t`, type, text }],
+	children: [{ id: `${type}-t`, text }],
 });
 
 const scenesOf = (...args: Parameters<typeof deserializeWithScenes>) =>

@@ -28,15 +28,15 @@ function content(
 	type: ContentElement["type"],
 	id: string,
 	text = "",
-	customAttributes?: Record<string, string>,
+	attributes: Record<string, string> = {},
 ): ContentElement {
 	return {
 		id,
 		type,
-		...splitAttributes(customAttributes ?? {}),
+		...splitAttributes(attributes),
 		children: [
-			{ id: `${id}-m`, type, text: ZERO_WIDTH_SPACE },
-			{ id: `${id}-t`, type, text },
+			{ id: `${id}-m`, text: ZERO_WIDTH_SPACE },
+			{ id: `${id}-t`, text },
 		],
 	};
 }
@@ -190,7 +190,7 @@ describe("updateElementText", () => {
 		const stripped: ContentElement = {
 			id: "n1",
 			type: "narration",
-			children: [{ id: "n1-t", type: "narration", text: "hello" }],
+			children: [{ id: "n1-t", text: "hello" }],
 		};
 		const editor = makeEditor([scene([stripped])]);
 		updateElementText(editor, "n1", "hello there");
@@ -308,7 +308,7 @@ describe("mergeAttrs", () => {
 		expect(flatAttributes(node.children[0])).toEqual({ name: "Lyra" });
 	});
 
-	it("handles element with no existing customAttributes", () => {
+	it("handles an element with no attributes yet", () => {
 		const el = content("narration", "n1");
 		const editor = makeEditor([scene([el])]);
 

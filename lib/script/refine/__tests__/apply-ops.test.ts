@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Editor } from "slate";
+import { Editor, Element } from "slate";
 import type {
 	AssetElement,
 	CanvasElement,
@@ -32,8 +32,8 @@ function content(
 		type,
 		...splitAttributes(attributes),
 		children: [
-			{ id: `${id}-m`, type, text: ZERO_WIDTH_SPACE },
-			{ id: `${id}-t`, type, text },
+			{ id: `${id}-m`, text: ZERO_WIDTH_SPACE },
+			{ id: `${id}-t`, text },
 		],
 	};
 }
@@ -458,7 +458,9 @@ describe("applyRefineOp — assets", () => {
 	};
 
 	const topLevelTypes = (editor: Editor) =>
-		editor.children.map((node) => node.type);
+		editor.children
+			.filter((node) => Element.isElement(node))
+			.map((node) => node.type);
 
 	const apply = (editor: Editor, ...ops: RefineOp[]) =>
 		applyRefineOps(editor, ops);
