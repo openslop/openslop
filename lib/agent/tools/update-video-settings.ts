@@ -35,10 +35,10 @@ const range = ({ min, max }: { min: number; max: number }) =>
 
 export const updateVideoSettings = defineTool({
 	description: dedent`
-	  Change how the video looks: its aspect ratio, the transition between scenes, the
-	  captions burned into it and the film effects over the whole frame. Send only what
+	  Change how the video looks: its aspect ratio, the transition between one visual and the
+	  next, the captions burned into it and the film effects over the whole frame. Send only what
 	  changes. It applies to the preview and the export right away. To change how long the
-	  video runs, use update_script_settings.
+	  video runs, edit_script.
 
 	  - aspectRatio: ${ASPECT_RATIOS.join(", ")}
 	  - transitionType: ${TRANSITION_TYPES.join(", ")}

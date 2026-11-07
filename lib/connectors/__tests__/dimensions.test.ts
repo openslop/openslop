@@ -5,7 +5,7 @@ import { projectSettings } from "@/lib/generation/__tests__/_context";
 import { pluginCtx, readsOf } from "./_state-ctx";
 
 const SEEDANCE = { provider: "runware", model: "Seedance 2 Fast" } as const;
-const SLOP_IMAGE = { provider: "openslop", model: "Slop Image v2" } as const;
+const SLOP_IMAGE = { provider: "openslop", model: "Muse Image" } as const;
 const image = createCanvasElement("image", { id: "i1" });
 const portraitSettings = projectSettings({ aspectRatio: "9:16" });
 const portrait = pluginCtx({
@@ -23,7 +23,7 @@ describe("createDimensionsPlugin", () => {
 		[
 			"another image model at its own default",
 			"image",
-			{ provider: "openslop", model: "Slop Image v1" },
+			{ provider: "openslop", model: "Seedream 5 Lite" },
 			{ resolution: "1440p", width: 1440, height: 2560 },
 		],
 		[

@@ -10,7 +10,7 @@ function mockJsonResponse(data: unknown) {
 }
 
 const llmResult = { text: "Hello", model: "test-model" };
-const model = { provider: "openslop", model: "Slop LLM v1" } as const;
+const model = { provider: "openslop", model: "Claude Opus 5" } as const;
 
 describe("BaseLLMConnector", () => {
 	beforeEach(() => {

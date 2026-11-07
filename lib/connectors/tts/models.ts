@@ -9,5 +9,5 @@ export const TTS_MODELS = {
 
 export const DEFAULT_TTS_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Slop TTS v1",
+	model: "Sonic 3.6",
 };

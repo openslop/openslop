@@ -24,7 +24,6 @@ verify. Follow every step. Do not skip the verification screenshots.
 | Posting account | tcbrah (the user's Discord account, already logged in) |
 | GitHub repo | `openslop/openslop`, default branch `master` |
 | Browser tool | `browser-harness` heredoc form, on the user's running Chrome |
-| Hosted video model name | `Slop Video v1 Fast` is Kling 3 Turbo on the hosted key |
 
 ## Step 1. Find or open the Discord tab
 

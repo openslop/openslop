@@ -641,7 +641,7 @@ describe("applyRefineOp — assets", () => {
 		expect(describeAssets(editor)[0]?.[2]).toBe("a girl");
 	});
 
-	it("refuses to rename an asset, and says to remove and insert it instead", () => {
+	it("refuses to rename an asset, and says to remove it and create it again", () => {
 		const voice = asset("asset_voice", {
 			name: "Mia",
 			attrs: { age: "child" },
@@ -655,13 +655,13 @@ describe("applyRefineOp — assets", () => {
 				attrs: { name: "Lumi" },
 			}).failures,
 		).toEqual([
-			`set: an asset's name never changes; remove "${voice.id}" and insert it again`,
+			`set: an asset's name never changes; remove "${voice.id}" and create it again with an asset op`,
 		]);
 		expect(
 			apply(editor, { op: "set", id: voice.id, attrs: { name: null } })
 				.failures,
 		).toEqual([
-			`set: an asset's name never changes; remove "${voice.id}" and insert it again`,
+			`set: an asset's name never changes; remove "${voice.id}" and create it again with an asset op`,
 		]);
 	});
 

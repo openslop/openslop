@@ -5,15 +5,13 @@ import {
 } from "@/lib/api/asset-bundle";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
+import { DEFAULT_DURATION_SEC } from "@/lib/canvas/types";
 import type { VideoGenerateParams } from "@/lib/connectors/types";
 import { ChargedError, type ProviderContract } from "../base";
 
 export type VideoJobStatus = "queued" | "processing" | "completed" | "failed";
 
 export type VideoRequest = VendorParams<VideoGenerateParams>;
-
-/** What a video runs for when the request names no duration, for asking and for reporting. */
-export const DEFAULT_VIDEO_DURATION_SEC = 5;
 
 export type VideoJobMetadata = {
 	jobId: string;
@@ -82,9 +80,7 @@ export abstract class BaseVideoProvider implements VideoProvider {
 		const metadata = {
 			...job.metadata,
 			durationSec:
-				job.metadata.durationSec ??
-				request.duration ??
-				DEFAULT_VIDEO_DURATION_SEC,
+				job.metadata.durationSec ?? request.duration ?? DEFAULT_DURATION_SEC,
 		};
 		const costUsd = job.costUsd ?? 0;
 		try {

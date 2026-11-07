@@ -5,17 +5,6 @@ import { type Pictured, pictured } from "@/lib/connectors/characters";
 import { cutVoice } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";
 
-export const klingTurbo: Conditioner = ({
-	prompt,
-	startFrame,
-	size,
-	resolution,
-}) => ({
-	positivePrompt: renderPrompt(prompt),
-	...inputsOf({ frameImages: compact([startFrame]) }),
-	...(startFrame && resolution ? { resolution } : size),
-});
-
 type OmniLimits = {
 	maxReferences: number;
 	maxElementsWithFrame: number;

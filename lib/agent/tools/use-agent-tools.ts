@@ -7,12 +7,12 @@ import { getAssets } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { isScriptEmpty } from "@/lib/canvas/scenes";
-import { countSpokenWords } from "@/lib/canvas/spoken-words";
-import { isGenerated } from "@/lib/canvas/types";
 import {
-	measureElementLengths,
-	measureRuntime,
-} from "@/lib/render/element-lengths";
+	countSpokenWords,
+	measureDialogueLengths,
+} from "@/lib/canvas/spoken-words";
+import { isGenerated } from "@/lib/canvas/types";
+import { measureRuntime, measureVisualSpans } from "@/lib/render/visual-spans";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
@@ -52,8 +52,13 @@ export function useAgentTools() {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
-				measureElementLengths: () => measureElementLengths(editor.children),
-				measureRuntime: () => measureRuntime(editor.children),
+				measureDialogueLengths: () => measureDialogueLengths(editor.children),
+				measureVisualSpans: () => measureVisualSpans(editor.children),
+				measureRuntime: () =>
+					measureRuntime(
+						editor.children,
+						store.getState().videoSettings.transitionType,
+					),
 				elementResult: async (id) => {
 					const element = findElementById(editor, id)?.[0];
 					return (

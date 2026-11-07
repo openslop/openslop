@@ -9,7 +9,7 @@ const IMAGE_URL = `${BUNDLE_URL}/output.png`;
 
 const config = {
 	projectId: "project-1",
-	model: { provider: "openslop", model: "Slop Image v1" },
+	model: { provider: "openslop", model: "Seedream 5 Lite" },
 } as const;
 
 function mockSuccess() {

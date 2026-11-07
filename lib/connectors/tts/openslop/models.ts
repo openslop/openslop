@@ -1,5 +1,4 @@
+import pick from "lodash/pick";
 import { CARTESIA_TTS_MODELS } from "../cartesia/models";
 
-export const OPENSLOP_TTS_MODELS = {
-	"Slop TTS v1": CARTESIA_TTS_MODELS["Sonic 3.6"],
-} as const;
+export const OPENSLOP_TTS_MODELS = pick(CARTESIA_TTS_MODELS, ["Sonic 3.6"]);

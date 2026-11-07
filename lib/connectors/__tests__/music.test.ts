@@ -8,7 +8,7 @@ const AUDIO_URL = `/assets/music/openslop/${TEST_ID}/output.mp3`;
 
 const config = {
 	projectId: "project-1",
-	model: { provider: "openslop", model: "Slop Music v1" },
+	model: { provider: "openslop", model: "Eleven Music v1" },
 } as const;
 
 function mockSuccess() {

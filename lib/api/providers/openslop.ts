@@ -47,24 +47,29 @@ const OPENSLOP_PROVIDERS: {
 	music: Sources<"music", typeof OPENSLOP_MUSIC_MODELS>;
 	stt: Sources<"stt", typeof OPENSLOP_STT_MODELS>;
 } = {
-	llm: { "Slop LLM v1": hosted("ANTHROPIC_API_KEY", AnthropicLLM, MockLLM) },
-	tts: { "Slop TTS v1": hosted("CARTESIA_API_KEY", CartesiaTTS, MockTTS) },
+	llm: { "Claude Opus 5": hosted("ANTHROPIC_API_KEY", AnthropicLLM, MockLLM) },
+	tts: { "Sonic 3.6": hosted("CARTESIA_API_KEY", CartesiaTTS, MockTTS) },
 	image: {
-		"Slop Image v2": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
-		"Slop Image v1": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
+		"Muse Image": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
+		"Seedream 5 Lite": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 		"Grok Imagine 2.0": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 	},
 	video: {
-		"Slop Video v2": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
-		"Slop Video v1": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
-		"Slop Video v1 Fast": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
+		"Kling 3 Omni": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
+		"Seedance 2 Fast": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 	},
-	sfx: { "Slop SFX v1": hosted("ELEVENLABS_API_KEY", ElevenLabsSFX, MockSFX) },
+	sfx: {
+		"Eleven Text to Sound v2": hosted(
+			"ELEVENLABS_API_KEY",
+			ElevenLabsSFX,
+			MockSFX,
+		),
+	},
 	music: {
-		"Slop Music v1": hosted("ELEVENLABS_API_KEY", ElevenLabsMusic, MockMusic),
+		"Eleven Music v1": hosted("ELEVENLABS_API_KEY", ElevenLabsMusic, MockMusic),
 	},
 	stt: {
-		"Slop STT v1": hosted("ELEVENLABS_API_KEY", ElevenLabsSTT, MockSTT),
+		"Scribe v2": hosted("ELEVENLABS_API_KEY", ElevenLabsSTT, MockSTT),
 	},
 };
 

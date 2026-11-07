@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { LinkedOff, LinkedOn } from "@/components/ui/icon";
 import { TOGGLE_OFF } from "@/lib/canvas/types";
+import { conjunction } from "@/lib/format";
 import { toggleValue } from "../attributes/common";
 import type { AttributeDef } from "../attributes/schema";
 
@@ -55,6 +56,9 @@ export const FRAMES = {
 export type FrameKey = keyof typeof FRAMES;
 
 export const FRAME_KEYS = Object.keys(FRAMES) as FrameKey[];
+
+export const frameNames = (keys: readonly FrameKey[]): string =>
+	conjunction(keys.map((key) => FRAMES[key].name.toLowerCase()));
 
 export const START_FRAME: FrameKey = "last";
 

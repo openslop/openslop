@@ -1,6 +1,7 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
+import { FRAME_KEYS, frameNames } from "@/lib/connectors/video/start-frame";
 import { ResultViewSchema, type ResultView } from "../element-result";
 import { defineTool, imageOutput, seconds } from "./define-tool";
 
@@ -27,7 +28,7 @@ export const viewResult = defineTool({
 	description: dedent`
 	  Look at what an element holds, generated or uploaded, so you can say whether a result
 	  matches what its text asks for. Pictures come back as the images themselves. A video
-	  comes back as frames from its beginning, middle and end, each with its time, and its
+	  comes back as frames from its ${frameNames(FRAME_KEYS)}, each with its time, and its
 	  length. A voice line, sound or music comes back as its length, with every word and when
 	  it is said where there are words. Take the id from read_script.
 	`,

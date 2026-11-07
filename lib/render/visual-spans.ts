@@ -1,33 +1,29 @@
+import sumBy from "lodash/sumBy";
 import type { Descendant } from "slate";
-import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { isSpeech } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
-import { countWords } from "@/lib/canvas/spoken-words";
+import { spokenWords } from "@/lib/canvas/spoken-words";
 import {
 	CONTENT_TYPES,
 	type ContentElement,
 	type ContentType,
 } from "@/lib/canvas/types";
 import { getDuration } from "../canvas/element-attributes";
-import { elementTrim, isTrimmed } from "./clip-trim";
+import { elementTrim } from "./clip-trim";
+import { transitionOverlapSec, type TransitionType } from "./transitions";
 import { MIN_DURATION_SEC } from "./types";
 import { secondsForWords } from "../project/video-length";
 
-/** How long one visual holds the screen, and what decides it. */
-export type ElementLength = {
+/** One visual and the dialogue after it, up to the next visual. */
+export type VisualSpan = {
 	id: string;
 	type: ContentType;
 	sceneNumber: number;
 	seconds: number;
-	/** The spoken words that follow it, up to the next visual. */
 	words: number;
 	dialogueIds: string[];
 	/** The length it is generated at, where its type has one at all. */
 	durationSec?: number;
-	/** The length it brings of its own, where it is a video. */
-	own?: OwnLength;
-	/** Which of its own duration, its trim, its dialogue or the minimum set `seconds`. */
-	decidedBy: "duration" | "trim" | "dialogue" | "minimum";
 };
 
 type Span = {
@@ -37,49 +33,25 @@ type Span = {
 	dialogueIds: string[];
 };
 
-export type OwnLength = {
-	seconds: number;
-	decidedBy: "duration" | "trim";
-};
-
 /** A video plays for its trim where the user set one, else its duration; a still has no length of its own. */
 const ownLength = (
 	element: ContentElement,
-): Pick<ElementLength, "durationSec" | "own"> => {
-	if (CONTENT_TYPES[element.type].outputKind !== "video") return {};
+): Pick<VisualSpan, "durationSec"> & { ownSec: number } => {
+	if (CONTENT_TYPES[element.type].outputKind !== "video") return { ownSec: 0 };
 	const durationSec = getDuration(element);
-	const trim = elementTrim(element, durationSec);
-	const trimmed = isTrimmed({ ...trim, mediaDurationSec: durationSec });
 	return {
 		durationSec,
-		own: {
-			seconds: trim.trimDurationSec,
-			decidedBy: trimmed ? "trim" : "duration",
-		},
+		ownSec: elementTrim(element, durationSec).trimDurationSec,
 	};
 };
 
-export const hasDialogue = ({ words }: Pick<ElementLength, "words">) =>
-	words > 0;
-
-const decide = (
-	own: OwnLength | undefined,
-	dialogueSec: number,
-): Pick<ElementLength, "seconds" | "decidedBy"> => {
-	if (own && own.seconds >= dialogueSec && own.seconds >= MIN_DURATION_SEC)
-		return own;
-	if (dialogueSec >= MIN_DURATION_SEC)
-		return { seconds: dialogueSec, decidedBy: "dialogue" };
-	return { seconds: MIN_DURATION_SEC, decidedBy: "minimum" };
-};
-
-const toLength = ({
+const toSpan = ({
 	element,
 	sceneNumber,
 	words,
 	dialogueIds,
-}: Span): ElementLength => {
-	const { durationSec, own } = ownLength(element);
+}: Span): VisualSpan => {
+	const { durationSec, ownSec } = ownLength(element);
 	return {
 		id: element.id,
 		type: element.type,
@@ -87,8 +59,7 @@ const toLength = ({
 		words,
 		dialogueIds,
 		durationSec,
-		own,
-		...decide(own, secondsForWords(words)),
+		seconds: Math.max(ownSec, secondsForWords(words), MIN_DURATION_SEC),
 	};
 };
 
@@ -109,7 +80,7 @@ const walk = (descendants: Descendant[]): Walk => {
 				continue;
 			}
 			if (!isSpeech(element)) continue;
-			const words = countWords(getElementBodyText(element));
+			const words = spokenWords(element);
 			const open = spans.at(-1);
 			if (!open) {
 				leadingWords += words;
@@ -128,17 +99,21 @@ const walk = (descendants: Descendant[]): Walk => {
  * alone: the same rule `buildRenderLayout` lays out with, read off the unrendered
  * script. Dialogue before the first visual belongs to no visual and is left out.
  */
-export const measureElementLengths = (
-	descendants: Descendant[],
-): ElementLength[] => walk(descendants).spans.map(toLength);
+export const measureVisualSpans = (descendants: Descendant[]): VisualSpan[] =>
+	walk(descendants).spans.map(toSpan);
 
-/** The whole video's length, dialogue before the first visual included: it plays over a blank scene. */
-export const measureRuntime = (descendants: Descendant[]): number => {
+/** The whole video's length: dialogue before the first visual plays over a blank scene, and scenes overlap by the transition. */
+export const measureRuntime = (
+	descendants: Descendant[],
+	transitionType: TransitionType,
+): number => {
 	const { spans, leadingWords } = walk(descendants);
-	return spans
-		.map(toLength)
-		.reduce(
-			(total, { seconds }) => total + seconds,
-			secondsForWords(leadingWords),
-		);
+	const scenes = spans.length + (leadingWords > 0 ? 1 : 0);
+	const overlapSec =
+		Math.max(0, scenes - 1) * transitionOverlapSec(transitionType);
+	return (
+		sumBy(spans, (span) => toSpan(span).seconds) +
+		secondsForWords(leadingWords) -
+		overlapSec
+	);
 };

@@ -94,15 +94,16 @@ describe("osmlSpec", () => {
 	});
 
 	it("mixes videos that start fresh with videos that continue the one before", () => {
-		expect(spec).toContain('startFrame="none" starts each video fresh');
+		expect(spec).toContain('startFrame="none" starts a video fresh');
 		expect(spec).toContain("Use both appropriately");
 	});
 
 	it("makes a fresh look the default and carries the previous visual only when requested", () => {
-		expect(spec).toContain('continuity="false" (the default)');
+		expect(spec).toContain('continuity="false" gives each video a fresh look');
 		expect(spec).toContain(
-			'continuity="true" to show the beginning and middle frames of the visual before it',
+			'continuity="true" shows it the visual before it (an image, or the beginning and middle frames of a video)',
 		);
+		expect(spec).toContain('The default is "false"');
 	});
 
 	it("opens a continued video where the one before it ends", () => {

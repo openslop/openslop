@@ -18,6 +18,12 @@ export function truncateMiddle(text: string, maxLength: number): string {
 	].join("…");
 }
 
+const conjunctionList = new Intl.ListFormat("en", { type: "conjunction" });
+
+/** "a, b, and c". */
+export const conjunction = (items: readonly string[]): string =>
+	conjunctionList.format(items);
+
 export function plural(count: number, noun: string): string {
 	return count === 1 ? noun : `${noun}s`;
 }

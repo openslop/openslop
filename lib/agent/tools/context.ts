@@ -1,7 +1,8 @@
 import type { AssetElement } from "@/lib/canvas/types";
 import type { ElementResult } from "../element-result";
 import type { ElementState } from "../element-state";
-import type { ElementLength } from "@/lib/render/element-lengths";
+import type { DialogueLength } from "@/lib/canvas/spoken-words";
+import type { VisualSpan } from "@/lib/render/visual-spans";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
 import type { Provider } from "@/lib/connectors/types";
@@ -21,7 +22,8 @@ export type AgentToolContext = Pick<
 	readScript: () => string;
 	isScriptEmpty: () => boolean;
 	countSpokenWords: () => number;
-	measureElementLengths: () => ElementLength[];
+	measureDialogueLengths: () => DialogueLength[];
+	measureVisualSpans: () => VisualSpan[];
 	measureRuntime: () => number;
 	elementResult: (id: string) => Promise<ElementResult | undefined>;
 	elementStates: () => ElementState[];

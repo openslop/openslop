@@ -51,7 +51,7 @@ describe("resolveElementConnector", () => {
 
 	it("falls back when the pinned provider no longer serves the model", () => {
 		const connector = resolveElementConnector(
-			el("image", { provider: "retired-vendor", model: "Slop Image v1" }),
+			el("image", { provider: "retired-vendor", model: "Seedream 5 Lite" }),
 			registry,
 			[],
 		);

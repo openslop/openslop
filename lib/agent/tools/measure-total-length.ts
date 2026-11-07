@@ -12,7 +12,7 @@ export const measureTotalLength = defineTool({
 	  and dialogue only; prompts and attributes are silent), against the project's target
 	  length. Runtime adds up every visual's time on screen, so a video counts its own
 	  length even with nothing spoken over it, a script with no speech at
-	  all still has a runtime, and speech before the first visual plays over a blank screen. For the breakdown per visual, use measure_element_lengths.
+	  all still has a runtime, and speech before the first visual plays over a blank screen. For each line of dialogue, use measure_dialogue_lengths.
 
 	  You cannot judge length by looking at a script, so run this after writing or editing
 	  whenever length matters, and edit until the runtime lands in the target range.

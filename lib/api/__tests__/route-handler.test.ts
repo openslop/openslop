@@ -35,7 +35,7 @@ beforeEach(() => {
 	});
 });
 
-const VALID_BODY = { prompt: "hello", model: "Slop Image v1" };
+const VALID_BODY = { prompt: "hello", model: "Seedream 5 Lite" };
 
 function makeRequest(body: unknown) {
 	return new NextRequest("http://localhost/api/test", {
@@ -134,7 +134,7 @@ describe("createHostedRouteHandler", () => {
 		expect(res.status).toBe(400);
 		const json = await res.json();
 		expect(json.error).toContain("Invalid model");
-		expect(json.error).toContain("Slop Image v1");
+		expect(json.error).toContain("Seedream 5 Lite");
 	});
 
 	// The name is what says which provider serves the model, so it survives the
@@ -142,7 +142,7 @@ describe("createHostedRouteHandler", () => {
 	it("passes the model through by name, with the provider it runs on", async () => {
 		const handle = vi.fn(async () => NextResponse.json({ done: true }));
 		const handler = makeHandler(handle);
-		await handler(makeRequest({ prompt: "hello", model: "Slop Image v1" }));
+		await handler(makeRequest({ prompt: "hello", model: "Seedream 5 Lite" }));
 
 		expect(handle).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -150,7 +150,7 @@ describe("createHostedRouteHandler", () => {
 				input: expect.objectContaining({
 					prompt: "hello",
 					provider: "openslop",
-					model: "Slop Image v1",
+					model: "Seedream 5 Lite",
 				}),
 			}),
 		);

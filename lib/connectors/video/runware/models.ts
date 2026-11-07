@@ -18,14 +18,6 @@ export const RUNWARE_VIDEO_MODELS = {
 		resolutions: ["720p", "1080p"],
 		description: ANIMATION,
 	},
-	"Kling 3 Turbo": {
-		id: "klingai:kling-video@3.0-turbo",
-		cost: "high",
-		speed: "high",
-		resolutions: ["720p", "1080p"],
-		description:
-			"Best for drafts and rapid iteration, before a slower final pass.",
-	},
 	"Kling 3 Omni": {
 		id: "klingai:kling-video@o3-standard",
 		cost: "high",

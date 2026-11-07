@@ -226,10 +226,10 @@ describe("buildNode", () => {
 			LAYOUT_ATTRIBUTE_KEYS.map((key) => [key, "1"]),
 		);
 		const node = resolve(
-			element("vid-1", "video", { ...layoutOnly, model: "Slop Video v1" }),
+			element("vid-1", "video", { ...layoutOnly, model: "Seedance 2 Fast" }),
 		);
 
-		expect(node.inputs.attributes).toEqual({ model: "Slop Video v1" });
+		expect(node.inputs.attributes).toEqual({ model: "Seedance 2 Fast" });
 	});
 
 	it("leaves a node that reads nothing alone when the project state changes", () => {

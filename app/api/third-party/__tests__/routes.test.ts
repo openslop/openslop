@@ -75,7 +75,7 @@ describe("POST /api/third-party/image", () => {
 		const res = await post({
 			prompt: "cat",
 			provider: "openslop",
-			model: "Slop Image v1",
+			model: "Seedream 5 Lite",
 		});
 
 		expect(res.status).toBe(400);

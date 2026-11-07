@@ -8,12 +8,12 @@ import {
 	fallsShort,
 	type DurationFit,
 } from "@/lib/render/duration-fit";
-import type { ElementLength } from "@/lib/render/element-lengths";
+import type { VisualSpan } from "@/lib/render/visual-spans";
 import { Hourglass } from "@/components/ui/icon";
 import { plural } from "@/lib/format";
 import { defineTool, seconds } from "./define-tool";
 
-const where = ({ sceneNumber, type, id }: ElementLength) =>
+const where = ({ sceneNumber, type, id }: VisualSpan) =>
 	`${sceneLabel(sceneNumber)} ${type} ${id}`;
 
 const changeLine = ({ length, duration, needed }: DurationFit) =>
@@ -35,7 +35,7 @@ const toSetOp = ({ length, duration }: DurationFit) => ({
 });
 
 /** The visuals asked for, and the ids that named none of them. */
-const scopeTo = (lengths: ElementLength[], ids?: string[]) => {
+const scopeTo = (lengths: VisualSpan[], ids?: string[]) => {
 	if (!ids) return { scoped: lengths, unknown: [] };
 	const wanted = new Set(ids);
 	const scoped = lengths.filter((length) => wanted.has(length.id));
@@ -77,10 +77,7 @@ export const fitDurations = defineTool({
 	icon: Hourglass,
 	label: "Fitting video elements to the dialogue",
 	execute: async ({ element_ids }, ctx) => {
-		const { scoped, unknown } = scopeTo(
-			ctx.measureElementLengths(),
-			element_ids,
-		);
+		const { scoped, unknown } = scopeTo(ctx.measureVisualSpans(), element_ids);
 		const fits = durationFits(scoped);
 		const changes = fits.filter(isUnfitted);
 		const short = fits.filter(fallsShort);

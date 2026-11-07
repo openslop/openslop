@@ -75,14 +75,14 @@ describe("setAsset", () => {
 			text: "Brown hair",
 		});
 		setAsset(editor, "asset_avatar", "Mia", {
-			attrs: { model: "Slop Image v1" },
+			attrs: { model: "Seedream 5 Lite" },
 			text: "Red hair",
 		});
 
 		expect(getAssets(editor.children)).toHaveLength(1);
 		const avatar = findAsset(editor.children, "asset_avatar", "Mia");
 		expect(avatar).toMatchObject({
-			generationAttributes: { name: "Mia", model: "Slop Image v1" },
+			generationAttributes: { name: "Mia", model: "Seedream 5 Lite" },
 		});
 		expect(avatar && getPromptText(avatar)).toBe("Red hair");
 	});
@@ -129,7 +129,7 @@ describe("setAsset", () => {
 			[
 				asset("asset_avatar", {
 					name: "Bob",
-					attrs: { provider: "openslop", model: "Slop Image v1" },
+					attrs: { provider: "openslop", model: "Seedream 5 Lite" },
 				}),
 			],
 			{ image: PINNED, voice: CARTESIA },
@@ -146,7 +146,7 @@ describe("setAsset", () => {
 		expect(attrs("asset_voice", "Mia")).toEqual({ name: "Mia", ...CARTESIA });
 		expect(attrs("asset_avatar", "Bob")).toMatchObject({
 			provider: "openslop",
-			model: "Slop Image v1",
+			model: "Seedream 5 Lite",
 		});
 		expect(attrs("asset_style")).toEqual({});
 	});

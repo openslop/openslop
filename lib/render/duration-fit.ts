@@ -1,11 +1,11 @@
 import { DURATION_MAX, snapDurationUp } from "@/lib/canvas/types";
-import type { ElementLength } from "./element-lengths";
+import type { VisualSpan } from "./visual-spans";
 import { secondsForWords } from "../project/video-length";
 
 /** Breathing room on top of the dialogue a visual has to cover. */
 export const DURATION_FIT_LEEWAY_SEC = 1;
 
-export type GeneratedLength = ElementLength & { durationSec: number };
+export type GeneratedLength = VisualSpan & { durationSec: number };
 
 /** The length a video should be generated at, against the length it is set to. */
 export type DurationFit = {
@@ -15,7 +15,7 @@ export type DurationFit = {
 	needed: number;
 };
 
-const isFittable = (length: ElementLength): length is GeneratedLength =>
+const isFittable = (length: VisualSpan): length is GeneratedLength =>
 	length.durationSec !== undefined && length.words > 0;
 
 const fit = (length: GeneratedLength): DurationFit => {
@@ -28,8 +28,8 @@ export const fallsShort = ({ needed }: DurationFit): boolean =>
 
 /**
  * What each generated video's `duration` should be to cover the dialogue under it,
- * as `measureElementLengths` attributes it: every line between this visual and the
+ * as `measureVisualSpans` attributes it: every line between this visual and the
  * next, scene boundaries included.
  */
-export const durationFits = (lengths: ElementLength[]): DurationFit[] =>
+export const durationFits = (lengths: VisualSpan[]): DurationFit[] =>
 	lengths.filter(isFittable).map(fit);

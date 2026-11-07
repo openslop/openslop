@@ -3,7 +3,7 @@ import type { IconComponent } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import { adaptScript } from "./adapt-script";
-import { measureElementLengths } from "./measure-element-lengths";
+import { measureDialogueLengths } from "./measure-dialogue-lengths";
 import { measureTotalLength } from "./measure-total-length";
 import { editScript } from "./edit-script";
 import { fitDurations } from "./fit-durations";
@@ -30,7 +30,7 @@ const TOOLS = {
 	view_result: viewResult,
 	outline_story: outlineStory,
 	measure_total_length: measureTotalLength,
-	measure_element_lengths: measureElementLengths,
+	measure_dialogue_lengths: measureDialogueLengths,
 	fit_durations: fitDurations,
 	set_title: setTitle,
 	list_models: listModels,

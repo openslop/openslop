@@ -80,8 +80,8 @@ const isStill = ({ element }: Sequence) =>
  *
  *  1. Foreground → starts a new scene.
  *  2. Overlay    → extends the current scene's duration; opens a blank scene if none exists.
- *  3. Background → updates the active background layer for that element type. Exclusive (one at a time per type).
- *  4. Effect     → same as background but additive (can overlap).
+ *  3. Background → starts with the next scene and cuts the one before it of the same type there. Exclusive (one at a time per type).
+ *  4. Effect     → starts where the speech before it ends, and overlaps freely.
  *
  * A scene is a consecutive, blocking sequence containing an element within a series.
  */
@@ -115,7 +115,9 @@ export function buildRenderLayout(
 		};
 		const stride = onGrid(loopStrideSec(element));
 		let current = series.at(-1);
-		const foregroundCursor = getForegroundCursor(current, cursor);
+		const nextSceneStart =
+			getForegroundCursor(current, cursor) -
+			(current ? transitionDurationSec : 0);
 
 		switch (element.role) {
 			case "effect": {
@@ -123,18 +125,12 @@ export function buildRenderLayout(
 				break;
 			}
 			case "background": {
-				cutAt(sequences[element.type], foregroundCursor);
-				pushSequence(sequences, element, foregroundCursor, stride);
+				cutAt(sequences[element.type], nextSceneStart);
+				pushSequence(sequences, element, nextSceneStart, stride);
 				break;
 			}
 			case "foreground": {
-				cursor = foregroundCursor;
-				if (series.length > 0) {
-					// TransitionSeries.Sequence overlap the previous
-					// ones by transitionDurationSec. Bake that into the cursor so every
-					// subsequent overlay/background/effect lands on the rendered timeline.
-					cursor -= transitionDurationSec;
-				}
+				cursor = nextSceneStart;
 				series.push(sequenceAt(element, cursor, MIN_DURATION_SEC));
 				overlaySec = 0;
 				break;

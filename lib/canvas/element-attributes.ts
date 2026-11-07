@@ -1,7 +1,7 @@
 import omit from "lodash/omit";
 import pick from "lodash/pick";
 import {
-	DEFAULT_DURATION,
+	DEFAULT_DURATION_SEC,
 	DEFAULT_LOOPS,
 	DURATION_MAX,
 	DURATION_MIN,
@@ -85,7 +85,7 @@ export function getVolumeGain(element: SplitAttributes): number {
 export function getDuration(element: ContentElement): number {
 	return (
 		clampedNumber(element.generationAttributes?.duration, DURATION) ??
-		Number(DEFAULT_DURATION)
+		DEFAULT_DURATION_SEC
 	);
 }
 

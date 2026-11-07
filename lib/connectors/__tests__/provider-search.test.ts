@@ -23,18 +23,19 @@ describe("searchProviders", () => {
 	});
 
 	it("matches a provider by name, case and spacing aside", () => {
-		expect(names("  ELEVEN ")).toEqual(["elevenlabs"]);
-		expect(names("eleven")).toEqual(["elevenlabs"]);
+		expect(names("  RUNWARE ")).toEqual(["runware"]);
+		expect(names("runware")).toEqual(["runware"]);
 	});
 
-	// Knowing the model you want should be enough to find who serves it.
+	// Knowing the model you want should be enough to find who serves it, hosted or not.
 	it("matches a provider by a model it serves", () => {
-		expect(names("claude opus")).toEqual(["anthropic"]);
-		expect(names("seedream")).toEqual(["runware"]);
+		expect(names("claude sonnet")).toEqual(["anthropic"]);
+		expect(names("claude opus")).toEqual(["openslop", "anthropic"]);
 	});
 
 	it("says which models matched, so a row can explain itself", () => {
 		expect(searchProviders("claude", all)).toEqual([
+			{ provider: "openslop", models: ["Claude Opus 5"] },
 			{
 				provider: "anthropic",
 				models: ["Claude Opus 5", "Claude Sonnet 5", "Claude Haiku 4.5"],
@@ -61,9 +62,7 @@ describe("searchProviders", () => {
 	// Under a capability tab only that tab's models can match or be the reason.
 	it("ignores a model match outside the browsed capability", () => {
 		expect(searchProviders("image", capabilities("voice"))).toEqual([]);
-		expect(searchProviders("slop", capabilities("voice"))).toEqual([
-			{ provider: "openslop", models: ["Slop TTS v1"] },
-		]);
+		expect(searchProviders("scribe", capabilities("voice"))).toEqual([]);
 	});
 
 	it("finds nothing for a query no one matches", () => {
