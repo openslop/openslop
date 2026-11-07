@@ -12,7 +12,7 @@ import { getDuration } from "../canvas/element-attributes";
 import { elementTrim } from "./clip-trim";
 import { transitionOverlapSec, type TransitionType } from "./transitions";
 import { MIN_DURATION_SEC } from "./types";
-import { secondsForWords } from "../project/video-length";
+import { estimateSpeechSec } from "../project/video-length";
 
 /** One visual and the dialogue after it, up to the next visual. */
 export type VisualSpan = {
@@ -22,7 +22,7 @@ export type VisualSpan = {
 	seconds: number;
 	words: number;
 	dialogueIds: string[];
-	/** The length it is generated at, where its type has one at all. */
+	/** Its `duration` attribute, where its type has one. */
 	durationSec?: number;
 };
 
@@ -59,7 +59,7 @@ const toSpan = ({
 		words,
 		dialogueIds,
 		durationSec,
-		seconds: Math.max(ownSec, secondsForWords(words), MIN_DURATION_SEC),
+		seconds: Math.max(ownSec, estimateSpeechSec(words), MIN_DURATION_SEC),
 	};
 };
 
@@ -94,16 +94,12 @@ const walk = (descendants: Descendant[]): Walk => {
 	return { spans, leadingWords };
 };
 
-/**
- * What every visual on the canvas is on screen for, estimated from the script
- * alone: the same rule `buildRenderLayout` lays out with, read off the unrendered
- * script. Dialogue before the first visual belongs to no visual and is left out.
- */
-export const measureVisualSpans = (descendants: Descendant[]): VisualSpan[] =>
+/** Dialogue before the first visual belongs to no visual. */
+export const estimateVisualSpans = (descendants: Descendant[]): VisualSpan[] =>
 	walk(descendants).spans.map(toSpan);
 
-/** The whole video's length: dialogue before the first visual plays over a blank scene, and scenes overlap by the transition. */
-export const measureRuntime = (
+/** Dialogue before the first visual plays over a blank scene; scenes overlap by the transition. */
+export const estimateRuntime = (
 	descendants: Descendant[],
 	transitionType: TransitionType,
 ): number => {
@@ -113,7 +109,7 @@ export const measureRuntime = (
 		Math.max(0, scenes - 1) * transitionOverlapSec(transitionType);
 	return (
 		sumBy(spans, (span) => toSpan(span).seconds) +
-		secondsForWords(leadingWords) -
+		estimateSpeechSec(leadingWords) -
 		overlapSec
 	);
 };

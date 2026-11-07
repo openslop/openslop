@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ContentElement, Scene } from "../types";
-import { countSpokenWords, measureDialogueLengths } from "../spoken-words";
+import { countSpokenWords, estimateDialogueLengths } from "../spoken-words";
 import { element } from "./_assets";
 
 const words = (count: number) => Array(count).fill("word").join(" ");
@@ -41,7 +41,7 @@ describe("countSpokenWords", () => {
 	});
 });
 
-describe("measureDialogueLengths", () => {
+describe("estimateDialogueLengths", () => {
 	it("estimates each line from its words and skips everything that isn't spoken", () => {
 		const nodes = [
 			scene(
@@ -51,7 +51,7 @@ describe("measureDialogueLengths", () => {
 			scene(element("c", "character", words(3))),
 		];
 
-		expect(measureDialogueLengths(nodes)).toEqual([
+		expect(estimateDialogueLengths(nodes)).toEqual([
 			{ id: "n", type: "narration", words: 90, seconds: 30 },
 			{ id: "c", type: "character", words: 3, seconds: 1 },
 		]);

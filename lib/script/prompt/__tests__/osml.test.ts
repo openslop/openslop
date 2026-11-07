@@ -50,7 +50,7 @@ describe("osmlSpec", () => {
 	it("writes a Cinematic music cue for the scenes it scores, timed to the picture", () => {
 		expect(spec).toContain("## Music prompts");
 		expect(spec).toContain("In Cinematic the score carries the story");
-		expect(spec).toContain("Runtime, as m:ss");
+		expect(spec).toContain("Estimated runtime, as m:ss");
 		expect(spec).toContain("each turn timestamped to what is on screen");
 		expect(spec).toContain(
 			"In Faceless and Explainer the music sits under speech",

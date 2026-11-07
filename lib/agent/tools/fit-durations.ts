@@ -16,30 +16,30 @@ import { defineTool, seconds } from "./define-tool";
 const where = ({ sceneNumber, type, id }: VisualSpan) =>
 	`${sceneLabel(sceneNumber)} ${type} ${id}`;
 
-const changeLine = ({ length, duration, needed }: DurationFit) =>
-	`${where(length)}: ${length.durationSec}s to ${duration}s, for ${seconds(needed)} of dialogue and leeway.`;
+const changeLine = ({ span, duration, needed }: DurationFit) =>
+	`${where(span)}: ${span.durationSec}s to ${duration}s, for about ${seconds(needed)} of estimated dialogue and leeway.`;
 
-const shortLine = ({ length, needed }: DurationFit) =>
-	`${where(length)} needs ${seconds(needed)} but ${DURATION_MAX}s is the longest a video element can be generated at; split the dialogue after it across more visuals.`;
+const shortLine = ({ span, needed }: DurationFit) =>
+	`${where(span)} needs about ${seconds(needed)} but ${DURATION_MAX}s is the longest a video element can be generated at; split the dialogue after it across more visuals.`;
 
 const report = (...lines: (string | false)[]) =>
 	lines.filter(Boolean).join("\n");
 
-const isUnfitted = ({ length, duration }: DurationFit) =>
-	length.durationSec !== duration;
+const isUnfitted = ({ span, duration }: DurationFit) =>
+	span.durationSec !== duration;
 
-const toSetOp = ({ length, duration }: DurationFit) => ({
+const toSetOp = ({ span, duration }: DurationFit) => ({
 	op: "set" as const,
-	id: length.id,
+	id: span.id,
 	attrs: { duration: String(duration) },
 });
 
 /** The visuals asked for, and the ids that named none of them. */
-const scopeTo = (lengths: VisualSpan[], ids?: string[]) => {
-	if (!ids) return { scoped: lengths, unknown: [] };
+const scopeTo = (spans: VisualSpan[], ids?: string[]) => {
+	if (!ids) return { scoped: spans, unknown: [] };
 	const wanted = new Set(ids);
-	const scoped = lengths.filter((length) => wanted.has(length.id));
-	const found = new Set(scoped.map((length) => length.id));
+	const scoped = spans.filter((span) => wanted.has(span.id));
+	const found = new Set(scoped.map((span) => span.id));
 	return { scoped, unknown: ids.filter((id) => !found.has(id)) };
 };
 
@@ -58,7 +58,7 @@ const headline = ({ fits, changes, short, applied }: Counts) => {
 export const fitDurations = defineTool({
 	description: dedent`
 	  Fit every video element to the dialogue that runs under it: set each one's
-	  \`duration\` to just cover the speech that follows it, up to the next visual, plus
+	  \`duration\` to just cover the estimated speech that follows it, up to the next visual, plus
 	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter ones freeze or loop under long dialogue;
 	  longer ones hold the next line back until they finish.
 
@@ -77,7 +77,7 @@ export const fitDurations = defineTool({
 	icon: Hourglass,
 	label: "Fitting video elements to the dialogue",
 	execute: async ({ element_ids }, ctx) => {
-		const { scoped, unknown } = scopeTo(ctx.measureVisualSpans(), element_ids);
+		const { scoped, unknown } = scopeTo(ctx.estimateVisualSpans(), element_ids);
 		const fits = durationFits(scoped);
 		const changes = fits.filter(isUnfitted);
 		const short = fits.filter(fallsShort);

@@ -4,7 +4,7 @@ import { getContentElements } from "./scenes";
 import { getElementBodyText } from "./osml-serializer";
 import { isSpeech } from "./guards";
 import type { ContentElement } from "./types";
-import { secondsForWords } from "../project/video-length";
+import { estimateSpeechSec } from "../project/video-length";
 
 export const countWords = (text: string) =>
 	text.split(/\s+/).filter(Boolean).length;
@@ -17,15 +17,14 @@ export function countSpokenWords(descendants: Descendant[]): number {
 	return sumBy(getContentElements(descendants).filter(isSpeech), spokenWords);
 }
 
-export type DialogueLength = Pick<ContentElement, "id" | "type"> & {
+export type DialogueEstimate = Pick<ContentElement, "id" | "type"> & {
 	words: number;
 	seconds: number;
 };
 
-/** How long each narration and character line runs, estimated from its words. */
-export const measureDialogueLengths = (
+export const estimateDialogueLengths = (
 	descendants: Descendant[],
-): DialogueLength[] =>
+): DialogueEstimate[] =>
 	getContentElements(descendants)
 		.filter(isSpeech)
 		.map((element) => {
@@ -34,6 +33,6 @@ export const measureDialogueLengths = (
 				id: element.id,
 				type: element.type,
 				words,
-				seconds: secondsForWords(words),
+				seconds: estimateSpeechSec(words),
 			};
 		});

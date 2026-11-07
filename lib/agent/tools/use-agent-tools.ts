@@ -9,10 +9,13 @@ import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { isScriptEmpty } from "@/lib/canvas/scenes";
 import {
 	countSpokenWords,
-	measureDialogueLengths,
+	estimateDialogueLengths,
 } from "@/lib/canvas/spoken-words";
 import { isGenerated } from "@/lib/canvas/types";
-import { measureRuntime, measureVisualSpans } from "@/lib/render/visual-spans";
+import {
+	estimateRuntime,
+	estimateVisualSpans,
+} from "@/lib/render/visual-spans";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
@@ -52,10 +55,10 @@ export function useAgentTools() {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
-				measureDialogueLengths: () => measureDialogueLengths(editor.children),
-				measureVisualSpans: () => measureVisualSpans(editor.children),
-				measureRuntime: () =>
-					measureRuntime(
+				estimateDialogueLengths: () => estimateDialogueLengths(editor.children),
+				estimateVisualSpans: () => estimateVisualSpans(editor.children),
+				estimateRuntime: () =>
+					estimateRuntime(
 						editor.children,
 						store.getState().videoSettings.transitionType,
 					),

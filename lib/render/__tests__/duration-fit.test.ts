@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
-import { measureVisualSpans, type VisualSpan } from "../visual-spans";
+import { estimateVisualSpans, type VisualSpan } from "../visual-spans";
 import {
 	DURATION_FIT_LEEWAY_SEC,
 	durationFits,
 	fallsShort,
 } from "../duration-fit";
 
-const length = (over: Partial<VisualSpan> = {}): VisualSpan => ({
+const span = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	id: "e1",
 	type: "video",
 	sceneNumber: 1,
@@ -20,11 +20,11 @@ const length = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 
 describe("durationFits", () => {
 	it("leaves out a video with no dialogue under it, which plays its own length", () => {
-		expect(durationFits([length({ words: 0, dialogueIds: [] })])).toEqual([]);
+		expect(durationFits([span({ words: 0, dialogueIds: [] })])).toEqual([]);
 	});
 
 	it("covers the dialogue under a video, plus the leeway", () => {
-		const [fit] = durationFits([length({ words: 30 })]);
+		const [fit] = durationFits([span({ words: 30 })]);
 
 		expect(fit.needed).toBe(10 + DURATION_FIT_LEEWAY_SEC);
 		expect(fit.duration).toBe(11);
@@ -32,11 +32,11 @@ describe("durationFits", () => {
 	});
 
 	it("snaps up to a whole option rather than under-covering", () => {
-		expect(durationFits([length({ words: 20 })])[0].duration).toBe(8);
+		expect(durationFits([span({ words: 20 })])[0].duration).toBe(8);
 	});
 
 	it("holds the longest option and reports that it falls short", () => {
-		const [fit] = durationFits([length({ words: 120 })]);
+		const [fit] = durationFits([span({ words: 120 })]);
 
 		expect(fit.duration).toBe(15);
 		expect(fallsShort(fit)).toBe(true);
@@ -44,7 +44,7 @@ describe("durationFits", () => {
 
 	it("leaves stills out, since they carry no duration and already stretch", () => {
 		expect(
-			durationFits([length({ type: "image", durationSec: undefined })]),
+			durationFits([span({ type: "image", durationSec: undefined })]),
 		).toEqual([]);
 	});
 });
@@ -63,7 +63,7 @@ const node = (
 	children: [{ id: `${id}-t`, text }],
 });
 
-describe("durationFits over a measured canvas", () => {
+describe("durationFits over an estimated canvas", () => {
 	it("fits a video to the dialogue that runs on past the scene it sits in", () => {
 		const script = [
 			{
@@ -81,9 +81,9 @@ describe("durationFits over a measured canvas", () => {
 			},
 		] as unknown as Descendant[];
 
-		const [fit] = durationFits(measureVisualSpans(script));
+		const [fit] = durationFits(estimateVisualSpans(script));
 
-		expect(fit.length.id).toBe("video1");
+		expect(fit.span.id).toBe("video1");
 		expect(fit.duration).toBe(11);
 	});
 });

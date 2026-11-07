@@ -45,9 +45,9 @@ const project = (
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<narration>hi</narration>",
 	countSpokenWords: () => 1,
-	measureDialogueLengths: () => [],
-	measureVisualSpans: () => [],
-	measureRuntime: () => 0,
+	estimateDialogueLengths: () => [],
+	estimateVisualSpans: () => [],
+	estimateRuntime: () => 0,
 	generateText: async () => "an outline",
 	elementResult: async () => undefined,
 	elementStates: () => [],
@@ -313,12 +313,12 @@ describe("executeToolCall", () => {
 		},
 	);
 
-	it("reports the runtime against the project's target length", async () => {
+	it("reports the estimated runtime against the project's target length", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "measure_total_length", input: {} },
+			{ toolName: "estimate_total_length", input: {} },
 			context({
 				countSpokenWords: () => 700,
-				measureRuntime: () => 240,
+				estimateRuntime: () => 240,
 			}),
 		);
 
@@ -328,26 +328,26 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain("within the target range");
 	});
 
-	it("says how far off the runtime is, so the model knows how much to cut or add", async () => {
+	it("says how far off the estimated runtime is, so the model knows how much to cut or add", async () => {
 		const over = await executeToolCall(
-			{ toolName: "measure_total_length", input: {} },
-			context({ measureRuntime: () => 400 }),
+			{ toolName: "estimate_total_length", input: {} },
+			context({ estimateRuntime: () => 400 }),
 		);
 		expect(over.ok && over.output).toContain("over by 100.0s");
 
 		const under = await executeToolCall(
-			{ toolName: "measure_total_length", input: {} },
-			context({ measureRuntime: () => 100 }),
+			{ toolName: "estimate_total_length", input: {} },
+			context({ estimateRuntime: () => 100 }),
 		);
 		expect(under.ok && under.output).toContain("under by 80.0s");
 	});
 
-	it("measures without a verdict when the length is auto", async () => {
+	it("estimates without a verdict when the length is auto", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "measure_total_length", input: {} },
+			{ toolName: "estimate_total_length", input: {} },
 			context({
 				countSpokenWords: () => 1000,
-				measureRuntime: () => 600,
+				estimateRuntime: () => 600,
 				readProject: () => project({ scriptSettings: { length: "auto" } }),
 			}),
 		);
@@ -358,9 +358,9 @@ describe("executeToolCall", () => {
 
 	it("estimates how long each line of dialogue runs", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "measure_dialogue_lengths", input: {} },
+			{ toolName: "estimate_dialogue_lengths", input: {} },
 			context({
-				measureDialogueLengths: () => [
+				estimateDialogueLengths: () => [
 					{ id: "nar1", type: "narration", words: 90, seconds: 30 },
 					{ id: "chr1", type: "character", words: 6, seconds: 2 },
 				],
@@ -377,7 +377,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
 			context({
-				measureVisualSpans: () => [
+				estimateVisualSpans: () => [
 					{
 						id: "ai1",
 						type: "video",
@@ -405,7 +405,7 @@ describe("executeToolCall", () => {
 
 		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video ai1: 10s to 5s, for 5.0s of dialogue and leeway.",
+			"Scene 1 video ai1: 10s to 5s, for about 5.0s of estimated dialogue and leeway.",
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
 		expect(outcome.ok && outcome.output).toContain(
@@ -417,7 +417,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
-				measureVisualSpans: () => [
+				estimateVisualSpans: () => [
 					{
 						id: "ai1",
 						type: "video",
@@ -450,7 +450,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
-				measureVisualSpans: () => [
+				estimateVisualSpans: () => [
 					{
 						id: "vid1",
 						type: "video",
@@ -474,7 +474,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1", "nope"] } },
 			context({
-				measureVisualSpans: () => [
+				estimateVisualSpans: () => [
 					{
 						id: "vid1",
 						type: "video",
@@ -497,7 +497,7 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
 			context({
-				measureVisualSpans: () => [
+				estimateVisualSpans: () => [
 					{
 						id: "img1",
 						type: "image",
@@ -517,7 +517,7 @@ describe("executeToolCall", () => {
 
 	it("says the canvas has no dialogue rather than reporting an empty table", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "measure_dialogue_lengths", input: {} },
+			{ toolName: "estimate_dialogue_lengths", input: {} },
 			context(),
 		);
 
@@ -704,8 +704,8 @@ describe("SLOPPY_TOOLS", () => {
 			"update_video_settings",
 			"view_result",
 			"outline_story",
-			"measure_total_length",
-			"measure_dialogue_lengths",
+			"estimate_total_length",
+			"estimate_dialogue_lengths",
 			"fit_durations",
 			"set_title",
 			"list_models",

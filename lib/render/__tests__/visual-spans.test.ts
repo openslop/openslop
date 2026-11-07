@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import type { ContentType } from "@/lib/canvas/types";
-import { measureRuntime, measureVisualSpans } from "../visual-spans";
+import { estimateRuntime, estimateVisualSpans } from "../visual-spans";
 import type { ResolvedElement } from "../types";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
-import { secondsForWords } from "@/lib/project/video-length";
+import { estimateSpeechSec } from "@/lib/project/video-length";
 import { layoutOf } from "./_layout";
 import { totalDuration } from "../sequences";
 import { transitionOverlapSec } from "../transitions";
@@ -30,13 +30,13 @@ const scene = (...children: ReturnType<typeof element>[]): Descendant =>
 
 const words = (count: number) => Array(count).fill("word").join(" ");
 
-describe("measureVisualSpans", () => {
+describe("estimateVisualSpans", () => {
 	it("holds a still for the dialogue that follows it, up to the next visual", () => {
 		const image = element("image", "A forest.");
 		const narration = element("narration", words(90));
 		const next = element("image", "A clearing.");
 
-		const [first, second] = measureVisualSpans([
+		const [first, second] = estimateVisualSpans([
 			scene(image, narration, next, element("narration", words(180))),
 		]);
 
@@ -52,7 +52,7 @@ describe("measureVisualSpans", () => {
 	it("counts dialogue across scene boundaries, since only a visual ends a span", () => {
 		const image = element("image", "A forest.");
 
-		const [only] = measureVisualSpans([
+		const [only] = estimateVisualSpans([
 			scene(image, element("narration", words(90))),
 			scene(element("character", words(90))),
 		]);
@@ -60,8 +60,8 @@ describe("measureVisualSpans", () => {
 		expect(only).toMatchObject({ seconds: 60, words: 180, sceneNumber: 1 });
 	});
 
-	it("holds a video for its generated length, or longer for the dialogue after it", () => {
-		const [held, extended] = measureVisualSpans([
+	it("holds a video for its duration, or longer for the dialogue after it", () => {
+		const [held, extended] = estimateVisualSpans([
 			scene(
 				element("video", "A pan.", { duration: "8" }),
 				element("narration", words(9)),
@@ -75,7 +75,7 @@ describe("measureVisualSpans", () => {
 	});
 
 	it("holds a trimmed video for its trimmed length", () => {
-		const [cut, opened] = measureVisualSpans([
+		const [cut, opened] = estimateVisualSpans([
 			scene(
 				element("video", "A pan.", { duration: "8", trimEnd: "5" }),
 				element("video", "A zoom.", { duration: "8", trimStart: "3" }),
@@ -87,7 +87,7 @@ describe("measureVisualSpans", () => {
 	});
 
 	it("lets dialogue run past a trim", () => {
-		const [held] = measureVisualSpans([
+		const [held] = estimateVisualSpans([
 			scene(
 				element("video", "A pan.", { duration: "8", trimEnd: "5" }),
 				element("narration", words(90)),
@@ -100,7 +100,7 @@ describe("measureVisualSpans", () => {
 	it("ignores silent elements and dialogue before the first visual", () => {
 		const image = element("image", "A forest.");
 
-		const lengths = measureVisualSpans([
+		const spans = estimateVisualSpans([
 			scene(
 				element("narration", words(180)),
 				image,
@@ -109,18 +109,18 @@ describe("measureVisualSpans", () => {
 			),
 		]);
 
-		expect(lengths).toHaveLength(1);
-		expect(lengths[0]).toMatchObject({ id: image.id, words: 0, seconds: 1 });
+		expect(spans).toHaveLength(1);
+		expect(spans[0]).toMatchObject({ id: image.id, words: 0, seconds: 1 });
 	});
 
-	it("measures an empty canvas as nothing", () => {
-		expect(measureVisualSpans([])).toEqual([]);
+	it("estimates an empty canvas as nothing", () => {
+		expect(estimateVisualSpans([])).toEqual([]);
 	});
 });
 
-describe("measureRuntime", () => {
+describe("estimateRuntime", () => {
 	it("adds up every visual's time on screen, not just the speech over it", () => {
-		const runtime = measureRuntime(
+		const runtime = estimateRuntime(
 			[
 				scene(
 					element("video", "A fox runs.", { duration: "10" }),
@@ -134,12 +134,12 @@ describe("measureRuntime", () => {
 	});
 
 	it("counts dialogue before the first visual, which plays over a blank scene", () => {
-		const runtime = measureRuntime(
+		const runtime = estimateRuntime(
 			[scene(element("narration", words(180)), element("image", "A forest."))],
 			"none",
 		);
 
-		expect(runtime).toBe(secondsForWords(180) + 1);
+		expect(runtime).toBe(estimateSpeechSec(180) + 1);
 	});
 
 	it("overlaps each scene after the first by the transition", () => {
@@ -148,15 +148,15 @@ describe("measureRuntime", () => {
 			scene(element("image", "A forest."), element("image", "A river.")),
 		];
 
-		expect(measureRuntime(script, "fade")).toBeCloseTo(
-			measureRuntime(script, "none") - 2 * transitionOverlapSec("fade"),
+		expect(estimateRuntime(script, "fade")).toBeCloseTo(
+			estimateRuntime(script, "none") - 2 * transitionOverlapSec("fade"),
 		);
 	});
 
-	it("measures a narration-only script by its speech", () => {
+	it("estimates a narration-only script by its speech", () => {
 		expect(
-			measureRuntime([scene(element("narration", words(90)))], "none"),
-		).toBe(secondsForWords(90));
+			estimateRuntime([scene(element("narration", words(90)))], "none"),
+		).toBe(estimateSpeechSec(90));
 	});
 });
 
@@ -203,30 +203,32 @@ describe("against buildRenderLayout", () => {
 	];
 	const layout = layoutOf(
 		[
-			resolved(opening, secondsForWords(15)),
+			resolved(opening, estimateSpeechSec(15)),
 			resolved(still, 0),
-			resolved(line, secondsForWords(90)),
+			resolved(line, estimateSpeechSec(90)),
 			resolved(held, 4),
-			resolved(heldLine, secondsForWords(30)),
+			resolved(heldLine, estimateSpeechSec(30)),
 			resolved(whole, 8),
-			resolved(shortLine, secondsForWords(6)),
+			resolved(shortLine, estimateSpeechSec(6)),
 		],
 		{ transitionType: "fade", fps: 25 },
 	);
 
 	it("estimates each visual's slot as the layout lays it down", () => {
 		const [, ...visuals] = layout.series;
-		const lengths = measureVisualSpans(script);
+		const spans = estimateVisualSpans(script);
 
 		expect(visuals.map(({ element: { id } }) => id)).toEqual(
-			lengths.map(({ id }) => id),
+			spans.map(({ id }) => id),
 		);
 		visuals.forEach((sequence, i) =>
-			expect(totalDuration(sequence)).toBeCloseTo(lengths[i].seconds),
+			expect(totalDuration(sequence)).toBeCloseTo(spans[i].seconds),
 		);
 	});
 
 	it("estimates the runtime the layout lays down", () => {
-		expect(measureRuntime(script, "fade")).toBeCloseTo(layout.totalDurationSec);
+		expect(estimateRuntime(script, "fade")).toBeCloseTo(
+			layout.totalDurationSec,
+		);
 	});
 });

@@ -48,7 +48,7 @@ const ROLE = dedent`
   - Ask only when the answer would change the work. Otherwise decide and say what you chose.
 
   # Lengths
-  - Never guess how long dialogue runs. measure_dialogue_lengths estimates each line from its
+  - Never guess how long dialogue runs. estimate_dialogue_lengths estimates each line's length from its
     words.
   - fit_durations sets every video element with dialogue under it to a \`duration\` that covers
     that dialogue, so none runs out mid-line and none holds the next line back.
