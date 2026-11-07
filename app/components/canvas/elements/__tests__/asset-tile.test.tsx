@@ -15,13 +15,14 @@ const VIEW = 'button[aria-label="View Mia larger"]';
 const onEdit = vi.fn();
 let canvas: ReturnType<typeof mountOnCanvas>;
 
-function renderTile(previewUrl?: string) {
+function renderTile(previewUrl?: string, type?: "character") {
 	canvas.render(
 		<TooltipProvider>
 			<AssetTile
 				name="Mia"
 				previewUrl={previewUrl}
 				Icon={User}
+				type={type}
 				onEdit={onEdit}
 			/>
 		</TooltipProvider>,
@@ -58,6 +59,15 @@ describe("AssetTile", () => {
 
 		expect(viewer()).toBeNull();
 		expect(document.activeElement).toBe(document.body.querySelector(VIEW));
+	});
+
+	it("badges the caption with the asset type, picture or not", () => {
+		const badge = () =>
+			document.body.querySelector('[data-slot="thumbnail-caption"] .icon');
+		renderTile(AVATAR);
+		expect(badge()).toBeNull();
+		renderTile(undefined, "character");
+		expect(badge()).not.toBeNull();
 	});
 
 	it("offers no viewer until there is a picture", () => {

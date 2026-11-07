@@ -31,7 +31,7 @@ export function MediaViewer({
 					<IconButton
 						ariaLabel={`View ${name} larger`}
 						size="sm"
-						chip
+						variant="onMedia"
 						className={cn(
 							"absolute left-1 top-1 z-10 transition focus-visible:opacity-100",
 							className,

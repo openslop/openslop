@@ -33,6 +33,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 			name={name}
 			previewUrl={avatar.url}
 			Icon={User}
+			type="character"
 			status={avatar.status}
 			startedAt={avatar.startedAt}
 			onEdit={() => editAsset("asset_avatar", name)}
@@ -42,6 +43,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 		<AssetTile
 			name={name}
 			Icon={Mic}
+			type="character"
 			fallback="icon"
 			onEdit={() => editAsset("asset_voice", name)}
 			{...tile}
@@ -65,6 +67,7 @@ export function ReferenceTile({
 			name={`Reference ${index + 1}`}
 			previewUrl={url}
 			Icon={Image}
+			type="image"
 			{...tile}
 		/>
 	);
