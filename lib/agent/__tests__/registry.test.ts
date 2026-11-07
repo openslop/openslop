@@ -233,7 +233,7 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(true);
 	});
 
-	it("update_script_settings writes only the settings it was given, and says they shape the next script", async () => {
+	it("update_script_settings stores only the settings it was given", async () => {
 		const settings: Partial<ScriptSettings>[] = [];
 		const outcome = await executeToolCall(
 			{
@@ -244,7 +244,9 @@ describe("executeToolCall", () => {
 		);
 
 		expect(settings).toStrictEqual([{ language: "es", length: "5-10m" }]);
-		expect(outcome.ok && outcome.output).toContain("next script");
+		expect(outcome.ok && outcome.output).toBe(
+			"Stored language es and length 5-10m.",
+		);
 	});
 
 	it.each([
