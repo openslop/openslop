@@ -12,6 +12,7 @@ How we write code here, for humans and agents. The codebase is deliberately rigi
 - Every unit stays as dumb and simple as possible. High cyclomatic complexity is a code smell, and it creeps in one cut corner at a time, so refuse each one and sweat the details (Ousterhout). The requirements almost never justify it, so design it away. When simplicity and a nice-to-have collide, simplicity usually wins.
 - Write declarative code that reads like config. Keep the unavoidable imperative bits in small, well-named, tested pure functions.
 - Define errors out of existence where you can. Design the API so the edge case can't arise in the first place, not so it gets swallowed (Ousterhout).
+- Don't harden core paths against inputs no real user produces. If a contrived input ever has to be handled, reject it at the boundary with validation (e.g. audio shorter than a frame on upload), never with added complexity in the core app.
 
 ## Structure and reuse
 
@@ -21,6 +22,7 @@ How we write code here, for humans and agents. The codebase is deliberately rigi
 - Dependencies point one way. `lib/` is the domain layer and never imports from `app/` (the UI); shared logic lives in `lib/`, and imports never cycle at runtime (type-only cycles are fine). ESLint-enforced.
 - Files and directories are kebab-case (`media-with-skeleton.tsx`, `third-party/`); identifiers inside keep their own case (`MediaWithSkeleton`). Acronyms are words (`with-osml-clipboard.ts`). Tests mirror their module; test helpers start with `_`. Exempt: route params (`[jobId]`) and tool folders (`__tests__`). ESLint-enforced for files.
 - Comments are a smell. Needing one usually means the code is hiding something a better name, type or structure should say, so fix that instead. Comment only to carry critical knowledge the code has no way to express, such as an external system's quirk, and then in one short line. A multi-line comment is almost always a design problem to fix, not text to keep. Never restate a name, a signature or the steps below, and never record history (what broke, what the code used to be); that belongs in the commit message.
+- Name a sub-shape that is built and passed around on its own, and compose bigger types from it (`ResolvedElement = Trim & { … }`). Use `Pick` only to narrow what a function or seam needs, or for types we don't own (vendor, zod-inferred).
 - Test behavior, not internals. Cover the seams (pure helpers and module boundaries) so refactors stay safe.
 
 ## Frontend
@@ -28,6 +30,7 @@ How we write code here, for humans and agents. The codebase is deliberately rigi
 - Server Components by default. Keep `"use client"` at the leaves, fetch data on the server, and reach for a client component only for interactivity.
 - Presentational components stay dumb: declarative, composable, and explicit about what they render. Conditional logic only when it serves one clear presentational concern.
 - The design system is off the shelf and non-negotiable. Components ship it by default, with no one-off Tailwind in higher-level components. Honor the component and style hierarchy. See DESIGN.md.
+- Make things faster by doing less work, not by caching it. No memoization layers, snapshot caches or reference-stability shims without a measured win.
 - Composition over context. Don't thread props through layers that don't use them; prefer composition with children. Reach for context only for genuinely cross-cutting state, never just to skip a level.
 - Accessible by default. Semantic HTML, labels, and keyboard support aren't optional. See [ACCESSIBILITY.md](ACCESSIBILITY.md).
 
