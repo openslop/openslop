@@ -12,7 +12,7 @@ How we write code here, for humans and agents. The codebase is deliberately rigi
 - Every unit stays as dumb and simple as possible. High cyclomatic complexity is a code smell, and it creeps in one cut corner at a time, so refuse each one and sweat the details (Ousterhout). The requirements almost never justify it, so design it away. When simplicity and a nice-to-have collide, simplicity usually wins.
 - Write declarative code that reads like config. Keep the unavoidable imperative bits in small, well-named, tested pure functions.
 - Define errors out of existence where you can. Design the API so the edge case can't arise in the first place, not so it gets swallowed (Ousterhout).
-- Don't harden core paths against inputs no real user produces. If a contrived input ever has to be handled, reject it at the boundary with validation (e.g. audio shorter than a frame on upload), never with a guard in the layout or render path.
+- Don't harden core paths against inputs no real user produces. If a contrived input ever has to be handled, reject it at the boundary with validation (e.g. audio shorter than a frame on upload), never with added complexity in the core app.
 
 ## Structure and reuse
 
