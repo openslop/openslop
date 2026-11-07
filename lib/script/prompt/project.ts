@@ -74,7 +74,7 @@ export function formatSection({ format }: ScriptSettings): string {
 	return dedent`
 		# Format
 
-		The user picked the ${videoFormatLabel(format)} format. Write in it.`;
+		The format is ${videoFormatLabel(format)}. Write in it.`;
 }
 
 /** Empty on `auto`: no budget is a budget the model would otherwise invent. */

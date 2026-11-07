@@ -585,11 +585,12 @@ describe("executeToolCall", () => {
 		expect(prompts[0]).toContain("conflict, twists, and a resolution");
 	});
 
-	it("reviews the script against the rules it was written to", async () => {
+	it("reviews the script against the rules and the stored format", async () => {
 		const calls: { prompt: string; systemPrompt?: string }[] = [];
 		const outcome = await executeToolCall(
-			{ toolName: "review_script", input: { format: "Cinematic" } },
+			{ toolName: "review_script", input: {} },
 			context({
+				readProject: () => project({ scriptSettings: { format: "cinematic" } }),
 				generateText: async (prompt, options) => {
 					calls.push({ prompt, systemPrompt: options?.systemPrompt });
 					return NO_FINDINGS;

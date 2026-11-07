@@ -1,7 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { scriptRules } from "@/lib/script/prompt/build";
-import { VIDEO_FORMAT_NAMES } from "@/lib/script/prompt/formats";
 import { NO_FINDINGS, reviewPrompt } from "@/lib/script/prompt/review";
 import { Search } from "@/components/ui/icon";
 import { defineTool } from "./define-tool";
@@ -22,25 +21,16 @@ export const reviewScript = defineTool({
 	  Run it when the user explicitly asks for a review or accepts your offer. Do not run it
 	  just because you wrote, adapted or edited the script.
 	`,
-	input: z.object({
-		format: z
-			.enum(VIDEO_FORMAT_NAMES)
-			.optional()
-			.describe(
-				"The format the script was written to, so the review holds it to that element list.",
-			),
-	}),
+	input: z.object({}),
 	output: z.string(),
 	icon: Search,
 	label: "Reviewing the script",
-	execute: async ({ format }, ctx) => {
+	execute: async (_input, ctx) => {
 		if (ctx.isScriptEmpty())
 			return "The script is empty, so there is nothing to review.";
-		return ctx.generateText(reviewPrompt(ctx.readScript(), format), {
-			systemPrompt: scriptRules(
-				ctx.readAssets(),
-				ctx.readProject().scriptSettings,
-			),
+		const settings = ctx.readProject().scriptSettings;
+		return ctx.generateText(reviewPrompt(ctx.readScript(), settings.format), {
+			systemPrompt: scriptRules(ctx.readAssets(), settings),
 		});
 	},
 	snapshot: true,

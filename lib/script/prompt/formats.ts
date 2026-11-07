@@ -19,12 +19,6 @@ export const VIDEO_FORMAT = {
 	explainer: VIDEO_FORMAT_SPECS.explainer.label,
 } as const;
 
-export const VIDEO_FORMAT_NAMES = [
-	VIDEO_FORMAT.cinematic,
-	VIDEO_FORMAT.faceless,
-	VIDEO_FORMAT.explainer,
-] as const;
-
 export const VIDEO_FORMAT_RULES = dedent`
 	First pick the format closest to the request if not already picked by the user. The format decides which elements you write.
 

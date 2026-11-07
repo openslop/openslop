@@ -22,14 +22,14 @@ describe("reviewPrompt", () => {
 	});
 
 	it("holds the script to its format only when one is named", () => {
-		expect(reviewPrompt(script, "Cinematic")).toContain(
+		expect(reviewPrompt(script, "cinematic")).toContain(
 			"It was intended as a Cinematic, so judge it accordingly.",
 		);
 		expect(reviewPrompt(script)).not.toContain("It was intended as a");
 	});
 
 	it("opens on one clean sentence whether or not a format is named", () => {
-		expect(reviewPrompt(script, "Cinematic")).not.toContain("..");
+		expect(reviewPrompt(script, "cinematic")).not.toContain("..");
 		expect(reviewPrompt(script)).not.toContain(" .");
 	});
 

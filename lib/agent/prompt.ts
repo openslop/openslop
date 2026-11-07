@@ -88,7 +88,8 @@ const FORMATS = dedent`
 
   ${VIDEO_FORMAT_RULES}
 
-  Name the format in the brief you hand write_script.
+  Classify every request into one of these and set it with update_script_settings before
+  writing a script.
 `;
 
 const SLOPPY_SYSTEM_PROMPT = [ROLE, FORMATS, LIMITS].join("\n\n");
