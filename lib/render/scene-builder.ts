@@ -41,17 +41,18 @@ type SequenceMap = RenderLayout["sequences"];
 /**
  * Lays down `element.loops` copies, each `stride` after the last. A stride
  * shorter than the copy overlaps them, which is how a looping effect crossfades
- * across its seam rather than cutting.
+ * across its seam rather than cutting. Each runs at least a frame, as Remotion requires.
  */
 function pushSequence(
 	sequences: SequenceMap,
 	element: ResolvedElement,
 	start: number,
 	stride: number,
+	frameSec: number,
 ) {
 	const list = (sequences[element.type] ??= []);
 	for (let i = 0; i < element.loops; i++) {
-		list.push(sequenceAt(element, start + i * stride, 0));
+		list.push(sequenceAt(element, start + i * stride, frameSec));
 	}
 }
 
@@ -102,6 +103,7 @@ export function buildRenderLayout(
 	const onGrid = (sec: number) =>
 		toSeconds(toFrames(sec, config.fps), config.fps);
 	const transitionDurationSec = onGrid(transitionOverlapSec(transitionType));
+	const frameSec = toSeconds(1, config.fps);
 	const series: Sequence[] = [];
 	const sequences: SequenceMap = {};
 	let cursor = 0;
@@ -119,12 +121,12 @@ export function buildRenderLayout(
 
 		switch (element.role) {
 			case "effect": {
-				pushSequence(sequences, element, cursor, stride);
+				pushSequence(sequences, element, cursor, stride, frameSec);
 				break;
 			}
 			case "background": {
 				cutAt(sequences[element.type], foregroundCursor);
-				pushSequence(sequences, element, foregroundCursor, stride);
+				pushSequence(sequences, element, foregroundCursor, stride, frameSec);
 				break;
 			}
 			case "foreground": {
@@ -145,7 +147,7 @@ export function buildRenderLayout(
 				if (!current) series.push(scene);
 				overlaySec += element.trimDurationSec;
 				scene.minDuration = Math.max(scene.minDuration, overlaySec);
-				pushSequence(sequences, element, cursor, stride);
+				pushSequence(sequences, element, cursor, stride, frameSec);
 				cursor += element.trimDurationSec;
 				break;
 			}

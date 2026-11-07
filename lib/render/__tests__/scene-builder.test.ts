@@ -662,5 +662,16 @@ describe("buildRenderLayout", () => {
 				}
 			}
 		});
+
+		it("runs a layer shorter than a frame for one frame", () => {
+			const layout = layoutOf(
+				[
+					el({ id: "img1", type: "image", trimDurationSec: 5 }),
+					el({ id: "s1", type: "sound", trimDurationSec: 0.01 }),
+				],
+				{ fps },
+			);
+			expect(toFrames(totalDuration(seqs(layout, "sound")[0]), fps)).toBe(1);
+		});
 	});
 });
