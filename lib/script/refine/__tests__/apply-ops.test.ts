@@ -12,6 +12,7 @@ import type { RefineOp } from "../types";
 import { getAssets, NARRATOR } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import { isContentElement } from "@/lib/canvas/guards";
+import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { asset, label, makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { getPromptText } from "@/lib/generation/inputs";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
@@ -20,20 +21,18 @@ import {
 	splitAttributes,
 } from "@/lib/canvas/element-attributes";
 
-const ZWSP = "\u200B";
-
 function content(
 	type: ContentElement["type"],
 	id: string,
 	text = "",
-	customAttributes?: Record<string, string>,
+	attributes: Record<string, string> = {},
 ): ContentElement {
 	return {
 		id,
 		type,
-		...splitAttributes(customAttributes ?? {}),
+		...splitAttributes(attributes),
 		children: [
-			{ id: `${id}-m`, type, text: ZWSP },
+			{ id: `${id}-m`, type, text: ZERO_WIDTH_SPACE },
 			{ id: `${id}-t`, type, text },
 		],
 	};
@@ -272,7 +271,7 @@ describe("applyRefineOp — set", () => {
 		expect(getContentTexts(editor)).toEqual(["new text"]);
 	});
 
-	it("merges attrs into existing customAttributes", () => {
+	it("merges attrs into the existing attributes", () => {
 		const editor = makeEditor([
 			scene([
 				content("character", "n1", "hello", {
@@ -347,10 +346,10 @@ describe("applyRefineOp — set", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "old")])]);
 
 		applyRefineOp(editor, { op: "set", id: "n1", text: "new" });
-		expect(Editor.string(editor, [0, 0])).toBe(`${ZWSP}new`);
+		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}new`);
 
 		applyRefineOp(editor, { op: "set", id: "n1", text: "" });
-		expect(Editor.string(editor, [0, 0])).toBe(ZWSP);
+		expect(Editor.string(editor, [0, 0])).toBe(ZERO_WIDTH_SPACE);
 	});
 
 	it("leaves the canvas alone when no element has the id", () => {
