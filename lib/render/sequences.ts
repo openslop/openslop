@@ -9,12 +9,12 @@ export const allSequences = ({
 ];
 
 /** How long past what plays its slot stays open. */
-export const holdDuration = (
+export const extensionDuration = (
 	{ minDuration }: Pick<Sequence, "minDuration">,
 	duration: number,
 ): number => Math.max(0, minDuration - duration);
 
-/** The whole slot: what plays and the hold after it. */
+/** The whole slot: what plays and its extension. */
 export const totalDuration = ({
 	duration,
 	minDuration,

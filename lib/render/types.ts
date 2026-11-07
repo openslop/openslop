@@ -14,7 +14,7 @@ export type ResolvedCaptions = {
 /** Where a clip opens in its media, and how long it plays from there. */
 export type Trim = {
 	trimStartSec: number;
-	/** Never past its media; a scene can hold past a visual. */
+	/** Never past its media; a scene can extend past a visual. */
 	trimDurationSec: number;
 };
 
@@ -42,7 +42,7 @@ export type Sequence = {
 	start: number;
 	/** How long it plays: what the trim handles sit on. */
 	duration: number;
-	/** Its slot stays open at least this long, holding past what plays. */
+	/** Its slot stays open at least this long, extending past what plays. */
 	minDuration: number;
 	/** Where the layout cuts it short. */
 	maxDuration?: number;

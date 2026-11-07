@@ -12,7 +12,7 @@ import {
 	trimPointSec,
 	type TrimEdge,
 } from "@/lib/render/clip-trim";
-import { holdDuration } from "@/lib/render/sequences";
+import { extensionDuration } from "@/lib/render/sequences";
 import { snapTrimEdge } from "@/lib/render/snap";
 import type { Trim } from "@/lib/render/types";
 import type { TimelineClip } from "./timeline-rows";
@@ -86,7 +86,7 @@ export function useClipTrim(
 	return {
 		trim,
 		trimming: preview !== null,
-		holdSec: holdDuration(clip, trim.trimDurationSec),
+		extensionSec: extensionDuration(clip, trim.trimDurationSec),
 		handleProps: isTrimmable(element) ? handles : null,
 		reset: isTrimmed(element) ? () => resetTrim(editor, element.id) : null,
 	};
