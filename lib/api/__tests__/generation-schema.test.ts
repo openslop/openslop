@@ -16,20 +16,25 @@ describe("bodySchema with a hosted model", () => {
 	const schema = bodySchema(hostedModel("image"), {});
 
 	it("takes the model alone and records the provider as ours", () => {
-		expect(schema.parse({ prompt: "a cat", model: "Slop Image v1" })).toEqual({
-			prompt: "a cat",
-			provider: "openslop",
-			model: "Slop Image v1",
-		});
+		expect(schema.parse({ prompt: "a cat", model: "Seedream 5 Lite" })).toEqual(
+			{
+				prompt: "a cat",
+				provider: "openslop",
+				model: "Seedream 5 Lite",
+			},
+		);
 	});
 
 	it("requires a model", () => {
 		expect(schema.safeParse({ prompt: "a cat" }).success).toBe(false);
 	});
 
-	it("refuses a model another provider serves", () => {
+	it("refuses a model only another provider serves", () => {
 		expect(
-			schema.safeParse({ prompt: "a cat", model: "Seedream 5 Lite" }).success,
+			bodySchema(hostedModel("video"), {}).safeParse({
+				prompt: "a cat",
+				model: "Seedance 2.5",
+			}).success,
 		).toBe(false);
 	});
 
@@ -38,7 +43,7 @@ describe("bodySchema with a hosted model", () => {
 			schema.safeParse({
 				prompt: "a cat",
 				provider: "runware",
-				model: "Slop Image v1",
+				model: "Seedream 5 Lite",
 			}).success,
 		).toBe(false);
 	});
@@ -72,7 +77,7 @@ describe("bodySchema with BYOK models", () => {
 			schema.safeParse({
 				prompt: "a cat",
 				provider: "runware",
-				model: "Slop Image v1",
+				model: "Midjourney 7",
 			}).success,
 		).toBe(false);
 	});
@@ -82,7 +87,7 @@ describe("bodySchema with BYOK models", () => {
 			schema.safeParse({
 				prompt: "a cat",
 				provider: "openslop",
-				model: "Slop Image v1",
+				model: "Seedream 5 Lite",
 			}).success,
 		).toBe(false);
 	});
@@ -91,7 +96,7 @@ describe("bodySchema with BYOK models", () => {
 describe("LLM fields", () => {
 	const schema = bodySchema(hostedModel("llm"), LLM_FIELDS);
 	const withMaxTokens = (maxTokens: unknown) =>
-		schema.safeParse({ prompt: "hi", model: "Slop LLM v1", maxTokens });
+		schema.safeParse({ prompt: "hi", model: "Claude Opus 5", maxTokens });
 
 	it("takes a positive whole maxTokens", () => {
 		expect(withMaxTokens(4096).data?.maxTokens).toBe(4096);
@@ -109,7 +114,7 @@ describe("video fields", () => {
 	const video = (fields: Record<string, unknown>) =>
 		schema.safeParse({
 			prompt: "they talk",
-			model: "Slop Video v2",
+			model: "Kling 3 Omni",
 			...fields,
 		});
 
@@ -148,7 +153,7 @@ describe("video fields", () => {
 describe("STT fields", () => {
 	const schema = bodySchema(hostedModel("stt"), STT_FIELDS);
 	const stt = (mediaUrl: unknown) =>
-		schema.safeParse({ model: "Slop STT v1", mediaUrl });
+		schema.safeParse({ model: "Scribe v2", mediaUrl });
 
 	it("takes a clip from our store, with no prompt", () => {
 		const mediaUrl = `${STORE}/assets/upload/user/abc/clip.mp4`;

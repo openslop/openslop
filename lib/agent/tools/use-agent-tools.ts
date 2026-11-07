@@ -54,7 +54,11 @@ export function useAgentTools() {
 				countSpokenWords: () => countSpokenWords(editor.children),
 				measureDialogueLengths: () => measureDialogueLengths(editor.children),
 				measureVisualSpans: () => measureVisualSpans(editor.children),
-				measureRuntime: () => measureRuntime(editor.children),
+				measureRuntime: () =>
+					measureRuntime(
+						editor.children,
+						store.getState().videoSettings.transitionType,
+					),
 				elementResult: async (id) => {
 					const element = findElementById(editor, id)?.[0];
 					return (

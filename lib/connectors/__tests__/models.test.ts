@@ -30,25 +30,25 @@ describe("hasModel", () => {
 		expect(hasModel("image", SLOP_IMAGE)).toBe(true);
 	});
 
-	// The same name means nothing on another provider.
+	// A name means nothing on a provider that doesn't serve it.
 	it("is false for a name under the wrong provider", () => {
 		expect(
-			hasModel("image", { provider: "openslop", model: "Seedream 5 Lite" }),
+			hasModel("video", { provider: "openslop", model: "Seedance 2.5" }),
 		).toBe(false);
 		expect(
-			hasModel("image", { provider: "runware", model: "Slop Image v1" }),
-		).toBe(false);
+			hasModel("video", { provider: "runware", model: "Seedance 2.5" }),
+		).toBe(true);
 	});
 
 	it("is false for a half pair or nothing", () => {
-		expect(hasModel("image", { model: "Slop Image v1" })).toBe(false);
+		expect(hasModel("image", { model: "Seedream 5 Lite" })).toBe(false);
 		expect(hasModel("image", { provider: "openslop" })).toBe(false);
 		expect(hasModel("image", undefined)).toBe(false);
 	});
 
 	it("is false for a provider or model outside the tables", () => {
 		expect(
-			hasModel("image", { provider: "nope", model: "Slop Image v1" }),
+			hasModel("image", { provider: "nope", model: "Seedream 5 Lite" }),
 		).toBe(false);
 		expect(
 			hasModel("image", { provider: "openslop", model: "Retired v0" }),
@@ -67,16 +67,16 @@ describe("modelEntry", () => {
 		expect(() =>
 			modelEntry("image", {
 				provider: "anthropic",
-				model: "Slop Image v1",
+				model: "Seedream 5 Lite",
 			}),
-		).toThrow('"anthropic" has no image model "Slop Image v1"');
+		).toThrow('"anthropic" has no image model "Seedream 5 Lite"');
 	});
 });
 
 describe("resolveModel", () => {
 	it("takes the first candidate the type offers", () => {
 		expect(
-			resolveModel("image", { model: "Slop Image v1" }, SEEDREAM, SLOP_IMAGE),
+			resolveModel("image", { model: "Seedream 5 Lite" }, SEEDREAM, SLOP_IMAGE),
 		).toEqual(SEEDREAM);
 	});
 
@@ -98,8 +98,8 @@ describe("listModels", () => {
 			...modelEntry("image", ref),
 		});
 		expect(listModels("image")).toEqual([
-			row({ provider: "openslop", model: "Slop Image v2" }),
-			row({ provider: "openslop", model: "Slop Image v1" }),
+			row({ provider: "openslop", model: "Muse Image" }),
+			row({ provider: "openslop", model: "Seedream 5 Lite" }),
 			row({ provider: "openslop", model: "Grok Imagine 2.0" }),
 			row({ provider: "runware", model: "Muse Image" }),
 			row(SEEDREAM),

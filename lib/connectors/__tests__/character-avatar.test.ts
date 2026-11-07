@@ -7,12 +7,12 @@ describe("character-avatar plugin", () => {
 		const params = {
 			prompt: "A young girl with red hair",
 			name: "Alice",
-			model: "Slop Image v1",
+			model: "Seedream 5 Lite",
 		};
 		expect(beforeGenerate?.(params, {})).toEqual({
 			prompt:
 				'Character portrait of Alice. A young girl with red hair. A small rectangular nameplate at the bottom of the frame reads "Alice" in clean sans-serif lettering. Plain solid white background, with no scenery, objects or location behind them',
-			model: "Slop Image v1",
+			model: "Seedream 5 Lite",
 		});
 	});
 

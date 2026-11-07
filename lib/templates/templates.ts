@@ -1,4 +1,5 @@
 import { dedent } from "@/lib/dedent";
+import { VIDEO_FORMAT } from "@/lib/script/prompt/formats";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { ArtStyle } from "@/lib/project/art-styles";
 import type { Voice } from "@/lib/project/types";
@@ -404,7 +405,7 @@ Add motion to all images and videos. All narrations should have speed="slow".
 		},
 		systemPrompt: dedent`
 # Important
-- This is an Explainer: every visual, including every title card, is a <video>. Nobody speaks inside the videos; the narrator carries every word.
+- This is an ${VIDEO_FORMAT.explainer}: every visual, including every title card, is a <video>. Nobody speaks inside the videos; the narrator carries every word.
 - Every video is a single continuous shot labelled Shot 1, with one camera move or a static frame. Never add a Shot 2.
 - The main character is always called Ethan, and Ethan must always be present in the character list of videos where relevant.
 - Ethan is already one of the characters: use him like a regular character in the story.
@@ -1330,7 +1331,7 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 		},
 		systemPrompt: dedent`
 # Important
-- This is an Explainer: every visual is a <video>, and nobody speaks inside them. The narrator carries every word.
+- This is an ${VIDEO_FORMAT.explainer}: every visual is a <video>, and nobody speaks inside them. The narrator carries every word.
 - Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.
 - Each person's segment opens on the same portrait grid of everyone in the video, zooming smoothly into that person's portrait.
 - Every video in a person's segment shows a white banner at the top reading their name, with dates or ages as small corner text where the narration states them.
@@ -1746,7 +1747,7 @@ Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or gr
 		systemPrompt: dedent`
 # Important
 - Write the script as if writing a Stickman-style explainer video about the topic in the user prompt.
-- This is an Explainer: every visual is a <video>, and nobody speaks inside them; the narrator carries every word.
+- This is an ${VIDEO_FORMAT.explainer}: every visual is a <video>, and nobody speaks inside them; the narrator carries every word.
 - Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.
 - The on-screen presenter is always called Host, referenced by name only, and Host is in the character list of every video he appears in.
 		`,

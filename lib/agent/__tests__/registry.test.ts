@@ -648,7 +648,7 @@ describe("model tools", () => {
 
 		expect(output).toContain("Videos (type video)\n");
 		expect(output).toContain(
-			"- Slop Video v1 from openslop. Best for animation and anything that isn't live action.",
+			"- Seedance 2 Fast from openslop. Best for animation and anything that isn't live action.",
 		);
 		expect(output).not.toContain("from runware");
 	});
@@ -666,15 +666,15 @@ describe("model tools", () => {
 		const updates: unknown[] = [];
 		const outcome = await run(
 			"set_default_model",
-			{ type: "voice", provider: "openslop", model: "Slop TTS v1" },
+			{ type: "voice", provider: "openslop", model: "Sonic 3.6" },
 			{ updateModels: (models: unknown) => void updates.push(models) },
 		);
 
 		expect(outcome.ok).toBe(true);
 		expect(updates).toEqual([
 			{
-				voice: { provider: "openslop", model: "Slop TTS v1" },
-				tts: { provider: "openslop", model: "Slop TTS v1" },
+				voice: { provider: "openslop", model: "Sonic 3.6" },
+				tts: { provider: "openslop", model: "Sonic 3.6" },
 			},
 		]);
 	});

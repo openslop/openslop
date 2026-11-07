@@ -157,7 +157,7 @@ function applySet(
 	)
 		return {
 			ok: false,
-			reason: `set: an asset's name never changes; remove "${op.id}" and insert it again`,
+			reason: `set: an asset's name never changes; remove "${op.id}" and create it again with an asset op`,
 		};
 
 	const unoffered = unofferedAttributes(

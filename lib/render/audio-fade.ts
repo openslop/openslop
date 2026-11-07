@@ -8,11 +8,7 @@ import type { ResolvedElement } from "./types";
  */
 export const LOOP_CROSSFADE_SEC = 0.15;
 
-/**
- * The overlap `element`'s loop copies share. Half a copy is the ceiling, past
- * which the copies would fade through each other end to end rather than at the
- * seam. One-shots and non-effect audio don't loop into anything, so they get none.
- */
+/** Half a copy is the ceiling, past which the copies would fade through each other end to end rather than at the seam. */
 export function loopCrossfadeSec(element: ResolvedElement): number {
 	if (element.role !== "effect" || element.loops < 2) return 0;
 	return Math.min(LOOP_CROSSFADE_SEC, element.trimDurationSec / 2);

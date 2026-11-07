@@ -1,4 +1,8 @@
-import { captionSourceOf, isCaptionable } from "@/lib/canvas/types";
+import {
+	captionSourceOf,
+	isCaptionable,
+	isSpeechType,
+} from "@/lib/canvas/types";
 import {
 	groupIntoLines,
 	type CaptionLine,
@@ -13,8 +17,7 @@ export type CaptionSequence = Sequence & {
 	line: CaptionLine;
 };
 
-const isSpeech = ({ element }: Sequence) =>
-	captionSourceOf(element.type) === "speech";
+const isSpeech = ({ element }: Sequence) => isSpeechType(element.type);
 
 const sceneIdsOf = (sequences: Sequence[]) =>
 	new Set(sequences.map(({ element }) => element.sceneId));

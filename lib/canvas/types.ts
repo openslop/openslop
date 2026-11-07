@@ -18,7 +18,7 @@ export type ContentSpec = {
 	outputKind: ResultKind;
 	role: ElementRole;
 	layer: LayerType;
-	captionSource?: "speech" | "video";
+	captionSource?: "video";
 };
 
 export const CONTENT_TYPES = {
@@ -27,14 +27,12 @@ export const CONTENT_TYPES = {
 		outputKind: "audio",
 		role: "overlay",
 		layer: "audio",
-		captionSource: "speech",
 	},
 	character: {
 		connector: "tts",
 		outputKind: "audio",
 		role: "overlay",
 		layer: "audio",
-		captionSource: "speech",
 	},
 	image: {
 		connector: "image",
@@ -72,10 +70,18 @@ export function captionSourceOf(
 	return spec.captionSource;
 }
 
+export const isSpeechType = (type: ContentType): boolean =>
+	CONTENT_TYPES[type].role === "overlay";
+
 export const isCaptionable = (type: ContentType): boolean =>
-	captionSourceOf(type) !== undefined;
+	isSpeechType(type) || captionSourceOf(type) !== undefined;
 
 const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
+
+export const SPEECH_TYPES = ALL_CONTENT_TYPES.filter(isSpeechType);
+export const PROMPTED_TYPES = ALL_CONTENT_TYPES.filter(
+	(type) => !isSpeechType(type),
+);
 
 export const ContentTypeSchema = z.enum(ALL_CONTENT_TYPES);
 
@@ -84,6 +90,7 @@ export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 );
 
 export const DEFAULT_DURATION = "10";
+export const DEFAULT_DURATION_SEC = Number(DEFAULT_DURATION);
 
 const DURATIONS = DURATION_OPTIONS.map(Number);
 

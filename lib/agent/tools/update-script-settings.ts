@@ -12,14 +12,16 @@ import {
 	VIDEO_FORMAT_TARGETS,
 } from "@/lib/project/video-format";
 import { Hourglass } from "@/components/ui/icon";
+import { conjunction } from "@/lib/format";
 import { defineTool } from "./define-tool";
 import { atLeastOne } from "./inputs";
 
 export const updateScriptSettings = defineTool({
 	description: dedent`
-	  Change how the next script is written: its language, length and format. Send only what
-	  changes. Nothing on the canvas changes; to change what is there, update the setting and
-	  then edit_script.
+	  Change how the next script is written: its language, length and format. write_script
+	  follows all three; adapt_script keeps the user's words, so only the language applies to it.
+	  Send only what changes. Nothing on the canvas changes; to change what is there, update the
+	  setting and then edit_script.
 
 	  - language: what narration and dialogue are written in. "auto" follows whatever language
 	    the user writes in. ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}
@@ -45,6 +47,6 @@ export const updateScriptSettings = defineTool({
 		const changed = Object.entries(patch).map(
 			([key, value]) => `${key} to ${value}`,
 		);
-		return `Set the ${changed.join(" and ")}. It applies to the next script written; what is on the canvas is unchanged.`;
+		return `Set the ${conjunction(changed)}. It applies to the next script written; what is on the canvas is unchanged.`;
 	},
 });

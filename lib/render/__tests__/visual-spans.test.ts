@@ -6,6 +6,8 @@ import type { ResolvedElement } from "../types";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { secondsForWords } from "@/lib/project/video-length";
 import { layoutOf } from "./_layout";
+import { totalDuration } from "../sequences";
+import { transitionOverlapSec } from "../transitions";
 import { splitAttributes } from "@/lib/canvas/element-attributes";
 
 let nextId = 0;
@@ -118,40 +120,54 @@ describe("measureVisualSpans", () => {
 
 describe("measureRuntime", () => {
 	it("adds up every visual's time on screen, not just the speech over it", () => {
-		const runtime = measureRuntime([
-			scene(
-				element("video", "A fox runs.", { duration: "10" }),
-				element("video", "It stops.", { duration: "8" }),
-			),
-		]);
+		const runtime = measureRuntime(
+			[
+				scene(
+					element("video", "A fox runs.", { duration: "10" }),
+					element("video", "It stops.", { duration: "8" }),
+				),
+			],
+			"none",
+		);
 
 		expect(runtime).toBe(18);
 	});
 
 	it("counts dialogue before the first visual, which plays over a blank scene", () => {
-		const runtime = measureRuntime([
-			scene(element("narration", words(180)), element("image", "A forest.")),
-		]);
+		const runtime = measureRuntime(
+			[scene(element("narration", words(180)), element("image", "A forest."))],
+			"none",
+		);
 
 		expect(runtime).toBe(secondsForWords(180) + 1);
 	});
 
-	it("measures a narration-only script by its speech", () => {
-		expect(measureRuntime([scene(element("narration", words(90)))])).toBe(
-			secondsForWords(90),
+	it("overlaps each scene after the first by the transition", () => {
+		const script = [
+			scene(element("narration", words(30))),
+			scene(element("image", "A forest."), element("image", "A river.")),
+		];
+
+		expect(measureRuntime(script, "fade")).toBeCloseTo(
+			measureRuntime(script, "none") - 2 * transitionOverlapSec("fade"),
 		);
+	});
+
+	it("measures a narration-only script by its speech", () => {
+		expect(
+			measureRuntime([scene(element("narration", words(90)))], "none"),
+		).toBe(secondsForWords(90));
 	});
 });
 
 /**
- * `measureVisualSpans` mirrors the scene-builder rule off the unrendered
- * script, so the two have to agree once the assets exist. Nothing else enforces
- * that: the layout skips ungenerated elements, which is why the estimate exists.
+ * The estimate copies the scene-builder rule off the unrendered script, so the
+ * two have to agree once every element is generated at the length it was set to.
  */
 describe("against buildRenderLayout", () => {
 	const resolved = (
 		node: ReturnType<typeof element>,
-		durationSec: number,
+		mediaDurationSec: number,
 	): ResolvedElement => {
 		const spec = CONTENT_TYPES[node.type];
 		return {
@@ -163,9 +179,9 @@ describe("against buildRenderLayout", () => {
 			sceneNumber: 1,
 			prompt: "",
 			url: `https://example.com/${node.id}`,
-			trimDurationSec: durationSec,
-			mediaDurationSec: 0,
 			trimStartSec: 0,
+			trimDurationSec: mediaDurationSec,
+			mediaDurationSec,
 			loops: 1,
 			loop: false,
 			volume: 10,
@@ -173,32 +189,44 @@ describe("against buildRenderLayout", () => {
 		};
 	};
 
-	it("estimates the same lengths the layout lays down", () => {
-		const first = element("image", "A forest.");
-		const line = element("narration", words(90));
-		const second = element("video", "A pan.", { duration: "8" });
-		const shortLine = element("character", words(15));
-		const third = element("video", "A zoom.", { duration: "8" });
-		const lastLine = element("character", words(15));
-
-		const lengths = measureVisualSpans([
-			scene(first, line),
-			scene(second, shortLine, element("music", "Soft piano.")),
-			scene(third, lastLine),
-		]);
-		const { series } = layoutOf([
-			resolved(first, 0),
+	const opening = element("narration", words(15));
+	const still = element("image", "A forest.");
+	const line = element("narration", words(90));
+	const held = element("video", "A pan.", { duration: "4" });
+	const heldLine = element("character", words(30));
+	const whole = element("video", "A zoom.", { duration: "8" });
+	const shortLine = element("character", words(6));
+	const script = [
+		scene(opening, still, line),
+		scene(held, heldLine, element("music", "Soft piano.")),
+		scene(whole, shortLine),
+	];
+	const layout = layoutOf(
+		[
+			resolved(opening, secondsForWords(15)),
+			resolved(still, 0),
 			resolved(line, secondsForWords(90)),
-			resolved(second, 8),
-			resolved(shortLine, secondsForWords(15)),
-			resolved(third, 8),
-			resolved(lastLine, secondsForWords(15)),
-		]);
+			resolved(held, 4),
+			resolved(heldLine, secondsForWords(30)),
+			resolved(whole, 8),
+			resolved(shortLine, secondsForWords(6)),
+		],
+		{ transitionType: "fade", fps: 25 },
+	);
 
-		expect(series).toHaveLength(lengths.length);
-		series.forEach((seq, i) => {
-			expect(seq.element.id).toBe(lengths[i].id);
-			expect(seq.duration).toBeCloseTo(lengths[i].seconds);
-		});
+	it("estimates each visual's slot as the layout lays it down", () => {
+		const [, ...visuals] = layout.series;
+		const lengths = measureVisualSpans(script);
+
+		expect(visuals.map(({ element: { id } }) => id)).toEqual(
+			lengths.map(({ id }) => id),
+		);
+		visuals.forEach((sequence, i) =>
+			expect(totalDuration(sequence)).toBeCloseTo(lengths[i].seconds),
+		);
+	});
+
+	it("estimates the runtime the layout lays down", () => {
+		expect(measureRuntime(script, "fade")).toBeCloseTo(layout.totalDurationSec);
 	});
 });

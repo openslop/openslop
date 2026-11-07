@@ -1,3 +1,4 @@
+import sumBy from "lodash/sumBy";
 import type { Descendant } from "slate";
 import { isSpeech } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
@@ -9,6 +10,7 @@ import {
 } from "@/lib/canvas/types";
 import { getDuration } from "../canvas/element-attributes";
 import { elementTrim } from "./clip-trim";
+import { transitionOverlapSec, type TransitionType } from "./transitions";
 import { MIN_DURATION_SEC } from "./types";
 import { secondsForWords } from "../project/video-length";
 
@@ -100,13 +102,18 @@ const walk = (descendants: Descendant[]): Walk => {
 export const measureVisualSpans = (descendants: Descendant[]): VisualSpan[] =>
 	walk(descendants).spans.map(toSpan);
 
-/** The whole video's length, dialogue before the first visual included: it plays over a blank scene. */
-export const measureRuntime = (descendants: Descendant[]): number => {
+/** The whole video's length: dialogue before the first visual plays over a blank scene, and scenes overlap by the transition. */
+export const measureRuntime = (
+	descendants: Descendant[],
+	transitionType: TransitionType,
+): number => {
 	const { spans, leadingWords } = walk(descendants);
-	return spans
-		.map(toSpan)
-		.reduce(
-			(total, { seconds }) => total + seconds,
-			secondsForWords(leadingWords),
-		);
+	const scenes = spans.length + (leadingWords > 0 ? 1 : 0);
+	const overlapSec =
+		Math.max(0, scenes - 1) * transitionOverlapSec(transitionType);
+	return (
+		sumBy(spans, (span) => toSpan(span).seconds) +
+		secondsForWords(leadingWords) -
+		overlapSec
+	);
 };

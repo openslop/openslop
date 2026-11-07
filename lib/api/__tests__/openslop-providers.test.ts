@@ -49,42 +49,42 @@ async function loadHostedProviderFor() {
 const HOSTED = [
 	{
 		type: "image",
-		model: "Slop Image v2",
+		model: "Muse Image",
 		envVar: "RUNWARE_API_KEY",
 		real: "RunwareImage",
 		mock: "MockImage",
 	},
 	{
 		type: "video",
-		model: "Slop Video v2",
+		model: "Kling 3 Omni",
 		envVar: "RUNWARE_API_KEY",
 		real: "RunwareVideo",
 		mock: "MockVideo",
 	},
 	{
 		type: "music",
-		model: "Slop Music v1",
+		model: "Eleven Music v1",
 		envVar: "ELEVENLABS_API_KEY",
 		real: "ElevenLabsMusic",
 		mock: "MockMusic",
 	},
 	{
 		type: "sfx",
-		model: "Slop SFX v1",
+		model: "Eleven Text to Sound v2",
 		envVar: "ELEVENLABS_API_KEY",
 		real: "ElevenLabsSFX",
 		mock: "MockSFX",
 	},
 	{
 		type: "llm",
-		model: "Slop LLM v1",
+		model: "Claude Opus 5",
 		envVar: "ANTHROPIC_API_KEY",
 		real: "AnthropicLLM",
 		mock: "MockLLM",
 	},
 	{
 		type: "tts",
-		model: "Slop TTS v1",
+		model: "Sonic 3.6",
 		envVar: "CARTESIA_API_KEY",
 		real: "CartesiaTTS",
 		mock: "MockTTS",
@@ -116,16 +116,16 @@ describe("hostedProviderFor", () => {
 	it("builds each hosted model once", async () => {
 		const hostedProviderFor = await loadHostedProviderFor();
 
-		expect(hostedProviderFor("tts", "Slop TTS v1")).toBe(
-			hostedProviderFor("tts", "Slop TTS v1"),
+		expect(hostedProviderFor("tts", "Sonic 3.6")).toBe(
+			hostedProviderFor("tts", "Sonic 3.6"),
 		);
 	});
 
 	it("throws for a model OpenSlop does not host", async () => {
 		const hostedProviderFor = await loadHostedProviderFor();
 
-		expect(() => hostedProviderFor("image", "Seedream 5 Lite")).toThrow(
-			'OpenSlop hosts no image model "Seedream 5 Lite"',
+		expect(() => hostedProviderFor("video", "Seedance 2.5")).toThrow(
+			'OpenSlop hosts no video model "Seedance 2.5"',
 		);
 	});
 });

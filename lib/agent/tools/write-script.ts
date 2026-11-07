@@ -17,7 +17,8 @@ export const writeScript = defineTool({
 	  for anything that is not a story, write the brief directly.
 
 	  Say which format the finished video takes (${VIDEO_FORMAT_NAMES.join(", ")}) and why,
-	  since the writer reads only the brief.
+	  unless the format setting already picks one: the writer reads the brief, the script
+	  settings and the assets, never this conversation.
 
 	  When the user gave you the actual text they want on the canvas, rather than an idea to
 	  write from, use adapt_script instead.

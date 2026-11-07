@@ -125,9 +125,9 @@ describe("deserializeWithScenes", () => {
 	it("round-trips assets through serializeOSMLWithScenes", () => {
 		const osml = [
 			'<asset_style id="a1">noir &amp; "moody"</asset_style>',
-			'<asset_voice id="a2" provider="openslop" model="Slop TTS v1" name="Narrator" gender="feminine"></asset_voice>',
-			'<asset_avatar id="a3" name="Ada &lt;the first&gt;" provider="openslop" model="Slop Image v1">tall</asset_avatar>',
-			'<asset_voice id="a4" provider="openslop" model="Slop TTS v1" name="Ada &lt;the first&gt;"></asset_voice>',
+			'<asset_voice id="a2" provider="openslop" model="Sonic 3.6" name="Narrator" gender="feminine"></asset_voice>',
+			'<asset_avatar id="a3" name="Ada &lt;the first&gt;" provider="openslop" model="Seedream 5 Lite">tall</asset_avatar>',
+			'<asset_voice id="a4" provider="openslop" model="Sonic 3.6" name="Ada &lt;the first&gt;"></asset_voice>',
 			'<asset_references id="a5" images="https://cdn/a.png?x=1&amp;y=2,https://cdn/b.png"></asset_references>',
 		].join("\n");
 
