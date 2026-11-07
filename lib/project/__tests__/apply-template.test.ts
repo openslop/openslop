@@ -159,7 +159,7 @@ describe("applyTemplate", () => {
 					{
 						id: "line",
 						type: "narration",
-						children: [{ id: "line-t", type: "narration", text: "hello" }],
+						children: [{ id: "line-t", text: "hello" }],
 					},
 				],
 			},

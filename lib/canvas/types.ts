@@ -77,9 +77,7 @@ export const isCaptionable = (type: ContentType): boolean =>
 
 const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
 
-export const ContentTypeSchema = z.enum(
-	ALL_CONTENT_TYPES as [ContentType, ...ContentType[]],
-);
+export const ContentTypeSchema = z.enum(ALL_CONTENT_TYPES);
 
 export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 	String(i + 4),
@@ -88,6 +86,8 @@ export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 export const DEFAULT_DURATION = "10";
 
 const DURATIONS = DURATION_OPTIONS.map(Number);
+
+export const DURATION_MIN = Math.min(...DURATIONS);
 
 /** The longest a video can be generated at, so the ceiling on what one visual covers. */
 export const DURATION_MAX = Math.max(...DURATIONS);
@@ -165,12 +165,10 @@ export const isGenerated = (
 ): element is GeneratedElement => connectorOf(element.type) !== undefined;
 
 export const ElementTypeSchema = z.enum(
-	Object.keys(ELEMENT_TYPES) as [ElementType, ...ElementType[]],
+	Object.keys(ELEMENT_TYPES) as ElementType[],
 );
 
-export const AssetTypeSchema = z.enum(
-	Object.keys(ASSET_TYPES) as [AssetType, ...AssetType[]],
-);
+export const AssetTypeSchema = z.enum(Object.keys(ASSET_TYPES) as AssetType[]);
 
 export type CanvasEditor = BaseEditor &
 	HistoryEditor &
@@ -218,7 +216,6 @@ export type CanvasBlock = Scene | CanvasElement;
 
 export type CanvasText = {
 	id: string;
-	type?: ElementType;
 	text: string;
 };
 

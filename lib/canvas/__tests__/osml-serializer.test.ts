@@ -73,8 +73,8 @@ describe("getElementText", () => {
 			id: "e1",
 			type: "narration",
 			children: [
-				{ id: "t1", type: "narration", text: "Hello " },
-				{ id: "t2", type: "narration", text: "world" },
+				{ id: "t1", text: "Hello " },
+				{ id: "t2", text: "world" },
 			],
 		};
 		expect(getElementText(narration)).toBe("Hello world");

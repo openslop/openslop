@@ -3,7 +3,8 @@ import pick from "lodash/pick";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
-	DURATION_OPTIONS,
+	DURATION_MAX,
+	DURATION_MIN,
 	LOOPS_OPTIONS,
 	VOLUME_OPTIONS,
 	isToggleOn,
@@ -47,7 +48,7 @@ const boundsOf = (options: readonly string[]) => {
 
 const VOLUME = boundsOf(VOLUME_OPTIONS);
 const LOOPS = boundsOf(LOOPS_OPTIONS);
-const DURATION = boundsOf(DURATION_OPTIONS);
+const DURATION = { min: DURATION_MIN, max: DURATION_MAX };
 
 const DEFAULT_VOLUME = VOLUME.max;
 

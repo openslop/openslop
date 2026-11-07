@@ -25,13 +25,13 @@ const video = (attrs: Record<string, string> = {}): ContentElement => ({
 	id: "video-1",
 	type: "video",
 	generationAttributes: attrs,
-	children: [{ id: "t", type: "video", text: "slow pan" }],
+	children: [{ id: "t", text: "slow pan" }],
 });
 
 const image: ContentElement = {
 	id: "img-1",
 	type: "image",
-	children: [{ id: "t", type: "image", text: "a sunset" }],
+	children: [{ id: "t", text: "a sunset" }],
 };
 
 const PREVIOUS_VIDEO_RESULT: Record<string, AssetResult> = {

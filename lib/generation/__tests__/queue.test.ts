@@ -415,7 +415,7 @@ describe("GenerationQueue", () => {
 					{
 						id: "scene-1",
 						type: "image",
-						children: [{ id: "scene-1-t", type: "image", text: "" }],
+						children: [{ id: "scene-1-t", text: "" }],
 					},
 				],
 				generationQueue,

@@ -14,7 +14,7 @@ export const content = (
 ): ContentElement => ({
 	id,
 	type,
-	children: [{ id: `${id}-t`, type, text }],
+	children: [{ id: `${id}-t`, text }],
 });
 
 export const scene = (children: ContentElement[], id = "s"): Scene => ({
