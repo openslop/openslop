@@ -27,6 +27,7 @@ import {
 import { SectionTitle } from "@/components/ui/section-title";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 
 function ElementSettings({
 	element,
@@ -41,7 +42,7 @@ function ElementSettings({
 			<SimpleTooltip label="Settings">
 				<PopoverTrigger asChild>
 					<HeaderIconButton ariaLabel="Settings">
-						<SlidersHorizontal size={14} />
+						<SlidersHorizontal size={ICON_SIZES.header} />
 					</HeaderIconButton>
 				</PopoverTrigger>
 			</SimpleTooltip>

@@ -319,7 +319,7 @@ export function Timeline() {
 							disabled={!canZoomOut}
 							size="sm"
 						>
-							<ZoomOut size={12} />
+							<ZoomOut size={ICON_SIZES.sm} />
 						</TooltipIconButton>
 						<TooltipIconButton
 							label={`Zoom in (${Math.round(zoom * 100)}%)`}
@@ -327,7 +327,7 @@ export function Timeline() {
 							disabled={!canZoomIn}
 							size="sm"
 						>
-							<ZoomIn size={12} />
+							<ZoomIn size={ICON_SIZES.sm} />
 						</TooltipIconButton>
 					</div>
 

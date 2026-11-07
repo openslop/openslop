@@ -4,6 +4,7 @@ import { renderPrompt } from "@/lib/connectors/character-refs";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, History, Pin, RotateCcw } from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 import {
 	Popover,
 	PopoverContent,
@@ -167,7 +168,7 @@ export function ElementHistoryPopover({
 			<SimpleTooltip label="Generation history">
 				<PopoverTrigger asChild>
 					<HeaderIconButton ariaLabel="Generation history">
-						<History size={14} />
+						<History size={ICON_SIZES.header} />
 					</HeaderIconButton>
 				</PopoverTrigger>
 			</SimpleTooltip>

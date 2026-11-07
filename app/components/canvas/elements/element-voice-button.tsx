@@ -1,6 +1,7 @@
 "use client";
 
 import { Mic } from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { speakerOf } from "@/lib/canvas/assets";
 import type { ContentElement } from "@/lib/canvas/types";
@@ -16,7 +17,7 @@ export function ElementVoiceButton({ element }: { element: ContentElement }) {
 	return (
 		<SimpleTooltip label="Edit voice">
 			<HeaderIconButton ariaLabel="Edit voice" onClick={open}>
-				<Mic size={14} />
+				<Mic size={ICON_SIZES.header} />
 			</HeaderIconButton>
 		</SimpleTooltip>
 	);
