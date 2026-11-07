@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { act, useEffect } from "react";
+import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChatOnToolCallCallback } from "ai";
@@ -75,10 +75,7 @@ function Probe({
 }: {
 	onControl: (control: ReturnType<typeof useSloppy>) => void;
 }) {
-	const current = useSloppy();
-	useEffect(() => {
-		onControl(current);
-	});
+	onControl(useSloppy());
 	return null;
 }
 
