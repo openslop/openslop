@@ -1,14 +1,14 @@
 // @vitest-environment happy-dom
-// @ts-expect-error React test environment flag
-globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it } from "vitest";
 import { useTimelineZoom, ZOOM_LEVELS } from "../use-timeline-zoom";
 
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+
 function renderTimelineHook(totalDurationSec = 100, viewportWidth = 1000) {
-	let latest!: ReturnType<typeof useTimelineZoom>;
+	let latest: ReturnType<typeof useTimelineZoom> | undefined;
 	function TestHarness() {
 		latest = useTimelineZoom(totalDurationSec, viewportWidth);
 		return null;
@@ -22,16 +22,17 @@ function renderTimelineHook(totalDurationSec = 100, viewportWidth = 1000) {
 
 	return {
 		get current() {
+			if (!latest) throw new Error("useTimelineZoom has not rendered");
 			return latest;
 		},
 		zoomIn() {
 			act(() => {
-				latest.zoomIn();
+				this.current.zoomIn();
 			});
 		},
 		zoomOut() {
 			act(() => {
-				latest.zoomOut();
+				this.current.zoomOut();
 			});
 		},
 		unmount() {
@@ -65,7 +66,6 @@ describe("useTimelineZoom behavior", () => {
 		expect(hook.current.zoom).toBe(64);
 		expect(hook.current.canZoomIn).toBe(false);
 
-		// Further zoomIn calls clamp at the upper bound
 		hook.zoomIn();
 		expect(hook.current.zoom).toBe(64);
 		expect(hook.current.canZoomIn).toBe(false);
@@ -75,9 +75,8 @@ describe("useTimelineZoom behavior", () => {
 	it("steps down through zoom levels on zoomOut and clamps at 1x", () => {
 		const hook = renderTimelineHook(100, 1000);
 
-		// Zoom in a few stops
-		hook.zoomIn(); // 1.25
-		hook.zoomIn(); // 1.5
+		hook.zoomIn();
+		hook.zoomIn();
 		expect(hook.current.zoom).toBe(1.5);
 
 		hook.zoomOut();
@@ -88,7 +87,6 @@ describe("useTimelineZoom behavior", () => {
 		expect(hook.current.zoom).toBe(1);
 		expect(hook.current.canZoomOut).toBe(false);
 
-		// Further zoomOut calls clamp at lower bound
 		hook.zoomOut();
 		expect(hook.current.zoom).toBe(1);
 		expect(hook.current.canZoomOut).toBe(false);
@@ -96,10 +94,10 @@ describe("useTimelineZoom behavior", () => {
 	});
 
 	it("calculates pxPerSec proportionally to duration and viewport", () => {
-		const hook = renderTimelineHook(50, 1000); // 20 px/sec at 1x
+		const hook = renderTimelineHook(50, 1000);
 		expect(hook.current.pxPerSec).toBe(20);
 
-		hook.zoomIn(); // 1.25x
+		hook.zoomIn();
 		expect(hook.current.pxPerSec).toBe(25);
 		hook.unmount();
 	});
