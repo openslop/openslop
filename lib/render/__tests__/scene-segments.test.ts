@@ -123,7 +123,7 @@ const sequence = (
 	start: number,
 	duration: number,
 	element: ResolvedElement,
-): Sequence => ({ element, start, duration });
+): Sequence => ({ element, start, duration, minDuration: 0 });
 
 const layout = (
 	series: Sequence[] = [],

@@ -39,7 +39,7 @@ describe("snapTarget", () => {
 });
 
 describe("snapTrimEdge", () => {
-	const clip = { element: el({}), start: 2, duration: 4 };
+	const clip = { element: el({}), start: 2, duration: 4, minDuration: 0 };
 
 	it("holds the end on a target it comes near", () => {
 		const { trim, snappedSec } = snapTrimEdge(clip, "end", 0.8, [6.9], 0.15);
@@ -60,7 +60,13 @@ describe("snapTrimEdge", () => {
 	});
 
 	it("snaps a cut clip's end from where it's drawn", () => {
-		const cut = { element: el({ trimDurationSec: 10 }), start: 0, duration: 6 };
+		const cut = {
+			element: el({ trimDurationSec: 10 }),
+			start: 0,
+			duration: 6,
+			minDuration: 0,
+			maxDuration: 6,
+		};
 		const { trim, snappedSec } = snapTrimEdge(cut, "end", -0.9, [5], 0.15);
 		expect(snappedSec).toBe(5);
 		expect(trim.trimDurationSec).toBe(5);
@@ -71,6 +77,7 @@ describe("snapTrimEdge", () => {
 			element: el({ trimDurationSec: 9.9 }),
 			start: 0,
 			duration: 9.9,
+			minDuration: 0,
 		};
 		const { trim, snappedSec } = snapTrimEdge(short, "end", 0, [10.02], 0.2);
 		expect(snappedSec).toBeNull();
@@ -84,14 +91,14 @@ describe("snapTargets", () => {
 
 	it("marks where every other clip starts and ends", () => {
 		const clips = [
-			{ element: image, start: 0, duration: 5 },
-			{ element: video, start: 5, duration: 4 },
+			{ element: image, start: 0, duration: 5, minDuration: 1 },
+			{ element: video, start: 5, duration: 4, minDuration: 1 },
 		];
 		expect(new Set(snapTargets(clips, "v"))).toEqual(new Set([0, 5]));
 	});
 
 	it("marks where a video's media stops as well as where its scene ends", () => {
-		const clips = [{ element: video, start: 0, duration: 6 }];
+		const clips = [{ element: video, start: 0, duration: 4, minDuration: 6 }];
 		expect(new Set(snapTargets(clips, "other"))).toEqual(new Set([0, 4, 6]));
 	});
 });

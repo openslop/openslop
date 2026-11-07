@@ -2,6 +2,7 @@ import { isForeground } from "@/lib/canvas/guards";
 import { sceneLabel } from "@/lib/canvas/constants";
 import { CONTENT_TYPES, type Scene } from "@/lib/canvas/types";
 import { toFrames } from "./frames";
+import { totalDuration } from "./sequences";
 import type { ResolvedElement, Sequence, RenderLayout } from "./types";
 
 export type SeekThumbnail = { url: string; kind: "image" | "video" };
@@ -65,7 +66,8 @@ function toThumbnail(element: ResolvedElement): SeekThumbnail | null {
  */
 export function buildSceneSegments(layout: RenderLayout): SceneSegment[] {
 	const segments: SceneSegment[] = [];
-	for (const { element, start, duration } of layout.series) {
+	for (const { element, start, ...slot } of layout.series) {
+		const duration = totalDuration(slot);
 		const last = segments.at(-1);
 		if (last?.sceneId === element.sceneId) {
 			last.duration = start + duration - last.start;

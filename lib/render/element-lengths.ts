@@ -10,7 +10,7 @@ import {
 } from "@/lib/canvas/types";
 import { getDuration } from "../canvas/element-attributes";
 import { elementTrim, isTrimmed } from "./clip-trim";
-import { MIN_DURATION_SEC } from "./scene-builder";
+import { MIN_DURATION_SEC } from "./types";
 import { secondsForWords } from "../project/video-length";
 
 /** How long one visual holds the screen, and what decides it. */

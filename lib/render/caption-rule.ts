@@ -45,6 +45,7 @@ function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 		line,
 		start: start + line.startMs / 1000,
 		duration: line.durationMs / 1000,
+		minDuration: 0,
 	}));
 }
 

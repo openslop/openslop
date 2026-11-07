@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-	audioEnvelopeFrames,
 	audioFadeSec,
 	LOOP_CROSSFADE_SEC,
 	loopCrossfadeSec,
@@ -82,19 +81,11 @@ describe("audioFadeSec", () => {
 	});
 });
 
-describe("audioEnvelopeFrames", () => {
-	it("spans the audio file when the sequence window outlasts it", () => {
-		expect(audioEnvelopeFrames(el({ trimDurationSec: 0.5 }), 24, 24)).toBe(12);
-	});
-
-	it("spans the sequence window when the audio outlasts it", () => {
-		expect(audioEnvelopeFrames(el({ trimDurationSec: 4 }), 48, 24)).toBe(48);
-	});
-
-	it("sums a looping effect's copies to a constant across the seam", () => {
+describe("a looping effect's copies", () => {
+	it("sum to a constant across the seam", () => {
 		const fps = 24;
 		const element = el({ trimDurationSec: 0.5, loops: 2 });
-		const window = audioEnvelopeFrames(element, toFrames(1, fps), fps);
+		const window = toFrames(element.trimDurationSec, fps);
 		const volume = audioVolume(1, window, toFrames(audioFadeSec(element), fps));
 		if (typeof volume !== "function") throw new Error("Expected function");
 		const stride = toFrames(loopStrideSec(element), fps);

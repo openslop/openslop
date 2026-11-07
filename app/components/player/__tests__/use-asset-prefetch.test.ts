@@ -55,7 +55,7 @@ function el(url: string): ResolvedElement {
 }
 
 function seq(element: ResolvedElement): Sequence {
-	return { element, start: 0, duration: 1 };
+	return { element, start: 0, duration: 1, minDuration: 0 };
 }
 
 function layout(partial: Partial<RenderLayout>): RenderLayout {
