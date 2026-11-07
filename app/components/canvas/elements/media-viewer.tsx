@@ -1,6 +1,6 @@
 "use client";
 
-import { Maximize } from "@/components/ui/icon";
+import { Maximize2 } from "@/components/ui/icon";
 import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
 import {
 	Dialog,
@@ -37,7 +37,7 @@ export function MediaViewer({
 							className,
 						)}
 					>
-						<Maximize size={ICON_SIZES.sm} />
+						<Maximize2 size={ICON_SIZES.sm} />
 					</IconButton>
 				</DialogTrigger>
 			</SimpleTooltip>
