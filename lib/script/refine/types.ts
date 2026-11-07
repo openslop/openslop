@@ -12,13 +12,17 @@ const newElement = z.object({
 
 export type NewElement = z.infer<typeof newElement>;
 
-const insertOp = z.object({
-	op: z.literal("insert"),
+const placement = {
 	anchor_id: z.string().optional(),
 	position: z
 		.enum(["before", "after"])
 		.optional()
 		.describe("Which side of the anchor; after when omitted."),
+};
+
+const insertOp = z.object({
+	op: z.literal("insert"),
+	...placement,
 	elements: z
 		.array(newElement)
 		.min(1)
@@ -37,6 +41,18 @@ const removeOp = z.object({
 	id: z.string(),
 });
 
+const moveOp = z.object({
+	op: z.literal("move"),
+	id: z.string(),
+	...placement,
+	scene: z
+		.boolean()
+		.optional()
+		.describe(
+			"Move the whole scene holding `id`, next to the scene holding `anchor_id`.",
+		),
+});
+
 const setOp = z.object({
 	op: z.literal("set"),
 	id: z.string(),
@@ -48,6 +64,7 @@ export const refineOpSchema = z.discriminatedUnion("op", [
 	insertOp,
 	assetOp,
 	removeOp,
+	moveOp,
 	setOp,
 ]);
 
