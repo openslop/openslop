@@ -206,6 +206,34 @@ describe("HTTP gateways", () => {
 		it.each([
 			[
 				"generation",
+				(gateway: HttpLLMGateway, signal: AbortSignal) =>
+					gateway.generate({ prompt: "hi" }, signal),
+				jsonResponse({ text: "Hello!", model: "x" }),
+			],
+			[
+				"stream",
+				(gateway: HttpLLMGateway, signal: AbortSignal) =>
+					Array.fromAsync(gateway.stream({ prompt: "hi" }, signal)),
+				sseResponse([{ text: "Hi", done: true }]),
+			],
+		] as const)(
+			"hands the abort signal to a %s request",
+			async (_, call, response) => {
+				fetchMock.mockResolvedValue(response);
+				const { signal } = new AbortController();
+
+				await call(new HttpLLMGateway(config(HOSTED_LLM)), signal);
+
+				expect(fetchMock).toHaveBeenCalledWith(
+					`/api/v1/llm`,
+					expect.objectContaining({ signal }),
+				);
+			},
+		);
+
+		it.each([
+			[
+				"generation",
 				(gateway: HttpLLMGateway) => gateway.generate({ prompt: "hi" }),
 				jsonResponse({ text: "Hello!", model: "x" }),
 			],

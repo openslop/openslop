@@ -10,14 +10,13 @@ import type { AttributeSchema } from "./attributes/schema";
 import type {
 	ConnectorConfig,
 	ConnectorType,
-	LLMConnector,
 	ModelRef,
 	ProviderConstructor,
 	TTSConnector,
 } from "./types";
 
 type ConnectorTypeMap = {
-	llm: LLMConnector;
+	llm: HttpLLMConnector;
 	music: HttpMusicConnector;
 	sfx: HttpSFXConnector;
 	image: HttpImageConnector;

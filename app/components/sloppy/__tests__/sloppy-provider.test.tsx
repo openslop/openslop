@@ -3,7 +3,9 @@
 import { act, useEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ChatOnToolCallCallback } from "ai";
 import type { SloppyMessage } from "@/lib/agent/types";
+import type { ToolOutcome } from "@/lib/agent/tools/registry";
 import { SloppyProvider, useSloppy } from "../sloppy-provider";
 
 const state = vi.hoisted(() => ({
@@ -12,17 +14,22 @@ const state = vi.hoisted(() => ({
 	sendMessage: vi.fn(),
 	stop: vi.fn(),
 	addToolOutput: vi.fn(),
+	runTool: vi.fn(),
+	onToolCall: undefined as ChatOnToolCallCallback<SloppyMessage> | undefined,
 }));
 
 vi.mock("@ai-sdk/react", () => ({
-	useChat: () => ({
-		messages: state.messages,
-		setMessages: state.setMessages,
-		sendMessage: state.sendMessage,
-		stop: state.stop,
-		addToolOutput: state.addToolOutput,
-		status: "streaming",
-	}),
+	useChat: (options: { onToolCall: typeof state.onToolCall }) => {
+		state.onToolCall = options.onToolCall;
+		return {
+			messages: state.messages,
+			setMessages: state.setMessages,
+			sendMessage: state.sendMessage,
+			stop: state.stop,
+			addToolOutput: state.addToolOutput,
+			status: "streaming",
+		};
+	},
 }));
 
 vi.mock("@/lib/project/project-provider", () => ({
@@ -31,7 +38,7 @@ vi.mock("@/lib/project/project-provider", () => ({
 }));
 
 vi.mock("@/lib/agent/tools/use-agent-tools", () => ({
-	useAgentTools: () => vi.fn(),
+	useAgentTools: () => state.runTool,
 }));
 
 vi.mock("@/lib/connectors/use-default-models", () => ({
@@ -117,5 +124,50 @@ describe("SloppyProvider stop", () => {
 				errorText: "Stopped by you before the editor finished it",
 			},
 		]);
+	});
+});
+
+describe("SloppyProvider tool calls", () => {
+	const toolCall = {
+		type: "tool-call",
+		toolCallId: "call-0",
+		toolName: "review_script",
+		input: {},
+	} as const;
+
+	function runToolCall() {
+		if (!state.onToolCall) throw new Error("useChat got no onToolCall");
+		return state.onToolCall({ toolCall });
+	}
+
+	it("hands a finished tool's output back to the model", async () => {
+		state.runTool.mockResolvedValueOnce({
+			ok: true,
+			output: "Tighten act two",
+		});
+		act(() => current().send("review it"));
+
+		await runToolCall();
+
+		expect(state.addToolOutput).toHaveBeenCalledWith({
+			tool: "review_script",
+			toolCallId: "call-0",
+			output: "Tighten act two",
+		});
+	});
+
+	it("aborts the running tool and drops its output when the user stops", async () => {
+		const tool = Promise.withResolvers<ToolOutcome>();
+		state.runTool.mockReturnValueOnce(tool.promise);
+		act(() => current().send("review it"));
+
+		const running = runToolCall();
+		act(() => current().stop());
+		tool.resolve({ ok: true, output: "Tighten act two" });
+		await running;
+
+		const signal: AbortSignal = state.runTool.mock.calls[0]?.[1];
+		expect(signal.aborted).toBe(true);
+		expect(state.addToolOutput).not.toHaveBeenCalled();
 	});
 });
