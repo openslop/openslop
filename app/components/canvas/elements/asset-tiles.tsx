@@ -43,7 +43,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 		<AssetTile
 			name={name}
 			Icon={Mic}
-			type="character"
+			type="narration"
 			fallback="icon"
 			onEdit={() => editAsset("asset_voice", name)}
 			{...tile}
