@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
-import { trimDurationDef } from "@/lib/connectors/attributes/common";
+import { trimEndDef } from "@/lib/connectors/attributes/common";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import type { ContentElement } from "@/lib/canvas/types";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -74,15 +74,15 @@ describe("AttributeBadge", () => {
 
 	describe("seconds", () => {
 		const reset = (html: string) =>
-			html.match(/<button[^>]*aria-label="Reset trim duration"[^>]*>/)?.[0];
+			html.match(/<button[^>]*aria-label="Reset trim end"[^>]*>/)?.[0];
 
 		it("offers a reset once the field holds a value", () => {
-			const html = render(elementWith({ trimDuration: "4" }), trimDurationDef);
+			const html = render(elementWith({ trimEnd: "4" }), trimEndDef);
 			expect(reset(html)).toBeDefined();
 		});
 
 		it("has nothing to reset while the field is on Auto", () => {
-			const html = render(elementWith({}), trimDurationDef);
+			const html = render(elementWith({}), trimEndDef);
 			expect(reset(html)).toBeUndefined();
 		});
 	});

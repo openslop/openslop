@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
 import {
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
@@ -10,7 +9,7 @@ import {
 	getDuration,
 	getLoops,
 	getMotion,
-	getTrimDuration,
+	getTrimEnd,
 	getTrimStart,
 	getVolume,
 	getVolumeGain,
@@ -178,7 +177,7 @@ describe("layoutAttributeSignature", () => {
 			"motion",
 			"uploadedFrame",
 			"trimStart",
-			"trimDuration",
+			"trimEnd",
 		]);
 		expect(
 			layoutAttributeSignature(
@@ -205,16 +204,12 @@ describe("trim attributes", () => {
 	it("reads an unset or invalid trim as none", () => {
 		expect(getTrimStart(el())).toBe(0);
 		expect(getTrimStart(el({ trimStart: "-1" }))).toBe(0);
-		expect(getTrimDuration(el())).toBeUndefined();
-		expect(getTrimDuration(el({ trimDuration: "nope" }))).toBeUndefined();
-	});
-
-	it("raises a trim duration below the minimum to it", () => {
-		expect(getTrimDuration(el({ trimDuration: "0.5" }))).toBe(MIN_DURATION_SEC);
+		expect(getTrimEnd(el())).toBeUndefined();
+		expect(getTrimEnd(el({ trimEnd: "nope" }))).toBeUndefined();
 	});
 
 	it("reads valid seconds", () => {
 		expect(getTrimStart(el({ trimStart: "1.25" }))).toBe(1.25);
-		expect(getTrimDuration(el({ trimDuration: " 4 " }))).toBe(4);
+		expect(getTrimEnd(el({ trimEnd: " 4 " }))).toBe(4);
 	});
 });

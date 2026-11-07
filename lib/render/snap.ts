@@ -17,17 +17,15 @@ export function snapTarget(
 
 type SnappedTrim = { trim: Trim; snappedSec: number | null };
 
-type Clip = Pick<Sequence, "element" | "start">;
-
 /** Where the handle sits on the timeline: the end handle moves the end, the start handle cuts the in-point from where the clip starts. */
-const edgeSec = ({ element, start }: Clip, edge: TrimEdge, trim: Trim) =>
+const edgeSec = ({ element, start }: Sequence, edge: TrimEdge, trim: Trim) =>
 	edge === "end"
 		? start + trim.trimDurationSec
 		: start + trim.trimStartSec - element.trimStartSec;
 
 /** Every drawn edge of the other clips: where each starts, where its media stops, and where its span ends. */
 export const snapTargets = (
-	clips: Pick<Sequence, "element" | "start" | "duration">[],
+	clips: Sequence[],
 	exceptElementId: string,
 ): number[] =>
 	clips
@@ -40,18 +38,18 @@ export const snapTargets = (
 
 /** The dragged handle sticks to a target within reach, unless the media runs out before it. */
 export function snapTrimEdge(
-	clip: Clip,
+	clip: Sequence,
 	edge: TrimEdge,
 	deltaSec: number,
 	targets: readonly number[],
 	thresholdSec: number,
 ): SnappedTrim {
-	const restSec = edgeSec(clip, edge, clip.element);
+	const restSec = edgeSec(clip, edge, laidOut(clip));
 	const target = snapTarget(restSec + deltaSec, targets, thresholdSec);
 	if (target !== null) {
-		const trim = trimEdge(clip.element, edge, target - restSec);
+		const trim = trimEdge(clip, edge, target - restSec);
 		if (Math.abs(edgeSec(clip, edge, trim) - target) < EPSILON_SEC)
 			return { trim, snappedSec: target };
 	}
-	return { trim: trimEdge(clip.element, edge, deltaSec), snappedSec: null };
+	return { trim: trimEdge(clip, edge, deltaSec), snappedSec: null };
 }

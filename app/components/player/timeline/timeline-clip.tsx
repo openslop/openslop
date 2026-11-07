@@ -18,12 +18,14 @@ import type {
 } from "./timeline-rows";
 
 const HEADER_ICON_SIZE = 9;
+const HEADER_HEIGHT = "h-3.5";
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 
 const FRAME =
 	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
-const SELECTED_EDGE = "border-current/60";
+const edge = (selected: boolean) =>
+	selected ? "border-current/60" : "border-border";
 
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
@@ -96,7 +98,12 @@ function ClipHeader({
 	width: number;
 }) {
 	return (
-		<span className="relative z-10 flex h-3.5 shrink-0 items-center gap-1 px-1">
+		<span
+			className={cn(
+				"relative z-10 flex shrink-0 items-center gap-1 px-1",
+				HEADER_HEIGHT,
+			)}
+		>
 			<Icon size={HEADER_ICON_SIZE} className="shrink-0" />
 			<span dir="auto" className="truncate text-badge-xs text-foreground">
 				{fit(label, width)}
@@ -122,15 +129,41 @@ function ClipFrame({
 		<div
 			role="img"
 			aria-label={label}
-			className={cn(
-				FRAME,
-				className,
-				colorClass,
-				selected ? SELECTED_EDGE : "border-border",
-			)}
+			className={cn(FRAME, className, colorClass, edge(selected))}
 		>
 			{children}
 			{selected ? <SelectedWash /> : null}
+		</div>
+	);
+}
+
+/** A clip's edge alone, for drawing over the clips it overlaps. */
+export function ClipOutline({
+	element,
+	selected,
+}: {
+	element: ResolvedElement;
+	selected: boolean;
+}) {
+	return (
+		<span
+			className={cn(
+				"absolute inset-0 rounded-md border",
+				ELEMENT_CONFIGS[element.type].colorClass,
+				edge(selected),
+			)}
+		/>
+	);
+}
+
+/** A control drawn over a clip, at the right of its body below the header. */
+export function ClipAction({ children }: { children: ReactNode }) {
+	return (
+		<div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
+			<span className={cn("shrink-0", HEADER_HEIGHT)} />
+			<div className="flex flex-1 items-center justify-end px-2 *:pointer-events-auto">
+				{children}
+			</div>
 		</div>
 	);
 }

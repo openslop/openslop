@@ -2,10 +2,12 @@ import isNil from "lodash/isNil";
 import mapValues from "lodash/mapValues";
 import omit from "lodash/omit";
 import omitBy from "lodash/omitBy";
+import round from "lodash/round";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasBlock, CanvasElement } from "./types";
 import { reconcileAttributes } from "@/lib/connectors/attributes/reconcile";
 import type { ElementVersion } from "@/lib/generation/versions";
+import type { TrimEdge } from "@/lib/render/clip-trim";
 import { flatAttributes, splitAttributes } from "./element-attributes";
 import { withoutCaretMarker, ZERO_WIDTH_SPACE } from "./constants";
 import { attributeSchemaFor } from "./element-connector";
@@ -145,18 +147,36 @@ export function mergeAttrs(
 	Transforms.setNodes(editor, splitAttributes(reconciled), { at: path });
 }
 
-const TRIM_KEYS = ["trimStart", "trimDuration"];
+const TRIM_KEYS = {
+	start: "trimStart",
+	end: "trimEnd",
+} as const satisfies Record<TrimEdge, string>;
+
+const BOTH_EDGES: TrimEdge[] = ["start", "end"];
+
+/** To the hundredth: the layout snaps whatever is stored onto the frame grid. */
+export const setTrimPoint = (
+	editor: Editor,
+	id: string,
+	edge: TrimEdge,
+	sec: number,
+): void => mergeAttrs(editor, id, { [TRIM_KEYS[edge]]: String(round(sec, 2)) });
 
 /** An element no longer on the canvas has no trim to reset. */
-export function resetTrim(editor: Editor, id: string): void {
+export function resetTrim(
+	editor: Editor,
+	id: string,
+	edges = BOTH_EDGES,
+): void {
 	const found = findElementById(editor, id);
 	if (!found) return;
 	const [element, path] = found;
 	const layout = element.layoutAttributes ?? {};
-	if (!TRIM_KEYS.some((key) => key in layout)) return;
+	const keys = edges.map((edge) => TRIM_KEYS[edge]);
+	if (!keys.some((key) => key in layout)) return;
 	Transforms.setNodes(
 		editor,
-		{ layoutAttributes: omit(layout, TRIM_KEYS) },
+		{ layoutAttributes: omit(layout, keys) },
 		{ at: path },
 	);
 }

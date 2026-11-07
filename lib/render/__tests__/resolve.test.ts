@@ -290,7 +290,7 @@ describe("resolveElements", () => {
 
 		it("starts the words at the element's first, though the end trim cuts the last", () => {
 			const { captions } = resolveOne(
-				makeElement("vid", "video", { trimDuration: "1.5" }),
+				makeElement("vid", "video", { trimEnd: "1.5" }),
 			);
 			expect(captions).toEqual({ trimIndexOffset: 0, words: [heard[0]] });
 		});
@@ -307,7 +307,7 @@ describe("resolveElements", () => {
 					wrap([
 						makeElement("v1", "video", {
 							trimStart: "1",
-							trimDuration: "3",
+							trimEnd: "4",
 						}),
 					]),
 				],

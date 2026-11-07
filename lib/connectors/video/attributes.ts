@@ -5,7 +5,7 @@ import {
 	motionDef,
 	OWN_MODEL_DEFS,
 	resolutionDef,
-	trimDurationDef,
+	trimEndDef,
 	trimStartDef,
 	volumeDef,
 } from "../attributes/common";
@@ -27,5 +27,5 @@ export const videoAttributesFor = (model: ModelRef) =>
 		volumeDef("5"),
 		motionDef,
 		trimStartDef,
-		trimDurationDef,
+		trimEndDef,
 	]);
