@@ -17,7 +17,7 @@ const scene = (id: string): Descendant => ({
 		{
 			id: `${id}-image`,
 			type: "image",
-			children: [{ id: `${id}-text`, type: "image", text: "a sunset" }],
+			children: [{ id: `${id}-text`, text: "a sunset" }],
 		},
 	],
 });

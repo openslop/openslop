@@ -35,8 +35,8 @@ function content(
 		type,
 		...splitAttributes(attributes),
 		children: [
-			{ id: `${id}-m`, type, text: ZERO_WIDTH_SPACE },
-			{ id: `${id}-t`, type, text },
+			{ id: `${id}-m`, text: ZERO_WIDTH_SPACE },
+			{ id: `${id}-t`, text },
 		],
 	};
 }
@@ -190,7 +190,7 @@ describe("updateElementText", () => {
 		const stripped: ContentElement = {
 			id: "n1",
 			type: "narration",
-			children: [{ id: "n1-t", type: "narration", text: "hello" }],
+			children: [{ id: "n1-t", text: "hello" }],
 		};
 		const editor = makeEditor([scene([stripped])]);
 		updateElementText(editor, "n1", "hello there");

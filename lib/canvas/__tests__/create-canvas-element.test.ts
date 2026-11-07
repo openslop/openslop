@@ -111,13 +111,13 @@ describe("createCanvasElement", () => {
 		expect(typeof node.id).toBe("string");
 	});
 
-	it("creates [ZWSP, text] children with the text as given", () => {
+	it("creates [ZWSP, text] leaves holding only an id and the text as given", () => {
 		const node = createCanvasElement("narration", {
 			text: "  hello  ",
 		});
-		expect(node.children).toMatchObject([
-			{ text: ZERO_WIDTH_SPACE },
-			{ text: "  hello  " },
+		expect(node.children).toEqual([
+			{ id: expect.any(String), text: ZERO_WIDTH_SPACE },
+			{ id: expect.any(String), text: "  hello  " },
 		]);
 	});
 

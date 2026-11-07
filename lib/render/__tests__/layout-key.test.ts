@@ -15,7 +15,7 @@ function el(
 		id,
 		type: "sound",
 		...splitAttributes(attributes),
-		children: [{ id: `${id}-t`, type: "sound", text: "" }],
+		children: [{ id: `${id}-t`, text: "" }],
 	};
 }
 
@@ -97,7 +97,7 @@ describe("getLayoutKey", () => {
 			{
 				id: "s1",
 				type: "sound",
-				children: [{ id: "s1-t", type: "sound", text: "rain" }],
+				children: [{ id: "s1-t", text: "rain" }],
 			},
 		];
 		expect(getLayoutKey(scene(a), "none")).toBe(getLayoutKey(scene(b), "none"));

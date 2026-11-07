@@ -18,7 +18,7 @@ function makeElement(
 		id,
 		type,
 		...splitAttributes(attributes),
-		children: [{ id: `${id}-text`, type, text: "test" }],
+		children: [{ id: `${id}-text`, text: "test" }],
 	};
 }
 

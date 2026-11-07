@@ -22,7 +22,7 @@ describe("assignIdRecursively", () => {
 	it("assigns an ID to an element without one", () => {
 		const node = {
 			type: "narration" as const,
-			children: [{ type: "narration" as const, text: "hi", id: "t1" }],
+			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 
 		assignIdRecursively(node);
@@ -34,7 +34,7 @@ describe("assignIdRecursively", () => {
 		const node = {
 			id: "existing-id",
 			type: "narration" as const,
-			children: [{ type: "narration" as const, text: "hi", id: "t1" }],
+			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 
 		assignIdRecursively(node);
@@ -44,7 +44,7 @@ describe("assignIdRecursively", () => {
 	it("recurses into nested children", () => {
 		const child = {
 			type: "character" as const,
-			children: [{ type: "character" as const, text: "inner", id: "t1" }],
+			children: [{ text: "inner", id: "t1" }],
 		} as Element;
 		const parent = {
 			type: "narration" as const,
@@ -57,7 +57,7 @@ describe("assignIdRecursively", () => {
 	});
 
 	it("skips text nodes", () => {
-		const textNode = { text: "hello", type: "narration" as const, id: "t1" };
+		const textNode = { text: "hello", id: "t1" };
 		assignIdRecursively(textNode);
 		expect(textNode.id).toBe("t1");
 	});
@@ -68,7 +68,7 @@ describe("stripIds", () => {
 		const node = {
 			id: "abc",
 			type: "narration" as const,
-			children: [{ type: "narration" as const, text: "hi", id: "t1" }],
+			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 
 		const stripped = stripIds(node) as Element;
@@ -79,7 +79,7 @@ describe("stripIds", () => {
 		const child = {
 			id: "child-el",
 			type: "character" as const,
-			children: [{ type: "character" as const, text: "inner", id: "t1" }],
+			children: [{ text: "inner", id: "t1" }],
 		} as Element;
 		const node = {
 			id: "parent",
@@ -96,7 +96,7 @@ describe("stripIds", () => {
 		const node = {
 			id: "parent",
 			type: "narration" as const,
-			children: [{ type: "narration" as const, text: "hi", id: "t1" }],
+			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 
 		const stripped = stripIds(node) as Element;
@@ -110,7 +110,7 @@ describe("stripIds", () => {
 			id: "abc",
 			type: "image" as const,
 			...splitAttributes({ src: "url" }),
-			children: [{ type: "image" as const, text: "", id: "t1" }],
+			children: [{ text: "", id: "t1" }],
 		} as Element;
 
 		const stripped = stripIds(node) as ContentElement;
@@ -119,7 +119,7 @@ describe("stripIds", () => {
 	});
 
 	it("returns a shallow clone for text nodes", () => {
-		const textNode = { text: "hello", type: "narration" as const, id: "t1" };
+		const textNode = { text: "hello", id: "t1" };
 		const result = stripIds(textNode);
 		expect(result).toEqual(textNode);
 		expect(result).not.toBe(textNode);

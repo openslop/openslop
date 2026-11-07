@@ -35,7 +35,7 @@ function mountHistoryKeymap() {
 				{
 					id: "narration-1",
 					type: "narration",
-					children: [{ id: "text-1", type: "narration", text: "" }],
+					children: [{ id: "text-1", text: "" }],
 				},
 			],
 		},

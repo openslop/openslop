@@ -12,7 +12,7 @@ const sceneWithId = (id: string): Scene => ({
 		{
 			id: `${id}-narration`,
 			type: "narration",
-			children: [{ id: `${id}-text`, type: "narration", text: "hello" }],
+			children: [{ id: `${id}-text`, text: "hello" }],
 		},
 	],
 });

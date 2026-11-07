@@ -56,5 +56,5 @@ export const element = (
 	id,
 	type,
 	...splitAttributes(attributes),
-	children: [{ id: `${id}-t`, type, text }],
+	children: [{ id: `${id}-t`, text }],
 });

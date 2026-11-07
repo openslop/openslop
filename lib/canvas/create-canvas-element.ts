@@ -29,8 +29,8 @@ export function createCanvasElement<T extends ElementType>(
 		type,
 		...splitAttributes(attributes),
 		children: [
-			{ id: makeNodeId(), type, text: ZERO_WIDTH_SPACE },
-			{ id: makeNodeId(), type, text },
+			{ id: makeNodeId(), text: ZERO_WIDTH_SPACE },
+			{ id: makeNodeId(), text },
 		],
 	};
 }

@@ -29,7 +29,7 @@ export const withCharacterRefs = (editor: CanvasEditor): CanvasEditor => {
 		return false;
 	};
 
-	const unchip = ({ type, children }: ContentElement, path: Path) => {
+	const unchip = ({ children }: ContentElement, path: Path) => {
 		for (const [index, child] of children.entries()) {
 			if (!isCharacterRef(child)) continue;
 			const at = [...path, index];
@@ -37,7 +37,7 @@ export const withCharacterRefs = (editor: CanvasEditor): CanvasEditor => {
 				Transforms.removeNodes(editor, { at });
 				Transforms.insertNodes(
 					editor,
-					{ id: makeNodeId(), type, text: child.name },
+					{ id: makeNodeId(), text: child.name },
 					{ at },
 				);
 			});

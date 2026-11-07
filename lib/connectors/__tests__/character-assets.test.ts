@@ -15,7 +15,7 @@ const redVoice = { url: "https://audio/red.mp3", durationSec: 6 };
 const element = (type: "image" | "video", prompt: string): ContentElement => ({
 	id: type,
 	type,
-	children: [{ id: "text", type, text: prompt }],
+	children: [{ id: "text", text: prompt }],
 });
 
 const avatar = (imageUrl: string): AssetResult => ({

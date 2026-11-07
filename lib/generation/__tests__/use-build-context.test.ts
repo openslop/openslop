@@ -61,7 +61,7 @@ const video = (id: string, text: string): ContentElement => ({
 	id,
 	type: "video",
 	...splitAttributes({ continuity: "true" }),
-	children: [{ id: `${id}-t`, type: "video", text }],
+	children: [{ id: `${id}-t`, text }],
 });
 
 /** A document is a new array for every edit, as Slate hands it back. */

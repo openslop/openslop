@@ -17,7 +17,7 @@ const seededEditor = (defaultModels: ConnectorModels = {}) =>
 					{
 						id: "img-1",
 						type: "image",
-						children: [{ id: "t1", type: "image", text: "a cat" }],
+						children: [{ id: "t1", text: "a cat" }],
 					},
 				],
 			},
