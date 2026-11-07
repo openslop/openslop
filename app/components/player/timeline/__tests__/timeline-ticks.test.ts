@@ -25,8 +25,12 @@ describe("buildTicks", () => {
 		expect(buildTicks(0, 5)).toEqual([0]);
 	});
 
+	it("keeps the end tick when the duration is an exact fractional multiple", () => {
+		expect(buildTicks(20.4, 0.2).at(-1)).toBe(20.4);
+	});
+
 	it("lands sub-second ticks on exact hundredths", () => {
-		expect(buildTicks(0.36, 0.05)).toEqual([
+		expect(buildTicks(0.35, 0.05)).toEqual([
 			0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35,
 		]);
 	});

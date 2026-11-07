@@ -14,11 +14,10 @@ export function tickInterval(pxPerSec: number): number {
 }
 
 export function buildTicks(totalDurationSec: number, interval: number) {
-	const count = Math.floor(totalDurationSec / interval) + 1;
-	return Array.from(
-		{ length: count },
-		(_, i) => Math.round(i * interval * 100) / 100,
-	);
+	const stepHundredths = Math.round(interval * 100);
+	const count =
+		Math.floor(Math.round(totalDurationSec * 100) / stepHundredths) + 1;
+	return Array.from({ length: count }, (_, i) => (i * stepHundredths) / 100);
 }
 
 export function tickLabel(seconds: number, interval: number): string {
