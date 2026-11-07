@@ -11,7 +11,14 @@ export type ResolvedCaptions = {
 	words: Caption[];
 };
 
-export type ResolvedElement = {
+/** Where a clip opens in its media, and how long it plays from there. */
+export type Trim = {
+	trimStartSec: number;
+	/** Never past its media; a scene can hold past a visual. */
+	trimDurationSec: number;
+};
+
+export type ResolvedElement = Trim & {
 	id: string;
 	type: ContentType;
 	role: ElementRole;
@@ -21,10 +28,7 @@ export type ResolvedElement = {
 	sceneNumber: number;
 	prompt: string;
 	url: string;
-	/** How long it plays once trimmed, never past its media; a scene can extend past a visual. */
-	trimDurationSec: number;
 	mediaDurationSec: number;
-	trimStartSec: number;
 	loops: number;
 	/** Whether a video restarts when it ends, instead of holding its last frame. */
 	loop: boolean;

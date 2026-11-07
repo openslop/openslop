@@ -1,7 +1,7 @@
 import minBy from "lodash/minBy";
-import { playedTrim, trimEdge, type Trim, type TrimEdge } from "./clip-trim";
+import { playedTrim, trimEdge, type TrimEdge } from "./clip-trim";
 import { totalDuration } from "./sequences";
-import type { Sequence } from "./types";
+import type { Sequence, Trim } from "./types";
 
 // A trim that lands on its target comes back a few ULPs off it.
 const EPSILON_SEC = 1e-6;

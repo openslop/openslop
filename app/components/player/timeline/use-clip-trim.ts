@@ -10,11 +10,11 @@ import {
 	isTrimmed,
 	playedTrim,
 	trimPointSec,
-	type Trim,
 	type TrimEdge,
 } from "@/lib/render/clip-trim";
 import { holdDuration } from "@/lib/render/sequences";
 import { snapTrimEdge } from "@/lib/render/snap";
+import type { Trim } from "@/lib/render/types";
 import type { TimelineClip } from "./timeline-rows";
 import type { TrimSnap } from "./use-trim-snap";
 

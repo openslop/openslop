@@ -7,12 +7,10 @@ import {
 	type ResolvedCaptions,
 	type ResolvedElement,
 	type Sequence,
+	type Trim,
 } from "./types";
 
 export type TrimEdge = "start" | "end";
-
-/** Where a clip opens in its media, and how long it runs on the timeline from there. */
-export type Trim = Pick<ResolvedElement, "trimStartSec" | "trimDurationSec">;
 
 /** A still has no media length to trim. */
 export const isTrimmable = (element: ResolvedElement): boolean =>

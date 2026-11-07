@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { Trim } from "@/lib/render/clip-trim";
-import type { ResolvedElement } from "@/lib/render/types";
+import type { ResolvedElement, Trim } from "@/lib/render/types";
 import { TimelineClip, TimelineExtension } from "../timeline-clip";
 
 const PX_PER_SEC = 10;
