@@ -13,6 +13,7 @@ import {
 } from "@/lib/generation/snapshots";
 import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
 import { GenerationIndicator } from "./generation-indicator";
+import { MediaViewer } from "./media-viewer";
 import { RemoveCrossButton } from "./remove-cross-button";
 
 export function AssetTile({
@@ -68,11 +69,6 @@ export function AssetTile({
 						className="absolute right-1 top-1"
 					/>
 				)}
-				{!isGenerationActive(status) && previewUrl && (
-					<div className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-md bg-card text-foreground shadow-elevation-1 ring-1 ring-border">
-						<Icon className="h-3 w-3" />
-					</div>
-				)}
 				{onEdit && (
 					<button
 						type="button"
@@ -83,6 +79,14 @@ export function AssetTile({
 						<Pencil className="h-3.5 w-3.5" />
 					</button>
 				)}
+				{previewUrl && (
+					<MediaViewer
+						src={previewUrl}
+						kind="image"
+						name={name}
+						className="opacity-0 group-hover/tile:opacity-100"
+					/>
+				)}
 			</ThumbnailFace>
 			{onRemove && status !== "generating" && (
 				<RemoveCrossButton
@@ -91,7 +95,9 @@ export function AssetTile({
 					className="z-10 opacity-0 group-hover/tile:opacity-100"
 				/>
 			)}
-			<ThumbnailCaption title={name}>{name}</ThumbnailCaption>
+			<ThumbnailCaption title={name} icon={<Icon size={10} />}>
+				{name}
+			</ThumbnailCaption>
 		</Thumbnail>
 	);
 }

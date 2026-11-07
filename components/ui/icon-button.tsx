@@ -10,6 +10,7 @@ const VARIANTS = {
 	quiet: "text-muted-foreground hover:text-foreground",
 	destructive:
 		"text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20",
+	onMedia: "bg-on-media/70 text-on-media-foreground hover:bg-on-media/80",
 } as const;
 
 const SHAPES = { square: "rounded-md", round: "rounded-full" } as const;
