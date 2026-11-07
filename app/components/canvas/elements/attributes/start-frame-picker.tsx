@@ -23,6 +23,7 @@ import {
 } from "@/lib/connectors/video/start-frame";
 import { useFileUpload } from "@/lib/upload/use-file-upload";
 import { AddAssetTile } from "../add-asset-tile";
+import { MediaViewer } from "../media-viewer";
 import { RemoveCrossButton } from "../remove-cross-button";
 import { AttributeTrigger } from "./attribute-trigger";
 import { usePreviousPictures } from "./use-previous-pictures";
@@ -37,40 +38,85 @@ function FrameTile({
 	kind,
 	current,
 	onSelect,
+	picture,
+	onRemove,
 	children,
 }: {
 	kind: FrameSource["kind"];
 	current: FrameSource["kind"];
 	onSelect: () => void;
-	children: React.ReactNode;
+	picture?: string;
+	onRemove?: () => void;
+	children?: React.ReactNode;
 }) {
 	const selected = kind === current;
 	const label = FRAME_SOURCE_LABEL[kind];
 	return (
-		<Thumbnail asChild>
-			<button
-				type="button"
-				role="radio"
-				aria-checked={selected}
-				aria-label={label}
-				onMouseDown={keepFocus}
-				onClick={onSelect}
-				className="focus-ring"
-			>
-				<ThumbnailFace selected={selected}>{children}</ThumbnailFace>
-				<ThumbnailCaption>{label}</ThumbnailCaption>
-			</button>
-		</Thumbnail>
+		<div className="group/tile relative">
+			<Thumbnail asChild>
+				<button
+					type="button"
+					role="radio"
+					aria-checked={selected}
+					aria-label={label}
+					onMouseDown={keepFocus}
+					onClick={onSelect}
+					className="focus-ring"
+				>
+					<ThumbnailFace selected={selected}>
+						{picture ? (
+							<MediaWithSkeleton outputKind="image" src={picture} alt="" />
+						) : (
+							children
+						)}
+					</ThumbnailFace>
+					<ThumbnailCaption>{label}</ThumbnailCaption>
+				</button>
+			</Thumbnail>
+			{picture && (
+				<MediaViewer
+					src={picture}
+					kind="image"
+					name={label}
+					className="opacity-0 group-hover/tile:opacity-100"
+				/>
+			)}
+			{onRemove && (
+				<RemoveCrossButton
+					label={`Remove ${label.toLowerCase()}`}
+					onClick={onRemove}
+					className="opacity-0 group-hover/tile:opacity-100"
+				/>
+			)}
+		</div>
 	);
 }
 
-function PreviousVisualPreview({ element }: { element: ContentElement }) {
+function PreviousFrameTile({
+	element,
+	current,
+	onSelect,
+}: {
+	element: ContentElement;
+	current: FrameSource["kind"];
+	onSelect: () => void;
+}) {
 	const previous = usePreviousPictures(element, [START_FRAME]);
-	if (previous.kind === "loading")
-		return <Skeleton className="absolute inset-0" />;
 	const [opening] = previous.kind === "ready" ? previous.pictures : [];
-	if (!opening) return <Transition className="h-5 w-5" />;
-	return <MediaWithSkeleton outputKind="image" src={opening.url} alt="" />;
+	return (
+		<FrameTile
+			kind="previous"
+			current={current}
+			onSelect={onSelect}
+			picture={opening?.url}
+		>
+			{previous.kind === "loading" ? (
+				<Skeleton className="absolute inset-0" />
+			) : (
+				<Transition className="h-5 w-5" />
+			)}
+		</FrameTile>
+	);
 }
 
 /** An upload is kept while another choice is made so it can be chosen again. */
@@ -116,28 +162,19 @@ export function StartFramePicker({
 					>
 						<Forbidden className="h-5 w-5" />
 					</FrameTile>
-					<FrameTile
-						kind="previous"
+					<PreviousFrameTile
+						element={element}
 						current={opening.kind}
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
-					>
-						<PreviousVisualPreview element={element} />
-					</FrameTile>
+					/>
 					{uploaded ? (
-						<div className="group/tile relative">
-							<FrameTile
-								kind="upload"
-								current={opening.kind}
-								onSelect={() => setFrame(uploaded)}
-							>
-								<MediaWithSkeleton outputKind="image" src={uploaded} alt="" />
-							</FrameTile>
-							<RemoveCrossButton
-								label="Remove uploaded picture"
-								onClick={() => setFrame(NO_FRAME, null)}
-								className="opacity-0 group-hover/tile:opacity-100"
-							/>
-						</div>
+						<FrameTile
+							kind="upload"
+							current={opening.kind}
+							onSelect={() => setFrame(uploaded)}
+							picture={uploaded}
+							onRemove={() => setFrame(NO_FRAME, null)}
+						/>
 					) : (
 						<AddAssetTile
 							label="Upload picture"

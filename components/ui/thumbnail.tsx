@@ -53,18 +53,23 @@ function ThumbnailFace({
 }
 
 function ThumbnailCaption({
+	icon,
 	className,
+	children,
 	...props
-}: React.ComponentProps<"span">) {
+}: React.ComponentProps<"span"> & { icon?: React.ReactNode }) {
 	return (
 		<span
 			data-slot="thumbnail-caption"
 			className={cn(
-				"truncate text-center text-badge text-muted-foreground",
+				"flex items-center justify-center gap-1 text-badge text-muted-foreground",
 				className,
 			)}
 			{...props}
-		/>
+		>
+			{icon}
+			<span className="truncate">{children}</span>
+		</span>
 	);
 }
 

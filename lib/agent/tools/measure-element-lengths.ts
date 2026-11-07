@@ -2,7 +2,7 @@ import { sceneLabel } from "@/lib/canvas/constants";
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { hasDialogue, type ElementLength } from "@/lib/render/element-lengths";
-import { MIN_DURATION_SEC } from "@/lib/render/scene-builder";
+import { MIN_DURATION_SEC } from "@/lib/render/types";
 import {
 	NARRATION_WORDS_PER_MINUTE,
 	NARRATION_WORDS_PER_SECOND,

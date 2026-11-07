@@ -7,9 +7,8 @@ import type { ResultKind } from "@/lib/canvas/types";
 import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
-import type { Trim } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
-import type { ResolvedElement } from "@/lib/render/types";
+import type { ResolvedElement, Trim } from "@/lib/render/types";
 import { cn } from "@/lib/utils";
 import { ClipWaveform } from "./clip-waveform";
 import type {

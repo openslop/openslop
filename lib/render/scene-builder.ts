@@ -1,5 +1,8 @@
+import remove from "lodash/remove";
+import { CONTENT_TYPES } from "@/lib/canvas/types";
 import {
 	DEFAULT_FPS,
+	MIN_DURATION_SEC,
 	type ResolvedElement,
 	type Sequence,
 	type RenderLayout,
@@ -7,6 +10,7 @@ import {
 import { ASPECT_RATIO_DIMENSIONS } from "../project/aspect-ratio";
 import type { VideoSettings } from "../project/video-settings";
 import { blankScene } from "./blank-scene";
+import { totalDuration } from "./sequences";
 import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
 import { transitionOverlapSec } from "./transitions";
@@ -17,23 +21,22 @@ export type BuildLayoutOptions = Pick<
 > &
 	Partial<Pick<RenderLayout, "fps">>;
 
-/** No sequence is ever shorter than this, however little content it holds. */
-export const MIN_DURATION_SEC = 1;
 // Durations accumulated on the frame grid land a few ULPs above a whole frame.
 // Without this slack the total ceils into a trailing frame with no content.
 const FRAME_EPSILON = 1e-6;
 
-function createSequence(
+const sequenceAt = (
 	element: ResolvedElement,
 	start: number,
-	duration: number,
-): Sequence {
-	return { element, start, duration: Math.max(duration, MIN_DURATION_SEC) };
-}
+	minDuration: number,
+): Sequence => ({
+	element,
+	start,
+	duration: element.trimDurationSec,
+	minDuration,
+});
 
 type SequenceMap = RenderLayout["sequences"];
-
-type SceneSequence = Sequence & { overlaySec: number };
 
 /**
  * Lays down `element.loops` copies, each `stride` after the last. A stride
@@ -48,22 +51,29 @@ function pushSequence(
 ) {
 	const list = (sequences[element.type] ??= []);
 	for (let i = 0; i < element.loops; i++) {
-		list.push(
-			createSequence(element, start + i * stride, element.trimDurationSec),
-		);
+		list.push(sequenceAt(element, start + i * stride, 0));
 	}
 }
 
-function trimSequencesAt(list: Sequence[] | undefined, cutoff: number) {
-	if (!list) return;
-	while (list.length > 0 && list[list.length - 1].start >= cutoff) list.pop();
-	const last = list.at(-1);
-	if (last) last.duration = Math.min(last.duration, cutoff - last.start);
+/** Drops what starts at `cutoff` or later and cuts what runs past it. */
+function cutAt(list: Sequence[] = [], cutoff: number) {
+	remove(list, ({ start }) => start > cutoff - FRAME_EPSILON);
+	for (const sequence of list) {
+		if (sequence.start + sequence.duration > cutoff) {
+			sequence.duration = cutoff - sequence.start;
+			sequence.maxDuration = sequence.duration;
+		}
+	}
 }
 
 function getForegroundCursor(current: Sequence | undefined, cursor: number) {
-	return current ? Math.max(cursor, current.start + current.duration) : cursor;
+	return current
+		? Math.max(cursor, current.start + totalDuration(current))
+		: cursor;
 }
+
+const isStill = ({ element }: Sequence) =>
+	CONTENT_TYPES[element.type].outputKind === "image";
 
 /**
  * Walks the element list and assembles scenes with these rules:
@@ -92,9 +102,10 @@ export function buildRenderLayout(
 	const onGrid = (sec: number) =>
 		toSeconds(toFrames(sec, config.fps), config.fps);
 	const transitionDurationSec = onGrid(transitionOverlapSec(transitionType));
-	const series: SceneSequence[] = [];
+	const series: Sequence[] = [];
 	const sequences: SequenceMap = {};
 	let cursor = 0;
+	let overlaySec = 0;
 
 	for (const raw of elements) {
 		const element = {
@@ -103,7 +114,7 @@ export function buildRenderLayout(
 			mediaDurationSec: onGrid(raw.mediaDurationSec),
 		};
 		const stride = onGrid(loopStrideSec(element));
-		const current = series.at(-1);
+		let current = series.at(-1);
 		const foregroundCursor = getForegroundCursor(current, cursor);
 
 		switch (element.role) {
@@ -112,7 +123,7 @@ export function buildRenderLayout(
 				break;
 			}
 			case "background": {
-				trimSequencesAt(sequences[element.type], foregroundCursor);
+				cutAt(sequences[element.type], foregroundCursor);
 				pushSequence(sequences, element, foregroundCursor, stride);
 				break;
 			}
@@ -124,26 +135,17 @@ export function buildRenderLayout(
 					// subsequent overlay/background/effect lands on the rendered timeline.
 					cursor -= transitionDurationSec;
 				}
-				series.push({
-					...createSequence(element, cursor, element.trimDurationSec),
-					overlaySec: 0,
-				});
+				series.push(sequenceAt(element, cursor, MIN_DURATION_SEC));
+				overlaySec = 0;
 				break;
 			}
 			case "overlay": {
 				if (!current) {
-					series.push({
-						...createSequence(
-							blankScene(element),
-							cursor,
-							element.trimDurationSec,
-						),
-						overlaySec: element.trimDurationSec,
-					});
-				} else {
-					current.overlaySec += element.trimDurationSec;
-					current.duration = Math.max(current.duration, current.overlaySec);
+					current = sequenceAt(blankScene(element), cursor, MIN_DURATION_SEC);
+					series.push(current);
 				}
+				overlaySec += element.trimDurationSec;
+				current.minDuration = Math.max(current.minDuration, overlaySec);
 				pushSequence(sequences, element, cursor, stride);
 				cursor += element.trimDurationSec;
 				break;
@@ -152,14 +154,13 @@ export function buildRenderLayout(
 	}
 
 	const last = series.at(-1);
-	const totalDurationSec = last ? last.start + last.duration : 0;
+	const totalDurationSec = last ? last.start + totalDuration(last) : 0;
 
-	for (const sequence of Object.values(sequences).flat()) {
-		const { start } = sequence;
-		if (start + sequence.duration > totalDurationSec) {
-			sequence.duration = Math.max(MIN_DURATION_SEC, totalDurationSec - start);
-		}
-	}
+	for (const list of Object.values(sequences)) cutAt(list, totalDurationSec);
+
+	// Cosmetic only: draws image clips on the timeline across their whole slot
+	for (const still of series.filter(isStill))
+		still.duration = totalDuration(still);
 
 	return {
 		...config,

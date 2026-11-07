@@ -11,7 +11,14 @@ export type ResolvedCaptions = {
 	words: Caption[];
 };
 
-export type ResolvedElement = {
+/** Where a clip opens in its media, and how long it plays from there. */
+export type Trim = {
+	trimStartSec: number;
+	/** Never past its media; a scene can extend past a visual. */
+	trimDurationSec: number;
+};
+
+export type ResolvedElement = Trim & {
 	id: string;
 	type: ContentType;
 	role: ElementRole;
@@ -21,10 +28,7 @@ export type ResolvedElement = {
 	sceneNumber: number;
 	prompt: string;
 	url: string;
-	/** How long it plays once trimmed, never past its media; a scene can extend past a visual. */
-	trimDurationSec: number;
 	mediaDurationSec: number;
-	trimStartSec: number;
 	loops: number;
 	/** Whether a video restarts when it ends, instead of holding its last frame. */
 	loop: boolean;
@@ -36,9 +40,12 @@ export type ResolvedElement = {
 export type Sequence = {
 	element: ResolvedElement;
 	start: number;
+	/** How long it plays: what the trim handles sit on. */
 	duration: number;
-	/** A scene says how long the overlays under it run; it holds at least that long. */
-	overlaySec?: number;
+	/** Its slot stays open at least this long, extending past what plays. */
+	minDuration: number;
+	/** Where the layout cuts it short. */
+	maxDuration?: number;
 };
 
 export type RenderLayout = {
@@ -59,3 +66,6 @@ export type RenderLayout = {
 export const COMPOSITION_ID = "VideoComposition";
 
 export const DEFAULT_FPS = 24;
+
+/** No scene is ever shorter than this, however little content it holds. */
+export const MIN_DURATION_SEC = 1;
