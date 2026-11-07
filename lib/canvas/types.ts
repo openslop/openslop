@@ -79,7 +79,7 @@ export const isCaptionable = (type: ContentType): boolean =>
 const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
 
 export const SPEECH_TYPES = ALL_CONTENT_TYPES.filter(isSpeechType);
-export const PROMPTED_TYPES = ALL_CONTENT_TYPES.filter(
+export const NON_SPEECH_TYPES = ALL_CONTENT_TYPES.filter(
 	(type) => !isSpeechType(type),
 );
 

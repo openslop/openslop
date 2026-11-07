@@ -2,12 +2,12 @@ import { z } from "zod";
 import {
 	AssetTypeSchema,
 	ContentTypeSchema,
-	PROMPTED_TYPES,
+	NON_SPEECH_TYPES,
 	SPEECH_TYPES,
 } from "@/lib/canvas/types";
 import { conjunction } from "@/lib/format";
 
-const ELEMENT_TEXT = `The element's content: the spoken line for ${conjunction(SPEECH_TYPES)}; the prompt for ${conjunction(PROMPTED_TYPES)}; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
+const ELEMENT_TEXT = `The element's content: the spoken line for ${conjunction(SPEECH_TYPES)}; the prompt for ${conjunction(NON_SPEECH_TYPES)}; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
 
 const newElement = z.object({
 	type: ContentTypeSchema,

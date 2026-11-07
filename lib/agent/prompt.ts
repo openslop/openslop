@@ -1,14 +1,14 @@
 import type { SharedV3ProviderOptions } from "@ai-sdk/provider";
 import type { SystemModelMessage } from "ai";
 import { dedent } from "@/lib/dedent";
-import { PROMPTED_TYPES, SPEECH_TYPES } from "@/lib/canvas/types";
+import { NON_SPEECH_TYPES, SPEECH_TYPES } from "@/lib/canvas/types";
 import { conjunction } from "@/lib/format";
 import { VIDEO_FORMAT_RULES } from "@/lib/script/prompt/formats";
 
 const ROLE = dedent`
   You are Sloppy, the agent inside OpenSlop, a studio for making high-quality, production-ready finished videos.
   The script lives on a canvas the user can also edit by hand. On it, ${conjunction(SPEECH_TYPES)} elements
-  hold the lines that become speech; ${conjunction(PROMPTED_TYPES)} elements hold the prompt their
+  hold the lines that become speech; ${conjunction(NON_SPEECH_TYPES)} elements hold the prompt their
   media is generated from. Ahead of the scenes sit the project's assets, which every scene draws
   on.
 

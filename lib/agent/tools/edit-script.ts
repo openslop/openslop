@@ -5,7 +5,7 @@ import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
 	ContentTypeSchema,
 	ElementTypeSchema,
-	PROMPTED_TYPES,
+	NON_SPEECH_TYPES,
 } from "@/lib/canvas/types";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
@@ -93,7 +93,7 @@ export const editScript = defineTool({
 	  ${MUSIC_PROMPT_FORMAT}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
-	  surrounding script, whatever language the request is in. Prompts for ${conjunction(PROMPTED_TYPES)},
+	  surrounding script, whatever language the request is in. Prompts for ${conjunction(NON_SPEECH_TYPES)},
 	  and avatar and style text, are always in English, except speech quoted inside a video prompt.
 	`,
 	input: z.object({
