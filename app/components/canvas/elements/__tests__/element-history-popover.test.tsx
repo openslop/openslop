@@ -116,4 +116,30 @@ describe("ElementHistoryPopover", () => {
 		expect(take?.getAttribute("src")).toBe("https://video/harbor.mp4");
 		expect(take?.controls).toBe(true);
 	});
+
+	it("closes the viewer on Escape and keeps the history open", async () => {
+		history = {
+			versions: [videoTake("harbor")],
+			status: "ready",
+			activeIndex: 0,
+		};
+		renderPopover();
+		await click('button[aria-label="Generation history"]');
+		const view = 'button[aria-label="View version 1 larger"]';
+		await click(view);
+		await act(async () => {
+			document.activeElement?.dispatchEvent(
+				new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+			);
+		});
+		await act(() => new Promise((resolve) => setTimeout(resolve)));
+
+		const dialogs = Array.from(
+			document.body.querySelectorAll('[role="dialog"]'),
+		);
+		expect(dialogs.map((dialog) => dialog.getAttribute("aria-label"))).toEqual([
+			"Generation history",
+		]);
+		expect(document.activeElement).toBe(document.body.querySelector(view));
+	});
 });
