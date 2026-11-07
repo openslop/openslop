@@ -153,7 +153,7 @@ function Clip({
 							label="Reset trim"
 							side="bottom"
 							size="sm"
-							variant="quiet"
+							variant="onMedia"
 							onClick={reset}
 							className="opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 						>
