@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Loader2, Plus } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useFileUpload } from "@/lib/upload/use-file-upload";
 import { useReferenceImages } from "../hooks/use-reference-images";
@@ -39,9 +39,9 @@ function AssetCard({
 						onClick={add.onClick}
 					>
 						{add.busy ? (
-							<Loader2 size={14} className="animate-spin" />
+							<Loader2 size={ICON_SIZES.header} className="animate-spin" />
 						) : (
-							<Plus size={14} />
+							<Plus size={ICON_SIZES.header} />
 						)}
 					</TooltipIconButton>
 				)

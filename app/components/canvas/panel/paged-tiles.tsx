@@ -3,7 +3,7 @@
 import range from "lodash/range";
 import { useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "@/components/ui/icon";
-import { IconButton } from "@/components/ui/icon-button";
+import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 4;
@@ -43,7 +43,7 @@ export function PagedTiles({
 						disabled={page === 0}
 						onClick={() => setRequestedPage(page - 1)}
 					>
-						<ChevronLeft size={14} />
+						<ChevronLeft size={ICON_SIZES.header} />
 					</IconButton>
 					<div className="flex items-center">
 						{range(pageCount).map((index) => (
@@ -73,7 +73,7 @@ export function PagedTiles({
 						disabled={page === pageCount - 1}
 						onClick={() => setRequestedPage(page + 1)}
 					>
-						<ChevronRight size={14} />
+						<ChevronRight size={ICON_SIZES.header} />
 					</IconButton>
 				</nav>
 			)}
