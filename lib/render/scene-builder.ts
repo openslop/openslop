@@ -114,7 +114,7 @@ export function buildRenderLayout(
 			mediaDurationSec: onGrid(raw.mediaDurationSec),
 		};
 		const stride = onGrid(loopStrideSec(element));
-		const current = series.at(-1);
+		let current = series.at(-1);
 		const foregroundCursor = getForegroundCursor(current, cursor);
 
 		switch (element.role) {
@@ -140,11 +140,12 @@ export function buildRenderLayout(
 				break;
 			}
 			case "overlay": {
-				const scene =
-					current ?? sequenceAt(blankScene(element), cursor, MIN_DURATION_SEC);
-				if (!current) series.push(scene);
+				if (!current) {
+					current = sequenceAt(blankScene(element), cursor, MIN_DURATION_SEC);
+					series.push(current);
+				}
 				overlaySec += element.trimDurationSec;
-				scene.minDuration = Math.max(scene.minDuration, overlaySec);
+				current.minDuration = Math.max(current.minDuration, overlaySec);
 				pushSequence(sequences, element, cursor, stride);
 				cursor += element.trimDurationSec;
 				break;
