@@ -78,7 +78,7 @@ type ClipProps<T> = {
 	onSelect: (clip: T) => void;
 };
 
-/** Each clip stacks as one, so a later clip covers everything an earlier one draws. */
+/** Each clip stacks as one, a later clip over an earlier, the selected one over both. */
 function ClipSlot({
 	start,
 	width,
@@ -131,7 +131,11 @@ function Clip({
 	const extensionStart = clip.start + trim.trimDurationSec;
 	return (
 		<>
-			<ClipSlot start={clip.start * pxPerSec} width={width}>
+			<ClipSlot
+				start={clip.start * pxPerSec}
+				width={width}
+				className={selected && !trimming ? "z-10" : undefined}
+			>
 				<SelectButton selected={selected} onClick={() => onSelect(clip)}>
 					<TimelineClip
 						clip={clip}
