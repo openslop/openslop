@@ -157,6 +157,8 @@ export function buildRenderLayout(
 	const totalDurationSec = last ? last.start + totalDuration(last) : 0;
 
 	for (const list of Object.values(sequences)) cutAt(list, totalDurationSec);
+
+	// Cosmetic only: draws image clips on the timeline across their whole slot
 	for (const still of series.filter(isStill))
 		still.duration = totalDuration(still);
 
