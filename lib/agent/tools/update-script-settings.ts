@@ -18,18 +18,16 @@ import { atLeastOne } from "./inputs";
 
 export const updateScriptSettings = defineTool({
 	description: dedent`
-	  Declare the language, length and format the script should have, and store them so you
-	  remember them later. Setting one only stores it; the script tools read it from there.
-	  adapt_script keeps the user's words, so only the language applies to it. Send only what
-	  changes.
+	  Store the language, length and format the script should have, so you remember them; the
+	  script tools read them from here. adapt_script keeps the user's words, so only the
+	  language applies to it. Send only what changes.
 
 	  - language: what narration and dialogue are written in. "auto" follows whatever language
 	    the user writes in. ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}
 	  - length: how long the video runs, as a spoken-word budget.
 	    - auto: no budget. The script runs as long as the material needs.
 	${VIDEO_LENGTH_TARGETS.map((length) => `    - ${length}: ${VIDEO_LENGTH_SPECS[length].minWords} to ${VIDEO_LENGTH_SPECS[length].maxWords} words`).join("\n")}
-	  - format: what the script is made of. Classify every request into one and set it before
-	    writing a script.
+	  - format: what the script is made of.
 	    - auto: not classified yet.
 	${VIDEO_FORMAT_TARGETS.map((format) => `    - ${format}: ${VIDEO_FORMAT_SPECS[format].summary}`).join("\n")}
 	`,

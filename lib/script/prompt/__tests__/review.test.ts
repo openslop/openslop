@@ -21,14 +21,14 @@ describe("reviewPrompt", () => {
 		expect(prompt).not.toContain("Shot 1");
 	});
 
-	it("holds the script to its format only when one is named", () => {
+	it("holds the script to its format unless it is auto", () => {
 		expect(reviewPrompt(script, "cinematic")).toContain(
 			"It was intended as a Cinematic, so judge it accordingly.",
 		);
 		expect(reviewPrompt(script)).not.toContain("It was intended as a");
 	});
 
-	it("opens on one clean sentence whether or not a format is named", () => {
+	it("opens on one clean sentence whether or not a format is set", () => {
 		expect(reviewPrompt(script, "cinematic")).not.toContain("..");
 		expect(reviewPrompt(script)).not.toContain(" .");
 	});

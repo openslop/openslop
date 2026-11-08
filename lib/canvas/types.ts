@@ -7,7 +7,7 @@ import type { AssetConnectorType } from "@/lib/connectors/types";
 
 export type ResultKind = "image" | "video" | "audio";
 
-/** How an element behaves on the rendered timeline. An overlay is speech: it holds the screen for as long as it talks. */
+/** How an element behaves on the rendered timeline. An overlay holds the screen for as long as it plays. */
 export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
 export type LayerType = "audio" | "visual";

@@ -88,7 +88,7 @@ describe("parseSloppyMessages", () => {
 		expect(messages.map((message) => message.id)).toEqual(["m1", "m2"]);
 	});
 
-	it("reads past calls today's tools would refuse", async () => {
+	it("reads stored tool calls without checking them against today's tools", async () => {
 		const call = (type: string, input: unknown) => ({
 			type,
 			toolCallId: type,

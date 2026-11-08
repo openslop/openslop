@@ -67,7 +67,7 @@ export function projectPreamble(assets: AssetElement[]): string {
 	return sections.join("\n\n");
 }
 
-/** Empty on `auto`: the writer then picks the format closest to the brief. */
+/** Empty on `auto`, where the writer falls back to the format closest to the brief. */
 export function formatSection({ format }: ScriptSettings): string {
 	if (format === "auto") return "";
 

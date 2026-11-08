@@ -15,8 +15,7 @@ export const writeScript = defineTool({
 	  finished video needs. For a story prompt without a sufficient plot outline, outline_story first and fold the outline in;
 	  for anything that is not a story, write the brief directly.
 
-	  Set the format with update_script_settings first. The writer reads the brief, the script
-	  settings and the assets, never this conversation.
+	  The writer reads the brief, the script settings and the assets, never this conversation.
 
 	  When the user gave you the actual text they want on the canvas, rather than an idea to
 	  write from, use adapt_script instead.

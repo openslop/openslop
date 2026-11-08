@@ -88,14 +88,10 @@ export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
 	);
 }
 
-// Optional: the message a turn opens with carries no metadata yet, and the
-// validator checks the field whether or not it is there.
+// Optional: the message a turn opens with carries no metadata yet.
 const metadataSchema = sloppyMetadataSchema.optional();
 
-/**
- * Rows the server wrote. A row it cannot read back is a broken transcript, not a 400.
- * Past calls are not held to today's tools, which may have renamed or narrowed since.
- */
+/** Rows the server wrote, never held to today's tools; a row it cannot read back is a broken transcript, not a 400. */
 export async function parseSloppyMessages(
 	messages: unknown[],
 ): Promise<SloppyMessage[]> {

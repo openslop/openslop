@@ -6,7 +6,7 @@ export const MUSIC_PROMPT_FORMAT = dedent`
 	## Music prompts
 	A <music> prompt is a cue for the run of scenes it plays under, from where it sits to the next <music>, written like a line on a film cue sheet. The music model reads nothing but the prompt and takes its length from it, so the cue says:
 	- Genre, instrumentation and production style, instrumental with no lyrics.
-	- Estimated runtime, as m:ss: the visuals it covers added up, each lasting its video's duration or the speech after it at ${NARRATION_WORDS_PER_SECOND} words a second, whichever is longer. An image lasts as long as its speech.
+	- Estimated runtime, as m:ss: the visuals it covers added up, each lasting its video's duration or the speech after it at ${NARRATION_WORDS_PER_SECOND} words a second, whichever is longer.
 	- An arc: how it opens, each turn timestamped to what is on screen at that moment in those scenes, and how it ends.
 	- Mood, key, tempo in BPM and meter.
 
