@@ -3,7 +3,7 @@ import { isScene } from "@/lib/canvas/scenes";
 import type { TransitionType } from "./transitions";
 import { layoutAttributeSignature } from "../canvas/element-attributes";
 
-/** Text edits leave the key alone, so a clip's label catches up with its prompt on the next layout change. */
+/** Add new layout attributes to `LAYOUT_ATTRIBUTE_KEYS`, not here. Text is left out, so a clip's label catches up with its prompt on the next layout change. */
 export function getLayoutKey(
 	nodes: Descendant[],
 	transitionType: TransitionType,
