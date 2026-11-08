@@ -1,6 +1,5 @@
 "use client";
 
-import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
 import { Button } from "@/components/ui/button";
@@ -25,15 +24,15 @@ function describe(active: boolean, pending: number) {
 	return `Caption ${pending} ${plural(pending, "element")}`;
 }
 
-const selectCaptionable = (editor: Editor) =>
-	captionableElements(editor.children);
-
 /** Generates speech to text for every captionable element that has a result and no words yet. */
 export function AutoCaptionsButton() {
 	const queue = useGenerationQueue();
 	const generateSTT = useGenerateSTT();
 
-	const captionable = useSlateSelector(selectCaptionable, shallow);
+	const captionable = useSlateSelector(
+		(editor) => captionableElements(editor.children),
+		shallow,
+	);
 	const uncaptioned = (q: GenerationQueue) =>
 		planCaptions(
 			withoutCaptions(captionable, q.getElementSnapshot),
