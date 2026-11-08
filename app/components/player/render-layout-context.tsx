@@ -5,13 +5,10 @@ import { useSlateStatic } from "slate-react";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import type { Scene } from "@/lib/canvas/types";
-import type { Sequence, RenderLayout } from "@/lib/render/types";
+import type { RenderLayout } from "@/lib/render/types";
 import {
 	buildSceneSegments,
-	buildSequenceIndex,
-	findSceneSequence,
 	type SceneSegment,
-	type SequenceIndex,
 } from "@/lib/render/scene-segments";
 import { useAssetPrefetch } from "./use-asset-prefetch";
 import { useRenderLayout } from "./use-render-layout";
@@ -21,7 +18,6 @@ type RenderLayoutValue = {
 	ready: boolean;
 	segments: SceneSegment[];
 	scenes: Scene[];
-	sequenceByElementId: SequenceIndex;
 };
 
 const [RenderLayoutContext, useLayout] =
@@ -34,20 +30,15 @@ export function RenderLayoutProvider({ children }: { children: ReactNode }) {
 	const prefetched = useAssetPrefetch(layout);
 	const busy = useQueueSelector((q) => q.isBusy());
 	const ready = prefetched && !busy;
-	const sequenceByElementId = useMemo(
-		() => buildSequenceIndex(layout.series),
-		[layout.series],
-	);
 	const segments = useMemo(() => buildSceneSegments(layout), [layout]);
 	const value = useMemo(
-		() => ({ layout, ready, segments, scenes, sequenceByElementId }),
-		[layout, ready, segments, scenes, sequenceByElementId],
+		() => ({ layout, ready, segments, scenes }),
+		[layout, ready, segments, scenes],
 	);
 	return <RenderLayoutContext value={value}>{children}</RenderLayoutContext>;
 }
 
-/** The rendered sequence a scene's foreground element occupies, if it has one. */
-export function useSceneSequence(scene: Scene): Sequence | undefined {
-	const { sequenceByElementId } = useLayout();
-	return findSceneSequence(scene, sequenceByElementId);
+export function useSceneSegment(scene: Scene): SceneSegment | undefined {
+	const { segments } = useLayout();
+	return segments.find(({ sceneId }) => sceneId === scene.id);
 }

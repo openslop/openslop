@@ -5,10 +5,9 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { Scene } from "@/lib/canvas/types";
-import { useSceneSequence } from "@/app/components/player/render-layout-context";
+import { useSceneSegment } from "@/app/components/player/render-layout-context";
 import { isForeground } from "@/lib/canvas/guards";
 import { sceneLabel } from "@/lib/canvas/constants";
-import { totalDuration } from "@/lib/render/sequences";
 import { useDropIndex } from "../dnd/drag-transfer-context";
 import { useSceneCollapsed, useViewMode } from "../view-mode-context";
 import { CollapsibleHeader } from "./collapsible-header";
@@ -54,12 +53,12 @@ function SceneHeader({
 	onToggle: () => void;
 	scene: Scene;
 }) {
-	const seq = useSceneSequence(scene);
+	const segment = useSceneSegment(scene);
 	const label = (
 		<>
 			{sceneLabel(sceneIndex)}
-			{seq && (
-				<SceneTimestamp start={seq.start} duration={totalDuration(seq)} />
+			{segment && (
+				<SceneTimestamp start={segment.start} duration={segment.duration} />
 			)}
 		</>
 	);

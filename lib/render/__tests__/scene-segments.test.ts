@@ -4,7 +4,6 @@ import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/caption-style";
 import {
 	buildSceneSegments,
-	buildSequenceIndex,
 	findSegmentIndexAtFrame,
 	type SceneSegment,
 } from "../scene-segments";
@@ -145,16 +144,6 @@ const layout = (
 
 const segmentsOf = (series: Sequence[], transitionDurationSec = 0) =>
 	buildSceneSegments(layout(series, transitionDurationSec));
-
-describe("buildSequenceIndex", () => {
-	it("keys sequences by their element id", () => {
-		const first = sequence(0, 2, resolved("a.png"));
-		const blank = sequence(2, 1, blankScene(resolved("a.png")));
-		const index = buildSequenceIndex([first, blank]);
-		expect(index.size).toBe(2);
-		expect(index.get("a.png-el")).toBe(first);
-	});
-});
 
 describe("buildSceneSegments", () => {
 	it("returns an empty array when there are no scenes", () => {

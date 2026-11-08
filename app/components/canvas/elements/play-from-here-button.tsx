@@ -6,7 +6,7 @@ import { keepFocus } from "@/components/ui/keep-focus";
 import { usePlayerControl } from "@/app/components/player/player-control-context";
 import {
 	useLayout,
-	useSceneSequence,
+	useSceneSegment,
 } from "@/app/components/player/render-layout-context";
 import type { Scene } from "@/lib/canvas/types";
 import { toFrames } from "@/lib/render/frames";
@@ -14,8 +14,8 @@ import { toFrames } from "@/lib/render/frames";
 export function PlayFromHereButton({ scene }: { scene: Scene }) {
 	const { layout } = useLayout();
 	const { playFromFrame } = usePlayerControl();
-	const seq = useSceneSequence(scene);
-	const startFrame = seq ? toFrames(seq.start, layout.fps) : null;
+	const segment = useSceneSegment(scene);
+	const startFrame = segment ? toFrames(segment.start, layout.fps) : null;
 	const unavailable = startFrame == null;
 	return (
 		<TooltipIconButton

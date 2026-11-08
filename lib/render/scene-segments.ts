@@ -1,9 +1,8 @@
-import { isForeground } from "@/lib/canvas/guards";
 import { sceneLabel } from "@/lib/canvas/constants";
-import { CONTENT_TYPES, type Scene } from "@/lib/canvas/types";
+import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { toFrames } from "./frames";
 import { totalDuration } from "./sequences";
-import type { ResolvedElement, Sequence, RenderLayout } from "./types";
+import type { ResolvedElement, RenderLayout } from "./types";
 
 export type SeekThumbnail = { url: string; kind: "image" | "video" };
 
@@ -15,24 +14,6 @@ export type SceneSegment = {
 	duration: number;
 	thumbnail: SeekThumbnail | null;
 };
-
-export type SequenceIndex = ReadonlyMap<string, Sequence>;
-
-/**
- * Lookup index from foreground element id to its scene sequence. Client-only:
- * the render payload carries the ordered `series`, not this projection of it.
- */
-export function buildSequenceIndex(series: Sequence[]): SequenceIndex {
-	return new Map(series.map((sequence) => [sequence.element.id, sequence]));
-}
-
-export function findSceneSequence(
-	scene: Scene,
-	index: SequenceIndex,
-): Sequence | undefined {
-	const foreground = scene.children.find(isForeground);
-	return foreground ? index.get(foreground.id) : undefined;
-}
 
 /**
  * Frame space, not seconds: the player only ever addresses whole frames, and
