@@ -22,8 +22,11 @@ type SkippedElement = { id: string; reason: string };
 
 export type CaptionsReport = { queued: string[]; skipped: SkippedElement[] };
 
-export const captionableElements = (nodes: Descendant[]): ContentElement[] =>
-	getContentElements(nodes).filter(({ type }) => isCaptionable(type));
+// TODO: auto caption music once we support lyric models like Suno; today's tracks are instrumental.
+export const autoCaptionElements = (nodes: Descendant[]): ContentElement[] =>
+	getContentElements(nodes).filter(
+		({ type }) => isCaptionable(type) && type !== "music",
+	);
 
 export const withoutCaptions = (
 	elements: ContentRef[],

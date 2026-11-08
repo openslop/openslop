@@ -5,7 +5,7 @@ import { shallow } from "zustand/shallow";
 import { Button } from "@/components/ui/button";
 import { MagicCaptions } from "@/components/ui/icon";
 import {
-	captionableElements,
+	autoCaptionElements,
 	isCaptioning,
 	planCaptions,
 	withoutCaptions,
@@ -30,7 +30,7 @@ export function AutoCaptionsButton() {
 	const generateSTT = useGenerateSTT();
 
 	const captionable = useSlateSelector(
-		(editor) => captionableElements(editor.children),
+		(editor) => autoCaptionElements(editor.children),
 		shallow,
 	);
 	const uncaptioned = (q: GenerationQueue) =>

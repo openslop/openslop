@@ -3,7 +3,7 @@ import type { ContentType } from "@/lib/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { element as scriptElement } from "@/lib/canvas/__tests__/_assets";
 import {
-	captionableElements,
+	autoCaptionElements,
 	planCaptions,
 	withoutCaptions,
 } from "../auto-captions";
@@ -54,8 +54,8 @@ const plan = (elements: ReturnType<typeof element>[]) => {
 	return { ready: ready.map(({ id }) => id), skipped };
 };
 
-describe("captionableElements", () => {
-	it("gives every element in the scenes whose type shows captions", () => {
+describe("autoCaptionElements", () => {
+	it("gives every element in the scenes whose type shows captions, except music", () => {
 		const nodes = [
 			{
 				id: "s1",
@@ -69,10 +69,9 @@ describe("captionableElements", () => {
 				],
 			},
 		];
-		expect(captionableElements(nodes).map(({ id }) => id)).toEqual([
+		expect(autoCaptionElements(nodes).map(({ id }) => id)).toEqual([
 			"n1",
 			"v1",
-			"m1",
 		]);
 	});
 });

@@ -18,7 +18,7 @@ import {
 } from "@/lib/render/visual-spans";
 import {
 	captionElements,
-	captionableElements,
+	autoCaptionElements,
 	withoutCaptions,
 } from "@/lib/captions/auto-captions";
 import { resolveModel } from "@/lib/connectors/models";
@@ -121,7 +121,7 @@ export function useAgentTools() {
 						ids
 							? ids.map(named)
 							: withoutCaptions(
-									captionableElements(editor.children),
+									autoCaptionElements(editor.children),
 									queue.getElementSnapshot,
 								),
 						resolveModel("stt", editor.defaultModels().stt),

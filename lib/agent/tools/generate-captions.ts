@@ -6,8 +6,9 @@ import { defineTool } from "./define-tool";
 export const generateCaptions = defineTool({
 	description: dedent`
 	  Queue captions for elements. Omit ids to caption every uncaptioned element that has been
-	  generated. Provide ids to (re)caption those elements. The output lists skipped elements
-	  with reasons. Captions show only while the captions setting is on (update_video_settings).
+	  generated, except music. Provide ids to (re)caption those elements, music included. The
+	  output lists skipped elements with reasons. Captions show only while the captions setting
+	  is on (update_video_settings).
 	`,
 	input: z.object({
 		ids: z
