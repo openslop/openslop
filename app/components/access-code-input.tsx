@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState, useCallback, useTransition } from "react";
+import { useId, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { apiJson } from "@/lib/clients/http";
 import { errorMessage } from "@/lib/errors";
@@ -28,31 +28,28 @@ export default function AccessCodeInput() {
 	const [validating, startValidating] = useTransition();
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-	const resetWithError = useCallback((message: string) => {
+	const resetWithError = (message: string) => {
 		setError(message);
 		setValues(emptyAccessCode());
 		inputRefs.current[0]?.focus();
-	}, []);
+	};
 
-	const submitCode = useCallback(
-		(code: string) => {
-			setError("");
-			startValidating(async () => {
-				try {
-					const { redirect } = await apiJson(
-						"/api/validate-code",
-						AccessGrantedSchema,
-						{ method: "POST", body: { code } },
-					);
-					router.push(redirect);
-				} catch (cause) {
-					console.error("Access code validation failed", cause);
-					resetWithError(errorMessage(cause));
-				}
-			});
-		},
-		[router, resetWithError],
-	);
+	const submitCode = (code: string) => {
+		setError("");
+		startValidating(async () => {
+			try {
+				const { redirect } = await apiJson(
+					"/api/validate-code",
+					AccessGrantedSchema,
+					{ method: "POST", body: { code } },
+				);
+				router.push(redirect);
+			} catch (cause) {
+				console.error("Access code validation failed", cause);
+				resetWithError(errorMessage(cause));
+			}
+		});
+	};
 
 	const applyEntry = (entry: CodeEntry | null) => {
 		if (!entry) return;

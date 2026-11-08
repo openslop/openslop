@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { Path } from "slate";
 import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import type { ContentElement, ContentType } from "@/lib/canvas/types";
@@ -41,27 +41,19 @@ export function SortableContent({
 
 	const insertGap = useDropIndex(sceneId) === path[path.length - 1];
 
-	const wrapperStyle = useMemo(
-		() => ({
-			marginTop: insertGap ? "3rem" : undefined,
-			transition: "margin-top 200ms ease",
-		}),
-		[insertGap],
-	);
-
-	const handleInsert = useCallback(
-		(type: ContentType) => {
-			const elementPath = ReactEditor.findPath(editor, element);
-			insertElement(editor, type, Path.next(elementPath));
-		},
-		[editor, element],
-	);
+	const handleInsert = (type: ContentType) => {
+		const elementPath = ReactEditor.findPath(editor, element);
+		insertElement(editor, type, Path.next(elementPath));
+	};
 
 	return (
 		<SortableItem
 			sceneId={sceneId}
 			sortableType="content"
-			wrapperStyle={wrapperStyle}
+			wrapperStyle={{
+				marginTop: insertGap ? "3rem" : undefined,
+				transition: "margin-top 200ms ease",
+			}}
 			insertMenu={
 				<InsertMenu
 					options={INSERT_OPTIONS}
