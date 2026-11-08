@@ -90,18 +90,18 @@ export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
 
 // Optional: the message a turn opens with carries no metadata yet, and the
 // validator checks the field whether or not it is there.
-const shape = {
-	metadataSchema: sloppyMetadataSchema.optional(),
-	tools: SLOPPY_TOOLS,
-};
+const metadataSchema = sloppyMetadataSchema.optional();
 
-/** Rows the server wrote. A row it cannot read back is a broken transcript, not a 400. */
+/**
+ * Rows the server wrote. A row it cannot read back is a broken transcript, not a 400.
+ * Past calls are not held to today's tools, which may have renamed or narrowed since.
+ */
 export async function parseSloppyMessages(
 	messages: unknown[],
 ): Promise<SloppyMessage[]> {
 	// The validator refuses an empty array; a new conversation is one.
 	if (messages.length === 0) return [];
-	return validateUIMessages<SloppyMessage>({ messages, ...shape });
+	return validateUIMessages<SloppyMessage>({ messages, metadataSchema });
 }
 
 /** One message off the wire. Null is the caller's 400, never a thrown 500. */
@@ -110,7 +110,8 @@ export async function parseSloppyMessage(
 ): Promise<SloppyMessage | null> {
 	const parsed = await safeValidateUIMessages<SloppyMessage>({
 		messages: [message],
-		...shape,
+		metadataSchema,
+		tools: SLOPPY_TOOLS,
 	});
 	return parsed.success ? (parsed.data[0] ?? null) : null;
 }

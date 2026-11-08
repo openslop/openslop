@@ -87,4 +87,29 @@ describe("parseSloppyMessages", () => {
 
 		expect(messages.map((message) => message.id)).toEqual(["m1", "m2"]);
 	});
+
+	it("reads past calls today's tools would refuse", async () => {
+		const call = (type: string, input: unknown) => ({
+			type,
+			toolCallId: type,
+			state: "input-available",
+			input,
+		});
+		const messages = await parseSloppyMessages([
+			{
+				id: "m1",
+				role: "assistant",
+				parts: [
+					call("tool-set_default_model", {
+						type: "video",
+						provider: "openslop",
+						model: "a model the catalog dropped",
+					}),
+					call("tool-a_tool_since_renamed", {}),
+				],
+			},
+		]);
+
+		expect(messages[0]?.parts).toHaveLength(2);
+	});
 });
