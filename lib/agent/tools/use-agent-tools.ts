@@ -20,7 +20,11 @@ import {
 	estimateRuntime,
 	estimateVisualSpans,
 } from "@/lib/render/visual-spans";
-import { captionClips, captionableClips } from "@/lib/captions/auto-captions";
+import {
+	captionClips,
+	captionableClips,
+	withoutCaptions,
+} from "@/lib/captions/auto-captions";
 import { resolveModel } from "@/lib/connectors/models";
 import { resolveElements } from "@/lib/render/resolve";
 import { buildRenderLayout } from "@/lib/render/scene-builder";
@@ -119,20 +123,24 @@ export function useAgentTools() {
 						return clip;
 					};
 					const timeline = () =>
-						captionableClips(
-							buildRenderLayout(
-								resolveElements(
-									editor.children.filter(isScene),
-									queue.getElementSnapshot,
+						withoutCaptions(
+							captionableClips(
+								buildRenderLayout(
+									resolveElements(
+										editor.children.filter(isScene),
+										queue.getElementSnapshot,
+									),
+									store.getState().videoSettings,
 								),
-								store.getState().videoSettings,
 							),
+							queue.getElementSnapshot,
 						);
-					return captionClips(queue, ids ? ids.map(named) : timeline(), {
-						recaption: ids !== undefined,
-						model: resolveModel("stt", editor.defaultModels().stt),
+					return captionClips(
+						queue,
+						ids ? ids.map(named) : timeline(),
+						resolveModel("stt", editor.defaultModels().stt),
 						projectId,
-					});
+					);
 				},
 				...pick(store.getState(), PROJECT_SETTERS),
 			};

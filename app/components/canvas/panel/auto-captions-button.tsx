@@ -7,6 +7,7 @@ import {
 	captionableClips,
 	isCaptioning,
 	planCaptions,
+	withoutCaptions,
 } from "@/lib/captions/auto-captions";
 import { plural } from "@/lib/format";
 import {
@@ -32,7 +33,10 @@ export function AutoCaptionsButton() {
 
 	const captionable = useMemo(() => captionableClips(layout), [layout]);
 	const uncaptioned = (q: GenerationQueue) =>
-		planCaptions(captionable, q.getElementSnapshot, { recaption: false }).ready;
+		planCaptions(
+			withoutCaptions(captionable, q.getElementSnapshot),
+			q.getElementSnapshot,
+		).ready;
 	const pending = useQueueSelector((q) => uncaptioned(q).length);
 	const active = useQueueSelector((q) =>
 		captionable.some(({ id }) => isCaptioning(q.getElementSnapshot, id)),

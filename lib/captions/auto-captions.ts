@@ -32,33 +32,34 @@ export const captionableClips = (
 		"id",
 	);
 
+export const withoutCaptions = (clips: Clip[], getSnapshot: GetSnapshot) =>
+	clips.filter(
+		({ id }) => getSnapshot(id).result?.textTimestamps === undefined,
+	);
+
 export const isCaptioning = (getSnapshot: GetSnapshot, id: string) =>
 	isGenerationActive(getSnapshot(captionsNodeId(id)).status);
 
 function skipReason(
 	{ id, type }: Clip,
 	getSnapshot: GetSnapshot,
-	recaption: boolean,
 ): string | undefined {
 	if (!isCaptionable(type)) return "never shows captions";
 	const { status, result } = getSnapshot(id);
 	if (!result) return "has no result yet";
 	if (isGenerationActive(status)) return "is generating";
 	if (isCaptioning(getSnapshot, id)) return "is already being captioned";
-	if (!recaption && result.textTimestamps !== undefined)
-		return "already has captions";
 	if (captionsEdited(result)) return "has hand-edited captions";
 }
 
 export function planCaptions(
 	clips: Clip[],
 	getSnapshot: GetSnapshot,
-	{ recaption }: { recaption: boolean },
 ): { ready: Clip[]; skipped: SkippedClip[] } {
 	const ready: Clip[] = [];
 	const skipped: SkippedClip[] = [];
 	for (const clip of clips) {
-		const reason = skipReason(clip, getSnapshot, recaption);
+		const reason = skipReason(clip, getSnapshot);
 		if (reason) skipped.push({ id: clip.id, reason });
 		else ready.push(clip);
 	}
@@ -86,15 +87,10 @@ export function enqueueCaptions(
 export function captionClips(
 	queue: GenerationQueue,
 	clips: Clip[],
-	{
-		recaption,
-		model,
-		projectId,
-	}: { recaption: boolean; model: ModelRef; projectId: string },
+	model: ModelRef,
+	projectId: string,
 ): CaptionsReport {
-	const { ready, skipped } = planCaptions(clips, queue.getElementSnapshot, {
-		recaption,
-	});
+	const { ready, skipped } = planCaptions(clips, queue.getElementSnapshot);
 	enqueueCaptions(queue, ready, model, projectId);
 	return { queued: ready.map(({ id }) => id), skipped };
 }
