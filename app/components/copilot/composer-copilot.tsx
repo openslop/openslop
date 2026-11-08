@@ -3,10 +3,10 @@
 import { useState } from "react";
 import {
 	CornerDownLeft,
-	Film,
 	FilmSlate,
 	Hourglass,
 	ImagePlus,
+	Media,
 	Mic,
 	Palette,
 	Plus,
@@ -115,16 +115,16 @@ function AttachMenu({
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
+			key: "media",
+			label: "Upload media",
+			icon: <Media className={iconClass} />,
+			onSelect: uploadMedia,
+		},
+		{
 			key: "upload",
 			label: "Upload reference images",
 			icon: <ImagePlus className={iconClass} />,
 			onSelect: uploadReferences,
-		},
-		{
-			key: "media",
-			label: "Upload media",
-			icon: <Film className={iconClass} />,
-			onSelect: uploadMedia,
 		},
 		{
 			key: "character",
@@ -218,13 +218,13 @@ export default function ComposerCopilot({
 		format: videoFormat,
 		language,
 	} = useProject((state) => state.scriptSettings);
-	const { add: addReferenceImages } = useReferenceImages();
+	const references = useReferenceImages();
 	const model = useDefaultModels().llm;
 
-	const references = useMediaUpload({
+	const referenceUpload = useMediaUpload({
 		kinds: ["image"],
 		multiple: true,
-		onUpload: addReferenceImages,
+		onUpload: references.add,
 	});
 	const media = useMediaUpload({
 		kinds: UploadKindSchema.options,
@@ -247,10 +247,10 @@ export default function ComposerCopilot({
 
 	return (
 		<div
-			{...references.dropZoneProps}
+			{...media.dropZoneProps}
 			className={cn(
 				"relative w-full rounded-xl border bg-card transition-shadow focus-within:shadow-elevation-5",
-				references.isDraggingOver ? "border-accent" : "border-accent/30",
+				media.isDraggingOver ? "border-accent" : "border-accent/30",
 			)}
 		>
 			<div className="px-4 py-3">
@@ -262,7 +262,9 @@ export default function ComposerCopilot({
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
-				<AssetStrip uploadingCount={references.uploadingCount} />
+				<AssetStrip
+					uploadingCount={referenceUpload.uploadingCount + media.uploadingCount}
+				/>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{activeTemplate && (
 						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
@@ -289,12 +291,12 @@ export default function ComposerCopilot({
 				</div>
 				<div className="flex items-center justify-between pt-2">
 					<div className="flex min-w-0 flex-wrap items-center gap-2">
-						{references.inputElement}
+						{referenceUpload.inputElement}
 						{media.inputElement}
 						<AttachMenu
-							uploadReferences={references.openPicker}
+							uploadReferences={referenceUpload.openPicker}
 							uploadMedia={media.openPicker}
-							uploading={references.uploading || media.uploading}
+							uploading={referenceUpload.uploading || media.uploading}
 						/>
 						<SettingPill
 							name="Aspect ratio"
@@ -359,9 +361,9 @@ export default function ComposerCopilot({
 					/>
 				</div>
 			</div>
-			{references.isDraggingOver && (
+			{media.isDraggingOver && (
 				<div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-card/90 font-body text-body text-accent">
-					Drop images to add them as references
+					Drop files to add them to your media
 				</div>
 			)}
 		</div>

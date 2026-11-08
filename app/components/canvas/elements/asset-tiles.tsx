@@ -2,18 +2,9 @@
 
 import { useState } from "react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import {
-	Image,
-	Mic,
-	Music,
-	Palette,
-	User,
-	Video,
-	type IconComponent,
-} from "@/components/ui/icon";
+import { Image, Media, Mic, Palette, User } from "@/components/ui/icon";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
-import type { UploadKind } from "@/lib/upload/upload-files";
 import { useHasAsset } from "@/lib/canvas/use-assets";
 import { useCharacterAvatar } from "../hooks/use-character-avatar";
 import { AssetTile } from "./asset-tile";
@@ -90,12 +81,6 @@ export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	);
 }
 
-const MEDIA_ICONS: Record<UploadKind, IconComponent> = {
-	image: Image,
-	video: Video,
-	audio: Music,
-};
-
 export function MediaAssetTile({
 	item: { name, kind, url },
 	...tile
@@ -109,7 +94,7 @@ export function MediaAssetTile({
 				name={name}
 				previewUrl={preview && url}
 				previewKind={preview}
-				Icon={MEDIA_ICONS[kind]}
+				Icon={Media}
 				fallback="icon"
 				onRemove={() => setConfirming(true)}
 				{...tile}

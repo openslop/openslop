@@ -70,6 +70,7 @@ export const Film = icon("film");
 export const FilmSlate = icon("film-slate");
 export const Forbidden = icon("forbidden");
 export const Freeze = icon("freeze");
+export const Media = icon("media");
 export const Music = icon("music");
 export const Proportions = icon("aspect-ratio");
 export const Captions = icon("captions");
