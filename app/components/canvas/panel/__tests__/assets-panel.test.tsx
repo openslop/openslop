@@ -69,7 +69,7 @@ describe("AssetsPanel", () => {
 		expect(openDialog()).toBe("asset_style");
 	});
 
-	it("lists the media and removes an item from it", async () => {
+	it("lists the media and removes an item once confirmed", async () => {
 		open();
 		await act(async () =>
 			store
@@ -80,6 +80,17 @@ describe("AssetsPanel", () => {
 		expect(document.body.textContent).toContain("theme");
 
 		await click('button[aria-label="Remove theme"]');
+
+		expect(store.getState().media).toHaveLength(1);
+		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(
+			"Remove theme?",
+		);
+
+		await act(async () =>
+			Array.from(document.querySelectorAll("[role=alertdialog] button"))
+				.find((button) => button.textContent === "Remove")
+				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+		);
 
 		expect(store.getState().media).toEqual([]);
 	});
