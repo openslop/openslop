@@ -7,7 +7,7 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
-import { IconButton } from "@/components/ui/icon-button";
+import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
 import type { Provider } from "@/lib/connectors/types";
@@ -61,7 +61,7 @@ export function SettingsDialog() {
 										size="sm"
 										onClick={() => setBrowsing(false)}
 									>
-										<ArrowLeft />
+										<ArrowLeft size={ICON_SIZES.sm} />
 									</IconButton>
 									<SectionTitle>Add providers</SectionTitle>
 								</div>

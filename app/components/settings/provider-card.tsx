@@ -128,7 +128,7 @@ export function ProviderCard({
 							disabled={testing}
 							onClick={test}
 						>
-							{testing ? <Spinner className="text-current" /> : <RefreshCw />}
+							{testing ? <Spinner /> : <RefreshCw />}
 							{testing ? "Testing…" : "Test"}
 						</Button>
 						<Button

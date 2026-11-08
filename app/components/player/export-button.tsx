@@ -65,7 +65,7 @@ export function ExportButton() {
 					<div className="animate-fadeInUp flex flex-col gap-2">
 						<div className="flex items-center justify-between text-label font-medium">
 							<span className="flex items-center gap-2">
-								<Spinner className="size-3.5" />
+								<Spinner size={14} className="text-muted-foreground" />
 								{isRendering ? "Rendering…" : "Starting…"}
 							</span>
 							{isRendering && (

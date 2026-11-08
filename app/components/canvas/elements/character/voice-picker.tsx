@@ -66,7 +66,7 @@ function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 				unavailable={loading}
 			>
 				{loading ? (
-					<Spinner />
+					<Spinner className="text-muted-foreground" />
 				) : playing ? (
 					<Pause className="h-4 w-4" />
 				) : (

@@ -60,7 +60,7 @@ function faceOf(
 	if (captions.status !== "idle")
 		return {
 			label: "Generating captions…",
-			icon: <Spinner className="text-current" />,
+			icon: <Spinner />,
 		};
 	if (captions.captioned) return null;
 	if (captions.error)
