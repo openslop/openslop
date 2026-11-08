@@ -360,6 +360,19 @@ describe("buildRenderLayout", () => {
 			);
 		});
 
+		it("starts a background placed mid-scene where the speech before it ends, with no transition there", () => {
+			const layout = crossfaded([
+				el({ id: "m1", type: "music", trimDurationSec: 30 }),
+				el({ id: "img1", type: "image" }),
+				el({ id: "n1", type: "narration", trimDurationSec: 3 }),
+				el({ id: "m2", type: "music", trimDurationSec: 30 }),
+				el({ id: "n2", type: "narration", trimDurationSec: 4 }),
+			]);
+			const [m1, m2] = seqs(layout, "music");
+			expect(m1.duration).toBe(3);
+			expect(m2.start).toBe(3);
+		});
+
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
 			const layout = crossfaded([
 				el({ id: "m1", type: "music", trimDurationSec: 10 }),

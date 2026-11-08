@@ -3,8 +3,8 @@ import type { IconComponent } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import { adaptScript } from "./adapt-script";
-import { measureElementLengths } from "./measure-element-lengths";
-import { measureTotalLength } from "./measure-total-length";
+import { estimateDialogueLengths } from "./estimate-dialogue-lengths";
+import { estimateTotalLength } from "./estimate-total-length";
 import { editScript } from "./edit-script";
 import { fitDurations } from "./fit-durations";
 import { listModels } from "./list-models";
@@ -29,8 +29,8 @@ const TOOLS = {
 	update_video_settings: updateVideoSettings,
 	view_result: viewResult,
 	outline_story: outlineStory,
-	measure_total_length: measureTotalLength,
-	measure_element_lengths: measureElementLengths,
+	estimate_total_length: estimateTotalLength,
+	estimate_dialogue_lengths: estimateDialogueLengths,
 	fit_durations: fitDurations,
 	set_title: setTitle,
 	list_models: listModels,

@@ -2,7 +2,11 @@ import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import { ContentTypeSchema, ElementTypeSchema } from "@/lib/canvas/types";
+import {
+	ContentTypeSchema,
+	ElementTypeSchema,
+	NON_SPEECH_TYPES,
+} from "@/lib/canvas/types";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
 	NO_FRAME,
@@ -14,7 +18,7 @@ import { MUSIC_PROMPT_FORMAT } from "@/lib/script/prompt/music-prompt";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
-import { plural } from "@/lib/format";
+import { conjunction, plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
 /** Attributes Sloppy can write by hand: those limited to a list of options, and free text. */
@@ -89,8 +93,8 @@ export const editScript = defineTool({
 	  ${MUSIC_PROMPT_FORMAT}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
-	  surrounding script, whatever language the request is in. Image, video, sound and music
-	  prompts, avatar and style text are always in English, except speech quoted inside a video prompt.
+	  surrounding script, whatever language the request is in. Prompts for ${conjunction(NON_SPEECH_TYPES)},
+	  and avatar and style text, are always in English, except speech quoted inside a video prompt.
 	`,
 	input: z.object({
 		ops: z

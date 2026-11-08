@@ -27,8 +27,8 @@ export const NARRATION_WORDS_PER_SECOND = Math.round(
 const wordsForSeconds = (sec: number): number =>
 	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;
 
-/** How long a spoken-word count takes to say, the one rate the app estimates with. */
-export const secondsForWords = (words: number): number =>
+/** The one rate the app estimates speech with. */
+export const estimateSpeechSec = (words: number): number =>
 	(words * 60) / NARRATION_WORDS_PER_MINUTE;
 
 export type VideoLengthSpec = {
@@ -36,7 +36,7 @@ export type VideoLengthSpec = {
 	/** The budget a script is written to, since a writer writes words, not seconds. */
 	minWords: number;
 	maxWords: number;
-	/** The runtime a finished video is measured against, which silent footage also fills. */
+	/** The runtime a script's estimate is checked against, which silent footage also fills. */
 	minSec: number;
 	maxSec: number;
 };

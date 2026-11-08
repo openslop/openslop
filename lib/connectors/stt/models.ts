@@ -11,5 +11,5 @@ export const STT_MODELS = {
 
 export const DEFAULT_STT_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Slop STT v1",
+	model: "Scribe v2",
 };

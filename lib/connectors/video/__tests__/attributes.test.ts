@@ -4,7 +4,7 @@ import { videoAttributesFor } from "../attributes";
 
 describe("videoAttributesFor", () => {
 	it.each([
-		{ model: "Kling 3 Turbo", resolution: "720p" },
+		{ model: "Seedance 2.5", resolution: "720p" },
 		{ model: "Kling 3 Omni Pro", resolution: "1080p" },
 	])(
 		"defaults $model to $resolution, the first it renders",
@@ -18,7 +18,7 @@ describe("videoAttributesFor", () => {
 
 	it("defaults continuity off for new videos", () => {
 		expect(
-			videoAttributesFor({ provider: "runware", model: "Kling 3 Turbo" })
+			videoAttributesFor({ provider: "runware", model: "Kling 3 Omni" })
 				.defaultAttributes.continuity,
 		).toBe(TOGGLE_OFF);
 	});

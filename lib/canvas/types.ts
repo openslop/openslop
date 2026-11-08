@@ -7,7 +7,7 @@ import type { AssetConnectorType } from "@/lib/connectors/types";
 
 export type ResultKind = "image" | "video" | "audio";
 
-/** How an element behaves on the rendered timeline. An overlay is speech: it holds the screen for as long as it talks. */
+/** How an element behaves on the rendered timeline. An overlay holds the screen for as long as it plays. */
 export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
 export type LayerType = "audio" | "visual";
@@ -72,10 +72,19 @@ export function captionSourceOf(
 	return spec.captionSource;
 }
 
+export const SPEECH_TYPES: readonly ContentType[] = ["narration", "character"];
+
+export const isSpeechType = (type: ContentType): boolean =>
+	SPEECH_TYPES.includes(type);
+
 export const isCaptionable = (type: ContentType): boolean =>
 	captionSourceOf(type) !== undefined;
 
 const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
+
+export const NON_SPEECH_TYPES = ALL_CONTENT_TYPES.filter(
+	(type) => !isSpeechType(type),
+);
 
 export const ContentTypeSchema = z.enum(ALL_CONTENT_TYPES);
 
@@ -84,6 +93,7 @@ export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 );
 
 export const DEFAULT_DURATION = "10";
+export const DEFAULT_DURATION_SEC = Number(DEFAULT_DURATION);
 
 const DURATIONS = DURATION_OPTIONS.map(Number);
 

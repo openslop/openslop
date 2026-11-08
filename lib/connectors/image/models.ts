@@ -9,5 +9,5 @@ export const IMAGE_MODELS = {
 
 export const DEFAULT_IMAGE_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Slop Image v1",
+	model: "Seedream 5 Lite",
 };

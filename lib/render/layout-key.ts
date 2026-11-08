@@ -3,12 +3,7 @@ import { isScene } from "@/lib/canvas/scenes";
 import type { TransitionType } from "./transitions";
 import { layoutAttributeSignature } from "../canvas/element-attributes";
 
-/**
- * Stable key over every element field that resolveElements/buildRenderLayout
- * actually read, plus project-wide layout-affecting settings. The set of
- * layout-affecting attributes lives in `LAYOUT_ATTRIBUTE_KEYS` so this key and
- * the resolver stay in lockstep — add new attributes there, not here.
- */
+/** Add new layout attributes to `LAYOUT_ATTRIBUTE_KEYS`, not here. Text is left out, so a clip's label catches up with its prompt on the next layout change. */
 export function getLayoutKey(
 	nodes: Descendant[],
 	transitionType: TransitionType,

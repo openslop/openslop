@@ -12,12 +12,12 @@ import { createProjectDocument } from "../project-document";
 import type { SavedProject } from "../saved-project";
 import { createProjectStore, ProjectDataSchema } from "../store";
 
-const RECOMMENDED = { provider: "openslop", model: "Slop Image v1" } as const;
+const RECOMMENDED = { provider: "openslop", model: "Seedream 5 Lite" } as const;
 const BYOK = { provider: "runware", model: "Seedream 5 Lite" } as const;
 
 // No provider, so the pair fails to parse and the element takes the default.
-const UNPINNED = `<image model="Slop Image v1">a sunset</image>`;
-const PINNED = `<image provider="openslop" model="Slop Image v1">a sunset</image>`;
+const UNPINNED = `<image model="Seedream 5 Lite">a sunset</image>`;
+const PINNED = `<image provider="openslop" model="Seedream 5 Lite">a sunset</image>`;
 
 const contentWith = (
 	script: string,
@@ -76,7 +76,7 @@ describe("createProjectDocument.write", () => {
 	});
 });
 
-const ASSETS = `<asset_style id="style">noir</asset_style>\n<asset_avatar id="avatar" name="Ada" provider="openslop" model="Slop Image v1">tall</asset_avatar>\n<asset_voice id="voice" provider="openslop" model="Slop TTS v1" name="Ada"></asset_voice>`;
+const ASSETS = `<asset_style id="style">noir</asset_style>\n<asset_avatar id="avatar" name="Ada" provider="openslop" model="Seedream 5 Lite">tall</asset_avatar>\n<asset_voice id="voice" provider="openslop" model="Sonic 3.6" name="Ada"></asset_voice>`;
 const SCENE = `--- Scene 1 ---\n<narration id="line">hello</narration>\n<image id="shot">a sunset</image>`;
 
 describe("createProjectDocument.read", () => {

@@ -1,13 +1,17 @@
 import { dedent } from "@/lib/dedent";
+import { videoFormatLabel, type VideoFormat } from "@/lib/project/video-format";
 
 /** Exported so the mock LLM can recognise a review prompt. */
 export const REVIEW_INSTRUCTION = "Thoroughly review this script";
 
 export const NO_FINDINGS = "NO FINDINGS";
 
-export function reviewPrompt(script: string, format?: string): string {
+export function reviewPrompt(
+	script: string,
+	format: VideoFormat = "auto",
+): string {
 	return dedent`
-		${REVIEW_INSTRUCTION} against the given rules.${format ? ` It was intended as a ${format}, so judge it accordingly.` : ""}
+		${REVIEW_INSTRUCTION} against the given rules.${format === "auto" ? "" : ` It was intended as a ${videoFormatLabel(format)}, so judge it accordingly.`}
 
 		Judge only the scenes of the script below. The asset elements ahead of the first scene are the project's assets, and outside the scope of this review.
 

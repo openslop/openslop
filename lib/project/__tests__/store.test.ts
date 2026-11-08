@@ -9,7 +9,7 @@ import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../video-settings";
 
 const RUNWARE = { provider: "runware", model: "Seedream 5 Lite" } as const;
-const SLOP = { provider: "openslop", model: "Slop Image v1" } as const;
+const SLOP = { provider: "openslop", model: "Seedream 5 Lite" } as const;
 const CLAUDE = { provider: "anthropic", model: "claude-sonnet" } as const;
 
 describe("project store", () => {

@@ -14,7 +14,7 @@ class TestConnector extends BaseConnector {
 }
 
 describe("BaseConnector", () => {
-	const model = { provider: "openslop", model: "Slop LLM v1" } as const;
+	const model = { provider: "openslop", model: "Claude Opus 5" } as const;
 	const config: ResolvedConnectorConfig = {
 		projectId: "project-1",
 		model,

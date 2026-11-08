@@ -1,7 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Film } from "@/components/ui/icon";
-import { VIDEO_FORMAT_NAMES } from "@/lib/script/prompt/formats";
 import { defineTool } from "./define-tool";
 
 export const writeScript = defineTool({
@@ -16,8 +15,7 @@ export const writeScript = defineTool({
 	  finished video needs. For a story prompt without a sufficient plot outline, outline_story first and fold the outline in;
 	  for anything that is not a story, write the brief directly.
 
-	  Say which format the finished video takes (${VIDEO_FORMAT_NAMES.join(", ")}) and why,
-	  since the writer reads only the brief.
+	  The writer reads the brief, the script settings and the assets, never this conversation.
 
 	  When the user gave you the actual text they want on the canvas, rather than an idea to
 	  write from, use adapt_script instead.

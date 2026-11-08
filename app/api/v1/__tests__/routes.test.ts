@@ -47,12 +47,12 @@ vi.mock("@/lib/api/auth", () => ({
 
 /** The model each hosted route serves; a body with a prompt names it unless it says otherwise. */
 const HOSTED_MODELS: Record<string, string> = {
-	image: "Slop Image v1",
-	video: "Slop Video v1",
-	music: "Slop Music v1",
-	sfx: "Slop SFX v1",
-	llm: "Slop LLM v1",
-	tts: "Slop TTS v1",
+	image: "Seedream 5 Lite",
+	video: "Seedance 2 Fast",
+	music: "Eleven Music v1",
+	sfx: "Eleven Text to Sound v2",
+	llm: "Claude Opus 5",
+	tts: "Sonic 3.6",
 };
 
 function makeRequest(
@@ -489,7 +489,7 @@ describe("API routes", () => {
 			});
 
 			await POST(
-				makeRequest("/api/v1/llm", { prompt: "hi", model: "Slop LLM v1" }),
+				makeRequest("/api/v1/llm", { prompt: "hi", model: "Claude Opus 5" }),
 			);
 
 			expect(mockLLMGenerate).toHaveBeenCalledWith(
@@ -518,7 +518,7 @@ describe("API routes", () => {
 			expect(mockCreateJob).toHaveBeenCalledExactlyOnceWith({
 				userId: "user-1",
 				connectorType: "llm",
-				request: { provider: "openslop", model: "Slop LLM v1" },
+				request: { provider: "openslop", model: "Claude Opus 5" },
 				status: "completed",
 				costUsd: 0.003,
 			});
@@ -536,7 +536,7 @@ describe("API routes", () => {
 			expect(mockCreateJob).toHaveBeenCalledExactlyOnceWith({
 				userId: "user-1",
 				connectorType: "llm",
-				request: { provider: "openslop", model: "Slop LLM v1" },
+				request: { provider: "openslop", model: "Claude Opus 5" },
 				status: "completed",
 				costUsd: 0.02,
 			});
@@ -611,7 +611,7 @@ describe("API routes", () => {
 			import("@/app/api/v1/agent/route").then(({ POST }) =>
 				POST(
 					makeRequest("/api/v1/agent", {
-						model: "Slop LLM v1",
+						model: "Claude Opus 5",
 						projectId: PROJECT_ID,
 						message: {
 							id: "m1",
@@ -698,7 +698,7 @@ describe("API routes", () => {
 			]);
 
 			const req = makeRequest(
-				"/api/v1/tts/voices?query=english&model=Slop%20TTS%20v1",
+				"/api/v1/tts/voices?query=english&model=Sonic%203.6",
 				undefined,
 				"GET",
 			);
@@ -724,7 +724,7 @@ describe("API routes", () => {
 			mockTTSSearch.mockRejectedValue(new Error("api down"));
 
 			const req = makeRequest(
-				"/api/v1/tts/voices?model=Slop%20TTS%20v1",
+				"/api/v1/tts/voices?model=Sonic%203.6",
 				undefined,
 				"GET",
 			);

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { DURATION_MAX, snapDurationUp } from "../types";
+import {
+	captionSourceOf,
+	CONTENT_TYPES,
+	DURATION_MAX,
+	isSpeechType,
+	snapDurationUp,
+	type ContentType,
+} from "../types";
 
 describe("snapDurationUp", () => {
 	it("takes the shortest option that still covers the seconds asked for", () => {
@@ -14,4 +21,13 @@ describe("snapDurationUp", () => {
 	it("holds the shortest option for anything under it", () => {
 		expect(snapDurationUp(0)).toBe(4);
 	});
+});
+
+describe("isSpeechType", () => {
+	it.each(Object.keys(CONTENT_TYPES) as ContentType[])(
+		"%s is captioned from speech exactly when it is speech",
+		(type) => {
+			expect(captionSourceOf(type) === "speech").toBe(isSpeechType(type));
+		},
+	);
 });

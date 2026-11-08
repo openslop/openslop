@@ -10,7 +10,7 @@ const AUDIO_URL = `/assets/tts/openslop/${TEST_ID}/output.wav`;
 
 const config = {
 	projectId: "project-1",
-	model: { provider: "openslop", model: "Slop TTS v1" },
+	model: { provider: "openslop", model: "Sonic 3.6" },
 } as const;
 
 const SUCCESS: Parameters<typeof mockGatewaySequence>[0] = [

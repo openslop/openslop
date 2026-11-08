@@ -32,6 +32,7 @@ vi.mock("@runware/sdk-js", () => ({
 }));
 
 import { EmptyRemoteFileError } from "@/lib/api/asset-bundle";
+import { DEFAULT_DURATION_SEC } from "@/lib/canvas/types";
 import { chargedUsd } from "../base";
 import { RunwareVideo } from "../video/runware";
 import { spyAssetBundle } from "./_asset-bundle";
@@ -63,37 +64,13 @@ describe("RunwareVideo", () => {
 				model: "bytedance:seedance@2.0-fast",
 				width: 1280,
 				height: 720,
-				duration: 5,
+				duration: DEFAULT_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
 				includeCost: true,
 				skipResponse: true,
 			});
 			expect(mockDisconnect).toHaveBeenCalled();
-		});
-
-		it("opens Kling on its frame and never sends it reference images", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-2",
-				status: "processing",
-			});
-
-			const provider = new RunwareVideo("test-key");
-			await provider.submit({
-				prompt: "animate this",
-				model: "klingai:kling-video@3.0-turbo",
-				referenceImages: ["data:image/png;base64,ref"],
-				frameImage: "data:image/png;base64,frame",
-			});
-
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({
-					inputs: {
-						frameImages: ["data:image/png;base64,frame"],
-						referenceImages: undefined,
-					},
-				}),
-			);
 		});
 
 		it("gives Seedance its start frame after its reference images, naming it", async () => {
@@ -395,44 +372,6 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		it("never sends Kling a voice", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-a4",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "they talk",
-				model: "klingai:kling-video@3.0-turbo",
-				frameImage: "https://img/last.png",
-				characterAssets: VOICES,
-			});
-
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({
-					positivePrompt: "they talk",
-					inputs: { frameImages: ["https://img/last.png"] },
-				}),
-			);
-		});
-
-		it("leaves inputs off a Kling video that starts fresh, which Kling rejects even empty", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-k4",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "a sunset",
-				model: "klingai:kling-video@3.0-turbo",
-				referenceImages: ["https://img/avatar.png"],
-			});
-
-			expect(mockVideoInference.mock.calls[0]?.[0]).not.toHaveProperty(
-				"inputs",
-			);
-		});
-
 		it("puts each character Seedance sees as their avatar's image, then the references, then the previous scene", async () => {
 			mockVideoInference.mockResolvedValue({
 				taskUUID: "job-s5",
@@ -692,46 +631,6 @@ describe("RunwareVideo", () => {
 				}),
 			).rejects.toThrow(/no video model "vidu:q3"/);
 			expect(mockVideoInference).not.toHaveBeenCalled();
-		});
-
-		it("sizes a frame-conditioned video by resolution preset", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-k",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "animate this",
-				model: "klingai:kling-video@3.0-turbo",
-				frameImage: "https://example.com/still.png",
-				resolution: "1080p",
-				width: 1920,
-				height: 1080,
-			});
-
-			const request = mockVideoInference.mock.calls[0]?.[0];
-			expect(request).toMatchObject({ resolution: "1080p" });
-			expect(request).not.toHaveProperty("width");
-			expect(request).not.toHaveProperty("height");
-		});
-
-		it("sizes a prompted video by pixels even when a resolution is named", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-k2",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "a sunset",
-				model: "klingai:kling-video@3.0-turbo",
-				resolution: "1080p",
-				width: 1920,
-				height: 1080,
-			});
-
-			const request = mockVideoInference.mock.calls[0]?.[0];
-			expect(request).toMatchObject({ width: 1920, height: 1080 });
-			expect(request).not.toHaveProperty("resolution");
 		});
 
 		it("handles array response from videoInference", async () => {

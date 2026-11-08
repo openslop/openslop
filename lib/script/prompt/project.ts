@@ -67,14 +67,14 @@ export function projectPreamble(assets: AssetElement[]): string {
 	return sections.join("\n\n");
 }
 
-/** Empty on `auto`: the writer then picks the format closest to the brief. */
+/** Empty on `auto`, where the writer falls back to the format closest to the brief. */
 export function formatSection({ format }: ScriptSettings): string {
 	if (format === "auto") return "";
 
 	return dedent`
 		# Format
 
-		The user picked the ${videoFormatLabel(format)} format. Write in it.`;
+		The format is ${videoFormatLabel(format)}. Write in it.`;
 }
 
 /** Empty on `auto`: no budget is a budget the model would otherwise invent. */

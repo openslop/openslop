@@ -81,7 +81,7 @@ const isStill = ({ element }: Sequence) =>
  *  1. Foreground → starts a new scene.
  *  2. Overlay    → extends the current scene's duration; opens a blank scene if none exists.
  *  3. Background → updates the active background layer for that element type. Exclusive (one at a time per type).
- *  4. Effect     → same as background but additive (can overlap).
+ *  4. Effect     → starts with its visual, or where the speech before it ends; overlaps freely.
  *
  * A scene is a consecutive, blocking sequence containing an element within a series.
  */

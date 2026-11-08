@@ -31,7 +31,11 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 		project_id: null,
 		connector_type: "video",
 		status: "processing",
-		request: { prompt: "a cat", provider: "openslop", model: "Slop Video v1" },
+		request: {
+			prompt: "a cat",
+			provider: "openslop",
+			model: "Seedance 2 Fast",
+		},
 		result: null,
 		metadata: { providerJobId: "upstream-1" },
 		error: null,

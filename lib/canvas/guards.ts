@@ -4,6 +4,7 @@ import {
 	CHARACTER_REF_TYPE,
 	CONTENT_TYPES,
 	ELEMENT_TYPES,
+	isSpeechType,
 	type AssetElement,
 	type AssetType,
 	type ContentElement,
@@ -29,7 +30,7 @@ export const isCharacterRef = (node: unknown): node is CharacterRefElement =>
 	Element.isElement(node) && node.type === CHARACTER_REF_TYPE;
 
 export const isSpeech = (node: unknown): boolean =>
-	isContentElement(node) && CONTENT_TYPES[node.type].connector === "tts";
+	isContentElement(node) && isSpeechType(node.type);
 
 export const isAssetType = (type: string): type is AssetType =>
 	Object.hasOwn(ASSET_TYPES, type);

@@ -9,5 +9,5 @@ export const MUSIC_MODELS = {
 
 export const DEFAULT_MUSIC_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Slop Music v1",
+	model: "Eleven Music v1",
 };

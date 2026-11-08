@@ -1,8 +1,9 @@
 import type { VideoJob, VideoJobStatus, VideoRequest } from "./base";
-import { BaseVideoProvider, DEFAULT_VIDEO_DURATION_SEC } from "./base";
+import { DEFAULT_DURATION_SEC } from "@/lib/canvas/types";
+import { BaseVideoProvider } from "./base";
 import { validateRunwareKey, withRunware } from "../runware";
 import type { Conditioner } from "./conditioning";
-import { klingOmni, klingTurbo } from "./kling";
+import { klingOmni } from "./kling";
 import { seedance } from "./seedance";
 import { RUNWARE_VIDEO_MODELS } from "@/lib/connectors/video/runware/models";
 import { renderSize } from "@/lib/connectors/models";
@@ -59,7 +60,6 @@ const CONDITIONERS: Record<ModelId, Conditioner> = {
 		totalAudioSec: 30,
 		voicesNeedPictures: false,
 	}),
-	"klingai:kling-video@3.0-turbo": klingTurbo,
 	"klingai:kling-video@o3-standard": omni,
 	"klingai:kling-video@o3-pro": omni,
 };
@@ -102,7 +102,7 @@ export class RunwareVideo extends BaseVideoProvider {
 			const result = await runware.videoInference({
 				model: params.model,
 				...conditioning,
-				duration: params.duration ?? DEFAULT_VIDEO_DURATION_SEC,
+				duration: params.duration ?? DEFAULT_DURATION_SEC,
 				outputType: "URL",
 				deliveryMethod: "async",
 				includeCost: true,

@@ -4,7 +4,7 @@ export const VIDEO_FORMAT_TARGETS = [
 	"explainer",
 ] as const;
 
-/** `auto` is a choice, not an absence: the writer picks the format that fits the brief. */
+/** `auto` is not classified yet; the writer falls back to the format closest to the brief. */
 export const VIDEO_FORMAT_CHOICES = ["auto", ...VIDEO_FORMAT_TARGETS] as const;
 
 export type VideoFormatTarget = (typeof VIDEO_FORMAT_TARGETS)[number];

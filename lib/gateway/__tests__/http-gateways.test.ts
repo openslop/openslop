@@ -21,12 +21,18 @@ function sseResponse(events: unknown[]) {
 	});
 }
 
-const HOSTED_IMAGE = { provider: "openslop", model: "Slop Image v1" } as const;
+const HOSTED_IMAGE = {
+	provider: "openslop",
+	model: "Seedream 5 Lite",
+} as const;
 const BYOK_IMAGE = { provider: "runware", model: "Seedream 5 Lite" } as const;
-const HOSTED_VIDEO = { provider: "openslop", model: "Slop Video v1" } as const;
-const HOSTED_TTS = { provider: "openslop", model: "Slop TTS v1" } as const;
+const HOSTED_VIDEO = {
+	provider: "openslop",
+	model: "Seedance 2 Fast",
+} as const;
+const HOSTED_TTS = { provider: "openslop", model: "Sonic 3.6" } as const;
 const BYOK_TTS = { provider: "cartesia", model: "Sonic 3.6" } as const;
-const HOSTED_LLM = { provider: "openslop", model: "Slop LLM v1" } as const;
+const HOSTED_LLM = { provider: "openslop", model: "Claude Opus 5" } as const;
 const BYOK_LLM = { provider: "anthropic", model: "Claude Sonnet 5" } as const;
 const config = (model: ModelRef) => ({ model, projectId: "project-1" });
 
@@ -136,7 +142,7 @@ describe("HTTP gateways", () => {
 			expect(url.searchParams.get("gender")).toBe("feminine");
 			expect(url.searchParams.get("limit")).toBe("5");
 			expect(url.searchParams.get("provider")).toBe("openslop");
-			expect(url.searchParams.get("model")).toBe("Slop TTS v1");
+			expect(url.searchParams.get("model")).toBe("Sonic 3.6");
 		});
 
 		it("hands previews back as the vendor names them", async () => {

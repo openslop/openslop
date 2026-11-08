@@ -39,15 +39,15 @@ describe("buildScriptPrompt", () => {
 		);
 	});
 
-	it("holds a brief to the format the user picked, and only then", () => {
+	it("holds a brief to the stored format, and only then", () => {
 		const formatOf = (format: "faceless" | "auto") => settingsOf({ format });
 		const brief = { kind: "brief", brief: "a brief" } as const;
 
 		expect(buildScriptPrompt([], formatOf("faceless"), brief).system).toContain(
-			"The user picked the Faceless format",
+			"The format is Faceless",
 		);
 		expect(buildScriptPrompt([], formatOf("auto"), brief).system).not.toContain(
-			"The user picked the",
+			"The format is",
 		);
 	});
 

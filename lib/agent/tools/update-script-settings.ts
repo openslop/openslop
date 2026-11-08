@@ -12,22 +12,23 @@ import {
 	VIDEO_FORMAT_TARGETS,
 } from "@/lib/project/video-format";
 import { Hourglass } from "@/components/ui/icon";
+import { conjunction } from "@/lib/format";
 import { defineTool } from "./define-tool";
 import { atLeastOne } from "./inputs";
 
 export const updateScriptSettings = defineTool({
 	description: dedent`
-	  Change how the next script is written: its language, length and format. Send only what
-	  changes. Nothing on the canvas changes; to change what is there, update the setting and
-	  then edit_script.
+	  Store the language, length and format the script should have, so you remember them; the
+	  script tools read them from here. adapt_script keeps the user's words, so only the
+	  language applies to it. Send only what changes.
 
 	  - language: what narration and dialogue are written in. "auto" follows whatever language
 	    the user writes in. ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}
-	  - length: how long the video runs, as the spoken-word budget the next script is held to.
+	  - length: how long the video runs, as a spoken-word budget.
 	    - auto: no budget. The script runs as long as the material needs.
 	${VIDEO_LENGTH_TARGETS.map((length) => `    - ${length}: ${VIDEO_LENGTH_SPECS[length].minWords} to ${VIDEO_LENGTH_SPECS[length].maxWords} words`).join("\n")}
-	  - format: what the next script is made of. Set one only when the user asks for it.
-	    - auto: the writer picks the format closest to the brief.
+	  - format: what the script is made of.
+	    - auto: not classified yet.
 	${VIDEO_FORMAT_TARGETS.map((format) => `    - ${format}: ${VIDEO_FORMAT_SPECS[format].summary}`).join("\n")}
 	`,
 	input: z
@@ -39,12 +40,12 @@ export const updateScriptSettings = defineTool({
 		.refine(...atLeastOne("script setting")),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Updating the script settings",
+	label: "Storing the script settings",
 	execute: async (patch, ctx) => {
 		ctx.updateScriptSettings(patch);
 		const changed = Object.entries(patch).map(
-			([key, value]) => `${key} to ${value}`,
+			([key, value]) => `${key} ${value}`,
 		);
-		return `Set the ${changed.join(" and ")}. It applies to the next script written; what is on the canvas is unchanged.`;
+		return `Stored ${conjunction(changed)}.`;
 	},
 });

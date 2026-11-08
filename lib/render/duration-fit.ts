@@ -1,35 +1,30 @@
 import { DURATION_MAX, snapDurationUp } from "@/lib/canvas/types";
-import type { ElementLength } from "./element-lengths";
-import { secondsForWords } from "../project/video-length";
+import type { VisualSpan } from "./visual-spans";
+import { estimateSpeechSec } from "../project/video-length";
 
 /** Breathing room on top of the dialogue a visual has to cover. */
 export const DURATION_FIT_LEEWAY_SEC = 1;
 
-export type GeneratedLength = ElementLength & { durationSec: number };
+type FittableSpan = VisualSpan & { durationSec: number };
 
-/** The length a video should be generated at, against the length it is set to. */
+/** The `duration` that covers a video's dialogue, against the one it is set to. */
 export type DurationFit = {
-	length: GeneratedLength;
+	span: FittableSpan;
 	duration: number;
 	/** Dialogue plus leeway, which no option covers once it passes DURATION_MAX. */
 	needed: number;
 };
 
-const isFittable = (length: ElementLength): length is GeneratedLength =>
-	length.durationSec !== undefined && length.words > 0;
+const isFittable = (span: VisualSpan): span is FittableSpan =>
+	span.durationSec !== undefined && span.words > 0;
 
-const fit = (length: GeneratedLength): DurationFit => {
-	const needed = secondsForWords(length.words) + DURATION_FIT_LEEWAY_SEC;
-	return { length, duration: snapDurationUp(needed), needed };
+const fit = (span: FittableSpan): DurationFit => {
+	const needed = estimateSpeechSec(span.words) + DURATION_FIT_LEEWAY_SEC;
+	return { span, duration: snapDurationUp(needed), needed };
 };
 
 export const fallsShort = ({ needed }: DurationFit): boolean =>
 	needed > DURATION_MAX;
 
-/**
- * What each generated video's `duration` should be to cover the dialogue under it,
- * as `measureElementLengths` attributes it: every line between this visual and the
- * next, scene boundaries included.
- */
-export const durationFits = (lengths: ElementLength[]): DurationFit[] =>
-	lengths.filter(isFittable).map(fit);
+export const durationFits = (spans: VisualSpan[]): DurationFit[] =>
+	spans.filter(isFittable).map(fit);
