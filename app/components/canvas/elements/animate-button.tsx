@@ -18,14 +18,12 @@ export function AnimateButton({ element }: { element: ContentElement }) {
 	const { send, loading } = useSloppy();
 	const { setActive } = useEditorPanel();
 
-	const picture = result?.imageUrl;
-
 	return (
 		<Button
 			type="button"
 			variant="ghost"
 			size="sm"
-			tooltip={`Turn this into a video element${picture ? " that starts from this image" : ""}`}
+			tooltip={`Turn this into a video element${result?.imageUrl ? " that starts from this image" : ""}`}
 			className="shrink-0"
 			disabled={loading || isGenerationActive(status)}
 			onMouseDown={keepFocus}

@@ -12,7 +12,6 @@ import { totalDuration } from "@/lib/render/sequences";
 import { useDropIndex } from "../dnd/drag-transfer-context";
 import { useSceneCollapsed, useViewMode } from "../view-mode-context";
 import { CollapsibleHeader } from "./collapsible-header";
-
 import { ForegroundPreview } from "./foreground-preview";
 import { PlayFromHereButton } from "./play-from-here-button";
 import { SceneDeleteButton } from "./scene-delete-button";

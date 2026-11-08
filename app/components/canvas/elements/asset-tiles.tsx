@@ -87,13 +87,13 @@ export function MediaAssetTile({
 }: TileProps & { item: MediaItem }) {
 	const removeMedia = useProject((state) => state.removeMedia);
 	const [confirming, setConfirming] = useState(false);
-	const preview = kind === "audio" ? undefined : kind;
+	const previewKind = kind === "audio" ? undefined : kind;
 	return (
 		<>
 			<AssetTile
 				name={name}
-				previewUrl={preview && url}
-				previewKind={preview}
+				previewUrl={previewKind && url}
+				previewKind={previewKind}
 				Icon={Media}
 				fallback="icon"
 				onRemove={() => setConfirming(true)}

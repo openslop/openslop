@@ -37,7 +37,6 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 	if (!edit) return null;
 
 	const value = flatAttributes(element)[attrKey] ?? "";
-	const shown = formatValue(value, unit);
 	const tooltip = `${label}: ${value || UNSET}`;
 
 	if (edit.kind === "images") {
@@ -73,7 +72,6 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 	}
 
 	if (edit.kind === "seconds") {
-		const { min } = edit;
 		return (
 			// Keyed on the value so a trim dragged on the timeline replaces the draft.
 			<InputAttributeField
@@ -82,7 +80,7 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 				attrKey={attrKey}
 				value={value}
 				label={label}
-				parse={(text) => clampedNumber(text, { min })?.toString()}
+				parse={(text) => clampedNumber(text, { min: edit.min })?.toString()}
 				inputMode="decimal"
 				placeholder="Auto"
 				aria-label={`${label} in seconds`}
@@ -96,15 +94,14 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 	};
 
 	if (edit.kind === "toggle") {
-		const { on, off } = edit;
 		return (
 			<MediaToggle
 				value={isToggleOn(value) ? TOGGLE_ON : TOGGLE_OFF}
 				onChange={handleSelect}
 				ariaLabel={label}
 				options={[
-					{ value: TOGGLE_OFF, ...off },
-					{ value: TOGGLE_ON, ...on },
+					{ value: TOGGLE_OFF, ...edit.off },
+					{ value: TOGGLE_ON, ...edit.on },
 				]}
 			/>
 		);
@@ -121,7 +118,7 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 			contentClassName="max-h-64 min-w-24"
 		>
 			<InlineMenuTrigger aria-label={tooltip}>
-				<span className="min-w-0 truncate">{shown}</span>
+				<span className="min-w-0 truncate">{formatValue(value, unit)}</span>
 			</InlineMenuTrigger>
 		</SelectMenu>
 	);
