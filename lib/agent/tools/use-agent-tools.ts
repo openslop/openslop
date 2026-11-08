@@ -6,11 +6,7 @@ import pick from "lodash/pick";
 import { getAssets } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
-import {
-	getContentElements,
-	isScene,
-	isScriptEmpty,
-} from "@/lib/canvas/scenes";
+import { getContentElements, isScriptEmpty } from "@/lib/canvas/scenes";
 import {
 	countSpokenWords,
 	estimateDialogueLengths,
@@ -126,10 +122,7 @@ export function useAgentTools() {
 						withoutCaptions(
 							captionableClips(
 								buildRenderLayout(
-									resolveElements(
-										editor.children.filter(isScene),
-										queue.getElementSnapshot,
-									),
+									resolveElements(editor.children, queue.getElementSnapshot),
 									store.getState().videoSettings,
 								),
 							),
