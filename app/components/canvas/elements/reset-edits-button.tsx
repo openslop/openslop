@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import { Undo } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
@@ -19,11 +18,11 @@ export function ResetEditsButton() {
 	const { element, node } = useElementGeneration();
 	const edited = useQueueSelector((q) => hasEditsSinceResult(node, q));
 
-	const reset = useCallback(() => {
+	const reset = () => {
 		const { resultInputs } = queue.getElementSnapshot(node.id);
 		if (!resultInputs) return;
 		applyElementVersion(editor, element.id, { inputs: resultInputs });
-	}, [queue, editor, node.id, element.id]);
+	};
 
 	if (!edited) return null;
 	return (

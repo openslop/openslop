@@ -90,9 +90,9 @@ function ElementVersionRow({
 				/>
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
-						<span
-							className={cn("font-numeric", active && "text-accent")}
-						>{`v${label}`}</span>
+						<span className={cn("font-numeric", active && "text-accent")}>
+							v{label}
+						</span>
 						<Dot />
 						{version.pinned && <Pin className="h-3 w-3" />}
 						{relativeTime(version.createdAt)}
@@ -155,7 +155,6 @@ export function ElementHistoryPopover({
 }) {
 	const loadHistory = useLoadElementHistory();
 	const [open, setOpen] = useState(false);
-	const close = () => setOpen(false);
 
 	return (
 		<Popover
@@ -185,7 +184,7 @@ export function ElementHistoryPopover({
 					<ElementVersionList
 						elementId={elementId}
 						onRestore={onRestore}
-						onClose={close}
+						onClose={() => setOpen(false)}
 					/>
 				</div>
 			</PopoverContent>

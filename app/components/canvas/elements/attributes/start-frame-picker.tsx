@@ -130,11 +130,11 @@ export function StartFramePicker({
 	label: string;
 }) {
 	const editor = useSlateStatic();
-	const opening = frameSource(element.generationAttributes?.[attrKey]);
+	const source = frameSource(element.generationAttributes?.[attrKey]);
 	// Sloppy sets a picture as the start frame without remembering it as the upload.
 	const uploaded =
 		element.layoutAttributes?.[UPLOADED_FRAME_ATTR] ??
-		(opening.kind === "upload" ? opening.url : undefined);
+		(source.kind === "upload" ? source.url : undefined);
 	const setFrame = (next: string, upload = uploaded ?? null) =>
 		mergeAttrs(editor, element.id, {
 			[attrKey]: next,
@@ -146,7 +146,7 @@ export function StartFramePicker({
 			if (url) setFrame(url, url);
 		},
 	});
-	const summary = FRAME_SOURCE_LABEL[opening.kind];
+	const summary = FRAME_SOURCE_LABEL[source.kind];
 
 	return (
 		<Popover>
@@ -157,20 +157,20 @@ export function StartFramePicker({
 				<div role="radiogroup" aria-label={label} className="flex gap-3">
 					<FrameTile
 						kind="none"
-						current={opening.kind}
+						current={source.kind}
 						onSelect={() => setFrame(NO_FRAME)}
 					>
 						<Forbidden className="h-5 w-5" />
 					</FrameTile>
 					<PreviousFrameTile
 						element={element}
-						current={opening.kind}
+						current={source.kind}
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					/>
 					{uploaded ? (
 						<FrameTile
 							kind="upload"
-							current={opening.kind}
+							current={source.kind}
 							onSelect={() => setFrame(uploaded)}
 							picture={uploaded}
 							onRemove={() => setFrame(NO_FRAME, null)}

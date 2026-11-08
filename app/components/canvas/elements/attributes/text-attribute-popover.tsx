@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useSlateStatic } from "slate-react";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,13 +32,10 @@ export function TextAttributePopover({
 	const [draft, setDraft] = useState(value);
 	const cancelRef = useRef(false);
 
-	const commit = useCallback(
-		(next: string) => {
-			if (next === value) return;
-			mergeAttrs(editor, element.id, { [attrKey]: next });
-		},
-		[editor, element, attrKey, value],
-	);
+	const commit = (next: string) => {
+		if (next === value) return;
+		mergeAttrs(editor, element.id, { [attrKey]: next });
+	};
 
 	const handleOpenChange = (next: boolean) => {
 		if (next || cancelRef.current) setDraft(value);

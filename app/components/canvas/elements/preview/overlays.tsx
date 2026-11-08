@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X as XIcon, AlertCircle, Check, Copy } from "@/components/ui/icon";
+import { X, AlertCircle, Check, Copy } from "@/components/ui/icon";
 import { IconButton } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { isGenerationActive } from "@/lib/generation/snapshots";
@@ -27,7 +27,7 @@ function CancelButton({ onClick }: { onClick: () => void }) {
 				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={onClick}
 			>
-				<XIcon className="w-3 h-3" aria-hidden="true" />
+				<X className="w-3 h-3" aria-hidden="true" />
 			</IconButton>
 		</SimpleTooltip>
 	);

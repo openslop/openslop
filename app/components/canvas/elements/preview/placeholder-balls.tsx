@@ -30,39 +30,30 @@ function useStaticRotations() {
 	return rotations;
 }
 
-function PlaceholderBalls({
-	generating,
-	staticRotations,
-}: {
-	generating: boolean;
-	staticRotations: number[];
-}) {
-	return (
-		<>
-			{PLACEHOLDER_BALLS.map((ball, i) => (
-				<span
-					key={i}
-					className={
-						generating
-							? loaderStyles.ball
-							: `${loaderStyles.ball} ${loaderStyles.ballStatic}`
-					}
-					style={
-						{
-							"--color": ball.color,
-							"--i": ball.size,
-							"--d": ball.duration,
-							"--x": ball.x,
-							"--y": ball.y,
-							...(!generating && {
-								"--rotation": `${staticRotations[i]}deg`,
-							}),
-						} as React.CSSProperties
-					}
-				/>
-			))}
-		</>
-	);
+function PlaceholderBalls({ generating }: { generating: boolean }) {
+	const staticRotations = useStaticRotations();
+	return PLACEHOLDER_BALLS.map((ball, i) => (
+		<span
+			key={i}
+			className={
+				generating
+					? loaderStyles.ball
+					: `${loaderStyles.ball} ${loaderStyles.ballStatic}`
+			}
+			style={
+				{
+					"--color": ball.color,
+					"--i": ball.size,
+					"--d": ball.duration,
+					"--x": ball.x,
+					"--y": ball.y,
+					...(!generating && {
+						"--rotation": `${staticRotations[i]}deg`,
+					}),
+				} as React.CSSProperties
+			}
+		/>
+	));
 }
 
 export function PlaceholderBallsLoader({
@@ -70,14 +61,10 @@ export function PlaceholderBallsLoader({
 }: {
 	generating: boolean;
 }) {
-	const staticRotations = useStaticRotations();
 	return (
 		<div className={loaderStyles.clipBox} aria-hidden="true">
 			<div className={loaderStyles.containerLoader}>
-				<PlaceholderBalls
-					generating={generating}
-					staticRotations={staticRotations}
-				/>
+				<PlaceholderBalls generating={generating} />
 			</div>
 		</div>
 	);
