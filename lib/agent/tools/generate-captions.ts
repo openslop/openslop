@@ -5,9 +5,9 @@ import { defineTool } from "./define-tool";
 
 export const generateCaptions = defineTool({
 	description: dedent`
-	  Queue speech to text on clips. No ids: every uncaptioned clip that has a result. Ids:
-	  those clips, redoing existing captions unless hand-edited. The output lists skipped clips
-	  and why. Captions show only while the captions setting is on (update_video_settings).
+	  Queue captions for clips. Omit ids to caption every uncaptioned clip that has been
+	  generated. Provide ids to (re)caption those clips. The output lists skipped clips with
+	  reasons. Captions show only while the captions setting is on (update_video_settings).
 	`,
 	input: z.object({
 		ids: z
