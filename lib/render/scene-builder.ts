@@ -1,5 +1,6 @@
 import remove from "lodash/remove";
-import { CONTENT_TYPES } from "@/lib/canvas/types";
+import { CONTENT_TYPES, type CanvasBlock } from "@/lib/canvas/types";
+import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import {
 	DEFAULT_FPS,
 	MIN_DURATION_SEC,
@@ -14,6 +15,7 @@ import { totalDuration } from "./sequences";
 import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
 import { transitionOverlapSec } from "./transitions";
+import { resolveElements } from "./resolve";
 
 export type BuildLayoutOptions = Pick<
 	VideoSettings,
@@ -178,3 +180,15 @@ export function buildRenderLayout(
 		rgbSplit,
 	};
 }
+
+export const layoutCanvas = (
+	blocks: CanvasBlock[],
+	getSnapshot: (id: string) => ElementSnapshot,
+	settings: BuildLayoutOptions & Pick<VideoSettings, "captions">,
+): RenderLayout =>
+	buildRenderLayout(
+		resolveElements(blocks, getSnapshot, {
+			captionsEnabled: settings.captions,
+		}),
+		settings,
+	);

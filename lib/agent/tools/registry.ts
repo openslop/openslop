@@ -7,6 +7,7 @@ import { estimateDialogueLengths } from "./estimate-dialogue-lengths";
 import { estimateTotalLength } from "./estimate-total-length";
 import { editScript } from "./edit-script";
 import { fitDurations } from "./fit-durations";
+import { generateCaptions } from "./generate-captions";
 import { listModels } from "./list-models";
 import { outlineStory } from "./outline-story";
 import { readScript } from "./read-script";
@@ -27,6 +28,7 @@ const TOOLS = {
 	review_script: reviewScript,
 	update_script_settings: updateScriptSettings,
 	update_video_settings: updateVideoSettings,
+	generate_captions: generateCaptions,
 	view_result: viewResult,
 	outline_story: outlineStory,
 	estimate_total_length: estimateTotalLength,

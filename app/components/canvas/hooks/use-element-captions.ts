@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
-import { captionsNode, captionsNodeId } from "@/lib/captions/captions-job";
+import { enqueueCaptions } from "@/lib/captions/auto-captions";
+import { captionsNodeId } from "@/lib/captions/captions-job";
 import {
 	captionsEdited,
 	replaceCaptions,
@@ -21,17 +22,13 @@ export function useGenerateSTT() {
 	const editor = useSlateStatic();
 	const projectId = useProjectId();
 	return useCallback(
-		(elements: ElementRef[]) => {
-			const model = resolveModel("stt", editor.defaultModels().stt);
-			queue.enqueueGraph(
-				elements.map((element) => {
-					const { result } = queue.getElementSnapshot(element.id);
-					if (!result)
-						throw new Error(`Element "${element.id}" has nothing to caption`);
-					return captionsNode(element, result, model, projectId);
-				}),
-			);
-		},
+		(elements: ElementRef[]) =>
+			enqueueCaptions(
+				queue,
+				elements,
+				resolveModel("stt", editor.defaultModels().stt),
+				projectId,
+			),
 		[queue, editor, projectId],
 	);
 }
