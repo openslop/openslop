@@ -63,11 +63,13 @@ export const editScript = defineTool({
 	  - asset: create an asset, or update the one with the same \`type\` and \`name\`. Assets sit
 	    outside the script, so they take no anchor.
 	  - remove: delete the element with \`id\`.
+	  - move: move the element with \`id\` before or after \`anchor_id\`, or to the start or end
+	    as insert does. It keeps its id, attributes and result.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it.
 
-	  To move an element or change its type, insert the new one before it, then remove it:
-	  that is a new, ungenerated element holding only what you send. To animate an image,
+	  To change an element's type, insert the new one before it, then remove it: that is a
+	  new, ungenerated element holding only what you send. To animate an image,
 	  insert a video that starts from it before the image, then remove the image.
 
 	  Script types: ${ContentTypeSchema.options.join(", ")}

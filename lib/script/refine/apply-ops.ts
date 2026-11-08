@@ -48,6 +48,9 @@ export function applyRefineOp(editor: Editor, op: RefineOp): RefineOpResult {
 			case "remove":
 				result = applyRemove(editor, op);
 				break;
+			case "move":
+				result = applyMove(editor, op);
+				break;
 			case "set":
 				result = applySet(editor, op);
 				break;
@@ -70,7 +73,7 @@ export function applyRefineOps(
 
 function resolveInsertPath(
 	editor: Editor,
-	op: Extract<RefineOp, { op: "insert" }>,
+	op: Pick<Extract<RefineOp, { op: "insert" }>, "anchor_id" | "position">,
 ): Path | null {
 	if (!op.anchor_id) {
 		const firstScene = editor.children.findIndex(isScene);
@@ -138,6 +141,30 @@ function applyRemove(
 	const entry = findElementById(editor, op.id);
 	if (!entry) return { ok: false, reason: `remove: no element "${op.id}"` };
 	Transforms.removeNodes(editor, { at: entry[1] });
+	return OK;
+}
+
+function applyMove(
+	editor: Editor,
+	op: Extract<RefineOp, { op: "move" }>,
+): RefineOpResult {
+	const entry = findElementById(editor, op.id);
+	if (!entry || !isContentElement(entry[0]))
+		return { ok: false, reason: `move: no script element "${op.id}"` };
+
+	const slot = resolveInsertPath(editor, op);
+	if (!slot) {
+		return {
+			ok: false,
+			reason: `move: no element "${op.anchor_id}" to anchor on`,
+		};
+	}
+
+	const [node, at] = entry;
+	// Slate reads a move's destination as counted without the moved node.
+	const to =
+		Path.transform(slot, { type: "remove_node", path: at, node }) ?? at;
+	Transforms.moveNodes(editor, { at, to });
 	return OK;
 }
 
