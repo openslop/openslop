@@ -19,7 +19,12 @@ import { resolveElements } from "./resolve";
 
 export type BuildLayoutOptions = Pick<
 	VideoSettings,
-	"transitionType" | "aspectRatio" | "captionStyle" | "filmGrain" | "rgbSplit"
+	| "transitionType"
+	| "aspectRatio"
+	| "captions"
+	| "captionStyle"
+	| "filmGrain"
+	| "rgbSplit"
 > &
 	Partial<Pick<RenderLayout, "fps">>;
 
@@ -92,6 +97,7 @@ export function buildRenderLayout(
 	{
 		transitionType,
 		aspectRatio,
+		captions,
 		captionStyle,
 		filmGrain,
 		rgbSplit,
@@ -175,6 +181,7 @@ export function buildRenderLayout(
 		),
 		transitionType,
 		transitionDurationSec,
+		captions,
 		captionStyle,
 		filmGrain,
 		rgbSplit,
@@ -184,11 +191,6 @@ export function buildRenderLayout(
 export const layoutCanvas = (
 	blocks: CanvasBlock[],
 	getSnapshot: (id: string) => ElementSnapshot,
-	settings: BuildLayoutOptions & Pick<VideoSettings, "captions">,
+	settings: BuildLayoutOptions,
 ): RenderLayout =>
-	buildRenderLayout(
-		resolveElements(blocks, getSnapshot, {
-			captionsEnabled: settings.captions,
-		}),
-		settings,
-	);
+	buildRenderLayout(resolveElements(blocks, getSnapshot), settings);

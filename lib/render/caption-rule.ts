@@ -53,8 +53,12 @@ function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 }
 
 export function layoutCaptions(
-	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle">,
+	layout: Pick<
+		RenderLayout,
+		"series" | "sequences" | "captions" | "captionStyle"
+	>,
 ): CaptionSequence[] {
+	if (!layout.captions) return [];
 	const sequences = allSequences(layout);
 	const scenesWithCaptionedSpeech = sceneIdsOf(
 		sequences.filter(

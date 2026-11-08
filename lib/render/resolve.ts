@@ -15,7 +15,6 @@ import { elementTrim, trimCaptions } from "./clip-trim";
 export function resolveElements(
 	blocks: CanvasBlock[],
 	getSnapshot: (id: string) => ElementSnapshot,
-	{ captionsEnabled }: { captionsEnabled: boolean },
 ): ResolvedElement[] {
 	const resolved: ResolvedElement[] = [];
 	let sceneNumber = 0;
@@ -50,10 +49,9 @@ export function resolveElements(
 				loop: getLoop(element),
 				volume: getVolume(element),
 				motion: getMotion(element),
-				captions:
-					captionsEnabled && textTimestamps?.length
-						? trimCaptions(textTimestamps, trim)
-						: undefined,
+				captions: textTimestamps?.length
+					? trimCaptions(textTimestamps, trim)
+					: undefined,
 			});
 		}
 	}

@@ -66,9 +66,6 @@ describe("resolveElements", () => {
 		const resolved = resolveElements(
 			[wrap(elements)],
 			(id) => snapshots[id] ?? makeSnapshot({ result: null }),
-			{
-				captionsEnabled: true,
-			},
 		);
 
 		expect(resolved).toHaveLength(2);
@@ -123,18 +120,13 @@ describe("resolveElements", () => {
 		const resolved = resolveElements(
 			[wrap(elements)],
 			(id) => snapshots[id] ?? makeSnapshot({ result: null }),
-			{
-				captionsEnabled: true,
-			},
 		);
 		expect(resolved).toHaveLength(1);
 		expect(resolved[0].id).toBe("img1");
 	});
 
 	it("returns empty for no elements", () => {
-		const resolved = resolveElements([], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([], () => makeSnapshot());
 		expect(resolved).toEqual([]);
 	});
 
@@ -148,9 +140,7 @@ describe("resolveElements", () => {
 			"sound",
 		];
 		const elements = types.map((t, i) => makeElement(`el${i}`, t));
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 
 		const roleMap = Object.fromEntries(resolved.map((r) => [r.type, r.role]));
 		expect(roleMap).toEqual({
@@ -178,9 +168,7 @@ describe("resolveElements", () => {
 			makeElement("s1", "sound", { loops: "4" }),
 			makeElement("s2", "sound"),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].loops).toBe(4);
 		expect(resolved[1].loops).toBe(1);
 	});
@@ -190,9 +178,7 @@ describe("resolveElements", () => {
 			makeElement("s1", "sound", { loops: "0" }),
 			makeElement("s2", "sound", { loops: "not-a-number" }),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].loops).toBe(1);
 		expect(resolved[1].loops).toBe(1);
 	});
@@ -203,9 +189,7 @@ describe("resolveElements", () => {
 			makeElement("s2", "music", { volume: "0" }),
 			makeElement("s3", "music"),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].volume).toBe(3);
 		expect(resolved[1].volume).toBe(0);
 		expect(resolved[2].volume).toBe(10);
@@ -217,9 +201,7 @@ describe("resolveElements", () => {
 			makeElement("s2", "music", { volume: "42" }),
 			makeElement("s3", "music", { volume: "not-a-number" }),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].volume).toBe(0);
 		expect(resolved[1].volume).toBe(10);
 		expect(resolved[2].volume).toBe(10);
@@ -230,9 +212,7 @@ describe("resolveElements", () => {
 			makeElement("s1", "music", { volume: "" }),
 			makeElement("s2", "music", { loops: "" }),
 		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot(), {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].volume).toBe(10);
 		expect(resolved[1].loops).toBe(1);
 	});
@@ -243,9 +223,7 @@ describe("resolveElements", () => {
 			makeElement("nar1", "narration"),
 		];
 		const noResult = makeSnapshot({ status: "idle", result: null });
-		const resolved = resolveElements([wrap(elements)], () => noResult, {
-			captionsEnabled: true,
-		});
+		const resolved = resolveElements([wrap(elements)], () => noResult);
 		expect(resolved).toEqual([]);
 	});
 
@@ -264,20 +242,14 @@ describe("resolveElements", () => {
 			}),
 		};
 		const bySnapshot = (id: string) => snapshots[id] ?? makeSnapshot();
-		const resolveOne = (element: ContentElement, captionsEnabled = true) =>
-			resolveElements([wrap([element])], bySnapshot, { captionsEnabled })[0];
+		const resolveOne = (element: ContentElement) =>
+			resolveElements([wrap([element])], bySnapshot)[0];
 
 		it("captions an element with the words on its own result, until it ends", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
 				trimIndexOffset: 0,
 				words: heard,
 			});
-		});
-
-		it("drops captions when captions are disabled project-wide", () => {
-			expect(
-				resolveOne(makeElement("vid", "video"), false).captions,
-			).toBeUndefined();
 		});
 
 		it("counts the words a trim cuts, so an edit still lands on the element's own", () => {
@@ -312,7 +284,6 @@ describe("resolveElements", () => {
 					]),
 				],
 				() => makeSnapshot(),
-				{ captionsEnabled: false },
 			);
 			expect(video).toMatchObject({ trimStartSec: 1, trimDurationSec: 3 });
 		});

@@ -110,6 +110,7 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 	height,
 	transitionType,
 	transitionDurationSec,
+	captions,
 	captionStyle,
 	filmGrain,
 	rgbSplit,
@@ -160,9 +161,9 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 		[fps, sequences],
 	);
 
-	const captions = useMemo(
-		() => layoutCaptions({ series, sequences, captionStyle }),
-		[series, sequences, captionStyle],
+	const captionLines = useMemo(
+		() => layoutCaptions({ series, sequences, captions, captionStyle }),
+		[series, sequences, captions, captionStyle],
 	);
 
 	return (
@@ -170,7 +171,7 @@ export const VideoComposition: React.FC<RenderLayout> = ({
 			<RgbSplit enabled={rgbSplit}>
 				<TransitionSeries>{transitionSeriesNodes}</TransitionSeries>
 				{layeredSequenceNodes}
-				<Captions captions={captions} style={captionStyle} />
+				<Captions captions={captionLines} style={captionStyle} />
 			</RgbSplit>
 			{filmGrain && <FilmGrain />}
 		</AbsoluteFill>

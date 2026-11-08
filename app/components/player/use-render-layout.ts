@@ -21,7 +21,7 @@ export function useRenderLayout(editor: Editor): {
 	const resultVersion = useQueueSelector((q) => q.getResultVersion());
 	const transitionType = useVideoSetting("transitionType");
 	const aspectRatio = useVideoSetting("aspectRatio");
-	const captionsEnabled = useVideoSetting("captions");
+	const captions = useVideoSetting("captions");
 	const [captionStyle] = useCaptionStyle();
 	const filmGrain = useVideoSetting("filmGrain");
 	const rgbSplit = useVideoSetting("rgbSplit");
@@ -41,7 +41,7 @@ export function useRenderLayout(editor: Editor): {
 			layout: layoutCanvas(scenes, queue.getElementSnapshot, {
 				transitionType,
 				aspectRatio,
-				captions: captionsEnabled,
+				captions,
 				captionStyle,
 				filmGrain,
 				rgbSplit,
@@ -55,7 +55,7 @@ export function useRenderLayout(editor: Editor): {
 		resultVersion,
 		transitionType,
 		aspectRatio,
-		captionsEnabled,
+		captions,
 		captionStyle,
 		filmGrain,
 		rgbSplit,

@@ -58,6 +58,7 @@ export type RenderLayout = {
 	totalFrames: number;
 	transitionType: TransitionType;
 	transitionDurationSec: number;
+	captions: boolean;
 	captionStyle: CaptionStyle;
 	filmGrain: boolean;
 	rgbSplit: boolean;

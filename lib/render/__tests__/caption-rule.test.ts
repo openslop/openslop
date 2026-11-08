@@ -46,6 +46,14 @@ describe("layoutCaptions", () => {
 			duration,
 		}));
 
+	it("lays no captions while captions are off", () => {
+		expect(
+			layoutCaptions(
+				layoutOf([el("vid", "video", heard)], { captions: false }),
+			),
+		).toEqual([]);
+	});
+
 	it("ends the last line with its last word", () => {
 		expect(spans(layoutOf([el("vid", "video", heard)]))).toEqual([
 			{ id: "vid", start: 0, duration: 1 },

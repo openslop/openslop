@@ -67,6 +67,7 @@ function layout(partial: Partial<RenderLayout>): RenderLayout {
 		height: 1080,
 		totalDurationSec: 1,
 		totalFrames: 30,
+		captions: true,
 		captionStyle: DEFAULT_CAPTION_STYLE,
 		transitionType: "none",
 		filmGrain: false,
