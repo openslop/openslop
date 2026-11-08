@@ -1,6 +1,16 @@
 "use client";
 
-import { Image, Mic, Palette, User } from "@/components/ui/icon";
+import {
+	Image,
+	Mic,
+	Music,
+	Palette,
+	User,
+	Video,
+	type IconComponent,
+} from "@/components/ui/icon";
+import type { MediaItem } from "@/lib/project/media";
+import type { UploadKind } from "@/lib/upload/upload-files";
 import { useHasAsset } from "@/lib/canvas/use-assets";
 import { useCharacterAvatar } from "../hooks/use-character-avatar";
 import { AssetTile } from "./asset-tile";
@@ -74,5 +84,28 @@ export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	const { editAsset } = useAssetEditors();
 	return (
 		<ReferenceTile {...tile} onEdit={() => editAsset("asset_references")} />
+	);
+}
+
+const MEDIA_ICONS: Record<UploadKind, IconComponent> = {
+	image: Image,
+	video: Video,
+	audio: Music,
+};
+
+export function MediaAssetTile({
+	item: { name, kind, url },
+	...tile
+}: TileProps & { item: MediaItem; onRemove: () => void }) {
+	const preview = kind === "audio" ? undefined : kind;
+	return (
+		<AssetTile
+			name={name}
+			previewUrl={preview && url}
+			previewKind={preview}
+			Icon={MEDIA_ICONS[kind]}
+			fallback="icon"
+			{...tile}
+		/>
 	);
 }

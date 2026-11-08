@@ -1,10 +1,13 @@
 // @vitest-environment happy-dom
 
+import { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Descendant } from "slate";
 import { findAsset } from "@/lib/canvas/assets";
 import { references } from "@/lib/canvas/__tests__/_assets";
+import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
+import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
 import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { AssetsPanel } from "../assets-panel";
@@ -16,16 +19,20 @@ vi.mock("../../elements/style/art-style-modal", () => ({
 }));
 
 let canvas: ReturnType<typeof mountOnCanvas>;
+let store: ProjectStore;
 afterEach(() => canvas.unmount());
 
 const open = (children: Descendant[] = []) => {
 	canvas = mountOnCanvas(children);
+	store = createProjectStore();
 	canvas.render(
-		<TooltipProvider>
-			<AssetEditProvider>
-				<AssetsPanel />
-			</AssetEditProvider>
-		</TooltipProvider>,
+		<ProjectStoreProvider store={store}>
+			<TooltipProvider>
+				<AssetEditProvider>
+					<AssetsPanel />
+				</AssetEditProvider>
+			</TooltipProvider>
+		</ProjectStoreProvider>,
 	);
 };
 
@@ -60,5 +67,20 @@ describe("AssetsPanel", () => {
 		await click('button[aria-label="Edit Reference 1"]');
 
 		expect(openDialog()).toBe("asset_style");
+	});
+
+	it("lists the media and removes an item from it", async () => {
+		open();
+		await act(async () =>
+			store
+				.getState()
+				.addMedia([{ kind: "audio", name: "theme.mp3", url: "https://a/t" }]),
+		);
+
+		expect(document.body.textContent).toContain("theme");
+
+		await click('button[aria-label="Remove theme"]');
+
+		expect(store.getState().media).toEqual([]);
 	});
 });

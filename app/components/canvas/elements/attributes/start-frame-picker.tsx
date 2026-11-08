@@ -21,7 +21,7 @@ import {
 	START_FRAME,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
-import { useFileUpload } from "@/lib/upload/use-file-upload";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { AddAssetTile } from "../add-asset-tile";
 import { MediaViewer } from "../media-viewer";
 import { RemoveCrossButton } from "../remove-cross-button";
@@ -140,8 +140,8 @@ export function StartFramePicker({
 			[attrKey]: next,
 			[UPLOADED_FRAME_ATTR]: upload,
 		});
-	const { openPicker, uploading, inputElement } = useFileUpload({
-		kind: "image",
+	const { openPicker, uploading, inputElement } = useMediaUpload({
+		kinds: ["image"],
 		onUpload: ([url]) => {
 			if (url) setFrame(url, url);
 		},

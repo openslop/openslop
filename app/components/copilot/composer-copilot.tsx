@@ -48,7 +48,7 @@ import {
 	videoFormatSummary,
 	type VideoFormat,
 } from "@/lib/project/video-format";
-import { useFileUpload } from "@/lib/upload/use-file-upload";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./action-button";
 import { AssetStrip } from "@/app/components/canvas/elements/asset-strip";
@@ -218,8 +218,8 @@ export default function ComposerCopilot({
 		inputElement,
 		dropZoneProps,
 		isDraggingOver,
-	} = useFileUpload({
-		kind: "image",
+	} = useMediaUpload({
+		kinds: ["image"],
 		multiple: true,
 		onUpload: addReferenceImages,
 	});

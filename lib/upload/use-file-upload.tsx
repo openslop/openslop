@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { toastError } from "@/lib/toast-error";
 import { uploadFile } from "./upload-file";
-import { partitionFiles, UPLOAD_KINDS, type UploadKind } from "./upload-files";
+import {
+	acceptedTypes,
+	partitionFiles,
+	type Upload,
+	type UploadKind,
+} from "./upload-files";
 
 const carriesFiles = (data: DataTransfer) => data.types.includes("Files");
 
@@ -26,12 +31,12 @@ function useBlockStrayFileDrops() {
 }
 
 export function useFileUpload({
-	kind,
+	kinds,
 	onUpload,
 	multiple = false,
 }: {
-	kind: UploadKind;
-	onUpload: (urls: string[]) => void | Promise<void>;
+	kinds: readonly UploadKind[];
+	onUpload: (uploads: Upload[]) => void | Promise<void>;
 	multiple?: boolean;
 }) {
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -41,7 +46,7 @@ export function useFileUpload({
 	useBlockStrayFileDrops();
 
 	const upload = async (candidates: File[]) => {
-		const { accepted, rejected } = partitionFiles(candidates, kind);
+		const { accepted, rejected } = partitionFiles(candidates, kinds);
 		for (const { name, reason } of rejected)
 			toastError(`${name} ${reason}`, "Not uploaded");
 
@@ -51,14 +56,18 @@ export function useFileUpload({
 		setUploadingCount((count) => count + files.length);
 		try {
 			const results = await Promise.allSettled(
-				files.map((file) => uploadFile(kind, file)),
+				files.map(async ({ file, kind }) => ({
+					kind,
+					name: file.name,
+					url: await uploadFile(kind, file),
+				})),
 			);
-			const urls: string[] = [];
+			const uploads: Upload[] = [];
 			for (const result of results) {
-				if (result.status === "fulfilled") urls.push(result.value);
+				if (result.status === "fulfilled") uploads.push(result.value);
 				else toastError(result.reason);
 			}
-			if (urls.length > 0) await onUpload(urls);
+			if (uploads.length > 0) await onUpload(uploads);
 		} catch (error) {
 			toastError(error);
 		} finally {
@@ -79,7 +88,7 @@ export function useFileUpload({
 		<input
 			ref={inputRef}
 			type="file"
-			accept={UPLOAD_KINDS[kind].contentTypes.join(",")}
+			accept={acceptedTypes(kinds)}
 			multiple={multiple}
 			className="hidden"
 			onChange={handleFileChange}

@@ -3,6 +3,21 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import unicorn from "eslint-plugin-unicorn";
 
+const LIB_TO_APP = {
+	group: ["@/app/**", "**/app/**"],
+	message:
+		"lib/ must not import from app/. Move shared domain logic into lib/.",
+};
+
+const MEDIA_UPLOAD = {
+	group: ["@/lib/upload/use-file-upload", "**/use-file-upload"],
+	message: "User uploads land in the project's media: use useMediaUpload.",
+};
+
+const restrictImports = (...patterns) => ({
+	"no-restricted-imports": ["error", { patterns }],
+});
+
 const eslintConfig = defineConfig([
 	...nextVitals,
 	...nextTs,
@@ -19,20 +34,15 @@ const eslintConfig = defineConfig([
 	{
 		// lib/ is the domain layer: it must never import from app/ (the UI layer)
 		files: ["lib/**/*.{ts,tsx}"],
-		rules: {
-			"no-restricted-imports": [
-				"error",
-				{
-					patterns: [
-						{
-							group: ["@/app/**", "**/app/**"],
-							message:
-								"lib/ must not import from app/. Move shared domain logic into lib/.",
-						},
-					],
-				},
-			],
-		},
+		rules: restrictImports(LIB_TO_APP, MEDIA_UPLOAD),
+	},
+	{
+		files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+		rules: restrictImports(MEDIA_UPLOAD),
+	},
+	{
+		files: ["lib/project/use-media-upload.ts", "lib/upload/**/*.{ts,tsx}"],
+		rules: restrictImports(LIB_TO_APP),
 	},
 	{
 		plugins: { unicorn },

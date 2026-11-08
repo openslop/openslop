@@ -11,7 +11,7 @@ import {
 	isGenerationActive,
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
-import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
+import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { GenerationIndicator } from "./generation-indicator";
 import { MediaViewer } from "./media-viewer";
 import { RemoveCrossButton } from "./remove-cross-button";
@@ -19,6 +19,7 @@ import { RemoveCrossButton } from "./remove-cross-button";
 export function AssetTile({
 	name,
 	previewUrl,
+	previewKind = "image",
 	Icon,
 	status = "idle",
 	startedAt = null,
@@ -29,6 +30,7 @@ export function AssetTile({
 }: {
 	name: string;
 	previewUrl?: string;
+	previewKind?: "image" | "video";
 	Icon: IconComponent;
 	status?: GenerationStatus;
 	startedAt?: number | null;
@@ -47,13 +49,11 @@ export function AssetTile({
 		<Thumbnail fill={fill} className="group/tile relative">
 			<ThumbnailFace>
 				{previewUrl ? (
-					<ImageWithShimmer
+					<MediaWithSkeleton
 						key={previewUrl}
+						outputKind={previewKind}
 						src={previewUrl}
 						alt={name}
-						fill
-						unoptimized
-						className="object-cover"
 					/>
 				) : (
 					<span className="text-body-lg">{fallbackContent}</span>
@@ -82,7 +82,7 @@ export function AssetTile({
 				{previewUrl && (
 					<MediaViewer
 						src={previewUrl}
-						kind="image"
+						kind={previewKind}
 						name={name}
 						className="opacity-0 group-hover/tile:opacity-100"
 					/>

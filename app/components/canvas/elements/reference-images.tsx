@@ -1,7 +1,7 @@
 "use client";
 
 import { ImagePlus } from "@/components/ui/icon";
-import { useFileUpload } from "@/lib/upload/use-file-upload";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { AddAssetTile } from "./add-asset-tile";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { ReferenceTile } from "./asset-tiles";
@@ -16,8 +16,8 @@ export function ReferenceImagePicker({
 	onAdd: (urls: string[]) => void;
 	onRemove: (index: number) => void;
 }) {
-	const { openPicker, uploading, inputElement } = useFileUpload({
-		kind: "image",
+	const { openPicker, uploading, inputElement } = useMediaUpload({
+		kinds: ["image"],
 		multiple: true,
 		onUpload: onAdd,
 	});
