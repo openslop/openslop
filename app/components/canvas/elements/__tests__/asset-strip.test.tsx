@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { act } from "react";
+import { act, type ReactNode } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +9,11 @@ import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
 import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
-import { AssetStrip } from "../asset-strip";
+import {
+	AssetStrip,
+	AssetStripMedia,
+	AssetStripReferences,
+} from "../asset-strip";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -17,14 +21,14 @@ let canvas: ReturnType<typeof mountOnCanvas>;
 let store: ProjectStore;
 afterEach(() => canvas.unmount());
 
-const open = (children: Descendant[] = []) => {
+const open = (tiles: ReactNode, children: Descendant[] = []) => {
 	canvas = mountOnCanvas(children);
 	store = createProjectStore();
 	canvas.render(
 		<ProjectStoreProvider store={store}>
 			<TooltipProvider>
 				<AssetEditProvider>
-					<AssetStrip />
+					<AssetStrip>{tiles}</AssetStrip>
 				</AssetEditProvider>
 			</TooltipProvider>
 		</ProjectStoreProvider>,
@@ -33,7 +37,7 @@ const open = (children: Descendant[] = []) => {
 
 describe("AssetStrip", () => {
 	it("shows the project's media and asks before removing an item", async () => {
-		open();
+		open(<AssetStripMedia />);
 		await act(async () =>
 			store
 				.getState()
@@ -50,8 +54,14 @@ describe("AssetStrip", () => {
 		);
 	});
 
-	it("shows an uploaded reference once, as a reference", async () => {
-		open([references("https://img/a.png")]);
+	it("shows an uploaded reference both as a reference and as media", async () => {
+		open(
+			<>
+				<AssetStripReferences />
+				<AssetStripMedia />
+			</>,
+			[references("https://img/a.png")],
+		);
 		await act(async () =>
 			store
 				.getState()
@@ -60,6 +70,6 @@ describe("AssetStrip", () => {
 
 		expect(
 			document.querySelectorAll('[aria-label="Assets"] > li'),
-		).toHaveLength(1);
+		).toHaveLength(2);
 	});
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Thumbnail } from "@/components/ui/thumbnail";
@@ -14,55 +15,64 @@ import {
 	ReferenceAssetTile,
 } from "./asset-tiles";
 
-export function AssetStrip({
-	uploadingCount = 0,
-}: {
-	uploadingCount?: number;
-}) {
-	const editor = useSlateStatic();
-	const names = useCharacterNames();
-	const references = useReferenceImages();
-	const hasArtStyle = useHasAsset("asset_style");
-	const media = useProject((state) => state.media).filter(
-		(item) => !references.urls.includes(item.url),
-	);
-
+export function AssetStrip({ children }: { children: ReactNode }) {
 	return (
 		<ul aria-label="Assets" className="flex flex-wrap gap-2 pb-2 empty:hidden">
-			{hasArtStyle && (
-				<li>
-					<ArtStyleAssetTile />
-				</li>
-			)}
-			{names.map((name) => (
-				<li key={name}>
-					<CharacterAssetTile
-						name={name}
-						onRemove={() => deleteCharacter(editor, name)}
-					/>
-				</li>
-			))}
-			{references.urls.map((url, index) => (
-				<li key={`reference:${url}`}>
-					<ReferenceAssetTile
-						url={url}
-						index={index}
-						onRemove={() => references.remove(index)}
-					/>
-				</li>
-			))}
-			{media.map((item) => (
-				<li key={`media:${item.name}`}>
-					<MediaAssetTile item={item} />
-				</li>
-			))}
-			{Array.from({ length: uploadingCount }).map((_, i) => (
-				<li key={`uploading:${i}`} aria-hidden>
-					<Thumbnail>
-						<Skeleton className="aspect-square" />
-					</Thumbnail>
-				</li>
-			))}
+			{children}
 		</ul>
 	);
+}
+
+export function AssetStripArtStyle() {
+	if (!useHasAsset("asset_style")) return null;
+	return (
+		<li>
+			<ArtStyleAssetTile />
+		</li>
+	);
+}
+
+export function AssetStripCharacters() {
+	const editor = useSlateStatic();
+	const names = useCharacterNames();
+	return names.map((name) => (
+		<li key={name}>
+			<CharacterAssetTile
+				name={name}
+				onRemove={() => deleteCharacter(editor, name)}
+			/>
+		</li>
+	));
+}
+
+export function AssetStripReferences() {
+	const references = useReferenceImages();
+	return references.urls.map((url, index) => (
+		<li key={url}>
+			<ReferenceAssetTile
+				url={url}
+				index={index}
+				onRemove={() => references.remove(index)}
+			/>
+		</li>
+	));
+}
+
+export function AssetStripMedia() {
+	const media = useProject((state) => state.media);
+	return media.map((item) => (
+		<li key={item.name}>
+			<MediaAssetTile item={item} />
+		</li>
+	));
+}
+
+export function AssetStripUploading({ count }: { count: number }) {
+	return Array.from({ length: count }, (_, i) => (
+		<li key={i} aria-hidden>
+			<Thumbnail>
+				<Skeleton className="aspect-square" />
+			</Thumbnail>
+		</li>
+	));
 }

@@ -53,7 +53,14 @@ import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { UploadKindSchema } from "@/lib/upload/upload-files";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./action-button";
-import { AssetStrip } from "@/app/components/canvas/elements/asset-strip";
+import {
+	AssetStrip,
+	AssetStripArtStyle,
+	AssetStripCharacters,
+	AssetStripMedia,
+	AssetStripReferences,
+	AssetStripUploading,
+} from "@/app/components/canvas/elements/asset-strip";
 import {
 	SettingPill,
 	SettingPillButton,
@@ -218,13 +225,13 @@ export default function ComposerCopilot({
 		format: videoFormat,
 		language,
 	} = useProject((state) => state.scriptSettings);
-	const references = useReferenceImages();
+	const { add: addReferenceImages } = useReferenceImages();
 	const model = useDefaultModels().llm;
 
-	const referenceUpload = useMediaUpload({
+	const references = useMediaUpload({
 		kinds: ["image"],
 		multiple: true,
-		onUpload: references.add,
+		onUpload: addReferenceImages,
 	});
 	const media = useMediaUpload({
 		kinds: UploadKindSchema.options,
@@ -262,9 +269,15 @@ export default function ComposerCopilot({
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
-				<AssetStrip
-					uploadingCount={referenceUpload.uploadingCount + media.uploadingCount}
-				/>
+				<AssetStrip>
+					<AssetStripArtStyle />
+					<AssetStripCharacters />
+					<AssetStripReferences />
+					<AssetStripMedia />
+					<AssetStripUploading
+						count={references.uploadingCount + media.uploadingCount}
+					/>
+				</AssetStrip>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{activeTemplate && (
 						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
@@ -291,12 +304,12 @@ export default function ComposerCopilot({
 				</div>
 				<div className="flex items-center justify-between pt-2">
 					<div className="flex min-w-0 flex-wrap items-center gap-2">
-						{referenceUpload.inputElement}
+						{references.inputElement}
 						{media.inputElement}
 						<AttachMenu
-							uploadReferences={referenceUpload.openPicker}
+							uploadReferences={references.openPicker}
 							uploadMedia={media.openPicker}
-							uploading={referenceUpload.uploading || media.uploading}
+							uploading={references.uploading || media.uploading}
 						/>
 						<SettingPill
 							name="Aspect ratio"
