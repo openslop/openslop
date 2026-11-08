@@ -22,7 +22,8 @@ import {
 } from "@/lib/render/visual-spans";
 import { captionClips, captionableClips } from "@/lib/captions/auto-captions";
 import { resolveModel } from "@/lib/connectors/models";
-import { layoutCanvas } from "@/lib/render/scene-builder";
+import { resolveElements } from "@/lib/render/resolve";
+import { buildRenderLayout } from "@/lib/render/scene-builder";
 import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNodes } from "@/lib/generation/generation-graph";
@@ -119,9 +120,11 @@ export function useAgentTools() {
 					};
 					const timeline = () =>
 						captionableClips(
-							layoutCanvas(
-								editor.children.filter(isScene),
-								queue.getElementSnapshot,
+							buildRenderLayout(
+								resolveElements(
+									editor.children.filter(isScene),
+									queue.getElementSnapshot,
+								),
 								store.getState().videoSettings,
 							),
 						);

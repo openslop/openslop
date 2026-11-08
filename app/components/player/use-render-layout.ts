@@ -8,7 +8,8 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 import { getLayoutKey } from "@/lib/render/layout-key";
-import { layoutCanvas } from "@/lib/render/scene-builder";
+import { resolveElements } from "@/lib/render/resolve";
+import { buildRenderLayout } from "@/lib/render/scene-builder";
 import { useCaptionStyle } from "@/lib/captions/use-caption-style";
 import { useVideoSetting } from "@/lib/project/use-video-setting";
 import type { RenderLayout } from "@/lib/render/types";
@@ -37,8 +38,9 @@ export function useRenderLayout(editor: Editor): {
 
 	return useMemo(() => {
 		const scenes = editor.children.filter(isScene);
+		const resolved = resolveElements(scenes, queue.getElementSnapshot);
 		return {
-			layout: layoutCanvas(scenes, queue.getElementSnapshot, {
+			layout: buildRenderLayout(resolved, {
 				transitionType,
 				aspectRatio,
 				captions,
