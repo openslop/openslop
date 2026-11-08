@@ -11,7 +11,7 @@ function Spinner({
 			role="status"
 			aria-hidden={false}
 			aria-label="Loading"
-			className={cn("size-4 animate-spin text-muted-foreground", className)}
+			className={cn("animate-spin", className)}
 			{...props}
 		/>
 	);

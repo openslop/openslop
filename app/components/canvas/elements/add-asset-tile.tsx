@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, type IconComponent } from "@/components/ui/icon";
+import type { IconComponent } from "@/components/ui/icon";
+import { Spinner } from "@/components/ui/spinner";
 import {
 	Thumbnail,
 	ThumbnailCaption,
@@ -35,11 +36,7 @@ export function AddAssetTile({
 				className="focus-ring"
 			>
 				<ThumbnailFace look="dashed">
-					{busy ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
-					) : (
-						<Icon className="h-4 w-4" />
-					)}
+					{busy ? <Spinner /> : <Icon />}
 				</ThumbnailFace>
 				<ThumbnailCaption>{label}</ThumbnailCaption>
 			</button>

@@ -85,7 +85,7 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 								: "Use reference images and character avatars for art style description: upload some first"
 						}
 					>
-						{deriving && <Spinner className="text-current" />}
+						{deriving && <Spinner />}
 						Use references
 					</Button>
 				}

@@ -16,7 +16,7 @@ import {
 	X,
 } from "@/components/ui/icon";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
-import { IconButton } from "@/components/ui/icon-button";
+import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
 import { Spinner } from "@/components/ui/spinner";
 import {
 	SegmentedControl,
@@ -167,9 +167,9 @@ function AttachMenu({
 				disabled={uploading}
 			>
 				{uploading ? (
-					<Spinner className="h-4 w-4 text-current" />
+					<Spinner size={ICON_SIZES.header} />
 				) : (
-					<Plus className="h-4 w-4" />
+					<Plus size={ICON_SIZES.header} />
 				)}
 			</IconButton>
 		</ActionMenu>
@@ -194,7 +194,7 @@ function TemplatePill({
 				shape="round"
 				onClick={onRemove}
 			>
-				<X className="h-3 w-3" />
+				<X size={ICON_SIZES.sm} />
 			</IconButton>
 			{template.promptPrefix}
 		</span>

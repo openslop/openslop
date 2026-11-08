@@ -12,7 +12,7 @@ import {
 } from "../hooks/use-generate-scope";
 
 function SceneGenerateIcon({ empty, active, pending, stale }: GenerateCounts) {
-	if (active) return <Spinner className="h-4 w-4 text-current" />;
+	if (active) return <Spinner />;
 	if (empty) return <Sparkles />;
 	if (pending === 0) return <Check />;
 	if (stale === pending) return <RotateCcw />;

@@ -31,7 +31,7 @@ export function ElementStaleIndicator() {
 }
 
 const GENERATE_ICON: Record<GenerationStatus, ReactNode> = {
-	generating: <Spinner className="text-current" />,
+	generating: <Spinner />,
 	queued: <Hourglass aria-hidden="true" />,
 	idle: <Sparkles aria-hidden="true" />,
 };

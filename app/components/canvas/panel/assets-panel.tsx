@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Loader2, Plus } from "@/components/ui/icon";
+import { Plus } from "@/components/ui/icon";
 import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
+import { Spinner } from "@/components/ui/spinner";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { useProject } from "@/lib/project/use-project";
@@ -42,7 +43,7 @@ function AssetCard({
 						onClick={add.onClick}
 					>
 						{add.busy ? (
-							<Loader2 size={ICON_SIZES.header} className="animate-spin" />
+							<Spinner size={ICON_SIZES.header} />
 						) : (
 							<Plus size={ICON_SIZES.header} />
 						)}

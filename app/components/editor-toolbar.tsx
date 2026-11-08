@@ -117,7 +117,7 @@ function EditorToolbarComponent() {
 						onClick={scope.run}
 					>
 						{busy ? (
-							<Spinner className="text-current" />
+							<Spinner />
 						) : allGenerated ? (
 							<Check aria-hidden="true" />
 						) : (
