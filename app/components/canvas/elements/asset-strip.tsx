@@ -4,13 +4,11 @@ import { useSlateStatic } from "slate-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Thumbnail } from "@/components/ui/thumbnail";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
-import { useProject } from "@/lib/project/use-project";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { deleteCharacter } from "./character/delete-character";
 import {
 	ArtStyleAssetTile,
 	CharacterAssetTile,
-	MediaAssetTile,
 	ReferenceAssetTile,
 } from "./asset-tiles";
 
@@ -23,9 +21,6 @@ export function AssetStrip({
 	const names = useCharacterNames();
 	const references = useReferenceImages();
 	const hasArtStyle = useHasAsset("asset_style");
-	const media = useProject((state) => state.media).filter(
-		(item) => !references.urls.includes(item.url),
-	);
 
 	return (
 		<ul aria-label="Assets" className="flex flex-wrap gap-2 pb-2 empty:hidden">
@@ -49,11 +44,6 @@ export function AssetStrip({
 						index={index}
 						onRemove={() => references.remove(index)}
 					/>
-				</li>
-			))}
-			{media.map((item) => (
-				<li key={`media:${item.name}`}>
-					<MediaAssetTile item={item} />
 				</li>
 			))}
 			{Array.from({ length: uploadingCount }).map((_, i) => (

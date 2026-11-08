@@ -262,9 +262,7 @@ export default function ComposerCopilot({
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
-				<AssetStrip
-					uploadingCount={references.uploadingCount + media.uploadingCount}
-				/>
+				<AssetStrip uploadingCount={references.uploadingCount} />
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{activeTemplate && (
 						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
