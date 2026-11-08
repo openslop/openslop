@@ -72,15 +72,16 @@ export function captionSourceOf(
 	return spec.captionSource;
 }
 
+export const SPEECH_TYPES: readonly ContentType[] = ["narration", "character"];
+
 export const isSpeechType = (type: ContentType): boolean =>
-	CONTENT_TYPES[type].role === "overlay";
+	SPEECH_TYPES.includes(type);
 
 export const isCaptionable = (type: ContentType): boolean =>
 	captionSourceOf(type) !== undefined;
 
 const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
 
-export const SPEECH_TYPES = ALL_CONTENT_TYPES.filter(isSpeechType);
 export const NON_SPEECH_TYPES = ALL_CONTENT_TYPES.filter(
 	(type) => !isSpeechType(type),
 );
