@@ -1,6 +1,7 @@
 -- The OpenSlop provider names each model as its vendor does ("Kling 3 Omni",
 -- not "Slop Video v2"). Rewrite every stored model name, so saved elements,
--- their results and saved defaults keep their model instead of falling back.
+-- their results, saved defaults and running jobs keep their model instead of
+-- falling back or failing.
 -- "Slop Video v1 Fast" (Kling 3 Turbo) is gone and is left to fall back.
 create function pg_temp.rename_openslop_models(doc text) returns text
 language sql immutable as $$
@@ -34,3 +35,8 @@ where concat(inputs::text, result::text) like '%"Slop %';
 update auth.users set
   raw_user_meta_data = pg_temp.rename_openslop_models(raw_user_meta_data::text)::jsonb
 where raw_user_meta_data::text like '%"Slop %';
+
+-- A job still running at deploy is processed and polled by its model name.
+update jobs set
+  request = pg_temp.rename_openslop_models(request::text)::jsonb
+where status in ('pending', 'processing') and request::text like '%"Slop %';
