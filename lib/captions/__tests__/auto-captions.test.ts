@@ -64,12 +64,15 @@ describe("captionableElements", () => {
 					scriptElement("n1", "narration"),
 					scriptElement("p1", "image"),
 					scriptElement("v1", "video"),
+					scriptElement("m1", "music"),
+					scriptElement("fx1", "sound"),
 				],
 			},
 		];
 		expect(captionableElements(nodes).map(({ id }) => id)).toEqual([
 			"n1",
 			"v1",
+			"m1",
 		]);
 	});
 });
