@@ -351,13 +351,26 @@ describe("buildRenderLayout", () => {
 			expect(layout.totalDurationSec).toBeCloseTo(16 - OVERLAP, 5);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "music")[0])).toBeCloseTo(
-				10 - OVERLAP,
+			expect(totalDuration(seqs(layout, "music")[0])).toBe(10);
+			expect(seqs(layout, "music")[1].start).toBe(10);
+			// m2 trimmed to the rendered total since img1 is overlapped by one transition.
+			expect(totalDuration(seqs(layout, "music")[1])).toBeCloseTo(
+				6 - OVERLAP,
 				5,
 			);
-			// m2 starts with img1's scene, one transition early.
-			expect(seqs(layout, "music")[1].start).toBeCloseTo(10 - OVERLAP, 5);
-			expect(totalDuration(seqs(layout, "music")[1])).toBeCloseTo(6, 5);
+		});
+
+		it("starts a background placed mid-scene where the speech before it ends, with no transition there", () => {
+			const layout = crossfaded([
+				el({ id: "m1", type: "music", trimDurationSec: 30 }),
+				el({ id: "img1", type: "image" }),
+				el({ id: "n1", type: "narration", trimDurationSec: 3 }),
+				el({ id: "m2", type: "music", trimDurationSec: 30 }),
+				el({ id: "n2", type: "narration", trimDurationSec: 4 }),
+			]);
+			const [m1, m2] = seqs(layout, "music");
+			expect(m1.duration).toBe(3);
+			expect(m2.start).toBe(3);
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
@@ -373,13 +386,13 @@ describe("buildRenderLayout", () => {
 			expect(layout.totalDurationSec).toBeCloseTo(30 - OVERLAP, 5);
 			expect(seqs(layout, "music")).toHaveLength(2);
 			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "music")[0])).toBeCloseTo(
-				10 - OVERLAP,
+			expect(totalDuration(seqs(layout, "music")[0])).toBe(10);
+			expect(seqs(layout, "music")[1].start).toBe(10);
+			// m5 trimmed to the rendered total since video1 is overlapped by one transition.
+			expect(totalDuration(seqs(layout, "music")[1])).toBeCloseTo(
+				20 - OVERLAP,
 				5,
 			);
-			// m5 starts with video1's scene, one transition early.
-			expect(seqs(layout, "music")[1].start).toBeCloseTo(10 - OVERLAP, 5);
-			expect(totalDuration(seqs(layout, "music")[1])).toBeCloseTo(20, 5);
 		});
 
 		it("emits N consecutive copies for a looped background, trimmed to the foreground span", () => {
@@ -405,11 +418,10 @@ describe("buildRenderLayout", () => {
 			const music = seqs(layout, "music");
 			expect(music).toHaveLength(3);
 			expect(music[0]).toMatchObject({ start: 0, duration: 10 });
-			expect(music[1].start).toBe(10);
-			expect(music[1].duration).toBeCloseTo(5 - OVERLAP, 5);
-			// m2 starts with img2's scene, one transition early.
-			expect(music[2].start).toBeCloseTo(15 - OVERLAP, 5);
-			expect(totalDuration(music[2])).toBeCloseTo(10, 5);
+			expect(music[1]).toMatchObject({ start: 10, duration: 5 });
+			// m2 trimmed to the rendered total since img2 is overlapped by one transition.
+			expect(music[2].start).toBe(15);
+			expect(totalDuration(music[2])).toBeCloseTo(10 - OVERLAP, 5);
 			expect(layout.totalDurationSec).toBeCloseTo(25 - OVERLAP, 5);
 		});
 
