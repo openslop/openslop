@@ -73,8 +73,8 @@ describe("planCaptions", () => {
 	});
 
 	it.each([
-		["ungenerated", "has no result yet"],
-		["generating", "is generating"],
+		["ungenerated", "isn't generated yet"],
+		["generating", "is still generating"],
 		["captioning", "is already being captioned"],
 		["edited", "has hand-edited captions"],
 	])("skips %s: it %s", (id, reason) => {

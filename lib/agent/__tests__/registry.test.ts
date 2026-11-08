@@ -107,7 +107,7 @@ describe("executeToolCall", () => {
 	it("names the clips generate_captions queued and every one it skipped, with why", async () => {
 		const generateCaptions = vi.fn(() => ({
 			queued: ["n1", "v2"],
-			skipped: [{ id: "n3", reason: "has no result yet" }],
+			skipped: [{ id: "n3", reason: "isn't generated yet" }],
 		}));
 
 		const outcome = await executeToolCall(
@@ -118,7 +118,7 @@ describe("executeToolCall", () => {
 		expect(generateCaptions).toHaveBeenCalledWith(["n1", "v2", "n3"]);
 		expect(outcome).toEqual({
 			ok: true,
-			output: "Captioning n1, v2.\nSkipped n3: it has no result yet.",
+			output: "Captioning n1, v2.\nSkipped n3: it isn't generated yet.",
 		});
 	});
 

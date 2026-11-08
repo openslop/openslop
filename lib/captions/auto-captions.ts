@@ -46,8 +46,8 @@ function skipReason(
 ): string | undefined {
 	if (!isCaptionable(type)) return "never shows captions";
 	const { status, result } = getSnapshot(id);
-	if (!result) return "has no result yet";
-	if (isGenerationActive(status)) return "is generating";
+	if (!result) return "isn't generated yet";
+	if (isGenerationActive(status)) return "is still generating";
 	if (isCaptioning(getSnapshot, id)) return "is already being captioned";
 	if (captionsEdited(result)) return "has hand-edited captions";
 }
