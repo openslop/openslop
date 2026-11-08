@@ -6,6 +6,7 @@ import {
 	FilmSlate,
 	Hourglass,
 	ImagePlus,
+	Media,
 	Mic,
 	Palette,
 	Plus,
@@ -48,10 +49,18 @@ import {
 	videoFormatSummary,
 	type VideoFormat,
 } from "@/lib/project/video-format";
-import { useFileUpload } from "@/lib/upload/use-file-upload";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
+import { UploadKindSchema } from "@/lib/upload/upload-files";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./action-button";
-import { AssetStrip } from "@/app/components/canvas/elements/asset-strip";
+import {
+	AssetStrip,
+	AssetStripArtStyle,
+	AssetStripCharacters,
+	AssetStripMedia,
+	AssetStripReferences,
+	AssetStripUploading,
+} from "@/app/components/canvas/elements/asset-strip";
 import {
 	SettingPill,
 	SettingPillButton,
@@ -101,20 +110,28 @@ const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map(
 );
 
 function AttachMenu({
-	openPicker,
+	uploadReferences,
+	uploadMedia,
 	uploading,
 }: {
-	openPicker: () => void;
+	uploadReferences: () => void;
+	uploadMedia: () => void;
 	uploading: boolean;
 }) {
 	const { openCreateCharacter, editAsset } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
+			key: "media",
+			label: "Upload media",
+			icon: <Media className={iconClass} />,
+			onSelect: uploadMedia,
+		},
+		{
 			key: "upload",
 			label: "Upload reference images",
 			icon: <ImagePlus className={iconClass} />,
-			onSelect: openPicker,
+			onSelect: uploadReferences,
 		},
 		{
 			key: "character",
@@ -211,17 +228,14 @@ export default function ComposerCopilot({
 	const { add: addReferenceImages } = useReferenceImages();
 	const model = useDefaultModels().llm;
 
-	const {
-		openPicker,
-		uploading,
-		uploadingCount,
-		inputElement,
-		dropZoneProps,
-		isDraggingOver,
-	} = useFileUpload({
-		kind: "image",
+	const references = useMediaUpload({
+		kinds: ["image"],
 		multiple: true,
 		onUpload: addReferenceImages,
+	});
+	const media = useMediaUpload({
+		kinds: UploadKindSchema.options,
+		multiple: true,
 	});
 	const hasText = value.trim().length > 0;
 	const pasting = intent === "script";
@@ -240,10 +254,10 @@ export default function ComposerCopilot({
 
 	return (
 		<div
-			{...dropZoneProps}
+			{...media.dropZoneProps}
 			className={cn(
 				"relative w-full rounded-xl border bg-card transition-shadow focus-within:shadow-elevation-5",
-				isDraggingOver ? "border-accent" : "border-accent/30",
+				media.isDraggingOver ? "border-accent" : "border-accent/30",
 			)}
 		>
 			<div className="px-4 py-3">
@@ -255,7 +269,15 @@ export default function ComposerCopilot({
 						ariaLabel="What you are giving Sloppy"
 					/>
 				</div>
-				<AssetStrip uploadingCount={uploadingCount} />
+				<AssetStrip>
+					<AssetStripArtStyle />
+					<AssetStripCharacters />
+					<AssetStripReferences />
+					<AssetStripMedia />
+					<AssetStripUploading
+						count={references.uploadingCount + media.uploadingCount}
+					/>
+				</AssetStrip>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{activeTemplate && (
 						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
@@ -282,8 +304,13 @@ export default function ComposerCopilot({
 				</div>
 				<div className="flex items-center justify-between pt-2">
 					<div className="flex min-w-0 flex-wrap items-center gap-2">
-						{inputElement}
-						<AttachMenu openPicker={openPicker} uploading={uploading} />
+						{references.inputElement}
+						{media.inputElement}
+						<AttachMenu
+							uploadReferences={references.openPicker}
+							uploadMedia={media.openPicker}
+							uploading={references.uploading || media.uploading}
+						/>
 						<SettingPill
 							name="Aspect ratio"
 							icon={<Proportions className="mr-1 h-3 w-3" />}
@@ -347,9 +374,9 @@ export default function ComposerCopilot({
 					/>
 				</div>
 			</div>
-			{isDraggingOver && (
+			{media.isDraggingOver && (
 				<div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-card/90 font-body text-body text-accent">
-					Drop images to add them as references
+					Drop files to add them to your media
 				</div>
 			)}
 		</div>

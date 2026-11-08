@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	UploadKindSchema,
 	partitionFiles,
 	UPLOAD_KINDS,
 	UPLOAD_PATHNAME,
@@ -16,8 +17,11 @@ describe("partitionFiles", () => {
 		const png = makeFile("a.png", "image/png");
 		const webp = makeFile("b.webp", "image/webp");
 
-		expect(partitionFiles([png, webp], "image")).toEqual({
-			accepted: [png, webp],
+		expect(partitionFiles([png, webp], ["image"])).toEqual({
+			accepted: [
+				{ file: png, kind: "image" },
+				{ file: webp, kind: "image" },
+			],
 			rejected: [],
 		});
 	});
@@ -25,7 +29,7 @@ describe("partitionFiles", () => {
 	it("rejects non-image files", () => {
 		const pdf = makeFile("script.pdf", "application/pdf");
 
-		expect(partitionFiles([pdf], "image")).toEqual({
+		expect(partitionFiles([pdf], ["image"])).toEqual({
 			accepted: [],
 			rejected: [{ name: "script.pdf", reason: "is not an image" }],
 		});
@@ -34,7 +38,7 @@ describe("partitionFiles", () => {
 	it("rejects image formats the export cannot decode", () => {
 		const svg = makeFile("logo.svg", "image/svg+xml");
 
-		expect(partitionFiles([svg], "image")).toEqual({
+		expect(partitionFiles([svg], ["image"])).toEqual({
 			accepted: [],
 			rejected: [{ name: "logo.svg", reason: "is not an image" }],
 		});
@@ -43,7 +47,7 @@ describe("partitionFiles", () => {
 	it("rejects images over the size cap", () => {
 		const huge = makeFile("huge.png", "image/png", MAX_IMAGE_UPLOAD_BYTES + 1);
 
-		expect(partitionFiles([huge], "image")).toEqual({
+		expect(partitionFiles([huge], ["image"])).toEqual({
 			accepted: [],
 			rejected: [{ name: "huge.png", reason: "is over 10 MB" }],
 		});
@@ -53,24 +57,26 @@ describe("partitionFiles", () => {
 		const ok = makeFile("ok.png", "image/png");
 		const bad = makeFile("bad.txt", "text/plain");
 
-		const { accepted, rejected } = partitionFiles([ok, bad, ok], "image");
+		const { accepted, rejected } = partitionFiles([ok, bad, ok], ["image"]);
 
-		expect(accepted).toEqual([ok, ok]);
+		expect(accepted.map(({ file }) => file)).toEqual([ok, ok]);
 		expect(rejected).toHaveLength(1);
 	});
 
 	it("treats a file exactly at the cap as acceptable", () => {
 		const exact = makeFile("exact.png", "image/png", MAX_IMAGE_UPLOAD_BYTES);
 
-		expect(partitionFiles([exact], "image").accepted).toEqual([exact]);
+		expect(partitionFiles([exact], ["image"]).accepted).toEqual([
+			{ file: exact, kind: "image" },
+		]);
 	});
 
 	it("takes videos only as videos", () => {
 		const clip = makeFile("clip.mp4", "video/mp4");
 		const still = makeFile("still.png", "image/png");
 
-		expect(partitionFiles([clip, still], "video")).toEqual({
-			accepted: [clip],
+		expect(partitionFiles([clip, still], ["video"])).toEqual({
+			accepted: [{ file: clip, kind: "video" }],
 			rejected: [{ name: "still.png", reason: "is not a video" }],
 		});
 	});
@@ -83,8 +89,8 @@ describe("partitionFiles", () => {
 			UPLOAD_KINDS.video.maxBytes + 1,
 		);
 
-		expect(partitionFiles([big, huge], "video")).toEqual({
-			accepted: [big],
+		expect(partitionFiles([big, huge], ["video"])).toEqual({
+			accepted: [{ file: big, kind: "video" }],
 			rejected: [{ name: "huge.mp4", reason: "is over 50 MB" }],
 		});
 	});
@@ -93,8 +99,8 @@ describe("partitionFiles", () => {
 		const song = makeFile("song.mp3", "audio/mpeg");
 		const clip = makeFile("clip.mp4", "video/mp4");
 
-		expect(partitionFiles([song, clip], "audio")).toEqual({
-			accepted: [song],
+		expect(partitionFiles([song, clip], ["audio"])).toEqual({
+			accepted: [{ file: song, kind: "audio" }],
 			rejected: [{ name: "clip.mp4", reason: "is not audio" }],
 		});
 	});
@@ -106,10 +112,42 @@ describe("partitionFiles", () => {
 			UPLOAD_KINDS.audio.maxBytes + 1,
 		);
 
-		expect(partitionFiles([huge], "audio")).toEqual({
+		expect(partitionFiles([huge], ["audio"])).toEqual({
 			accepted: [],
 			rejected: [{ name: "huge.mp3", reason: "is over 20 MB" }],
 		});
+	});
+});
+
+describe("partitionFiles across kinds", () => {
+	it("uploads each file as the kind it is", () => {
+		const still = makeFile("still.png", "image/png");
+		const clip = makeFile("clip.mp4", "video/mp4");
+		const song = makeFile("song.mp3", "audio/mpeg");
+
+		expect(
+			partitionFiles([still, clip, song], UploadKindSchema.options).accepted,
+		).toEqual([
+			{ file: still, kind: "image" },
+			{ file: clip, kind: "video" },
+			{ file: song, kind: "audio" },
+		]);
+	});
+
+	it("names every kind it takes when a file is none of them", () => {
+		const pdf = makeFile("script.pdf", "application/pdf");
+
+		expect(partitionFiles([pdf], UploadKindSchema.options).rejected).toEqual([
+			{ name: "script.pdf", reason: "is not an image, a video, or audio" },
+		]);
+	});
+
+	it("holds each file to its own kind's size cap", () => {
+		const clip = makeFile("clip.mp4", "video/mp4", MAX_IMAGE_UPLOAD_BYTES + 1);
+
+		expect(partitionFiles([clip], UploadKindSchema.options).accepted).toEqual([
+			{ file: clip, kind: "video" },
+		]);
 	});
 });
 

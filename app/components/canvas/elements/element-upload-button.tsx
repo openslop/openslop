@@ -2,6 +2,7 @@
 
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { UploadButton } from "@/lib/upload/upload-button";
 import type { UploadKind } from "@/lib/upload/upload-files";
 import { uploadedResult } from "@/lib/upload/uploaded-result";
@@ -18,18 +19,27 @@ function ElementUploadButton({
 }) {
 	const queue = useGenerationQueue();
 	const { node, status } = useElementGeneration();
-
-	return (
-		<UploadButton
-			kind={kind}
-			className={cn("shrink-0", className)}
-			disabled={isGenerationActive(status)}
-			onUpload={async (url) =>
+	const { openPicker, uploading, inputElement } = useMediaUpload({
+		kinds: [kind],
+		onUpload: async ([url]) => {
+			if (url)
 				queue.commitResult(node, await uploadedResult(kind, url), {
 					pinned: true,
-				})
-			}
-		/>
+				});
+		},
+	});
+
+	return (
+		<>
+			{inputElement}
+			<UploadButton
+				kind={kind}
+				uploading={uploading}
+				onClick={openPicker}
+				className={cn("shrink-0", className)}
+				disabled={isGenerationActive(status)}
+			/>
+		</>
 	);
 }
 

@@ -1,5 +1,16 @@
+import partition from "lodash/partition";
 import { nanoid } from "nanoid";
+import { z } from "zod";
 import type { ResultKind } from "@/lib/canvas/types";
+import { disjunction } from "@/lib/format";
+
+export const UploadKindSchema = z.enum([
+	"image",
+	"video",
+	"audio",
+] as const satisfies readonly ResultKind[]);
+
+export type UploadKind = z.infer<typeof UploadKindSchema>;
 
 /** What a user may upload. Images are limited to what the export's `ImageDecoder` can decode. */
 export const UPLOAD_KINDS = {
@@ -24,14 +35,16 @@ export const UPLOAD_KINDS = {
 		maxBytes: 20 * 1024 * 1024,
 		contentTypes: ["audio/*"],
 	},
-} as const satisfies Partial<
-	Record<
-		ResultKind,
-		{ noun: string; maxBytes: number; contentTypes: readonly string[] }
-	>
+} as const satisfies Record<
+	UploadKind,
+	{ noun: string; maxBytes: number; contentTypes: readonly string[] }
 >;
 
-export type UploadKind = keyof typeof UPLOAD_KINDS;
+export interface Upload {
+	kind: UploadKind;
+	name: string;
+	url: string;
+}
 
 const UPLOAD_DIR = "assets/upload/user";
 
@@ -54,16 +67,19 @@ const matchesContentType = (type: string, pattern: string) =>
 		? type.startsWith(pattern.slice(0, -1))
 		: type === pattern;
 
-/** Why the upload route would turn `file` away, if it would. */
-export function fileRejection(
-	file: File,
-	kind: UploadKind,
-): string | undefined {
-	const { noun, maxBytes, contentTypes } = UPLOAD_KINDS[kind];
-	if (!contentTypes.some((pattern) => matchesContentType(file.type, pattern)))
-		return `is not ${noun}`;
-	if (file.size > maxBytes) return `is over ${maxBytes / 1024 / 1024} MB`;
-	return undefined;
+const kindOf = (file: File, kinds: readonly UploadKind[]) =>
+	kinds.find((kind) =>
+		UPLOAD_KINDS[kind].contentTypes.some((pattern) =>
+			matchesContentType(file.type, pattern),
+		),
+	);
+
+export const acceptedTypes = (kinds: readonly UploadKind[]) =>
+	kinds.flatMap((kind) => UPLOAD_KINDS[kind].contentTypes).join(",");
+
+interface AcceptedFile {
+	file: File;
+	kind: UploadKind;
 }
 
 export interface RejectedFile {
@@ -71,21 +87,32 @@ export interface RejectedFile {
 	reason: string;
 }
 
+function sortFile(
+	file: File,
+	kinds: readonly UploadKind[],
+): AcceptedFile | RejectedFile {
+	const kind = kindOf(file, kinds);
+	if (!kind)
+		return {
+			name: file.name,
+			reason: `is not ${disjunction(kinds.map((k) => UPLOAD_KINDS[k].noun))}`,
+		};
+	const { maxBytes } = UPLOAD_KINDS[kind];
+	if (file.size > maxBytes)
+		return { name: file.name, reason: `is over ${maxBytes / 1024 / 1024} MB` };
+	return { file, kind };
+}
+
 export function partitionFiles(
 	files: File[],
-	kind: UploadKind,
+	kinds: readonly UploadKind[],
 ): {
-	accepted: File[];
+	accepted: AcceptedFile[];
 	rejected: RejectedFile[];
 } {
-	const accepted: File[] = [];
-	const rejected: RejectedFile[] = [];
-
-	for (const file of files) {
-		const reason = fileRejection(file, kind);
-		if (reason) rejected.push({ name: file.name, reason });
-		else accepted.push(file);
-	}
-
+	const [accepted, rejected] = partition(
+		files.map((file) => sortFile(file, kinds)),
+		(sorted): sorted is AcceptedFile => "kind" in sorted,
+	);
 	return { accepted, rejected };
 }

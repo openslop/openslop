@@ -84,7 +84,23 @@ describe("store snapshot", () => {
 			videoSettings: VideoSettingsSchema.parse({}),
 			scriptSettings: ScriptSettingsSchema.parse({}),
 			models: {},
+			media: [],
 		});
+	});
+
+	it("addMedia keeps an upload and removeMedia drops it", () => {
+		const store = createProjectStore();
+		store
+			.getState()
+			.addMedia([{ kind: "image", name: "cat.png", url: "https://blob/a" }]);
+
+		expect(store.getState().media).toEqual([
+			{ name: "cat", kind: "image", url: "https://blob/a" },
+		]);
+
+		store.getState().removeMedia("cat");
+
+		expect(store.getState().media).toEqual([]);
 	});
 
 	it("round-trips through createProjectStore", () => {

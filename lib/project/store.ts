@@ -6,6 +6,8 @@ import {
 	connectorModelsSchema,
 	type ConnectorModels,
 } from "@/lib/connectors/models";
+import type { Upload } from "@/lib/upload/upload-files";
+import { MediaItemSchema, toMediaItems } from "./media";
 import {
 	ScriptSettingsSchema,
 	type DeepPartial,
@@ -24,6 +26,7 @@ export const ProjectDataSchema = z.object({
 	),
 	/** The models this project pins per connector type, ahead of the account's. */
 	models: connectorModelsSchema.default({}),
+	media: z.array(MediaItemSchema).default([]),
 });
 
 export type ProjectData = z.infer<typeof ProjectDataSchema>;
@@ -33,6 +36,8 @@ export type ProjectContext = ProjectData & {
 	updateVideoSettings: (partial: DeepPartial<VideoSettings>) => void;
 	updateScriptSettings: (settings: Partial<ScriptSettings>) => void;
 	updateModels: (models: ConnectorModels) => void;
+	addMedia: (uploads: Upload[]) => void;
+	removeMedia: (name: string) => void;
 	reset: () => void;
 };
 
@@ -61,6 +66,14 @@ export function createProjectStore(
 			updateModels: (models) =>
 				set((state) => {
 					Object.assign(state.models, models);
+				}),
+			addMedia: (uploads) =>
+				set((state) => {
+					state.media.push(...toMediaItems(state.media, uploads));
+				}),
+			removeMedia: (name) =>
+				set((state) => {
+					state.media = state.media.filter((item) => item.name !== name);
 				}),
 			reset: () => set(freshProject()),
 		})),

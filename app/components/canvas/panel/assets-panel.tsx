@@ -4,10 +4,13 @@ import type { ReactNode } from "react";
 import { Loader2, Plus } from "@/components/ui/icon";
 import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
-import { useFileUpload } from "@/lib/upload/use-file-upload";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
+import { useProject } from "@/lib/project/use-project";
+import { UploadKindSchema } from "@/lib/upload/upload-files";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
 	ArtStyleAssetTile,
+	MediaAssetTile,
 	CharacterAssetTile,
 	ReferenceAssetTile,
 } from "../elements/asset-tiles";
@@ -72,8 +75,8 @@ function CharactersCard() {
 
 function ReferencesCard() {
 	const { urls, add, remove } = useReferenceImages();
-	const { openPicker, uploading, inputElement } = useFileUpload({
-		kind: "image",
+	const { openPicker, uploading, inputElement } = useMediaUpload({
+		kinds: ["image"],
 		multiple: true,
 		onUpload: add,
 	});
@@ -121,12 +124,35 @@ function ArtStyleCard() {
 	);
 }
 
+function MediaCard() {
+	const media = useProject((state) => state.media);
+	const { openPicker, uploading, inputElement } = useMediaUpload({
+		kinds: UploadKindSchema.options,
+		multiple: true,
+	});
+	return (
+		<>
+			{inputElement}
+			<AssetCard
+				title="Media"
+				empty="Nothing uploaded yet"
+				add={{ label: "Upload media", onClick: openPicker, busy: uploading }}
+			>
+				{media.map((item) => (
+					<MediaAssetTile key={item.name} item={item} fill />
+				))}
+			</AssetCard>
+		</>
+	);
+}
+
 export function AssetsPanel() {
 	return (
 		<>
 			<ArtStyleCard />
 			<CharactersCard />
 			<ReferencesCard />
+			<MediaCard />
 		</>
 	);
 }

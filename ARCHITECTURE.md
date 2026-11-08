@@ -69,7 +69,9 @@ Canvas
 
 Assets come first, then the scenes. An asset is known by its type and name, never its id, and there is one of each. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/element-connector.ts`).
 
-`lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template) and the project's pinned default models. It also owns saving and version history.
+`lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template), the project's pinned default models and its media. It also owns saving and version history.
+
+**Media** holds the project's own files, apart from the canvas: every image, video or audio file the user uploads, whether to the Media card, an element, a start frame or the references, lands there through `useMediaUpload`. Each item is known by a unique name taken from its file. Removing an item never touches the elements that use its URL.
 
 Each generated element is a node in a dependency graph (`lib/generation/`). A node holds the element's text, its attributes, the metadata its plugins read, and edges to the generated elements it uses. Per-type behaviour comes from the plugins installed in `lib/connectors/registry.ts`:
 

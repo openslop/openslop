@@ -24,6 +24,12 @@ const conjunctionList = new Intl.ListFormat("en", { type: "conjunction" });
 export const conjunction = (items: readonly string[]): string =>
 	conjunctionList.format(items);
 
+const disjunctionList = new Intl.ListFormat("en", { type: "disjunction" });
+
+/** "a, b, or c". */
+export const disjunction = (items: readonly string[]): string =>
+	disjunctionList.format(items);
+
 export function plural(count: number, noun: string): string {
 	return count === 1 ? noun : `${noun}s`;
 }

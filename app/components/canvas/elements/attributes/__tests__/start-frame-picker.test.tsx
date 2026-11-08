@@ -12,8 +12,8 @@ import { StartFramePicker } from "../start-frame-picker";
 vi.mock("../use-previous-pictures", () => ({
 	usePreviousPictures: () => ({ kind: "ready", pictures: [] }),
 }));
-vi.mock("@/lib/upload/use-file-upload", () => ({
-	useFileUpload: () => ({
+vi.mock("@/lib/project/use-media-upload", () => ({
+	useMediaUpload: () => ({
 		openPicker: vi.fn(),
 		uploading: false,
 		inputElement: null,
