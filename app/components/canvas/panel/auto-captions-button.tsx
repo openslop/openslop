@@ -19,11 +19,10 @@ import {
 import type { GenerationQueue } from "@/lib/generation/queue";
 import { useGenerateSTT } from "../hooks/use-element-captions";
 
-function describe(active: boolean, pending: number, captionable: number) {
-	if (captionable === 0) return "No clips to caption";
+function describe(active: boolean, pending: number) {
 	if (active) return "Captioning…";
-	if (pending === 0) return "Every clip is captioned";
-	return `Caption ${pending} ${plural(pending, "clip")}`;
+	if (pending === 0) return "No elements to caption";
+	return `Caption ${pending} ${plural(pending, "element")}`;
 }
 
 const selectCaptionable = (editor: Editor) =>
@@ -50,7 +49,7 @@ export function AutoCaptionsButton() {
 			size="sm"
 			variant="generate"
 			className="w-full"
-			tooltip={describe(active, pending, captionable.length)}
+			tooltip={describe(active, pending)}
 			unavailable={active || pending === 0}
 			onClick={() => generateSTT(uncaptioned(queue))}
 		>
