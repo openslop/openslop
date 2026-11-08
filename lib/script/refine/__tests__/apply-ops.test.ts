@@ -328,46 +328,6 @@ describe("applyRefineOp — move", () => {
 				["s2", "i2"],
 			],
 		],
-		[
-			"a scene after another",
-			{ id: "n1", anchor_id: "n3", scene: true },
-			[
-				["s2", "i2", "n3"],
-				["s1", "i1", "n1", "n2"],
-			],
-		],
-		[
-			"a scene before another",
-			{ id: "i2", anchor_id: "n2", position: "before", scene: true },
-			[
-				["s2", "i2", "n3"],
-				["s1", "i1", "n1", "n2"],
-			],
-		],
-		[
-			"a scene to the end",
-			{ id: "i1", scene: true },
-			[
-				["s2", "i2", "n3"],
-				["s1", "i1", "n1", "n2"],
-			],
-		],
-		[
-			"a scene to the start",
-			{ id: "n3", position: "before", scene: true },
-			[
-				["s2", "i2", "n3"],
-				["s1", "i1", "n1", "n2"],
-			],
-		],
-		[
-			"a scene next to itself",
-			{ id: "n1", anchor_id: "n2", scene: true },
-			[
-				["s1", "i1", "n1", "n2"],
-				["s2", "i2", "n3"],
-			],
-		],
 	])("moves %s", (_, move, expected) => {
 		const editor = twoScenes();
 

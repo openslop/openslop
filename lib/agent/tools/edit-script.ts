@@ -60,8 +60,7 @@ export const editScript = defineTool({
 	    outside the script, so they take no anchor.
 	  - remove: delete the element with \`id\`.
 	  - move: move the element with \`id\` before or after \`anchor_id\`, or to the start or end
-	    as insert does. It keeps its id, attributes and result. Set \`scene\` to move its whole
-	    scene next to the anchor's scene instead.
+	    as insert does. It keeps its id, attributes and result.
 	  - set: change an element. Send only what changes, and the full replacement \`text\` when
 	    text changes. Set an attribute to null to drop it.
 

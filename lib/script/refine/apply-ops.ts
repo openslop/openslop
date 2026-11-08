@@ -1,4 +1,4 @@
-import { Editor, Node, Path, Transforms } from "slate";
+import { Editor, Path, Transforms } from "slate";
 import { setAsset } from "@/lib/canvas/asset-ops";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
@@ -71,28 +71,19 @@ export function applyRefineOps(
 	};
 }
 
-type Placement = Pick<
-	Extract<RefineOp, { op: "move" }>,
-	"anchor_id" | "position" | "scene"
->;
-
-const elementOrScene = (path: Path, scene?: boolean): Path =>
-	scene ? Path.parent(path) : path;
-
-function resolveSlot(
+function resolveInsertPath(
 	editor: Editor,
-	{ anchor_id, position, scene }: Placement,
+	op: Pick<Extract<RefineOp, { op: "insert" }>, "anchor_id" | "position">,
 ): Path | null {
-	if (!anchor_id) {
+	if (!op.anchor_id) {
 		const firstScene = editor.children.findIndex(isScene);
-		if (position !== "before" || firstScene < 0)
-			return [editor.children.length];
-		return elementOrScene([firstScene, 0], scene);
+		return op.position === "before" && firstScene >= 0
+			? [firstScene, 0]
+			: [editor.children.length];
 	}
-	const entry = findElementById(editor, anchor_id);
+	const entry = findElementById(editor, op.anchor_id);
 	if (!entry || !isContentElement(entry[0])) return null;
-	const anchor = elementOrScene(entry[1], scene);
-	return position === "before" ? anchor : Path.next(anchor);
+	return op.position === "before" ? entry[1] : Path.next(entry[1]);
 }
 
 function elementProblems({ type, attrs, text }: NewElement): string[] {
@@ -110,7 +101,7 @@ function applyInsert(
 	if (problems.length > 0)
 		return { ok: false, reason: `insert: ${problems.join("; ")}` };
 
-	const at = resolveSlot(editor, op);
+	const at = resolveInsertPath(editor, op);
 	if (!at) {
 		return {
 			ok: false,
@@ -161,7 +152,7 @@ function applyMove(
 	if (!entry || !isContentElement(entry[0]))
 		return { ok: false, reason: `move: no script element "${op.id}"` };
 
-	const slot = resolveSlot(editor, op);
+	const slot = resolveInsertPath(editor, op);
 	if (!slot) {
 		return {
 			ok: false,
@@ -169,8 +160,7 @@ function applyMove(
 		};
 	}
 
-	const at = elementOrScene(entry[1], op.scene);
-	const node = Node.get(editor, at);
+	const [node, at] = entry;
 	// Slate reads a move's destination as counted without the moved node.
 	const to =
 		Path.transform(slot, { type: "remove_node", path: at, node }) ?? at;

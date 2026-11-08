@@ -45,12 +45,6 @@ const moveOp = z.object({
 	op: z.literal("move"),
 	id: z.string(),
 	...placement,
-	scene: z
-		.boolean()
-		.optional()
-		.describe(
-			"Move the whole scene holding `id`, next to the scene holding `anchor_id`.",
-		),
 });
 
 const setOp = z.object({
