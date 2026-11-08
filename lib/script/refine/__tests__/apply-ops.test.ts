@@ -290,9 +290,9 @@ describe("applyRefineOp — move", () => {
 	it.each<[string, Move, string[][]]>([
 		[
 			"later in its scene",
-			{ id: "n1", anchor_id: "n2" },
+			{ id: "i1", anchor_id: "n1" },
 			[
-				["s1", "i1", "n2", "n1"],
+				["s1", "n1", "i1", "n2"],
 				["s2", "i2", "n3"],
 			],
 		],
