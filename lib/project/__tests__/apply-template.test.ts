@@ -131,6 +131,19 @@ describe("applyTemplate", () => {
 		expect(store.getState().videoSettings).toEqual(videoSettings);
 	});
 
+	it("keeps the project's media", () => {
+		store
+			.getState()
+			.addMedia([
+				{ kind: "video", name: "clip.mp4", url: "https://blob/clip" },
+			]);
+		const { media } = store.getState();
+
+		apply("pov-life");
+
+		expect(store.getState().media).toEqual(media);
+	});
+
 	it.each(["pov-life", "true-crime"])(
 		"keeps a non-default aspect ratio when applying the %s template",
 		(templateId) => {
