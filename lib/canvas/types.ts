@@ -18,7 +18,7 @@ export type ContentSpec = {
 	outputKind: ResultKind;
 	role: ElementRole;
 	layer: LayerType;
-	captionSource?: "video";
+	captionSource?: "speech" | "video";
 };
 
 export const CONTENT_TYPES = {
@@ -27,12 +27,14 @@ export const CONTENT_TYPES = {
 		outputKind: "audio",
 		role: "overlay",
 		layer: "audio",
+		captionSource: "speech",
 	},
 	character: {
 		connector: "tts",
 		outputKind: "audio",
 		role: "overlay",
 		layer: "audio",
+		captionSource: "speech",
 	},
 	image: {
 		connector: "image",
@@ -74,7 +76,7 @@ export const isSpeechType = (type: ContentType): boolean =>
 	CONTENT_TYPES[type].role === "overlay";
 
 export const isCaptionable = (type: ContentType): boolean =>
-	isSpeechType(type) || captionSourceOf(type) !== undefined;
+	captionSourceOf(type) !== undefined;
 
 const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
 
