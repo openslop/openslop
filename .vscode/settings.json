@@ -4,6 +4,8 @@
 	"editor.tabSize": 2,
 	"editor.insertSpaces": false,
 	"editor.detectIndentation": false,
+	"js/ts.tsdk.path": "./node_modules/typescript/lib",
+	"js/ts.tsdk.promptToUseWorkspaceVersion": true,
 
 	"[javascript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
