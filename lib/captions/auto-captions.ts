@@ -12,6 +12,7 @@ import {
 } from "@/lib/generation/snapshots";
 import { captionableSequences } from "@/lib/render/caption-rule";
 import type { RenderLayout } from "@/lib/render/types";
+import { captionsEdited } from "./caption-edits";
 import { captionsNode, captionsNodeId } from "./captions-job";
 
 type Clip = Pick<ContentElement, "id" | "type">;
@@ -44,6 +45,7 @@ function skipReason(
 	if (!result) return "has no result yet";
 	if (isGenerationActive(status)) return "is generating";
 	if (isCaptioning(getSnapshot, id)) return "is already being captioned";
+	if (captionsEdited(result)) return "has hand-edited captions";
 	if (!recaption && result.textTimestamps !== undefined)
 		return "already has captions";
 }

@@ -16,11 +16,18 @@ const idle: ElementSnapshot = {
 };
 
 const spoken = { audioUrl: "https://example.com/a.wav", durationSec: 2 };
-const captioned = { ...spoken, textTimestamps: [toCaption("hi", 0, 1)] };
+const words = [toCaption("hi", 0, 1)];
+const captioned = {
+	...spoken,
+	textTimestamps: words,
+	originalTextTimestamps: words,
+};
+const edited = { ...captioned, textTimestamps: [toCaption("hey", 0, 1)] };
 
 const snapshots: Record<string, Partial<ElementSnapshot>> = {
 	fresh: { result: spoken },
 	captioned: { result: captioned },
+	edited: { result: edited },
 	ungenerated: {},
 	generating: { result: spoken, status: "generating" },
 	captioning: { result: spoken },
@@ -62,6 +69,16 @@ describe("planCaptions", () => {
 			skipped: [{ id: "picture", reason: "never shows captions" }],
 		});
 	});
+
+	it.each([false, true])(
+		"never redoes hand-edited captions (recaption: %s)",
+		(recaption) => {
+			expect(plan([clip("edited")], recaption)).toEqual({
+				ready: [],
+				skipped: [{ id: "edited", reason: "has hand-edited captions" }],
+			});
+		},
+	);
 
 	it("redoes captions a clip already has when asked to recaption", () => {
 		expect(plan([clip("captioned"), clip("ungenerated")], true)).toEqual({
