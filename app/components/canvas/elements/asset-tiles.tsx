@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import {
 	Image,
 	Mic,
@@ -10,6 +12,7 @@ import {
 	type IconComponent,
 } from "@/components/ui/icon";
 import type { MediaItem } from "@/lib/project/media";
+import { useProject } from "@/lib/project/use-project";
 import type { UploadKind } from "@/lib/upload/upload-files";
 import { useHasAsset } from "@/lib/canvas/use-assets";
 import { useCharacterAvatar } from "../hooks/use-character-avatar";
@@ -96,16 +99,29 @@ const MEDIA_ICONS: Record<UploadKind, IconComponent> = {
 export function MediaAssetTile({
 	item: { name, kind, url },
 	...tile
-}: TileProps & { item: MediaItem; onRemove: () => void }) {
+}: TileProps & { item: MediaItem }) {
+	const removeMedia = useProject((state) => state.removeMedia);
+	const [confirming, setConfirming] = useState(false);
 	const preview = kind === "audio" ? undefined : kind;
 	return (
-		<AssetTile
-			name={name}
-			previewUrl={preview && url}
-			previewKind={preview}
-			Icon={MEDIA_ICONS[kind]}
-			fallback="icon"
-			{...tile}
-		/>
+		<>
+			<AssetTile
+				name={name}
+				previewUrl={preview && url}
+				previewKind={preview}
+				Icon={MEDIA_ICONS[kind]}
+				fallback="icon"
+				onRemove={() => setConfirming(true)}
+				{...tile}
+			/>
+			<ConfirmDeleteDialog
+				target={confirming ? name : undefined}
+				onClose={() => setConfirming(false)}
+				title={(target) => `Remove ${target}?`}
+				description="This removes it from the project's media. It can't be undone. Elements already using it keep it."
+				actionLabel="Remove"
+				onConfirm={removeMedia}
+			/>
+		</>
 	);
 }

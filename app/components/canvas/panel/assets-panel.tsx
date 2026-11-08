@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import type { ReactNode } from "react";
 import { Loader2, Plus } from "@/components/ui/icon";
 import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
-import type { MediaItem } from "@/lib/project/media";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { useProject } from "@/lib/project/use-project";
 import { UploadKindSchema } from "@/lib/upload/upload-files";
@@ -128,8 +126,6 @@ function ArtStyleCard() {
 
 function MediaCard() {
 	const media = useProject((state) => state.media);
-	const removeMedia = useProject((state) => state.removeMedia);
-	const [removing, setRemoving] = useState<MediaItem>();
 	const { openPicker, uploading, inputElement } = useMediaUpload({
 		kinds: UploadKindSchema.options,
 		multiple: true,
@@ -143,22 +139,9 @@ function MediaCard() {
 				add={{ label: "Upload media", onClick: openPicker, busy: uploading }}
 			>
 				{media.map((item) => (
-					<MediaAssetTile
-						key={item.name}
-						item={item}
-						onRemove={() => setRemoving(item)}
-						fill
-					/>
+					<MediaAssetTile key={item.name} item={item} fill />
 				))}
 			</AssetCard>
-			<ConfirmDeleteDialog
-				target={removing}
-				onClose={() => setRemoving(undefined)}
-				title={(item) => `Remove ${item.name}?`}
-				description="This removes it from the project's media. It can't be undone. Elements already using it keep it."
-				actionLabel="Remove"
-				onConfirm={(item) => removeMedia(item.name)}
-			/>
 		</>
 	);
 }
