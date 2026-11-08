@@ -22,8 +22,6 @@ import {
 	withoutCaptions,
 } from "@/lib/captions/auto-captions";
 import { resolveModel } from "@/lib/connectors/models";
-import { resolveElements } from "@/lib/render/resolve";
-import { buildRenderLayout } from "@/lib/render/scene-builder";
 import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNodes } from "@/lib/generation/generation-graph";
@@ -118,19 +116,14 @@ export function useAgentTools() {
 							);
 						return found;
 					};
-					const timeline = () =>
-						withoutCaptions(
-							captionableElements(
-								buildRenderLayout(
-									resolveElements(editor.children, queue.getElementSnapshot),
-									store.getState().videoSettings,
-								),
-							),
-							queue.getElementSnapshot,
-						);
 					return captionElements(
 						queue,
-						ids ? ids.map(named) : timeline(),
+						ids
+							? ids.map(named)
+							: withoutCaptions(
+									captionableElements(editor.children),
+									queue.getElementSnapshot,
+								),
 						resolveModel("stt", editor.defaultModels().stt),
 						projectId,
 					);

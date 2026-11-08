@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { ContentType } from "@/lib/canvas/types";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
-import { planCaptions, withoutCaptions } from "../auto-captions";
+import { element as scriptElement } from "@/lib/canvas/__tests__/_assets";
+import {
+	captionableElements,
+	planCaptions,
+	withoutCaptions,
+} from "../auto-captions";
 import { captionsNodeId } from "../captions-job";
 import { toCaption } from "../word-captions";
 
@@ -48,6 +53,26 @@ const plan = (elements: ReturnType<typeof element>[]) => {
 	const { ready, skipped } = planCaptions(elements, getSnapshot);
 	return { ready: ready.map(({ id }) => id), skipped };
 };
+
+describe("captionableElements", () => {
+	it("gives every element in the scenes whose type shows captions", () => {
+		const nodes = [
+			{
+				id: "s1",
+				type: "scene" as const,
+				children: [
+					scriptElement("n1", "narration"),
+					scriptElement("p1", "image"),
+					scriptElement("v1", "video"),
+				],
+			},
+		];
+		expect(captionableElements(nodes).map(({ id }) => id)).toEqual([
+			"n1",
+			"v1",
+		]);
+	});
+});
 
 describe("withoutCaptions", () => {
 	it("keeps only the elements that have no words yet", () => {

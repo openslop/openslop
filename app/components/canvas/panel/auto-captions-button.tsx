@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import type { Editor } from "slate";
+import { useSlateSelector } from "slate-react";
+import { shallow } from "zustand/shallow";
 import { Button } from "@/components/ui/button";
 import { MagicCaptions } from "@/components/ui/icon";
 import {
@@ -15,7 +17,6 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 import type { GenerationQueue } from "@/lib/generation/queue";
-import { useLayout } from "@/app/components/player/render-layout-context";
 import { useGenerateSTT } from "../hooks/use-element-captions";
 
 function describe(active: boolean, pending: number, captionable: number) {
@@ -25,13 +26,15 @@ function describe(active: boolean, pending: number, captionable: number) {
 	return `Caption ${pending} ${plural(pending, "clip")}`;
 }
 
-/** Generates speech to text for every element on the timeline that would show captions and has no words yet. */
+const selectCaptionable = (editor: Editor) =>
+	captionableElements(editor.children);
+
+/** Generates speech to text for every captionable element that has a result and no words yet. */
 export function AutoCaptionsButton() {
 	const queue = useGenerationQueue();
-	const { layout } = useLayout();
 	const generateSTT = useGenerateSTT();
 
-	const captionable = useMemo(() => captionableElements(layout), [layout]);
+	const captionable = useSlateSelector(selectCaptionable, shallow);
 	const uncaptioned = (q: GenerationQueue) =>
 		planCaptions(
 			withoutCaptions(captionable, q.getElementSnapshot),

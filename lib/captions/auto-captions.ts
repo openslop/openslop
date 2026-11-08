@@ -1,4 +1,5 @@
-import uniqBy from "lodash/uniqBy";
+import type { Descendant } from "slate";
+import { getContentElements } from "@/lib/canvas/scenes";
 import {
 	isCaptionable,
 	type ContentElement,
@@ -10,8 +11,6 @@ import {
 	isGenerationActive,
 	type ElementSnapshot,
 } from "@/lib/generation/snapshots";
-import { captionableSequences } from "@/lib/render/caption-rule";
-import type { RenderLayout } from "@/lib/render/types";
 import { captionsEdited } from "./caption-edits";
 import { captionsNode, captionsNodeId } from "./captions-job";
 
@@ -23,14 +22,8 @@ type SkippedElement = { id: string; reason: string };
 
 export type CaptionsReport = { queued: string[]; skipped: SkippedElement[] };
 
-/** Every element on the timeline that would show captions. */
-export const captionableElements = (
-	layout: Pick<RenderLayout, "series" | "sequences">,
-): ContentRef[] =>
-	uniqBy(
-		captionableSequences(layout).map(({ element }) => element),
-		"id",
-	);
+export const captionableElements = (nodes: Descendant[]): ContentElement[] =>
+	getContentElements(nodes).filter(({ type }) => isCaptionable(type));
 
 export const withoutCaptions = (
 	elements: ContentRef[],
