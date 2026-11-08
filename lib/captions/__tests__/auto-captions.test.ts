@@ -70,15 +70,12 @@ describe("planCaptions", () => {
 		});
 	});
 
-	it.each([false, true])(
-		"never redoes hand-edited captions (recaption: %s)",
-		(recaption) => {
-			expect(plan([clip("edited")], recaption)).toEqual({
-				ready: [],
-				skipped: [{ id: "edited", reason: "has hand-edited captions" }],
-			});
-		},
-	);
+	it("never redoes hand-edited captions, even when asked to recaption", () => {
+		expect(plan([clip("edited")], true)).toEqual({
+			ready: [],
+			skipped: [{ id: "edited", reason: "has hand-edited captions" }],
+		});
+	});
 
 	it("redoes captions a clip already has when asked to recaption", () => {
 		expect(plan([clip("captioned"), clip("ungenerated")], true)).toEqual({

@@ -5,23 +5,16 @@ import { defineTool } from "./define-tool";
 
 export const generateCaptions = defineTool({
 	description: dedent`
-	  Caption clips: speech to text runs on what each clip holds now, with the project's Speech
-	  to Text model, and every word lands on the clip with when it is said. With no ids it
-	  captions every clip on the timeline that would show captions and has no words yet, the
-	  same clips as Auto captions in the Captions panel. Name ids to caption those clips, which
-	  also redoes captions a clip already has, unless the user hand-edited them. It only queues the work: the words arrive in
-	  the background. A clip needs a result first, so the output names every clip it skipped
-	  and why; tell the user what to generate. Captions show in the video only while the
-	  captions setting is on (update_video_settings).
+	  Queue speech to text on clips. No ids: every uncaptioned clip that has a result. Ids:
+	  those clips, redoing existing captions unless hand-edited. The output lists skipped clips
+	  and why. Captions show only while the captions setting is on (update_video_settings).
 	`,
 	input: z.object({
 		ids: z
 			.array(z.string().min(1))
 			.min(1)
 			.optional()
-			.describe(
-				"Element ids, exactly as read_script gives them. Leave out to caption every uncaptioned clip.",
-			),
+			.describe("Element ids from read_script."),
 	}),
 	output: z.string(),
 	icon: MagicCaptions,

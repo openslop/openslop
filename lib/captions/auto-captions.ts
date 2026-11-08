@@ -19,7 +19,7 @@ type Clip = Pick<ContentElement, "id" | "type">;
 
 type GetSnapshot = (id: string) => ElementSnapshot;
 
-export type SkippedClip = { id: string; reason: string };
+type SkippedClip = { id: string; reason: string };
 
 export type CaptionsReport = { queued: string[]; skipped: SkippedClip[] };
 
@@ -45,9 +45,9 @@ function skipReason(
 	if (!result) return "has no result yet";
 	if (isGenerationActive(status)) return "is generating";
 	if (isCaptioning(getSnapshot, id)) return "is already being captioned";
-	if (captionsEdited(result)) return "has hand-edited captions";
 	if (!recaption && result.textTimestamps !== undefined)
 		return "already has captions";
+	if (captionsEdited(result)) return "has hand-edited captions";
 }
 
 export function planCaptions(
