@@ -20,9 +20,9 @@ export function applyTemplate(
 ) {
 	const template = getTemplate(templateId);
 	const project = store.getState();
-	const { videoSettings } = project;
+	const { videoSettings, media } = project;
 	project.reset();
-	project.updateVideoSettings(videoSettings);
+	store.setState({ videoSettings, media });
 	project.updateScriptSettings({
 		template: template.id,
 		length: template.length,
