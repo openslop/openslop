@@ -15,25 +15,28 @@ import type { RenderLayout } from "@/lib/render/types";
 import { captionsEdited } from "./caption-edits";
 import { captionsNode, captionsNodeId } from "./captions-job";
 
-type Clip = Pick<ContentElement, "id" | "type">;
+type ContentRef = Pick<ContentElement, "id" | "type">;
 
 type GetSnapshot = (id: string) => ElementSnapshot;
 
-type SkippedClip = { id: string; reason: string };
+type SkippedElement = { id: string; reason: string };
 
-export type CaptionsReport = { queued: string[]; skipped: SkippedClip[] };
+export type CaptionsReport = { queued: string[]; skipped: SkippedElement[] };
 
-/** Every clip on the timeline that would show captions. */
-export const captionableClips = (
+/** Every element on the timeline that would show captions. */
+export const captionableElements = (
 	layout: Pick<RenderLayout, "series" | "sequences">,
-): Clip[] =>
+): ContentRef[] =>
 	uniqBy(
 		captionableSequences(layout).map(({ element }) => element),
 		"id",
 	);
 
-export const withoutCaptions = (clips: Clip[], getSnapshot: GetSnapshot) =>
-	clips.filter(
+export const withoutCaptions = (
+	elements: ContentRef[],
+	getSnapshot: GetSnapshot,
+) =>
+	elements.filter(
 		({ id }) => getSnapshot(id).result?.textTimestamps === undefined,
 	);
 
@@ -41,7 +44,7 @@ export const isCaptioning = (getSnapshot: GetSnapshot, id: string) =>
 	isGenerationActive(getSnapshot(captionsNodeId(id)).status);
 
 function skipReason(
-	{ id, type }: Clip,
+	{ id, type }: ContentRef,
 	getSnapshot: GetSnapshot,
 ): string | undefined {
 	if (!isCaptionable(type)) return "never shows captions";
@@ -53,15 +56,15 @@ function skipReason(
 }
 
 export function planCaptions(
-	clips: Clip[],
+	elements: ContentRef[],
 	getSnapshot: GetSnapshot,
-): { ready: Clip[]; skipped: SkippedClip[] } {
-	const ready: Clip[] = [];
-	const skipped: SkippedClip[] = [];
-	for (const clip of clips) {
-		const reason = skipReason(clip, getSnapshot);
-		if (reason) skipped.push({ id: clip.id, reason });
-		else ready.push(clip);
+): { ready: ContentRef[]; skipped: SkippedElement[] } {
+	const ready: ContentRef[] = [];
+	const skipped: SkippedElement[] = [];
+	for (const element of elements) {
+		const reason = skipReason(element, getSnapshot);
+		if (reason) skipped.push({ id: element.id, reason });
+		else ready.push(element);
 	}
 	return { ready, skipped };
 }
@@ -83,14 +86,14 @@ export function enqueueCaptions(
 	);
 }
 
-/** Queues speech to text on every clip it can run on now, and says why it skipped the rest. */
-export function captionClips(
+/** Queues speech to text on every element it can run on now, and says why it skipped the rest. */
+export function captionElements(
 	queue: GenerationQueue,
-	clips: Clip[],
+	elements: ContentRef[],
 	model: ModelRef,
 	projectId: string,
 ): CaptionsReport {
-	const { ready, skipped } = planCaptions(clips, queue.getElementSnapshot);
+	const { ready, skipped } = planCaptions(elements, queue.getElementSnapshot);
 	enqueueCaptions(queue, ready, model, projectId);
 	return { queued: ready.map(({ id }) => id), skipped };
 }

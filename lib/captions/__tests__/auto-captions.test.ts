@@ -42,18 +42,18 @@ const getSnapshot = (id: string): ElementSnapshot => ({
 	...snapshots[id],
 });
 
-const clip = (id: string, type: ContentType = "narration") => ({ id, type });
+const element = (id: string, type: ContentType = "narration") => ({ id, type });
 
-const plan = (clips: ReturnType<typeof clip>[]) => {
-	const { ready, skipped } = planCaptions(clips, getSnapshot);
+const plan = (elements: ReturnType<typeof element>[]) => {
+	const { ready, skipped } = planCaptions(elements, getSnapshot);
 	return { ready: ready.map(({ id }) => id), skipped };
 };
 
 describe("withoutCaptions", () => {
-	it("keeps only the clips that have no words yet", () => {
+	it("keeps only the elements that have no words yet", () => {
 		expect(
 			withoutCaptions(
-				[clip("fresh"), clip("captioned"), clip("edited")],
+				[element("fresh"), element("captioned"), element("edited")],
 				getSnapshot,
 			).map(({ id }) => id),
 		).toEqual(["fresh"]);
@@ -61,12 +61,12 @@ describe("withoutCaptions", () => {
 });
 
 describe("planCaptions", () => {
-	it("captions a clip that has a result and no words yet", () => {
-		expect(plan([clip("fresh")])).toEqual({ ready: ["fresh"], skipped: [] });
+	it("captions a element that has a result and no words yet", () => {
+		expect(plan([element("fresh")])).toEqual({ ready: ["fresh"], skipped: [] });
 	});
 
-	it("redoes captions a clip already has", () => {
-		expect(plan([clip("captioned")])).toEqual({
+	it("redoes captions a element already has", () => {
+		expect(plan([element("captioned")])).toEqual({
 			ready: ["captioned"],
 			skipped: [],
 		});
@@ -78,11 +78,14 @@ describe("planCaptions", () => {
 		["captioning", "is already being captioned"],
 		["edited", "has hand-edited captions"],
 	])("skips %s: it %s", (id, reason) => {
-		expect(plan([clip(id)])).toEqual({ ready: [], skipped: [{ id, reason }] });
+		expect(plan([element(id)])).toEqual({
+			ready: [],
+			skipped: [{ id, reason }],
+		});
 	});
 
 	it("skips an element whose type never shows captions", () => {
-		expect(plan([clip("picture", "image")])).toEqual({
+		expect(plan([element("picture", "image")])).toEqual({
 			ready: [],
 			skipped: [{ id: "picture", reason: "never shows captions" }],
 		});

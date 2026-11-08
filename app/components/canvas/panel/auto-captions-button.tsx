@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { MagicCaptions } from "@/components/ui/icon";
 import {
-	captionableClips,
+	captionableElements,
 	isCaptioning,
 	planCaptions,
 	withoutCaptions,
@@ -31,7 +31,7 @@ export function AutoCaptionsButton() {
 	const { layout } = useLayout();
 	const generateSTT = useGenerateSTT();
 
-	const captionable = useMemo(() => captionableClips(layout), [layout]);
+	const captionable = useMemo(() => captionableElements(layout), [layout]);
 	const uncaptioned = (q: GenerationQueue) =>
 		planCaptions(
 			withoutCaptions(captionable, q.getElementSnapshot),

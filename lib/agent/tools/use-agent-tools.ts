@@ -17,8 +17,8 @@ import {
 	estimateVisualSpans,
 } from "@/lib/render/visual-spans";
 import {
-	captionClips,
-	captionableClips,
+	captionElements,
+	captionableElements,
 	withoutCaptions,
 } from "@/lib/captions/auto-captions";
 import { resolveModel } from "@/lib/connectors/models";
@@ -111,16 +111,16 @@ export function useAgentTools() {
 				generateCaptions: (ids) => {
 					const content = getContentElements(editor.children);
 					const named = (id: string) => {
-						const clip = content.find((element) => element.id === id);
-						if (!clip)
+						const found = content.find((element) => element.id === id);
+						if (!found)
 							throw new Error(
 								`There is no element ${id} in the scenes. Read the script for the ids there are.`,
 							);
-						return clip;
+						return found;
 					};
 					const timeline = () =>
 						withoutCaptions(
-							captionableClips(
+							captionableElements(
 								buildRenderLayout(
 									resolveElements(editor.children, queue.getElementSnapshot),
 									store.getState().videoSettings,
@@ -128,7 +128,7 @@ export function useAgentTools() {
 							),
 							queue.getElementSnapshot,
 						);
-					return captionClips(
+					return captionElements(
 						queue,
 						ids ? ids.map(named) : timeline(),
 						resolveModel("stt", editor.defaultModels().stt),
