@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CONTENT_TYPES, type ContentType } from "@/lib/canvas/types";
 import { toCaption } from "@/lib/captions/word-captions";
-import { captionableSequences, layoutCaptions } from "../caption-rule";
+import { layoutCaptions } from "../caption-rule";
 import type { RenderLayout, ResolvedCaptions, ResolvedElement } from "../types";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
 import { layoutOf } from "./_layout";
@@ -45,6 +45,14 @@ describe("layoutCaptions", () => {
 			start,
 			duration,
 		}));
+
+	it("lays no captions while captions are off", () => {
+		expect(
+			layoutCaptions(
+				layoutOf([el("vid", "video", heard)], { captions: false }),
+			),
+		).toEqual([]);
+	});
 
 	it("ends the last line with its last word", () => {
 		expect(spans(layoutOf([el("vid", "video", heard)]))).toEqual([
@@ -100,24 +108,5 @@ describe("layoutCaptions", () => {
 		expect(
 			spans(layoutOf([el("song", "music", heard), el("img", "image")])),
 		).toEqual([{ id: "song", start: 0, duration: 1 }]);
-	});
-});
-
-describe("captionableSequences", () => {
-	const ids = (layout: RenderLayout) =>
-		captionableSequences(layout).map(({ element }) => element.id);
-
-	it("needs no captions on a video whose scene has speech", () => {
-		expect(ids(layoutOf([el("vid", "video"), el("nar", "narration")]))).toEqual(
-			["nar"],
-		);
-	});
-
-	it("captions a video with no speech in its scene", () => {
-		expect(ids(layoutOf([el("vid", "video")]))).toEqual(["vid"]);
-	});
-
-	it("leaves music out, since generated tracks have no lyrics", () => {
-		expect(ids(layoutOf([el("song", "music")]))).toEqual([]);
 	});
 });

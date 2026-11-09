@@ -6,7 +6,7 @@ import pick from "lodash/pick";
 import { getAssets } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
-import { isScriptEmpty } from "@/lib/canvas/scenes";
+import { getContentElements, isScriptEmpty } from "@/lib/canvas/scenes";
 import {
 	countSpokenWords,
 	estimateDialogueLengths,
@@ -16,6 +16,13 @@ import {
 	estimateRuntime,
 	estimateVisualSpans,
 } from "@/lib/render/visual-spans";
+import {
+	captionElements,
+	autoCaptionElements,
+	withoutCaptions,
+} from "@/lib/captions/auto-captions";
+import { resolveModel } from "@/lib/connectors/models";
+import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
@@ -39,6 +46,7 @@ export function useAgentTools() {
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
 	const createConnector = useCreateConnector();
+	const projectId = useProjectId();
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
@@ -98,10 +106,32 @@ export function useAgentTools() {
 					draftScript({ kind: "adapt", script, notes }),
 				isConnected: (provider) =>
 					findProviderKey(account.getState().providerKeys, provider) !== null,
+				generateCaptions: (ids) => {
+					const content = getContentElements(editor.children);
+					const named = (id: string) => {
+						const found = content.find((element) => element.id === id);
+						if (!found)
+							throw new Error(
+								`There is no element ${id} in the scenes. Read the script for the ids there are.`,
+							);
+						return found;
+					};
+					return captionElements(
+						queue,
+						ids
+							? ids.map(named)
+							: withoutCaptions(
+									autoCaptionElements(editor.children),
+									queue.getElementSnapshot,
+								),
+						resolveModel("stt", editor.defaultModels().stt),
+						projectId,
+					);
+				},
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, store, account, queue, buildContext, createConnector],
+		[editor, store, account, queue, buildContext, createConnector, projectId],
 	);
 }

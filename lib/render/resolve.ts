@@ -1,4 +1,5 @@
-import { CONTENT_TYPES, type CanvasBlock } from "@/lib/canvas/types";
+import type { Descendant } from "slate";
+import { CONTENT_TYPES } from "@/lib/canvas/types";
 import { isScene } from "@/lib/canvas/scenes";
 import { getPromptText } from "@/lib/generation/inputs";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
@@ -13,14 +14,13 @@ import {
 import { elementTrim, trimCaptions } from "./clip-trim";
 
 export function resolveElements(
-	blocks: CanvasBlock[],
+	nodes: Descendant[],
 	getSnapshot: (id: string) => ElementSnapshot,
-	{ captionsEnabled }: { captionsEnabled: boolean },
 ): ResolvedElement[] {
 	const resolved: ResolvedElement[] = [];
 	let sceneNumber = 0;
 
-	for (const scene of blocks) {
+	for (const scene of nodes) {
 		if (!isScene(scene)) continue;
 		sceneNumber += 1;
 
@@ -50,10 +50,9 @@ export function resolveElements(
 				loop: getLoop(element),
 				volume: getVolume(element),
 				motion: getMotion(element),
-				captions:
-					captionsEnabled && textTimestamps?.length
-						? trimCaptions(textTimestamps, trim)
-						: undefined,
+				captions: textTimestamps?.length
+					? trimCaptions(textTimestamps, trim)
+					: undefined,
 			});
 		}
 	}

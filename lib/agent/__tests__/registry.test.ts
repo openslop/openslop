@@ -62,6 +62,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateScriptSettings: () => {},
 	updateModels: () => {},
 	isConnected: () => true,
+	generateCaptions: () => ({ queued: [], skipped: [] }),
 	...over,
 });
 
@@ -103,6 +104,24 @@ describe("script review opt-in", () => {
 });
 
 describe("executeToolCall", () => {
+	it("names the clips generate_captions queued and every one it skipped, with why", async () => {
+		const generateCaptions = vi.fn(() => ({
+			queued: ["n1", "v2"],
+			skipped: [{ id: "n3", reason: "isn't generated yet" }],
+		}));
+
+		const outcome = await executeToolCall(
+			{ toolName: "generate_captions", input: { ids: ["n1", "v2", "n3"] } },
+			context({ generateCaptions }),
+		);
+
+		expect(generateCaptions).toHaveBeenCalledWith(["n1", "v2", "n3"]);
+		expect(outcome).toEqual({
+			ok: true,
+			output: "Captioning n1, v2.\nSkipped n3: it isn't generated yet.",
+		});
+	});
+
 	it("hands back the script and the settings it renders with", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
@@ -705,6 +724,7 @@ describe("SLOPPY_TOOLS", () => {
 			"review_script",
 			"update_script_settings",
 			"update_video_settings",
+			"generate_captions",
 			"view_result",
 			"outline_story",
 			"estimate_total_length",

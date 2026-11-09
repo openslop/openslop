@@ -22,7 +22,7 @@ export function useRenderLayout(editor: Editor): {
 	const resultVersion = useQueueSelector((q) => q.getResultVersion());
 	const transitionType = useVideoSetting("transitionType");
 	const aspectRatio = useVideoSetting("aspectRatio");
-	const captionsEnabled = useVideoSetting("captions");
+	const captions = useVideoSetting("captions");
 	const [captionStyle] = useCaptionStyle();
 	const filmGrain = useVideoSetting("filmGrain");
 	const rgbSplit = useVideoSetting("rgbSplit");
@@ -38,13 +38,12 @@ export function useRenderLayout(editor: Editor): {
 
 	return useMemo(() => {
 		const scenes = editor.children.filter(isScene);
-		const resolved = resolveElements(scenes, queue.getElementSnapshot, {
-			captionsEnabled,
-		});
+		const resolved = resolveElements(scenes, queue.getElementSnapshot);
 		return {
 			layout: buildRenderLayout(resolved, {
 				transitionType,
 				aspectRatio,
+				captions,
 				captionStyle,
 				filmGrain,
 				rgbSplit,
@@ -58,7 +57,7 @@ export function useRenderLayout(editor: Editor): {
 		resultVersion,
 		transitionType,
 		aspectRatio,
-		captionsEnabled,
+		captions,
 		captionStyle,
 		filmGrain,
 		rgbSplit,

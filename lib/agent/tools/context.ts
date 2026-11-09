@@ -6,6 +6,7 @@ import type { VisualSpan } from "@/lib/render/visual-spans";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
 import type { Provider } from "@/lib/connectors/types";
+import type { CaptionsReport } from "@/lib/captions/auto-captions";
 
 export const PROJECT_SETTERS = [
 	"setTitle",
@@ -38,4 +39,5 @@ export type AgentToolContext = Pick<
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
 	isConnected: (provider: Provider) => boolean;
+	generateCaptions: (ids?: string[]) => CaptionsReport;
 };

@@ -18,7 +18,7 @@ export type ContentSpec = {
 	outputKind: ResultKind;
 	role: ElementRole;
 	layer: LayerType;
-	captionSource?: "speech" | "video";
+	captionSource?: "speech" | "video" | "music";
 };
 
 export const CONTENT_TYPES = {
@@ -60,6 +60,7 @@ export const CONTENT_TYPES = {
 		outputKind: "audio",
 		role: "background",
 		layer: "audio",
+		captionSource: "music",
 	},
 } as const satisfies Record<string, ContentSpec>;
 

@@ -135,6 +135,7 @@ const layout = (
 	height: 1080,
 	totalDurationSec: 0,
 	totalFrames: 0,
+	captions: true,
 	captionStyle: DEFAULT_CAPTION_STYLE,
 	transitionType: "none",
 	filmGrain: false,

@@ -1,16 +1,10 @@
-import {
-	captionSourceOf,
-	isCaptionable,
-	isSpeechType,
-} from "@/lib/canvas/types";
+import { captionSourceOf, isSpeechType } from "@/lib/canvas/types";
 import {
 	groupIntoLines,
 	type CaptionLine,
 } from "@/lib/captions/caption-layout";
 import { allSequences } from "./sequences";
 import type { RenderLayout, Sequence } from "./types";
-
-type Layout = Pick<RenderLayout, "series" | "sequences">;
 
 export type CaptionSequence = Sequence & {
 	/** Timed from the element's start, as its words are. */
@@ -27,18 +21,6 @@ const isVideoInSpokenScene = (
 	captionSourceOf(element.type) === "video" &&
 	spokenScenes.has(element.sceneId);
 
-export function captionableSequences(layout: Layout): Sequence[] {
-	const sequences = allSequences(layout);
-	const scenesWithSpeech = sceneIdsOf(
-		sequences.filter(({ element }) => isSpeechType(element.type)),
-	);
-	return sequences.filter(
-		(sequence) =>
-			isCaptionable(sequence.element.type) &&
-			!isVideoInSpokenScene(sequence, scenesWithSpeech),
-	);
-}
-
 function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 	const { element, start } = sequence;
 	if (!element.captions) return [];
@@ -53,8 +35,12 @@ function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 }
 
 export function layoutCaptions(
-	layout: Pick<RenderLayout, "series" | "sequences" | "captionStyle">,
+	layout: Pick<
+		RenderLayout,
+		"series" | "sequences" | "captions" | "captionStyle"
+	>,
 ): CaptionSequence[] {
+	if (!layout.captions) return [];
 	const sequences = allSequences(layout);
 	const scenesWithCaptionedSpeech = sceneIdsOf(
 		sequences.filter(
