@@ -10,11 +10,10 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { Download, Link } from "@/components/ui/icon";
+import { Link } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Separator } from "@/components/ui/separator";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
-import { downloadFile } from "@/lib/download-file";
 import { formatDateTime } from "@/lib/format";
 import { toastError } from "@/lib/toast-error";
 
@@ -28,11 +27,7 @@ export type Viewed = {
 	createdAt?: string;
 };
 
-function ViewerActions({ src, name }: Pick<Viewed, "src" | "name">) {
-	const download = () =>
-		downloadFile(src, name).catch((error: unknown) =>
-			toastError(error, `Couldn't download ${name}`),
-		);
+function ViewerActions({ src }: Pick<Viewed, "src">) {
 	const copyLink = () =>
 		navigator.clipboard.writeText(src).then(
 			() => toast("Copied the link"),
@@ -40,9 +35,6 @@ function ViewerActions({ src, name }: Pick<Viewed, "src" | "name">) {
 		);
 	return (
 		<div className="flex shrink-0 items-center gap-1">
-			<TooltipIconButton label={`Download ${name}`} onClick={download}>
-				<Download />
-			</TooltipIconButton>
 			<TooltipIconButton label="Copy link" onClick={copyLink}>
 				<Link />
 			</TooltipIconButton>
@@ -84,7 +76,7 @@ export function MediaViewerDialog({
 								.join(" · ")}
 						</DialogDescription>
 					</div>
-					<ViewerActions src={src} name={name} />
+					<ViewerActions src={src} />
 				</div>
 				<Separator bleed />
 				<div className="relative h-[75dvh] overflow-hidden rounded-md">
