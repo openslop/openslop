@@ -27,7 +27,7 @@ export const GenerationSnapshotSchema = z.record(
 	ElementSnapshotSchema,
 );
 
-const EMPTY_SNAPSHOT: ElementSnapshot = {
+export const EMPTY_SNAPSHOT: ElementSnapshot = {
 	status: "idle",
 	startedAt: null,
 	result: null,
