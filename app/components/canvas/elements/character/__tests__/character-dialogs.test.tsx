@@ -26,8 +26,8 @@ vi.mock("../../generate-button", () => ({
 	ElementGenerateButton: Nothing,
 	ElementStaleIndicator: Nothing,
 }));
-vi.mock("../../element-history-button", () => ({
-	ElementHistoryButton: Nothing,
+vi.mock("../../element-history-popover", () => ({
+	ElementHistoryPopover: Nothing,
 }));
 vi.mock("../../reset-edits-button", () => ({
 	ResetEditsButton: Nothing,
