@@ -16,10 +16,10 @@ import { buildNode } from "@/lib/generation/generation-graph";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { needsGeneration } from "@/lib/generation/staleness";
-import { applyTemplate } from "@/lib/templates/apply-template";
-import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
-import { createProjectStore, type ProjectStore } from "../store";
-import { VoiceSchema } from "../types";
+import { applyTemplate } from "../apply-template";
+import { getTemplate, TEMPLATES } from "../templates";
+import { createProjectStore, type ProjectStore } from "@/lib/project/store";
+import { VoiceSchema } from "@/lib/project/types";
 import { makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { storeCtx } from "@/lib/generation/__tests__/_context";
 
