@@ -52,7 +52,7 @@ export function ReferenceImagesEditor({ columns, ...target }: LaidOutTarget) {
 				</span>
 				{override && (
 					<TooltipIconButton
-						label="Use the project's reference images"
+						label="Reset to project references"
 						variant="quiet"
 						onClick={() => set(null)}
 					>

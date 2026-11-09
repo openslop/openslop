@@ -25,6 +25,8 @@ export function AssetTile({
 	name,
 	previewUrl,
 	previewKind = "image",
+	context,
+	createdAt,
 	Icon,
 	status = "idle",
 	startedAt = null,
@@ -38,6 +40,9 @@ export function AssetTile({
 	name: string;
 	previewUrl?: string;
 	previewKind?: "image" | "video";
+	/** What the picture is, as its larger view says. */
+	context?: string;
+	createdAt?: string;
 	Icon: IconComponent;
 	status?: GenerationStatus;
 	startedAt?: number | null;
@@ -85,7 +90,13 @@ export function AssetTile({
 				{children}
 				<TileActions label={name}>
 					{previewUrl && (
-						<ViewLargerAction src={previewUrl} kind={previewKind} name={name} />
+						<ViewLargerAction
+							src={previewUrl}
+							kind={previewKind}
+							name={name}
+							context={context}
+							createdAt={createdAt}
+						/>
 					)}
 					{onEdit && <EditAction name={name} onClick={onEdit} />}
 					{actions}

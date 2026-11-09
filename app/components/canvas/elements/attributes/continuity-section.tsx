@@ -53,6 +53,7 @@ export function ContinuityReferencesPopover({
 									key={url}
 									name={name}
 									previewUrl={url}
+									context="Continuity"
 									Icon={Image}
 								/>
 							))}

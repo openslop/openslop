@@ -67,16 +67,25 @@ function DialogOverlay({
 	);
 }
 
+/** `elevated` is the popover's plain surface, for a dialog that is mostly what it shows. */
+const SURFACES = {
+	default: "grain bg-popover p-6 shadow-elevation-10",
+	elevated:
+		"bg-surface-elevated p-3 shadow-elevation-5 [--scrollbar:var(--scrollbar-elevated)]",
+} as const;
+
 function DialogContent({
 	className,
 	children,
 	showCloseButton = true,
 	glow = true,
+	surface = "default",
 	...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
 	showCloseButton?: boolean;
 	/** The light from above. Off for dialogs that carry their own surface. */
 	glow?: boolean;
+	surface?: keyof typeof SURFACES;
 }) {
 	return (
 		<DialogPortal>
@@ -84,12 +93,13 @@ function DialogContent({
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
 				className={cn(
-					"grain fixed left-[50%] top-[50%] z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-1rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] flex-col gap-4 overflow-hidden rounded-md border border-border bg-popover p-6 text-popover-foreground shadow-elevation-10 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:w-full",
+					"fixed left-[50%] top-[50%] z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-1rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] flex-col gap-4 overflow-hidden rounded-md border border-border text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:w-full",
+					SURFACES[surface],
 					className,
 				)}
 				{...props}
 			>
-				{glow && (
+				{glow && surface === "default" && (
 					<div
 						aria-hidden
 						className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40"
@@ -99,7 +109,7 @@ function DialogContent({
 						}}
 					/>
 				)}
-				<div className="relative z-[2] flex min-h-0 flex-1 flex-col gap-4">
+				<div className="relative z-[2] flex min-h-0 flex-1 flex-col gap-[inherit]">
 					{children}
 				</div>
 				{showCloseButton && (

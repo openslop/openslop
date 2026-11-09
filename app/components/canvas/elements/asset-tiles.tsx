@@ -40,6 +40,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 		<AssetTile
 			name={name}
 			previewUrl={avatar.url}
+			context="Character"
 			Icon={User}
 			status={avatar.status}
 			startedAt={avatar.startedAt}
@@ -72,6 +73,7 @@ export function ReferenceTile({
 		<AssetTile
 			name={`Reference ${index + 1}`}
 			previewUrl={url}
+			context="Reference image"
 			Icon={Image}
 			{...tile}
 		/>
@@ -111,7 +113,7 @@ type MediaTileProps = TileProps & {
 
 /** A piece of the project's media as a small tile; audio shows by its icon. */
 export function MediaAssetTile({
-	item: { name, kind, url },
+	item: { name, kind, url, createdAt },
 	...tile
 }: MediaTileProps) {
 	const remove = useDeleteMedia(name);
@@ -122,6 +124,8 @@ export function MediaAssetTile({
 				name={name}
 				previewUrl={previewKind && url}
 				previewKind={previewKind}
+				context="Media library"
+				createdAt={createdAt}
 				Icon={MEDIA_KINDS[kind].Icon}
 				fallback="icon"
 				onDelete={remove.request}

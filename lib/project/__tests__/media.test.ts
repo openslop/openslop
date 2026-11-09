@@ -14,6 +14,7 @@ describe("toMediaItems", () => {
 				name: "beach-sunset",
 				kind: "image",
 				url: "https://blob/Beach Sunset.png",
+				createdAt: expect.any(String),
 			},
 		]);
 	});

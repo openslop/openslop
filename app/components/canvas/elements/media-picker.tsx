@@ -38,7 +38,7 @@ const ADD: Record<UploadKind, { label: string; Icon: IconComponent }> = {
 };
 
 function MediaChoice({
-	item: { name, kind, url },
+	item: { name, kind, url, createdAt },
 	onPick,
 }: {
 	item: MediaItem;
@@ -69,7 +69,13 @@ function MediaChoice({
 			</Thumbnail>
 			{pictured && (
 				<TileActions label={name}>
-					<ViewLargerAction src={url} kind={pictured} name={name} />
+					<ViewLargerAction
+						src={url}
+						kind={pictured}
+						name={name}
+						context="Media library"
+						createdAt={createdAt}
+					/>
 				</TileActions>
 			)}
 		</div>

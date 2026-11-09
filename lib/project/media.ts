@@ -10,6 +10,8 @@ export const MediaItemSchema = z.object({
 	name: z.string(),
 	kind: UploadKindSchema,
 	url: z.string(),
+	/** Missing on media added before it was recorded. */
+	createdAt: z.string().optional(),
 });
 
 export type MediaItem = z.infer<typeof MediaItemSchema>;
@@ -28,10 +30,12 @@ export function toMediaItems(
 	uploads: Upload[],
 ): MediaItem[] {
 	const taken = new Set(media.map((item) => item.name));
+	const createdAt = new Date().toISOString();
 	return uploads.map(({ kind, name, url }) => ({
 		name: uniqueName(kebabCase(stem(name)) || kind, taken),
 		kind,
 		url,
+		createdAt,
 	}));
 }
 

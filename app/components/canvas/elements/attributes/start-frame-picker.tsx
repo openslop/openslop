@@ -77,7 +77,12 @@ function FrameTile({
 			</Thumbnail>
 			<TileActions label={label}>
 				{picture && (
-					<ViewLargerAction src={picture} kind="image" name={label} />
+					<ViewLargerAction
+						src={picture}
+						kind="image"
+						name={label}
+						context="Start frame"
+					/>
 				)}
 				{onRemove && (
 					<RemoveAction name={label.toLowerCase()} onClick={onRemove} />

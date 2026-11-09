@@ -39,10 +39,10 @@ const Dot = () => (
 );
 
 function ElementVersionThumbnail({
-	result,
+	version: { result, createdAt },
 	name,
 }: {
-	result: ElementVersion["result"];
+	version: ElementVersion;
 	name: string;
 }) {
 	const src = result.videoUrl ?? result.imageUrl;
@@ -52,7 +52,13 @@ function ElementVersionThumbnail({
 		<div className="group/tile relative aspect-video w-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
 			<MediaWithSkeleton outputKind={kind} src={src} alt="" />
 			<TileActions label={name}>
-				<ViewLargerAction src={src} kind={kind} name={name} />
+				<ViewLargerAction
+					src={src}
+					kind={kind}
+					name={name}
+					context="Version history"
+					createdAt={createdAt}
+				/>
 			</TileActions>
 		</div>
 	);
@@ -80,10 +86,7 @@ function ElementVersionRow({
 			)}
 		>
 			<div className="flex items-center gap-2.5">
-				<ElementVersionThumbnail
-					result={version.result}
-					name={`version ${label}`}
-				/>
+				<ElementVersionThumbnail version={version} name={`version ${label}`} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
 						<span className={cn("font-numeric", active && "text-accent")}>
