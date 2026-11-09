@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
+import isEmpty from "lodash/isEmpty";
 import { HistoryEditor } from "slate-history";
 import { useSlateStatic } from "slate-react";
-import { ensureAsset } from "@/lib/canvas/asset-ops";
+import { clearDraft, ensureAsset } from "@/lib/canvas/asset-ops";
+import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import {
 	PLAYGROUND_CONTENT_TYPES,
 	playgroundTypeOf,
+	type AssetElement,
 	type PlaygroundContentType,
 } from "@/lib/canvas/types";
 import { useAsset } from "@/lib/canvas/use-assets";
@@ -16,6 +19,7 @@ import { ELEMENT_CONFIGS } from "../elements/element-configs";
 import { ElementTypeIcon } from "../elements/element-type-icon";
 import { ElementGenerationProvider } from "../elements/element-generation-context";
 import { ElementGenerateButton } from "../elements/generate-button";
+import { ResetButton } from "../elements/reset-edits-button";
 import { PanelCard, PanelField } from "../panel/panel-card";
 import { DraftPictures, DraftSettings } from "./draft-attributes";
 import { DraftPrompt } from "./draft-prompt";
@@ -53,6 +57,19 @@ function useDraft(type: PlaygroundContentType) {
 	return useAsset(draftType);
 }
 
+function ClearDraftButton({ draft }: { draft: AssetElement }) {
+	const editor = useSlateStatic();
+	const blank =
+		!getElementBodyText(draft) && isEmpty(draft.generationAttributes);
+	if (blank) return null;
+	return (
+		<ResetButton
+			tooltip="Clear the prompt and settings"
+			onClick={() => clearDraft(editor, draft.id)}
+		/>
+	);
+}
+
 /** One draft per type: switching type keeps each one's prompt and settings. */
 export function DraftCard({
 	type,
@@ -77,7 +94,8 @@ export function DraftCard({
 					<DraftPictures element={draft} />
 					<DraftPrompt draft={draft} />
 					<DraftSettings element={draft} />
-					<div className="flex justify-end">
+					<div className="flex items-center justify-end gap-2">
+						<ClearDraftButton draft={draft} />
 						<ElementGenerateButton />
 					</div>
 				</ElementGenerationProvider>

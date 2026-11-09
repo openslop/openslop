@@ -4,6 +4,7 @@ import { getPromptText } from "@/lib/generation/inputs";
 import {
 	addCharacter,
 	addElementReferences,
+	clearDraft,
 	restoreDraft,
 	ensureAsset,
 	removeAsset,
@@ -367,5 +368,26 @@ describe("restoreDraft", () => {
 		const draft = findAsset(editor.children, "asset_playground_image");
 		expect(draft && getPromptText(draft)).toBe("A wizard {{Mia}}");
 		expect(draft?.generationAttributes).toEqual({ resolution: "720p" });
+	});
+});
+
+describe("clearDraft", () => {
+	it("blanks the draft's prompt and settings", () => {
+		const editor = makeEditor([scene("s1", narration("n1"))]);
+		restoreDraft(editor, "asset_playground_image", {
+			inputs: {
+				prompt: "A wizard",
+				attributes: { resolution: "720p" },
+				reads: {},
+				dependencies: {},
+			},
+		});
+		const id = findAsset(editor.children, "asset_playground_image")?.id ?? "";
+
+		clearDraft(editor, id);
+
+		const draft = findAsset(editor.children, "asset_playground_image");
+		expect(draft && getPromptText(draft)).toBe("");
+		expect(draft?.generationAttributes ?? {}).toEqual({});
 	});
 });

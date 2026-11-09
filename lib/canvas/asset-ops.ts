@@ -92,6 +92,18 @@ export function restoreDraft(
 	applyElementVersion(editor, draft.id, version);
 }
 
+const EMPTY_INPUTS = {
+	prompt: "",
+	attributes: {},
+	reads: {},
+	dependencies: {},
+};
+
+/** Back to a blank prompt with no settings, as the draft first was. */
+export function clearDraft(editor: Editor, id: string): void {
+	applyElementVersion(editor, id, { inputs: EMPTY_INPUTS });
+}
+
 export function removeAssets(editor: Editor): void {
 	Transforms.removeNodes(editor, { at: [], match: isAssetElement });
 }

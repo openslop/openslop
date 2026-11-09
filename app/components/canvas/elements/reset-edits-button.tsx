@@ -12,6 +12,29 @@ import {
 import { hasEditsSinceResult } from "@/lib/generation/stale-reason";
 import { useElementGeneration } from "./element-generation-context";
 
+export function ResetButton({
+	tooltip,
+	onClick,
+}: {
+	tooltip: string;
+	onClick: () => void;
+}) {
+	return (
+		<Button
+			type="button"
+			variant="ghost"
+			size="sm"
+			tooltip={tooltip}
+			className="shrink-0"
+			onMouseDown={keepFocus}
+			onClick={onClick}
+		>
+			<Undo aria-hidden="true" />
+			<span className="hidden sm:inline">Reset</span>
+		</Button>
+	);
+}
+
 export function ResetEditsButton() {
 	const editor = useSlateStatic();
 	const queue = useGenerationQueue();
@@ -26,17 +49,9 @@ export function ResetEditsButton() {
 
 	if (!edited) return null;
 	return (
-		<Button
-			type="button"
-			variant="ghost"
-			size="sm"
+		<ResetButton
 			tooltip="Reset any edits made to this element"
-			className="shrink-0"
-			onMouseDown={keepFocus}
 			onClick={reset}
-		>
-			<Undo aria-hidden="true" />
-			<span className="hidden sm:inline">Reset</span>
-		</Button>
+		/>
 	);
 }
