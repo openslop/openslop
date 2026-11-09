@@ -1,11 +1,12 @@
 import { Editor, Transforms } from "slate";
 import { HistoryEditor } from "slate-history";
+import { seedDrafts } from "@/lib/canvas/asset-ops";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import { deserializeWithScenes } from "./serialize";
 
 /**
- * Replaces the document outside undo history and clears the stack, whose
- * entries point at paths this swap removes.
+ * Replaces the document outside undo history, with every playground draft,
+ * and clears the stack, whose entries point at paths this swap removes.
  */
 export function applyScriptToEditor(
 	editor: CanvasEditor,
@@ -21,6 +22,7 @@ export function applyScriptToEditor(
 				match: (_node, path) => path.length === 1,
 			});
 			Transforms.insertNodes(editor, nodes, { at: [0] });
+			seedDrafts(editor);
 		});
 		Editor.normalize(editor, { force: true });
 	};

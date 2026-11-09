@@ -24,7 +24,13 @@ import {
 } from "./editor-ops";
 import { isAssetElement } from "./guards";
 import type { ElementVersion } from "@/lib/generation/versions";
-import type { AssetType, PlaygroundType } from "./types";
+import {
+	PLAYGROUND_CONTENT_TYPES,
+	playgroundTypeOf,
+	type AssetElement,
+	type AssetType,
+	type PlaygroundType,
+} from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
@@ -81,16 +87,25 @@ export function addElementReferences(
 	});
 }
 
-/** The draft's id, made first if missing; its unrecorded insert at the top shifts every path on the undo stack, so it clears it. */
+const insertDraft = (editor: Editor, draft: AssetElement) =>
+	Transforms.insertNodes(editor, draft, { at: [0] });
+
+const newDraft = (editor: Editor, type: PlaygroundType): AssetElement =>
+	createCanvasElement(type, { defaultModels: editor.defaultModels() });
+
+/** Gives every playground type its draft; run where the undo stack starts empty, since each insert shifts every path on it. */
+export function seedDrafts(editor: Editor): void {
+	for (const type of PLAYGROUND_CONTENT_TYPES.map(playgroundTypeOf))
+		if (!findAsset(editor.children, type))
+			insertDraft(editor, newDraft(editor, type));
+}
+
+/** The draft's id, remade outside undo if something removed it, clearing the stack its insert would shift. */
 export function ensureDraft(editor: Editor, type: PlaygroundType): string {
 	const found = findAsset(editor.children, type);
 	if (found) return found.id;
-	const draft = createCanvasElement(type, {
-		defaultModels: editor.defaultModels(),
-	});
-	HistoryEditor.withoutSaving(editor, () =>
-		Transforms.insertNodes(editor, draft, { at: [0] }),
-	);
+	const draft = newDraft(editor, type);
+	HistoryEditor.withoutSaving(editor, () => insertDraft(editor, draft));
 	editor.history = { undos: [], redos: [] };
 	return draft.id;
 }
