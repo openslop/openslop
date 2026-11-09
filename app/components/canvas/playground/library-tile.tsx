@@ -27,7 +27,7 @@ import { toastError } from "@/lib/toast-error";
 import { commitUploaded } from "@/lib/upload/uploaded-result";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
-import { shortName, TileAction, TilePlayer } from "../elements/tile-actions";
+import { TileAction, TilePlayer } from "../elements/tile-actions";
 import { usesFor, type MediaUse, type UseContext } from "./media-uses";
 
 function useUseContext(): UseContext {
@@ -83,8 +83,9 @@ function UseAsMenu({ item }: { item: MediaItem }) {
 		<DropdownMenu modal={false}>
 			<DropdownMenuTrigger asChild>
 				<TileAction
-					label={`Use ${item.name} as`}
-					tooltip={`Use ${shortName(item.name)} as`}
+					name={item.name}
+					describe={(name) => `Use ${name} as`}
+					tooltip="Use as"
 					icon={Alternative}
 				/>
 			</DropdownMenuTrigger>
@@ -106,8 +107,8 @@ function AddReferenceAction({
 	if (item.kind !== "image") return null;
 	return (
 		<TileAction
-			label={`Add ${item.name} to references`}
-			tooltip={`Add ${shortName(item.name)} to references`}
+			name={item.name}
+			describe={(name) => `Add ${name} to references`}
 			icon={LayersPlus}
 			onClick={() =>
 				addElementReferences(editor, elementId, REFERENCE_IMAGES_ATTR, [

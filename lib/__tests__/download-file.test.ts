@@ -11,18 +11,18 @@ const respond = (body: Blob, status = 200) =>
 describe("downloadFile", () => {
 	afterEach(() => vi.restoreAllMocks());
 
-	it("saves the file under its name with the type's extension", async () => {
-		respond(new Blob(["x"], { type: "image/png" }));
+	it("saves the file under its name with the URL's extension", async () => {
+		respond(new Blob(["x"], { type: "audio/mpeg" }));
 		URL.createObjectURL = vi.fn(() => "blob:x");
 		URL.revokeObjectURL = vi.fn();
 		const click = vi
 			.spyOn(HTMLAnchorElement.prototype, "click")
 			.mockImplementation(() => {});
 
-		await downloadFile("https://cdn.test/a.png", "sunset");
+		await downloadFile("https://cdn.test/a.mp3", "sunset");
 
 		const link = click.mock.contexts[0] as HTMLAnchorElement;
-		expect(link.download).toBe("sunset.png");
+		expect(link.download).toBe("sunset.mp3");
 		expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:x");
 	});
 

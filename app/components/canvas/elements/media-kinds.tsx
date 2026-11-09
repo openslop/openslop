@@ -3,6 +3,7 @@
 import { EmptyState } from "@/components/ui/empty-state";
 import {
 	Image,
+	Search,
 	Video,
 	Volume2,
 	type IconComponent,
@@ -30,14 +31,16 @@ export function EmptyLibrary({
 	query: string;
 }) {
 	const sought = query.trim();
-	const { label } = MEDIA_KINDS[kind];
+	const { label, Icon } = MEDIA_KINDS[kind];
 	return sought ? (
 		<EmptyState
+			icon={Search}
 			title={`Nothing matches "${sought}"`}
 			description="Try a different name"
 		/>
 	) : (
 		<EmptyState
+			icon={Icon}
 			title={`No ${label.toLowerCase()} yet`}
 			description={`${label} you upload or generate show up here`}
 		/>

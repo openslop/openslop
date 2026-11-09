@@ -70,8 +70,7 @@ function DialogOverlay({
 /** `elevated` is the popover's plain surface, for a dialog that is mostly what it shows. */
 const SURFACES = {
 	default: "grain bg-popover p-6 shadow-elevation-10",
-	elevated:
-		"bg-surface-elevated p-3 shadow-elevation-5 [--scrollbar:var(--scrollbar-elevated)]",
+	elevated: "elevated-surface p-3 shadow-elevation-5",
 } as const;
 
 function DialogContent({

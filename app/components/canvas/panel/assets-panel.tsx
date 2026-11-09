@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { ActionMenu } from "@/components/ui/action-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import { StockAlt, Upload } from "@/components/ui/icon";
+import { Image, Palette, StockAlt, Upload, User } from "@/components/ui/icon";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useMediaLibrary } from "@/lib/project/use-media-library";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
@@ -56,6 +56,7 @@ function CharactersCard() {
 			title="Characters"
 			empty={
 				<EmptyState
+					icon={User}
 					title="No characters yet"
 					description="Characters you create show up here"
 				/>
@@ -92,6 +93,7 @@ function ReferencesCard() {
 				title="References"
 				empty={
 					<EmptyState
+						icon={Image}
 						title="No reference images yet"
 						description="Reference images you upload show up here"
 					/>
@@ -124,6 +126,7 @@ function ArtStyleCard() {
 			title="Art style"
 			empty={
 				<EmptyState
+					icon={Palette}
 					title="No art style yet"
 					description="The art style you set shows up here"
 				/>

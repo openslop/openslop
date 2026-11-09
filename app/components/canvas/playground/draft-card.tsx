@@ -2,9 +2,8 @@
 
 import { useEffect } from "react";
 import isEmpty from "lodash/isEmpty";
-import { HistoryEditor } from "slate-history";
 import { useSlateStatic } from "slate-react";
-import { clearDraft, ensureAsset } from "@/lib/canvas/asset-ops";
+import { clearDraft, ensureDraft } from "@/lib/canvas/asset-ops";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import {
 	PLAYGROUND_CONTENT_TYPES,
@@ -13,12 +12,16 @@ import {
 	type PlaygroundContentType,
 } from "@/lib/canvas/types";
 import { useAsset } from "@/lib/canvas/use-assets";
+import { isGenerationActive } from "@/lib/generation/snapshots";
 import { SelectMenu, SelectMenuTrigger } from "@/components/ui/select-menu";
 import { ModelAttribute } from "../elements/attributes/model-attribute";
 import { ELEMENT_CONFIGS } from "../elements/element-configs";
 import { ElementTypeIcon } from "../elements/element-type-icon";
-import { ElementGenerationProvider } from "../elements/element-generation-context";
-import { ElementGenerateButton } from "../elements/generate-button";
+import {
+	ElementGenerationProvider,
+	useElementGeneration,
+} from "../elements/element-generation-context";
+import { GenerateButton } from "../elements/generate-button";
 import { ResetButton } from "../elements/reset-edits-button";
 import { PanelCard, PanelField } from "../panel/panel-card";
 import { DraftPictures, DraftSettings } from "./draft-attributes";
@@ -47,14 +50,16 @@ function TypeSelect({
 	);
 }
 
-/** The draft for a type, made the first time the playground turns to it; kept out of undo. */
+/** The draft for a type, made whenever the playground turns to it and it is missing. */
 function useDraft(type: PlaygroundContentType) {
 	const editor = useSlateStatic();
 	const draftType = playgroundTypeOf(type);
+	const draft = useAsset(draftType);
+	const missing = !draft;
 	useEffect(() => {
-		HistoryEditor.withoutSaving(editor, () => ensureAsset(editor, draftType));
-	}, [editor, draftType]);
-	return useAsset(draftType);
+		if (missing) ensureDraft(editor, draftType);
+	}, [editor, draftType, missing]);
+	return draft;
 }
 
 function ClearDraftButton({ draft }: { draft: AssetElement }) {
@@ -66,6 +71,19 @@ function ClearDraftButton({ draft }: { draft: AssetElement }) {
 		<ResetButton
 			tooltip="Clear the prompt and settings"
 			onClick={() => clearDraft(editor, draft.id)}
+		/>
+	);
+}
+
+/** Each run makes a new take in the media, so a draft only ever generates. */
+function DraftGenerateButton() {
+	const { hasPrompt, status, generate } = useElementGeneration();
+	return (
+		<GenerateButton
+			status={status}
+			hasResult={false}
+			disabled={!hasPrompt || isGenerationActive(status)}
+			onGenerate={generate}
 		/>
 	);
 }
@@ -96,7 +114,7 @@ export function DraftCard({
 					<DraftSettings element={draft} />
 					<div className="flex items-center justify-end gap-2">
 						<ClearDraftButton draft={draft} />
-						<ElementGenerateButton />
+						<DraftGenerateButton />
 					</div>
 				</ElementGenerationProvider>
 			)}

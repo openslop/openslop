@@ -68,7 +68,7 @@ export function AssetStripMedia() {
 
 export function AssetStripUploading({ count }: { count: number }) {
 	return Array.from({ length: count }, (_, i) => (
-		<li key={i}>
+		<li key={i} aria-hidden>
 			<UploadingTile />
 		</li>
 	));

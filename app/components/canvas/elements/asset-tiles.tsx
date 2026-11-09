@@ -136,7 +136,6 @@ export function MediaAssetTile({
 	);
 }
 
-/** A piece of media as a library lists it: pictures as tiles, video and audio a row wide. */
 function MediaAudioRow({ item, actions }: MediaTileProps) {
 	const remove = useDeleteMedia(item.name);
 	return (
@@ -157,6 +156,7 @@ function MediaAudioRow({ item, actions }: MediaTileProps) {
 	);
 }
 
+/** A piece of media as a library lists it: pictures and video as tiles, audio a row wide. */
 export function MediaLibraryItem({
 	item,
 	actions,

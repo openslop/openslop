@@ -52,9 +52,7 @@ export function SelectMenuItem({
 			className={cn("py-1", className)}
 		>
 			<span className="flex w-3.5 shrink-0 items-center justify-center">
-				{selected && (
-					<Check className="h-3 w-3 text-accent" aria-hidden="true" />
-				)}
+				{selected && <Check size={ICON_SIZES.header} aria-hidden="true" />}
 			</span>
 			{children}
 		</DropdownMenuItem>

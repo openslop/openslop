@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSlateSelector } from "slate-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThumbnailGrid } from "@/components/ui/thumbnail";
@@ -83,7 +83,7 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 	);
 }
 
-/** Every take and upload of one kind, newest first, under whatever the playground is making now. */
+/** Every take and upload of one kind, newest first, under whatever the playground is making now; switching type shows its kind. */
 export function PlaygroundLibrary({
 	type,
 	onReuse,
@@ -92,6 +92,7 @@ export function PlaygroundLibrary({
 	onReuse: (take: ElementVersion) => void;
 }) {
 	const allDraftIds = useDraftHistories();
+	const { outputKind } = CONTENT_TYPES[type];
 	const {
 		kind,
 		setKind,
@@ -101,7 +102,12 @@ export function PlaygroundLibrary({
 		openPicker,
 		uploadingCount,
 		inputElement,
-	} = useMediaLibrary();
+	} = useMediaLibrary(outputKind);
+	const [shownFor, setShownFor] = useState(outputKind);
+	if (shownFor !== outputKind) {
+		setShownFor(outputKind);
+		setKind(outputKind);
+	}
 	const referencesOf = useSlateSelector((editor) => {
 		const draft = findAsset(editor.children, playgroundTypeOf(type));
 		return draft && elementOffers(draft, REFERENCE_IMAGES_ATTR)

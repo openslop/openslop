@@ -2,6 +2,7 @@ import isNil from "lodash/isNil";
 import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
 import { Editor, Transforms } from "slate";
+import { HistoryEditor } from "slate-history";
 import {
 	parseReferenceImages,
 	serializeReferenceImages,
@@ -80,16 +81,30 @@ export function addElementReferences(
 	});
 }
 
+/** The draft's id, made first if missing; its unrecorded insert at the top shifts every path on the undo stack, so it clears it. */
+export function ensureDraft(editor: Editor, type: PlaygroundType): string {
+	const found = findAsset(editor.children, type);
+	if (found) return found.id;
+	const draft = createCanvasElement(type, {
+		defaultModels: editor.defaultModels(),
+	});
+	HistoryEditor.withoutSaving(editor, () =>
+		Transforms.insertNodes(editor, draft, { at: [0] }),
+	);
+	editor.history = { undos: [], redos: [] };
+	return draft.id;
+}
+
 /** Puts a playground draft back on the prompt and attributes one of its takes came from. */
 export function restoreDraft(
 	editor: Editor,
 	type: PlaygroundType,
 	version: Pick<ElementVersion, "inputs">,
 ): void {
-	ensureAsset(editor, type);
-	const draft = findAsset(editor.children, type);
-	if (!draft) throw new Error(`No ${type} draft to restore`);
-	applyElementVersion(editor, draft.id, version);
+	const id = ensureDraft(editor, type);
+	HistoryEditor.withoutSaving(editor, () =>
+		applyElementVersion(editor, id, version),
+	);
 }
 
 const EMPTY_INPUTS = {
@@ -101,7 +116,9 @@ const EMPTY_INPUTS = {
 
 /** Back to a blank prompt with no settings, as the draft first was. */
 export function clearDraft(editor: Editor, id: string): void {
-	applyElementVersion(editor, id, { inputs: EMPTY_INPUTS });
+	HistoryEditor.withoutSaving(editor, () =>
+		applyElementVersion(editor, id, { inputs: EMPTY_INPUTS }),
+	);
 }
 
 export function removeAssets(editor: Editor): void {

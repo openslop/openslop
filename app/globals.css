@@ -63,6 +63,12 @@
 		ew-resize;
 }
 
+/* Popovers, menus and dialogs: the raised surface and the scrollbar that reads on it. */
+@utility elevated-surface {
+	background-color: var(--surface-elevated);
+	--scrollbar: var(--scrollbar-elevated);
+}
+
 @utility focus-ring {
 	@apply outline-none focus-visible:ring-2 focus-visible:ring-ring;
 }

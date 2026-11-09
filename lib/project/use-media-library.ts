@@ -7,8 +7,8 @@ import { useMediaUpload } from "./use-media-upload";
 import { useProject } from "./use-project";
 
 /** The project's media of the kind and query chosen, with the picker that uploads more. */
-export function useMediaLibrary() {
-	const [kind, setKind] = useState<UploadKind>("image");
+export function useMediaLibrary(initialKind: UploadKind = "image") {
+	const [kind, setKind] = useState(initialKind);
 	const [query, setQuery] = useState("");
 	const media = useProject((state) => state.media);
 	const upload = useMediaUpload({

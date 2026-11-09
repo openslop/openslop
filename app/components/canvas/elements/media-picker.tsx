@@ -10,6 +10,7 @@ import {
 	type IconComponent,
 } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
+import { Spinner } from "@/components/ui/spinner";
 import {
 	Popover,
 	PopoverContent,
@@ -82,44 +83,37 @@ function MediaChoice({
 	);
 }
 
+type MediaUpload = ReturnType<typeof useMediaUpload>;
+
 /** The first tile: a file from the computer, dropped or picked, joins the media and is used. */
 function UploadChoice({
 	kind,
-	onPick,
+	upload: { openPicker, uploading, dropZoneProps },
 }: {
 	kind: UploadKind;
-	onPick: (url: string) => void;
+	upload: MediaUpload;
 }) {
-	const { openPicker, uploading, inputElement, dropZoneProps } = useMediaUpload(
-		{
-			kinds: [kind],
-			onUpload: ([url]) => {
-				if (url) onPick(url);
-			},
-		},
-	);
 	return (
-		<>
-			<AddAssetTile
-				label={`Upload ${kind}`}
-				ariaLabel={`Upload ${kind} from your computer`}
-				Icon={Upload}
-				onClick={openPicker}
-				disabled={uploading}
-				busy={uploading}
-				{...dropZoneProps}
-			/>
-			{inputElement}
-		</>
+		<AddAssetTile
+			label={`Upload ${kind}`}
+			ariaLabel={`Upload ${kind} from your computer`}
+			Icon={Upload}
+			onClick={openPicker}
+			disabled={uploading}
+			busy={uploading}
+			{...dropZoneProps}
+		/>
 	);
 }
 
 /** Mounted only while the popover is open, so a closed picker reads no media. */
 function MediaChoices({
 	kind,
+	upload,
 	onPick,
 }: {
 	kind: UploadKind;
+	upload: MediaUpload;
 	onPick: (url: string) => void;
 }) {
 	const [query, setQuery] = useState("");
@@ -133,7 +127,7 @@ function MediaChoices({
 					<EmptyLibrary kind={kind} query={query} />
 				) : (
 					<ThumbnailGrid columns={2}>
-						<UploadChoice kind={kind} onPick={onPick} />
+						<UploadChoice kind={kind} upload={upload} />
 						{items.map((item) => (
 							<MediaChoice
 								key={item.name}
@@ -166,25 +160,34 @@ export function MediaPicker({
 		setOpen(false);
 		void onPick(url);
 	};
+	// Outlives the popover, so an upload still running when it closes lands.
+	const upload = useMediaUpload({
+		kinds: [kind],
+		onUpload: ([url]) => {
+			if (url) pick(url);
+		},
+	});
+	const shown = upload.uploading ? `Uploading ${kind}…` : label;
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
+			{upload.inputElement}
 			<PopoverTrigger asChild>
 				<Button
 					type="button"
 					variant="ghost"
 					size="sm"
-					tooltip={label}
-					disabled={disabled}
+					tooltip={shown}
+					disabled={disabled || upload.uploading}
 					onMouseDown={keepFocus}
 					className={className}
 				>
-					<Icon aria-hidden="true" />
-					<span className="hidden sm:inline">{label}</span>
+					{upload.uploading ? <Spinner /> : <Icon aria-hidden="true" />}
+					<span className="hidden sm:inline">{shown}</span>
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent align="end" className="w-80">
-				<PopoverHeader title="Media Library" icon={FolderOpen} />
-				<MediaChoices kind={kind} onPick={pick} />
+				<PopoverHeader title="Media library" icon={FolderOpen} />
+				<MediaChoices kind={kind} upload={upload} onPick={pick} />
 			</PopoverContent>
 		</Popover>
 	);

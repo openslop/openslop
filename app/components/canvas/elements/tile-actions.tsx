@@ -71,23 +71,26 @@ export function TileActions({
 	);
 }
 
-/** A file name short enough for a tooltip; the accessible label keeps it whole. */
-export const shortName = (name: string) => truncateMiddle(name, 24);
-
-/** One action in a tile's pill; dialogs and menus take it as their trigger. */
+/** One action on the tile named `name`, which its label reads whole and its tooltip shortened unless given; dialogs and menus take it as their trigger. */
 export function TileAction({
-	label,
-	tooltip = label,
+	name,
+	describe,
+	tooltip = describe(truncateMiddle(name, 24)),
 	icon: Icon,
 	...props
 }: ComponentProps<typeof ToolbarButton> & {
-	label: string;
+	name: string;
+	describe: (name: string) => string;
 	tooltip?: string;
 	icon: IconComponent;
 }) {
 	return (
 		<SimpleTooltip label={tooltip}>
-			<ToolbarButton aria-label={label} onMouseDown={keepFocus} {...props}>
+			<ToolbarButton
+				aria-label={describe(name)}
+				onMouseDown={keepFocus}
+				{...props}
+			>
 				<Icon size={ICON_SIZES.header} />
 			</ToolbarButton>
 		</SimpleTooltip>
@@ -98,8 +101,8 @@ export function ViewLargerAction(viewed: Viewed) {
 	return (
 		<MediaViewerDialog {...viewed}>
 			<TileAction
-				label={`View ${viewed.name} larger`}
-				tooltip={`View ${shortName(viewed.name)} larger`}
+				name={viewed.name}
+				describe={(name) => `View ${name} larger`}
 				icon={Maximize2}
 			/>
 		</MediaViewerDialog>
@@ -111,8 +114,8 @@ type NamedAction = { name: string; onClick: () => void };
 export function EditAction({ name, onClick }: NamedAction) {
 	return (
 		<TileAction
-			label={`Edit ${name}`}
-			tooltip={`Edit ${shortName(name)}`}
+			name={name}
+			describe={(shown) => `Edit ${shown}`}
 			icon={Pencil}
 			onClick={onClick}
 		/>
@@ -124,22 +127,24 @@ const LoadIn: IconComponent = ({ className, ...props }) => (
 	<PushIn className={cn("-scale-y-100", className)} {...props} />
 );
 
-const reuseLabels = (name: string) => ({
-	label: `Load the prompt and settings of ${name}`,
-	tooltip: `Load the prompt and settings of ${shortName(name)}`,
-});
-
 /** Loads what made a take back into the playground, like restoring a version. */
 export function ReuseAction({ name, onClick }: NamedAction) {
-	return <TileAction {...reuseLabels(name)} icon={LoadIn} onClick={onClick} />;
+	return (
+		<TileAction
+			name={name}
+			describe={(shown) => `Load the prompt and settings of ${shown}`}
+			icon={LoadIn}
+			onClick={onClick}
+		/>
+	);
 }
 
 /** Takes it off this list; the media itself stays. */
 export function RemoveAction({ name, onClick }: NamedAction) {
 	return (
 		<TileAction
-			label={`Remove ${name}`}
-			tooltip={`Remove ${shortName(name)}`}
+			name={name}
+			describe={(shown) => `Remove ${shown}`}
 			icon={X}
 			onClick={onClick}
 		/>
@@ -150,8 +155,8 @@ export function RemoveAction({ name, onClick }: NamedAction) {
 export function DeleteAction({ name, onClick }: NamedAction) {
 	return (
 		<TileAction
-			label={`Delete ${name}`}
-			tooltip={`Delete ${shortName(name)}`}
+			name={name}
+			describe={(shown) => `Delete ${shown}`}
 			icon={Trash2}
 			onClick={onClick}
 			tone="destructive"
@@ -176,8 +181,8 @@ export function TilePlayer({ src, name }: { src: string; name: string }) {
 			)}
 			<TileChip spot="center" label={`${name} playback`} shown={playing}>
 				<TileAction
-					label={`${playing ? "Stop" : "Play"} ${name}`}
-					tooltip={`${playing ? "Stop" : "Play"} ${shortName(name)}`}
+					name={name}
+					describe={(shown) => `${playing ? "Stop" : "Play"} ${shown}`}
 					icon={playing ? Stop : Play}
 					onClick={() => setPlaying(!playing)}
 				/>

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { withHistory } from "slate-history";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
 import {
 	addCharacter,
 	addElementReferences,
 	clearDraft,
+	ensureDraft,
 	restoreDraft,
 	ensureAsset,
 	removeAsset,
@@ -349,6 +351,20 @@ describe("addElementReferences", () => {
 		]);
 
 		expect(ownReferences(editor)).toBe("https://b.png,https://c.png");
+	});
+});
+
+describe("ensureDraft", () => {
+	it("makes the draft once and clears the undo stack its insert would shift", () => {
+		const editor = withHistory(makeEditor([scene("s1", narration("n1"))]));
+		editor.history.undos.push({ operations: [], selectionBefore: null });
+
+		const id = ensureDraft(editor, "asset_playground_image");
+
+		expect(findAsset(editor.children, "asset_playground_image")?.id).toBe(id);
+		expect(editor.history.undos).toEqual([]);
+		expect(ensureDraft(editor, "asset_playground_image")).toBe(id);
+		expect(getAssets(editor.children)).toHaveLength(1);
 	});
 });
 
