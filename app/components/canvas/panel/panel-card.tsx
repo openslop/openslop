@@ -13,7 +13,7 @@ export function PanelCard({
 	children: ReactNode;
 }) {
 	return (
-		<section className="grain relative shrink-0 overflow-hidden rounded-xl bg-element-card shadow-elevation-1">
+		<section className="grain relative shrink-0 overflow-hidden rounded-xl border border-border bg-element-card shadow-elevation-3">
 			<div className="relative z-10 flex flex-col gap-3 p-3 text-panel-fg">
 				{title && (
 					<div className="flex items-center justify-between gap-2">
