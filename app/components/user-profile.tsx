@@ -19,16 +19,7 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-	Check,
-	Contrast,
-	LogOut,
-	Monitor,
-	Moon,
-	Settings,
-	Sun,
-	User,
-} from "@/components/ui/icon";
+import { Check, Contrast, LogOut, Settings, User } from "@/components/ui/icon";
 import ImpersonateDialog from "./impersonate-dialog";
 import { SettingsDialog } from "./settings/settings-dialog";
 import { useSettings } from "@/lib/settings/use-settings";
@@ -36,9 +27,9 @@ import { useSettings } from "@/lib/settings/use-settings";
 const IS_DEV = process.env.NODE_ENV !== "production";
 
 const THEME_MODES = [
-	{ value: "light", label: "Light", Icon: Sun },
-	{ value: "dark", label: "Dark", Icon: Moon },
-	{ value: "system", label: "System", Icon: Monitor },
+	{ value: "light", label: "Light" },
+	{ value: "dark", label: "Dark" },
+	{ value: "system", label: "System" },
 ];
 
 function UserProfile() {
@@ -91,7 +82,6 @@ function UserProfile() {
 									<span className="flex w-4 items-center justify-center">
 										{theme === mode.value && <Check className="size-3.5" />}
 									</span>
-									<mode.Icon />
 									{mode.label}
 								</DropdownMenuItem>
 							))}
