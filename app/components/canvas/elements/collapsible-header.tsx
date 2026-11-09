@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronRight } from "@/components/ui/icon";
-import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
+import { IconButton } from "@/components/ui/icon-button";
 import type { ReactNode } from "react";
 
 export function CollapsibleHeader({
@@ -25,12 +25,11 @@ export function CollapsibleHeader({
 		>
 			<IconButton
 				ariaLabel={ariaLabel}
-				size="sm"
 				variant="quiet"
 				className="ml-1 opacity-0 transition-opacity duration-200 group-hover/collapsible:opacity-100 focus-visible:opacity-100"
 				onClick={onToggle}
 			>
-				<Icon size={ICON_SIZES.sm} />
+				<Icon />
 			</IconButton>
 			{label}
 			{rightSlot && (

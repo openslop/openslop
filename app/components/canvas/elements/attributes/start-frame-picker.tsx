@@ -11,7 +11,8 @@ import {
 	ThumbnailFace,
 } from "@/components/ui/thumbnail";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
-import type { ContentElement } from "@/lib/canvas/types";
+import { isContentElement } from "@/lib/canvas/guards";
+import type { GeneratedElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import {
 	type FrameSource,
@@ -23,9 +24,10 @@ import {
 } from "@/lib/connectors/video/start-frame";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { AddAssetTile } from "../add-asset-tile";
-import { MediaViewer } from "../media-viewer";
-import { RemoveCrossButton } from "../remove-cross-button";
+import { RemoveAction, TileActions, ViewLargerAction } from "../tile-actions";
+import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
 import { AttributeTrigger } from "./attribute-trigger";
+import { TileRow } from "./tile-row";
 import { usePreviousPictures } from "./use-previous-pictures";
 
 const FRAME_SOURCE_LABEL: Record<FrameSource["kind"], string> = {
@@ -73,21 +75,14 @@ function FrameTile({
 					<ThumbnailCaption>{label}</ThumbnailCaption>
 				</button>
 			</Thumbnail>
-			{picture && (
-				<MediaViewer
-					src={picture}
-					kind="image"
-					name={label}
-					className="opacity-0 group-hover/tile:opacity-100"
-				/>
-			)}
-			{onRemove && (
-				<RemoveCrossButton
-					label={`Remove ${label.toLowerCase()}`}
-					onClick={onRemove}
-					className="opacity-0 group-hover/tile:opacity-100"
-				/>
-			)}
+			<TileActions label={label}>
+				{picture && (
+					<ViewLargerAction src={picture} kind="image" name={label} />
+				)}
+				{onRemove && (
+					<RemoveAction name={label.toLowerCase()} onClick={onRemove} />
+				)}
+			</TileActions>
 		</div>
 	);
 }
@@ -97,7 +92,7 @@ function PreviousFrameTile({
 	current,
 	onSelect,
 }: {
-	element: ContentElement;
+	element: GeneratedElement;
 	current: FrameSource["kind"];
 	onSelect: () => void;
 }) {
@@ -120,15 +115,12 @@ function PreviousFrameTile({
 }
 
 /** An upload is kept while another choice is made so it can be chosen again. */
-export function StartFramePicker({
+export function StartFrameOptions({
 	element,
 	attrKey,
 	label,
-}: {
-	element: ContentElement;
-	attrKey: string;
-	label: string;
-}) {
+	columns,
+}: LaidOutTarget) {
 	const editor = useSlateStatic();
 	const source = frameSource(element.generationAttributes?.[attrKey]);
 	// Sloppy sets a picture as the start frame without remembering it as the upload.
@@ -146,47 +138,60 @@ export function StartFramePicker({
 			if (url) setFrame(url, url);
 		},
 	});
-	const summary = FRAME_SOURCE_LABEL[source.kind];
 
 	return (
-		<Popover>
-			<AttributeTrigger tooltip={`${label}: ${summary}`}>
-				{summary}
-			</AttributeTrigger>
-			<PopoverContent align="end" className="w-auto">
-				<div role="radiogroup" aria-label={label} className="flex gap-3">
-					<FrameTile
-						kind="none"
-						current={source.kind}
-						onSelect={() => setFrame(NO_FRAME)}
-					>
-						<Forbidden className="h-5 w-5" />
-					</FrameTile>
+		<>
+			<TileRow columns={columns} radiogroup={label}>
+				<FrameTile
+					kind="none"
+					current={source.kind}
+					onSelect={() => setFrame(NO_FRAME)}
+				>
+					<Forbidden className="h-5 w-5" />
+				</FrameTile>
+				{isContentElement(element) && (
 					<PreviousFrameTile
 						element={element}
 						current={source.kind}
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					/>
-					{uploaded ? (
-						<FrameTile
-							kind="upload"
-							current={source.kind}
-							onSelect={() => setFrame(uploaded)}
-							picture={uploaded}
-							onRemove={() => setFrame(NO_FRAME, null)}
-						/>
-					) : (
-						<AddAssetTile
-							label="Upload picture"
-							ariaLabel="Upload a picture to open on"
-							Icon={ImagePlus}
-							onClick={openPicker}
-							disabled={uploading}
-							busy={uploading}
-						/>
-					)}
-				</div>
-				{inputElement}
+				)}
+				{uploaded ? (
+					<FrameTile
+						kind="upload"
+						current={source.kind}
+						onSelect={() => setFrame(uploaded)}
+						picture={uploaded}
+						onRemove={() => setFrame(NO_FRAME, null)}
+					/>
+				) : (
+					<AddAssetTile
+						label="Upload"
+						ariaLabel="Upload a picture to open on"
+						Icon={ImagePlus}
+						onClick={openPicker}
+						disabled={uploading}
+						busy={uploading}
+					/>
+				)}
+			</TileRow>
+			{inputElement}
+		</>
+	);
+}
+
+export function StartFramePicker(target: AttributeTarget) {
+	const { kind } = frameSource(
+		target.element.generationAttributes?.[target.attrKey],
+	);
+	const summary = FRAME_SOURCE_LABEL[kind];
+	return (
+		<Popover>
+			<AttributeTrigger tooltip={`${target.label}: ${summary}`}>
+				{summary}
+			</AttributeTrigger>
+			<PopoverContent align="end" className="w-auto">
+				<StartFrameOptions {...target} />
 			</PopoverContent>
 		</Popover>
 	);

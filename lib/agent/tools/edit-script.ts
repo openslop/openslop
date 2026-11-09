@@ -5,6 +5,7 @@ import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
 	ContentTypeSchema,
 	ElementTypeSchema,
+	isPlaygroundType,
 	NON_SPEECH_TYPES,
 } from "@/lib/canvas/types";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
@@ -31,6 +32,7 @@ const describeAttribute = ({ key, edit }: AttributeDef): string[] => {
 // TODO(#743): an element's model-specific options show only as the value it already holds.
 // Sloppy needs a tool that resolves one element's schema.
 const ATTRIBUTES_BY_TYPE = ElementTypeSchema.options
+	.filter((type) => !isPlaygroundType(type))
 	.flatMap((type) => {
 		const attributes =
 			attributeSchemaFor(type).baseDefs.flatMap(describeAttribute);
@@ -50,6 +52,8 @@ const ASSETS = dedent`
 	- asset_style: the art style every visual is drawn in, as its text: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
 	- asset_references: the pictures every visual is drawn after. The user uploads these.
+	- asset_playground_<type>: what the user is drafting in the Playground panel, one per
+	  type. It feeds nothing in the script; leave it alone.
 `;
 
 export const editScript = defineTool({

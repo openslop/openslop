@@ -15,11 +15,17 @@ export type MediaToggleOption<T extends string> = {
 const mediaChromePill =
 	"inline-flex items-center gap-0.5 rounded-md bg-media-toggle-bg p-0.5";
 
+/** `field` sits level with a small form field beside it. */
+const SEGMENT_SIZES = { default: "h-6 min-w-6", field: "h-7 min-w-7" } as const;
+
+type ToggleSize = keyof typeof SEGMENT_SIZES;
+
 // The tooltip trigger owns `data-state` on the item, so the selected look comes
 // from the caller rather than from Radix's own attribute.
-const segment = (active: boolean) =>
+const segment = (active: boolean, size: ToggleSize) =>
 	cn(
-		"flex h-6 min-w-6 flex-1 basis-0 items-center justify-center rounded-sm px-1 transition-colors focus-ring unavailable:cursor-not-allowed unavailable:opacity-40",
+		"flex flex-1 basis-0 items-center justify-center rounded-sm px-1 transition-colors focus-ring unavailable:cursor-not-allowed unavailable:opacity-40",
+		SEGMENT_SIZES[size],
 		active
 			? "bg-media-toggle-active-bg text-media-toggle-active-fg"
 			: "text-media-toggle-fg hover:bg-media-toggle-hover-bg",
@@ -28,9 +34,11 @@ const segment = (active: boolean) =>
 function Segment<T extends string>({
 	option: { value, label, icon: Icon, text, disabled = false },
 	active,
+	size,
 }: {
 	option: MediaToggleOption<T>;
 	active: boolean;
+	size: ToggleSize;
 }) {
 	return (
 		<SimpleTooltip label={label}>
@@ -38,7 +46,7 @@ function Segment<T extends string>({
 				value={value}
 				aria-label={label}
 				disabled={disabled}
-				className={segment(active)}
+				className={segment(active, size)}
 			>
 				{Icon ? (
 					<Icon className="h-3.5 w-3.5" />
@@ -60,12 +68,14 @@ export function MediaToggle<T extends string>({
 	options,
 	onChange,
 	ariaLabel,
+	size = "default",
 	className,
 }: {
 	value: T;
 	options: MediaToggleOption<T>[];
 	onChange: (value: T) => void;
 	ariaLabel?: string;
+	size?: ToggleSize;
 	className?: string;
 }) {
 	return (
@@ -83,6 +93,7 @@ export function MediaToggle<T extends string>({
 					key={option.value}
 					option={option}
 					active={option.value === value}
+					size={size}
 				/>
 			))}
 		</ToggleGroupPrimitive.Root>
@@ -125,6 +136,7 @@ export function MediaToggleFlags<T extends string>({
 					key={option.value}
 					option={option}
 					active={values[option.value]}
+					size="default"
 				/>
 			))}
 		</ToggleGroupPrimitive.Root>

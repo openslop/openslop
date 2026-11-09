@@ -10,7 +10,6 @@ export function DuplicateButton({ element }: { element: ContentElement }) {
 	return (
 		<DuplicateIconButton
 			ariaLabel="Duplicate element"
-			size="header"
 			onMouseDown={keepFocus}
 			onClick={() => duplicateElement(editor, element.id)}
 		/>

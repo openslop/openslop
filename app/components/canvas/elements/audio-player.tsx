@@ -6,8 +6,22 @@ import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Waveform, type WaveformHandle } from "@/lib/components/waveform";
 import { formatTime } from "@/lib/render/timestamps";
 
+const TONES = {
+	default: { button: "default", time: "text-muted-foreground" },
+	/** In the side panel, in its heading's color. */
+	panel: { button: "panel", time: "text-panel-label" },
+} as const;
+
 /** `volume` is the playback gain, 0 to 1. */
-export function AudioPlayer({ src, volume }: { src: string; volume?: number }) {
+export function AudioPlayer({
+	src,
+	volume,
+	tone = "default",
+}: {
+	src: string;
+	volume?: number;
+	tone?: keyof typeof TONES;
+}) {
 	const waveformRef = useRef<WaveformHandle>(null);
 	const [playing, setPlaying] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
@@ -17,10 +31,11 @@ export function AudioPlayer({ src, volume }: { src: string; volume?: number }) {
 		<>
 			<TooltipIconButton
 				label={playing ? "Pause" : "Play"}
+				variant={TONES[tone].button}
 				onClick={() => waveformRef.current?.toggle()}
 				disabled={duration === 0}
 			>
-				{playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+				{playing ? <Pause /> : <Play />}
 			</TooltipIconButton>
 			<Waveform
 				ref={waveformRef}
@@ -35,7 +50,9 @@ export function AudioPlayer({ src, volume }: { src: string; volume?: number }) {
 				}}
 				onFinish={() => setPlaying(false)}
 			/>
-			<span className="shrink-0 ml-auto text-badge font-numeric text-muted-foreground">
+			<span
+				className={`shrink-0 ml-auto text-badge font-numeric ${TONES[tone].time}`}
+			>
 				{formatTime(currentTime)}/{formatTime(duration)}
 			</span>
 		</>

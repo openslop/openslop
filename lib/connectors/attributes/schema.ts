@@ -26,6 +26,8 @@ type AttributeEdit =
 export interface AttributeDef {
 	key: string;
 	label: string;
+	/** Marks its control where the label is left out. */
+	icon?: IconComponent;
 	/** Unit suffix appended to the displayed value (e.g. `"s"` for seconds). */
 	unit?: string;
 	/** What sets it. Left out, nothing on screen does. */

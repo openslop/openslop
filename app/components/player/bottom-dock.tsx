@@ -4,8 +4,8 @@ import { BottomTransportBar } from "./bottom-transport-bar";
 import { DOCK_DEFAULT_HEIGHT } from "./dock-layout";
 import { BOTTOM_VIEWS } from "./bottom-views";
 import { useBottomView } from "./bottom-view-context";
-import { ResizeHandle } from "./resize-handle";
-import { useResize } from "./use-resize";
+import { ResizeHandle } from "@/app/components/resize/resize-handle";
+import { useResize } from "@/app/components/resize/use-resize";
 
 /** The transport bar and its panel, resized by a handle on the dock's top edge. */
 export function BottomDock() {

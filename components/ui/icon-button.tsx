@@ -3,11 +3,11 @@ import * as React from "react";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const SIZES = { sm: "h-5 w-5", header: "h-6 w-6", default: "h-7 w-7" } as const;
-
 const VARIANTS = {
 	default: "text-foreground",
 	quiet: "text-muted-foreground hover:text-foreground",
+	/** The side panel's heading color. */
+	panel: "text-panel-label",
 	destructive:
 		"text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20",
 	onMedia: "bg-on-media/70 text-on-media-foreground hover:bg-on-media/80",
@@ -15,12 +15,11 @@ const VARIANTS = {
 
 const SHAPES = { square: "rounded-md", round: "rounded-full" } as const;
 
-/** The icon that fills each {@link IconButton} size. */
+/** Icon sizes by role; an {@link IconButton} always draws its icon at `header`. */
 export const ICON_SIZES = { sm: 12, header: 14, default: 16 } as const;
 
 export function IconButton({
 	ariaLabel,
-	size = "default",
 	variant = "default",
 	shape = "square",
 	chip,
@@ -32,7 +31,6 @@ export function IconButton({
 	...props
 }: React.ComponentProps<"button"> & {
 	ariaLabel: string;
-	size?: keyof typeof SIZES;
 	variant?: keyof typeof VARIANTS;
 	shape?: keyof typeof SHAPES;
 	/** Carries its own backdrop. */
@@ -47,7 +45,7 @@ export function IconButton({
 			aria-label={ariaLabel}
 			className={cn(
 				"flex shrink-0 items-center justify-center transition-colors hover:bg-button-hover focus-ring disabled:pointer-events-none unavailable:opacity-40",
-				SIZES[size],
+				"size-6 [&_.icon]:size-3.5 [&_svg]:size-3.5",
 				VARIANTS[variant],
 				SHAPES[shape],
 				chip && "bg-muted",

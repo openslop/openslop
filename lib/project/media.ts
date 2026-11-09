@@ -1,6 +1,10 @@
 import kebabCase from "lodash/kebabCase";
 import { z } from "zod";
-import { UploadKindSchema, type Upload } from "@/lib/upload/upload-files";
+import {
+	UploadKindSchema,
+	type Upload,
+	type UploadKind,
+} from "@/lib/upload/upload-files";
 
 export const MediaItemSchema = z.object({
 	name: z.string(),
@@ -29,4 +33,18 @@ export function toMediaItems(
 		kind,
 		url,
 	}));
+}
+
+/** The media of one kind whose name holds the query, newest first. */
+export function findMedia(
+	media: MediaItem[],
+	kind: UploadKind,
+	query: string,
+): MediaItem[] {
+	const sought = query.trim().toLowerCase();
+	return media
+		.filter(
+			(item) => item.kind === kind && item.name.toLowerCase().includes(sought),
+		)
+		.toReversed();
 }

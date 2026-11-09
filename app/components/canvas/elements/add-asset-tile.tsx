@@ -1,5 +1,6 @@
 "use client";
 
+import type { ComponentProps } from "react";
 import type { IconComponent } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -16,7 +17,8 @@ export function AddAssetTile({
 	onClick,
 	disabled,
 	busy,
-}: {
+	...props
+}: Omit<ComponentProps<"button">, "onClick"> & {
 	label: string;
 	ariaLabel: string;
 	Icon: IconComponent;
@@ -34,6 +36,7 @@ export function AddAssetTile({
 				title={ariaLabel}
 				disabled={disabled}
 				className="focus-ring"
+				{...props}
 			>
 				<ThumbnailFace look="dashed">
 					{busy ? <Spinner /> : <Icon />}

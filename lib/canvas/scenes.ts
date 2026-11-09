@@ -49,3 +49,12 @@ const numberScenes = memoizeOne(
 export function sceneIndexOf(nodes: Descendant[], sceneId: string): number {
 	return numberScenes(nodes).get(sceneId) ?? 0;
 }
+
+type SceneVisual = { sceneNumber: number; visual: ContentElement };
+
+/** Each scene's one foreground element, by the scene's number. */
+export const sceneVisuals = (nodes: Descendant[]): SceneVisual[] =>
+	nodes.filter(isScene).flatMap((scene, index) => {
+		const visual = scene.children.find(isForeground);
+		return visual ? [{ sceneNumber: index + 1, visual }] : [];
+	});

@@ -1,13 +1,17 @@
 import { useSlateStatic } from "slate-react";
 import { MediaToggle } from "@/components/ui/media-toggle";
-import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
+import {
+	ChipMenuTrigger,
+	InlineMenuTrigger,
+	SelectMenu,
+} from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
 	isToggleOn,
 	TOGGLE_OFF,
 	TOGGLE_ON,
-	type ContentElement,
+	type GeneratedElement,
 } from "@/lib/canvas/types";
 import { continuityDef } from "@/lib/connectors/video/start-frame";
 import { ContinuityReferencesPopover } from "./attributes/continuity-section";
@@ -27,11 +31,17 @@ function formatValue(value: string, unit?: string): string {
 const SECONDS_FIELD = "w-20 font-numeric";
 
 interface AttributeBadgeProps {
-	element: ContentElement;
+	element: GeneratedElement;
 	def: AttributeDef;
+	/** `chip` shows a choice as the panel's chip, named by its icon. */
+	look?: "inline" | "chip";
 }
 
-export function AttributeBadge({ element, def }: AttributeBadgeProps) {
+export function AttributeBadge({
+	element,
+	def,
+	look = "inline",
+}: AttributeBadgeProps) {
 	const editor = useSlateStatic();
 	const { key: attrKey, label, unit, edit } = def;
 	if (!edit) return null;
@@ -117,9 +127,15 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 			}))}
 			contentClassName="max-h-64 min-w-24"
 		>
-			<InlineMenuTrigger aria-label={tooltip}>
-				<span className="min-w-0 truncate">{formatValue(value, unit)}</span>
-			</InlineMenuTrigger>
+			{look === "chip" ? (
+				<ChipMenuTrigger icon={def.icon} aria-label={tooltip}>
+					{formatValue(value, unit)}
+				</ChipMenuTrigger>
+			) : (
+				<InlineMenuTrigger aria-label={tooltip}>
+					<span className="min-w-0 truncate">{formatValue(value, unit)}</span>
+				</InlineMenuTrigger>
+			)}
 		</SelectMenu>
 	);
 }

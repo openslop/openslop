@@ -191,3 +191,22 @@ describe("asset schemas", () => {
 		});
 	});
 });
+
+describe("playground drafts", () => {
+	it("take the attributes of the type they draft", () => {
+		const attrs = { provider: DEFAULT_IMAGE_MODEL.provider };
+		expect(attributeSchemaFor("asset_playground_image", attrs).keys).toEqual(
+			attributeSchemaFor("image", attrs).keys,
+		);
+		expect(attributeSchemaFor("asset_playground_video").keys).toEqual(
+			attributeSchemaFor("video").keys,
+		);
+	});
+
+	it("generate on the connector and plugins of the type they draft", () => {
+		const draft = asset("asset_playground_image");
+		const connector = resolveElementConnector(draft, registry, [draft]);
+		expect(connector.type).toBe("image");
+		expect(connector.config).toBe(registry.image);
+	});
+});

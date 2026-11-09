@@ -2,16 +2,28 @@ import isNil from "lodash/isNil";
 import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
 import { Editor, Transforms } from "slate";
-import { serializeReferenceImages } from "@/lib/connectors/attributes/reference-images";
-import { findAsset, isAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
+import {
+	parseReferenceImages,
+	serializeReferenceImages,
+} from "@/lib/connectors/attributes/reference-images";
+import {
+	findAsset,
+	isAsset,
+	NARRATOR,
+	REFERENCE_URLS_ATTR,
+	referenceUrls,
+} from "./assets";
 import { createCanvasElement } from "./create-canvas-element";
 import {
+	applyElementVersion,
 	mergeAttrs,
+	requireElement,
 	updateElementText,
 	type AttributeChanges,
 } from "./editor-ops";
 import { isAssetElement } from "./guards";
-import type { AssetType } from "./types";
+import type { ElementVersion } from "@/lib/generation/versions";
+import type { AssetType, PlaygroundType } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
@@ -50,6 +62,34 @@ export function setReferenceImages(editor: Editor, urls: string[]): void {
 	setAsset(editor, "asset_references", undefined, {
 		attrs: { [REFERENCE_URLS_ATTR]: serializeReferenceImages(uniq(urls)) },
 	});
+}
+
+/** An element still on the project's references starts its own from them. */
+export function addElementReferences(
+	editor: Editor,
+	id: string,
+	attrKey: string,
+	added: string[],
+): void {
+	const [element] = requireElement(editor, id);
+	const current =
+		parseReferenceImages(element.generationAttributes?.[attrKey]) ??
+		referenceUrls(editor.children);
+	mergeAttrs(editor, id, {
+		[attrKey]: serializeReferenceImages(uniq([...current, ...added])),
+	});
+}
+
+/** Puts a playground draft back on the prompt and attributes one of its takes came from. */
+export function restoreDraft(
+	editor: Editor,
+	type: PlaygroundType,
+	version: Pick<ElementVersion, "inputs">,
+): void {
+	ensureAsset(editor, type);
+	const draft = findAsset(editor.children, type);
+	if (!draft) throw new Error(`No ${type} draft to restore`);
+	applyElementVersion(editor, draft.id, version);
 }
 
 export function removeAssets(editor: Editor): void {

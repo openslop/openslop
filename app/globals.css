@@ -171,6 +171,8 @@
 	--media-toggle-active-bg: #583e4a;
 	--media-toggle-active-fg: #ffffff;
 	--scrollbar: #dddadb;
+	/* On popovers and menus, which sit on --surface-elevated. */
+	--scrollbar-elevated: #c9c2c5;
 	--timeline-active: color-mix(in oklab, var(--grey-0) 16%, transparent);
 	--panel-fg: var(--foreground);
 	--panel-label: var(--muted-foreground);
@@ -310,6 +312,7 @@
 	--media-toggle-active-bg: #d2c6cb;
 	--media-toggle-active-fg: #583f4a;
 	--scrollbar: #3d373a;
+	--scrollbar-elevated: #5a5055;
 	--panel-fg: #e0dbde;
 	--panel-label: #f9e6f6;
 	--voice-hover: #312c30;

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { IconComponent } from "@/components/ui/icon";
+import { chipControlClassName } from "@/components/ui/chip-control";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { clamp, cn } from "@/lib/utils";
 
@@ -48,10 +49,7 @@ export function NumberScrubber({
 		null,
 	);
 
-	const shell = cn(
-		"flex h-6 items-center gap-1 rounded-md bg-media-toggle-bg px-2 text-media-toggle-fg transition-colors focus-ring",
-		className,
-	);
+	const shell = cn(chipControlClassName, className);
 	// Reserving the widest value keeps the box one size, whether it is showing
 	// three digits, one, or an input.
 	const valueWidth = `${String(max).length + suffix.length}ch`;

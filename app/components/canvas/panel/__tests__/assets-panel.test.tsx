@@ -8,9 +8,14 @@ import { findAsset } from "@/lib/canvas/assets";
 import { references } from "@/lib/canvas/__tests__/_assets";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
+import { EditorPanelProvider } from "../editor-panel-context";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
 import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { AssetsPanel } from "../assets-panel";
+
+vi.mock("@/app/components/canvas/workspace-context", () => ({
+	useShowWorkspace: () => true,
+}));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -28,9 +33,11 @@ const open = (children: Descendant[] = []) => {
 	canvas.render(
 		<ProjectStoreProvider store={store}>
 			<TooltipProvider>
-				<AssetEditProvider>
-					<AssetsPanel />
-				</AssetEditProvider>
+				<EditorPanelProvider>
+					<AssetEditProvider>
+						<AssetsPanel />
+					</AssetEditProvider>
+				</EditorPanelProvider>
 			</TooltipProvider>
 		</ProjectStoreProvider>,
 	);
@@ -69,7 +76,7 @@ describe("AssetsPanel", () => {
 		expect(openDialog()).toBe("asset_style");
 	});
 
-	it("lists the media and removes an item once confirmed", async () => {
+	it("lists the media of the kind shown and deletes an item once confirmed", async () => {
 		open();
 		await act(async () =>
 			store
@@ -77,18 +84,20 @@ describe("AssetsPanel", () => {
 				.addMedia([{ kind: "audio", name: "theme.mp3", url: "https://a/t" }]),
 		);
 
+		expect(document.body.textContent).not.toContain("theme");
+		await click('[role=radio][aria-label="Audio"]');
 		expect(document.body.textContent).toContain("theme");
 
-		await click('button[aria-label="Remove theme"]');
+		await click('button[aria-label="Delete theme"]');
 
 		expect(store.getState().media).toHaveLength(1);
 		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(
-			"Remove theme?",
+			"Delete theme?",
 		);
 
 		await act(async () =>
 			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Remove")
+				.find((button) => button.textContent === "Delete")
 				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
 		);
 

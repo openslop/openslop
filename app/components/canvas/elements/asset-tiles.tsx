@@ -1,16 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { Image, Media, Mic, Palette, User } from "@/components/ui/icon";
+import { Image, Mic, Palette, User } from "@/components/ui/icon";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useHasAsset } from "@/lib/canvas/use-assets";
 import { useCharacterAvatar } from "../hooks/use-character-avatar";
 import { AssetTile } from "./asset-tile";
+import { AudioCard } from "./audio-card";
+import { AudioPlayer } from "./audio-player";
+import { MEDIA_KINDS } from "./media-kinds";
+import { DeleteAction, ReuseAction } from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
 
-type TileProps = { fill?: boolean };
+type TileProps = { children?: ReactNode };
 
 export function ArtStyleAssetTile(tile: TileProps) {
 	const { editAsset } = useAssetEditors();
@@ -25,7 +29,7 @@ export function ArtStyleAssetTile(tile: TileProps) {
 	);
 }
 
-type CharacterTileProps = TileProps & { name: string; onRemove?: () => void };
+type CharacterTileProps = TileProps & { name: string; onDelete?: () => void };
 
 /** A character by their look, or by their voice when they have no look. */
 export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
@@ -81,12 +85,36 @@ export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	);
 }
 
+/** Asks before taking a piece of media out of the project. */
+function useDeleteMedia(name: string) {
+	const removeMedia = useProject((state) => state.removeMedia);
+	const [confirming, setConfirming] = useState(false);
+	return {
+		request: () => setConfirming(true),
+		dialog: (
+			<ConfirmDeleteDialog
+				target={confirming ? name : undefined}
+				onClose={() => setConfirming(false)}
+				title={(target) => `Delete ${target}?`}
+				description="This deletes it from the project's media. It can't be undone. Elements already using it keep it."
+				actionLabel="Delete"
+				onConfirm={removeMedia}
+			/>
+		),
+	};
+}
+
+type MediaTileProps = TileProps & {
+	item: MediaItem;
+	actions?: ReactNode;
+};
+
+/** A piece of the project's media as a small tile; audio shows by its icon. */
 export function MediaAssetTile({
 	item: { name, kind, url },
 	...tile
-}: TileProps & { item: MediaItem }) {
-	const removeMedia = useProject((state) => state.removeMedia);
-	const [confirming, setConfirming] = useState(false);
+}: MediaTileProps) {
+	const remove = useDeleteMedia(name);
 	const previewKind = kind === "audio" ? undefined : kind;
 	return (
 		<>
@@ -94,19 +122,54 @@ export function MediaAssetTile({
 				name={name}
 				previewUrl={previewKind && url}
 				previewKind={previewKind}
-				Icon={Media}
+				Icon={MEDIA_KINDS[kind].Icon}
 				fallback="icon"
-				onRemove={() => setConfirming(true)}
+				onDelete={remove.request}
 				{...tile}
 			/>
-			<ConfirmDeleteDialog
-				target={confirming ? name : undefined}
-				onClose={() => setConfirming(false)}
-				title={(target) => `Remove ${target}?`}
-				description="This removes it from the project's media. It can't be undone. Elements already using it keep it."
-				actionLabel="Remove"
-				onConfirm={removeMedia}
-			/>
+			{remove.dialog}
 		</>
+	);
+}
+
+/** A piece of media as a library lists it: pictures as tiles, video and audio a row wide. */
+function MediaAudioRow({ item, actions }: MediaTileProps) {
+	const remove = useDeleteMedia(item.name);
+	return (
+		<>
+			<AudioCard
+				name={item.name}
+				actions={
+					<>
+						{actions}
+						<DeleteAction name={item.name} onClick={remove.request} />
+					</>
+				}
+			>
+				<AudioPlayer src={item.url} tone="panel" />
+			</AudioCard>
+			{remove.dialog}
+		</>
+	);
+}
+
+export function MediaLibraryItem({
+	item,
+	actions,
+	onReuse,
+	children,
+}: MediaTileProps & { onReuse?: () => void }) {
+	const pill = (
+		<>
+			{onReuse && <ReuseAction name={item.name} onClick={onReuse} />}
+			{actions}
+		</>
+	);
+	return item.kind === "audio" ? (
+		<MediaAudioRow item={item} actions={pill} />
+	) : (
+		<MediaAssetTile item={item} actions={pill}>
+			{children}
+		</MediaAssetTile>
 	);
 }

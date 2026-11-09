@@ -4,7 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
 import { addCharacter, ensureAsset } from "@/lib/canvas/asset-ops";
-import type { AssetType } from "@/lib/canvas/types";
+import type { ProjectAssetType } from "@/lib/canvas/types";
 import { AssetEditContext, type AssetEditors } from "../asset-edit-context";
 import { ArtStyleModal } from "../style/art-style-modal";
 import { CharacterEditModal } from "./character-edit-modal";
@@ -16,7 +16,7 @@ type AssetEdit =
 	| { kind: "character"; name: string }
 	| { kind: "artStyle" };
 
-const DIALOG_OF: Record<AssetType, (name?: string) => AssetEdit> = {
+const DIALOG_OF: Record<ProjectAssetType, (name?: string) => AssetEdit> = {
 	asset_avatar: (name = "") => ({ kind: "character", name }),
 	asset_voice: (name = "") => ({ kind: "character", name }),
 	asset_style: () => ({ kind: "artStyle" }),

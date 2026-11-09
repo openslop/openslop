@@ -19,7 +19,16 @@ import {
 	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Check, Contrast, LogOut, Settings, User } from "@/components/ui/icon";
+import {
+	Check,
+	Contrast,
+	LogOut,
+	Monitor,
+	Moon,
+	Settings,
+	Sun,
+	User,
+} from "@/components/ui/icon";
 import ImpersonateDialog from "./impersonate-dialog";
 import { SettingsDialog } from "./settings/settings-dialog";
 import { useSettings } from "@/lib/settings/use-settings";
@@ -27,9 +36,9 @@ import { useSettings } from "@/lib/settings/use-settings";
 const IS_DEV = process.env.NODE_ENV !== "production";
 
 const THEME_MODES = [
-	{ value: "light", label: "Light" },
-	{ value: "dark", label: "Dark" },
-	{ value: "system", label: "System" },
+	{ value: "light", label: "Light", Icon: Sun },
+	{ value: "dark", label: "Dark", Icon: Moon },
+	{ value: "system", label: "System", Icon: Monitor },
 ];
 
 function UserProfile() {
@@ -73,9 +82,7 @@ function UserProfile() {
 							Appearance
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							<DropdownMenuLabel className="text-label text-muted-foreground">
-								Mode
-							</DropdownMenuLabel>
+							<DropdownMenuLabel className="text-label">Mode</DropdownMenuLabel>
 							{THEME_MODES.map((mode) => (
 								<DropdownMenuItem
 									key={mode.value}
@@ -84,6 +91,7 @@ function UserProfile() {
 									<span className="flex w-4 items-center justify-center">
 										{theme === mode.value && <Check className="size-3.5" />}
 									</span>
+									<mode.Icon />
 									{mode.label}
 								</DropdownMenuItem>
 							))}

@@ -136,15 +136,57 @@ export const SCENE_TYPE = "scene" as const;
 /** What every element type declares: the connector it generates on, if any. */
 type ElementSpec = { connector?: AssetConnectorType };
 
+/** What the playground makes outside any scene, each on its own draft. */
+export const PLAYGROUND_CONTENT_TYPES = [
+	"image",
+	"video",
+	"narration",
+	"music",
+	"sound",
+] as const satisfies readonly ContentType[];
+
+export type PlaygroundContentType = (typeof PLAYGROUND_CONTENT_TYPES)[number];
+
+export type PlaygroundType = `asset_playground_${PlaygroundContentType}`;
+
+export const playgroundTypeOf = <T extends PlaygroundContentType>(
+	type: T,
+): `asset_playground_${T}` => `asset_playground_${type}`;
+
+type PlaygroundSpecs = {
+	[T in PlaygroundContentType as `asset_playground_${T}`]: {
+		connector: (typeof CONTENT_TYPES)[T]["connector"];
+		draftOf: T;
+	};
+};
+
+/** A playground draft generates exactly like the content type it drafts. */
+const PLAYGROUND_SPECS = Object.fromEntries(
+	PLAYGROUND_CONTENT_TYPES.map((type) => [
+		playgroundTypeOf(type),
+		{ connector: CONTENT_TYPES[type].connector, draftOf: type },
+	]),
+) as PlaygroundSpecs;
+
 /** Tiles ahead of the scenes; one with a connector generates like content does. */
 export const ASSET_TYPES = {
 	asset_avatar: { connector: "image" },
 	asset_voice: { connector: "voice" },
 	asset_style: {},
 	asset_references: {},
+	...PLAYGROUND_SPECS,
 } as const satisfies Record<`asset_${string}`, ElementSpec>;
 
 export type AssetType = keyof typeof ASSET_TYPES;
+
+/** The assets every scene draws on; a playground draft feeds nothing. */
+export type ProjectAssetType = Exclude<AssetType, PlaygroundType>;
+
+export const isPlaygroundType = (type: string): type is PlaygroundType =>
+	Object.hasOwn(PLAYGROUND_SPECS, type);
+
+export const draftedType = (type: PlaygroundType): PlaygroundContentType =>
+	PLAYGROUND_SPECS[type].draftOf;
 
 export type ElementType = ContentType | AssetType;
 

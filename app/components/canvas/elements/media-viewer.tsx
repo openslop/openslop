@@ -1,45 +1,25 @@
 "use client";
 
-import { Maximize2 } from "@/components/ui/icon";
-import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
 import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { SimpleTooltip } from "@/components/ui/tooltip";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
-import { cn } from "@/lib/utils";
 
-export function MediaViewer({
+export type Viewed = { src: string; kind: "image" | "video"; name: string };
+
+/** Opens the media large from the trigger given as `children`. */
+export function MediaViewerDialog({
 	src,
 	kind,
 	name,
-	className,
-}: {
-	src: string;
-	kind: "image" | "video";
-	name: string;
-	className?: string;
-}) {
+	children,
+}: Viewed & { children: React.ReactNode }) {
 	return (
 		<Dialog>
-			<SimpleTooltip label="View larger">
-				<DialogTrigger asChild>
-					<IconButton
-						ariaLabel={`View ${name} larger`}
-						size="sm"
-						variant="onMedia"
-						className={cn(
-							"absolute left-1 top-1 z-10 transition focus-visible:opacity-100",
-							className,
-						)}
-					>
-						<Maximize2 size={ICON_SIZES.sm} />
-					</IconButton>
-				</DialogTrigger>
-			</SimpleTooltip>
+			<DialogTrigger asChild>{children}</DialogTrigger>
 			<DialogContent
 				glow={false}
 				aria-describedby={undefined}

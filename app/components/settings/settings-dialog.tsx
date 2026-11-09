@@ -7,7 +7,7 @@ import {
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
-import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
+import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
 import type { Provider } from "@/lib/connectors/types";
@@ -58,10 +58,9 @@ export function SettingsDialog() {
 								<div className="flex items-center gap-2">
 									<IconButton
 										ariaLabel="Back to settings"
-										size="sm"
 										onClick={() => setBrowsing(false)}
 									>
-										<ArrowLeft size={ICON_SIZES.sm} />
+										<ArrowLeft />
 									</IconButton>
 									<SectionTitle>Add providers</SectionTitle>
 								</div>

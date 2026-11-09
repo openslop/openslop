@@ -161,7 +161,6 @@ function AttachMenu({
 		>
 			<IconButton
 				ariaLabel="Attach"
-				size="header"
 				variant="quiet"
 				shape="round"
 				disabled={uploading}
@@ -188,13 +187,8 @@ function TemplatePill({
 			className="relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-body text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
-			<IconButton
-				ariaLabel="Remove template"
-				size="sm"
-				shape="round"
-				onClick={onRemove}
-			>
-				<X size={ICON_SIZES.sm} />
+			<IconButton ariaLabel="Remove template" shape="round" onClick={onRemove}>
+				<X />
 			</IconButton>
 			{template.promptPrefix}
 		</span>

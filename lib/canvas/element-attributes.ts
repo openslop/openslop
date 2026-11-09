@@ -29,6 +29,9 @@ export const LAYOUT_ATTRIBUTE_KEYS = [
 	"trimEnd",
 ] as const;
 
+export const isLayoutAttribute = (key: string): boolean =>
+	(LAYOUT_ATTRIBUTE_KEYS as readonly string[]).includes(key);
+
 export const splitAttributes = (
 	attributes: Record<string, string>,
 ): SplitAttributes => ({

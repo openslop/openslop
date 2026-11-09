@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type { ResizeAxis, useResize } from "./use-resize";
 
 const fade = (direction: "to right" | "to bottom") =>
@@ -13,6 +14,8 @@ const LINES: Record<
 	{
 		orientation: "horizontal" | "vertical";
 		handle: string;
+		/** Cancels the handle's own thickness so a quiet one takes no room. */
+		overlap: string;
 		line: string;
 		bar: string;
 		mask: string;
@@ -21,6 +24,7 @@ const LINES: Record<
 	vertical: {
 		orientation: "horizontal",
 		handle: "h-2 w-full cursor-row-resize",
+		overlap: "-my-1",
 		line: "h-0.5 w-full flex-col",
 		bar: "h-px w-full",
 		mask: fade("to right"),
@@ -28,6 +32,7 @@ const LINES: Record<
 	horizontal: {
 		orientation: "vertical",
 		handle: "h-full w-4 cursor-col-resize",
+		overlap: "-mx-2",
 		line: "h-full w-0.5",
 		bar: "h-full w-px",
 		mask: fade("to bottom"),
@@ -37,6 +42,8 @@ const LINES: Record<
 type ResizeHandleProps = {
 	axis: ResizeAxis;
 	label: string;
+	/** `quiet` takes no room and shows its line only while hovered, focused or dragged. */
+	look?: "default" | "quiet";
 	resizing: boolean;
 	handleProps: ReturnType<typeof useResize>["handleProps"];
 };
@@ -44,10 +51,11 @@ type ResizeHandleProps = {
 export function ResizeHandle({
 	axis,
 	label,
+	look = "default",
 	resizing,
 	handleProps,
 }: ResizeHandleProps) {
-	const { orientation, handle, line, bar, mask } = LINES[axis];
+	const { orientation, handle, overlap, line, bar, mask } = LINES[axis];
 
 	return (
 		<div
@@ -56,10 +64,21 @@ export function ResizeHandle({
 			aria-orientation={orientation}
 			aria-label={label}
 			tabIndex={0}
-			className={`group relative flex shrink-0 touch-none items-center justify-center focus-ring ${handle} ${resizing ? "select-none" : ""}`}
+			className={cn(
+				"group relative flex shrink-0 touch-none items-center justify-center focus-ring",
+				handle,
+				look === "quiet" && ["z-10", overlap],
+				resizing && "select-none",
+			)}
 		>
 			<div
-				className={`flex ${line}`}
+				className={cn(
+					"flex transition-opacity",
+					line,
+					look === "quiet" &&
+						!resizing &&
+						"opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100",
+				)}
 				style={{ maskImage: mask, WebkitMaskImage: mask }}
 			>
 				<div

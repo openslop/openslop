@@ -10,8 +10,6 @@ export interface InsertOption<K extends string = string> {
 	key: K;
 	label: string;
 	icon: React.ReactNode;
-	iconBgClass: string;
-	colorClass: string;
 }
 
 export function InsertMenu<K extends string>({
@@ -26,16 +24,10 @@ export function InsertMenu<K extends string>({
 	if (options.length === 0) return null;
 	return (
 		<ActionMenu
-			items={options.map(({ key, label, icon, iconBgClass, colorClass }) => ({
+			items={options.map(({ key, label, icon }) => ({
 				key,
 				label,
-				icon: (
-					<span
-						className={`${iconBgClass} ${colorClass} mr-1 inline-flex size-6 items-center justify-center rounded-md`}
-					>
-						{icon}
-					</span>
-				),
+				icon,
 				onSelect: () => onInsert(key),
 			}))}
 			contentClassName="w-40"

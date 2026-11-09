@@ -46,11 +46,11 @@ describe("AssetStrip", () => {
 
 		expect(document.body.textContent).toContain("intro");
 
-		await click('button[aria-label="Remove intro"]');
+		await click('button[aria-label="Delete intro"]');
 
 		expect(store.getState().media).toHaveLength(1);
 		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(
-			"Remove intro?",
+			"Delete intro?",
 		);
 	});
 

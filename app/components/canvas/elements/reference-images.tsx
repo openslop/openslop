@@ -3,6 +3,7 @@
 import { ImagePlus } from "@/components/ui/icon";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { AddAssetTile } from "./add-asset-tile";
+import { uploadingTiles } from "./uploading-tile";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { ReferenceTile } from "./asset-tiles";
 
@@ -16,7 +17,7 @@ export function ReferenceImagePicker({
 	onAdd: (urls: string[]) => void;
 	onRemove: (index: number) => void;
 }) {
-	const { openPicker, uploading, inputElement } = useMediaUpload({
+	const { openPicker, uploadingCount, inputElement } = useMediaUpload({
 		kinds: ["image"],
 		multiple: true,
 		onUpload: onAdd,
@@ -32,13 +33,12 @@ export function ReferenceImagePicker({
 					onRemove={() => onRemove(index)}
 				/>
 			))}
+			{uploadingTiles(uploadingCount)}
 			<AddAssetTile
 				label="Reference"
 				ariaLabel="Add reference image"
 				Icon={ImagePlus}
 				onClick={openPicker}
-				disabled={uploading}
-				busy={uploading}
 			/>
 			{inputElement}
 		</>

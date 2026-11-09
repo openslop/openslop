@@ -14,7 +14,7 @@ const root = createRoot(container);
 const render = (count: number) =>
 	act(() =>
 		root.render(
-			<PagedTiles label="Characters" empty="No characters yet">
+			<PagedTiles label="Characters" empty={<p>No characters yet</p>}>
 				{Array.from({ length: count }, (_, index) => (
 					<i key={index}>{index}</i>
 				))}
@@ -34,36 +34,50 @@ describe("PagedTiles", () => {
 		expect(container.textContent).toBe("No characters yet");
 	});
 
-	it("shows four tiles with no pager while they fit one page", async () => {
-		await render(4);
+	it("shows two tiles with no pager while they fit one page", async () => {
+		await render(2);
 
-		expect(shown()).toEqual(["0", "1", "2", "3"]);
+		expect(shown()).toEqual(["0", "1"]);
 		expect(container.querySelector("nav")).toBeNull();
 	});
 
 	it("pages with the arrows and jumps with a dot", async () => {
-		await render(9);
+		await render(5);
 
 		expect(container.querySelectorAll("[aria-label^='Page ']")).toHaveLength(3);
 		await click("[aria-label='Next page']");
-		expect(shown()).toEqual(["4", "5", "6", "7"]);
+		expect(shown()).toEqual(["2", "3"]);
 		await click("[aria-label='Page 3']");
-		expect(shown()).toEqual(["8"]);
+		expect(shown()).toEqual(["4"]);
 		expect(
 			container
 				.querySelector("[aria-current='page']")
 				?.getAttribute("aria-label"),
 		).toBe("Page 3");
 		await click("[aria-label='Previous page']");
-		expect(shown()).toEqual(["4", "5", "6", "7"]);
+		expect(shown()).toEqual(["2", "3"]);
+	});
+
+	it("pages one at a time in a single column", async () => {
+		await act(() =>
+			root.render(
+				<PagedTiles label="Videos" empty={<p>No videos yet</p>} columns={1}>
+					{[<i key="a">a</i>, <i key="b">b</i>]}
+				</PagedTiles>,
+			),
+		);
+
+		expect(shown()).toEqual(["a"]);
+		await click("[aria-label='Next page']");
+		expect(shown()).toEqual(["b"]);
 	});
 
 	it("falls back to the last page when the tiles shrink under the one shown", async () => {
-		await render(9);
+		await render(5);
 		await click("[aria-label='Page 3']");
 
-		await render(6);
+		await render(3);
 
-		expect(shown()).toEqual(["4", "5"]);
+		expect(shown()).toEqual(["2"]);
 	});
 });

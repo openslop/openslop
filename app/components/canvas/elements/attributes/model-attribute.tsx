@@ -3,6 +3,7 @@
 import { useSlateStatic } from "slate-react";
 import {
 	ConfigureModelsItem,
+	ModelPanelTrigger,
 	ModelSelect,
 	ModelSelectTrigger,
 } from "@/app/components/models/model-select";
@@ -16,10 +17,13 @@ import { flatAttributes } from "@/lib/canvas/element-attributes";
 export function ModelAttribute({
 	element,
 	label,
+	look = "inline",
 	className,
 }: {
 	element: GeneratedElement;
 	label: string;
+	/** `panel` matches the side panel's other dropdowns. */
+	look?: "inline" | "panel";
 	className?: string;
 }) {
 	const editor = useSlateStatic();
@@ -40,7 +44,11 @@ export function ModelAttribute({
 				})
 			}
 		>
-			<ModelSelectTrigger model={value} label={label} className={className} />
+			{look === "panel" ? (
+				<ModelPanelTrigger model={value} label={label} className={className} />
+			) : (
+				<ModelSelectTrigger model={value} label={label} className={className} />
+			)}
 		</ModelSelect>
 	);
 }

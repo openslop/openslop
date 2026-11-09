@@ -9,6 +9,7 @@ import {
 } from "@/lib/connectors/video/start-frame";
 import { cn } from "@/lib/utils";
 import { AssetTile } from "../asset-tile";
+import { TileRow } from "./tile-row";
 import {
 	ReferenceImagesPopover,
 	type ReferenceImagesPopoverProps,
@@ -37,7 +38,7 @@ export function ContinuityReferencesPopover({
 
 	return (
 		<ReferenceImagesPopover {...popover} added={linked ? pictures.length : 0}>
-			<section className="mt-3 border-t border-border pt-3">
+			<section className="mt-1 border-t border-border pt-3">
 				<div className="mb-2 flex items-center justify-between gap-2">
 					<p className="text-label text-muted-foreground">
 						{caption(previous, linked)}
@@ -45,15 +46,17 @@ export function ContinuityReferencesPopover({
 					{toggle}
 				</div>
 				{pictures.length > 0 && (
-					<div
-						className={cn(
-							"flex flex-wrap gap-2 transition-opacity",
-							!linked && "opacity-40",
-						)}
-					>
-						{pictures.map(({ name, url }) => (
-							<AssetTile key={url} name={name} previewUrl={url} Icon={Image} />
-						))}
+					<div className={cn("transition-opacity", !linked && "opacity-40")}>
+						<TileRow>
+							{pictures.map(({ name, url }) => (
+								<AssetTile
+									key={url}
+									name={name}
+									previewUrl={url}
+									Icon={Image}
+								/>
+							))}
+						</TileRow>
 					</div>
 				)}
 			</section>

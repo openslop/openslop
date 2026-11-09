@@ -3,34 +3,34 @@
 import range from "lodash/range";
 import { useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "@/components/ui/icon";
-import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
+import { IconButton } from "@/components/ui/icon-button";
+import { ThumbnailGrid } from "@/components/ui/thumbnail";
 import { cn } from "@/lib/utils";
 
-const PAGE_SIZE = 4;
-
-/** Tiles four to a page, with arrows and a dot per page once they overflow one. */
+/** One row of tiles a page, with arrows and a dot per page once they overflow one. */
 export function PagedTiles({
 	label,
 	empty,
+	columns = 2,
 	children,
 }: {
 	label: string;
-	empty: string;
+	empty: ReactNode;
+	columns?: 1 | 2;
 	children: ReactNode[];
 }) {
 	const [requestedPage, setRequestedPage] = useState(0);
 
-	if (children.length === 0)
-		return <p className="text-label text-muted-foreground">{empty}</p>;
+	if (children.length === 0) return empty;
 
-	const pageCount = Math.ceil(children.length / PAGE_SIZE);
+	const pageCount = Math.ceil(children.length / columns);
 	const page = Math.min(requestedPage, pageCount - 1);
 
 	return (
 		<div className="flex flex-col gap-3">
-			<div className="grid grid-cols-4 gap-2">
-				{children.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)}
-			</div>
+			<ThumbnailGrid columns={columns}>
+				{children.slice(page * columns, (page + 1) * columns)}
+			</ThumbnailGrid>
 			{pageCount > 1 && (
 				<nav
 					aria-label={`${label} pages`}
@@ -38,12 +38,11 @@ export function PagedTiles({
 				>
 					<IconButton
 						ariaLabel="Previous page"
-						size="header"
 						variant="quiet"
 						disabled={page === 0}
 						onClick={() => setRequestedPage(page - 1)}
 					>
-						<ChevronLeft size={ICON_SIZES.header} />
+						<ChevronLeft />
 					</IconButton>
 					<div className="flex items-center">
 						{range(pageCount).map((index) => (
@@ -68,12 +67,11 @@ export function PagedTiles({
 					</div>
 					<IconButton
 						ariaLabel="Next page"
-						size="header"
 						variant="quiet"
 						disabled={page === pageCount - 1}
 						onClick={() => setRequestedPage(page + 1)}
 					>
-						<ChevronRight size={ICON_SIZES.header} />
+						<ChevronRight />
 					</IconButton>
 				</nav>
 			)}

@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
+import { Plus } from "@/components/ui/icon";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { InfoTip } from "@/components/ui/info-tip";
 
 export function PanelCard({
@@ -44,5 +46,32 @@ export function PanelField({
 			</span>
 			{children}
 		</div>
+	);
+}
+
+/** A label over a control too wide to sit beside it. */
+export function PanelSection({
+	label,
+	children,
+}: {
+	label: string;
+	children: ReactNode;
+}) {
+	return (
+		<div className="flex flex-col gap-2">
+			<span className="text-label font-medium text-panel-label">{label}</span>
+			{children}
+		</div>
+	);
+}
+
+/** The card header's add button; also a menu's trigger. */
+export function PanelCardAddButton(
+	props: Omit<ComponentProps<typeof TooltipIconButton>, "children">,
+) {
+	return (
+		<TooltipIconButton variant="quiet" {...props}>
+			<Plus />
+		</TooltipIconButton>
 	);
 }

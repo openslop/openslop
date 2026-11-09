@@ -1,7 +1,9 @@
 "use client";
 
 import { type ComponentProps, type ReactNode } from "react";
-import { Check, ChevronDown } from "@/components/ui/icon";
+import { Check, ChevronDown, type IconComponent } from "@/components/ui/icon";
+import { chipControlClassName } from "@/components/ui/chip-control";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 import { keepFocus } from "@/components/ui/keep-focus";
 import {
 	DropdownMenu,
@@ -80,6 +82,31 @@ export function InlineMenuTrigger({
 				className="h-3 w-3 shrink-0 text-muted-foreground"
 				aria-hidden="true"
 			/>
+		</button>
+	);
+}
+
+/** A {@link chipControlClassName} chip that opens a menu: the icon names it, the text is its value. */
+export function ChipMenuTrigger({
+	icon: Icon,
+	className,
+	children,
+	...props
+}: ComponentProps<"button"> & { icon?: IconComponent }) {
+	return (
+		<button
+			type="button"
+			onMouseDown={keepFocus}
+			className={cn(
+				chipControlClassName,
+				"min-w-0 cursor-pointer hover:bg-media-toggle-hover-bg unavailable:opacity-40",
+				className,
+			)}
+			{...props}
+		>
+			{Icon && <Icon size={ICON_SIZES.header} />}
+			<span className="min-w-0 truncate text-label-xs">{children}</span>
+			<ChevronDown size={ICON_SIZES.sm} />
 		</button>
 	);
 }

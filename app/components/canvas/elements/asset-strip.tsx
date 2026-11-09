@@ -2,12 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Thumbnail } from "@/components/ui/thumbnail";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useProject } from "@/lib/project/use-project";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { deleteCharacter } from "./character/delete-character";
+import { UploadingTile } from "./uploading-tile";
 import {
 	ArtStyleAssetTile,
 	CharacterAssetTile,
@@ -39,7 +38,7 @@ export function AssetStripCharacters() {
 		<li key={name}>
 			<CharacterAssetTile
 				name={name}
-				onRemove={() => deleteCharacter(editor, name)}
+				onDelete={() => deleteCharacter(editor, name)}
 			/>
 		</li>
 	));
@@ -69,10 +68,8 @@ export function AssetStripMedia() {
 
 export function AssetStripUploading({ count }: { count: number }) {
 	return Array.from({ length: count }, (_, i) => (
-		<li key={i} aria-hidden>
-			<Thumbnail>
-				<Skeleton className="aspect-square" />
-			</Thumbnail>
+		<li key={i}>
+			<UploadingTile />
 		</li>
 	));
 }

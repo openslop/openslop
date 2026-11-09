@@ -23,7 +23,7 @@ function PresetTile({
 }) {
 	const [broken, setBroken] = useState(false);
 	return (
-		<Thumbnail asChild fill>
+		<Thumbnail asChild>
 			<button
 				type="button"
 				onClick={onSelect}

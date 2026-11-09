@@ -7,6 +7,8 @@ import { CloseButton } from "@/components/ui/close-button";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import type { IconComponent } from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 
 function Popover({
 	...props
@@ -39,7 +41,7 @@ function PopoverContent({
 				align={align}
 				sideOffset={sideOffset}
 				className={cn(
-					"z-50 min-w-48 origin-(--radix-popover-content-transform-origin) rounded-md bg-surface-elevated p-3 text-popover-foreground shadow-elevation-3 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+					"z-50 min-w-48 origin-(--radix-popover-content-transform-origin) rounded-md border border-border bg-surface-elevated p-3 [--scrollbar:var(--scrollbar-elevated)] text-popover-foreground shadow-elevation-3 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
 					className,
 				)}
 				{...props}
@@ -48,12 +50,21 @@ function PopoverContent({
 	);
 }
 
-/** A titled popover's first row: the title, a Close button, and a rule under both. */
-function PopoverHeader({ title }: { title: string }) {
+/** A titled popover's first row: its icon and title, a Close button, and a rule under both. */
+function PopoverHeader({
+	title,
+	icon: Icon,
+}: {
+	title: string;
+	icon?: IconComponent;
+}) {
 	return (
 		<>
 			<div className="flex items-center justify-between">
-				<SectionTitle>{title}</SectionTitle>
+				<SectionTitle className="flex items-center gap-2">
+					{Icon && <Icon size={ICON_SIZES.header} />}
+					{title}
+				</SectionTitle>
 				<PopoverPrimitive.Close asChild>
 					<CloseButton />
 				</PopoverPrimitive.Close>
