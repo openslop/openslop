@@ -13,6 +13,7 @@ import {
 	type ElementSnapshot,
 } from "./snapshots";
 import { generationInputs, needsGeneration } from "./staleness";
+import type { ElementCopy } from "./history";
 import type { CommittedVersion } from "./versions";
 import {
 	flattenGraph,
@@ -38,6 +39,7 @@ export class GenerationQueue {
 	private readonly limits: ConcurrencyLimits;
 	private readonly committed = createEmitter<CommittedVersion>();
 	private readonly newResult = createEmitter<string>();
+	private readonly duplicated = createEmitter<ElementCopy>();
 
 	constructor({
 		limits,
@@ -53,6 +55,7 @@ export class GenerationQueue {
 	onCommitted = this.committed.subscribe;
 	/** Generated, uploaded or restored; revising the held result is not new. */
 	onNewResult = this.newResult.subscribe;
+	onDuplicated = this.duplicated.subscribe;
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
 	getElementSnapshot = (id: string): ElementSnapshot => this.snapshots.get(id);
@@ -112,6 +115,12 @@ export class GenerationQueue {
 		this.snapshots.remove(elementId);
 		this.snapshots.notify();
 		if (wasActive) this.processQueue();
+	}
+
+	duplicate(fromId: string, toId: string) {
+		this.snapshots.copy(fromId, toId);
+		this.snapshots.notify();
+		this.duplicated.notify({ fromId, toId });
 	}
 
 	setError(elementId: string, message: string) {

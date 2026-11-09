@@ -1,16 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { upsert, single } = vi.hoisted(() => ({
+const { upsert, single, order } = vi.hoisted(() => ({
 	upsert: vi.fn(),
 	single: vi.fn(),
+	order: vi.fn(),
 }));
 
+const read = { eq: () => read, not: () => read, order };
+
 vi.mock("@/lib/supabase/client", () => ({
-	createClient: () => ({ from: () => ({ upsert }) }),
+	createClient: () => ({ from: () => ({ upsert, select: () => read }) }),
 }));
 
 import type { CommittedVersion } from "@/lib/generation/versions";
-import { parseElementVersions, saveElementVersion } from "../element-history";
+import {
+	copyElementVersions,
+	parseElementVersions,
+	saveElementVersion,
+} from "../element-history";
 
 const row = (overrides: Record<string, unknown> = {}) => ({
 	id: "11111111-1111-1111-1111-111111111111",
@@ -149,5 +156,67 @@ describe("saveElementVersion", () => {
 		await expect(saveElementVersion("p1", makeVersion())).rejects.toThrow(
 			"denied",
 		);
+	});
+});
+
+describe("copyElementVersions", () => {
+	const source = [
+		row(),
+		row({ created_at: "2026-01-02T00:00:00.000Z", pinned: true }),
+	];
+	const copiedRows = async () => {
+		upsert.mockClear();
+		await copyElementVersions("p1", { fromId: "el-1", toId: "el-2" });
+		return upsert.mock.calls[0]?.[0] as Record<string, unknown>[];
+	};
+
+	beforeEach(() => {
+		order.mockResolvedValue({ data: source, error: null });
+		upsert.mockResolvedValue({ error: null });
+	});
+
+	it("files every version under the copy, keeping its date", async () => {
+		const copies = await copiedRows();
+
+		expect(copies).toEqual([
+			expect.objectContaining({
+				element_id: "el-2",
+				created_at: "2026-01-01T00:00:00.000Z",
+				pinned: false,
+			}),
+			expect.objectContaining({
+				element_id: "el-2",
+				created_at: "2026-01-02T00:00:00.000Z",
+				pinned: true,
+			}),
+		]);
+	});
+
+	it("hands back the copies as filed", async () => {
+		expect(
+			await copyElementVersions("p1", { fromId: "el-1", toId: "el-2" }),
+		).toEqual(
+			parseElementVersions(source).map((version) => ({
+				...version,
+				elementId: "el-2",
+			})),
+		);
+	});
+
+	it("puts each copy on the row the copy would record it to", async () => {
+		const [copy] = await copiedRows();
+		upsert.mockReturnValue({ select: () => ({ single }) });
+		single.mockResolvedValue({ data: row(), error: null });
+		const [original] = parseElementVersions(source);
+		const recorded = await savedRow("p1", { ...original, elementId: "el-2" });
+
+		expect(copy?.id).toBe(recorded.id);
+	});
+
+	it("throws when the write fails", async () => {
+		upsert.mockResolvedValue({ error: new Error("denied") });
+		await expect(
+			copyElementVersions("p1", { fromId: "el-1", toId: "el-2" }),
+		).rejects.toThrow("denied");
 	});
 });

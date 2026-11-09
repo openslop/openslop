@@ -30,6 +30,7 @@ const storageOf = (
 ): ElementVersionStorage => ({
 	read,
 	write: vi.fn((committed) => Promise.resolve({ ...committed, createdAt: AT })),
+	copy: ({ toId }) => Promise.resolve([{ ...stored, elementId: toId }]),
 });
 
 describe("ElementHistory", () => {
@@ -71,6 +72,7 @@ describe("ElementHistory", () => {
 		const history = new ElementHistory({
 			read: () => Promise.resolve([]),
 			write: () => Promise.reject(new Error("denied")),
+			copy: () => Promise.resolve([]),
 		});
 
 		await history.record(version("a"));
@@ -108,5 +110,30 @@ describe("ElementHistory", () => {
 		await history.load("a");
 		expect(history.status("a")).toBe("ready");
 		expect(history.get("a")).toEqual([stored]);
+	});
+
+	it("files a copy's versions under the copy, ready to read", async () => {
+		const history = new ElementHistory(storageOf());
+
+		await history.duplicate({ fromId: "a", toId: "b" });
+
+		expect(history.status("b")).toBe("ready");
+		expect(history.get("b")).toEqual([{ ...stored, elementId: "b" }]);
+		expect(history.get("a")).toEqual([]);
+	});
+
+	it("surfaces a failed copy", async () => {
+		const history = new ElementHistory({
+			...storageOf(),
+			copy: () => Promise.reject(new Error("denied")),
+		});
+
+		await history.duplicate({ fromId: "a", toId: "b" });
+
+		expect(history.get("b")).toEqual([]);
+		expect(toastError).toHaveBeenCalledWith(
+			expect.any(Error),
+			"Copying this element's history failed",
+		);
 	});
 });

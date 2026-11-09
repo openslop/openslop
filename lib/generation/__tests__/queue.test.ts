@@ -372,6 +372,58 @@ describe("GenerationQueue", () => {
 		});
 	});
 
+	describe("duplicate", () => {
+		it("hands the copy the source's result, current against its dependencies", async () => {
+			const still = makeJob("still");
+			generateMock.mockImplementation(({ id }) =>
+				Promise.resolve({ imageUrl: `${id}.png`, durationSec: 0 }),
+			);
+			generationQueue.enqueueGraph([makeJob("d1", [still])]);
+			await vi.runAllTimersAsync();
+
+			generationQueue.duplicate("d1", "d2");
+
+			expect(generationQueue.getElementSnapshot("d2")).toEqual(
+				generationQueue.getElementSnapshot("d1"),
+			);
+			expect(
+				isNodeStale(makeJob("d2", [still], { prompt: "d1" }), generationQueue),
+			).toBe(false);
+		});
+
+		it("keeps an upload pinned on the copy", () => {
+			generationQueue.commitResult(
+				makeJob("d3"),
+				{ imageUrl: "up.png", durationSec: 0 },
+				{ pinned: true },
+			);
+
+			generationQueue.duplicate("d3", "d4");
+
+			expect(generationQueue.getElementSnapshot("d4").pinned).toBe(true);
+		});
+
+		it("lands the copy of an in-flight element idle", () => {
+			generateMock.mockReturnValue(pending());
+			generationQueue.enqueueGraph([makeJob("d5")]);
+
+			generationQueue.duplicate("d5", "d6");
+
+			expect(generationQueue.getElementSnapshot("d6").status).toBe("idle");
+			expect(generationQueue.getActiveCount()).toBe(1);
+			generationQueue.discard("d5");
+		});
+
+		it("announces the copy to its listeners", () => {
+			const duplicated = vi.fn();
+			generationQueue.onDuplicated(duplicated);
+
+			generationQueue.duplicate("d7", "d8");
+
+			expect(duplicated).toHaveBeenCalledWith({ fromId: "d7", toId: "d8" });
+		});
+	});
+
 	describe("setError", () => {
 		it("sets an error on an element", () => {
 			generationQueue.setError("se1", "something went wrong");

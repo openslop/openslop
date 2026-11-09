@@ -1,3 +1,4 @@
+import pick from "lodash/pick";
 import { z } from "zod";
 import { createEmitter } from "@/lib/store/emitter";
 import { ASSET_CONNECTOR_TYPES, AssetResultSchema } from "../connectors/types";
@@ -122,6 +123,14 @@ export class SnapshotStore {
 		const { result, error } = this.get(id);
 		if (result || error) this.update(id, { status: "idle", startedAt: null });
 		else this.state.delete(id);
+	}
+
+	/** In-flight progress stays the source's, so the copy lands idle. */
+	copy(fromId: string, toId: string) {
+		this.update(
+			toId,
+			pick(this.get(fromId), [...RESULT_FIELDS, "connectorType"]),
+		);
 	}
 
 	commit(version: CommittedVersion): CommittedVersion {
