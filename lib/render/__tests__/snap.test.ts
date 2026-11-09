@@ -59,6 +59,20 @@ describe("snapTrimEdge", () => {
 		expect(trim).toEqual({ trimStartSec: 1, trimDurationSec: 3 });
 	});
 
+	it("leaves a handle at rest where it is, even beside a target", () => {
+		for (const edge of ["start", "end"] as const) {
+			const { trim, snappedSec } = snapTrimEdge(
+				clip,
+				edge,
+				0,
+				[2.1, 6.1],
+				0.15,
+			);
+			expect(snappedSec).toBeNull();
+			expect(trim).toEqual({ trimStartSec: 0, trimDurationSec: 4 });
+		}
+	});
+
 	it("snaps a cut clip's end from where it's drawn", () => {
 		const cut = {
 			element: el({ trimDurationSec: 10 }),

@@ -37,7 +37,7 @@ export const snapTargets = (
 			clip.start + totalDuration(clip),
 		]);
 
-/** The dragged handle sticks to a target within reach, unless the media runs out before it. */
+/** The dragged handle sticks to a target within reach, unless the media runs out before it. A handle at rest never snaps, so a click changes nothing. */
 export function snapTrimEdge(
 	clip: Sequence,
 	edge: TrimEdge,
@@ -46,7 +46,10 @@ export function snapTrimEdge(
 	thresholdSec: number,
 ): SnappedTrim {
 	const restSec = edgeSec(clip, edge, playedTrim(clip));
-	const target = snapTarget(restSec + deltaSec, targets, thresholdSec);
+	const target =
+		deltaSec === 0
+			? null
+			: snapTarget(restSec + deltaSec, targets, thresholdSec);
 	if (target !== null) {
 		const trim = trimEdge(clip, edge, target - restSec);
 		if (Math.abs(edgeSec(clip, edge, trim) - target) < EPSILON_SEC)
