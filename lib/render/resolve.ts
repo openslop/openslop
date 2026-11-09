@@ -18,12 +18,8 @@ export function resolveElements(
 	getSnapshot: (id: string) => ElementSnapshot,
 ): ResolvedElement[] {
 	const resolved: ResolvedElement[] = [];
-	let sceneNumber = 0;
 
-	for (const scene of nodes) {
-		if (!isScene(scene)) continue;
-		sceneNumber += 1;
-
+	for (const [sceneIndex, scene] of nodes.filter(isScene).entries()) {
 		for (const element of scene.children) {
 			const snapshot = getSnapshot(element.id);
 			if (!snapshot.result) continue;
@@ -41,7 +37,7 @@ export function resolveElements(
 				role: spec.role,
 				layer: spec.layer,
 				sceneId: scene.id,
-				sceneNumber,
+				sceneNumber: sceneIndex + 1,
 				prompt: getPromptText(element),
 				url,
 				...trim,
