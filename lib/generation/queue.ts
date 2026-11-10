@@ -114,6 +114,11 @@ export class GenerationQueue {
 		if (wasActive) this.processQueue();
 	}
 
+	duplicate(fromId: string, toId: string) {
+		this.snapshots.copy(fromId, toId);
+		this.snapshots.notify();
+	}
+
 	setError(elementId: string, message: string) {
 		this.snapshots.update(elementId, { result: null, error: message });
 		this.snapshots.notify();

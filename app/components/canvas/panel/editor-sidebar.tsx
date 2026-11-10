@@ -23,7 +23,9 @@ import {
 	RobotFill,
 	TextBox,
 	TextBoxFill,
+	X,
 } from "@/components/ui/icon";
+import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/sloppy-composer";
 import { SloppyPanel } from "@/app/components/sloppy/sloppy-panel";
@@ -214,7 +216,7 @@ function ResizablePanel({ children }: { children: ReactNode }) {
 }
 
 function EditorSidebarComponent() {
-	const { active } = useEditorPanel();
+	const { active, setActive } = useEditorPanel();
 	const current = active ? PANELS[active] : null;
 
 	return (
@@ -231,6 +233,15 @@ function EditorSidebarComponent() {
 						<h2 className="text-body font-semibold text-panel-label">
 							{current.label}
 						</h2>
+						<TooltipIconButton
+							label="Close panel"
+							size="header"
+							variant="quiet"
+							className="ml-auto"
+							onClick={() => setActive(null)}
+						>
+							<X size={ICON_SIZES.header} />
+						</TooltipIconButton>
 					</div>
 					<div
 						key={active}

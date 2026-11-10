@@ -3,15 +3,19 @@ import { DuplicateButton as DuplicateIconButton } from "@/components/ui/duplicat
 import { keepFocus } from "@/components/ui/keep-focus";
 import { duplicateElement } from "@/lib/canvas/editor-ops";
 import type { ContentElement } from "@/lib/canvas/types";
+import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 
 export function DuplicateButton({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
+	const queue = useGenerationQueue();
 
 	return (
 		<DuplicateIconButton
 			ariaLabel="Duplicate element"
 			onMouseDown={keepFocus}
-			onClick={() => duplicateElement(editor, element.id)}
+			onClick={() =>
+				queue.duplicate(element.id, duplicateElement(editor, element.id))
+			}
 		/>
 	);
 }

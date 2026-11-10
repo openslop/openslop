@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { useSlateStatic } from "slate-react";
+import { applyElementVersion } from "@/lib/canvas/editor-ops";
 import { getVolumeGain } from "@/lib/canvas/element-attributes";
 import { truncateMiddle } from "@/lib/format";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
@@ -153,13 +155,7 @@ function LoadingRows() {
  * Versions are read on open, and the list that subscribes to them only mounts
  * while the popover is open, so no card watches versions it never shows.
  */
-export function ElementHistoryPopover({
-	elementId,
-	onRestore,
-}: {
-	elementId: string;
-	onRestore: (version: ElementVersion) => void;
-}) {
+export function ElementHistoryPopover({ elementId }: { elementId: string }) {
 	const loadHistory = useLoadElementHistory();
 	const [open, setOpen] = useState(false);
 
@@ -190,7 +186,6 @@ export function ElementHistoryPopover({
 				>
 					<ElementVersionList
 						elementId={elementId}
-						onRestore={onRestore}
 						onClose={() => setOpen(false)}
 					/>
 				</div>
@@ -201,19 +196,18 @@ export function ElementHistoryPopover({
 
 function ElementVersionList({
 	elementId,
-	onRestore,
 	onClose,
 }: {
 	elementId: string;
-	onRestore: (version: ElementVersion) => void;
 	onClose: () => void;
 }) {
 	const { versions, status, activeIndex } = useElementHistory(elementId);
 	const loadHistory = useLoadElementHistory();
 	const queue = useGenerationQueue();
+	const editor = useSlateStatic();
 	const restore = (version: ElementVersion) => {
 		queue.restoreResult(version);
-		onRestore(version);
+		applyElementVersion(editor, elementId, version);
 		onClose();
 	};
 

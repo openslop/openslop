@@ -88,11 +88,11 @@ describe("withoutCaptions", () => {
 });
 
 describe("planCaptions", () => {
-	it("captions a element that has a result and no words yet", () => {
+	it("captions an element that has a result and no words yet", () => {
 		expect(plan([element("fresh")])).toEqual({ ready: ["fresh"], skipped: [] });
 	});
 
-	it("redoes captions a element already has", () => {
+	it("redoes captions an element already has", () => {
 		expect(plan([element("captioned")])).toEqual({
 			ready: ["captioned"],
 			skipped: [],

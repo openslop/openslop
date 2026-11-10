@@ -2,10 +2,13 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
+import { Editor } from "slate";
+import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { inputsFor } from "@/lib/generation/__tests__/_graph";
 import type { ElementVersion } from "@/lib/generation/versions";
 import type { ElementVersionHistory } from "../../hooks/use-element-history";
+import { content, scene } from "../../__tests__/fixtures";
 import { click, mountOnCanvas } from "../../__tests__/_mount";
 import { ElementHistoryPopover } from "../element-history-popover";
 
@@ -24,8 +27,9 @@ let element: { layoutAttributes: { volume: string } };
 vi.mock("../element-generation-context", () => ({
 	useElementGeneration: () => ({ element }),
 }));
+const restoreResult = vi.fn();
 vi.mock("@/lib/generation/generation-queue-provider", () => ({
-	useGenerationQueue: () => ({ restoreResult: vi.fn() }),
+	useGenerationQueue: () => ({ restoreResult }),
 }));
 
 let canvas: ReturnType<typeof mountOnCanvas>;
@@ -40,7 +44,7 @@ beforeEach(() => {
 function renderPopover() {
 	canvas.render(
 		<TooltipProvider>
-			<ElementHistoryPopover elementId="el-1" onRestore={() => {}} />
+			<ElementHistoryPopover elementId="el-1" />
 		</TooltipProvider>,
 	);
 }
@@ -79,6 +83,33 @@ describe("ElementHistoryPopover", () => {
 		await act(async () => retry.click());
 		expect(loadHistory).toHaveBeenCalledTimes(2);
 		expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+	});
+
+	it("restores a take onto the queue and the element's prompt, then closes", async () => {
+		canvas.unmount();
+		canvas = mountOnCanvas([
+			scene([content("video", "el-1", "harbor at dusk")]),
+		]);
+		history = {
+			versions: [videoTake("harbor"), videoTake("harbor at dusk")],
+			status: "ready",
+			activeIndex: 1,
+		};
+		renderPopover();
+		await click('button[aria-label="Generation history"]');
+
+		const restore = Array.from(document.body.querySelectorAll("button")).find(
+			(button) => button.textContent === "Restore",
+		);
+		if (!restore) throw new Error("no Restore button");
+		await act(async () => restore.click());
+
+		const [take] = history.versions;
+		expect(restoreResult).toHaveBeenCalledWith(take);
+		expect(Editor.string(canvas.editor, [0, 0])).toBe(
+			`${ZERO_WIDTH_SPACE}harbor`,
+		);
+		expect(document.body.querySelector('[role="dialog"]')).toBeNull();
 	});
 
 	it("plays each audio take at the element's volume, following a change", async () => {
