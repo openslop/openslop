@@ -17,6 +17,7 @@ import {
 	type PlaygroundType,
 } from "@/lib/canvas/types";
 import { useAvatarNames } from "@/lib/canvas/use-assets";
+import { useWriteThrough } from "../hooks/use-write-through";
 import { ElementInput } from "../elements/element-input";
 import { MentionEditable } from "../elements/mention-editable";
 import { withCanvas } from "../plugins/with-canvas";
@@ -68,12 +69,7 @@ function useScratchEditor(draft: Draft, onWrite: (text: string) => void) {
 	});
 	const onValueChange = () => {
 		const [prompt] = getContentElements(scratch.children);
-		const text = prompt ? getElementBodyText(prompt) : "";
-		onWrite(text);
-		// The prompt box keeps its own undo; the canvas's would rewrite the draft behind it.
-		HistoryEditor.withoutSaving(canvas, () =>
-			updateElementText(canvas, draft.id, text),
-		);
+		onWrite(prompt ? getElementBodyText(prompt) : "");
 	};
 	return { scratch, onValueChange };
 }
@@ -117,25 +113,21 @@ function ScratchPrompt({
 
 /** Typed like an element's prompt on the canvas, `@` mentions and all; a new character, or a prompt set from outside, rebuilds it. */
 export function DraftPrompt({ draft }: { draft: Draft }) {
+	const canvas = useSlateStatic();
 	const names = useAvatarNames();
-	const text = getElementBodyText(draft);
-	const [prompt, setPrompt] = useState({
-		draft: text,
-		typed: text,
-		revision: 0,
-	});
-	// A keystroke renders here before the draft catches up, so only a draft that moved to text nobody typed rebuilds.
-	if (text !== prompt.draft)
-		setPrompt({
-			draft: text,
-			typed: text,
-			revision: text === prompt.typed ? prompt.revision : prompt.revision + 1,
-		});
+	const [, write, replaced] = useWriteThrough(
+		getElementBodyText(draft),
+		(text) =>
+			// The prompt box keeps its own undo; the canvas's would rewrite the draft behind it.
+			HistoryEditor.withoutSaving(canvas, () =>
+				updateElementText(canvas, draft.id, text),
+			),
+	);
 	return (
 		<ScratchPrompt
-			key={`${draft.id}:${names.join("|")}:${prompt.revision}`}
+			key={`${draft.id}:${names.join("|")}:${replaced}`}
 			draft={draft}
-			onWrite={(typed) => setPrompt((last) => ({ ...last, typed }))}
+			onWrite={write}
 		/>
 	);
 }
