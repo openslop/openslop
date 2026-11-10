@@ -14,7 +14,7 @@ import {
 	ElementGenerateButton,
 	ElementStaleIndicator,
 } from "./generate-button";
-import { ElementHistoryButton } from "./element-history-button";
+import { ElementHistoryPopover } from "./element-history-popover";
 import { ResetEditsButton } from "./reset-edits-button";
 import { HeaderIconButton } from "./header-icon-button";
 import { ElementGenerationProvider } from "./element-generation-context";
@@ -114,7 +114,7 @@ export function ElementContainer({
 								{config.tools?.map((Tool, index) => (
 									<Tool key={index} element={element} />
 								))}
-								<ElementHistoryButton element={element} />
+								<ElementHistoryPopover elementId={element.id} />
 							</div>
 							<div className="flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-200 group-hover/card:opacity-100 group-hover/card:pointer-events-auto focus-within:opacity-100 focus-within:pointer-events-auto">
 								<DuplicateButton element={element} />
