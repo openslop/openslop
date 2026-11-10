@@ -57,7 +57,7 @@ export function AssetStripReferences() {
 			<ReferenceAssetTile
 				url={url}
 				index={index}
-				onDelete={() => references.remove(index)}
+				onRemove={() => references.remove(index)}
 			/>
 		</li>
 	));

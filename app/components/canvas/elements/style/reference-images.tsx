@@ -4,7 +4,9 @@ import { AddButton } from "@/components/ui/add-button";
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
 import { FieldHeader, FieldLabel } from "../character/fields";
 import { MediaPicker } from "../media-picker";
-import { ReferenceImageTiles } from "../reference-images";
+import { ProjectReferenceTile } from "../asset-tiles";
+import { TileRow } from "../attributes/tile-row";
+import { NoReferenceImages } from "../reference-images";
 
 /** The project's reference images, added from the media picker like an element's. */
 export function ReferenceImages() {
@@ -20,7 +22,20 @@ export function ReferenceImages() {
 			>
 				<FieldLabel>Reference images</FieldLabel>
 			</FieldHeader>
-			<ReferenceImageTiles urls={urls} onDelete={remove} />
+			{urls.length === 0 ? (
+				<NoReferenceImages />
+			) : (
+				<TileRow>
+					{urls.map((url, index) => (
+						<ProjectReferenceTile
+							key={url}
+							url={url}
+							index={index}
+							onRemove={() => remove(index)}
+						/>
+					))}
+				</TileRow>
+			)}
 		</section>
 	);
 }

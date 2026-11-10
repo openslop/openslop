@@ -13,16 +13,16 @@ export const NoReferenceImages = () => (
 	/>
 );
 
-/** A caller-owned list of reference images as tiles, or the empty state when there are none. */
+/** An element's reference images as tiles, each removable from the list, or the empty state when there are none. */
 export function ReferenceImageTiles({
 	urls,
 	onRemove,
-	onDelete,
 	columns,
-}: { urls: string[]; columns?: 2 } & (
-	| { onRemove: (index: number) => void; onDelete?: never }
-	| { onDelete: (index: number) => void; onRemove?: never }
-)) {
+}: {
+	urls: string[];
+	onRemove: (index: number) => void;
+	columns?: 2;
+}) {
 	if (urls.length === 0) return <NoReferenceImages />;
 	return (
 		<TileRow columns={columns}>
@@ -31,8 +31,7 @@ export function ReferenceImageTiles({
 					key={`reference:${url}`}
 					url={url}
 					index={index}
-					onRemove={onRemove && (() => onRemove(index))}
-					onDelete={onDelete && (() => onDelete(index))}
+					onRemove={() => onRemove(index)}
 				/>
 			))}
 		</TileRow>

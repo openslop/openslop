@@ -98,7 +98,7 @@ function ReferencesCard() {
 							key={url}
 							url={url}
 							index={index}
-							onDelete={() => remove(index)}
+							onRemove={() => remove(index)}
 						/>
 					)),
 					...uploadingTiles(uploadingCount),

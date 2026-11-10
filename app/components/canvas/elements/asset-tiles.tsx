@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { Image, Mic, Palette, Pencil, User } from "@/components/ui/icon";
+import { Image, Mic, Palette, Pencil, User, X } from "@/components/ui/icon";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useHasAsset } from "@/lib/canvas/use-assets";
@@ -12,7 +12,12 @@ import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
 import { AudioPlayer } from "./audio-player";
 import { MEDIA_KINDS } from "./media-kinds";
-import { DeleteItem, useTilePlayer, type TilePrimary } from "./tile-actions";
+import {
+	DeleteItem,
+	TileMenuItem,
+	useTilePlayer,
+	type TilePrimary,
+} from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
 import { deleteArtStyle } from "./delete-asset";
 import { LoadRequestItem, useLoadRequest } from "../playground/load-request";
@@ -73,13 +78,13 @@ type ReferenceTileProps = TileProps & { url: string; index: number };
 
 const referenceName = (index: number) => `Reference ${index + 1}`;
 
-/** A reference image on a list; `onRemove` takes it off the list, `onDelete` out of the project's references. */
 export function ReferenceTile({
 	url,
 	index,
 	...tile
 }: ReferenceTileProps & {
 	primary?: TilePrimary;
+	menu?: ReactNode;
 	onRemove?: () => void;
 	onDelete?: () => void;
 }) {
@@ -94,13 +99,38 @@ export function ReferenceTile({
 	);
 }
 
-/** One of the project's reference images: choosing it edits them, its menu deletes it. */
+/** One of the project's reference images: its menu takes it off the references, or deletes its file from the media library and the references both. */
+export function ProjectReferenceTile({
+	onRemove,
+	...tile
+}: ReferenceTileProps & { primary?: TilePrimary; onRemove: () => void }) {
+	const item = useProject((state) =>
+		state.media.find(({ url }) => url === tile.url),
+	);
+	const remove = useDeleteMedia(item?.name ?? "", onRemove);
+	return (
+		<>
+			<ReferenceTile
+				{...tile}
+				menu={
+					<TileMenuItem icon={X} onSelect={onRemove}>
+						Remove from references
+					</TileMenuItem>
+				}
+				onDelete={item && remove.request}
+			/>
+			{remove.dialog}
+		</>
+	);
+}
+
+/** A project reference image on the canvas strip or the assets panel, where choosing it edits the references. */
 export function ReferenceAssetTile(
-	tile: ReferenceTileProps & { onDelete: () => void },
+	tile: ReferenceTileProps & { onRemove: () => void },
 ) {
 	const { editAsset } = useAssetEditors();
 	return (
-		<ReferenceTile
+		<ProjectReferenceTile
 			{...tile}
 			primary={editing(referenceName(tile.index), () =>
 				editAsset("asset_references"),
@@ -109,8 +139,8 @@ export function ReferenceAssetTile(
 	);
 }
 
-/** Asks before taking a piece of media out of the project. */
-function useDeleteMedia(name: string) {
+/** Asks before taking a piece of media out of the project, then does `andThen`. */
+function useDeleteMedia(name: string, andThen?: () => void) {
 	const removeMedia = useProject((state) => state.removeMedia);
 	const [confirming, setConfirming] = useState(false);
 	return {
@@ -122,7 +152,10 @@ function useDeleteMedia(name: string) {
 				title={(target) => `Delete ${target}?`}
 				description="This deletes it from the project's media. It can't be undone. Elements already using it keep it."
 				actionLabel="Delete"
-				onConfirm={removeMedia}
+				onConfirm={(target) => {
+					removeMedia(target);
+					andThen?.();
+				}}
 			/>
 		),
 	};
