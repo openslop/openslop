@@ -13,7 +13,7 @@ export const NoReferenceImages = () => (
 	/>
 );
 
-/** An element's reference images as tiles, each removable from the list, or the empty state when there are none. */
+/** An element's reference images as tiles, each removable from the list. */
 export function ReferenceImageTiles({
 	urls,
 	onRemove,
@@ -23,7 +23,7 @@ export function ReferenceImageTiles({
 	onRemove: (index: number) => void;
 	columns?: 2;
 }) {
-	if (urls.length === 0) return <NoReferenceImages />;
+	if (urls.length === 0) return null;
 	return (
 		<TileRow columns={columns}>
 			{urls.map((url, index) => (
