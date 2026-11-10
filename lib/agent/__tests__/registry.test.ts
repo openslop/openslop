@@ -18,7 +18,6 @@ import {
 	TTS_PITCHES,
 } from "@/lib/connectors/tts/enums";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
-import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
 import { sloppyInstructions } from "../prompt";
 
@@ -46,7 +45,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<narration>hi</narration>",
 	countSpokenWords: () => 1,
 	estimateDialogueLengths: () => [],
-	estimateVisualSpans: () => [],
 	estimateRuntime: () => 0,
 	generateText: async () => "an outline",
 	elementResult: async () => undefined,
@@ -393,142 +391,6 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("fits each video element to the dialogue under it and says it went stale", async () => {
-		const ops: RefineOp[][] = [];
-		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: {} },
-			context({
-				estimateVisualSpans: () => [
-					{
-						id: "ai1",
-						type: "video",
-						sceneNumber: 1,
-						words: 12,
-						dialogueIds: ["nar1"],
-						durationSec: 10,
-					},
-					{
-						id: "img1",
-						type: "image",
-						sceneNumber: 1,
-						words: 90,
-						dialogueIds: ["nar2"],
-					},
-				],
-				editScript: (applied) => {
-					ops.push(applied);
-					return { applied: applied.length, failures: [] };
-				},
-			}),
-		);
-
-		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
-		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video ai1: 10s to 5s, for about 5.0s of estimated dialogue and leeway.",
-		);
-		expect(outcome.ok && outcome.output).toContain("need regenerating");
-		expect(outcome.ok && outcome.output).toContain(
-			"1 image or video without dialogue left alone.",
-		);
-	});
-
-	it("names a video element whose dialogue outruns the longest option instead of hiding the clamp", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
-			context({
-				estimateVisualSpans: () => [
-					{
-						id: "ai1",
-						type: "video",
-						sceneNumber: 1,
-						words: 12,
-						dialogueIds: [],
-						durationSec: 10,
-					},
-					{
-						id: "vid1",
-						type: "video",
-						sceneNumber: 2,
-						words: 180,
-						dialogueIds: ["nar2"],
-						durationSec: 15,
-					},
-				],
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("Scene 2 video vid1 needs");
-		expect(outcome.ok && outcome.output).toContain("split the dialogue");
-		expect(outcome.ok && outcome.output).not.toContain("ai1");
-		expect(outcome.ok && outcome.output).not.toContain("already cover");
-	});
-
-	it("leaves durations alone when every video element already covers its dialogue", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
-			context({
-				estimateVisualSpans: () => [
-					{
-						id: "vid1",
-						type: "video",
-						sceneNumber: 1,
-						words: 12,
-						dialogueIds: ["nar1"],
-						durationSec: 5,
-					},
-				],
-				editScript: () => {
-					throw new Error("nothing to apply");
-				},
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("nothing to change");
-	});
-
-	it("names element_ids that match no visual instead of reporting a clean pass", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: { element_ids: ["vid1", "nope"] } },
-			context({
-				estimateVisualSpans: () => [
-					{
-						id: "vid1",
-						type: "video",
-						sceneNumber: 1,
-						words: 12,
-						dialogueIds: ["nar1"],
-						durationSec: 5,
-					},
-				],
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain(
-			"Not a visual on the canvas: nope.",
-		);
-	});
-
-	it("says there is nothing to fit when only stills are in scope", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "fit_durations", input: {} },
-			context({
-				estimateVisualSpans: () => [
-					{
-						id: "img1",
-						type: "image",
-						sceneNumber: 1,
-						words: 90,
-						dialogueIds: ["nar1"],
-					},
-				],
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain(
-			"No video elements with dialogue under them in scope.",
-		);
-	});
-
 	it("says the canvas has no dialogue rather than reporting an empty table", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "estimate_dialogue_lengths", input: {} },
@@ -722,7 +584,6 @@ describe("SLOPPY_TOOLS", () => {
 			"outline_story",
 			"estimate_total_length",
 			"estimate_dialogue_lengths",
-			"fit_durations",
 			"set_title",
 			"list_models",
 			"set_default_model",
@@ -749,6 +610,12 @@ describe("SLOPPY_TOOLS", () => {
 		]) {
 			expect(description).toContain(`(${options.join(" | ")})`);
 		}
+	});
+
+	it("teaches the trim of a video, so a long one can play for just its dialogue", () => {
+		expect(SLOPPY_TOOLS.edit_script.description).toMatch(
+			/- video: .*trimStart \(seconds\), trimEnd \(seconds\)/,
+		);
 	});
 });
 
@@ -791,7 +658,6 @@ describe("tool flags", () => {
 		expect([...DRAFTING_TOOLS].sort()).toEqual([
 			"adapt_script",
 			"edit_script",
-			"fit_durations",
 			"review_script",
 			"write_script",
 		]);

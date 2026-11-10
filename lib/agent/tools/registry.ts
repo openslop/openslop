@@ -6,7 +6,6 @@ import { adaptScript } from "./adapt-script";
 import { estimateDialogueLengths } from "./estimate-dialogue-lengths";
 import { estimateTotalLength } from "./estimate-total-length";
 import { editScript } from "./edit-script";
-import { fitDurations } from "./fit-durations";
 import { generateCaptions } from "./generate-captions";
 import { listModels } from "./list-models";
 import { outlineStory } from "./outline-story";
@@ -33,7 +32,6 @@ const TOOLS = {
 	outline_story: outlineStory,
 	estimate_total_length: estimateTotalLength,
 	estimate_dialogue_lengths: estimateDialogueLengths,
-	fit_durations: fitDurations,
 	set_title: setTitle,
 	list_models: listModels,
 	set_default_model: setDefaultModel,

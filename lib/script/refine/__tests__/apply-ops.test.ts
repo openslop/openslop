@@ -431,6 +431,24 @@ describe("applyRefineOp — set", () => {
 		expect(getPromptText(line)).toBe("Hello!");
 	});
 
+	it("trims a video as a layout change", () => {
+		const editor = makeEditor([
+			scene([content("video", "v1", "a fox runs", { duration: "10" })]),
+		]);
+
+		const result = applyRefineOp(editor, {
+			op: "set",
+			id: "v1",
+			attrs: { trimEnd: "6.5" },
+		});
+
+		expect(result).toEqual({ ok: true });
+		expect(getNode(editor, "v1")).toMatchObject({
+			generationAttributes: { duration: "10" },
+			layoutAttributes: { trimEnd: "6.5" },
+		});
+	});
+
 	it("refuses an attribute value the type does not offer, changing nothing", () => {
 		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
 

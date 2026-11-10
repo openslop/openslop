@@ -103,10 +103,6 @@ export const DURATION_MIN = Math.min(...DURATIONS);
 /** The longest a video can be generated at, so the ceiling on what one visual covers. */
 export const DURATION_MAX = Math.max(...DURATIONS);
 
-/** The shortest option that still covers `seconds`, or the longest there is. */
-export const snapDurationUp = (seconds: number): number =>
-	DURATIONS.find((option) => option >= seconds) ?? DURATION_MAX;
-
 export const VOLUME_OPTIONS = [
 	"0",
 	"1",

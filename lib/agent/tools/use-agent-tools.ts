@@ -13,7 +13,6 @@ import {
 } from "@/lib/canvas/spoken-words";
 import { isGenerated } from "@/lib/canvas/types";
 import { estimateRuntime } from "@/lib/render/estimate-runtime";
-import { estimateVisualSpans } from "@/lib/render/visual-spans";
 import {
 	captionElements,
 	autoCaptionElements,
@@ -62,7 +61,6 @@ export function useAgentTools() {
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				estimateDialogueLengths: () => estimateDialogueLengths(editor.children),
-				estimateVisualSpans: () => estimateVisualSpans(editor.children),
 				estimateRuntime: () =>
 					estimateRuntime(editor.children, store.getState().videoSettings),
 				elementResult: async (id) => {

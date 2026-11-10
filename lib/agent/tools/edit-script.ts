@@ -7,6 +7,7 @@ import {
 	ElementTypeSchema,
 	NON_SPEECH_TYPES,
 } from "@/lib/canvas/types";
+import { trimEndDef, trimStartDef } from "@/lib/connectors/attributes/common";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
 	NO_FRAME,
@@ -21,10 +22,10 @@ import { Pencil } from "@/components/ui/icon";
 import { conjunction, plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
-/** Attributes Sloppy can write by hand: those limited to a list of options, and free text. */
 const describeAttribute = ({ key, edit }: AttributeDef): string[] => {
 	if (edit?.kind === "enum" || edit?.kind === "toggle")
 		return [`${key} (${edit.value.options.join(" | ")})`];
+	if (edit?.kind === "seconds") return [`${key} (seconds)`];
 	return edit?.kind === "text" ? [key] : [];
 };
 
@@ -81,6 +82,9 @@ export const editScript = defineTool({
 
 	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: a picture's URL from
 	  view_result. Leave a URL already set alone.
+
+	  ${trimStartDef.key} and ${trimEndDef.key} are where a clip starts and stops playing, in seconds into its
+	  generated media. Trimming needs no regenerating.
 
 	  The attributes above work with every model. Some models have extra attributes of their own;
 	  read_script shows the ones an element already has.
