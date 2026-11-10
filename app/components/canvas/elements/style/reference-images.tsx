@@ -20,7 +20,7 @@ export function ReferenceImages() {
 			>
 				<FieldLabel>Reference images</FieldLabel>
 			</FieldHeader>
-			<ReferenceImageTiles urls={urls} onRemove={remove} />
+			<ReferenceImageTiles urls={urls} onDelete={remove} />
 		</section>
 	);
 }

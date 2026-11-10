@@ -69,19 +69,20 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 	);
 }
 
-type ReferenceTileProps = TileProps & {
-	url: string;
-	index: number;
-	onRemove: () => void;
-};
+type ReferenceTileProps = TileProps & { url: string; index: number };
 
 const referenceName = (index: number) => `Reference ${index + 1}`;
 
+/** A reference image on a list; `onRemove` takes it off the list, `onDelete` out of the project's references. */
 export function ReferenceTile({
 	url,
 	index,
 	...tile
-}: ReferenceTileProps & { primary?: TilePrimary }) {
+}: ReferenceTileProps & {
+	primary?: TilePrimary;
+	onRemove?: () => void;
+	onDelete?: () => void;
+}) {
 	return (
 		<AssetTile
 			name={referenceName(index)}
@@ -93,7 +94,10 @@ export function ReferenceTile({
 	);
 }
 
-export function ReferenceAssetTile(tile: ReferenceTileProps) {
+/** One of the project's reference images: choosing it edits them, its menu deletes it. */
+export function ReferenceAssetTile(
+	tile: ReferenceTileProps & { onDelete: () => void },
+) {
 	const { editAsset } = useAssetEditors();
 	return (
 		<ReferenceTile

@@ -118,7 +118,7 @@ export function AttributeBadge({
 			}))}
 			contentClassName="max-h-64 min-w-24"
 		>
-			<ButtonMenuTrigger icon={edit.icon} aria-label={tooltip}>
+			<ButtonMenuTrigger icon={<edit.icon />} aria-label={tooltip}>
 				{formatValue(value, unit)}
 			</ButtonMenuTrigger>
 		</SelectMenu>

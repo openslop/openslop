@@ -17,12 +17,12 @@ export const NoReferenceImages = () => (
 export function ReferenceImageTiles({
 	urls,
 	onRemove,
+	onDelete,
 	columns,
-}: {
-	urls: string[];
-	onRemove: (index: number) => void;
-	columns?: 2;
-}) {
+}: { urls: string[]; columns?: 2 } & (
+	| { onRemove: (index: number) => void; onDelete?: never }
+	| { onDelete: (index: number) => void; onRemove?: never }
+)) {
 	if (urls.length === 0) return <NoReferenceImages />;
 	return (
 		<TileRow columns={columns}>
@@ -31,7 +31,8 @@ export function ReferenceImageTiles({
 					key={`reference:${url}`}
 					url={url}
 					index={index}
-					onRemove={() => onRemove(index)}
+					onRemove={onRemove && (() => onRemove(index))}
+					onDelete={onDelete && (() => onDelete(index))}
 				/>
 			))}
 		</TileRow>

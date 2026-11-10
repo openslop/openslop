@@ -1,7 +1,7 @@
 "use client";
 
 import { type ComponentProps, type ReactNode } from "react";
-import { Check, ChevronDown, type IconComponent } from "@/components/ui/icon";
+import { Check, ChevronDown } from "@/components/ui/icon";
 import { ICON_SIZES } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 import { keepFocus } from "@/components/ui/keep-focus";
@@ -86,10 +86,10 @@ export function InlineMenuTrigger({
 
 /** A ghost button that opens a menu: the icon names it, the text is its value. */
 export function ButtonMenuTrigger({
-	icon: Icon,
+	icon,
 	children,
 	...props
-}: ComponentProps<typeof Button> & { icon?: IconComponent }) {
+}: ComponentProps<typeof Button> & { icon?: ReactNode }) {
 	return (
 		<Button
 			type="button"
@@ -98,7 +98,7 @@ export function ButtonMenuTrigger({
 			onMouseDown={keepFocus}
 			{...props}
 		>
-			{Icon && <Icon />}
+			{icon}
 			<span className="min-w-0 truncate">{children}</span>
 			<ChevronDown size={ICON_SIZES.sm} />
 		</Button>

@@ -21,7 +21,7 @@ export default function ComposerHero() {
 	};
 
 	return (
-		<div className="flex w-full max-w-2xl flex-col items-center px-4">
+		<div className="flex w-full max-w-4xl flex-col items-center px-4">
 			<BackToMySlopLink className="mb-4 self-start" />
 			<h1 className="mb-6 text-center font-serif text-hero text-balance text-foreground">
 				Describe your slop
