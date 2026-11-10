@@ -36,11 +36,7 @@ const ownReferences = ({ element, attrKey }: AttributeTarget) =>
  * The element's reference images as tiles, under the menu that adds more. With no
  * override they are the project's; the first add or remove copies them onto it.
  */
-export function ReferenceImagesEditor({
-	columns,
-	Section,
-	...target
-}: LaidOutTarget) {
+export function ReferenceImagesEditor({ Section, ...target }: LaidOutTarget) {
 	const { element, attrKey, label } = target;
 	const editor = useSlateStatic();
 	const { urls: projectImages } = useReferenceImages();
@@ -82,7 +78,7 @@ export function ReferenceImagesEditor({
 				<ReferenceImageTiles
 					urls={urls}
 					onRemove={(index) => set(urls.filter((_, i) => i !== index))}
-					columns={columns}
+					columns={2}
 				/>
 			</div>
 		</Section>
@@ -105,11 +101,7 @@ export function ReferenceImagesPopover({
 				{summary}
 			</AttributeTrigger>
 			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
-				<ReferenceImagesEditor
-					{...target}
-					columns={2}
-					Section={AttributePopoverSection}
-				/>
+				<ReferenceImagesEditor {...target} Section={AttributePopoverSection} />
 				{children}
 			</PopoverContent>
 		</Popover>

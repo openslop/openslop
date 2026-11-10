@@ -37,7 +37,6 @@ export function DraftPictures({ element }: { element: GeneratedElement }) {
 					element={element}
 					attrKey={def.key}
 					label={def.label}
-					columns={2}
 					Section={PanelSection}
 				/>
 			)

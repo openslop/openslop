@@ -129,7 +129,6 @@ export function StartFrameOptions({
 	element,
 	attrKey,
 	label,
-	columns,
 	Section,
 }: LaidOutTarget) {
 	const editor = useSlateStatic();
@@ -153,7 +152,7 @@ export function StartFrameOptions({
 				</MediaPicker>
 			}
 		>
-			<TileRow columns={columns} radiogroup={label}>
+			<TileRow columns={2} radiogroup={label}>
 				<FrameTile
 					kind="none"
 					current={source.kind}
@@ -193,11 +192,7 @@ export function StartFramePicker(target: AttributeTarget) {
 				{summary}
 			</AttributeTrigger>
 			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
-				<StartFrameOptions
-					{...target}
-					columns={2}
-					Section={AttributePopoverSection}
-				/>
+				<StartFrameOptions {...target} Section={AttributePopoverSection} />
 			</PopoverContent>
 		</Popover>
 	);

@@ -15,8 +15,5 @@ export type EditorSection = ComponentType<{
 	children: ReactNode;
 }>;
 
-/** In a surface with `columns`, its tiles fill a grid; otherwise they wrap in a row. */
-export type LaidOutTarget = AttributeTarget & {
-	columns?: 2;
-	Section: EditorSection;
-};
+/** An attribute editor, titled by the surface it sits on. */
+export type LaidOutTarget = AttributeTarget & { Section: EditorSection };
