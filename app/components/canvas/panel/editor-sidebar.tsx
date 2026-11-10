@@ -25,7 +25,7 @@ import {
 	TextBoxFill,
 	X,
 } from "@/components/ui/icon";
-import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/sloppy-composer";
 import { SloppyPanel } from "@/app/components/sloppy/sloppy-panel";
@@ -235,12 +235,11 @@ function EditorSidebarComponent() {
 						</h2>
 						<TooltipIconButton
 							label="Close panel"
-							size="header"
 							variant="quiet"
 							className="ml-auto"
 							onClick={() => setActive(null)}
 						>
-							<X size={ICON_SIZES.header} />
+							<X />
 						</TooltipIconButton>
 					</div>
 					<div
