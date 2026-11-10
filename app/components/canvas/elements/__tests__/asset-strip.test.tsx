@@ -71,7 +71,7 @@ describe("AssetStrip", () => {
 		);
 	});
 
-	it("shows an uploaded reference both as a reference and as media", async () => {
+	it("shows an uploaded reference once, as a reference", async () => {
 		open(
 			<>
 				<AssetStripReferences />
@@ -87,6 +87,9 @@ describe("AssetStrip", () => {
 
 		expect(
 			document.querySelectorAll('[aria-label="Assets"] > li'),
-		).toHaveLength(2);
+		).toHaveLength(1);
+		expect(
+			document.querySelector('button[aria-label="Edit Reference 1"]'),
+		).not.toBeNull();
 	});
 });

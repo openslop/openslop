@@ -1,8 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useSlateStatic } from "slate-react";
+import type { Editor } from "slate";
+import { useSlateSelector, useSlateStatic } from "slate-react";
+import { shallow } from "zustand/shallow";
+import { getAssets } from "@/lib/canvas/assets";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
+import { getPrimaryUrl } from "@/lib/connectors/asset-url";
+import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
+import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { deleteCharacter } from "./delete-asset";
@@ -57,12 +63,37 @@ export function AssetStripReferences() {
 	));
 }
 
+const avatarIdsOf = (editor: Editor) =>
+	getAssets(editor.children)
+		.filter((asset) => asset.type === "asset_avatar")
+		.map((asset) => asset.id);
+
+/** Whether a reference or an avatar tile already shows the file at `url`. */
+function useShownAsAsset(url: string): boolean {
+	const { urls } = useReferenceImages();
+	const avatarIds = useSlateSelector(avatarIdsOf, shallow);
+	const isAvatar = useQueueSelector((q) =>
+		avatarIds.some(
+			(id) => getPrimaryUrl(q.getElementSnapshot(id).result, "image") === url,
+		),
+	);
+	return urls.includes(url) || isAvatar;
+}
+
+function AssetStripMediaItem({ item }: { item: MediaItem }) {
+	if (useShownAsAsset(item.url)) return null;
+	return (
+		<li>
+			<LibraryMediaTile item={item} />
+		</li>
+	);
+}
+
+/** The project's media, each file once: what a reference or avatar tile shows isn't listed again. */
 export function AssetStripMedia() {
 	const media = useProject((state) => state.media);
 	return media.map((item) => (
-		<li key={item.name}>
-			<LibraryMediaTile item={item} />
-		</li>
+		<AssetStripMediaItem key={item.name} item={item} />
 	));
 }
 
