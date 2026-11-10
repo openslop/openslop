@@ -45,7 +45,7 @@ export function runTransformPrompt(
 
 export async function runOnError(
 	plugins: ConnectorPlugin[],
-	error: string,
+	error: unknown,
 	ctx: PluginContext,
 ): Promise<void> {
 	for (const plugin of plugins) await plugin.onError?.(error, ctx);

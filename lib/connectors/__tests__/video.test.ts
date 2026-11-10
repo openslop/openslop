@@ -96,13 +96,15 @@ describe("HttpVideoConnector", () => {
 
 	it("runs onError plugin on failure", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("video failed"));
-		const errors: string[] = [];
+		const errors: unknown[] = [];
 		const connector = new HttpVideoConnector({
 			...config,
 			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
 		});
 
-		await expect(connector.generate({ prompt: "test" })).rejects.toThrow();
-		expect(errors[0]).toContain("video failed");
+		const error = await connector
+			.generate({ prompt: "test" })
+			.catch((e: unknown) => e);
+		expect(errors).toEqual([error]);
 	});
 });

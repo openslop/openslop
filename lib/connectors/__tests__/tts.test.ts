@@ -76,15 +76,15 @@ describe("BaseTTSConnector", () => {
 
 	it("runs onError plugin on failure", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("tts failed"));
-		const errors: string[] = [];
+		const errors: unknown[] = [];
 		const connector = new HttpTTSConnector({
 			...config,
 			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
 		});
 
-		await expect(
-			connector.generate({ prompt: "hi", voiceId: "v" }),
-		).rejects.toThrow();
-		expect(errors[0]).toContain("tts failed");
+		const error = await connector
+			.generate({ prompt: "hi", voiceId: "v" })
+			.catch((e: unknown) => e);
+		expect(errors).toEqual([error]);
 	});
 });

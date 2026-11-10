@@ -1,5 +1,4 @@
 import { HttpLLMGateway } from "@/lib/gateway/http";
-import { stringifyError } from "@/lib/errors";
 import { BaseConnector } from "../base";
 import { runOnError } from "../plugins";
 import type {
@@ -37,7 +36,7 @@ export class HttpLLMConnector
 			const prepared = await this.prepareParams(params, {});
 			yield* this.gateway.stream(prepared, signal);
 		} catch (error) {
-			await runOnError(this.plugins, stringifyError(error), {});
+			await runOnError(this.plugins, error, {});
 			throw error;
 		}
 	}
