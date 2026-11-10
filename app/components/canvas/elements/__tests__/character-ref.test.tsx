@@ -64,11 +64,7 @@ const renderElement = ({
 	);
 
 const untouched = () => Promise.reject(new Error("a chip reads no history"));
-const noHistory: ElementVersionStorage = {
-	read: untouched,
-	write: untouched,
-	copy: untouched,
-};
+const noHistory: ElementVersionStorage = { read: untouched, write: untouched };
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 

@@ -413,15 +413,6 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getActiveCount()).toBe(1);
 			generationQueue.discard("d5");
 		});
-
-		it("announces the copy to its listeners", () => {
-			const duplicated = vi.fn();
-			generationQueue.onDuplicated(duplicated);
-
-			generationQueue.duplicate("d7", "d8");
-
-			expect(duplicated).toHaveBeenCalledWith({ fromId: "d7", toId: "d8" });
-		});
 	});
 
 	describe("setError", () => {

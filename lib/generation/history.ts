@@ -3,14 +3,10 @@ import { toastError } from "@/lib/toast-error";
 import type { CommittedVersion, ElementVersion } from "./versions";
 import { VersionLog } from "./versions";
 
-export type ElementCopy = { fromId: string; toId: string };
-
 export interface ElementVersionStorage {
 	read(elementId: string): Promise<ElementVersion[]>;
 	/** Resolves with the version as stored; storage alone decides its date. */
 	write(version: CommittedVersion): Promise<ElementVersion>;
-	/** Keeps each version's date. */
-	copy(copy: ElementCopy): Promise<ElementVersion[]>;
 }
 
 /** A version list is either still arriving, readable, or unreadable. */
@@ -59,16 +55,6 @@ export class ElementHistory {
 			this.log.record(await this.storage.write(committed));
 		} catch (error) {
 			toastError(error, "Saving this version failed");
-			return;
-		}
-		this.emitter.notify();
-	};
-
-	duplicate = async (copy: ElementCopy): Promise<void> => {
-		try {
-			this.log.hydrate(copy.toId, await this.storage.copy(copy));
-		} catch (error) {
-			toastError(error, "Copying this element's history failed");
 			return;
 		}
 		this.emitter.notify();

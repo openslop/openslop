@@ -33,7 +33,6 @@ export function GenerationQueueProvider({
 		const history = new ElementHistory(storage);
 		const queue = new GenerationQueue({ initialState });
 		queue.onCommitted(history.record);
-		queue.onDuplicated(history.duplicate);
 		return { queue, history };
 	});
 	useEffect(() => () => queue.cancelAll(), [queue]);

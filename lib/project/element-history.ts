@@ -5,10 +5,7 @@ import {
 	ASSET_CONNECTOR_TYPES,
 	AssetResultSchema,
 } from "@/lib/connectors/types";
-import type {
-	ElementCopy,
-	ElementVersionStorage,
-} from "@/lib/generation/history";
+import type { ElementVersionStorage } from "@/lib/generation/history";
 import { GenerationInputsSchema } from "@/lib/generation/inputs";
 import {
 	versionKey,
@@ -106,30 +103,9 @@ export async function saveElementVersion(
 	return toVersion(RowSchema.parse(data));
 }
 
-export async function copyElementVersions(
-	projectId: string,
-	{ fromId, toId }: ElementCopy,
-): Promise<ElementVersion[]> {
-	const copies = (await fetchElementVersions(projectId, fromId)).map(
-		(version) => ({ ...version, elementId: toId }),
-	);
-	const { error } = await createClient()
-		.from(TABLE)
-		.upsert(
-			copies.map((copy) => ({
-				...toRow(projectId, copy),
-				created_at: copy.createdAt,
-			})),
-			{ onConflict: "id" },
-		);
-	if (error) throw error;
-	return copies;
-}
-
 export const elementHistoryStorage = (
 	projectId: string,
 ): ElementVersionStorage => ({
 	read: (elementId) => fetchElementVersions(projectId, elementId),
 	write: (version) => saveElementVersion(projectId, version),
-	copy: (copy) => copyElementVersions(projectId, copy),
 });

@@ -125,7 +125,6 @@ export class SnapshotStore {
 		else this.state.delete(id);
 	}
 
-	/** In-flight progress stays the source's, so the copy lands idle. */
 	copy(fromId: string, toId: string) {
 		this.update(
 			toId,
