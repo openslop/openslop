@@ -11,7 +11,6 @@ const span = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	id: "e1",
 	type: "video",
 	sceneNumber: 1,
-	seconds: 10,
 	words: 30,
 	dialogueIds: ["n1"],
 	durationSec: 10,

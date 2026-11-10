@@ -12,10 +12,8 @@ import {
 	estimateDialogueLengths,
 } from "@/lib/canvas/spoken-words";
 import { isGenerated } from "@/lib/canvas/types";
-import {
-	estimateRuntime,
-	estimateVisualSpans,
-} from "@/lib/render/visual-spans";
+import { estimateRuntime } from "@/lib/render/estimate-runtime";
+import { estimateVisualSpans } from "@/lib/render/visual-spans";
 import {
 	captionElements,
 	autoCaptionElements,
@@ -66,10 +64,7 @@ export function useAgentTools() {
 				estimateDialogueLengths: () => estimateDialogueLengths(editor.children),
 				estimateVisualSpans: () => estimateVisualSpans(editor.children),
 				estimateRuntime: () =>
-					estimateRuntime(
-						editor.children,
-						store.getState().videoSettings.transitionType,
-					),
+					estimateRuntime(editor.children, store.getState().videoSettings),
 				elementResult: async (id) => {
 					const element = findElementById(editor, id)?.[0];
 					return (
