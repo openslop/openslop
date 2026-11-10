@@ -24,23 +24,28 @@ import { useProject } from "@/lib/project/use-project";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import type { UploadKind } from "@/lib/upload/upload-files";
 import { useEditorPanel } from "../panel/editor-panel-context";
+import { LoadRequestItem, useLoadRequest } from "../playground/load-request";
 import { MediaAssetTile } from "./asset-tiles";
 import { EmptyLibrary, MediaSearch } from "./media-kinds";
 import { uploadingTiles } from "./uploading-tile";
 
-/** Choosing the tile uses the media for whatever asked; everything else waits in its ⋮. */
-const MediaChoice = ({
+/** Choosing the tile uses the media for whatever asked; its request waits in the menu. */
+function MediaChoice({
 	item,
 	onPick,
 }: {
 	item: MediaItem;
 	onPick: () => void;
-}) => (
-	<MediaAssetTile
-		item={item}
-		primary={{ label: `Use ${item.name}`, icon: PlusCircle, onSelect: onPick }}
-	/>
-);
+}) {
+	const request = useLoadRequest(item);
+	return (
+		<MediaAssetTile
+			item={item}
+			primary={{ label: "Use this", icon: PlusCircle, onSelect: onPick }}
+			menu={request && <LoadRequestItem {...request} />}
+		/>
+	);
+}
 
 type MediaUpload = ReturnType<typeof useMediaUpload>;
 

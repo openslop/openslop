@@ -10,7 +10,7 @@ import { UploadingTile } from "./uploading-tile";
 import {
 	ArtStyleAssetTile,
 	CharacterAssetTile,
-	MediaAssetTile,
+	LibraryMediaTile,
 	ReferenceAssetTile,
 } from "./asset-tiles";
 
@@ -61,7 +61,7 @@ export function AssetStripMedia() {
 	const media = useProject((state) => state.media);
 	return media.map((item) => (
 		<li key={item.name}>
-			<MediaAssetTile item={item} />
+			<LibraryMediaTile item={item} />
 		</li>
 	));
 }

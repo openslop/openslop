@@ -3,14 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import {
-	Image,
-	MagicEdit,
-	Mic,
-	Palette,
-	Pencil,
-	User,
-} from "@/components/ui/icon";
+import { Image, Mic, Palette, Pencil, User } from "@/components/ui/icon";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useHasAsset } from "@/lib/canvas/use-assets";
@@ -19,16 +12,10 @@ import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
 import { AudioPlayer } from "./audio-player";
 import { MEDIA_KINDS } from "./media-kinds";
-import {
-	DeleteItem,
-	TileMenuItem,
-	useTilePlayer,
-	type TilePrimary,
-} from "./tile-actions";
+import { DeleteItem, useTilePlayer, type TilePrimary } from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
 import { deleteArtStyle } from "./delete-asset";
-import { usePlayground } from "../playground/playground-context";
-import { useTake } from "../playground/use-take";
+import { LoadRequestItem, useLoadRequest } from "../playground/load-request";
 
 type TileProps = { children?: ReactNode };
 
@@ -143,37 +130,14 @@ type MediaTileProps = TileProps & {
 	menu?: ReactNode;
 };
 
-/** Loads the request that made `item` into the playground, when the playground made it. */
-function useReusing(item: MediaItem) {
-	const { take } = useTake(item);
-	const { reuse } = usePlayground();
-	return (
-		take && {
-			label: `Load the request that made ${item.name}`,
-			icon: MagicEdit,
-			onSelect: () => reuse(take),
-		}
-	);
-}
-
-const LoadRequestItem = ({ onSelect }: { onSelect: () => void }) => (
-	<TileMenuItem icon={MagicEdit} onSelect={onSelect}>
-		Load request
-	</TileMenuItem>
-);
-
-/** A piece of the project's media as a small tile; its request is the face's action or in its menu. */
+/** A piece of the project's media as a small tile; the caller says what its face does, if anything. */
 export function MediaAssetTile({
-	item,
+	item: { name, kind, url, createdAt },
 	primary,
 	menu,
 	children,
-}: MediaTileProps & { primary?: TilePrimary }) {
-	const { name, kind, url, createdAt } = item;
+}: MediaTileProps & { primary: TilePrimary | undefined }) {
 	const remove = useDeleteMedia(name);
-	const reusing = useReusing(item);
-	const player = useTilePlayer(kind === "video" ? url : undefined, name);
-	const chosen = primary ?? player.primary ?? reusing;
 	const previewKind = kind === "audio" ? undefined : kind;
 	return (
 		<>
@@ -185,18 +149,10 @@ export function MediaAssetTile({
 				createdAt={createdAt}
 				Icon={MEDIA_KINDS[kind].Icon}
 				fallback="icon"
-				primary={chosen}
-				menu={
-					<>
-						{reusing && chosen !== reusing && (
-							<LoadRequestItem onSelect={reusing.onSelect} />
-						)}
-						{menu}
-					</>
-				}
+				primary={primary}
+				menu={menu}
 				onDelete={remove.request}
 			>
-				{player.video}
 				{children}
 			</AssetTile>
 			{remove.dialog}
@@ -204,17 +160,41 @@ export function MediaAssetTile({
 	);
 }
 
+/** Media as a library shows it: a video's face plays it, anything else's loads its request, which is otherwise in the menu. */
+export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
+	const player = useTilePlayer(
+		item.kind === "video" ? item.url : undefined,
+		item.name,
+	);
+	const request = useLoadRequest(item);
+	return (
+		<MediaAssetTile
+			item={item}
+			primary={player.primary ?? request}
+			menu={
+				<>
+					{player.primary && request && <LoadRequestItem {...request} />}
+					{menu}
+				</>
+			}
+		>
+			{player.video}
+			{children}
+		</MediaAssetTile>
+	);
+}
+
 /** Audio has no face to choose, so its request is always in the menu. */
 function MediaAudioRow({ item, menu }: MediaTileProps) {
 	const remove = useDeleteMedia(item.name);
-	const reusing = useReusing(item);
+	const request = useLoadRequest(item);
 	return (
 		<>
 			<AudioCard
 				name={item.name}
 				menu={
 					<>
-						{reusing && <LoadRequestItem onSelect={reusing.onSelect} />}
+						{request && <LoadRequestItem {...request} />}
 						{menu}
 						<DeleteItem onSelect={remove.request} />
 					</>
@@ -232,8 +212,8 @@ export function MediaLibraryItem({ item, menu, children }: MediaTileProps) {
 	return item.kind === "audio" ? (
 		<MediaAudioRow item={item} menu={menu} />
 	) : (
-		<MediaAssetTile item={item} menu={menu}>
+		<LibraryMediaTile item={item} menu={menu}>
 			{children}
-		</MediaAssetTile>
+		</LibraryMediaTile>
 	);
 }
