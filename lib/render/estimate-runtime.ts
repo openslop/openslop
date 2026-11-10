@@ -12,12 +12,11 @@ import { estimateSpeechSec } from "../project/video-length";
 import { resolveElements } from "./resolve";
 import { buildRenderLayout, type BuildLayoutOptions } from "./scene-builder";
 
-/** How long an element plays once generated as the script sets it. */
 const scriptedLengthSec = (element: ContentElement): number => {
 	if (isSpeech(element)) return estimateSpeechSec(spokenWords(element));
-	return CONTENT_TYPES[element.type].outputKind === "video"
-		? getDuration(element)
-		: 0;
+	if (CONTENT_TYPES[element.type].outputKind === "video")
+		return getDuration(element);
+	return 0;
 };
 
 // resolveElements lays down only what has media to play.
