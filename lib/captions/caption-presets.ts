@@ -16,16 +16,14 @@ export const CAPTION_PRESET_KEYS = [
 
 export type CaptionPresetKey = (typeof CAPTION_PRESET_KEYS)[number];
 
-export type CaptionPreset = {
-	key: CaptionPresetKey;
+type LabeledStyle = {
 	label: string;
 	style: CaptionStyle;
 };
 
-const preset = (
-	label: string,
-	style: Partial<CaptionStyle>,
-): Omit<CaptionPreset, "key"> => ({
+export type CaptionPreset = LabeledStyle & { key: CaptionPresetKey };
+
+const preset = (label: string, style: Partial<CaptionStyle>): LabeledStyle => ({
 	label,
 	style: { ...DEFAULT_CAPTION_STYLE, ...style },
 });
@@ -36,7 +34,7 @@ const text = (style: Partial<CaptionTextStyle>): CaptionTextStyle => ({
 });
 
 /** Keyed by {@link CAPTION_PRESET_KEYS}, so every key names exactly one preset. */
-const PRESETS: Record<CaptionPresetKey, Omit<CaptionPreset, "key">> = {
+const PRESETS: Record<CaptionPresetKey, LabeledStyle> = {
 	classic: preset("Classic", { alignX: "center" }),
 	karaoke: preset("Karaoke", {
 		font: "bangers",

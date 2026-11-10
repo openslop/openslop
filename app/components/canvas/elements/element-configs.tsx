@@ -30,8 +30,7 @@ type ElementControl = ComponentType<{
 }>;
 
 /** How a content type looks on the canvas, and the controls its card adds to every card's own. */
-interface ElementConfig extends ContentSpec {
-	type: ContentType;
+type ElementPresentation = {
 	label: string;
 	Icon: IconComponent;
 	/** Tint for the square type-icon container, keyed to the media-type color. */
@@ -47,9 +46,9 @@ interface ElementConfig extends ContentSpec {
 	tools?: ElementControl[];
 	/** Beside the generate button. */
 	actions?: ElementControl[];
-}
+};
 
-type ElementPresentation = Omit<ElementConfig, keyof ContentSpec | "type">;
+type ElementConfig = ContentSpec & ElementPresentation & { type: ContentType };
 
 const PRESENTATION: Record<ContentType, ElementPresentation> = {
 	narration: {
