@@ -13,13 +13,18 @@ import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import {
 	artStyleReferences,
 	deriveArtStyle,
+	type CharacterAvatar,
 } from "@/lib/project/derive-art-style";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { useAsset, useAssets } from "@/lib/canvas/use-assets";
 import { setAsset } from "@/lib/canvas/asset-ops";
 import { toastError } from "@/lib/toast-error";
+import { EmptyState } from "@/components/ui/empty-state";
+import { User } from "@/components/ui/icon";
 import { AssetDialog } from "../character/asset-dialog";
-import { TextAreaField } from "../character/fields";
+import { FieldHeader, FieldLabel, TextAreaField } from "../character/fields";
+import { AssetTile } from "../asset-tile";
+import { TileRow } from "../attributes/tile-row";
 import { ReferenceImages } from "./reference-images";
 import { ArtStylePresets } from "./art-style-presets";
 
@@ -36,18 +41,16 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 	const model = useDefaultModels().llm;
 	const createConnector = useCreateConnector();
 
-	const hasReferences = useQueueSelector(
-		(q) => artStyleReferences(assets, q).length > 0,
-	);
+	useQueueSelector((q) => q.getResultVersion());
+	const { images, avatars } = artStyleReferences(assets, queue);
+	const references = [...images, ...avatars.map(({ url }) => url)];
+	const hasReferences = references.length > 0;
 
 	const deriveFromReferences = () =>
 		startDeriving(async () => {
 			try {
 				setStyle(
-					await deriveArtStyle(
-						createConnector("llm", model),
-						artStyleReferences(assets, queue),
-					),
+					await deriveArtStyle(createConnector("llm", model), references),
 				);
 			} catch (error) {
 				toastError(error, "Deriving the art style failed");
@@ -63,6 +66,8 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 		>
 			<ReferenceImages />
 
+			<CharacterAvatars avatars={avatars} />
+
 			<TextAreaField
 				label="Art Style Description"
 				autoFocus
@@ -77,11 +82,11 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 						tooltip={
 							hasReferences
 								? undefined
-								: "Use reference images and character avatars for art style description: upload some first"
+								: "Upload reference images or character avatars to describe their art style"
 						}
 					>
 						{deriving && <Spinner />}
-						Use references
+						Use images and avatars
 					</Button>
 				}
 				rows={5}
@@ -92,5 +97,35 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 
 			<ArtStylePresets value={style} onSelect={setStyle} />
 		</AssetDialog>
+	);
+}
+
+/** The uploaded character avatars the art style is read from, shown read-only. */
+function CharacterAvatars({ avatars }: { avatars: CharacterAvatar[] }) {
+	return (
+		<section aria-label="Character avatars" className="flex flex-col gap-2">
+			<FieldHeader>
+				<FieldLabel>Character avatars</FieldLabel>
+			</FieldHeader>
+			{avatars.length === 0 ? (
+				<EmptyState
+					icon={User}
+					title="No uploaded character avatars yet"
+					description="Character avatars you upload show up here"
+				/>
+			) : (
+				<TileRow>
+					{avatars.map(({ name, url }) => (
+						<AssetTile
+							key={name}
+							name={name}
+							previewUrl={url}
+							context="Character avatar"
+							Icon={User}
+						/>
+					))}
+				</TileRow>
+			)}
+		</section>
 	);
 }

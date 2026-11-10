@@ -26,14 +26,17 @@ describe("artStyleReferences", () => {
 					},
 				}),
 			),
-		).toEqual([
-			"https://example.com/reference.jpg",
-			"https://example.com/uploaded.jpg",
-		]);
+		).toEqual({
+			images: ["https://example.com/reference.jpg"],
+			avatars: [{ name: "Mira", url: "https://example.com/uploaded.jpg" }],
+		});
 	});
 
 	it("is empty when nothing has been uploaded", () => {
-		expect(artStyleReferences([avatar("Mira")], resultQueue({}))).toEqual([]);
+		expect(artStyleReferences([avatar("Mira")], resultQueue({}))).toEqual({
+			images: [],
+			avatars: [],
+		});
 	});
 });
 
