@@ -62,7 +62,6 @@ export function AssetTile({
 			? { src: previewUrl, kind: previewKind, name, context, createdAt }
 			: undefined,
 	);
-	const hasMenu = Boolean(viewer.item || menu || onRemove || onDelete);
 	const fallbackContent =
 		fallback === "icon" ? (
 			<Icon className="h-5 w-5" />
@@ -97,14 +96,12 @@ export function AssetTile({
 						className="absolute top-1 right-1"
 					/>
 				) : (
-					hasMenu && (
-						<TileMenu label={name}>
-							{viewer.item}
-							{menu}
-							{onRemove && <RemoveItem onSelect={onRemove} />}
-							{onDelete && <DeleteItem onSelect={onDelete} />}
-						</TileMenu>
-					)
+					<TileMenu label={name}>
+						{viewer.item}
+						{menu}
+						{onRemove && <RemoveItem onSelect={onRemove} />}
+						{onDelete && <DeleteItem onSelect={onDelete} />}
+					</TileMenu>
 				)}
 			</ThumbnailFace>
 			{viewer.dialog}

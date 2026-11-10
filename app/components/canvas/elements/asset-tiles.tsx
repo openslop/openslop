@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useSlateStatic } from "slate-react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import {
 	Image,
@@ -25,6 +26,7 @@ import {
 	type TilePrimary,
 } from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
+import { deleteArtStyle } from "./delete-asset";
 import { usePlayground } from "../playground/playground-context";
 import { useTake } from "../playground/use-take";
 
@@ -37,6 +39,7 @@ const editing = (name: string, onSelect: () => void): TilePrimary => ({
 });
 
 export function ArtStyleAssetTile(tile: TileProps) {
+	const editor = useSlateStatic();
 	const { editAsset } = useAssetEditors();
 	return (
 		<AssetTile
@@ -44,12 +47,13 @@ export function ArtStyleAssetTile(tile: TileProps) {
 			Icon={Palette}
 			fallback="icon"
 			primary={editing("Art style", () => editAsset("asset_style"))}
+			onDelete={() => deleteArtStyle(editor)}
 			{...tile}
 		/>
 	);
 }
 
-type CharacterTileProps = TileProps & { name: string; onDelete?: () => void };
+type CharacterTileProps = TileProps & { name: string; onDelete: () => void };
 
 /** A character by their look, or by their voice when they have no look. */
 export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {

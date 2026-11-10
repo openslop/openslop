@@ -14,7 +14,7 @@ import {
 	ReferenceAssetTile,
 } from "../elements/asset-tiles";
 import { useAssetEditors } from "../elements/asset-edit-context";
-import { deleteCharacter } from "../elements/character/delete-character";
+import { deleteCharacter } from "../elements/delete-asset";
 import {
 	EmptyLibrary,
 	MEDIA_KINDS,

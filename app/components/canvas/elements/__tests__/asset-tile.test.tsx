@@ -81,9 +81,4 @@ describe("AssetTile", () => {
 			document.body.querySelector('[data-slot="thumbnail-caption"] .icon'),
 		).not.toBeNull();
 	});
-
-	it("offers no menu until there is something in it", () => {
-		renderTile();
-		expect(document.body.querySelector(MENU)).toBeNull();
-	});
 });

@@ -5,7 +5,7 @@ import { useSlateStatic } from "slate-react";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useProject } from "@/lib/project/use-project";
 import { useReferenceImages } from "../hooks/use-reference-images";
-import { deleteCharacter } from "./character/delete-character";
+import { deleteCharacter } from "./delete-asset";
 import { UploadingTile } from "./uploading-tile";
 import {
 	ArtStyleAssetTile,

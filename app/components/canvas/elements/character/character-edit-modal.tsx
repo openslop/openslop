@@ -19,7 +19,7 @@ import { ResetEditsButton } from "../reset-edits-button";
 import { AddImageButton } from "../element-media-picker";
 import { OutputPreview } from "../output-preview";
 import { AssetDialog } from "./asset-dialog";
-import { deleteCharacter } from "./delete-character";
+import { deleteCharacter } from "../delete-asset";
 import { SwitchField, TextAreaField } from "./fields";
 import { VoiceEditor } from "./voice-editor";
 

@@ -67,6 +67,18 @@ describe("AssetsPanel", () => {
 		expect(openDialog()).toBe("asset_style");
 	});
 
+	it("deletes the art style from its menu and offers to add one again", async () => {
+		open();
+		await click('button[aria-label="Add art style"]');
+
+		await chooseTileMenuItem("Art style", "Delete");
+
+		expect(findAsset(canvas.editor.children, "asset_style")).toBeUndefined();
+		expect(
+			document.body.querySelector('button[aria-label="Add art style"]'),
+		).not.toBeNull();
+	});
+
 	it("offers no second art style once there is one", async () => {
 		open();
 		await click('button[aria-label="Add art style"]');
