@@ -14,7 +14,8 @@ import {
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
 import { MediaPicker } from "../media-picker";
 import { AddButton } from "@/components/ui/add-button";
-import { ReferenceImageTiles } from "../reference-images";
+import { ReferenceTile } from "../asset-tiles";
+import { TileRow } from "./tile-row";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
 import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
 
@@ -50,37 +51,44 @@ export function ReferenceImagesEditor({ Section, ...target }: LaidOutTarget) {
 		<Section
 			title={label}
 			action={
-				<MediaPicker
-					kind="image"
-					onPick={(url) =>
-						addElementReferences(editor, element.id, attrKey, [url])
-					}
-				>
-					<AddButton label="Add reference image" />
-				</MediaPicker>
-			}
-		>
-			<div className="flex flex-col gap-2">
-				<div className="flex items-center justify-between gap-2">
-					<span className="text-label">
-						{override ? "Custom for this element" : "Using project references"}
-					</span>
+				<>
 					{override && (
 						<TooltipIconButton
-							label="Reset to project references"
+							label="Reset references"
 							variant="inherit"
 							onClick={() => set(null)}
 						>
 							<RotateCcw />
 						</TooltipIconButton>
 					)}
+					<MediaPicker
+						kind="image"
+						onPick={(url) =>
+							addElementReferences(editor, element.id, attrKey, [url])
+						}
+					>
+						<AddButton label="Add reference image" />
+					</MediaPicker>
+				</>
+			}
+		>
+			{urls.length > 0 && (
+				<div className="flex flex-col gap-2">
+					{!override && (
+						<span className="text-label">Using project references</span>
+					)}
+					<TileRow columns={2}>
+						{urls.map((url, index) => (
+							<ReferenceTile
+								key={url}
+								url={url}
+								index={index}
+								onRemove={() => set(urls.filter((_, i) => i !== index))}
+							/>
+						))}
+					</TileRow>
 				</div>
-				<ReferenceImageTiles
-					urls={urls}
-					onRemove={(index) => set(urls.filter((_, i) => i !== index))}
-					columns={2}
-				/>
-			</div>
+			)}
 		</Section>
 	);
 }

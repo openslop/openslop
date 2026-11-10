@@ -1,9 +1,5 @@
-"use client";
-
 import { EmptyState } from "@/components/ui/empty-state";
 import { Search } from "@/components/ui/icon";
-import { ReferenceTile } from "./asset-tiles";
-import { TileRow } from "./attributes/tile-row";
 
 export const NoReferenceImages = () => (
 	<EmptyState
@@ -12,28 +8,3 @@ export const NoReferenceImages = () => (
 		description="Reference images you add show up here"
 	/>
 );
-
-/** An element's reference images as tiles, each removable from the list. */
-export function ReferenceImageTiles({
-	urls,
-	onRemove,
-	columns,
-}: {
-	urls: string[];
-	onRemove: (index: number) => void;
-	columns?: 2;
-}) {
-	if (urls.length === 0) return null;
-	return (
-		<TileRow columns={columns}>
-			{urls.map((url, index) => (
-				<ReferenceTile
-					key={`reference:${url}`}
-					url={url}
-					index={index}
-					onRemove={() => onRemove(index)}
-				/>
-			))}
-		</TileRow>
-	);
-}
