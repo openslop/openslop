@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Palette, User } from "@/components/ui/icon";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useMediaLibrary } from "@/lib/project/use-media-library";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
 	ArtStyleAssetTile,
@@ -22,10 +23,7 @@ import {
 } from "../elements/media-kinds";
 import { uploadingTiles } from "../elements/uploading-tile";
 import { AddMediaMenu } from "../elements/add-media-menu";
-import {
-	NoReferenceImages,
-	useReferenceUpload,
-} from "../elements/reference-images";
+import { NoReferenceImages } from "../elements/reference-images";
 import { PagedTiles } from "./paged-tiles";
 import { PanelCard } from "./panel-card";
 import { AddButton } from "@/components/ui/add-button";
@@ -79,14 +77,20 @@ function CharactersCard() {
 
 function ReferencesCard() {
 	const { urls, add, remove } = useReferenceImages();
-	const { addMenu, uploadingCount, inputElement } = useReferenceUpload(add);
+	const { openPicker, uploadingCount, inputElement } = useMediaUpload({
+		kinds: ["image"],
+		multiple: true,
+		onUpload: add,
+	});
 	return (
 		<>
 			{inputElement}
 			<AssetCard
 				title="References"
 				empty={<NoReferenceImages />}
-				action={addMenu}
+				action={
+					<AddMediaMenu label="Add reference image" onUpload={openPicker} />
+				}
 			>
 				{[
 					...urls.map((url, index) => (

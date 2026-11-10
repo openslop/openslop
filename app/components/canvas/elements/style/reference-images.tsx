@@ -1,24 +1,26 @@
 "use client";
 
+import { AddButton } from "@/components/ui/add-button";
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
 import { FieldHeader, FieldLabel } from "../character/fields";
-import { ReferenceImageTiles, useReferenceUpload } from "../reference-images";
+import { MediaPicker } from "../media-picker";
+import { ReferenceImageTiles } from "../reference-images";
 
-/** The project's reference images, with the menu that adds more. */
+/** The project's reference images, added from the media picker like an element's. */
 export function ReferenceImages() {
 	const { urls, add, remove } = useReferenceImages();
-	const { addMenu, uploadingCount, inputElement } = useReferenceUpload(add);
 	return (
 		<section aria-label="Reference images" className="flex flex-col gap-2">
-			<FieldHeader aside={addMenu}>
+			<FieldHeader
+				aside={
+					<MediaPicker kind="image" onPick={(url) => add([url])}>
+						<AddButton label="Add reference image" />
+					</MediaPicker>
+				}
+			>
 				<FieldLabel>Reference images</FieldLabel>
 			</FieldHeader>
-			<ReferenceImageTiles
-				urls={urls}
-				uploadingCount={uploadingCount}
-				onRemove={remove}
-			/>
-			{inputElement}
+			<ReferenceImageTiles urls={urls} onRemove={remove} />
 		</section>
 	);
 }
