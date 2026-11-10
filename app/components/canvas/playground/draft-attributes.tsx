@@ -8,7 +8,7 @@ import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { AttributeBadge } from "../elements/attribute-badge";
 import type { LaidOutTarget } from "../elements/attributes/attribute-target";
 import { ReferenceImagesEditor } from "../elements/attributes/reference-images-popover";
-import { StartFrameOptions } from "../elements/attributes/start-frame-picker";
+import { DraftStartFrame } from "../elements/attributes/start-frame-picker";
 import { PanelSection } from "../panel/panel-card";
 
 type Edit = NonNullable<AttributeDef["edit"]>["kind"];
@@ -16,7 +16,7 @@ type Edit = NonNullable<AttributeDef["edit"]>["kind"];
 /** Pictures need the room a popover gave them, so they lie flat under their label. */
 const LAID_FLAT: Partial<Record<Edit, ComponentType<LaidOutTarget>>> = {
 	images: ReferenceImagesEditor,
-	frame: StartFrameOptions,
+	frame: DraftStartFrame,
 };
 
 const laidFlat = (def: AttributeDef) => def.edit && LAID_FLAT[def.edit.kind];

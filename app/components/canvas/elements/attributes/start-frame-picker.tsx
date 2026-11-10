@@ -1,7 +1,7 @@
 "use client";
 
 import { useSlateStatic } from "slate-react";
-import { Forbidden, Transition } from "@/components/ui/icon";
+import { Forbidden, Image, Transition } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,6 +23,7 @@ import {
 	START_FRAME,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
+import { AssetTile } from "../asset-tile";
 import { MediaPicker } from "../media-picker";
 import { AddButton } from "@/components/ui/add-button";
 import { RemoveItem, TileMenu, useViewLarger } from "../tile-actions";
@@ -125,12 +126,7 @@ function PreviousFrameTile({
 }
 
 /** An upload is kept while another choice is made so it can be chosen again. */
-export function StartFrameOptions({
-	element,
-	attrKey,
-	label,
-	Section,
-}: LaidOutTarget) {
+function StartFrameOptions({ element, attrKey, label }: AttributeTarget) {
 	const editor = useSlateStatic();
 	const source = frameSource(element.generationAttributes?.[attrKey]);
 	// Sloppy sets a picture as the start frame without remembering it as the upload.
@@ -144,7 +140,7 @@ export function StartFrameOptions({
 		});
 
 	return (
-		<Section
+		<AttributePopoverSection
 			title={label}
 			action={
 				<MediaPicker kind="image" onPick={(url) => setFrame(url, url)}>
@@ -177,6 +173,44 @@ export function StartFrameOptions({
 					/>
 				)}
 			</TileRow>
+		</AttributePopoverSection>
+	);
+}
+
+/** A draft opens on a picture or on nothing: it has no scene before it to choose instead. */
+export function DraftStartFrame({
+	element,
+	attrKey,
+	label,
+	Section,
+}: LaidOutTarget) {
+	const editor = useSlateStatic();
+	const source = frameSource(element.generationAttributes?.[attrKey]);
+	const setFrame = (url: string | null) =>
+		mergeAttrs(editor, element.id, {
+			[attrKey]: url ?? NO_FRAME,
+			[UPLOADED_FRAME_ATTR]: url,
+		});
+	return (
+		<Section
+			title={label}
+			action={
+				<MediaPicker kind="image" onPick={setFrame}>
+					<AddButton label="Add start frame" />
+				</MediaPicker>
+			}
+		>
+			{source.kind === "upload" && (
+				<TileRow columns={2}>
+					<AssetTile
+						name={label}
+						previewUrl={source.url}
+						context="Start frame"
+						Icon={Image}
+						onRemove={() => setFrame(null)}
+					/>
+				</TileRow>
+			)}
 		</Section>
 	);
 }
@@ -192,7 +226,7 @@ export function StartFramePicker(target: AttributeTarget) {
 				{summary}
 			</AttributeTrigger>
 			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
-				<StartFrameOptions {...target} Section={AttributePopoverSection} />
+				<StartFrameOptions {...target} />
 			</PopoverContent>
 		</Popover>
 	);
