@@ -1,10 +1,6 @@
 import { useSlateStatic } from "slate-react";
 import { MediaToggle } from "@/components/ui/media-toggle";
-import {
-	ButtonMenuTrigger,
-	InlineMenuTrigger,
-	SelectMenu,
-} from "@/components/ui/select-menu";
+import { ButtonMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
@@ -30,18 +26,13 @@ function formatValue(value: string, unit?: string): string {
 
 const SECONDS_FIELD = "w-20 font-numeric";
 
-interface AttributeBadgeProps {
-	element: GeneratedElement;
-	def: AttributeDef;
-	/** `button` shows a choice as a ghost button, named by its icon. */
-	look?: "inline" | "button";
-}
-
 export function AttributeBadge({
 	element,
 	def,
-	look = "inline",
-}: AttributeBadgeProps) {
+}: {
+	element: GeneratedElement;
+	def: AttributeDef;
+}) {
 	const editor = useSlateStatic();
 	const { key: attrKey, label, unit, edit } = def;
 	if (!edit) return null;
@@ -127,15 +118,9 @@ export function AttributeBadge({
 			}))}
 			contentClassName="max-h-64 min-w-24"
 		>
-			{look === "button" ? (
-				<ButtonMenuTrigger icon={def.icon} aria-label={tooltip}>
-					{formatValue(value, unit)}
-				</ButtonMenuTrigger>
-			) : (
-				<InlineMenuTrigger aria-label={tooltip}>
-					<span className="min-w-0 truncate">{formatValue(value, unit)}</span>
-				</InlineMenuTrigger>
-			)}
+			<ButtonMenuTrigger icon={edit.icon} aria-label={tooltip}>
+				{formatValue(value, unit)}
+			</ButtonMenuTrigger>
 		</SelectMenu>
 	);
 }

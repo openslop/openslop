@@ -51,12 +51,7 @@ export function DraftSettings({ element }: { element: GeneratedElement }) {
 	return (
 		<div className="flex flex-wrap gap-2">
 			{chips.map((def) => (
-				<AttributeBadge
-					key={def.key}
-					element={element}
-					def={def}
-					look="button"
-				/>
+				<AttributeBadge key={def.key} element={element} def={def} />
 			))}
 		</div>
 	);

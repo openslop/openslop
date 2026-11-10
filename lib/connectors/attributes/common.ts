@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { Freeze, Image, Monitor, Repeat, Timer } from "@/components/ui/icon";
+import {
+	Freeze,
+	Image,
+	Monitor,
+	Motion,
+	Repeat,
+	Timer,
+	Volume2,
+} from "@/components/ui/icon";
 import { parseNumber } from "@/lib/canvas/element-attributes";
 import {
 	DEFAULT_DURATION,
@@ -41,30 +49,29 @@ export const OWN_MODEL_DEFS: readonly AttributeDef[] = [
 export const volumeDef = (defaultValue: string): AttributeDef => ({
 	key: "volume",
 	label: "Volume",
-	edit: { kind: "enum", value: volumeValue },
+	edit: { kind: "enum", value: volumeValue, icon: Volume2 },
 	default: defaultValue,
 });
 
 export const motionDef: AttributeDef = {
 	key: "motion",
 	label: "Motion",
-	edit: { kind: "enum", value: z.enum(MOTION_EFFECTS) },
+	edit: { kind: "enum", value: z.enum(MOTION_EFFECTS), icon: Motion },
 	default: DEFAULT_MOTION,
 };
 
 export const durationDef: AttributeDef = {
 	key: "duration",
 	label: "Duration",
-	icon: Timer,
 	unit: "s",
-	edit: { kind: "enum", value: z.enum(DURATION_OPTIONS) },
+	edit: { kind: "enum", value: z.enum(DURATION_OPTIONS), icon: Timer },
 	default: DEFAULT_DURATION,
 };
 
 export const loopsDef: AttributeDef = {
 	key: "loops",
 	label: "Loops",
-	edit: { kind: "enum", value: z.enum(LOOPS_OPTIONS) },
+	edit: { kind: "enum", value: z.enum(LOOPS_OPTIONS), icon: Repeat },
 	default: DEFAULT_LOOPS,
 };
 
@@ -73,8 +80,7 @@ export const resolutionDef = (
 ): AttributeDef => ({
 	key: "resolution",
 	label: "Resolution",
-	icon: Monitor,
-	edit: { kind: "enum", value: z.enum(options) },
+	edit: { kind: "enum", value: z.enum(options), icon: Monitor },
 	default: options[0],
 	perModel: true,
 });
@@ -82,8 +88,7 @@ export const resolutionDef = (
 export const formatDef: AttributeDef = {
 	key: "format",
 	label: "Image format",
-	icon: Image,
-	edit: { kind: "enum", value: z.enum(IMAGE_FORMATS) },
+	edit: { kind: "enum", value: z.enum(IMAGE_FORMATS), icon: Image },
 	default: DEFAULT_IMAGE_FORMAT,
 };
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Image } from "@/components/ui/icon";
 import { describe, expect, it } from "vitest";
 import { AttributeSchema } from "../schema";
 import { reconcileAttributes } from "../reconcile";
@@ -78,7 +79,7 @@ describe("reconcileAttributes", () => {
 			{
 				key: "resolution",
 				label: "Resolution",
-				edit: { kind: "enum", value: z.enum(["720p", "1080p"]) },
+				edit: { kind: "enum", value: z.enum(["720p", "1080p"]), icon: Image },
 				default: "720p",
 			},
 		]);
@@ -86,7 +87,7 @@ describe("reconcileAttributes", () => {
 			{
 				key: "resolution",
 				label: "Resolution",
-				edit: { kind: "enum", value: z.enum(["720p"]) },
+				edit: { kind: "enum", value: z.enum(["720p"]), icon: Image },
 				default: "720p",
 			},
 		]);
