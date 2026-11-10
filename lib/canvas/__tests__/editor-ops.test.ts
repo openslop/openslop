@@ -239,9 +239,10 @@ describe("duplicateElement", () => {
 		const el = content("character", "c1", "line", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
-		duplicateElement(editor, "c1");
+		const copyId = duplicateElement(editor, "c1");
 
 		const copy = (editor.children[0] as Scene).children[1];
+		expect(copy.id).toBe(copyId);
 		expect(copy.id).not.toBe("c1");
 		expect(flatAttributes(copy)).toEqual({ name: "Lyra" });
 		expect(copy.children.map((leaf) => leaf.id)).not.toContain("c1-t");

@@ -50,13 +50,14 @@ function requireElement(editor: Editor, id: string): NodeEntry<CanvasElement> {
 	return found;
 }
 
-export function duplicateElement(editor: Editor, id: string): void {
+export function duplicateElement(editor: Editor, id: string): string {
 	const [element, path] = requireElement(editor, id);
+	const copyId = makeNodeId();
 	Transforms.insertNodes(
 		editor,
 		{
 			...element,
-			id: makeNodeId(),
+			id: copyId,
 			children: element.children.map((child) => ({
 				...child,
 				id: makeNodeId(),
@@ -64,6 +65,7 @@ export function duplicateElement(editor: Editor, id: string): void {
 		},
 		{ at: Path.next(path) },
 	);
+	return copyId;
 }
 
 /**
