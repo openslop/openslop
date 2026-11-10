@@ -15,6 +15,7 @@ import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-
 import { MediaPicker } from "../media-picker";
 import { AddButton } from "@/components/ui/add-button";
 import { ReferenceTile } from "../asset-tiles";
+import { NoReferenceImages } from "../reference-images";
 import { TileRow } from "./tile-row";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
 import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
@@ -37,7 +38,11 @@ const ownReferences = ({ element, attrKey }: AttributeTarget) =>
  * The element's reference images as tiles, under the menu that adds more. With no
  * override they are the project's; the first add or remove copies them onto it.
  */
-export function ReferenceImagesEditor({ Section, ...target }: LaidOutTarget) {
+export function ReferenceImagesEditor({
+	Section,
+	empty,
+	...target
+}: LaidOutTarget & { empty?: React.ReactNode }) {
 	const { element, attrKey, label } = target;
 	const editor = useSlateStatic();
 	const { urls: projectImages } = useReferenceImages();
@@ -72,7 +77,7 @@ export function ReferenceImagesEditor({ Section, ...target }: LaidOutTarget) {
 				</>
 			}
 		>
-			{urls.length > 0 && (
+			{urls.length > 0 ? (
 				<div className="flex flex-col gap-2">
 					{!override && (
 						<span className="text-label">Using project references</span>
@@ -88,6 +93,8 @@ export function ReferenceImagesEditor({ Section, ...target }: LaidOutTarget) {
 						))}
 					</TileRow>
 				</div>
+			) : (
+				empty
 			)}
 		</Section>
 	);
@@ -109,7 +116,11 @@ export function ReferenceImagesPopover({
 				{summary}
 			</AttributeTrigger>
 			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
-				<ReferenceImagesEditor {...target} Section={AttributePopoverSection} />
+				<ReferenceImagesEditor
+					{...target}
+					Section={AttributePopoverSection}
+					empty={<NoReferenceImages />}
+				/>
 				{children}
 			</PopoverContent>
 		</Popover>
