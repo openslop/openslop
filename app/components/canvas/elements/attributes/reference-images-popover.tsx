@@ -6,15 +6,17 @@ import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import { RotateCcw } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Popover, PopoverContent } from "@/components/ui/popover";
+import { THUMBNAIL_POPOVER_WIDTH } from "@/components/ui/thumbnail";
 import {
 	parseReferenceImages,
 	serializeReferenceImages,
 } from "@/lib/connectors/attributes/reference-images";
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
-import { ReferenceImagePicker } from "../reference-images";
+import { MediaPicker } from "../media-picker";
+import { AddButton } from "@/components/ui/add-button";
+import { ReferenceImageTiles } from "../reference-images";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
-import { AttributeTrigger } from "./attribute-trigger";
-import { TileRow } from "./tile-row";
+import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
 
 const summarize = (override: string[] | undefined, projectCount: number) => {
 	if (!override) return `Project (${projectCount})`;
@@ -31,11 +33,15 @@ const ownReferences = ({ element, attrKey }: AttributeTarget) =>
 	parseReferenceImages(element.generationAttributes?.[attrKey]);
 
 /**
- * The element's reference images as tiles, with the tile that adds more. With no
+ * The element's reference images as tiles, under the menu that adds more. With no
  * override they are the project's; the first add or remove copies them onto it.
  */
-export function ReferenceImagesEditor({ columns, ...target }: LaidOutTarget) {
-	const { element, attrKey } = target;
+export function ReferenceImagesEditor({
+	columns,
+	Section,
+	...target
+}: LaidOutTarget) {
+	const { element, attrKey, label } = target;
 	const editor = useSlateStatic();
 	const { urls: projectImages } = useReferenceImages();
 	const override = ownReferences(target);
@@ -45,31 +51,41 @@ export function ReferenceImagesEditor({ columns, ...target }: LaidOutTarget) {
 			[attrKey]: next && serializeReferenceImages(next),
 		});
 	return (
-		<>
-			<div className="flex items-center justify-between gap-2">
-				<span className="text-label text-muted-foreground">
-					{override ? "Custom for this element" : "Using project references"}
-				</span>
-				{override && (
-					<TooltipIconButton
-						label="Reset to project references"
-						variant="quiet"
-						onClick={() => set(null)}
-					>
-						<RotateCcw />
-					</TooltipIconButton>
-				)}
-			</div>
-			<TileRow columns={columns}>
-				<ReferenceImagePicker
-					urls={urls}
-					onAdd={(added) =>
-						addElementReferences(editor, element.id, attrKey, added)
+		<Section
+			title={label}
+			action={
+				<MediaPicker
+					kind="image"
+					onPick={(url) =>
+						addElementReferences(editor, element.id, attrKey, [url])
 					}
+				>
+					<AddButton label="Add reference image" />
+				</MediaPicker>
+			}
+		>
+			<div className="flex flex-col gap-2">
+				<div className="flex items-center justify-between gap-2">
+					<span className="text-label">
+						{override ? "Custom for this element" : "Using project references"}
+					</span>
+					{override && (
+						<TooltipIconButton
+							label="Reset to project references"
+							variant="inherit"
+							onClick={() => set(null)}
+						>
+							<RotateCcw />
+						</TooltipIconButton>
+					)}
+				</div>
+				<ReferenceImageTiles
+					urls={urls}
 					onRemove={(index) => set(urls.filter((_, i) => i !== index))}
+					columns={columns}
 				/>
-			</TileRow>
-		</>
+			</div>
+		</Section>
 	);
 }
 
@@ -88,8 +104,12 @@ export function ReferenceImagesPopover({
 			<AttributeTrigger tooltip={`${target.label}: ${summary}`}>
 				{summary}
 			</AttributeTrigger>
-			<PopoverContent align="end" className="flex w-72 flex-col gap-2">
-				<ReferenceImagesEditor {...target} columns={2} />
+			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
+				<ReferenceImagesEditor
+					{...target}
+					columns={2}
+					Section={AttributePopoverSection}
+				/>
 				{children}
 			</PopoverContent>
 		</Popover>

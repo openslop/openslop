@@ -50,24 +50,29 @@ function PopoverContent({
 	);
 }
 
-/** A titled popover's first row: its icon and title, a Close button, and a rule under both. */
+/** A titled popover's first row: its icon and title, its action and a Close button, and a rule under them. */
 function PopoverHeader({
 	title,
 	icon: Icon,
+	action,
 }: {
 	title: string;
 	icon?: IconComponent;
+	action?: React.ReactNode;
 }) {
 	return (
 		<>
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between text-foreground">
 				<SectionTitle className="flex items-center gap-2">
 					{Icon && <Icon size={ICON_SIZES.header} />}
 					{title}
 				</SectionTitle>
-				<PopoverPrimitive.Close asChild>
-					<CloseButton />
-				</PopoverPrimitive.Close>
+				<div className="flex items-center gap-1">
+					{action}
+					<PopoverPrimitive.Close asChild>
+						<CloseButton />
+					</PopoverPrimitive.Close>
+				</div>
 			</div>
 			<Separator bleed />
 		</>

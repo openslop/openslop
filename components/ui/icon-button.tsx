@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 const VARIANTS = {
 	default: "text-foreground",
+	/** Takes the color of the text it sits beside. */
+	inherit: "hover:text-foreground",
 	quiet: "text-muted-foreground hover:text-foreground",
 	/** The side panel's heading color. */
 	panel: "text-panel-label",
@@ -15,13 +17,20 @@ const VARIANTS = {
 
 const SHAPES = { square: "rounded-md", round: "rounded-full" } as const;
 
-/** Icon sizes by role; an {@link IconButton} always draws its icon at `header`. */
+/** `sm` fits where the room is fixed: on media, in a pill, in a ruler. */
+const SIZES = {
+	default: "size-8 [&_.icon]:size-4 [&_svg]:size-4",
+	sm: "size-6 [&_.icon]:size-3.5 [&_svg]:size-3.5",
+} as const;
+
+/** Icon sizes by role; an {@link IconButton} draws its icon at `default`, or `header` when `sm`. */
 export const ICON_SIZES = { sm: 12, header: 14, default: 16 } as const;
 
 export function IconButton({
 	ariaLabel,
 	variant = "default",
 	shape = "square",
+	size = "default",
 	chip,
 	className,
 	unavailable,
@@ -33,6 +42,7 @@ export function IconButton({
 	ariaLabel: string;
 	variant?: keyof typeof VARIANTS;
 	shape?: keyof typeof SHAPES;
+	size?: keyof typeof SIZES;
 	/** Carries its own backdrop. */
 	chip?: boolean;
 	/** Inert, but still hoverable so a tooltip can explain why. */
@@ -45,7 +55,7 @@ export function IconButton({
 			aria-label={ariaLabel}
 			className={cn(
 				"flex shrink-0 items-center justify-center transition-colors hover:bg-button-hover focus-ring disabled:pointer-events-none unavailable:opacity-40",
-				"size-6 [&_.icon]:size-3.5 [&_svg]:size-3.5",
+				SIZES[size],
 				VARIANTS[variant],
 				SHAPES[shape],
 				chip && "bg-muted",

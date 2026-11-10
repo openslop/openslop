@@ -10,6 +10,7 @@ import {
 	AlertDialogFooter,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useReturnFocus } from "@/components/ui/return-focus";
 
 /**
  * Confirmation gate for destructive actions. It is open while there is a
@@ -35,6 +36,7 @@ export function ConfirmDeleteDialog<T>({
 	// target so the content doesn't flash empty after the caller clears it.
 	const [latched, setLatched] = useState(target);
 	if (target !== undefined && target !== latched) setLatched(target);
+	const returnFocus = useReturnFocus(target !== undefined);
 
 	return (
 		<AlertDialog
@@ -44,7 +46,7 @@ export function ConfirmDeleteDialog<T>({
 			}}
 		>
 			{latched !== undefined && (
-				<AlertDialogContent>
+				<AlertDialogContent onCloseAutoFocus={returnFocus}>
 					<AlertDialogTitle>{title(latched)}</AlertDialogTitle>
 					<AlertDialogDescription>{description}</AlertDialogDescription>
 					<AlertDialogFooter>

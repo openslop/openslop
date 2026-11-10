@@ -187,7 +187,12 @@ function TemplatePill({
 			className="relative inline-flex self-start shrink-0 items-center gap-1 overflow-hidden rounded-full py-0.5 pl-1 pr-2 font-body text-body text-foreground whitespace-nowrap sm:mt-px sm:self-auto"
 			style={{ backgroundColor: template.color }}
 		>
-			<IconButton ariaLabel="Remove template" shape="round" onClick={onRemove}>
+			<IconButton
+				ariaLabel="Remove template"
+				shape="round"
+				size="sm"
+				onClick={onRemove}
+			>
 				<X />
 			</IconButton>
 			{template.promptPrefix}

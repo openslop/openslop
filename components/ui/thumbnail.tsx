@@ -86,6 +86,9 @@ const thumbnailGridVariants = cva("grid gap-2 [--thumbnail-width:100%]", {
 	},
 });
 
+/** A popover's width, holding two thumbnails a row in a `columns={2}` grid. */
+const THUMBNAIL_POPOVER_WIDTH = "w-72";
+
 /** Thumbnails sharing a surface's width, `columns` to a row. */
 function ThumbnailGrid({
 	className,
@@ -102,4 +105,10 @@ function ThumbnailGrid({
 	);
 }
 
-export { Thumbnail, ThumbnailCaption, ThumbnailFace, ThumbnailGrid };
+export {
+	Thumbnail,
+	ThumbnailCaption,
+	ThumbnailFace,
+	ThumbnailGrid,
+	THUMBNAIL_POPOVER_WIDTH,
+};

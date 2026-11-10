@@ -2,7 +2,14 @@
 
 import { useState, type ReactNode } from "react";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { Image, Mic, Palette, User } from "@/components/ui/icon";
+import {
+	Image,
+	MagicEdit,
+	Mic,
+	Palette,
+	Pencil,
+	User,
+} from "@/components/ui/icon";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useHasAsset } from "@/lib/canvas/use-assets";
@@ -11,10 +18,23 @@ import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
 import { AudioPlayer } from "./audio-player";
 import { MEDIA_KINDS } from "./media-kinds";
-import { DeleteAction, ReuseAction } from "./tile-actions";
+import {
+	DeleteItem,
+	TileMenuItem,
+	useTilePlayer,
+	type TilePrimary,
+} from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
+import { usePlayground } from "../playground/playground-context";
+import { useTake } from "../playground/use-take";
 
 type TileProps = { children?: ReactNode };
+
+const editing = (name: string, onSelect: () => void): TilePrimary => ({
+	label: `Edit ${name}`,
+	icon: Pencil,
+	onSelect,
+});
 
 export function ArtStyleAssetTile(tile: TileProps) {
 	const { editAsset } = useAssetEditors();
@@ -23,7 +43,7 @@ export function ArtStyleAssetTile(tile: TileProps) {
 			name="Art style"
 			Icon={Palette}
 			fallback="icon"
-			onEdit={() => editAsset("asset_style")}
+			primary={editing("Art style", () => editAsset("asset_style"))}
 			{...tile}
 		/>
 	);
@@ -44,7 +64,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 			Icon={User}
 			status={avatar.status}
 			startedAt={avatar.startedAt}
-			onEdit={() => editAsset("asset_avatar", name)}
+			primary={editing(name, () => editAsset("asset_avatar", name))}
 			{...tile}
 		/>
 	) : (
@@ -52,7 +72,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 			name={name}
 			Icon={Mic}
 			fallback="icon"
-			onEdit={() => editAsset("asset_voice", name)}
+			primary={editing(name, () => editAsset("asset_voice", name))}
 			{...tile}
 		/>
 	);
@@ -64,14 +84,16 @@ type ReferenceTileProps = TileProps & {
 	onRemove: () => void;
 };
 
+const referenceName = (index: number) => `Reference ${index + 1}`;
+
 export function ReferenceTile({
 	url,
 	index,
 	...tile
-}: ReferenceTileProps & { onEdit?: () => void }) {
+}: ReferenceTileProps & { primary?: TilePrimary }) {
 	return (
 		<AssetTile
-			name={`Reference ${index + 1}`}
+			name={referenceName(index)}
 			previewUrl={url}
 			context="Reference image"
 			Icon={Image}
@@ -83,7 +105,12 @@ export function ReferenceTile({
 export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	const { editAsset } = useAssetEditors();
 	return (
-		<ReferenceTile {...tile} onEdit={() => editAsset("asset_references")} />
+		<ReferenceTile
+			{...tile}
+			primary={editing(referenceName(tile.index), () =>
+				editAsset("asset_references"),
+			)}
+		/>
 	);
 }
 
@@ -108,15 +135,41 @@ function useDeleteMedia(name: string) {
 
 type MediaTileProps = TileProps & {
 	item: MediaItem;
-	actions?: ReactNode;
+	/** Menu items before Delete. */
+	menu?: ReactNode;
 };
 
-/** A piece of the project's media as a small tile; audio shows by its icon. */
+/** Loads the request that made `item` into the playground, when the playground made it. */
+function useReusing(item: MediaItem) {
+	const { take } = useTake(item);
+	const { reuse } = usePlayground();
+	return (
+		take && {
+			label: `Load the request that made ${item.name}`,
+			icon: MagicEdit,
+			onSelect: () => reuse(take),
+		}
+	);
+}
+
+const LoadRequestItem = ({ onSelect }: { onSelect: () => void }) => (
+	<TileMenuItem icon={MagicEdit} onSelect={onSelect}>
+		Load request
+	</TileMenuItem>
+);
+
+/** A piece of the project's media as a small tile; its request is the face's action or in its menu. */
 export function MediaAssetTile({
-	item: { name, kind, url, createdAt },
-	...tile
-}: MediaTileProps) {
+	item,
+	primary,
+	menu,
+	children,
+}: MediaTileProps & { primary?: TilePrimary }) {
+	const { name, kind, url, createdAt } = item;
 	const remove = useDeleteMedia(name);
+	const reusing = useReusing(item);
+	const player = useTilePlayer(kind === "video" ? url : undefined, name);
+	const chosen = primary ?? player.primary ?? reusing;
 	const previewKind = kind === "audio" ? undefined : kind;
 	return (
 		<>
@@ -128,24 +181,38 @@ export function MediaAssetTile({
 				createdAt={createdAt}
 				Icon={MEDIA_KINDS[kind].Icon}
 				fallback="icon"
+				primary={chosen}
+				menu={
+					<>
+						{reusing && chosen !== reusing && (
+							<LoadRequestItem onSelect={reusing.onSelect} />
+						)}
+						{menu}
+					</>
+				}
 				onDelete={remove.request}
-				{...tile}
-			/>
+			>
+				{player.video}
+				{children}
+			</AssetTile>
 			{remove.dialog}
 		</>
 	);
 }
 
-function MediaAudioRow({ item, actions }: MediaTileProps) {
+/** Audio has no face to choose, so its request is always in the menu. */
+function MediaAudioRow({ item, menu }: MediaTileProps) {
 	const remove = useDeleteMedia(item.name);
+	const reusing = useReusing(item);
 	return (
 		<>
 			<AudioCard
 				name={item.name}
-				actions={
+				menu={
 					<>
-						{actions}
-						<DeleteAction name={item.name} onClick={remove.request} />
+						{reusing && <LoadRequestItem onSelect={reusing.onSelect} />}
+						{menu}
+						<DeleteItem onSelect={remove.request} />
 					</>
 				}
 			>
@@ -157,22 +224,11 @@ function MediaAudioRow({ item, actions }: MediaTileProps) {
 }
 
 /** A piece of media as a library lists it: pictures and video as tiles, audio a row wide. */
-export function MediaLibraryItem({
-	item,
-	actions,
-	onReuse,
-	children,
-}: MediaTileProps & { onReuse?: () => void }) {
-	const pill = (
-		<>
-			{onReuse && <ReuseAction name={item.name} onClick={onReuse} />}
-			{actions}
-		</>
-	);
+export function MediaLibraryItem({ item, menu, children }: MediaTileProps) {
 	return item.kind === "audio" ? (
-		<MediaAudioRow item={item} actions={pill} />
+		<MediaAudioRow item={item} menu={menu} />
 	) : (
-		<MediaAssetTile item={item} actions={pill}>
+		<MediaAssetTile item={item} menu={menu}>
 			{children}
 		</MediaAssetTile>
 	);

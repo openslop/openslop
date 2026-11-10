@@ -2,32 +2,25 @@
 
 import { useSlateStatic } from "slate-react";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSub,
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
-	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Alternative, LayersPlus } from "@/components/ui/icon";
 import { addElementReferences } from "@/lib/canvas/asset-ops";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import type { GeneratedElement } from "@/lib/canvas/types";
 import { buildNode } from "@/lib/generation/generation-graph";
-import {
-	useElementHistorySelector,
-	useGenerationQueue,
-} from "@/lib/generation/generation-queue-provider";
+import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import type { MediaItem } from "@/lib/project/media";
-import type { ElementVersion } from "@/lib/generation/versions";
-import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { toastError } from "@/lib/toast-error";
 import { commitUploaded } from "@/lib/upload/uploaded-result";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
-import { TileAction, TilePlayer } from "../elements/tile-actions";
+import { TileMenuItem } from "../elements/tile-actions";
+import { useTake } from "./use-take";
 import { usesFor, type MediaUse, type UseContext } from "./media-uses";
 
 function useUseContext(): UseContext {
@@ -76,27 +69,24 @@ function UseAsItems({ item, uses }: { item: MediaItem; uses: MediaUse[] }) {
 	});
 }
 
-function UseAsMenu({ item }: { item: MediaItem }) {
+/** Where the media can go on the canvas, each use a submenu of its targets. */
+function UseAsItem({ item }: { item: MediaItem }) {
 	const uses = usesFor(item.kind);
 	if (uses.length === 0) return null;
 	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>
-				<TileAction
-					name={item.name}
-					describe={(name) => `Use ${name} as`}
-					tooltip="Use as"
-					icon={Alternative}
-				/>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="min-w-40">
+		<DropdownMenuSub>
+			<DropdownMenuSubTrigger>
+				<Alternative />
+				Use as
+			</DropdownMenuSubTrigger>
+			<DropdownMenuSubContent className="min-w-40">
 				<UseAsItems item={item} uses={uses} />
-			</DropdownMenuContent>
-		</DropdownMenu>
+			</DropdownMenuSubContent>
+		</DropdownMenuSub>
 	);
 }
 
-function AddReferenceAction({
+function AddReferenceItem({
 	item,
 	elementId,
 }: {
@@ -106,16 +96,16 @@ function AddReferenceAction({
 	const editor = useSlateStatic();
 	if (item.kind !== "image") return null;
 	return (
-		<TileAction
-			name={item.name}
-			describe={(name) => `Add ${name} to references`}
+		<TileMenuItem
 			icon={LayersPlus}
-			onClick={() =>
+			onSelect={() =>
 				addElementReferences(editor, elementId, REFERENCE_IMAGES_ATTR, [
 					item.url,
 				])
 			}
-		/>
+		>
+			Add to references
+		</TileMenuItem>
 	);
 }
 
@@ -123,38 +113,24 @@ function AddReferenceAction({
 export function LibraryTile({
 	item,
 	referencesOf,
-	draftIds,
-	onReuse,
 }: {
 	item: MediaItem;
 	/** The element the tile adds itself to the references of, when it takes any. */
 	referencesOf?: string;
-	/** The drafts whose takes may have made this media. */
-	draftIds: string[];
-	onReuse: (take: ElementVersion) => void;
 }) {
-	const take = useElementHistorySelector((history) =>
-		draftIds
-			.flatMap((id) => history.get(id))
-			.find(({ result }) => getPrimaryUrl(result, item.kind) === item.url),
-	);
-	const traced = useElementHistorySelector((history) =>
-		draftIds.every((id) => history.status(id) === "ready"),
-	);
+	const { take, traced } = useTake(item);
 	return (
 		<MediaLibraryItem
 			item={item}
-			onReuse={take && (() => onReuse(take))}
-			actions={
+			menu={
 				<>
 					{referencesOf && (
-						<AddReferenceAction item={item} elementId={referencesOf} />
+						<AddReferenceItem item={item} elementId={referencesOf} />
 					)}
-					<UseAsMenu item={item} />
+					<UseAsItem item={item} />
 				</>
 			}
 		>
-			{item.kind === "video" && <TilePlayer src={item.url} name={item.name} />}
 			{traced && !take && (
 				<div className="absolute right-1 bottom-1">
 					<UploadedLabel tooltip="Uploaded, not made in the playground" />

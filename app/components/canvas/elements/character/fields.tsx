@@ -26,6 +26,22 @@ export function FieldLabel({ children }: { children: ReactNode }) {
 	);
 }
 
+/** A field's label, with what sits beside it. */
+export function FieldHeader({
+	aside,
+	children,
+}: {
+	aside?: ReactNode;
+	children: ReactNode;
+}) {
+	return (
+		<div className="flex min-h-6 items-center justify-between gap-2">
+			{children}
+			{aside}
+		</div>
+	);
+}
+
 export function TextAreaField({
 	label,
 	aside,
@@ -49,12 +65,11 @@ export function TextAreaField({
 	const [draft, setDraft] = useWriteThrough(value, onChange);
 	return (
 		<div className={cn("flex flex-col gap-1", className)}>
-			<div className="flex min-h-6 items-center justify-between gap-2">
+			<FieldHeader aside={aside}>
 				<label htmlFor={id}>
 					<FieldLabel>{label}</FieldLabel>
 				</label>
-				{aside}
-			</div>
+			</FieldHeader>
 			<Textarea
 				id={id}
 				size="sm"

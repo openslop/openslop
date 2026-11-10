@@ -10,9 +10,12 @@ import type { ContentElement } from "@/lib/canvas/types";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
-import type { ElementVersionStorage } from "@/lib/generation/history";
-import { click, mountOnCanvas } from "../../__tests__/_mount";
-import { withCharacterRefs } from "../../plugins/with-character-refs";
+import {
+	click,
+	mountOnCanvas,
+	noHistory,
+} from "@/app/components/canvas/__tests__/_mount";
+import { withCharacterRefs } from "@/app/components/canvas/plugins/with-character-refs";
 import { AssetEditProvider } from "../character/asset-edit-provider";
 import { CharacterRef } from "../character-ref";
 
@@ -62,9 +65,6 @@ const renderElement = ({
 	) : (
 		<div {...attributes}>{children}</div>
 	);
-
-const untouched = () => Promise.reject(new Error("a chip reads no history"));
-const noHistory: ElementVersionStorage = { read: untouched, write: untouched };
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 

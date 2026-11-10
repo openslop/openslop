@@ -1,7 +1,7 @@
 "use client";
 
 import { useSlateStatic } from "slate-react";
-import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
+import { Forbidden, Transition } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +9,7 @@ import {
 	Thumbnail,
 	ThumbnailCaption,
 	ThumbnailFace,
+	THUMBNAIL_POPOVER_WIDTH,
 } from "@/components/ui/thumbnail";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import { isContentElement } from "@/lib/canvas/guards";
@@ -22,11 +23,11 @@ import {
 	START_FRAME,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
-import { useMediaUpload } from "@/lib/project/use-media-upload";
-import { AddAssetTile } from "../add-asset-tile";
-import { RemoveAction, TileActions, ViewLargerAction } from "../tile-actions";
+import { MediaPicker } from "../media-picker";
+import { AddButton } from "@/components/ui/add-button";
+import { RemoveItem, TileMenu, useViewLarger } from "../tile-actions";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
-import { AttributeTrigger } from "./attribute-trigger";
+import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
 import { TileRow } from "./tile-row";
 import { usePreviousPictures } from "./use-previous-pictures";
 
@@ -53,6 +54,16 @@ function FrameTile({
 }) {
 	const selected = kind === current;
 	const label = FRAME_SOURCE_LABEL[kind];
+	const viewer = useViewLarger(
+		picture
+			? {
+					src: picture,
+					kind: "image",
+					name: label,
+					context: "Start frame",
+				}
+			: undefined,
+	);
 	return (
 		<div className="group/tile relative">
 			<Thumbnail asChild>
@@ -75,19 +86,13 @@ function FrameTile({
 					<ThumbnailCaption>{label}</ThumbnailCaption>
 				</button>
 			</Thumbnail>
-			<TileActions label={label}>
-				{picture && (
-					<ViewLargerAction
-						src={picture}
-						kind="image"
-						name={label}
-						context="Start frame"
-					/>
-				)}
-				{onRemove && (
-					<RemoveAction name={label.toLowerCase()} onClick={onRemove} />
-				)}
-			</TileActions>
+			{(viewer.item || onRemove) && (
+				<TileMenu label={label}>
+					{viewer.item}
+					{onRemove && <RemoveItem onSelect={onRemove} />}
+				</TileMenu>
+			)}
+			{viewer.dialog}
 		</div>
 	);
 }
@@ -125,6 +130,7 @@ export function StartFrameOptions({
 	attrKey,
 	label,
 	columns,
+	Section,
 }: LaidOutTarget) {
 	const editor = useSlateStatic();
 	const source = frameSource(element.generationAttributes?.[attrKey]);
@@ -137,15 +143,16 @@ export function StartFrameOptions({
 			[attrKey]: next,
 			[UPLOADED_FRAME_ATTR]: upload,
 		});
-	const { openPicker, uploading, inputElement } = useMediaUpload({
-		kinds: ["image"],
-		onUpload: ([url]) => {
-			if (url) setFrame(url, url);
-		},
-	});
 
 	return (
-		<>
+		<Section
+			title={label}
+			action={
+				<MediaPicker kind="image" onPick={(url) => setFrame(url, url)}>
+					<AddButton label="Add start frame" />
+				</MediaPicker>
+			}
+		>
 			<TileRow columns={columns} radiogroup={label}>
 				<FrameTile
 					kind="none"
@@ -161,7 +168,7 @@ export function StartFrameOptions({
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					/>
 				)}
-				{uploaded ? (
+				{uploaded && (
 					<FrameTile
 						kind="upload"
 						current={source.kind}
@@ -169,19 +176,9 @@ export function StartFrameOptions({
 						picture={uploaded}
 						onRemove={() => setFrame(NO_FRAME, null)}
 					/>
-				) : (
-					<AddAssetTile
-						label="Upload"
-						ariaLabel="Upload a picture to open on"
-						Icon={ImagePlus}
-						onClick={openPicker}
-						disabled={uploading}
-						busy={uploading}
-					/>
 				)}
 			</TileRow>
-			{inputElement}
-		</>
+		</Section>
 	);
 }
 
@@ -195,8 +192,12 @@ export function StartFramePicker(target: AttributeTarget) {
 			<AttributeTrigger tooltip={`${target.label}: ${summary}`}>
 				{summary}
 			</AttributeTrigger>
-			<PopoverContent align="end" className="w-auto">
-				<StartFrameOptions {...target} />
+			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
+				<StartFrameOptions
+					{...target}
+					columns={2}
+					Section={AttributePopoverSection}
+				/>
 			</PopoverContent>
 		</Popover>
 	);

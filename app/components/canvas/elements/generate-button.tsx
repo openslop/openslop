@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
@@ -47,11 +48,13 @@ export function GenerateButton({
 	hasResult,
 	disabled,
 	onGenerate,
+	className,
 }: {
 	status: GenerationStatus;
 	hasResult: boolean;
 	disabled: boolean;
 	onGenerate: () => void;
+	className?: string;
 }) {
 	const label = generateLabel(status, hasResult);
 	return (
@@ -59,7 +62,7 @@ export function GenerateButton({
 			type="button"
 			variant="generate"
 			size="sm"
-			className="shrink-0"
+			className={cn("shrink-0", className)}
 			disabled={disabled}
 			onMouseDown={keepFocus}
 			onClick={onGenerate}

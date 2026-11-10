@@ -1,192 +1,174 @@
 "use client";
 
 import { useState, type ComponentProps, type ReactNode } from "react";
-import { ICON_SIZES } from "@/components/ui/icon-button";
 import {
-	PushIn,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
 	Maximize2,
-	Pencil,
+	MoreVertical,
 	Play,
 	Stop,
 	Trash2,
 	X,
 	type IconComponent,
 } from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { Toolbar, ToolbarButton } from "@/components/ui/toolbar";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { truncateMiddle } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { MediaViewerDialog, type Viewed } from "./media-viewer";
 
-const SPOTS = {
-	/** Centered along the top once the tile (`@container/tile`) is wide enough to give it room. */
-	top: "top-1 left-1 @[6rem]/tile:left-1/2 @[6rem]/tile:-translate-x-1/2",
-	center: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-} as const;
-
-// Touch has no hover, so there the pill always shows.
+// Touch has no hover, so there the controls always show.
 const REVEAL_ON_HOVER =
 	"opacity-0 group-hover/tile:opacity-100 focus-within:opacity-100 has-[[aria-expanded=true]]:opacity-100 pointer-coarse:opacity-100";
 
-/** The panel's toggle pill over a tile's face (`group/tile`), shown on hover or while `shown`. */
-function TileChip({
-	spot,
+/** What choosing a tile's face (`group/tile`) does. */
+export type TilePrimary = {
+	label: string;
+	icon: IconComponent;
+	onSelect: () => void;
+};
+
+/** The whole face as one button, under the media scrim on hover with its icon in the middle. */
+export function TilePrimaryAction({
 	label,
-	shown = false,
+	icon: Icon,
+	onSelect,
+}: TilePrimary) {
+	return (
+		<SimpleTooltip label={label}>
+			<button
+				type="button"
+				onClick={onSelect}
+				onMouseDown={keepFocus}
+				aria-label={label}
+				className="focus-ring absolute inset-0 flex items-center justify-center bg-on-media/55 text-on-media-foreground opacity-0 transition group-hover/tile:opacity-100 focus-visible:opacity-100 focus-visible:ring-inset"
+			>
+				<Icon size={ICON_SIZES.header} />
+			</button>
+		</SimpleTooltip>
+	);
+}
+
+/** A tile's other actions, behind the ⋮ on its toolbar in the top-right corner. */
+export function TileMenu({
+	label,
 	children,
 }: {
-	spot: keyof typeof SPOTS;
 	label: string;
-	shown?: boolean;
 	children: ReactNode;
 }) {
 	return (
 		<Toolbar
 			variant="tile"
-			aria-label={label}
 			className={cn(
-				"absolute z-10 transition-opacity empty:hidden",
-				SPOTS[spot],
-				!shown && REVEAL_ON_HOVER,
+				"absolute top-1 right-1 z-10 transition-opacity",
+				REVEAL_ON_HOVER,
 			)}
 		>
-			{children}
+			<DropdownMenu modal={false}>
+				<DropdownMenuTrigger asChild>
+					<TileToolbarButton
+						label={`More actions for ${label}`}
+						tooltip="More actions"
+					>
+						<MoreVertical size={ICON_SIZES.header} />
+					</TileToolbarButton>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" className="min-w-40">
+					{children}
+				</DropdownMenuContent>
+			</DropdownMenu>
 		</Toolbar>
 	);
 }
 
-/** Every action on a tile, in one pill along its top edge. */
-export function TileActions({
-	label,
+export function TileMenuItem({
+	icon: Icon,
 	children,
-}: {
-	label: string;
-	children: ReactNode;
-}) {
+	...props
+}: ComponentProps<typeof DropdownMenuItem> & { icon: IconComponent }) {
 	return (
-		<TileChip spot="top" label={`${label} actions`}>
+		<DropdownMenuItem {...props}>
+			<Icon />
 			{children}
-		</TileChip>
+		</DropdownMenuItem>
 	);
 }
 
-/** One action on the tile named `name`, which its label reads whole and its tooltip shortened unless given; dialogs and menus take it as their trigger. */
-export function TileAction({
-	name,
-	describe,
-	tooltip = describe(truncateMiddle(name, 24)),
-	icon: Icon,
+/** A button on a tile's toolbar, with its tooltip; menus take it as their trigger. */
+function TileToolbarButton({
+	label,
+	tooltip,
 	...props
-}: ComponentProps<typeof ToolbarButton> & {
-	name: string;
-	describe: (name: string) => string;
-	tooltip?: string;
-	icon: IconComponent;
-}) {
+}: ComponentProps<typeof ToolbarButton> & { label: string; tooltip: string }) {
 	return (
 		<SimpleTooltip label={tooltip}>
-			<ToolbarButton
-				aria-label={describe(name)}
-				onMouseDown={keepFocus}
-				{...props}
-			>
-				<Icon size={ICON_SIZES.header} />
-			</ToolbarButton>
+			<ToolbarButton aria-label={label} onMouseDown={keepFocus} {...props} />
 		</SimpleTooltip>
 	);
 }
 
-export function ViewLargerAction(viewed: Viewed) {
-	return (
-		<MediaViewerDialog {...viewed}>
-			<TileAction
-				name={viewed.name}
-				describe={(name) => `View ${name} larger`}
-				icon={Maximize2}
-			/>
-		</MediaViewerDialog>
-	);
-}
-
-type NamedAction = { name: string; onClick: () => void };
-
-export function EditAction({ name, onClick }: NamedAction) {
-	return (
-		<TileAction
-			name={name}
-			describe={(shown) => `Edit ${shown}`}
-			icon={Pencil}
-			onClick={onClick}
-		/>
-	);
-}
-
-/** The push-in arrow flipped, rising into the frame: what made a take comes back in. */
-const LoadIn: IconComponent = ({ className, ...props }) => (
-	<PushIn className={cn("-scale-y-100", className)} {...props} />
-);
-
-/** Loads what made a take back into the playground, like restoring a version. */
-export function ReuseAction({ name, onClick }: NamedAction) {
-	return (
-		<TileAction
-			name={name}
-			describe={(shown) => `Load the prompt and settings of ${shown}`}
-			icon={LoadIn}
-			onClick={onClick}
-		/>
-	);
-}
+type MenuAction = { onSelect: () => void };
 
 /** Takes it off this list; the media itself stays. */
-export function RemoveAction({ name, onClick }: NamedAction) {
-	return (
-		<TileAction
-			name={name}
-			describe={(shown) => `Remove ${shown}`}
-			icon={X}
-			onClick={onClick}
-		/>
-	);
-}
+export const RemoveItem = ({ onSelect }: MenuAction) => (
+	<TileMenuItem icon={X} onSelect={onSelect}>
+		Remove
+	</TileMenuItem>
+);
 
 /** Takes it out of the project for good. */
-export function DeleteAction({ name, onClick }: NamedAction) {
-	return (
-		<TileAction
-			name={name}
-			describe={(shown) => `Delete ${shown}`}
-			icon={Trash2}
-			onClick={onClick}
-			tone="destructive"
-		/>
-	);
+export const DeleteItem = ({ onSelect }: MenuAction) => (
+	<TileMenuItem icon={Trash2} variant="destructive" onSelect={onSelect}>
+		Delete
+	</TileMenuItem>
+);
+
+/** The large view of `viewed`: its menu item, and the dialog that outlives the menu closing. */
+export function useViewLarger(viewed: Viewed | undefined) {
+	const [open, setOpen] = useState(false);
+	const show = () => setOpen(true);
+	return viewed
+		? {
+				show,
+				item: (
+					<TileMenuItem icon={Maximize2} onSelect={show}>
+						View larger
+					</TileMenuItem>
+				),
+				dialog: (
+					<MediaViewerDialog {...viewed} open={open} onOpenChange={setOpen} />
+				),
+			}
+		: { show, item: null, dialog: null };
 }
 
-/** Plays a tile's video in place with no controls, back to its still when stopped or done. */
-export function TilePlayer({ src, name }: { src: string; name: string }) {
+/** Plays a tile's video in place with no controls, back to its still when stopped or done; the face plays and stops it. */
+export function useTilePlayer(src: string | undefined, name: string) {
 	const [playing, setPlaying] = useState(false);
+	if (!src) return { primary: undefined, video: null };
 	const stop = () => setPlaying(false);
-	return (
-		<>
-			{playing && (
-				<video
-					src={src}
-					autoPlay
-					onEnded={stop}
-					onError={stop}
-					className="pointer-events-none absolute inset-0 size-full object-cover"
-				/>
-			)}
-			<TileChip spot="center" label={`${name} playback`} shown={playing}>
-				<TileAction
-					name={name}
-					describe={(shown) => `${playing ? "Stop" : "Play"} ${shown}`}
-					icon={playing ? Stop : Play}
-					onClick={() => setPlaying(!playing)}
-				/>
-			</TileChip>
-		</>
-	);
+	const primary: TilePrimary = {
+		label: `${playing ? "Stop" : "Play"} ${name}`,
+		icon: playing ? Stop : Play,
+		onSelect: () => setPlaying((was) => !was),
+	};
+	return {
+		primary,
+		video: playing && (
+			<video
+				src={src}
+				autoPlay
+				onEnded={stop}
+				onError={stop}
+				className="pointer-events-none absolute inset-0 size-full object-cover"
+			/>
+		),
+	};
 }

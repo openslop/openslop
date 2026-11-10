@@ -38,16 +38,14 @@ export function ContinuityReferencesPopover({
 
 	return (
 		<ReferenceImagesPopover {...popover} added={linked ? pictures.length : 0}>
-			<section className="mt-1 border-t border-border pt-3">
+			<section className="mt-3 border-t border-border pt-3">
 				<div className="mb-2 flex items-center justify-between gap-2">
-					<p className="text-label text-muted-foreground">
-						{caption(previous, linked)}
-					</p>
+					<p className="text-label">{caption(previous, linked)}</p>
 					{toggle}
 				</div>
 				{pictures.length > 0 && (
 					<div className={cn("transition-opacity", !linked && "opacity-40")}>
-						<TileRow>
+						<TileRow columns={2}>
 							{pictures.map(({ name, url }) => (
 								<AssetTile
 									key={url}

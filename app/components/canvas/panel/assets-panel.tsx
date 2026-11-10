@@ -2,12 +2,10 @@
 
 import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
-import { ActionMenu } from "@/components/ui/action-menu";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Image, Palette, StockAlt, Upload, User } from "@/components/ui/icon";
+import { Palette, User } from "@/components/ui/icon";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useMediaLibrary } from "@/lib/project/use-media-library";
-import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
 	ArtStyleAssetTile,
@@ -23,9 +21,14 @@ import {
 	MediaLibraryFilter,
 } from "../elements/media-kinds";
 import { uploadingTiles } from "../elements/uploading-tile";
-import { useEditorPanel } from "./editor-panel-context";
+import { AddMediaMenu } from "../elements/add-media-menu";
+import {
+	NoReferenceImages,
+	useReferenceUpload,
+} from "../elements/reference-images";
 import { PagedTiles } from "./paged-tiles";
-import { PanelCard, PanelCardAddButton } from "./panel-card";
+import { PanelCard } from "./panel-card";
+import { AddButton } from "@/components/ui/add-button";
 
 function AssetCard({
 	title,
@@ -61,12 +64,7 @@ function CharactersCard() {
 					description="Characters you create show up here"
 				/>
 			}
-			action={
-				<PanelCardAddButton
-					label="Add character"
-					onClick={openCreateCharacter}
-				/>
-			}
+			action={<AddButton label="Add character" onClick={openCreateCharacter} />}
 		>
 			{names.map((name) => (
 				<CharacterAssetTile
@@ -81,26 +79,14 @@ function CharactersCard() {
 
 function ReferencesCard() {
 	const { urls, add, remove } = useReferenceImages();
-	const { openPicker, uploadingCount, inputElement } = useMediaUpload({
-		kinds: ["image"],
-		multiple: true,
-		onUpload: add,
-	});
+	const { addMenu, uploadingCount, inputElement } = useReferenceUpload(add);
 	return (
 		<>
 			{inputElement}
 			<AssetCard
 				title="References"
-				empty={
-					<EmptyState
-						icon={Image}
-						title="No reference images yet"
-						description="Reference images you upload show up here"
-					/>
-				}
-				action={
-					<AddMediaMenu label="Add reference image" onUpload={openPicker} />
-				}
+				empty={<NoReferenceImages />}
+				action={addMenu}
 			>
 				{[
 					...urls.map((url, index) => (
@@ -133,7 +119,7 @@ function ArtStyleCard() {
 			}
 			action={
 				!hasStyle && (
-					<PanelCardAddButton
+					<AddButton
 						label="Add art style"
 						onClick={() => editAsset("asset_style")}
 					/>
@@ -142,38 +128,6 @@ function ArtStyleCard() {
 		>
 			{hasStyle ? [<ArtStyleAssetTile key="asset_style" />] : []}
 		</AssetCard>
-	);
-}
-
-/** Pictures and media come from an upload or from the playground. */
-function AddMediaMenu({
-	label,
-	onUpload,
-}: {
-	label: string;
-	onUpload: () => void;
-}) {
-	const { setActive } = useEditorPanel();
-	return (
-		<ActionMenu
-			align="end"
-			items={[
-				{
-					key: "upload",
-					label: "Upload",
-					icon: <Upload />,
-					onSelect: onUpload,
-				},
-				{
-					key: "playground",
-					label: "Generate in Playground",
-					icon: <StockAlt />,
-					onSelect: () => setActive("playground"),
-				},
-			]}
-		>
-			<PanelCardAddButton label={label} />
-		</ActionMenu>
 	);
 }
 

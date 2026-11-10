@@ -6,8 +6,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { element } from "@/lib/canvas/__tests__/_assets";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { findElementById } from "@/lib/canvas/editor-ops";
-import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
+import {
+	chooseTileMenuItem,
+	mountOnCanvas,
+} from "@/app/components/canvas/__tests__/_mount";
+import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
 import { StartFramePicker } from "../start-frame-picker";
+
+vi.mock("@/app/components/canvas/workspace-context", () => ({
+	useShowWorkspace: () => true,
+}));
 
 vi.mock("../use-previous-pictures", () => ({
 	usePreviousPictures: () => ({ kind: "ready", pictures: [] }),
@@ -16,6 +24,7 @@ vi.mock("@/lib/project/use-media-upload", () => ({
 	useMediaUpload: () => ({
 		openPicker: vi.fn(),
 		uploading: false,
+		uploadingCount: 0,
 		inputElement: null,
 	}),
 }));
@@ -36,11 +45,13 @@ function openPicker(startFrame: string, uploadedFrame?: string) {
 	canvas = mountOnCanvas([video]);
 	canvas.render(
 		<TooltipProvider>
-			<StartFramePicker
-				element={video}
-				attrKey="startFrame"
-				label="Start frame"
-			/>
+			<EditorPanelProvider>
+				<StartFramePicker
+					element={video}
+					attrKey="startFrame"
+					label="Start frame"
+				/>
+			</EditorPanelProvider>
 		</TooltipProvider>,
 	);
 	const trigger = document.body.querySelector<HTMLButtonElement>(
@@ -82,16 +93,19 @@ describe("StartFramePicker", () => {
 	it("opens the uploaded picture full size without choosing it", async () => {
 		openPicker("previous", PICTURE);
 
-		await click('[aria-label="View Uploaded picture larger"]');
+		await chooseTileMenuItem("Uploaded picture", "View larger");
 
 		const viewer = document.body.querySelectorAll('[role="dialog"]')[1];
 		expect(viewer?.querySelector("img")?.src).toBe(PICTURE);
 		expect(tile("Previous scene")?.getAttribute("aria-checked")).toBe("true");
 	});
 
-	it("offers an upload when the start frame is not a picture", () => {
+	it("offers the media library when the start frame is not a picture", () => {
 		openPicker("previous");
 
 		expect(tile("Uploaded picture")).toBeNull();
+		expect(
+			document.body.querySelector('[aria-label="Add start frame"]'),
+		).not.toBeNull();
 	});
 });

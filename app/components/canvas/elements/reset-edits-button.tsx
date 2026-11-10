@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useSlateStatic } from "slate-react";
 import { Undo } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,11 @@ import { useElementGeneration } from "./element-generation-context";
 export function ResetButton({
 	tooltip,
 	onClick,
+	className,
 }: {
 	tooltip: string;
 	onClick: () => void;
+	className?: string;
 }) {
 	return (
 		<Button
@@ -25,7 +28,7 @@ export function ResetButton({
 			variant="ghost"
 			size="sm"
 			tooltip={tooltip}
-			className="shrink-0"
+			className={cn("shrink-0", className)}
 			onMouseDown={keepFocus}
 			onClick={onClick}
 		>

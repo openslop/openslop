@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { IconComponent } from "@/components/ui/icon";
 import { chipControlClassName } from "@/components/ui/chip-control";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { clamp, cn } from "@/lib/utils";
 
@@ -63,7 +64,7 @@ export function NumberScrubber({
 		};
 		return (
 			<div className={cn(shell, "ring-2 ring-ring")}>
-				{Icon && <Icon className="h-3.5 w-3.5" />}
+				{Icon && <Icon size={ICON_SIZES.default} />}
 				<input
 					autoFocus
 					aria-label={label}
@@ -137,7 +138,7 @@ export function NumberScrubber({
 					"cursor-ew-resize touch-none select-none hover:bg-media-toggle-hover-bg",
 				)}
 			>
-				{Icon && <Icon className="h-3.5 w-3.5" />}
+				{Icon && <Icon size={ICON_SIZES.default} />}
 				<span className={valueText} style={{ minWidth: valueWidth }}>
 					{value}
 					{suffix}

@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 import { MEDIA_KINDS } from "./media-kinds";
 import { ThumbnailCaption } from "@/components/ui/thumbnail";
-import { TileActions } from "./tile-actions";
+import { TileMenu } from "./tile-actions";
 
-/** An audio asset a row wide: its name over what it plays, with the tile's pill. */
+/** An audio asset a row wide: its name over what it plays, with the ⋮ of a tile's actions. */
 export function AudioCard({
 	name,
-	actions,
+	menu,
 	children,
 }: {
 	name: string;
-	actions?: ReactNode;
+	menu?: ReactNode;
 	children: ReactNode;
 }) {
 	return (
@@ -25,7 +25,7 @@ export function AudioCard({
 			<div className="flex min-h-7 flex-wrap items-center gap-x-2 gap-y-1 [--waveform-height:1.25rem]">
 				{children}
 			</div>
-			<TileActions label={name}>{actions}</TileActions>
+			{menu && <TileMenu label={name}>{menu}</TileMenu>}
 		</div>
 	);
 }

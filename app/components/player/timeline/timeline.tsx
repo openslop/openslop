@@ -153,6 +153,7 @@ function Clip({
 							label="Reset trim"
 							side="bottom"
 							variant="onMedia"
+							size="sm"
 							onClick={reset}
 							className="opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 						>
@@ -314,6 +315,7 @@ export function Timeline() {
 					>
 						<TooltipIconButton
 							label="Zoom out"
+							size="sm"
 							onClick={zoomOut}
 							disabled={!canZoomOut}
 						>
@@ -321,6 +323,7 @@ export function Timeline() {
 						</TooltipIconButton>
 						<TooltipIconButton
 							label={`Zoom in (${Math.round(zoom * 100)}%)`}
+							size="sm"
 							onClick={zoomIn}
 							disabled={!canZoomIn}
 						>

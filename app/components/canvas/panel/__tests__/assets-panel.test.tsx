@@ -10,7 +10,14 @@ import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { EditorPanelProvider } from "../editor-panel-context";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
-import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
+import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
+import { PlaygroundProvider } from "@/app/components/canvas/playground/playground-context";
+import {
+	chooseTileMenuItem,
+	click,
+	mountOnCanvas,
+	noHistory,
+} from "@/app/components/canvas/__tests__/_mount";
 import { AssetsPanel } from "../assets-panel";
 
 vi.mock("@/app/components/canvas/workspace-context", () => ({
@@ -32,13 +39,17 @@ const open = (children: Descendant[] = []) => {
 	store = createProjectStore();
 	canvas.render(
 		<ProjectStoreProvider store={store}>
-			<TooltipProvider>
-				<EditorPanelProvider>
-					<AssetEditProvider>
-						<AssetsPanel />
-					</AssetEditProvider>
-				</EditorPanelProvider>
-			</TooltipProvider>
+			<GenerationQueueProvider initialState={{}} storage={noHistory}>
+				<TooltipProvider>
+					<EditorPanelProvider>
+						<PlaygroundProvider>
+							<AssetEditProvider>
+								<AssetsPanel />
+							</AssetEditProvider>
+						</PlaygroundProvider>
+					</EditorPanelProvider>
+				</TooltipProvider>
+			</GenerationQueueProvider>
 		</ProjectStoreProvider>,
 	);
 };
@@ -88,7 +99,7 @@ describe("AssetsPanel", () => {
 		await click('[role=radio][aria-label="Audio"]');
 		expect(document.body.textContent).toContain("theme");
 
-		await click('button[aria-label="Delete theme"]');
+		await chooseTileMenuItem("theme", "Delete");
 
 		expect(store.getState().media).toHaveLength(1);
 		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(

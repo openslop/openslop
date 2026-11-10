@@ -31,7 +31,7 @@ export function EmptyLibrary({
 	query: string;
 }) {
 	const sought = query.trim();
-	const { label, Icon } = MEDIA_KINDS[kind];
+	const { label } = MEDIA_KINDS[kind];
 	return sought ? (
 		<EmptyState
 			icon={Search}
@@ -40,7 +40,7 @@ export function EmptyLibrary({
 		/>
 	) : (
 		<EmptyState
-			icon={Icon}
+			icon={Search}
 			title={`No ${label.toLowerCase()} yet`}
 			description={`${label} you upload or generate show up here`}
 		/>
@@ -95,7 +95,6 @@ export function MediaLibraryFilter({
 				<MediaSearch kind={kind} query={query} onQueryChange={onQueryChange} />
 			</div>
 			<MediaToggle
-				size="field"
 				ariaLabel="Media type"
 				value={kind}
 				onChange={onKindChange}

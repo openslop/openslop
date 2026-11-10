@@ -119,13 +119,23 @@ function ScratchPrompt({
 export function DraftPrompt({ draft }: { draft: Draft }) {
 	const names = useAvatarNames();
 	const text = getElementBodyText(draft);
-	const [typed, setTyped] = useState({ text, revision: 0 });
-	if (text !== typed.text) setTyped({ text, revision: typed.revision + 1 });
+	const [prompt, setPrompt] = useState({
+		draft: text,
+		typed: text,
+		revision: 0,
+	});
+	// A keystroke renders here before the draft catches up, so only a draft that moved to text nobody typed rebuilds.
+	if (text !== prompt.draft)
+		setPrompt({
+			draft: text,
+			typed: text,
+			revision: text === prompt.typed ? prompt.revision : prompt.revision + 1,
+		});
 	return (
 		<ScratchPrompt
-			key={`${draft.id}:${names.join("|")}:${typed.revision}`}
+			key={`${draft.id}:${names.join("|")}:${prompt.revision}`}
 			draft={draft}
-			onWrite={(next) => setTyped((last) => ({ ...last, text: next }))}
+			onWrite={(typed) => setPrompt((last) => ({ ...last, typed }))}
 		/>
 	);
 }

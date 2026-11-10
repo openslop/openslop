@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSlateSelector } from "slate-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThumbnailGrid } from "@/components/ui/thumbnail";
 import { shallow } from "zustand/shallow";
-import type { Editor } from "slate";
 import { findAsset, getAssets } from "@/lib/canvas/assets";
 import { elementOffers } from "@/lib/canvas/element-connector";
 import {
@@ -18,7 +17,6 @@ import {
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import type { ElementVersion } from "@/lib/generation/versions";
 import { useMediaLibrary } from "@/lib/project/use-media-library";
 import type { UploadKind } from "@/lib/upload/upload-files";
 import { AssetTile } from "../elements/asset-tile";
@@ -31,27 +29,10 @@ import {
 	MediaLibraryFilter,
 } from "../elements/media-kinds";
 import { uploadingTiles } from "../elements/uploading-tile";
-import { useLoadElementHistory } from "../hooks/use-element-history";
-import { PanelCard, PanelCardAddButton } from "../panel/panel-card";
+import { PanelCard } from "../panel/panel-card";
+import { AddButton } from "@/components/ui/add-button";
 import { LibraryTile } from "./library-tile";
-
-/** The drafts, or only those whose takes are `kind`. */
-const draftIdsOf = (editor: Editor, kind?: UploadKind) =>
-	getAssets(editor.children)
-		.filter(
-			(asset) =>
-				isPlaygroundType(asset.type) &&
-				(!kind || CONTENT_TYPES[draftedType(asset.type)].outputKind === kind),
-		)
-		.map((asset) => asset.id);
-
-/** Every draft's takes, so a take in the media can be traced back to what made it. */
-function useDraftHistories(): string[] {
-	const draftIds = useSlateSelector(draftIdsOf, shallow);
-	const load = useLoadElementHistory();
-	useEffect(() => draftIds.forEach(load), [draftIds, load]);
-	return draftIds;
-}
+import { draftIdsOf } from "./playground-context";
 
 /** Holds the place of a take still on its way; gone once it lands in the media. */
 function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
@@ -84,14 +65,7 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 }
 
 /** Every take and upload of one kind, newest first, under whatever the playground is making now; switching type shows its kind. */
-export function PlaygroundLibrary({
-	type,
-	onReuse,
-}: {
-	type: PlaygroundContentType;
-	onReuse: (take: ElementVersion) => void;
-}) {
-	const allDraftIds = useDraftHistories();
+export function PlaygroundLibrary({ type }: { type: PlaygroundContentType }) {
 	const { outputKind } = CONTENT_TYPES[type];
 	const {
 		kind,
@@ -127,9 +101,7 @@ export function PlaygroundLibrary({
 			{inputElement}
 			<PanelCard
 				title="Media library"
-				action={
-					<PanelCardAddButton label="Upload media" onClick={openPicker} />
-				}
+				action={<AddButton label="Upload media" onClick={openPicker} />}
 			>
 				<MediaLibraryFilter
 					kind={kind}
@@ -150,8 +122,6 @@ export function PlaygroundLibrary({
 								key={item.name}
 								item={item}
 								referencesOf={referencesOf}
-								draftIds={allDraftIds}
-								onReuse={onReuse}
 							/>
 						))}
 					</ThumbnailGrid>

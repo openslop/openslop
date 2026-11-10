@@ -69,11 +69,7 @@ export function ExportDoneToast({
 					Download
 				</a>
 			</Button>
-			<CloseButton
-				onClick={() => toast.dismiss(toastId)}
-				size={14}
-				className="shrink-0"
-			/>
+			<CloseButton onClick={() => toast.dismiss(toastId)} />
 		</div>
 	);
 }

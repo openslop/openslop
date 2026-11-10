@@ -51,7 +51,7 @@ function ToolbarButton({
 		<ToolbarPrimitive.Button
 			data-slot="toolbar-button"
 			className={cn(
-				"inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-ring [&_svg]:size-4 [&_svg]:shrink-0",
+				"inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-ring [&_svg]:size-4 [&_svg]:shrink-0",
 				"group-data-[variant=tile]/toolbar:size-6 group-data-[variant=tile]/toolbar:rounded-sm group-data-[variant=tile]/toolbar:text-media-toggle-fg group-data-[variant=tile]/toolbar:hover:bg-media-toggle-hover-bg group-data-[variant=tile]/toolbar:hover:text-media-toggle-fg group-data-[variant=tile]/toolbar:[&_.icon]:size-3.5",
 				TONES[tone],
 				className,

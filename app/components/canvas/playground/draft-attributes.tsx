@@ -32,27 +32,32 @@ export function DraftPictures({ element }: { element: GeneratedElement }) {
 		const Flat = laidFlat(def);
 		return (
 			Flat && (
-				<PanelSection key={def.key} label={def.label}>
-					<Flat
-						element={element}
-						attrKey={def.key}
-						label={def.label}
-						columns={2}
-					/>
-				</PanelSection>
+				<Flat
+					key={def.key}
+					element={element}
+					attrKey={def.key}
+					label={def.label}
+					columns={2}
+					Section={PanelSection}
+				/>
 			)
 		);
 	});
 }
 
-/** Every other setting, as a row of chips; layout belongs to a scene. */
+/** Every other setting, as a row of menu buttons; layout belongs to a scene. */
 export function DraftSettings({ element }: { element: GeneratedElement }) {
 	const chips = generationDefs(element).filter((def) => !laidFlat(def));
 	if (chips.length === 0) return null;
 	return (
 		<div className="flex flex-wrap gap-2">
 			{chips.map((def) => (
-				<AttributeBadge key={def.key} element={element} def={def} look="chip" />
+				<AttributeBadge
+					key={def.key}
+					element={element}
+					def={def}
+					look="button"
+				/>
 			))}
 		</div>
 	);

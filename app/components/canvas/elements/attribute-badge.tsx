@@ -1,7 +1,7 @@
 import { useSlateStatic } from "slate-react";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import {
-	ChipMenuTrigger,
+	ButtonMenuTrigger,
 	InlineMenuTrigger,
 	SelectMenu,
 } from "@/components/ui/select-menu";
@@ -33,8 +33,8 @@ const SECONDS_FIELD = "w-20 font-numeric";
 interface AttributeBadgeProps {
 	element: GeneratedElement;
 	def: AttributeDef;
-	/** `chip` shows a choice as the panel's chip, named by its icon. */
-	look?: "inline" | "chip";
+	/** `button` shows a choice as a ghost button, named by its icon. */
+	look?: "inline" | "button";
 }
 
 export function AttributeBadge({
@@ -127,10 +127,10 @@ export function AttributeBadge({
 			}))}
 			contentClassName="max-h-64 min-w-24"
 		>
-			{look === "chip" ? (
-				<ChipMenuTrigger icon={def.icon} aria-label={tooltip}>
+			{look === "button" ? (
+				<ButtonMenuTrigger icon={def.icon} aria-label={tooltip}>
 					{formatValue(value, unit)}
-				</ChipMenuTrigger>
+				</ButtonMenuTrigger>
 			) : (
 				<InlineMenuTrigger aria-label={tooltip}>
 					<span className="min-w-0 truncate">{formatValue(value, unit)}</span>

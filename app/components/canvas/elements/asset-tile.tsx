@@ -14,13 +14,15 @@ import {
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { GenerationIndicator } from "./generation-indicator";
 import {
-	DeleteAction,
-	EditAction,
-	RemoveAction,
-	TileActions,
-	ViewLargerAction,
+	DeleteItem,
+	RemoveItem,
+	TileMenu,
+	TilePrimaryAction,
+	useViewLarger,
+	type TilePrimary,
 } from "./tile-actions";
 
+/** A picture or initial over its name: choosing the face does `primary`; the ⋮ holds the rest. */
 export function AssetTile({
 	name,
 	previewUrl,
@@ -30,10 +32,10 @@ export function AssetTile({
 	Icon,
 	status = "idle",
 	startedAt = null,
-	onEdit,
+	primary,
+	menu,
 	onRemove,
 	onDelete,
-	actions,
 	children,
 	fallback = "initial",
 }: {
@@ -46,15 +48,21 @@ export function AssetTile({
 	Icon: IconComponent;
 	status?: GenerationStatus;
 	startedAt?: number | null;
-	onEdit?: () => void;
+	primary?: TilePrimary;
 	onRemove?: () => void;
 	onDelete?: () => void;
-	/** Between edit and remove or delete in the pill. */
-	actions?: React.ReactNode;
-	/** Over the face, under the pill. */
+	/** Menu items between View larger and Remove or Delete. */
+	menu?: React.ReactNode;
+	/** Over the face, under its actions. */
 	children?: React.ReactNode;
 	fallback?: "initial" | "icon";
 }) {
+	const viewer = useViewLarger(
+		previewUrl
+			? { src: previewUrl, kind: previewKind, name, context, createdAt }
+			: undefined,
+	);
+	const hasMenu = Boolean(viewer.item || menu || onRemove || onDelete);
 	const fallbackContent =
 		fallback === "icon" ? (
 			<Icon className="h-5 w-5" />
@@ -79,35 +87,27 @@ export function AssetTile({
 				{status === "generating" && (
 					<Skeleton className="absolute inset-0" aria-hidden />
 				)}
-				{isGenerationActive(status) && (
+				{children}
+				{primary && <TilePrimaryAction {...primary} />}
+				{isGenerationActive(status) ? (
 					<GenerationIndicator
 						status={status}
 						startedAt={startedAt}
 						size="sm"
 						className="absolute top-1 right-1"
 					/>
+				) : (
+					hasMenu && (
+						<TileMenu label={name}>
+							{viewer.item}
+							{menu}
+							{onRemove && <RemoveItem onSelect={onRemove} />}
+							{onDelete && <DeleteItem onSelect={onDelete} />}
+						</TileMenu>
+					)
 				)}
-				{children}
-				<TileActions label={name}>
-					{previewUrl && (
-						<ViewLargerAction
-							src={previewUrl}
-							kind={previewKind}
-							name={name}
-							context={context}
-							createdAt={createdAt}
-						/>
-					)}
-					{onEdit && <EditAction name={name} onClick={onEdit} />}
-					{actions}
-					{onRemove && status !== "generating" && (
-						<RemoveAction name={name} onClick={onRemove} />
-					)}
-					{onDelete && status !== "generating" && (
-						<DeleteAction name={name} onClick={onDelete} />
-					)}
-				</TileActions>
 			</ThumbnailFace>
+			{viewer.dialog}
 			<ThumbnailCaption title={name} icon={<Icon size={10} />}>
 				{name}
 			</ThumbnailCaption>

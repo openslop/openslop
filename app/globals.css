@@ -67,6 +67,7 @@
 @utility elevated-surface {
 	background-color: var(--surface-elevated);
 	--scrollbar: var(--scrollbar-elevated);
+	--button-hover: var(--surface-hover);
 }
 
 @utility focus-ring {

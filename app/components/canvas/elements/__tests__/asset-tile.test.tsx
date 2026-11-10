@@ -2,15 +2,20 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
-import { User } from "@/components/ui/icon";
+import { Pencil, User } from "@/components/ui/icon";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { click, mountOnCanvas } from "../../__tests__/_mount";
+import {
+	chooseTileMenuItem,
+	click,
+	mountOnCanvas,
+} from "@/app/components/canvas/__tests__/_mount";
 import { AssetTile } from "../asset-tile";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const AVATAR = "https://cdn.example/mia.png";
-const VIEW = 'button[aria-label="View Mia larger"]';
+const EDIT = 'button[aria-label="Edit Mia"]';
+const MENU = 'button[aria-label="More actions for Mia"]';
 
 const onEdit = vi.fn();
 let canvas: ReturnType<typeof mountOnCanvas>;
@@ -22,7 +27,7 @@ function renderTile(previewUrl?: string) {
 				name="Mia"
 				previewUrl={previewUrl}
 				Icon={User}
-				onEdit={onEdit}
+				primary={{ label: "Edit Mia", icon: Pencil, onSelect: onEdit }}
 			/>
 		</TooltipProvider>,
 	);
@@ -30,25 +35,35 @@ function renderTile(previewUrl?: string) {
 
 const viewer = () => document.body.querySelector('[role="dialog"]');
 
+const viewLarger = () => chooseTileMenuItem("Mia", "View larger");
+
 beforeEach(() => {
+	onEdit.mockClear();
 	canvas = mountOnCanvas();
 });
 
 afterEach(() => canvas.unmount());
 
 describe("AssetTile", () => {
-	it("opens the full-size picture without editing the asset", async () => {
+	it("edits the asset when its face is chosen", async () => {
 		renderTile(AVATAR);
-		await click(VIEW);
+		await click(EDIT);
+
+		expect(onEdit).toHaveBeenCalledOnce();
+	});
+
+	it("opens the full-size picture from its menu without editing the asset", async () => {
+		renderTile(AVATAR);
+		await viewLarger();
 
 		expect(onEdit).not.toHaveBeenCalled();
 		expect(viewer()?.querySelector("img")?.getAttribute("src")).toBe(AVATAR);
 		expect(viewer()?.textContent).toContain("Mia");
 	});
 
-	it("closes on Escape and hands focus back to the tile", async () => {
+	it("closes the larger view on Escape and hands focus back to the menu", async () => {
 		renderTile(AVATAR);
-		await click(VIEW);
+		await viewLarger();
 		await act(async () => {
 			document.activeElement?.dispatchEvent(
 				new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
@@ -57,7 +72,7 @@ describe("AssetTile", () => {
 		await act(() => new Promise((resolve) => setTimeout(resolve)));
 
 		expect(viewer()).toBeNull();
-		expect(document.activeElement).toBe(document.body.querySelector(VIEW));
+		expect(document.activeElement).toBe(document.body.querySelector(MENU));
 	});
 
 	it("leads the caption with the asset's icon", () => {
@@ -67,8 +82,8 @@ describe("AssetTile", () => {
 		).not.toBeNull();
 	});
 
-	it("offers no viewer until there is a picture", () => {
+	it("offers no menu until there is something in it", () => {
 		renderTile();
-		expect(document.body.querySelector(VIEW)).toBeNull();
+		expect(document.body.querySelector(MENU)).toBeNull();
 	});
 });

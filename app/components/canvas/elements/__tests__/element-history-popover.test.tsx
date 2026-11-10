@@ -126,6 +126,7 @@ describe("ElementHistoryPopover", () => {
 		renderPopover();
 		await click('button[aria-label="Generation history"]');
 		const view = 'button[aria-label="View version 1 larger"]';
+		document.body.querySelector<HTMLElement>(view)?.focus();
 		await click(view);
 		await act(async () => {
 			document.activeElement?.dispatchEvent(

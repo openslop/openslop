@@ -140,9 +140,7 @@ type ElementSpec = { connector?: AssetConnectorType };
 export const PLAYGROUND_CONTENT_TYPES = [
 	"image",
 	"video",
-	"narration",
 	"music",
-	"sound",
 ] as const satisfies readonly ContentType[];
 
 export type PlaygroundContentType = (typeof PLAYGROUND_CONTENT_TYPES)[number];

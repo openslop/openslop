@@ -1,6 +1,4 @@
-import type { ComponentProps, ReactNode } from "react";
-import { Plus } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import type { ReactNode } from "react";
 import { InfoTip } from "@/components/ui/info-tip";
 
 export function PanelCard({
@@ -16,8 +14,8 @@ export function PanelCard({
 		<section className="grain relative shrink-0 overflow-hidden rounded-xl border border-border bg-element-card shadow-elevation-3 dark:border-transparent dark:shadow-elevation-1">
 			<div className="relative z-10 flex flex-col gap-3 p-3 text-panel-fg">
 				{title && (
-					<div className="flex items-center justify-between gap-2">
-						<h3 className="text-label font-semibold tracking-wider text-panel-label uppercase">
+					<div className="flex items-center justify-between gap-2 text-panel-label">
+						<h3 className="text-label font-semibold tracking-wider uppercase">
 							{title}
 						</h3>
 						{action}
@@ -49,29 +47,23 @@ export function PanelField({
 	);
 }
 
-/** A label over a control too wide to sit beside it. */
+/** A title, and the action beside it, over a control too wide to sit beside it; all of it in the label color. */
 export function PanelSection({
-	label,
+	title,
+	action,
 	children,
 }: {
-	label: string;
+	title: string;
+	action?: ReactNode;
 	children: ReactNode;
 }) {
 	return (
-		<div className="flex flex-col gap-2">
-			<span className="text-label font-medium text-panel-label">{label}</span>
+		<div className="flex flex-col gap-2 text-panel-label">
+			<div className="flex items-center justify-between gap-2">
+				<span className="text-label font-medium">{title}</span>
+				{action}
+			</div>
 			{children}
 		</div>
-	);
-}
-
-/** The card header's add button; also a menu's trigger. */
-export function PanelCardAddButton(
-	props: Omit<ComponentProps<typeof TooltipIconButton>, "children">,
-) {
-	return (
-		<TooltipIconButton variant="quiet" {...props}>
-			<Plus />
-		</TooltipIconButton>
 	);
 }

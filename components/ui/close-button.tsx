@@ -1,25 +1,17 @@
-import * as React from "react";
+import type * as React from "react";
 import { X } from "@/components/ui/icon";
-import { cn } from "@/lib/utils";
+import { IconButton } from "@/components/ui/icon-button";
 
-export function CloseButton({
-	size = 16,
-	className,
-	ref,
-	...props
-}: React.ComponentProps<"button"> & { size?: number }) {
+/** Closes the surface it sits on; looks like every header action beside it. */
+export function CloseButton(
+	props: Omit<
+		React.ComponentProps<typeof IconButton>,
+		"ariaLabel" | "variant" | "size"
+	>,
+) {
 	return (
-		<button
-			ref={ref}
-			type="button"
-			aria-label="Close"
-			className={cn(
-				"inline-flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-hover hover:text-foreground focus-ring",
-				className,
-			)}
-			{...props}
-		>
-			<X size={size} />
-		</button>
+		<IconButton ariaLabel="Close" variant="inherit" {...props}>
+			<X />
+		</IconButton>
 	);
 }

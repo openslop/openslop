@@ -3,7 +3,13 @@
 import { renderPrompt } from "@/lib/connectors/character-refs";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, History, Pin, RotateCcw } from "@/components/ui/icon";
+import {
+	AlertCircle,
+	History,
+	Maximize2,
+	Pin,
+	RotateCcw,
+} from "@/components/ui/icon";
 import {
 	Popover,
 	PopoverContent,
@@ -25,7 +31,7 @@ import {
 import { AudioPlayer } from "./audio-player";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
-import { TileActions, ViewLargerAction } from "./tile-actions";
+import { TilePrimaryAction, useViewLarger } from "./tile-actions";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 
 const PROMPT_LENGTH = 72;
@@ -46,20 +52,22 @@ function ElementVersionThumbnail({
 	name: string;
 }) {
 	const src = result.videoUrl ?? result.imageUrl;
-	if (!src) return null;
 	const kind = result.videoUrl ? "video" : "image";
+	const viewer = useViewLarger(
+		src
+			? { src, kind, name, context: "Version history", createdAt }
+			: undefined,
+	);
+	if (!src) return null;
 	return (
 		<div className="group/tile relative aspect-video w-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
 			<MediaWithSkeleton outputKind={kind} src={src} alt="" />
-			<TileActions label={name}>
-				<ViewLargerAction
-					src={src}
-					kind={kind}
-					name={name}
-					context="Version history"
-					createdAt={createdAt}
-				/>
-			</TileActions>
+			<TilePrimaryAction
+				label={`View ${name} larger`}
+				icon={Maximize2}
+				onSelect={viewer.show}
+			/>
+			{viewer.dialog}
 		</div>
 	);
 }

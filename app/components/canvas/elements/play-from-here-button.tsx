@@ -21,6 +21,7 @@ export function PlayFromHereButton({ scene }: { scene: Scene }) {
 		<TooltipIconButton
 			label={unavailable ? "Generate scene to play" : "Play from here"}
 			ariaLabel="Play from here"
+			size="sm"
 			chip
 			unavailable={unavailable}
 			onMouseDown={keepFocus}

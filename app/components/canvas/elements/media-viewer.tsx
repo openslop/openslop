@@ -8,10 +8,10 @@ import {
 	DialogContent,
 	DialogDescription,
 	DialogTitle,
-	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Link } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { useReturnFocus } from "@/components/ui/return-focus";
 import { Separator } from "@/components/ui/separator";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { formatDateTime } from "@/lib/format";
@@ -45,18 +45,19 @@ function ViewerActions({ src }: Pick<Viewed, "src">) {
 	);
 }
 
-/** Opens the media large from the trigger given as `children`. */
+/** The media large, while `open`. */
 export function MediaViewerDialog({
 	src,
 	kind,
 	name,
 	context,
 	createdAt,
-	children,
-}: Viewed & { children: React.ReactNode }) {
+	open,
+	onOpenChange,
+}: Viewed & { open: boolean; onOpenChange: (open: boolean) => void }) {
+	const returnFocus = useReturnFocus(open);
 	return (
-		<Dialog>
-			<DialogTrigger asChild>{children}</DialogTrigger>
+		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
 				surface="elevated"
 				// The first button is a tooltip trigger, which would take the first Escape.
@@ -64,6 +65,7 @@ export function MediaViewerDialog({
 					event.preventDefault();
 					(event.currentTarget as HTMLElement).focus();
 				}}
+				onCloseAutoFocus={returnFocus}
 				showCloseButton={false}
 				className="max-w-4xl gap-2"
 			>

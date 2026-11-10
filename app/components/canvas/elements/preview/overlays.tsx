@@ -22,6 +22,7 @@ function CancelButton({ onClick }: { onClick: () => void }) {
 			<IconButton
 				ariaLabel="Cancel generation"
 				shape="round"
+				size="sm"
 				chip
 				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={onClick}
