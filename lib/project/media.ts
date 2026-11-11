@@ -1,4 +1,5 @@
 import kebabCase from "lodash/kebabCase";
+import { matchSorter } from "match-sorter";
 import { z } from "zod";
 import {
 	UploadKindSchema,
@@ -39,16 +40,14 @@ export function toMediaItems(
 	}));
 }
 
-/** The media of one kind whose name holds the query, newest first. */
-export function findMedia(
+/** The media of one kind whose name matches the query, best match first; ties newest first. */
+export const findMedia = (
 	media: MediaItem[],
 	kind: UploadKind,
 	query: string,
-): MediaItem[] {
-	const sought = query.trim().toLowerCase();
-	return media
-		.filter(
-			(item) => item.kind === kind && item.name.toLowerCase().includes(sought),
-		)
-		.toReversed();
-}
+): MediaItem[] =>
+	matchSorter(
+		media.filter((item) => item.kind === kind).toReversed(),
+		query.trim(),
+		{ keys: ["name"], baseSort: (a, b) => a.index - b.index },
+	);
