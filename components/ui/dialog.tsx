@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { CloseButton } from "@/components/ui/close-button";
+import { useReturnFocus } from "@/components/ui/return-focus";
 
 import { cn } from "@/lib/utils";
 
@@ -79,6 +80,8 @@ function DialogContent({
 	showCloseButton = true,
 	glow = true,
 	surface = "default",
+	onOpenAutoFocus,
+	onCloseAutoFocus,
 	...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
 	showCloseButton?: boolean;
@@ -86,6 +89,7 @@ function DialogContent({
 	glow?: boolean;
 	surface?: keyof typeof SURFACES;
 }) {
+	const returnFocus = useReturnFocus({ onOpenAutoFocus, onCloseAutoFocus });
 	return (
 		<DialogPortal>
 			<DialogOverlay />
@@ -97,6 +101,7 @@ function DialogContent({
 					className,
 				)}
 				{...props}
+				{...returnFocus}
 			>
 				{glow && surface === "default" && (
 					<div

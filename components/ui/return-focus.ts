@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
 
 /** Where focus belongs once a dialog opened from the focused element closes: a menu item's menu button, else the element itself. */
 function returnTarget(): HTMLElement | null {
@@ -13,18 +13,27 @@ function returnTarget(): HTMLElement | null {
 		: null;
 }
 
-/** For a dialog with no trigger: notes what opened it as it opens, and hands focus back there as it closes. */
-export function useReturnFocus(open: boolean) {
-	const [opened, setOpened] = useState({
-		open,
-		from: null as HTMLElement | null,
-	});
-	// The render that opens it is the last moment the opener is still focused.
-	if (open !== opened.open)
-		setOpened({ open, from: open ? returnTarget() : opened.from });
-	return (event: Event) => {
-		if (!opened.from?.isConnected) return;
-		event.preventDefault();
-		opened.from.focus();
+type AutoFocusHandlers = {
+	onOpenAutoFocus?: (event: Event) => void;
+	onCloseAutoFocus?: (event: Event) => void;
+};
+
+/** For keyboard and screen-reader users: a closing dialog hands focus back to what opened it, since Radix sends it to the body without a trigger. A caller's handler can prevent it. */
+export function useReturnFocus({
+	onOpenAutoFocus,
+	onCloseAutoFocus,
+}: AutoFocusHandlers): Required<AutoFocusHandlers> {
+	const opener = useRef<HTMLElement | null>(null);
+	return {
+		onOpenAutoFocus: (event) => {
+			opener.current = returnTarget();
+			onOpenAutoFocus?.(event);
+		},
+		onCloseAutoFocus: (event) => {
+			onCloseAutoFocus?.(event);
+			if (event.defaultPrevented || !opener.current?.isConnected) return;
+			event.preventDefault();
+			opener.current.focus();
+		},
 	};
 }

@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Link } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useReturnFocus } from "@/components/ui/return-focus";
 import { Separator } from "@/components/ui/separator";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { formatDateTime } from "@/lib/format";
@@ -55,7 +54,6 @@ export function MediaViewerDialog({
 	open,
 	onOpenChange,
 }: Viewed & { open: boolean; onOpenChange: (open: boolean) => void }) {
-	const returnFocus = useReturnFocus(open);
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent
@@ -65,7 +63,6 @@ export function MediaViewerDialog({
 					event.preventDefault();
 					(event.currentTarget as HTMLElement).focus();
 				}}
-				onCloseAutoFocus={returnFocus}
 				showCloseButton={false}
 				className="max-w-4xl gap-2"
 			>
