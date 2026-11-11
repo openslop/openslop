@@ -1,9 +1,9 @@
+import once from "lodash/once";
 import { memoAsync } from "@/lib/memo-async";
 
 export const PEAK_COUNT = 200;
 
-let sharedAudioContext: AudioContext | null = null;
-const getAudioContext = () => (sharedAudioContext ??= new AudioContext());
+const getAudioContext = once(() => new AudioContext());
 
 /**
  * Normalized amplitudes (0–1) from raw audio samples, one per bucket.

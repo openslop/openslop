@@ -1,18 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { prefetch as PrefetchFn } from "remotion";
+import { memoAsync } from "@/lib/memo-async";
 import type { RenderLayout } from "@/lib/render/types";
 import { toastError } from "@/lib/toast-error";
 
 type PrefetchHandle = ReturnType<typeof PrefetchFn>;
 
-let prefetchPromise: Promise<typeof PrefetchFn> | null = null;
-const loadPrefetch = () =>
-	(prefetchPromise ??= import("remotion")
-		.then((remotion) => remotion.prefetch)
-		.catch((error) => {
-			prefetchPromise = null;
-			throw error;
-		}));
+const loadPrefetch = memoAsync(
+	() => import("remotion").then((remotion) => remotion.prefetch),
+	() => "remotion",
+);
 
 export function collectUrls(layout: RenderLayout): Set<string> {
 	const urls = new Set<string>();
