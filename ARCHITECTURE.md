@@ -71,7 +71,7 @@ Assets come first, then the scenes. An asset is known by its type and name, neve
 
 `lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template), the project's pinned default models and its media. It also owns saving and version history.
 
-**Media** holds the project's own files, apart from the canvas: every image, video or audio file the user uploads, whether to the Media card, an element, a start frame or the references, lands there through `useMediaUpload`. Each item is known by a unique name taken from its file. Removing an item never touches the elements that use its URL.
+**Media** holds the project's own files, apart from the canvas: every image, video or audio file the user uploads, whether to the Media panel, an element, a start frame or the references, lands there through `useMediaUpload`, and so does every take generated in the Media panel. Each item is known by a unique name taken from its file, or from its type for a generated take. Removing an item never touches the elements that use its URL.
 
 Each generated element is a node in a dependency graph (`lib/generation/`). A node holds the element's text, its attributes, the metadata its plugins read, and edges to the generated elements it uses. Per-type behaviour comes from the plugins installed in `lib/connectors/registry.ts`:
 
