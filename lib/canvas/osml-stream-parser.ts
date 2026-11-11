@@ -23,7 +23,8 @@ export type OSMLElement<T extends ElementType = ElementType> = {
 /**
  * Incrementally reads a stream of OSML text. Each `appendChunk` returns the
  * elements that chunk opened or added text to, in document order. A tag the
- * canvas does not know is dropped along with its text.
+ * canvas does not know is dropped along with its text, and so is any text
+ * outside a tag (a scene marker, or a model's chatter around the XML).
  */
 export class OSMLStreamParser {
 	private buffer = "";
@@ -48,7 +49,8 @@ export class OSMLStreamParser {
 			const [matched, closing, openTag] = match;
 			const text = this.buffer.slice(lastIndex, match.index);
 			if (text.trim()) this.grow(text);
-			if (!closing) this.open(openTag);
+			if (closing) this.current = undefined;
+			else this.open(openTag);
 			lastIndex = match.index + matched.length;
 		}
 		this.buffer = this.buffer.slice(lastIndex);

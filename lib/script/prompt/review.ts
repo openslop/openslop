@@ -30,7 +30,9 @@ export function reviewPrompt(
 		- Pacing and beats: the video progresses at a natural speed, with no sudden awkward cuts or overly dragged out scenes.
 		- Prompts: all prompts are clear, specific, and give the model enough information to generate the intended visuals and audio.
 
-		Work through every scene and give each element a single finding.
+		Attributes the rules never mention, like provider, model, volume and trimStart, are app settings and outside the scope of this review.
+
+		Work through every scene and give each element at most one finding.
 
 		Write each finding as one bullet, three fields in this order:
 

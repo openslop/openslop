@@ -21,9 +21,13 @@ import { CHARACTER_REFS_RULE } from "./character-refs";
 import { VIDEO_PROMPT_FORMAT } from "./video-prompt";
 import { MUSIC_PROMPT_FORMAT } from "./music-prompt";
 
+/** Only the writer replies in XML; a review reads the same spec and replies in findings. */
+export const OSML_REPLY_FORMAT =
+	"Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >.";
+
 export function osmlSpec(language: string): string {
 	return dedent`
-		The story script must be written in the XML format below. Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >. Never nest tags.
+		The story script must be written in the XML format below. Never nest tags.
 
 		## Format
 		${VIDEO_FORMAT_RULES}

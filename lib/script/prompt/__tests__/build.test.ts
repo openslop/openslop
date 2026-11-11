@@ -169,4 +169,32 @@ describe("buildScriptPrompt", () => {
 		expect(rules).toContain("muted watercolor");
 		expect(rules).not.toContain("# Length");
 	});
+
+	it("asks the writer, and not the review, for a reply of raw XML", () => {
+		const brief = { kind: "brief", brief: "a brief" } as const;
+		const adapt = { kind: "adapt", script: "Once upon a time." } as const;
+
+		expect(buildScriptPrompt([], settingsOf(), brief).system).toContain(
+			"Reply with the raw XML only",
+		);
+		expect(buildScriptPrompt([], settingsOf(), adapt).system).toContain(
+			"Reply with the raw XML only",
+		);
+		expect(scriptRules([], settingsOf())).not.toContain("raw XML");
+	});
+
+	it("maps the user's dialogue to <character> lines, or into the video prompts for a cinematic", () => {
+		const { system } = buildScriptPrompt([], settingsOf(), {
+			kind: "adapt",
+			script: "Once upon a time.",
+		});
+
+		expect(system).toContain(
+			"In Faceless and Explainer, text no character says in the user's script is narration, and a line a character says is a <character> line.",
+		);
+		expect(system).toContain(
+			"In Cinematic, a character's lines go word for word inside the <video> prompt of the shot they say them in, never in <character>.",
+		);
+		expect(system).not.toContain("Text without tags is narration");
+	});
 });

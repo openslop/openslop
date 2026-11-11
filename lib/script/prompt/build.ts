@@ -4,7 +4,7 @@ import type { ScriptSettings } from "@/lib/project/types";
 import { getTemplateById } from "@/lib/templates/templates";
 import { ADAPT_GUIDELINES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
-import { osmlSpec } from "./osml";
+import { OSML_REPLY_FORMAT, osmlSpec } from "./osml";
 import { formatSection, lengthSection, projectPreamble } from "./project";
 import { templatePrompt } from "./template";
 
@@ -74,7 +74,11 @@ export function buildScriptPrompt(
 ): ScriptPrompt {
 	const { guidance, instruction } = promptParts(source, settings);
 	return {
-		system: compact([...guidance, scriptRules(assets, settings)]).join("\n\n"),
+		system: compact([
+			...guidance,
+			scriptRules(assets, settings),
+			OSML_REPLY_FORMAT,
+		]).join("\n\n"),
 		prompt: instruction,
 	};
 }

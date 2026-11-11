@@ -14,6 +14,10 @@ describe("xmlEscape", () => {
 		expect(unescapeXml(escapeXml("&amp; means and"))).toBe("&amp; means and");
 	});
 
+	it("decodes the apostrophe", () => {
+		expect(unescapeXml("it&apos;s")).toBe("it's");
+	});
+
 	it("leaves unknown entities untouched", () => {
 		expect(unescapeXml("&nbsp; &#39;")).toBe("&nbsp; &#39;");
 	});

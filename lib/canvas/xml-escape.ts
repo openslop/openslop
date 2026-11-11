@@ -17,6 +17,7 @@ const UNESCAPES: Record<string, string> = {
 	lt: "<",
 	gt: ">",
 	quot: '"',
+	apos: "'",
 };
 
 export function escapeXml(value: string): string {
@@ -25,7 +26,7 @@ export function escapeXml(value: string): string {
 
 export function unescapeXml(value: string): string {
 	return value.replace(
-		/&(amp|lt|gt|quot);/g,
+		/&(amp|lt|gt|quot|apos);/g,
 		(entity, name: string) => UNESCAPES[name] ?? entity,
 	);
 }

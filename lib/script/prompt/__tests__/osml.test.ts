@@ -106,8 +106,13 @@ describe("osmlSpec", () => {
 		expect(spec).toContain('The default is "false"');
 	});
 
-	it("opens a continued video where the one before it ends", () => {
-		expect(spec).toContain("starts exactly where that video's last shot ends");
+	it("opens a continued video on the visual before it, an image included", () => {
+		expect(spec).toContain(
+			"starts exactly on the visual before it: that image, or the end of that video's last shot.",
+		);
+		expect(spec).not.toContain(
+			"starts exactly where that video's last shot ends",
+		);
 	});
 
 	it("keeps a film to videos and music, whatever the other element rules say", () => {
