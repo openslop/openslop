@@ -136,9 +136,7 @@ export function buildRenderLayout(
 			case "foreground": {
 				cursor = foregroundCursor;
 				if (series.length > 0) {
-					// TransitionSeries.Sequence overlap the previous
-					// ones by transitionDurationSec. Bake that into the cursor so every
-					// subsequent overlay/background/effect lands on the rendered timeline.
+					// TransitionSeries overlaps each sequence with the one before it by the transition.
 					cursor -= transitionDurationSec;
 				}
 				series.push(sequenceAt(element, cursor, MIN_DURATION_SEC));

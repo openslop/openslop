@@ -6,9 +6,8 @@ import type { AssetConnectorType, AssetResult } from "../connectors/types";
 import { serializeInputs, type GenerationInputs } from "./inputs";
 import type { ElementSnapshot } from "./snapshots";
 
-export type ElementVersion = {
+export type CommittedVersion = {
 	elementId: string;
-	createdAt: string;
 	connectorType: AssetConnectorType;
 	elementType: ElementType;
 	inputs: GenerationInputs;
@@ -17,7 +16,7 @@ export type ElementVersion = {
 	pinned: boolean;
 };
 
-export type CommittedVersion = Omit<ElementVersion, "createdAt">;
+export type ElementVersion = CommittedVersion & { createdAt: string };
 
 const NO_VERSIONS: readonly ElementVersion[] = [];
 
