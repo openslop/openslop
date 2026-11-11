@@ -26,7 +26,7 @@ export function ProjectCard({
 						<ProjectThumbnail url={project.thumbnail_url} name={project.name} />
 					</div>
 				</Link>
-				<div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
+				<div className="absolute top-2 right-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
 					<DeleteButton
 						ariaLabel={`Delete ${project.name}`}
 						chip
