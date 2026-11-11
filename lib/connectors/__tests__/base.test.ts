@@ -58,7 +58,7 @@ describe("BaseConnector", () => {
 			"transform failed",
 		);
 		expect(onError).toHaveBeenCalledWith(
-			expect.stringContaining("transform failed"),
+			new Error("transform failed"),
 			expect.any(Object),
 		);
 	});
@@ -77,7 +77,7 @@ describe("BaseConnector", () => {
 		const c = new TestConnector({ projectId: "project-1", model, plugins });
 		await expect(c.generate({ prompt: "hi" })).rejects.toThrow("before failed");
 		expect(onError).toHaveBeenCalledWith(
-			expect.stringContaining("before failed"),
+			new Error("before failed"),
 			expect.any(Object),
 		);
 	});

@@ -56,7 +56,7 @@ describe("BaseLLMConnector", () => {
 
 	it("runs onError plugin when _generate fails", async () => {
 		vi.mocked(fetch).mockRejectedValue(new Error("generation failed"));
-		const errors: string[] = [];
+		const errors: unknown[] = [];
 		const plugin: ConnectorPlugin = {
 			name: "error-handler",
 			onError: (e) => void errors.push(e),
@@ -68,10 +68,11 @@ describe("BaseLLMConnector", () => {
 			plugins: [plugin],
 		});
 
-		await expect(connector.generate({ prompt: "test" })).rejects.toThrow(
-			"generation failed",
-		);
-		expect(errors[0]).toContain("generation failed");
+		const error = await connector
+			.generate({ prompt: "test" })
+			.catch((e: unknown) => e);
+		expect(error).toEqual(new Error("generation failed"));
+		expect(errors).toEqual([error]);
 	});
 
 	it("runs plugins in order", async () => {
@@ -146,7 +147,7 @@ describe("BaseLLMConnector", () => {
 		const gen = connector.stream({ prompt: "test" });
 		await expect(gen.next()).rejects.toThrow("transform failed");
 		expect(onError).toHaveBeenCalledWith(
-			expect.stringContaining("transform failed"),
+			new Error("transform failed"),
 			expect.any(Object),
 		);
 	});
@@ -169,7 +170,7 @@ describe("BaseLLMConnector", () => {
 		const gen = connector.stream({ prompt: "test" });
 		await expect(gen.next()).rejects.toThrow("before failed");
 		expect(onError).toHaveBeenCalledWith(
-			expect.stringContaining("before failed"),
+			new Error("before failed"),
 			expect.any(Object),
 		);
 	});

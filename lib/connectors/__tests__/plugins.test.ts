@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
 	runAfterGenerate,
 	runBeforeGenerate,
@@ -55,13 +55,19 @@ describe("plugins", () => {
 	});
 
 	it("runs onError for all plugins", async () => {
-		const errors: string[] = [];
-		const plugins: ConnectorPlugin[] = [
-			{ name: "a", onError: (e) => void errors.push(`a:${e}`) },
-			{ name: "b", onError: (e) => void errors.push(`b:${e}`) },
-		];
-		await runOnError(plugins, "fail", {});
-		expect(errors).toEqual(["a:fail", "b:fail"]);
+		const error = new Error("fail");
+		const a = vi.fn();
+		const b = vi.fn();
+		await runOnError(
+			[
+				{ name: "a", onError: a },
+				{ name: "b", onError: b },
+			],
+			error,
+			{},
+		);
+		expect(a).toHaveBeenCalledWith(error, {});
+		expect(b).toHaveBeenCalledWith(error, {});
 	});
 
 	it("skips undefined hooks", async () => {

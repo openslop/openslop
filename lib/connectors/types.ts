@@ -123,7 +123,7 @@ export interface ConnectorPlugin<TParams = unknown, TResult = unknown> {
 		prompt: string,
 		ctx: PluginContext,
 	): string | Promise<string>;
-	onError?(error: string, ctx: PluginContext): void | Promise<void>;
+	onError?(error: unknown, ctx: PluginContext): void | Promise<void>;
 }
 
 export interface ConnectorConfig {

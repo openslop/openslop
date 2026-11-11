@@ -1,5 +1,4 @@
 import { AttributeSchema } from "./attributes/schema";
-import { stringifyError } from "../errors";
 import {
 	runAfterGenerate,
 	runBeforeGenerate,
@@ -55,7 +54,7 @@ export abstract class BaseConnector<
 			const result = await this._generate(prepared, ctx.signal);
 			return await runAfterGenerate(this.plugins, result, ctx);
 		} catch (error) {
-			await runOnError(this.plugins, stringifyError(error), ctx);
+			await runOnError(this.plugins, error, ctx);
 			throw error;
 		}
 	}
