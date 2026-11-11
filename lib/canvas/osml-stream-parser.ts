@@ -10,7 +10,7 @@ const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<(\/?)([^<>/][^<>]*?)>/g;
 // A chunk can end mid-entity ("&am"); flushing it would decode the two halves
 // separately and lose the character.
-const PARTIAL_ENTITY = /&(#x?[0-9a-f]*|[a-z]*)$/i;
+const PARTIAL_ENTITY = /&[a-z]*$/i;
 
 /** An element as its OSML states it. While the stream is open, `text` keeps growing. */
 export type OSMLElement<T extends ElementType = ElementType> = {

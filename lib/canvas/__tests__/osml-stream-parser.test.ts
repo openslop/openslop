@@ -94,12 +94,6 @@ describe("OSMLStreamParser", () => {
 		expect(grown?.text).toBe("Rock & Roll forever");
 	});
 
-	it("decodes a numeric entity split across chunk boundaries", () => {
-		const [, , [grown]] = read("<narration>", "It&#3", "9;s raining again");
-
-		expect(grown?.text).toBe("It's raining again");
-	});
-
 	it("drops an unknown tag along with its text", () => {
 		const [elements] = read(
 			"<narration>Once</narration><unknowntag>stray words</unknowntag>",

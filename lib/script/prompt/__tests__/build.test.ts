@@ -183,14 +183,17 @@ describe("buildScriptPrompt", () => {
 		expect(scriptRules([], settingsOf())).not.toContain("raw XML");
 	});
 
-	it("tells the converter that untagged text is narration in the user's script, not in its reply", () => {
+	it("maps the user's dialogue to <character> lines, or into the video prompts for a cinematic", () => {
 		const { system } = buildScriptPrompt([], settingsOf(), {
 			kind: "adapt",
 			script: "Once upon a time.",
 		});
 
 		expect(system).toContain(
-			"In the user's script, text no character says is narration.",
+			"In Faceless and Explainer, text no character says in the user's script is narration, and a line a character says is a <character> line.",
+		);
+		expect(system).toContain(
+			"In Cinematic, a character's lines go word for word inside the <video> prompt of the shot they say them in, never in <character>.",
 		);
 		expect(system).not.toContain("Text without tags is narration");
 	});
