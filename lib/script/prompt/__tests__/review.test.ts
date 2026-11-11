@@ -46,6 +46,19 @@ describe("reviewPrompt", () => {
 		expect(reviewPrompt(script)).toContain("Work through every scene");
 	});
 
+	it("allows at most one finding per element, so a clean element can have none", () => {
+		const prompt = reviewPrompt(script);
+
+		expect(prompt).toContain("give each element at most one finding");
+		expect(prompt).not.toContain("a single finding");
+	});
+
+	it("keeps the reviewer off the app's own attributes, which the rules never teach", () => {
+		expect(reviewPrompt(script)).toContain(
+			"Attributes the rules never mention, like provider, model, volume and trimStart, are app settings and outside the scope of this review.",
+		);
+	});
+
 	it("asks for findings in one shape, and names the reply that ends the loop", () => {
 		expect(reviewPrompt(script)).toContain(
 			"- <element id> | <the rule it breaks> | <the smallest change that fixes it>",

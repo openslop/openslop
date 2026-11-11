@@ -169,4 +169,29 @@ describe("buildScriptPrompt", () => {
 		expect(rules).toContain("muted watercolor");
 		expect(rules).not.toContain("# Length");
 	});
+
+	it("asks the writer, and not the review, for a reply of raw XML", () => {
+		const brief = { kind: "brief", brief: "a brief" } as const;
+		const adapt = { kind: "adapt", script: "Once upon a time." } as const;
+
+		expect(buildScriptPrompt([], settingsOf(), brief).system).toContain(
+			"Reply with the raw XML only",
+		);
+		expect(buildScriptPrompt([], settingsOf(), adapt).system).toContain(
+			"Reply with the raw XML only",
+		);
+		expect(scriptRules([], settingsOf())).not.toContain("raw XML");
+	});
+
+	it("tells the converter that untagged text is narration in the user's script, not in its reply", () => {
+		const { system } = buildScriptPrompt([], settingsOf(), {
+			kind: "adapt",
+			script: "Once upon a time.",
+		});
+
+		expect(system).toContain(
+			"In the user's script, text no character says is narration.",
+		);
+		expect(system).not.toContain("Text without tags is narration");
+	});
 });

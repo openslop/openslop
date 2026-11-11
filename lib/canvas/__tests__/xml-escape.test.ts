@@ -14,7 +14,21 @@ describe("xmlEscape", () => {
 		expect(unescapeXml(escapeXml("&amp; means and"))).toBe("&amp; means and");
 	});
 
-	it("leaves unknown entities untouched", () => {
-		expect(unescapeXml("&nbsp; &#39;")).toBe("&nbsp; &#39;");
+	it("decodes the apostrophe and numeric character references", () => {
+		expect(unescapeXml("it&apos;s &#39;ok&#x27; &#8212; &#x1F600;")).toBe(
+			"it's 'ok' \u2014 \u{1F600}",
+		);
+	});
+
+	it("does not decode a numeric reference the user typed literally", () => {
+		expect(unescapeXml(escapeXml("&#39; is an apostrophe"))).toBe(
+			"&#39; is an apostrophe",
+		);
+	});
+
+	it("leaves unknown entities and impossible code points untouched", () => {
+		expect(unescapeXml("&nbsp; &#x110000; &#xD800; &#0;")).toBe(
+			"&nbsp; &#x110000; &#xD800; &#0;",
+		);
 	});
 });

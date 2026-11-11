@@ -34,12 +34,41 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("returns an element once per chunk, however often the chunk touches it", () => {
-		const [elements] = read("<narration>Once</narration> upon <image>");
+		const [elements] = read("<narration>Once</narration><image>");
 
 		expect(elements).toMatchObject([
-			{ type: "narration", text: "Once upon " },
+			{ type: "narration", text: "Once" },
 			{ type: "image", text: "" },
 		]);
+	});
+
+	it("ends an element at its closing tag, so text between elements is dropped", () => {
+		const [elements] = read(
+			"<narration>Once</narration>\n--- Scene 2 ---\n<image>a hill</image> Hope this helps!",
+		);
+
+		expect(elements).toMatchObject([
+			{ type: "narration", text: "Once" },
+			{ type: "image", text: "a hill" },
+		]);
+	});
+
+	it("drops text that streams in after the last closing tag", () => {
+		const parser = new OSMLStreamParser();
+		const [image] = parser.appendChunk("<image>a hill</image>");
+
+		expect(parser.appendChunk(" Let me know if you want changes.")).toEqual([]);
+		expect(image?.text).toBe("a hill");
+	});
+
+	it("ends an element at a closing tag split across chunks", () => {
+		const [[narration]] = read(
+			"<narration>Once</narr",
+			"ation> and some",
+			" stray words",
+		);
+
+		expect(narration?.text).toBe("Once");
 	});
 
 	it("returns nothing for a chunk that changes nothing", () => {
@@ -63,6 +92,12 @@ describe("OSMLStreamParser", () => {
 		);
 
 		expect(grown?.text).toBe("Rock & Roll forever");
+	});
+
+	it("decodes a numeric entity split across chunk boundaries", () => {
+		const [, , [grown]] = read("<narration>", "It&#3", "9;s raining again");
+
+		expect(grown?.text).toBe("It's raining again");
 	});
 
 	it("drops an unknown tag along with its text", () => {
