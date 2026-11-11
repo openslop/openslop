@@ -10,29 +10,28 @@ export function MentionEditable({
 	onKeyDown,
 	...props
 }: ComponentProps<typeof Editable>) {
-	const mention = useCharacterMention();
-	const open = mention.mention;
+	const menu = useCharacterMention();
 	return (
 		<>
 			<Editable
 				{...props}
 				onKeyDown={(event) => {
-					mention.onKeyDown(event);
+					menu.onKeyDown(event);
 					if (!event.defaultPrevented) onKeyDown?.(event);
 				}}
-				aria-controls={open && mention.listboxId}
+				aria-controls={menu.mention && menu.listboxId}
 				aria-activedescendant={
-					open && optionId(mention.listboxId, mention.active)
+					menu.mention && optionId(menu.listboxId, menu.active)
 				}
 			/>
-			{open && (
+			{menu.mention && (
 				<CharacterMentionMenu
-					mention={open}
-					options={mention.options}
-					active={mention.active}
-					listboxId={mention.listboxId}
-					onSelect={mention.select}
-					onDismiss={mention.dismiss}
+					mention={menu.mention}
+					options={menu.options}
+					active={menu.active}
+					listboxId={menu.listboxId}
+					onSelect={menu.select}
+					onDismiss={menu.dismiss}
 				/>
 			)}
 		</>
