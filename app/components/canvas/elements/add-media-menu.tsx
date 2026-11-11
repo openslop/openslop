@@ -5,7 +5,7 @@ import { StockAlt, Upload } from "@/components/ui/icon";
 import { useEditorPanel } from "../panel/editor-panel-context";
 import { AddButton } from "@/components/ui/add-button";
 
-/** Pictures and media come from an upload or from the playground. */
+/** Pictures and media come from an upload or from the Media panel. */
 export function AddMediaMenu({
 	label,
 	onUpload,
@@ -25,10 +25,10 @@ export function AddMediaMenu({
 					onSelect: onUpload,
 				},
 				{
-					key: "playground",
-					label: "Generate in Playground",
+					key: "generate",
+					label: "Generate",
 					icon: <StockAlt />,
-					onSelect: () => setActive("playground"),
+					onSelect: () => setActive("media"),
 				},
 			]}
 		>

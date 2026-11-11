@@ -34,7 +34,7 @@ import type { PanelKey } from "./panel-keys";
 import { Rail } from "./rail";
 import { ResizeHandle } from "@/app/components/resize/resize-handle";
 import { useResize } from "@/app/components/resize/use-resize";
-import { PlaygroundPanel } from "../playground/playground-panel";
+import { MediaPanel } from "../media/media-panel";
 import { AssetsPanel } from "./assets-panel";
 import { CanvasHistoryPanel } from "./canvas-history-panel";
 import { ModelsPanel } from "./models-panel";
@@ -59,11 +59,11 @@ const PANELS: Record<PanelKey, PanelEntry> = {
 		iconActive: FolderOpenFill,
 		Panel: AssetsPanel,
 	},
-	playground: {
-		label: "Playground",
+	media: {
+		label: "Media",
 		icon: StockAlt,
 		iconActive: StockAltFill,
-		Panel: PlaygroundPanel,
+		Panel: MediaPanel,
 	},
 	project: {
 		label: "Project",

@@ -1,6 +1,6 @@
 /** The rail's panels in draw order. */
 export const RAIL_PANEL_GROUPS = [
-	["assets", "playground", "captions"],
+	["assets", "media", "captions"],
 	["layout", "properties", "effects"],
 	["models"],
 	["history", "project"],

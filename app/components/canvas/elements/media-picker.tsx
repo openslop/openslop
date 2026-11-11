@@ -24,7 +24,7 @@ import { useProject } from "@/lib/project/use-project";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import type { UploadKind } from "@/lib/upload/upload-files";
 import { useEditorPanel } from "../panel/editor-panel-context";
-import { LoadRequestItem, useLoadRequest } from "../playground/load-request";
+import { LoadRequestItem, useLoadRequest } from "../media/load-request";
 import { MediaAssetTile } from "./asset-tiles";
 import { EmptyLibrary, MediaSearch } from "./media-kinds";
 import { uploadingTiles } from "./uploading-tile";
@@ -105,7 +105,7 @@ const [UploadingContext, useMediaPickerUploading] =
 /** Whether the picker's upload is still landing, for a trigger that shows it. */
 export { useMediaPickerUploading };
 
-/** Supplies media from the project's own, the computer or the playground, picked in a popover its `children` open. */
+/** Supplies media from the project's own, the computer or the Media panel, picked in a popover its `children` open. */
 export function MediaPicker({
 	kind,
 	onPick,
@@ -136,15 +136,15 @@ export function MediaPicker({
 			</UploadingContext>
 			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
 				<PopoverHeader
-					title="Media library"
+					title="Media"
 					icon={FolderOpen}
 					action={
 						<TooltipIconButton
-							label="Open playground"
+							label="Open Media"
 							variant="inherit"
 							onClick={() => {
 								setOpen(false);
-								setActive("playground");
+								setActive("media");
 							}}
 						>
 							<PanelLeft />

@@ -1,17 +1,16 @@
 // @vitest-environment happy-dom
 
-import { act } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Descendant } from "slate";
 import { findAsset } from "@/lib/canvas/assets";
 import { references } from "@/lib/canvas/__tests__/_assets";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
-import { createProjectStore, type ProjectStore } from "@/lib/project/store";
+import { createProjectStore } from "@/lib/project/store";
 import { EditorPanelProvider } from "../editor-panel-context";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
-import { PlaygroundProvider } from "@/app/components/canvas/playground/playground-context";
+import { MediaPanelProvider } from "@/app/components/canvas/media/media-panel-context";
 import {
 	chooseTileMenuItem,
 	click,
@@ -31,22 +30,21 @@ vi.mock("../../elements/style/art-style-modal", () => ({
 }));
 
 let canvas: ReturnType<typeof mountOnCanvas>;
-let store: ProjectStore;
 afterEach(() => canvas.unmount());
 
 const open = (children: Descendant[] = []) => {
 	canvas = mountOnCanvas(children);
-	store = createProjectStore();
+	const store = createProjectStore();
 	canvas.render(
 		<ProjectStoreProvider store={store}>
 			<GenerationQueueProvider initialState={{}} storage={noHistory}>
 				<TooltipProvider>
 					<EditorPanelProvider>
-						<PlaygroundProvider>
+						<MediaPanelProvider>
 							<AssetEditProvider>
 								<AssetsPanel />
 							</AssetEditProvider>
-						</PlaygroundProvider>
+						</MediaPanelProvider>
 					</EditorPanelProvider>
 				</TooltipProvider>
 			</GenerationQueueProvider>
@@ -97,33 +95,5 @@ describe("AssetsPanel", () => {
 		await click('button[aria-label="Edit Reference 1"]');
 
 		expect(openDialog()).toBe("asset_style");
-	});
-
-	it("lists the media of the kind shown and deletes an item once confirmed", async () => {
-		open();
-		await act(async () =>
-			store
-				.getState()
-				.addMedia([{ kind: "audio", name: "theme.mp3", url: "https://a/t" }]),
-		);
-
-		expect(document.body.textContent).not.toContain("theme");
-		await click('[role=radio][aria-label="Audio"]');
-		expect(document.body.textContent).toContain("theme");
-
-		await chooseTileMenuItem("theme", "Delete");
-
-		expect(store.getState().media).toHaveLength(1);
-		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(
-			"Delete theme?",
-		);
-
-		await act(async () =>
-			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Delete")
-				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-		);
-
-		expect(store.getState().media).toEqual([]);
 	});
 });

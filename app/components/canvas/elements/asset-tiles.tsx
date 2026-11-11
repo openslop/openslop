@@ -20,7 +20,7 @@ import {
 } from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
 import { deleteArtStyle } from "./delete-asset";
-import { LoadRequestItem, useLoadRequest } from "../playground/load-request";
+import { LoadRequestItem, useLoadRequest } from "../media/load-request";
 
 type TileProps = { children?: ReactNode };
 
@@ -99,7 +99,7 @@ export function ReferenceTile({
 	);
 }
 
-/** One of the project's reference images: its menu takes it off the references, or deletes its file from the media library and the references both. */
+/** One of the project's reference images: its menu takes it off the references, or deletes its file from the project's media and the references both. */
 export function ProjectReferenceTile({
 	onRemove,
 	...tile
@@ -182,7 +182,7 @@ export function MediaAssetTile({
 				name={name}
 				previewUrl={previewKind && url}
 				previewKind={previewKind}
-				context="Media library"
+				context="Media"
 				createdAt={createdAt}
 				Icon={MEDIA_KINDS[kind].Icon}
 				fallback="icon"

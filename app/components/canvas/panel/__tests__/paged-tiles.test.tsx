@@ -58,20 +58,6 @@ describe("PagedTiles", () => {
 		expect(shown()).toEqual(["2", "3"]);
 	});
 
-	it("pages one at a time in a single column", async () => {
-		await act(() =>
-			root.render(
-				<PagedTiles label="Videos" empty={<p>No videos yet</p>} columns={1}>
-					{[<i key="a">a</i>, <i key="b">b</i>]}
-				</PagedTiles>,
-			),
-		);
-
-		expect(shown()).toEqual(["a"]);
-		await click("[aria-label='Next page']");
-		expect(shown()).toEqual(["b"]);
-	});
-
 	it("falls back to the last page when the tiles shrink under the one shown", async () => {
 		await render(5);
 		await click("[aria-label='Page 3']");

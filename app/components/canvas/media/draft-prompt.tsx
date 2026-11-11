@@ -11,10 +11,10 @@ import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import {
 	draftedType,
-	isPlaygroundType,
+	isMediaDraftType,
 	type AssetElement,
 	type ContentElement,
-	type PlaygroundType,
+	type MediaDraftType,
 } from "@/lib/canvas/types";
 import { useAvatarNames } from "@/lib/canvas/use-assets";
 import { useWriteThrough } from "../hooks/use-write-through";
@@ -26,7 +26,7 @@ import {
 	renderCanvasElement,
 } from "../render-canvas-element";
 
-type Draft = AssetElement<PlaygroundType>;
+type Draft = AssetElement<MediaDraftType>;
 
 const renderElement = renderCanvasElement({
 	Scene: ({ attributes, children }) => <div {...attributes}>{children}</div>,
@@ -50,7 +50,7 @@ const renderElement = renderCanvasElement({
 /** The draft's prompt as the canvas would type it, beside the assets its chips resolve against. */
 function scratchValue(canvas: Descendant[], draft: Draft): Descendant[] {
 	const assets = getAssets(canvas).filter(
-		(asset) => !isPlaygroundType(asset.type),
+		(asset) => !isMediaDraftType(asset.type),
 	);
 	const prompt = createCanvasElement(draftedType(draft.type), {
 		text: getElementBodyText(draft),

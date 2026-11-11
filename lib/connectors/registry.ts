@@ -1,9 +1,9 @@
 import {
-	PLAYGROUND_CONTENT_TYPES,
-	playgroundTypeOf,
+	MEDIA_CONTENT_TYPES,
+	mediaDraftTypeOf,
 	type ContentType,
 	type GeneratedType,
-	type PlaygroundType,
+	type MediaDraftType,
 } from "@/lib/canvas/types";
 import { createArtStylePlugin } from "./image/plugins/art-style";
 import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
@@ -37,11 +37,8 @@ const CONTENT = {
 
 /** A draft generates on the plugins of the type it drafts. */
 const DRAFTS = Object.fromEntries(
-	PLAYGROUND_CONTENT_TYPES.map((type) => [
-		playgroundTypeOf(type),
-		CONTENT[type],
-	]),
-) as Record<PlaygroundType, ConnectorConfig>;
+	MEDIA_CONTENT_TYPES.map((type) => [mediaDraftTypeOf(type), CONTENT[type]]),
+) as Record<MediaDraftType, ConnectorConfig>;
 
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	...CONTENT,

@@ -2,20 +2,20 @@ import { useEffect } from "react";
 import {
 	CONTENT_TYPES,
 	draftedType,
-	isPlaygroundType,
+	isMediaDraftType,
 } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useProject } from "@/lib/project/use-project";
 
-/** Every take the playground makes lands in the project's media. */
-export function usePlaygroundMedia(): void {
+/** Every take a media draft makes lands in the project's media. */
+export function useSaveDraftTakes(): void {
 	const queue = useGenerationQueue();
 	const addMedia = useProject((state) => state.addMedia);
 	useEffect(
 		() =>
 			queue.onCommitted(({ elementType, result }) => {
-				if (!isPlaygroundType(elementType)) return;
+				if (!isMediaDraftType(elementType)) return;
 				const name = draftedType(elementType);
 				const kind = CONTENT_TYPES[name].outputKind;
 				const url = getPrimaryUrl(result, kind);

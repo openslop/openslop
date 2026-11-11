@@ -5,7 +5,7 @@ import type { CanvasEditor } from "@/lib/canvas/types";
 import { deserializeWithScenes } from "./serialize";
 
 /**
- * Replaces the document outside undo history, with every playground draft,
+ * Replaces the document outside undo history, with every media draft,
  * and clears the stack, whose entries point at paths this swap removes.
  */
 export function applyScriptToEditor(

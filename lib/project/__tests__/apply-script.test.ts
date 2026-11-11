@@ -5,7 +5,7 @@ import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { getAssets } from "@/lib/canvas/assets";
 import { isScene } from "@/lib/canvas/scenes";
 import {
-	PLAYGROUND_CONTENT_TYPES,
+	MEDIA_CONTENT_TYPES,
 	SCENE_TYPE,
 	type Scene,
 } from "@/lib/canvas/types";
@@ -39,7 +39,7 @@ describe("applyScriptToEditor", () => {
 		expect(editor.history.undos).toEqual([]);
 	});
 
-	it("gives a loaded document every playground draft, once", () => {
+	it("gives a loaded document every media draft, once", () => {
 		const editor = historyEditor();
 		const osml = serializeOSMLWithScenes([scene]);
 		applyScriptToEditor(editor, osml);
@@ -50,9 +50,7 @@ describe("applyScriptToEditor", () => {
 			getAssets(editor.children)
 				.map((asset) => asset.type)
 				.sort(),
-		).toEqual(
-			PLAYGROUND_CONTENT_TYPES.map((type) => `asset_playground_${type}`).sort(),
-		);
+		).toEqual(MEDIA_CONTENT_TYPES.map((type) => `asset_media_${type}`).sort());
 	});
 
 	it("drops undo entries that point into the replaced document", () => {

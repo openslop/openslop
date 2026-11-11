@@ -98,7 +98,7 @@ function AddReferenceItem({
 	);
 }
 
-/** A piece of the project's media, with what the playground can do with it. */
+/** A piece of the project's media, with what the Media panel can do with it. */
 export function LibraryTile({
 	item,
 	referencesOf,
@@ -122,7 +122,7 @@ export function LibraryTile({
 		>
 			{traced && !take && (
 				<div className="absolute right-1 bottom-1">
-					<UploadedLabel tooltip="Uploaded, not made in the playground" />
+					<UploadedLabel tooltip="Uploaded, not generated" />
 				</div>
 			)}
 		</MediaLibraryItem>

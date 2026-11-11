@@ -17,12 +17,12 @@ vi.mock("@/lib/project/use-project", () => ({
 	useProject: () => (media: Upload[]) => added.push(...media),
 }));
 
-const { usePlaygroundMedia } = await import("../hooks/use-playground-media");
+const { useSaveDraftTakes } = await import("../hooks/use-save-draft-takes");
 
-describe("usePlaygroundMedia", () => {
-	it("adds a playground take to the media", () => {
-		usePlaygroundMedia();
-		const draft = asset("asset_playground_image", { text: "A wizard" });
+describe("useSaveDraftTakes", () => {
+	it("adds a media draft take to the media", () => {
+		useSaveDraftTakes();
+		const draft = asset("asset_media_image", { text: "A wizard" });
 		const node = buildNode(draft, buildCtx([draft]));
 
 		queue.commitResult(node, {

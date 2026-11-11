@@ -3,11 +3,11 @@
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { useElementHistorySelector } from "@/lib/generation/generation-queue-provider";
 import type { MediaItem } from "@/lib/project/media";
-import { usePlayground } from "./playground-context";
+import { useMediaPanel } from "./media-panel-context";
 
-/** The playground take that made `item`, and whether every draft's takes are read so its absence means an upload. */
+/** The draft take that made `item`, and whether every draft's takes are read so its absence means an upload. */
 export function useTake(item: MediaItem) {
-	const { draftIds } = usePlayground();
+	const { draftIds } = useMediaPanel();
 	const take = useElementHistorySelector((history) =>
 		draftIds
 			.flatMap((id) => history.get(id))

@@ -11,7 +11,7 @@ import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
-import { PlaygroundProvider } from "@/app/components/canvas/playground/playground-context";
+import { MediaPanelProvider } from "@/app/components/canvas/media/media-panel-context";
 import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
 import {
 	chooseTileMenuItem,
@@ -42,11 +42,11 @@ const open = (tiles: ReactNode, children: Descendant[] = []) => {
 			<GenerationQueueProvider initialState={{}} storage={noHistory}>
 				<TooltipProvider>
 					<EditorPanelProvider>
-						<PlaygroundProvider>
+						<MediaPanelProvider>
 							<AssetEditProvider>
 								<AssetStrip>{tiles}</AssetStrip>
 							</AssetEditProvider>
-						</PlaygroundProvider>
+						</MediaPanelProvider>
 					</EditorPanelProvider>
 				</TooltipProvider>
 			</GenerationQueueProvider>

@@ -359,11 +359,11 @@ describe("ensureDraft", () => {
 		const editor = withHistory(makeEditor([scene("s1", narration("n1"))]));
 		editor.history.undos.push({ operations: [], selectionBefore: null });
 
-		const id = ensureDraft(editor, "asset_playground_image");
+		const id = ensureDraft(editor, "asset_media_image");
 
-		expect(findAsset(editor.children, "asset_playground_image")?.id).toBe(id);
+		expect(findAsset(editor.children, "asset_media_image")?.id).toBe(id);
 		expect(editor.history.undos).toEqual([]);
-		expect(ensureDraft(editor, "asset_playground_image")).toBe(id);
+		expect(ensureDraft(editor, "asset_media_image")).toBe(id);
 		expect(getAssets(editor.children)).toHaveLength(1);
 	});
 });
@@ -379,9 +379,9 @@ describe("restoreDraft", () => {
 	it("makes the draft when there is none and puts it on the take's inputs", () => {
 		const editor = makeEditor([scene("s1", narration("n1"))]);
 
-		restoreDraft(editor, "asset_playground_image", { inputs });
+		restoreDraft(editor, "asset_media_image", { inputs });
 
-		const draft = findAsset(editor.children, "asset_playground_image");
+		const draft = findAsset(editor.children, "asset_media_image");
 		expect(draft && getPromptText(draft)).toBe("A wizard {{Mia}}");
 		expect(draft?.generationAttributes).toEqual({ resolution: "720p" });
 	});
@@ -390,7 +390,7 @@ describe("restoreDraft", () => {
 describe("clearDraft", () => {
 	it("blanks the draft's prompt and settings", () => {
 		const editor = makeEditor([scene("s1", narration("n1"))]);
-		restoreDraft(editor, "asset_playground_image", {
+		restoreDraft(editor, "asset_media_image", {
 			inputs: {
 				prompt: "A wizard",
 				attributes: { resolution: "720p" },
@@ -398,11 +398,11 @@ describe("clearDraft", () => {
 				dependencies: {},
 			},
 		});
-		const id = findAsset(editor.children, "asset_playground_image")?.id ?? "";
+		const id = findAsset(editor.children, "asset_media_image")?.id ?? "";
 
 		clearDraft(editor, id);
 
-		const draft = findAsset(editor.children, "asset_playground_image");
+		const draft = findAsset(editor.children, "asset_media_image");
 		expect(draft && getPromptText(draft)).toBe("");
 		expect(draft?.generationAttributes ?? {}).toEqual({});
 	});

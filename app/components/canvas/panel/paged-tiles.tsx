@@ -7,29 +7,29 @@ import { IconButton } from "@/components/ui/icon-button";
 import { ThumbnailGrid } from "@/components/ui/thumbnail";
 import { cn } from "@/lib/utils";
 
+const COLUMNS = 2;
+
 /** One row of tiles a page, with arrows and a dot per page once they overflow one. */
 export function PagedTiles({
 	label,
 	empty,
-	columns = 2,
 	children,
 }: {
 	label: string;
 	empty: ReactNode;
-	columns?: 1 | 2;
 	children: ReactNode[];
 }) {
 	const [requestedPage, setRequestedPage] = useState(0);
 
 	if (children.length === 0) return empty;
 
-	const pageCount = Math.ceil(children.length / columns);
+	const pageCount = Math.ceil(children.length / COLUMNS);
 	const page = Math.min(requestedPage, pageCount - 1);
 
 	return (
 		<div className="flex flex-col gap-3">
-			<ThumbnailGrid columns={columns}>
-				{children.slice(page * columns, (page + 1) * columns)}
+			<ThumbnailGrid columns={COLUMNS}>
+				{children.slice(page * COLUMNS, (page + 1) * COLUMNS)}
 			</ThumbnailGrid>
 			{pageCount > 1 && (
 				<nav

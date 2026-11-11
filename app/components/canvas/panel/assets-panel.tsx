@@ -5,22 +5,15 @@ import { useSlateStatic } from "slate-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Palette, User } from "@/components/ui/icon";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
-import { useMediaLibrary } from "@/lib/project/use-media-library";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
 	ArtStyleAssetTile,
-	MediaLibraryItem,
 	CharacterAssetTile,
 	ReferenceAssetTile,
 } from "../elements/asset-tiles";
 import { useAssetEditors } from "../elements/asset-edit-context";
 import { deleteCharacter } from "../elements/delete-asset";
-import {
-	EmptyLibrary,
-	MEDIA_KINDS,
-	MediaLibraryFilter,
-} from "../elements/media-kinds";
 import { uploadingTiles } from "../elements/uploading-tile";
 import { AddMediaMenu } from "../elements/add-media-menu";
 import { NoReferenceImages } from "../elements/reference-images";
@@ -135,55 +128,12 @@ function ArtStyleCard() {
 	);
 }
 
-function MediaLibraryCard() {
-	const {
-		kind,
-		setKind,
-		query,
-		setQuery,
-		items,
-		openPicker,
-		uploadingCount,
-		inputElement,
-	} = useMediaLibrary();
-	return (
-		<>
-			{inputElement}
-			<PanelCard
-				title="Media library"
-				action={<AddMediaMenu label="Add media" onUpload={openPicker} />}
-			>
-				<MediaLibraryFilter
-					kind={kind}
-					onKindChange={setKind}
-					query={query}
-					onQueryChange={setQuery}
-				/>
-				<PagedTiles
-					key={kind}
-					label="Media library"
-					empty={<EmptyLibrary kind={kind} query={query} />}
-					columns={MEDIA_KINDS[kind].columns}
-				>
-					{[
-						...uploadingTiles(uploadingCount, kind),
-						...items.map((item) => (
-							<MediaLibraryItem key={item.name} item={item} />
-						)),
-					]}
-				</PagedTiles>
-			</PanelCard>
-		</>
-	);
-}
-
 export function AssetsPanel() {
 	return (
 		<>
 			<ArtStyleCard />
 			<CharactersCard />
 			<ReferencesCard />
-			<MediaLibraryCard />
 		</>
 	);
 }

@@ -10,9 +10,9 @@ import { elementOffers } from "@/lib/canvas/element-connector";
 import {
 	CONTENT_TYPES,
 	draftedType,
-	isPlaygroundType,
-	playgroundTypeOf,
-	type PlaygroundContentType,
+	isMediaDraftType,
+	mediaDraftTypeOf,
+	type MediaContentType,
 } from "@/lib/canvas/types";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
@@ -32,7 +32,7 @@ import { uploadingTiles } from "../elements/uploading-tile";
 import { PanelCard } from "../panel/panel-card";
 import { AddButton } from "@/components/ui/add-button";
 import { LibraryTile } from "./library-tile";
-import { draftIdsOf } from "./playground-context";
+import { draftIdsOf } from "./media-panel-context";
 
 /** Holds the place of a take still on its way; gone once it lands in the media. */
 function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
@@ -43,7 +43,7 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 	const { status, startedAt } = useQueueSelector((q) =>
 		q.getElementSnapshot(id),
 	);
-	if (!type || !isPlaygroundType(type) || !isGenerationActive(status))
+	if (!type || !isMediaDraftType(type) || !isGenerationActive(status))
 		return null;
 	const { label, Icon } = ELEMENT_CONFIGS[draftedType(type)];
 	if (kind === "audio")
@@ -64,8 +64,8 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 	);
 }
 
-/** Every take and upload of one kind, newest first, under whatever the playground is making now; switching type shows its kind. */
-export function PlaygroundLibrary({ type }: { type: PlaygroundContentType }) {
+/** Every take and upload of one kind, newest first, under whatever the Media panel is making now; switching type shows its kind. */
+export function MediaLibrary({ type }: { type: MediaContentType }) {
 	const { outputKind } = CONTENT_TYPES[type];
 	const {
 		kind,
@@ -83,7 +83,7 @@ export function PlaygroundLibrary({ type }: { type: PlaygroundContentType }) {
 		setKind(outputKind);
 	}
 	const referencesOf = useSlateSelector((editor) => {
-		const draft = findAsset(editor.children, playgroundTypeOf(type));
+		const draft = findAsset(editor.children, mediaDraftTypeOf(type));
 		return draft && elementOffers(draft, REFERENCE_IMAGES_ATTR)
 			? draft.id
 			: undefined;
@@ -100,7 +100,7 @@ export function PlaygroundLibrary({ type }: { type: PlaygroundContentType }) {
 		<>
 			{inputElement}
 			<PanelCard
-				title="Media library"
+				title="Library"
 				action={<AddButton label="Upload media" onClick={openPicker} />}
 			>
 				<MediaLibraryFilter

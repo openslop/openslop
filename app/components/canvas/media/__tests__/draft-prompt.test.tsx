@@ -17,7 +17,7 @@ vi.hoisted(() => {
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-const DRAFT = "asset_playground_image";
+const DRAFT = "asset_media_image";
 
 function Prompt() {
 	const draft = useAsset(DRAFT);

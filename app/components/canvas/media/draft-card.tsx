@@ -6,10 +6,10 @@ import { useSlateStatic } from "slate-react";
 import { clearDraft, ensureDraft } from "@/lib/canvas/asset-ops";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import {
-	PLAYGROUND_CONTENT_TYPES,
-	playgroundTypeOf,
+	MEDIA_CONTENT_TYPES,
+	mediaDraftTypeOf,
 	type AssetElement,
-	type PlaygroundContentType,
+	type MediaContentType,
 } from "@/lib/canvas/types";
 import { useAsset } from "@/lib/canvas/use-assets";
 import { isGenerationActive } from "@/lib/generation/snapshots";
@@ -26,17 +26,17 @@ import { PanelCard, PanelField } from "../panel/panel-card";
 import { DraftPictures, DraftSettings } from "./draft-attributes";
 import { DraftPrompt } from "./draft-prompt";
 
-const TYPE_OPTIONS = PLAYGROUND_CONTENT_TYPES.map((type) => ({
+const TYPE_OPTIONS = MEDIA_CONTENT_TYPES.map((type) => ({
 	value: type,
 	label: ELEMENT_CONFIGS[type].label,
 	text: ELEMENT_CONFIGS[type].label,
 	icon: ELEMENT_CONFIGS[type].Icon,
 }));
 
-/** The draft for a type, made whenever the playground turns to it and it is missing. */
-function useDraft(type: PlaygroundContentType) {
+/** The draft for a type, made whenever the Media panel turns to it and it is missing. */
+function useDraft(type: MediaContentType) {
 	const editor = useSlateStatic();
-	const draftType = playgroundTypeOf(type);
+	const draftType = mediaDraftTypeOf(type);
 	const draft = useAsset(draftType);
 	const missing = !draft;
 	useEffect(() => {
@@ -78,8 +78,8 @@ export function DraftCard({
 	type,
 	onTypeChange,
 }: {
-	type: PlaygroundContentType;
-	onTypeChange: (type: PlaygroundContentType) => void;
+	type: MediaContentType;
+	onTypeChange: (type: MediaContentType) => void;
 }) {
 	const draft = useDraft(type);
 	return (

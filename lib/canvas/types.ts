@@ -136,35 +136,35 @@ export const SCENE_TYPE = "scene" as const;
 /** What every element type declares: the connector it generates on, if any. */
 type ElementSpec = { connector?: AssetConnectorType };
 
-/** What the playground makes outside any scene, each on its own draft. */
-export const PLAYGROUND_CONTENT_TYPES = [
+/** What the Media panel makes outside any scene, each on its own draft. */
+export const MEDIA_CONTENT_TYPES = [
 	"image",
 	"video",
 	"music",
 ] as const satisfies readonly ContentType[];
 
-export type PlaygroundContentType = (typeof PLAYGROUND_CONTENT_TYPES)[number];
+export type MediaContentType = (typeof MEDIA_CONTENT_TYPES)[number];
 
-export type PlaygroundType = `asset_playground_${PlaygroundContentType}`;
+export type MediaDraftType = `asset_media_${MediaContentType}`;
 
-export const playgroundTypeOf = <T extends PlaygroundContentType>(
+export const mediaDraftTypeOf = <T extends MediaContentType>(
 	type: T,
-): `asset_playground_${T}` => `asset_playground_${type}`;
+): `asset_media_${T}` => `asset_media_${type}`;
 
-type PlaygroundSpecs = {
-	[T in PlaygroundContentType as `asset_playground_${T}`]: {
+type MediaDraftSpecs = {
+	[T in MediaContentType as `asset_media_${T}`]: {
 		connector: (typeof CONTENT_TYPES)[T]["connector"];
 		draftOf: T;
 	};
 };
 
-/** A playground draft generates exactly like the content type it drafts. */
-const PLAYGROUND_SPECS = Object.fromEntries(
-	PLAYGROUND_CONTENT_TYPES.map((type) => [
-		playgroundTypeOf(type),
+/** A media draft generates exactly like the content type it drafts. */
+const MEDIA_DRAFT_SPECS = Object.fromEntries(
+	MEDIA_CONTENT_TYPES.map((type) => [
+		mediaDraftTypeOf(type),
 		{ connector: CONTENT_TYPES[type].connector, draftOf: type },
 	]),
-) as PlaygroundSpecs;
+) as MediaDraftSpecs;
 
 /** Tiles ahead of the scenes; one with a connector generates like content does. */
 export const ASSET_TYPES = {
@@ -172,19 +172,19 @@ export const ASSET_TYPES = {
 	asset_voice: { connector: "voice" },
 	asset_style: {},
 	asset_references: {},
-	...PLAYGROUND_SPECS,
+	...MEDIA_DRAFT_SPECS,
 } as const satisfies Record<`asset_${string}`, ElementSpec>;
 
 export type AssetType = keyof typeof ASSET_TYPES;
 
-/** The assets every scene draws on; a playground draft feeds nothing. */
-export type ProjectAssetType = Exclude<AssetType, PlaygroundType>;
+/** The assets every scene draws on; a media draft feeds nothing. */
+export type ProjectAssetType = Exclude<AssetType, MediaDraftType>;
 
-export const isPlaygroundType = (type: string): type is PlaygroundType =>
-	Object.hasOwn(PLAYGROUND_SPECS, type);
+export const isMediaDraftType = (type: string): type is MediaDraftType =>
+	Object.hasOwn(MEDIA_DRAFT_SPECS, type);
 
-export const draftedType = (type: PlaygroundType): PlaygroundContentType =>
-	PLAYGROUND_SPECS[type].draftOf;
+export const draftedType = (type: MediaDraftType): MediaContentType =>
+	MEDIA_DRAFT_SPECS[type].draftOf;
 
 export type ElementType = ContentType | AssetType;
 

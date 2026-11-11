@@ -25,11 +25,11 @@ import {
 import { isAssetElement } from "./guards";
 import type { ElementVersion } from "@/lib/generation/versions";
 import {
-	PLAYGROUND_CONTENT_TYPES,
-	playgroundTypeOf,
+	MEDIA_CONTENT_TYPES,
+	mediaDraftTypeOf,
 	type AssetElement,
 	type AssetType,
-	type PlaygroundType,
+	type MediaDraftType,
 } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
@@ -90,18 +90,18 @@ export function addElementReferences(
 const insertDraft = (editor: Editor, draft: AssetElement) =>
 	Transforms.insertNodes(editor, draft, { at: [0] });
 
-const newDraft = (editor: Editor, type: PlaygroundType): AssetElement =>
+const newDraft = (editor: Editor, type: MediaDraftType): AssetElement =>
 	createCanvasElement(type, { defaultModels: editor.defaultModels() });
 
-/** Gives every playground type its draft; run where the undo stack starts empty, since each insert shifts every path on it. */
+/** Gives every media draft type its draft; run where the undo stack starts empty, since each insert shifts every path on it. */
 export function seedDrafts(editor: Editor): void {
-	for (const type of PLAYGROUND_CONTENT_TYPES.map(playgroundTypeOf))
+	for (const type of MEDIA_CONTENT_TYPES.map(mediaDraftTypeOf))
 		if (!findAsset(editor.children, type))
 			insertDraft(editor, newDraft(editor, type));
 }
 
 /** The draft's id, remade outside undo if something removed it, clearing the stack its insert would shift. */
-export function ensureDraft(editor: Editor, type: PlaygroundType): string {
+export function ensureDraft(editor: Editor, type: MediaDraftType): string {
 	const found = findAsset(editor.children, type);
 	if (found) return found.id;
 	const draft = newDraft(editor, type);
@@ -110,10 +110,10 @@ export function ensureDraft(editor: Editor, type: PlaygroundType): string {
 	return draft.id;
 }
 
-/** Puts a playground draft back on the prompt and attributes one of its takes came from. */
+/** Puts a media draft back on the prompt and attributes one of its takes came from. */
 export function restoreDraft(
 	editor: Editor,
-	type: PlaygroundType,
+	type: MediaDraftType,
 	version: Pick<ElementVersion, "inputs">,
 ): void {
 	const id = ensureDraft(editor, type);
