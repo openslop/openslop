@@ -7,8 +7,8 @@ import {
 	AlertCircle,
 	History,
 	Maximize2,
-	Pin,
 	RotateCcw,
+	Upload,
 } from "@/components/ui/icon";
 import {
 	Popover,
@@ -103,7 +103,12 @@ function ElementVersionRow({
 							v{label}
 						</span>
 						<Dot />
-						{version.pinned && <Pin className="h-3 w-3" />}
+						{version.pinned && (
+							<>
+								<Upload className="h-3 w-3" />
+								<span className="sr-only">Uploaded</span>
+							</>
+						)}
 						{relativeTime(version.createdAt)}
 					</span>
 					<span className="w-full truncate text-label-xs text-muted-foreground">

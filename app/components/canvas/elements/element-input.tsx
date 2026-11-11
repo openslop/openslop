@@ -1,9 +1,16 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useState, type ReactNode } from "react";
+import { Editor, Transforms } from "slate";
+import { ReactEditor, useSlateStatic } from "slate-react";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { getElementText } from "@/lib/canvas/osml-serializer";
 import type { ContentElement } from "@/lib/canvas/types";
+import { Lock } from "@/components/ui/icon";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { ELEMENT_CONFIGS } from "./element-configs";
+import { useElementGeneration } from "./element-generation-context";
 
 const LOOKS = {
 	card: "bg-element-input",
@@ -15,19 +22,34 @@ export function ElementInput({
 	element,
 	look = "card",
 	dir,
+	uploaded = false,
 	children,
 }: {
 	element: ContentElement;
 	look?: keyof typeof LOOKS;
 	dir?: string;
+	uploaded?: boolean;
 	children: ReactNode;
 }) {
+	const editor = useSlateStatic();
+	const [unlocked, setUnlocked] = useState(false);
+	const locked = uploaded && !unlocked;
+	const unlock = () => {
+		setUnlocked(true);
+		Transforms.select(
+			editor,
+			Editor.end(editor, ReactEditor.findPath(editor, element)),
+		);
+		ReactEditor.focus(editor);
+	};
+
 	return (
 		<div
 			dir={dir}
 			className={cn(
 				"relative min-w-0 rounded-xl border border-transparent px-3 py-2.5 transition-colors hover:border-element-input-border-hover focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30",
 				LOOKS[look],
+				locked && "pe-9",
 			)}
 		>
 			{getElementText(element) === ZERO_WIDTH_SPACE && (
@@ -35,9 +57,48 @@ export function ElementInput({
 					{ELEMENT_CONFIGS[element.type].placeholder}
 				</div>
 			)}
-			<div className="overflow-hidden text-start text-label leading-relaxed text-foreground transition-[max-height,opacity] duration-200">
+			<div
+				contentEditable={locked ? false : undefined}
+				aria-readonly={locked || undefined}
+				className={cn(
+					"overflow-hidden text-start text-label leading-relaxed transition-[max-height,opacity] duration-200",
+					locked ? "text-muted-foreground" : "text-foreground",
+				)}
+			>
 				{children}
 			</div>
+			{locked && (
+				<div
+					contentEditable={false}
+					className="absolute end-1.5 top-1.5 select-none"
+				>
+					<TooltipIconButton
+						label="Uploaded, so the prompt doesn't drive this result. Click to edit it anyway."
+						variant="quiet"
+						size="sm"
+						onClick={unlock}
+					>
+						<Lock />
+					</TooltipIconButton>
+				</div>
+			)}
 		</div>
+	);
+}
+
+export function ElementPrompt({
+	element,
+	dir,
+	children,
+}: {
+	element: ContentElement;
+	dir?: string;
+	children: ReactNode;
+}) {
+	const { uploaded } = useElementGeneration();
+	return (
+		<ElementInput element={element} dir={dir} uploaded={uploaded}>
+			{children}
+		</ElementInput>
 	);
 }
