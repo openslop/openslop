@@ -1,5 +1,3 @@
-import { GripVertical, Plus } from "@/components/ui/icon";
-import { IconButton } from "@/components/ui/icon-button";
 import { useMemo } from "react";
 import { createEditor, Descendant } from "slate";
 import { Editable, Slate } from "slate-react";
@@ -10,6 +8,7 @@ import { ElementContainer } from "../elements/element-container";
 import { SceneContainer } from "../elements/scene-container";
 import { useSceneIndex } from "../hooks/use-scene-index";
 import { withCanvas } from "../plugins/with-canvas";
+import { DragHandle, InsertButton } from "./sortable-actions";
 import {
 	CANVAS_TEXT_CLASS,
 	renderCanvasElement,
@@ -50,12 +49,8 @@ export function DragOverlayPreview({ block }: { block: CanvasBlock }) {
 		<div className={styles.dragOverlay}>
 			<Slate editor={editor} initialValue={value}>
 				<div className={styles.actions} aria-hidden>
-					<IconButton ariaLabel="Add element">
-						<Plus size={18} />
-					</IconButton>
-					<IconButton ariaLabel="Drag handle">
-						<GripVertical size={22} />
-					</IconButton>
+					<InsertButton />
+					<DragHandle />
 				</div>
 				<Editable
 					readOnly={true}

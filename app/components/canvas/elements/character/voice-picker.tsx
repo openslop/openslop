@@ -68,9 +68,9 @@ function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 				{loading ? (
 					<Spinner className="text-muted-foreground" />
 				) : playing ? (
-					<Pause className="h-4 w-4" />
+					<Pause />
 				) : (
-					<Play className="h-4 w-4" />
+					<Play />
 				)}
 			</TooltipIconButton>
 		</>

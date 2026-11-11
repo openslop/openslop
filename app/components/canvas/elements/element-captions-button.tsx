@@ -12,7 +12,6 @@ import {
 	RotateCcw,
 	Trash2,
 } from "@/components/ui/icon";
-import { ICON_SIZES } from "@/components/ui/icon-button";
 import { Spinner } from "@/components/ui/spinner";
 import {
 	SimpleTooltip,
@@ -26,8 +25,6 @@ import { useElementCaptions } from "../hooks/use-element-captions";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
 
-const SIZE = ICON_SIZES.header;
-
 type Captions = ReturnType<typeof useElementCaptions>;
 type Generation = ReturnType<typeof useElementGeneration>;
 
@@ -40,12 +37,12 @@ interface Face {
 
 const NOT_GENERATED: Face = {
 	label: "Generate this element first to caption it",
-	icon: <MagicCaptions size={SIZE} />,
+	icon: <MagicCaptions />,
 };
 
 const GENERATING: Face = {
 	label: "Captions wait for this element to finish generating",
-	icon: <Hourglass size={SIZE} />,
+	icon: <Hourglass />,
 };
 
 /** How the button looks before there are captions to act on; null once there are. */
@@ -56,7 +53,7 @@ function faceOf(
 	if (!result) return NOT_GENERATED;
 	if (isGenerationActive(status)) return GENERATING;
 	if (captions.status === "queued")
-		return { label: "Captions queued", icon: <Hourglass size={SIZE} /> };
+		return { label: "Captions queued", icon: <Hourglass /> };
 	if (captions.status !== "idle")
 		return {
 			label: "Generating captions…",
@@ -66,13 +63,13 @@ function faceOf(
 	if (captions.error)
 		return {
 			label: `Captions failed: ${captions.error}. Try again`,
-			icon: <CaptionsAlert size={SIZE} />,
+			icon: <CaptionsAlert />,
 			variant: "destructive",
 			onClick: captions.generate,
 		};
 	return {
 		label: "Generate captions",
-		icon: <MagicCaptions size={SIZE} />,
+		icon: <MagicCaptions />,
 		onClick: captions.generate,
 	};
 }
@@ -149,11 +146,7 @@ export function ElementCaptionsButton({
 							ariaLabel={label}
 							variant={captions.error ? "destructive" : "quiet"}
 						>
-							{captions.error ? (
-								<CaptionsAlert size={SIZE} />
-							) : (
-								<CaptionsReady size={SIZE} />
-							)}
+							{captions.error ? <CaptionsAlert /> : <CaptionsReady />}
 						</HeaderIconButton>
 					</TooltipTrigger>
 				</ActionMenu>

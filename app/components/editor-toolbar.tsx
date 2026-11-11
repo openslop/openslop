@@ -103,7 +103,7 @@ function EditorToolbarComponent() {
 							className="self-center"
 							onClick={onClick}
 						>
-							<X className="h-3 w-3" aria-hidden="true" />
+							<X aria-hidden="true" />
 						</TooltipIconButton>
 					))}
 					<Button

@@ -34,14 +34,23 @@ export function InsertMenu<K extends string>({
 			itemClassName="rounded-lg py-1"
 			onOpenChange={onOpenChange}
 		>
-			<IconButton
-				ariaLabel="Insert item"
-				variant="quiet"
-				className="size-7 [&_.icon]:size-[18px]"
-			>
-				<Plus />
-			</IconButton>
+			<InsertButton />
 		</ActionMenu>
+	);
+}
+
+export function InsertButton(
+	props: Omit<React.ComponentProps<typeof IconButton>, "ariaLabel">,
+) {
+	return (
+		<IconButton
+			ariaLabel="Insert item"
+			variant="quiet"
+			className="size-7 [&_.icon]:size-[18px]"
+			{...props}
+		>
+			<Plus />
+		</IconButton>
 	);
 }
 

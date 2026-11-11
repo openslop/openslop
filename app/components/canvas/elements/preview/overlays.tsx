@@ -27,7 +27,7 @@ function CancelButton({ onClick }: { onClick: () => void }) {
 				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={onClick}
 			>
-				<X className="w-3 h-3" aria-hidden="true" />
+				<X aria-hidden="true" />
 			</IconButton>
 		</SimpleTooltip>
 	);
