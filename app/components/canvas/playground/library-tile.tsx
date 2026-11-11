@@ -11,35 +11,24 @@ import { Alternative, LayersPlus } from "@/components/ui/icon";
 import { addElementReferences } from "@/lib/canvas/asset-ops";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import type { GeneratedElement } from "@/lib/canvas/types";
-import { buildNode } from "@/lib/generation/generation-graph";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import type { MediaItem } from "@/lib/project/media";
 import { toastError } from "@/lib/toast-error";
-import { commitUploaded } from "@/lib/upload/uploaded-result";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
 import { TileMenuItem } from "../elements/tile-actions";
 import { useTake } from "./use-take";
-import { usesFor, type MediaUse, type UseContext } from "./media-uses";
-
-function useUseContext(): UseContext {
-	const editor = useSlateStatic();
-	const queue = useGenerationQueue();
-	const buildContext = useBuildContext();
-	return {
-		editor,
-		showAsResult: (element, { kind, url }) =>
-			commitUploaded(queue, buildNode(element, buildContext()), kind, url),
-	};
-}
+import { usesFor, type MediaUse } from "./media-uses";
 
 /** Mounted as the menu opens, so the targets are read from the canvas as it is then. */
 function UseAsItems({ item, uses }: { item: MediaItem; uses: MediaUse[] }) {
-	const context = useUseContext();
+	const editor = useSlateStatic();
+	const queue = useGenerationQueue();
+	const buildContext = useBuildContext();
 	const run = async (use: MediaUse, element: GeneratedElement) => {
 		try {
-			await use.apply(context, element, item);
+			await use.apply({ editor, queue, buildContext }, element, item);
 		} catch (error) {
 			toastError(
 				error,
@@ -48,7 +37,7 @@ function UseAsItems({ item, uses }: { item: MediaItem; uses: MediaUse[] }) {
 		}
 	};
 	return uses.map((use) => {
-		const targets = use.targets(context.editor.children, item.kind);
+		const targets = use.targets(editor.children, item.kind);
 		return (
 			<DropdownMenuSub key={use.label}>
 				<DropdownMenuSubTrigger disabled={targets.length === 0}>

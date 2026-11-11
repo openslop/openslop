@@ -15,15 +15,19 @@ import {
 	openingOn,
 	START_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
+import { buildNode } from "@/lib/generation/generation-graph";
+import type { BuildContext } from "@/lib/generation/graph";
+import type { GenerationQueue } from "@/lib/generation/queue";
 import type { MediaItem } from "@/lib/project/media";
 import type { UploadKind } from "@/lib/upload/upload-files";
+import { commitUploaded } from "@/lib/upload/uploaded-result";
 
 type UseTarget = { label: string; element: GeneratedElement };
 
-export type UseContext = {
+type Canvas = {
 	editor: Editor;
-	/** Shows the media as the element's result, as an upload to it would. */
-	showAsResult: (element: GeneratedElement, item: MediaItem) => Promise<void>;
+	queue: GenerationQueue;
+	buildContext: () => BuildContext;
 };
 
 export type MediaUse = {
@@ -31,7 +35,7 @@ export type MediaUse = {
 	kinds: readonly UploadKind[];
 	targets: (nodes: Descendant[], kind: UploadKind) => UseTarget[];
 	apply: (
-		context: UseContext,
+		canvas: Canvas,
 		element: GeneratedElement,
 		item: MediaItem,
 	) => void | Promise<void>;
@@ -47,8 +51,11 @@ const scenesWhere =
 				element: visual,
 			}));
 
-const showAsResult: MediaUse["apply"] = (context, element, item) =>
-	context.showAsResult(element, item);
+const pinAsResult: MediaUse["apply"] = (
+	{ queue, buildContext },
+	element,
+	{ kind, url },
+) => commitUploaded(queue, buildNode(element, buildContext()), kind, url);
 
 /** Where a piece of the project's media can go, by what it is. */
 const MEDIA_USES: readonly MediaUse[] = [
@@ -60,7 +67,7 @@ const MEDIA_USES: readonly MediaUse[] = [
 				const name = avatar.generationAttributes?.name;
 				return name ? [{ label: name, element: avatar }] : [];
 			}),
-		apply: showAsResult,
+		apply: pinAsResult,
 	},
 	{
 		label: "Scene visual",
@@ -68,7 +75,7 @@ const MEDIA_USES: readonly MediaUse[] = [
 		targets: scenesWhere(
 			(visual, kind) => CONTENT_TYPES[visual.type].outputKind === kind,
 		),
-		apply: showAsResult,
+		apply: pinAsResult,
 	},
 	{
 		label: "Start frame",
