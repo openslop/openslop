@@ -5,7 +5,6 @@ import { sendMagicLink, signInWithGoogle } from "@/lib/auth/session";
 import { errorMessage } from "@/lib/errors";
 import OnboardingCard from "./onboarding-card";
 import EmailSentCard from "./email-sent-card";
-import OrDivider from "./or-divider";
 import GoogleOAuthButton from "./google-o-auth-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,16 @@ interface AuthFormProps {
 	otpData?: Record<string, unknown>;
 	footer?: React.ReactNode;
 	children?: React.ReactNode;
+}
+
+function OrDivider() {
+	return (
+		<div className="flex w-full items-center gap-3">
+			<div className="h-px flex-1 bg-border" />
+			<span className="text-label text-muted-foreground">OR</span>
+			<div className="h-px flex-1 bg-border" />
+		</div>
+	);
 }
 
 export default function AuthForm({

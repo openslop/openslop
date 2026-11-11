@@ -13,7 +13,23 @@ import type { SavedProject } from "@/lib/project/saved-project";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
 import { elementHistoryStorage } from "@/lib/project/element-history";
 import { CanvasProviders } from "@/app/components/canvas/canvas-providers";
-import Editor from "@/app/components/editor";
+import PrePromptView from "@/app/components/pre-prompt-view";
+import PostPromptView from "@/app/components/post-prompt-view";
+import { useShowWorkspace } from "@/app/components/canvas/workspace-context";
+
+function Editor() {
+	const showWorkspace = useShowWorkspace();
+
+	return (
+		<div
+			className={`flex min-h-screen flex-col items-center transition-[padding] duration-700 ease-out ${
+				showWorkspace ? "" : "pt-[22vh]"
+			}`}
+		>
+			{showWorkspace ? <PostPromptView /> : <PrePromptView />}
+		</div>
+	);
+}
 
 export default function ProjectEditor({
 	projectId,

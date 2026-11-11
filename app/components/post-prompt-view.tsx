@@ -1,6 +1,9 @@
 "use client";
 
 import { DotGrid } from "@/components/ui/dot-grid";
+import { Input } from "@/components/ui/input";
+import { UNTITLED_PROJECT } from "@/lib/project/project-document";
+import { useProject } from "@/lib/project/use-project";
 import UserProfile from "./user-profile";
 import { EditorToolbar } from "./editor-toolbar";
 import Canvas from "./canvas/canvas";
@@ -11,11 +14,29 @@ import {
 	AssetStripCharacters,
 	AssetStripReferences,
 } from "./canvas/elements/asset-strip";
-import { ProjectTitle } from "./project-title";
 import { EditorSidebar } from "./canvas/panel/editor-sidebar";
 import { TopPlayerPanel, SidePlayerPanel } from "./player/player-panel";
 import { BottomDock } from "./player/bottom-dock";
 import { usePlayerPlacement } from "./player/player-placement-context";
+
+function ProjectTitle() {
+	const title = useProject((state) => state.title);
+	const setTitle = useProject((state) => state.setTitle);
+
+	return (
+		<h1 className="mb-3">
+			<Input
+				variant="bare"
+				size="heading"
+				value={title}
+				onChange={(event) => setTitle(event.target.value)}
+				placeholder={UNTITLED_PROJECT}
+				aria-label="Project title"
+				autoComplete="off"
+			/>
+		</h1>
+	);
+}
 
 export default function PostPromptView() {
 	const { placement } = usePlayerPlacement();
