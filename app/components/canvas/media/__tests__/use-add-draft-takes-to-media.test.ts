@@ -17,11 +17,12 @@ vi.mock("@/lib/project/use-project", () => ({
 	useProject: () => (media: Upload[]) => added.push(...media),
 }));
 
-const { useSaveDraftTakes } = await import("../hooks/use-save-draft-takes");
+const { useAddDraftTakesToMedia } =
+	await import("../use-add-draft-takes-to-media");
 
-describe("useSaveDraftTakes", () => {
+describe("useAddDraftTakesToMedia", () => {
 	it("adds a media draft take to the media", () => {
-		useSaveDraftTakes();
+		useAddDraftTakesToMedia();
 		const draft = asset("asset_media_image", { text: "A wizard" });
 		const node = buildNode(draft, buildCtx([draft]));
 

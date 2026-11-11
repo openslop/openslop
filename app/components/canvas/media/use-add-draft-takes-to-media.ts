@@ -8,8 +8,7 @@ import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useProject } from "@/lib/project/use-project";
 
-/** Every take a media draft makes lands in the project's media. */
-export function useSaveDraftTakes(): void {
+export function useAddDraftTakesToMedia(): void {
 	const queue = useGenerationQueue();
 	const addMedia = useProject((state) => state.addMedia);
 	useEffect(

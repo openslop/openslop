@@ -22,7 +22,6 @@ import { AssetEditProvider } from "./elements/character/asset-edit-provider";
 import { useEditorSession } from "./hooks/use-editor-session";
 import { useProjectHistoryHotkeys } from "./project-history-keymap";
 import { useResetTrimOnNewResult } from "./hooks/use-reset-trim-on-new-result";
-import { useSaveDraftTakes } from "./hooks/use-save-draft-takes";
 
 const CanvasScopedProviders = composeProviders(
 	WorkspaceProvider,
@@ -51,7 +50,6 @@ export function CanvasProviders({ children }: { children: ReactNode }) {
 	const { editor, onDocumentChange, history } = useEditorSession();
 	useProjectHistoryHotkeys(editor);
 	useResetTrimOnNewResult(editor);
-	useSaveDraftTakes();
 
 	return (
 		<Slate

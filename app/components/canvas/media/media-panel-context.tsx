@@ -17,6 +17,7 @@ import { useLoadElementHistory } from "../hooks/use-element-history";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import type { ElementVersion } from "@/lib/generation/versions";
 import { useEditorPanel } from "../panel/editor-panel-context";
+import { useAddDraftTakesToMedia } from "./use-add-draft-takes-to-media";
 
 /** The drafts, or only those whose takes are `kind`. */
 export const draftIdsOf = (editor: Editor, kind?: UploadKind) =>
@@ -49,6 +50,7 @@ export function MediaPanelProvider({ children }: { children: ReactNode }) {
 	const draftIds = useSlateSelector(draftIdsOf, shallow);
 	const load = useLoadElementHistory();
 	useEffect(() => draftIds.forEach(load), [draftIds, load]);
+	useAddDraftTakesToMedia();
 	const reuse = (take: ElementVersion) => {
 		if (!isMediaDraftType(take.elementType))
 			throw new Error(`"${take.elementType}" is not a media draft`);
