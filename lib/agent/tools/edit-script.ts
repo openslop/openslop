@@ -52,8 +52,7 @@ const ASSETS = dedent`
 	- asset_style: the art style every visual is drawn in, as its text: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
 	- asset_references: the pictures every visual is drawn after. The user uploads these.
-	- asset_media_<type>: what the user is drafting in the Media panel, one per
-	  type. It feeds nothing in the script; leave it alone.
+	- asset_media_<type>: the user's Media panel drafts. Ignore them for now.
 `;
 
 export const editScript = defineTool({
