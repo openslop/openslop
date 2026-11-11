@@ -158,6 +158,8 @@ type MediaDraftSpecs = {
 	};
 };
 
+export const MEDIA_DRAFT_TYPES = MEDIA_CONTENT_TYPES.map(mediaDraftTypeOf);
+
 /** A media draft generates exactly like the content type it drafts. */
 const MEDIA_DRAFT_SPECS = Object.fromEntries(
 	MEDIA_CONTENT_TYPES.map((type) => [

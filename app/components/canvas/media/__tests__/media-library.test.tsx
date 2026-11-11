@@ -13,6 +13,7 @@ import {
 	mountOnCanvas,
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
+import { asset } from "@/lib/canvas/__tests__/_assets";
 import { MediaPanelProvider } from "../media-panel-context";
 import { MediaLibrary } from "../media-library";
 
@@ -27,7 +28,7 @@ let store: ProjectStore;
 afterEach(() => canvas.unmount());
 
 const open = () => {
-	canvas = mountOnCanvas([]);
+	canvas = mountOnCanvas([asset("asset_media_image")]);
 	store = createProjectStore();
 	canvas.render(
 		<ProjectStoreProvider store={store}>

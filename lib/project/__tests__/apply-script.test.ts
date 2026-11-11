@@ -2,13 +2,8 @@ import { createEditor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { describe, expect, it } from "vitest";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
-import { getAssets } from "@/lib/canvas/assets";
 import { isScene } from "@/lib/canvas/scenes";
-import {
-	MEDIA_CONTENT_TYPES,
-	SCENE_TYPE,
-	type Scene,
-} from "@/lib/canvas/types";
+import { SCENE_TYPE, type Scene } from "@/lib/canvas/types";
 import { applyScriptToEditor } from "../apply-script";
 
 const sceneWithId = (id: string): Scene => ({
@@ -37,20 +32,6 @@ describe("applyScriptToEditor", () => {
 
 		expect(editor.children.filter(isScene)).toHaveLength(1);
 		expect(editor.history.undos).toEqual([]);
-	});
-
-	it("gives a loaded document every media draft, once", () => {
-		const editor = historyEditor();
-		const osml = serializeOSMLWithScenes([scene]);
-		applyScriptToEditor(editor, osml);
-
-		applyScriptToEditor(editor, serializeOSMLWithScenes(editor.children));
-
-		expect(
-			getAssets(editor.children)
-				.map((asset) => asset.type)
-				.sort(),
-		).toEqual(MEDIA_CONTENT_TYPES.map((type) => `asset_media_${type}`).sort());
 	});
 
 	it("drops undo entries that point into the replaced document", () => {

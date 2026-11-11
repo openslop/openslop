@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { withHistory } from "slate-history";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
 import {
 	addCharacter,
 	addElementReferences,
 	clearDraft,
-	ensureDraft,
 	restoreDraft,
 	ensureAsset,
 	removeAsset,
@@ -354,20 +352,6 @@ describe("addElementReferences", () => {
 	});
 });
 
-describe("ensureDraft", () => {
-	it("makes the draft once and clears the undo stack its insert would shift", () => {
-		const editor = withHistory(makeEditor([scene("s1", narration("n1"))]));
-		editor.history.undos.push({ operations: [], selectionBefore: null });
-
-		const id = ensureDraft(editor, "asset_media_image");
-
-		expect(findAsset(editor.children, "asset_media_image")?.id).toBe(id);
-		expect(editor.history.undos).toEqual([]);
-		expect(ensureDraft(editor, "asset_media_image")).toBe(id);
-		expect(getAssets(editor.children)).toHaveLength(1);
-	});
-});
-
 describe("restoreDraft", () => {
 	const inputs = {
 		prompt: "A wizard {{Mia}}",
@@ -376,8 +360,11 @@ describe("restoreDraft", () => {
 		dependencies: {},
 	};
 
-	it("makes the draft when there is none and puts it on the take's inputs", () => {
-		const editor = makeEditor([scene("s1", narration("n1"))]);
+	it("puts the draft on the take's inputs", () => {
+		const editor = makeEditor([
+			asset("asset_media_image"),
+			scene("s1", narration("n1")),
+		]);
 
 		restoreDraft(editor, "asset_media_image", { inputs });
 
@@ -389,7 +376,10 @@ describe("restoreDraft", () => {
 
 describe("clearDraft", () => {
 	it("blanks the draft's prompt and settings", () => {
-		const editor = makeEditor([scene("s1", narration("n1"))]);
+		const editor = makeEditor([
+			asset("asset_media_image"),
+			scene("s1", narration("n1")),
+		]);
 		restoreDraft(editor, "asset_media_image", {
 			inputs: {
 				prompt: "A wizard",

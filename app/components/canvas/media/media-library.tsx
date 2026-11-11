@@ -5,7 +5,7 @@ import { useSlateSelector } from "slate-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThumbnailGrid } from "@/components/ui/thumbnail";
 import { shallow } from "zustand/shallow";
-import { findAsset, getAssets } from "@/lib/canvas/assets";
+import { getAssets, requireAsset } from "@/lib/canvas/assets";
 import { elementOffers } from "@/lib/canvas/element-connector";
 import {
 	CONTENT_TYPES,
@@ -83,10 +83,8 @@ export function MediaLibrary({ type }: { type: MediaContentType }) {
 		setKind(outputKind);
 	}
 	const referencesOf = useSlateSelector((editor) => {
-		const draft = findAsset(editor.children, mediaDraftTypeOf(type));
-		return draft && elementOffers(draft, REFERENCE_IMAGES_ATTR)
-			? draft.id
-			: undefined;
+		const draft = requireAsset(editor.children, mediaDraftTypeOf(type));
+		return elementOffers(draft, REFERENCE_IMAGES_ATTR) ? draft.id : undefined;
 	});
 	const draftIds = useSlateSelector(
 		(editor) => draftIdsOf(editor, kind),

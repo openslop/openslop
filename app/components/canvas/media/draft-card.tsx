@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
 import isEmpty from "lodash/isEmpty";
-import { useSlateStatic } from "slate-react";
-import { clearDraft, ensureDraft } from "@/lib/canvas/asset-ops";
+import { useSlateSelector, useSlateStatic } from "slate-react";
+import { clearDraft } from "@/lib/canvas/asset-ops";
+import { requireAsset } from "@/lib/canvas/assets";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import {
 	MEDIA_CONTENT_TYPES,
@@ -11,7 +11,6 @@ import {
 	type AssetElement,
 	type MediaContentType,
 } from "@/lib/canvas/types";
-import { useAsset } from "@/lib/canvas/use-assets";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { ModelAttribute } from "../elements/attributes/model-attribute";
@@ -32,18 +31,6 @@ const TYPE_OPTIONS = MEDIA_CONTENT_TYPES.map((type) => ({
 	text: ELEMENT_CONFIGS[type].label,
 	icon: ELEMENT_CONFIGS[type].Icon,
 }));
-
-/** The draft for a type, made whenever the Media panel turns to it and it is missing. */
-function useDraft(type: MediaContentType) {
-	const editor = useSlateStatic();
-	const draftType = mediaDraftTypeOf(type);
-	const draft = useAsset(draftType);
-	const missing = !draft;
-	useEffect(() => {
-		if (missing) ensureDraft(editor, draftType);
-	}, [editor, draftType, missing]);
-	return draft;
-}
 
 function ClearDraftButton({ draft }: { draft: AssetElement }) {
 	const editor = useSlateStatic();
@@ -81,7 +68,9 @@ export function DraftCard({
 	type: MediaContentType;
 	onTypeChange: (type: MediaContentType) => void;
 }) {
-	const draft = useDraft(type);
+	const draft = useSlateSelector((editor) =>
+		requireAsset(editor.children, mediaDraftTypeOf(type)),
+	);
 	return (
 		<PanelCard title="Generate">
 			<MediaToggle
@@ -90,20 +79,18 @@ export function DraftCard({
 				onChange={onTypeChange}
 				options={TYPE_OPTIONS}
 			/>
-			{draft && !ELEMENT_CONFIGS[type].hidesModel && (
+			{!ELEMENT_CONFIGS[type].hidesModel && (
 				<PanelField label="Model">
 					<ModelAttribute element={draft} label="Model" look="panel" />
 				</PanelField>
 			)}
-			{draft && (
-				<ElementGenerationProvider element={draft}>
-					<DraftPictures element={draft} />
-					<DraftPrompt draft={draft} />
-					<DraftSettings element={draft} />
-					<DraftGenerateButton />
-					<ClearDraftButton draft={draft} />
-				</ElementGenerationProvider>
-			)}
+			<ElementGenerationProvider element={draft}>
+				<DraftPictures element={draft} />
+				<DraftPrompt draft={draft} />
+				<DraftSettings element={draft} />
+				<DraftGenerateButton />
+				<ClearDraftButton draft={draft} />
+			</ElementGenerationProvider>
 		</PanelCard>
 	);
 }
