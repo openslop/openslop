@@ -38,7 +38,7 @@ export function AttributeBadge({
 	if (!edit) return null;
 
 	const value = flatAttributes(element)[attrKey] ?? "";
-	const tooltip = `${label}: ${value || UNSET}`;
+	const summary = `${label}: ${value || UNSET}`;
 
 	if (edit.kind === "images") {
 		const popover = { element, attrKey, label };
@@ -65,7 +65,7 @@ export function AttributeBadge({
 				attrKey={attrKey}
 				value={value}
 				label={label}
-				tooltip={tooltip}
+				tooltip={summary}
 				placeholder={edit.placeholder}
 				rows={edit.rows}
 			/>
@@ -116,9 +116,10 @@ export function AttributeBadge({
 				value: option,
 				label: formatValue(option, unit),
 			}))}
+			tooltip={label}
 			contentClassName="max-h-64 min-w-24"
 		>
-			<ButtonMenuTrigger icon={<edit.icon />} aria-label={tooltip}>
+			<ButtonMenuTrigger icon={<edit.icon />} aria-label={summary}>
 				{formatValue(value, unit)}
 			</ButtonMenuTrigger>
 		</SelectMenu>
