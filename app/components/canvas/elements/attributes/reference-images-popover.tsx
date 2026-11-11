@@ -68,8 +68,8 @@ export function ReferenceImagesEditor({
 					)}
 					<MediaPicker
 						kind="image"
-						onPick={(url) =>
-							addElementReferences(editor, element.id, attrKey, [url])
+						onPickMany={(urls) =>
+							addElementReferences(editor, element.id, attrKey, urls)
 						}
 					>
 						<AddButton label="Add reference image" />

@@ -105,28 +105,32 @@ const [UploadingContext, useMediaPickerUploading] =
 /** Whether the picker's upload is still landing, for a trigger that shows it. */
 export { useMediaPickerUploading };
 
+/** A slot takes one piece of media; a list takes every file uploaded at once. */
+type PickTarget =
+	| { onPick: (url: string) => void | Promise<void>; onPickMany?: never }
+	| { onPickMany: (urls: string[]) => void | Promise<void>; onPick?: never };
+
 /** Supplies media from the project's own, the computer or the Media panel, picked in a popover its `children` open. */
 export function MediaPicker({
 	kind,
-	onPick,
 	children,
+	...target
 }: {
 	kind: UploadKind;
-	onPick: (url: string) => void | Promise<void>;
 	children: ReactNode;
-}) {
+} & PickTarget) {
 	const [open, setOpen] = useState(false);
 	const { setActive } = useEditorPanel();
-	const pick = (url: string) => {
+	const pick = (urls: string[]) => {
 		setOpen(false);
-		void onPick(url);
+		if (target.onPickMany) void target.onPickMany(urls);
+		else if (urls[0]) void target.onPick(urls[0]);
 	};
 	// Outlives the popover, so an upload still running when it closes lands.
 	const upload = useMediaUpload({
 		kinds: [kind],
-		onUpload: ([url]) => {
-			if (url) pick(url);
-		},
+		multiple: target.onPickMany !== undefined,
+		onUpload: pick,
 	});
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -151,7 +155,11 @@ export function MediaPicker({
 						</TooltipIconButton>
 					}
 				/>
-				<MediaChoices kind={kind} upload={upload} onPick={pick} />
+				<MediaChoices
+					kind={kind}
+					upload={upload}
+					onPick={(url) => pick([url])}
+				/>
 			</PopoverContent>
 		</Popover>
 	);

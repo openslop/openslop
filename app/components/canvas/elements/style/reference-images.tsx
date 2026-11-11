@@ -15,7 +15,7 @@ export function ReferenceImages() {
 		<section aria-label="Reference images" className="flex flex-col gap-2">
 			<FieldHeader
 				aside={
-					<MediaPicker kind="image" onPick={(url) => add([url])}>
+					<MediaPicker kind="image" onPickMany={add}>
 						<AddButton label="Add reference image" />
 					</MediaPicker>
 				}
