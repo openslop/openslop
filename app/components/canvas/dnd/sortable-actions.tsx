@@ -34,8 +34,12 @@ export function InsertMenu<K extends string>({
 			itemClassName="rounded-lg py-1"
 			onOpenChange={onOpenChange}
 		>
-			<IconButton ariaLabel="Insert item" variant="quiet">
-				<Plus size={18} />
+			<IconButton
+				ariaLabel="Insert item"
+				variant="quiet"
+				className="size-7 [&_.icon]:size-[18px]"
+			>
+				<Plus />
 			</IconButton>
 		</ActionMenu>
 	);
@@ -55,11 +59,11 @@ export function DragHandle({
 			ref={ref}
 			ariaLabel="Drag to reorder"
 			variant="quiet"
-			className="cursor-grab active:cursor-grabbing"
+			className="size-7 cursor-grab active:cursor-grabbing [&_.icon]:size-[22px]"
 			{...attributes}
 			{...listeners}
 		>
-			<GripVertical size={22} />
+			<GripVertical />
 		</IconButton>
 	);
 }

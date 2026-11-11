@@ -10,6 +10,7 @@ export function DeleteButton({ element }: { element: ContentElement }) {
 	return (
 		<DeleteIconButton
 			ariaLabel="Delete element"
+			size="sm"
 			onMouseDown={keepFocus}
 			onClick={() => removeBlock(editor, element.id)}
 		/>

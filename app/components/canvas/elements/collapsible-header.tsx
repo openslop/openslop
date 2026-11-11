@@ -25,6 +25,7 @@ export function CollapsibleHeader({
 		>
 			<IconButton
 				ariaLabel={ariaLabel}
+				size="sm"
 				variant="quiet"
 				className="ml-1 opacity-0 transition-opacity duration-200 group-hover/collapsible:opacity-100 focus-visible:opacity-100"
 				onClick={onToggle}

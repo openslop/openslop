@@ -22,7 +22,7 @@ import {
 
 export function AssetStrip({ children }: { children: ReactNode }) {
 	return (
-		<ul aria-label="Assets" className="flex flex-wrap gap-2 pb-2 empty:hidden">
+		<ul aria-label="Assets" className="flex flex-wrap gap-2 pb-1 empty:hidden">
 			{children}
 		</ul>
 	);
