@@ -1,11 +1,18 @@
 import kebabCase from "lodash/kebabCase";
+import { matchSorter } from "match-sorter";
 import { z } from "zod";
-import { UploadKindSchema, type Upload } from "@/lib/upload/upload-files";
+import {
+	UploadKindSchema,
+	type Upload,
+	type UploadKind,
+} from "@/lib/upload/upload-files";
 
 export const MediaItemSchema = z.object({
 	name: z.string(),
 	kind: UploadKindSchema,
 	url: z.string(),
+	/** Missing on media added before it was recorded. */
+	createdAt: z.string().optional(),
 });
 
 export type MediaItem = z.infer<typeof MediaItemSchema>;
@@ -24,9 +31,23 @@ export function toMediaItems(
 	uploads: Upload[],
 ): MediaItem[] {
 	const taken = new Set(media.map((item) => item.name));
+	const createdAt = new Date().toISOString();
 	return uploads.map(({ kind, name, url }) => ({
 		name: uniqueName(kebabCase(stem(name)) || kind, taken),
 		kind,
 		url,
+		createdAt,
 	}));
 }
+
+/** The media of one kind whose name matches the query, best match first; ties newest first. */
+export const findMedia = (
+	media: MediaItem[],
+	kind: UploadKind,
+	query: string,
+): MediaItem[] =>
+	matchSorter(
+		media.filter((item) => item.kind === kind).toReversed(),
+		query.trim(),
+		{ keys: ["name"], baseSort: (a, b) => a.index - b.index },
+	);

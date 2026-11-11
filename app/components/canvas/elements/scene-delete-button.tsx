@@ -10,6 +10,7 @@ export function SceneDeleteButton({ scene }: { scene: Scene }) {
 	return (
 		<DeleteIconButton
 			ariaLabel="Delete scene"
+			size="sm"
 			chip
 			onMouseDown={keepFocus}
 			onClick={() => removeBlock(editor, scene.id)}

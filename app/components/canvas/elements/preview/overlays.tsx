@@ -21,8 +21,8 @@ function CancelButton({ onClick }: { onClick: () => void }) {
 		<SimpleTooltip label="Cancel generation">
 			<IconButton
 				ariaLabel="Cancel generation"
-				size="header"
 				shape="round"
+				size="sm"
 				chip
 				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={onClick}

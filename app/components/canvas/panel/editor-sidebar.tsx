@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import {
+	FolderOpen,
+	FolderOpenFill,
 	History,
 	Home,
 	Info,
@@ -23,13 +25,16 @@ import {
 	TextBoxFill,
 	X,
 } from "@/components/ui/icon";
-import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { SloppyComposer } from "@/app/components/sloppy/sloppy-composer";
 import { SloppyPanel } from "@/app/components/sloppy/sloppy-panel";
 import { useEditorPanel } from "./editor-panel-context";
 import type { PanelKey } from "./panel-keys";
 import { Rail } from "./rail";
+import { ResizeHandle } from "@/app/components/resize/resize-handle";
+import { useResize } from "@/app/components/resize/use-resize";
+import { MediaPanel } from "../media/media-panel";
 import { AssetsPanel } from "./assets-panel";
 import { CanvasHistoryPanel } from "./canvas-history-panel";
 import { ModelsPanel } from "./models-panel";
@@ -50,9 +55,15 @@ type PanelEntry = {
 const PANELS: Record<PanelKey, PanelEntry> = {
 	assets: {
 		label: "Assets",
+		icon: FolderOpen,
+		iconActive: FolderOpenFill,
+		Panel: AssetsPanel,
+	},
+	media: {
+		label: "Media",
 		icon: StockAlt,
 		iconActive: StockAltFill,
-		Panel: AssetsPanel,
+		Panel: MediaPanel,
 	},
 	project: {
 		label: "Project",
@@ -173,6 +184,37 @@ function PanelRailItem({ panelKey }: { panelKey: PanelKey }) {
 	);
 }
 
+/** Room for a panel card of about 280px, up to about twice that. */
+const PANEL_WIDTH = { default: 300, min: 300, max: 490 };
+
+/** The open panel at the width its handle is dragged to; a drag re-renders only this frame. */
+function ResizablePanel({ children }: { children: ReactNode }) {
+	const { size, handleProps, resizing } = useResize({
+		axis: "horizontal",
+		defaultSize: PANEL_WIDTH.default,
+		minSize: PANEL_WIDTH.min,
+		maxSize: PANEL_WIDTH.max,
+		invert: true,
+	});
+	return (
+		<>
+			<div
+				className="flex shrink-0 flex-col gap-3 pr-1 pb-3 text-panel-fg"
+				style={{ width: size }}
+			>
+				{children}
+			</div>
+			<ResizeHandle
+				axis="horizontal"
+				label="Resize side panel"
+				look="quiet"
+				resizing={resizing}
+				handleProps={handleProps}
+			/>
+		</>
+	);
+}
+
 function EditorSidebarComponent() {
 	const { active, setActive } = useEditorPanel();
 	const current = active ? PANELS[active] : null;
@@ -185,7 +227,7 @@ function EditorSidebarComponent() {
 			/>
 
 			{current && (
-				<div className="flex w-64 shrink-0 flex-col gap-3 pr-1 pb-3 text-panel-fg">
+				<ResizablePanel>
 					<div className="flex shrink-0 items-center gap-2 px-1">
 						<current.iconActive className="h-5 w-5 text-panel-label" />
 						<h2 className="text-body font-semibold text-panel-label">
@@ -193,12 +235,11 @@ function EditorSidebarComponent() {
 						</h2>
 						<TooltipIconButton
 							label="Close panel"
-							size="header"
 							variant="quiet"
 							className="ml-auto"
 							onClick={() => setActive(null)}
 						>
-							<X size={ICON_SIZES.header} />
+							<X />
 						</TooltipIconButton>
 					</div>
 					<div
@@ -214,7 +255,7 @@ function EditorSidebarComponent() {
 							<current.Footer />
 						</div>
 					)}
-				</div>
+				</ResizablePanel>
 			)}
 		</div>
 	);

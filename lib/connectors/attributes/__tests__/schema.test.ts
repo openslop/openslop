@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Image } from "@/components/ui/icon";
 import { describe, expect, it } from "vitest";
 import { Play } from "@/components/ui/icon";
 import { toggleValue, trimStartDef } from "../common";
@@ -40,13 +41,13 @@ describe("AttributeSchema", () => {
 			{
 				key: "model",
 				label: "Model",
-				edit: { kind: "enum", value: z.enum(["a", "b"]) },
+				edit: { kind: "enum", value: z.enum(["a", "b"]), icon: Image },
 				default: "a",
 			},
 			{
 				key: "motion",
 				label: "Motion",
-				edit: { kind: "enum", value: z.enum(["x"]) },
+				edit: { kind: "enum", value: z.enum(["x"]), icon: Image },
 			},
 			{ key: "prompt", label: "Prompt", edit: { kind: "text" } },
 			{

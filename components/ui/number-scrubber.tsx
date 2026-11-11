@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import type { IconComponent } from "@/components/ui/icon";
+import { chipControlClassName } from "@/components/ui/chip-control";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { clamp, cn } from "@/lib/utils";
 
@@ -48,10 +50,7 @@ export function NumberScrubber({
 		null,
 	);
 
-	const shell = cn(
-		"flex h-6 items-center gap-1 rounded-md bg-media-toggle-bg px-2 text-media-toggle-fg transition-colors focus-ring",
-		className,
-	);
+	const shell = cn(chipControlClassName, className);
 	// Reserving the widest value keeps the box one size, whether it is showing
 	// three digits, one, or an input.
 	const valueWidth = `${String(max).length + suffix.length}ch`;
@@ -65,7 +64,7 @@ export function NumberScrubber({
 		};
 		return (
 			<div className={cn(shell, "ring-2 ring-ring")}>
-				{Icon && <Icon className="h-3.5 w-3.5" />}
+				{Icon && <Icon size={ICON_SIZES.default} />}
 				<input
 					autoFocus
 					aria-label={label}
@@ -139,7 +138,7 @@ export function NumberScrubber({
 					"cursor-ew-resize touch-none select-none hover:bg-media-toggle-hover-bg",
 				)}
 			>
-				{Icon && <Icon className="h-3.5 w-3.5" />}
+				{Icon && <Icon size={ICON_SIZES.default} />}
 				<span className={valueText} style={{ minWidth: valueWidth }}>
 					{value}
 					{suffix}

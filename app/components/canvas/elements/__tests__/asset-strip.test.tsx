@@ -1,19 +1,32 @@
 // @vitest-environment happy-dom
 
 import { act, type ReactNode } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Descendant } from "slate";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { references } from "@/lib/canvas/__tests__/_assets";
+import { findAsset, REFERENCE_URLS_ATTR } from "@/lib/canvas/assets";
+import { parseReferenceImages } from "@/lib/connectors/attributes/reference-images";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
-import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
+import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
+import { MediaPanelProvider } from "@/app/components/canvas/media/media-panel-context";
+import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
+import {
+	chooseTileMenuItem,
+	mountOnCanvas,
+	noHistory,
+} from "@/app/components/canvas/__tests__/_mount";
 import {
 	AssetStrip,
 	AssetStripMedia,
 	AssetStripReferences,
 } from "../asset-strip";
+
+vi.mock("@/app/components/canvas/workspace-context", () => ({
+	useShowWorkspace: () => true,
+}));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -26,11 +39,17 @@ const open = (tiles: ReactNode, children: Descendant[] = []) => {
 	store = createProjectStore();
 	canvas.render(
 		<ProjectStoreProvider store={store}>
-			<TooltipProvider>
-				<AssetEditProvider>
-					<AssetStrip>{tiles}</AssetStrip>
-				</AssetEditProvider>
-			</TooltipProvider>
+			<GenerationQueueProvider initialState={{}} storage={noHistory}>
+				<TooltipProvider>
+					<EditorPanelProvider>
+						<MediaPanelProvider>
+							<AssetEditProvider>
+								<AssetStrip>{tiles}</AssetStrip>
+							</AssetEditProvider>
+						</MediaPanelProvider>
+					</EditorPanelProvider>
+				</TooltipProvider>
+			</GenerationQueueProvider>
 		</ProjectStoreProvider>,
 	);
 };
@@ -46,15 +65,53 @@ describe("AssetStrip", () => {
 
 		expect(document.body.textContent).toContain("intro");
 
-		await click('button[aria-label="Remove intro"]');
+		await chooseTileMenuItem("intro", "Delete");
 
 		expect(store.getState().media).toHaveLength(1);
 		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(
-			"Remove intro?",
+			"Delete intro?",
 		);
 	});
 
-	it("shows an uploaded reference both as a reference and as media", async () => {
+	const openUploadedReference = async () => {
+		open(<AssetStripReferences />, [references("https://img/a.png")]);
+		await act(async () =>
+			store
+				.getState()
+				.addMedia([{ kind: "image", name: "a.png", url: "https://img/a.png" }]),
+		);
+	};
+
+	const referenceUrls = () =>
+		parseReferenceImages(
+			findAsset(canvas.editor.children, "asset_references")
+				?.generationAttributes?.[REFERENCE_URLS_ATTR],
+		) ?? [];
+
+	it("takes a reference off the references and keeps its file", async () => {
+		await openUploadedReference();
+
+		await chooseTileMenuItem("Reference 1", "Remove from references");
+
+		expect(referenceUrls()).toEqual([]);
+		expect(store.getState().media).toHaveLength(1);
+	});
+
+	it("deletes a reference's file from the media and the references once confirmed", async () => {
+		await openUploadedReference();
+
+		await chooseTileMenuItem("Reference 1", "Delete");
+		await act(async () =>
+			Array.from(document.querySelectorAll("[role=alertdialog] button"))
+				.find((button) => button.textContent === "Delete")
+				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+		);
+
+		expect(store.getState().media).toEqual([]);
+		expect(referenceUrls()).toEqual([]);
+	});
+
+	it("shows an uploaded reference once, as a reference", async () => {
 		open(
 			<>
 				<AssetStripReferences />
@@ -70,6 +127,9 @@ describe("AssetStrip", () => {
 
 		expect(
 			document.querySelectorAll('[aria-label="Assets"] > li'),
-		).toHaveLength(2);
+		).toHaveLength(1);
+		expect(
+			document.querySelector('button[aria-label="Edit Reference 1"]'),
+		).not.toBeNull();
 	});
 });

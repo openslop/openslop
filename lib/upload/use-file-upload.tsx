@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { toastError } from "@/lib/toast-error";
 import { uploadFile } from "./upload-file";
 import {
@@ -67,11 +68,13 @@ export function useFileUpload({
 				if (result.status === "fulfilled") uploads.push(result.value);
 				else toastError(result.reason);
 			}
-			if (uploads.length > 0) await onUpload(uploads);
+			// Store and state updates render in separate passes; one commit keeps placeholders from showing beside what replaced them.
+			await flushSync(() => {
+				setUploadingCount((count) => count - files.length);
+				return uploads.length > 0 ? onUpload(uploads) : undefined;
+			});
 		} catch (error) {
 			toastError(error);
-		} finally {
-			setUploadingCount((count) => count - files.length);
 		}
 	};
 

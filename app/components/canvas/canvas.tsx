@@ -1,11 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-	Editable,
-	useSlateStatic,
-	type RenderPlaceholderProps,
-} from "slate-react";
+import { useSlateStatic, type RenderPlaceholderProps } from "slate-react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -18,15 +14,11 @@ import { findBlockById } from "@/lib/canvas/editor-ops";
 import { SortableScene } from "./dnd/sortable-scene";
 import { SortableContent } from "./dnd/sortable-content";
 import { DragOverlayPreview } from "./dnd/drag-overlay";
-import {
-	CharacterMentionMenu,
-	optionId,
-} from "./elements/character-mention-menu";
+import { MentionEditable } from "./elements/mention-editable";
 import {
 	CANVAS_TEXT_CLASS,
 	renderCanvasElement,
 } from "./render-canvas-element";
-import { useCharacterMention } from "./hooks/use-character-mention";
 
 const renderElement = renderCanvasElement({
 	Scene: SortableScene,
@@ -59,8 +51,6 @@ export default function Canvas() {
 		handleDragEnd,
 		handleDragCancel,
 	} = useDragAndDrop(editor);
-	const { mention, options, active, listboxId, select, dismiss, onKeyDown } =
-		useCharacterMention();
 
 	const activeBlock = useMemo(
 		() =>
@@ -82,26 +72,13 @@ export default function Canvas() {
 					items={sceneItems}
 					strategy={verticalListSortingStrategy}
 				>
-					<Editable
+					<MentionEditable
 						placeholder="Start typing your story…"
 						renderPlaceholder={renderPlaceholder}
 						renderElement={renderElement}
-						onKeyDown={onKeyDown}
-						aria-controls={mention && listboxId}
-						aria-activedescendant={mention && optionId(listboxId, active)}
 						className={`${CANVAS_TEXT_CLASS} focus-ring`}
 					/>
 				</SortableContext>
-				{mention && (
-					<CharacterMentionMenu
-						mention={mention}
-						options={options}
-						active={active}
-						listboxId={listboxId}
-						onSelect={select}
-						onDismiss={dismiss}
-					/>
-				)}
 				<DragOverlay>
 					{activeBlock && <DragOverlayPreview block={activeBlock} />}
 				</DragOverlay>

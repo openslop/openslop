@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
-import { PopoverTrigger } from "@/components/ui/popover";
+import { PopoverHeader, PopoverTrigger } from "@/components/ui/popover";
 
 /** The pill that opens an attribute's editor. */
 export function AttributeTrigger({
@@ -28,5 +28,23 @@ export function AttributeTrigger({
 				<ChevronDown className="h-3 w-3 shrink-0 text-foreground" />
 			</Button>
 		</PopoverTrigger>
+	);
+}
+
+/** An attribute popover's title and action, over its editor. */
+export function AttributePopoverSection({
+	title,
+	action,
+	children,
+}: {
+	title: string;
+	action: React.ReactNode;
+	children: React.ReactNode;
+}) {
+	return (
+		<>
+			<PopoverHeader title={title} action={action} />
+			{children}
+		</>
 	);
 }

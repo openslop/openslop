@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Image } from "@/components/ui/icon";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createEditor } from "slate";
@@ -16,7 +17,7 @@ const elementWith = (attributes: Record<string, string>) =>
 const motionDef: AttributeDef = {
 	key: "motion",
 	label: "Motion",
-	edit: { kind: "enum", value: z.enum(["none", "zoom_in"]) },
+	edit: { kind: "enum", value: z.enum(["none", "zoom_in"]), icon: Image },
 };
 
 function render(element: ContentElement, def: AttributeDef) {
@@ -56,7 +57,7 @@ describe("AttributeBadge", () => {
 			key: "duration",
 			label: "Duration",
 			unit: "s",
-			edit: { kind: "enum", value: z.enum(["5", "10"]) },
+			edit: { kind: "enum", value: z.enum(["5", "10"]), icon: Image },
 		};
 		const html = render(elementWith({}), durationDef);
 		expect(control(html)).toBe("—");

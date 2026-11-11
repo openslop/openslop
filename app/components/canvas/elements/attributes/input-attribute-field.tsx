@@ -3,10 +3,10 @@
 import { useState, type ComponentProps } from "react";
 import { useSlateStatic } from "slate-react";
 import { RotateCcw } from "@/components/ui/icon";
-import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
-import type { ContentElement } from "@/lib/canvas/types";
+import type { GeneratedElement } from "@/lib/canvas/types";
 
 type InputProps = Omit<
 	ComponentProps<typeof Input>,
@@ -22,7 +22,7 @@ export function InputAttributeField({
 	parse,
 	...inputProps
 }: InputProps & {
-	element: ContentElement;
+	element: GeneratedElement;
 	attrKey: string;
 	value: string;
 	label: string;
@@ -45,11 +45,10 @@ export function InputAttributeField({
 			{value ? (
 				<TooltipIconButton
 					label={`Reset ${label.toLowerCase()}`}
-					size="sm"
 					variant="quiet"
 					onClick={() => mergeAttrs(editor, element.id, { [attrKey]: null })}
 				>
-					<RotateCcw size={ICON_SIZES.sm} />
+					<RotateCcw />
 				</TooltipIconButton>
 			) : null}
 			<Input

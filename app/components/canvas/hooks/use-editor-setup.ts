@@ -9,13 +9,14 @@ import type { ProjectStore } from "@/lib/project/store";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
 import type { AccountStore } from "@/lib/user/account-store";
 import { withCanvas } from "../plugins/with-canvas";
+import { withMediaDrafts } from "../plugins/with-media-drafts";
 
 function createCanvasEditor(
 	script: string,
 	{ project, account }: { project: ProjectStore; account: AccountStore },
 	sceneId: (index: number) => string,
 ): CanvasEditor {
-	const editor = withCanvas(withHistory(createEditor()));
+	const editor = withMediaDrafts(withCanvas(withHistory(createEditor())));
 	editor.defaultModels = () =>
 		resolveDefaultModels({
 			project: project.getState().models,

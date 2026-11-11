@@ -4,8 +4,8 @@ import { memo, type ReactNode } from "react";
 import { getAspectRatioValue } from "@/lib/project/aspect-ratio";
 import { useVideoSetting } from "@/lib/project/use-video-setting";
 import { SIDE_PLAYER_DEFAULT_WIDTH } from "./dock-layout";
-import { ResizeHandle } from "./resize-handle";
-import { useResize } from "./use-resize";
+import { ResizeHandle } from "@/app/components/resize/resize-handle";
+import { useResize } from "@/app/components/resize/use-resize";
 import { PreviewPanel } from "./preview-panel";
 
 const TOP_DEFAULT = 300;

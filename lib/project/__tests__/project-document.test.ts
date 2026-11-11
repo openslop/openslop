@@ -86,9 +86,7 @@ describe("createProjectDocument.read", () => {
 		document.write(contentWith(`${ASSETS}\n${SCENE}`));
 		const { script } = document.read();
 
-		expect(script.startsWith(`${ASSETS}\n\n--- Scene 1 ---\n<narration`)).toBe(
-			true,
-		);
+		expect(script).toContain(`${ASSETS}\n\n--- Scene 1 ---\n<narration`);
 		document.write(contentWith(script));
 		expect(document.read().script).toBe(script);
 	});

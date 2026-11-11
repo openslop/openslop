@@ -1,4 +1,10 @@
-import type { GeneratedType } from "@/lib/canvas/types";
+import {
+	MEDIA_CONTENT_TYPES,
+	mediaDraftTypeOf,
+	type ContentType,
+	type GeneratedType,
+	type MediaDraftType,
+} from "@/lib/canvas/types";
 import { createArtStylePlugin } from "./image/plugins/art-style";
 import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
 import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
@@ -14,7 +20,7 @@ export type ConnectorRegistry = Record<GeneratedType, ConnectorConfig>;
 
 const speech: ConnectorConfig = { plugins: [createSpeakerVoicePlugin()] };
 
-export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
+const CONTENT = {
 	narration: speech,
 	character: speech,
 	image: { plugins: buildVisualPlugins("image") },
@@ -27,6 +33,16 @@ export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	},
 	sound: {},
 	music: {},
+} satisfies Record<ContentType, ConnectorConfig>;
+
+/** A draft generates on the plugins of the type it drafts. */
+const DRAFTS = Object.fromEntries(
+	MEDIA_CONTENT_TYPES.map((type) => [mediaDraftTypeOf(type), CONTENT[type]]),
+) as Record<MediaDraftType, ConnectorConfig>;
+
+export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
+	...CONTENT,
+	...DRAFTS,
 	asset_avatar: {
 		plugins: [
 			createCharacterAvatarPlugin(),

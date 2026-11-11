@@ -25,6 +25,9 @@ vi.mock("../layout-panel", () => ({ LayoutPanel: () => null }));
 vi.mock("../models-panel", () => ({ ModelsPanel: () => null }));
 vi.mock("../project-panel", () => ({ ProjectPanel: () => null }));
 vi.mock("../properties-panel", () => ({ PropertiesPanel: () => null }));
+vi.mock("../../media/media-panel", () => ({
+	MediaPanel: () => null,
+}));
 vi.mock("@/app/components/sloppy/sloppy-panel", () => ({
 	SloppyPanel: () => null,
 }));

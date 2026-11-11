@@ -95,7 +95,12 @@ describe("store snapshot", () => {
 			.addMedia([{ kind: "image", name: "cat.png", url: "https://blob/a" }]);
 
 		expect(store.getState().media).toEqual([
-			{ name: "cat", kind: "image", url: "https://blob/a" },
+			{
+				name: "cat",
+				kind: "image",
+				url: "https://blob/a",
+				createdAt: expect.any(String),
+			},
 		]);
 
 		store.getState().removeMedia("cat");

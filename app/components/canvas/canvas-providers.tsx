@@ -17,6 +17,7 @@ import { ActiveCaptionFont } from "./caption-fonts";
 import { SloppyProvider } from "../sloppy/sloppy-provider";
 import { SloppyUnread } from "../sloppy/sloppy-unread";
 import { EditorPanelProvider } from "./panel/editor-panel-context";
+import { MediaPanelProvider } from "./media/media-panel-context";
 import { AssetEditProvider } from "./elements/character/asset-edit-provider";
 import { useEditorSession } from "./hooks/use-editor-session";
 import { useProjectHistoryHotkeys } from "./project-history-keymap";
@@ -34,6 +35,7 @@ const CanvasScopedProviders = composeProviders(
 	ViewModeProvider,
 	SloppyProvider,
 	EditorPanelProvider,
+	MediaPanelProvider,
 	AssetEditProvider,
 );
 

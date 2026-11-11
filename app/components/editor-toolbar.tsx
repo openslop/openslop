@@ -98,6 +98,7 @@ function EditorToolbarComponent() {
 							key={label}
 							label={label}
 							variant="quiet"
+							size="sm"
 							chip
 							className="self-center"
 							onClick={onClick}

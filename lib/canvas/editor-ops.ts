@@ -44,7 +44,10 @@ export function findElementById(
 	return entry ?? null;
 }
 
-function requireElement(editor: Editor, id: string): NodeEntry<CanvasElement> {
+export function requireElement(
+	editor: Editor,
+	id: string,
+): NodeEntry<CanvasElement> {
 	const found = findElementById(editor, id);
 	if (!found) throw new Error(`Element "${id}" is not on the canvas`);
 	return found;

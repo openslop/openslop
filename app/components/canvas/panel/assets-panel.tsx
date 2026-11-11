@@ -1,56 +1,39 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Plus } from "@/components/ui/icon";
-import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
-import { Spinner } from "@/components/ui/spinner";
+import { useSlateStatic } from "slate-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Palette, User } from "@/components/ui/icon";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
-import { useProject } from "@/lib/project/use-project";
-import { UploadKindSchema } from "@/lib/upload/upload-files";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
 	ArtStyleAssetTile,
-	MediaAssetTile,
 	CharacterAssetTile,
 	ReferenceAssetTile,
 } from "../elements/asset-tiles";
 import { useAssetEditors } from "../elements/asset-edit-context";
+import { deleteCharacter } from "../elements/delete-asset";
+import { uploadingTiles } from "../elements/uploading-tile";
+import { AddMediaMenu } from "../elements/add-media-menu";
+import { NoReferenceImages } from "../elements/reference-images";
 import { PagedTiles } from "./paged-tiles";
 import { PanelCard } from "./panel-card";
+import { AddButton } from "@/components/ui/add-button";
 
 function AssetCard({
 	title,
 	empty,
-	add,
+	action,
 	children,
 }: {
 	title: string;
-	empty: string;
-	add?: { label: string; onClick: () => void; busy?: boolean };
+	empty: ReactNode;
+	action?: ReactNode;
 	children: ReactNode[];
 }) {
 	return (
-		<PanelCard
-			title={title}
-			action={
-				add && (
-					<TooltipIconButton
-						label={add.label}
-						size="header"
-						variant="quiet"
-						disabled={add.busy}
-						onClick={add.onClick}
-					>
-						{add.busy ? (
-							<Spinner size={ICON_SIZES.header} />
-						) : (
-							<Plus size={ICON_SIZES.header} />
-						)}
-					</TooltipIconButton>
-				)
-			}
-		>
+		<PanelCard title={title} action={action}>
 			<PagedTiles label={title} empty={empty}>
 				{children}
 			</PagedTiles>
@@ -59,16 +42,27 @@ function AssetCard({
 }
 
 function CharactersCard() {
+	const editor = useSlateStatic();
 	const { openCreateCharacter } = useAssetEditors();
 	const names = useCharacterNames();
 	return (
 		<AssetCard
 			title="Characters"
-			empty="No characters yet"
-			add={{ label: "Add character", onClick: openCreateCharacter }}
+			empty={
+				<EmptyState
+					icon={User}
+					title="No characters yet"
+					description="Characters you create show up here"
+				/>
+			}
+			action={<AddButton label="Add character" onClick={openCreateCharacter} />}
 		>
 			{names.map((name) => (
-				<CharacterAssetTile key={name} name={name} fill />
+				<CharacterAssetTile
+					key={name}
+					name={name}
+					onDelete={() => deleteCharacter(editor, name)}
+				/>
 			))}
 		</AssetCard>
 	);
@@ -76,7 +70,7 @@ function CharactersCard() {
 
 function ReferencesCard() {
 	const { urls, add, remove } = useReferenceImages();
-	const { openPicker, uploading, inputElement } = useMediaUpload({
+	const { openPicker, uploadingCount, inputElement } = useMediaUpload({
 		kinds: ["image"],
 		multiple: true,
 		onUpload: add,
@@ -86,22 +80,22 @@ function ReferencesCard() {
 			{inputElement}
 			<AssetCard
 				title="References"
-				empty="No reference images yet"
-				add={{
-					label: "Add reference image",
-					onClick: openPicker,
-					busy: uploading,
-				}}
+				empty={<NoReferenceImages />}
+				action={
+					<AddMediaMenu label="Add reference image" onUpload={openPicker} />
+				}
 			>
-				{urls.map((url, index) => (
-					<ReferenceAssetTile
-						key={url}
-						url={url}
-						index={index}
-						onRemove={() => remove(index)}
-						fill
-					/>
-				))}
+				{[
+					...urls.map((url, index) => (
+						<ReferenceAssetTile
+							key={url}
+							url={url}
+							index={index}
+							onRemove={() => remove(index)}
+						/>
+					)),
+					...uploadingTiles(uploadingCount),
+				]}
 			</AssetCard>
 		</>
 	);
@@ -113,37 +107,24 @@ function ArtStyleCard() {
 	return (
 		<AssetCard
 			title="Art style"
-			empty="No art style yet"
-			add={
-				hasStyle
-					? undefined
-					: { label: "Add art style", onClick: () => editAsset("asset_style") }
+			empty={
+				<EmptyState
+					icon={Palette}
+					title="No art style yet"
+					description="The art style you set shows up here"
+				/>
+			}
+			action={
+				!hasStyle && (
+					<AddButton
+						label="Add art style"
+						onClick={() => editAsset("asset_style")}
+					/>
+				)
 			}
 		>
-			{hasStyle ? [<ArtStyleAssetTile key="asset_style" fill />] : []}
+			{hasStyle ? [<ArtStyleAssetTile key="asset_style" />] : []}
 		</AssetCard>
-	);
-}
-
-function MediaCard() {
-	const media = useProject((state) => state.media);
-	const { openPicker, uploading, inputElement } = useMediaUpload({
-		kinds: UploadKindSchema.options,
-		multiple: true,
-	});
-	return (
-		<>
-			{inputElement}
-			<AssetCard
-				title="Media"
-				empty="Nothing uploaded yet"
-				add={{ label: "Upload media", onClick: openPicker, busy: uploading }}
-			>
-				{media.map((item) => (
-					<MediaAssetTile key={item.name} item={item} fill />
-				))}
-			</AssetCard>
-		</>
 	);
 }
 
@@ -153,7 +134,6 @@ export function AssetsPanel() {
 			<ArtStyleCard />
 			<CharactersCard />
 			<ReferencesCard />
-			<MediaCard />
 		</>
 	);
 }

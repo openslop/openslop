@@ -1,3 +1,4 @@
+import { PlaybackSpeed, Smile } from "@/components/ui/icon";
 import { z } from "zod";
 import { AttributeSchema } from "../attributes/schema";
 import {
@@ -20,13 +21,13 @@ export const TTS_ATTRIBUTES = AttributeSchema.from([
 	{
 		key: "emotion",
 		label: "Emotion",
-		edit: { kind: "enum", value: z.enum(TTS_EMOTIONS) },
+		edit: { kind: "enum", value: z.enum(TTS_EMOTIONS), icon: Smile },
 		default: DEFAULT_TTS_EMOTION,
 	},
 	{
 		key: "speed",
 		label: "Speed",
-		edit: { kind: "enum", value: z.enum(TTS_SPEEDS) },
+		edit: { kind: "enum", value: z.enum(TTS_SPEEDS), icon: PlaybackSpeed },
 		default: DEFAULT_TTS_SPEED,
 	},
 	volumeDef("10"),

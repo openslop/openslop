@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, type IconComponent } from "@/components/ui/icon";
+import type { IconComponent } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Thumbnail,
@@ -13,32 +13,55 @@ import {
 } from "@/lib/generation/snapshots";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { GenerationIndicator } from "./generation-indicator";
-import { MediaViewer } from "./media-viewer";
-import { RemoveCrossButton } from "./remove-cross-button";
+import {
+	DeleteItem,
+	RemoveItem,
+	TileMenu,
+	TilePrimaryAction,
+	useViewLarger,
+	type TilePrimary,
+} from "./tile-actions";
 
+/** A picture or initial over its name: choosing the face does `primary`; the ⋮ holds the rest. */
 export function AssetTile({
 	name,
 	previewUrl,
 	previewKind = "image",
+	context,
+	createdAt,
 	Icon,
 	status = "idle",
 	startedAt = null,
-	onEdit,
+	primary,
+	menu,
 	onRemove,
+	onDelete,
+	children,
 	fallback = "initial",
-	fill = false,
 }: {
 	name: string;
 	previewUrl?: string;
 	previewKind?: "image" | "video";
+	/** What the picture is, as its larger view says. */
+	context?: string;
+	createdAt?: string;
 	Icon: IconComponent;
 	status?: GenerationStatus;
 	startedAt?: number | null;
-	onEdit?: () => void;
+	primary?: TilePrimary;
 	onRemove?: () => void;
+	onDelete?: () => void;
+	/** Menu items between View larger and Remove or Delete. */
+	menu?: React.ReactNode;
+	/** Over the face, under its actions. */
+	children?: React.ReactNode;
 	fallback?: "initial" | "icon";
-	fill?: boolean;
 }) {
+	const viewer = useViewLarger(
+		previewUrl
+			? { src: previewUrl, kind: previewKind, name, context, createdAt }
+			: undefined,
+	);
 	const fallbackContent =
 		fallback === "icon" ? (
 			<Icon className="h-5 w-5" />
@@ -46,55 +69,42 @@ export function AssetTile({
 			name.trim().charAt(0).toUpperCase()
 		);
 	return (
-		<Thumbnail fill={fill} className="group/tile relative">
-			<ThumbnailFace>
+		<Thumbnail className="group/tile relative">
+			<ThumbnailFace className="@container/tile">
 				{previewUrl ? (
 					<MediaWithSkeleton
 						key={previewUrl}
 						outputKind={previewKind}
 						src={previewUrl}
-						alt={name}
+						alt=""
 					/>
 				) : (
-					<span className="text-body-lg">{fallbackContent}</span>
+					<span className="flex items-center justify-center text-body-lg">
+						{fallbackContent}
+					</span>
 				)}
 				{status === "generating" && (
 					<Skeleton className="absolute inset-0" aria-hidden />
 				)}
-				{isGenerationActive(status) && (
+				{children}
+				{primary && <TilePrimaryAction {...primary} />}
+				{isGenerationActive(status) ? (
 					<GenerationIndicator
 						status={status}
 						startedAt={startedAt}
 						size="sm"
-						className="absolute right-1 top-1"
+						className="absolute top-1 right-1"
 					/>
-				)}
-				{onEdit && (
-					<button
-						type="button"
-						onClick={onEdit}
-						aria-label={`Edit ${name}`}
-						className="focus-ring absolute inset-0 flex items-center justify-center bg-background/70 text-foreground opacity-0 transition group-hover/tile:opacity-100 hover:bg-background/90 focus-visible:opacity-100 focus-visible:ring-inset"
-					>
-						<Pencil className="h-3.5 w-3.5" />
-					</button>
-				)}
-				{previewUrl && (
-					<MediaViewer
-						src={previewUrl}
-						kind={previewKind}
-						name={name}
-						className="opacity-0 group-hover/tile:opacity-100"
-					/>
+				) : (
+					<TileMenu label={name}>
+						{viewer.item}
+						{menu}
+						{onRemove && <RemoveItem onSelect={onRemove} />}
+						{onDelete && <DeleteItem onSelect={onDelete} />}
+					</TileMenu>
 				)}
 			</ThumbnailFace>
-			{onRemove && status !== "generating" && (
-				<RemoveCrossButton
-					label={`Remove ${name}`}
-					onClick={onRemove}
-					className="z-10 opacity-0 group-hover/tile:opacity-100"
-				/>
-			)}
+			{viewer.dialog}
 			<ThumbnailCaption title={name} icon={<Icon size={10} />}>
 				{name}
 			</ThumbnailCaption>

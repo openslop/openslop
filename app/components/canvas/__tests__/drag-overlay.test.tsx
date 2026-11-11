@@ -7,10 +7,9 @@ import type { ContentElement } from "@/lib/canvas/types";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
-import type { ElementVersionStorage } from "@/lib/generation/history";
 import { DragOverlayPreview } from "../dnd/drag-overlay";
 import { ViewModeProvider } from "../view-mode-context";
-import { mountOnCanvas } from "./_mount";
+import { mountOnCanvas, noHistory } from "./_mount";
 
 vi.mock("../elements/element-container", () => ({
 	ElementContainer: ({ children }: { children: ReactNode }) => (
@@ -31,10 +30,6 @@ const image = (...cast: string[]): ContentElement => ({
 		]),
 	],
 });
-
-const untouched = () =>
-	Promise.reject(new Error("a drag preview reads no history"));
-const noHistory: ElementVersionStorage = { read: untouched, write: untouched };
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 

@@ -7,7 +7,12 @@ import type { toggleValue } from "./common";
 type ToggleFace = { icon: IconComponent; label: string };
 
 type AttributeEdit =
-	| { kind: "enum"; value: z.ZodEnum<Record<string, string>> }
+	/** One of a few values, picked from a menu its icon marks where the label is left out. */
+	| {
+			kind: "enum";
+			value: z.ZodEnum<Record<string, string>>;
+			icon: IconComponent;
+	  }
 	/** A boolean stored as "true" or "false", switched between two iconed faces. */
 	| {
 			kind: "toggle";

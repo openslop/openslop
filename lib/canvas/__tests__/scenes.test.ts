@@ -7,6 +7,7 @@ import {
 	parentSceneId,
 	previousVisual,
 	sceneIndexOf,
+	sceneVisuals,
 } from "../scenes";
 import { element } from "./_assets";
 
@@ -105,5 +106,24 @@ describe("previousVisual", () => {
 	it("is nothing for the first visual or an unknown id", () => {
 		expect(previousVisual(elements, "a")).toBeUndefined();
 		expect(previousVisual(elements, "zzz")).toBeUndefined();
+	});
+});
+
+describe("sceneVisuals", () => {
+	it("numbers each scene's foreground and skips scenes without one", () => {
+		const nodes = [
+			scene("s1", [narration("n1"), element("i1", "image")]),
+			scene("s2", [narration("n2")]),
+			scene("s3", [element("v1", "video")]),
+		];
+		expect(
+			sceneVisuals(nodes).map(({ sceneNumber, visual }) => [
+				sceneNumber,
+				visual.id,
+			]),
+		).toEqual([
+			[1, "i1"],
+			[3, "v1"],
+		]);
 	});
 });

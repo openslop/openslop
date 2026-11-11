@@ -1,7 +1,7 @@
 "use client";
 
 import { useSlateStatic } from "slate-react";
-import { Forbidden, ImagePlus, Transition } from "@/components/ui/icon";
+import { Forbidden, Image, Transition } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,9 +9,11 @@ import {
 	Thumbnail,
 	ThumbnailCaption,
 	ThumbnailFace,
+	THUMBNAIL_POPOVER_WIDTH,
 } from "@/components/ui/thumbnail";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
-import type { ContentElement } from "@/lib/canvas/types";
+import { isContentElement } from "@/lib/canvas/guards";
+import type { GeneratedElement } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import {
 	type FrameSource,
@@ -21,11 +23,13 @@ import {
 	START_FRAME,
 	UPLOADED_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
-import { useMediaUpload } from "@/lib/project/use-media-upload";
-import { AddAssetTile } from "../add-asset-tile";
-import { MediaViewer } from "../media-viewer";
-import { RemoveCrossButton } from "../remove-cross-button";
-import { AttributeTrigger } from "./attribute-trigger";
+import { AssetTile } from "../asset-tile";
+import { MediaPicker } from "../media-picker";
+import { AddButton } from "@/components/ui/add-button";
+import { RemoveItem, TileMenu, useViewLarger } from "../tile-actions";
+import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
+import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
+import { TileRow } from "./tile-row";
 import { usePreviousPictures } from "./use-previous-pictures";
 
 const FRAME_SOURCE_LABEL: Record<FrameSource["kind"], string> = {
@@ -51,6 +55,16 @@ function FrameTile({
 }) {
 	const selected = kind === current;
 	const label = FRAME_SOURCE_LABEL[kind];
+	const viewer = useViewLarger(
+		picture
+			? {
+					src: picture,
+					kind: "image",
+					name: label,
+					context: "Start frame",
+				}
+			: undefined,
+	);
 	return (
 		<div className="group/tile relative">
 			<Thumbnail asChild>
@@ -73,21 +87,13 @@ function FrameTile({
 					<ThumbnailCaption>{label}</ThumbnailCaption>
 				</button>
 			</Thumbnail>
-			{picture && (
-				<MediaViewer
-					src={picture}
-					kind="image"
-					name={label}
-					className="opacity-0 group-hover/tile:opacity-100"
-				/>
+			{(viewer.item || onRemove) && (
+				<TileMenu label={label}>
+					{viewer.item}
+					{onRemove && <RemoveItem onSelect={onRemove} />}
+				</TileMenu>
 			)}
-			{onRemove && (
-				<RemoveCrossButton
-					label={`Remove ${label.toLowerCase()}`}
-					onClick={onRemove}
-					className="opacity-0 group-hover/tile:opacity-100"
-				/>
-			)}
+			{viewer.dialog}
 		</div>
 	);
 }
@@ -97,7 +103,7 @@ function PreviousFrameTile({
 	current,
 	onSelect,
 }: {
-	element: ContentElement;
+	element: GeneratedElement;
 	current: FrameSource["kind"];
 	onSelect: () => void;
 }) {
@@ -120,15 +126,7 @@ function PreviousFrameTile({
 }
 
 /** An upload is kept while another choice is made so it can be chosen again. */
-export function StartFramePicker({
-	element,
-	attrKey,
-	label,
-}: {
-	element: ContentElement;
-	attrKey: string;
-	label: string;
-}) {
+function StartFrameOptions({ element, attrKey, label }: AttributeTarget) {
 	const editor = useSlateStatic();
 	const source = frameSource(element.generationAttributes?.[attrKey]);
 	// Sloppy sets a picture as the start frame without remembering it as the upload.
@@ -140,53 +138,95 @@ export function StartFramePicker({
 			[attrKey]: next,
 			[UPLOADED_FRAME_ATTR]: upload,
 		});
-	const { openPicker, uploading, inputElement } = useMediaUpload({
-		kinds: ["image"],
-		onUpload: ([url]) => {
-			if (url) setFrame(url, url);
-		},
-	});
-	const summary = FRAME_SOURCE_LABEL[source.kind];
 
 	return (
-		<Popover>
-			<AttributeTrigger tooltip={`${label}: ${summary}`}>
-				{summary}
-			</AttributeTrigger>
-			<PopoverContent align="end" className="w-auto">
-				<div role="radiogroup" aria-label={label} className="flex gap-3">
-					<FrameTile
-						kind="none"
-						current={source.kind}
-						onSelect={() => setFrame(NO_FRAME)}
-					>
-						<Forbidden className="h-5 w-5" />
-					</FrameTile>
+		<AttributePopoverSection
+			title={label}
+			action={
+				<MediaPicker kind="image" onPick={(url) => setFrame(url, url)}>
+					<AddButton label="Add start frame" />
+				</MediaPicker>
+			}
+		>
+			<TileRow columns={2} radiogroup={label}>
+				<FrameTile
+					kind="none"
+					current={source.kind}
+					onSelect={() => setFrame(NO_FRAME)}
+				>
+					<Forbidden className="h-5 w-5" />
+				</FrameTile>
+				{isContentElement(element) && (
 					<PreviousFrameTile
 						element={element}
 						current={source.kind}
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					/>
-					{uploaded ? (
-						<FrameTile
-							kind="upload"
-							current={source.kind}
-							onSelect={() => setFrame(uploaded)}
-							picture={uploaded}
-							onRemove={() => setFrame(NO_FRAME, null)}
-						/>
-					) : (
-						<AddAssetTile
-							label="Upload picture"
-							ariaLabel="Upload a picture to open on"
-							Icon={ImagePlus}
-							onClick={openPicker}
-							disabled={uploading}
-							busy={uploading}
-						/>
-					)}
-				</div>
-				{inputElement}
+				)}
+				{uploaded && (
+					<FrameTile
+						kind="upload"
+						current={source.kind}
+						onSelect={() => setFrame(uploaded)}
+						picture={uploaded}
+						onRemove={() => setFrame(NO_FRAME, null)}
+					/>
+				)}
+			</TileRow>
+		</AttributePopoverSection>
+	);
+}
+
+/** A draft opens on a picture or on nothing: it has no scene before it to choose instead. */
+export function DraftStartFrame({
+	element,
+	attrKey,
+	label,
+	Section,
+}: LaidOutTarget) {
+	const editor = useSlateStatic();
+	const source = frameSource(element.generationAttributes?.[attrKey]);
+	const setFrame = (url: string | null) =>
+		mergeAttrs(editor, element.id, {
+			[attrKey]: url ?? NO_FRAME,
+			[UPLOADED_FRAME_ATTR]: url,
+		});
+	return (
+		<Section
+			title={label}
+			action={
+				<MediaPicker kind="image" onPick={setFrame}>
+					<AddButton label="Add start frame" />
+				</MediaPicker>
+			}
+		>
+			{source.kind === "upload" && (
+				<TileRow columns={2}>
+					<AssetTile
+						name={label}
+						previewUrl={source.url}
+						context="Start frame"
+						Icon={Image}
+						onRemove={() => setFrame(null)}
+					/>
+				</TileRow>
+			)}
+		</Section>
+	);
+}
+
+export function StartFramePicker(target: AttributeTarget) {
+	const { kind } = frameSource(
+		target.element.generationAttributes?.[target.attrKey],
+	);
+	const summary = FRAME_SOURCE_LABEL[kind];
+	return (
+		<Popover>
+			<AttributeTrigger tooltip={`${target.label}: ${summary}`}>
+				{summary}
+			</AttributeTrigger>
+			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
+				<StartFrameOptions {...target} />
 			</PopoverContent>
 		</Popover>
 	);

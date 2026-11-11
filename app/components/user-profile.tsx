@@ -73,9 +73,7 @@ function UserProfile() {
 							Appearance
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							<DropdownMenuLabel className="text-label text-muted-foreground">
-								Mode
-							</DropdownMenuLabel>
+							<DropdownMenuLabel className="text-label">Mode</DropdownMenuLabel>
 							{THEME_MODES.map((mode) => (
 								<DropdownMenuItem
 									key={mode.value}

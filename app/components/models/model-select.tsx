@@ -10,8 +10,13 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link, Settings } from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
 import { InfoTip } from "@/components/ui/info-tip";
-import { InlineMenuTrigger, SelectMenuItem } from "@/components/ui/select-menu";
+import {
+	InlineMenuTrigger,
+	SelectMenuItem,
+	SelectMenuTrigger,
+} from "@/components/ui/select-menu";
 import {
 	SimpleTooltip,
 	Tooltip,
@@ -65,7 +70,7 @@ export function ModelSelect({
 				<DropdownMenuContent
 					side={side}
 					align={align}
-					className="max-h-80 min-w-72 overflow-y-auto bg-surface-elevated"
+					className="max-h-80 min-w-72 overflow-y-auto"
 				>
 					<ModelMenuItems {...menu} />
 					{footer}
@@ -156,6 +161,38 @@ function ConnectHint({ provider }: { provider: Provider }) {
 				Connect
 			</span>
 		</SimpleTooltip>
+	);
+}
+
+/** The side panel's face for a model menu: the Select look, muted while the model is only inherited. */
+export function ModelPanelTrigger({
+	model,
+	label,
+	inherited = false,
+	className,
+	...props
+}: ComponentProps<"button"> & {
+	model: ModelRef;
+	label: string;
+	inherited?: boolean;
+}) {
+	return (
+		<SelectMenuTrigger
+			aria-label={`${label}: ${modelLabel(model)}`}
+			className={cn("min-w-0", className)}
+			{...props}
+		>
+			<ProviderIcon
+				provider={model.provider}
+				size={ICON_SIZES.header}
+				className={cn(inherited && "opacity-70")}
+			/>
+			<span
+				className={cn("min-w-0 truncate", inherited && "text-muted-foreground")}
+			>
+				{model.model}
+			</span>
+		</SelectMenuTrigger>
 	);
 }
 

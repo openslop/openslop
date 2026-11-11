@@ -10,8 +10,6 @@ export interface InsertOption<K extends string = string> {
 	key: K;
 	label: string;
 	icon: React.ReactNode;
-	iconBgClass: string;
-	colorClass: string;
 }
 
 export function InsertMenu<K extends string>({
@@ -26,24 +24,22 @@ export function InsertMenu<K extends string>({
 	if (options.length === 0) return null;
 	return (
 		<ActionMenu
-			items={options.map(({ key, label, icon, iconBgClass, colorClass }) => ({
+			items={options.map(({ key, label, icon }) => ({
 				key,
 				label,
-				icon: (
-					<span
-						className={`${iconBgClass} ${colorClass} mr-1 inline-flex size-6 items-center justify-center rounded-md`}
-					>
-						{icon}
-					</span>
-				),
+				icon,
 				onSelect: () => onInsert(key),
 			}))}
 			contentClassName="w-40"
 			itemClassName="rounded-lg py-1"
 			onOpenChange={onOpenChange}
 		>
-			<IconButton ariaLabel="Insert item" variant="quiet">
-				<Plus size={18} />
+			<IconButton
+				ariaLabel="Insert item"
+				variant="quiet"
+				className="size-7 [&_.icon]:size-[18px]"
+			>
+				<Plus />
 			</IconButton>
 		</ActionMenu>
 	);
@@ -63,11 +59,11 @@ export function DragHandle({
 			ref={ref}
 			ariaLabel="Drag to reorder"
 			variant="quiet"
-			className="cursor-grab active:cursor-grabbing"
+			className="size-7 cursor-grab active:cursor-grabbing [&_.icon]:size-[22px]"
 			{...attributes}
 			{...listeners}
 		>
-			<GripVertical size={22} />
+			<GripVertical />
 		</IconButton>
 	);
 }

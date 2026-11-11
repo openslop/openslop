@@ -2,6 +2,8 @@
 
 import { type ComponentProps, type ReactNode } from "react";
 import { Check, ChevronDown } from "@/components/ui/icon";
+import { ICON_SIZES } from "@/components/ui/icon-button";
+import { Button } from "@/components/ui/button";
 import { keepFocus } from "@/components/ui/keep-focus";
 import {
 	DropdownMenu,
@@ -50,9 +52,7 @@ export function SelectMenuItem({
 			className={cn("py-1", className)}
 		>
 			<span className="flex w-3.5 shrink-0 items-center justify-center">
-				{selected && (
-					<Check className="h-3 w-3 text-accent" aria-hidden="true" />
-				)}
+				{selected && <Check size={ICON_SIZES.header} aria-hidden="true" />}
 			</span>
 			{children}
 		</DropdownMenuItem>
@@ -81,6 +81,27 @@ export function InlineMenuTrigger({
 				aria-hidden="true"
 			/>
 		</button>
+	);
+}
+
+/** A ghost button that opens a menu: the icon names it, the text is its value. */
+export function ButtonMenuTrigger({
+	icon,
+	children,
+	...props
+}: ComponentProps<typeof Button> & { icon?: ReactNode }) {
+	return (
+		<Button
+			type="button"
+			variant="ghost"
+			size="sm"
+			onMouseDown={keepFocus}
+			{...props}
+		>
+			{icon}
+			<span className="min-w-0 truncate">{children}</span>
+			<ChevronDown size={ICON_SIZES.sm} />
+		</Button>
 	);
 }
 

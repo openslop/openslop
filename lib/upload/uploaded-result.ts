@@ -1,5 +1,7 @@
 import { assetUrlField } from "@/lib/connectors/asset-url";
 import type { AssetResult } from "@/lib/connectors/types";
+import type { GenerationNode } from "@/lib/generation/graph";
+import type { GenerationQueue } from "@/lib/generation/queue";
 import type { UploadKind } from "./upload-files";
 
 async function mediaDurationSec(url: string): Promise<number> {
@@ -32,4 +34,14 @@ export async function uploadedResult(
 		[assetUrlField(kind)]: url,
 		durationSec: await READ_DURATION[kind](url),
 	};
+}
+
+/** Pinned, so Generate All never overwrites what the user chose. */
+export async function commitUploaded(
+	queue: GenerationQueue,
+	node: GenerationNode,
+	kind: UploadKind,
+	url: string,
+): Promise<void> {
+	queue.commitResult(node, await uploadedResult(kind, url), { pinned: true });
 }

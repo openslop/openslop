@@ -4,11 +4,6 @@ import { keepFocus } from "@/components/ui/keep-focus";
 
 export function HeaderIconButton(props: ComponentProps<typeof IconButton>) {
 	return (
-		<IconButton
-			size="header"
-			variant="quiet"
-			onMouseDown={keepFocus}
-			{...props}
-		/>
+		<IconButton size="sm" variant="quiet" onMouseDown={keepFocus} {...props} />
 	);
 }

@@ -2,16 +2,30 @@ import isNil from "lodash/isNil";
 import omitBy from "lodash/omitBy";
 import uniq from "lodash/uniq";
 import { Editor, Transforms } from "slate";
-import { serializeReferenceImages } from "@/lib/connectors/attributes/reference-images";
-import { findAsset, isAsset, NARRATOR, REFERENCE_URLS_ATTR } from "./assets";
+import { HistoryEditor } from "slate-history";
+import {
+	parseReferenceImages,
+	serializeReferenceImages,
+} from "@/lib/connectors/attributes/reference-images";
+import {
+	findAsset,
+	isAsset,
+	NARRATOR,
+	REFERENCE_URLS_ATTR,
+	referenceUrls,
+	requireAsset,
+} from "./assets";
 import { createCanvasElement } from "./create-canvas-element";
 import {
+	applyElementVersion,
 	mergeAttrs,
+	requireElement,
 	updateElementText,
 	type AttributeChanges,
 } from "./editor-ops";
 import { isAssetElement } from "./guards";
-import type { AssetType } from "./types";
+import type { ElementVersion } from "@/lib/generation/versions";
+import type { AssetType, MediaDraftType } from "./types";
 
 type AssetPatch = { attrs?: AttributeChanges; text?: string };
 
@@ -50,6 +64,48 @@ export function setReferenceImages(editor: Editor, urls: string[]): void {
 	setAsset(editor, "asset_references", undefined, {
 		attrs: { [REFERENCE_URLS_ATTR]: serializeReferenceImages(uniq(urls)) },
 	});
+}
+
+/** An element still on the project's references starts its own from them. */
+export function addElementReferences(
+	editor: Editor,
+	id: string,
+	attrKey: string,
+	added: string[],
+): void {
+	const [element] = requireElement(editor, id);
+	const current =
+		parseReferenceImages(element.generationAttributes?.[attrKey]) ??
+		referenceUrls(editor.children);
+	mergeAttrs(editor, id, {
+		[attrKey]: serializeReferenceImages(uniq([...current, ...added])),
+	});
+}
+
+/** Puts a media draft back on the prompt and attributes one of its takes came from. */
+export function restoreDraft(
+	editor: Editor,
+	type: MediaDraftType,
+	version: Pick<ElementVersion, "inputs">,
+): void {
+	const draft = requireAsset(editor.children, type);
+	HistoryEditor.withoutSaving(editor, () =>
+		applyElementVersion(editor, draft.id, version),
+	);
+}
+
+const EMPTY_INPUTS = {
+	prompt: "",
+	attributes: {},
+	reads: {},
+	dependencies: {},
+};
+
+/** Back to a blank prompt with no settings, as the draft first was. */
+export function clearDraft(editor: Editor, id: string): void {
+	HistoryEditor.withoutSaving(editor, () =>
+		applyElementVersion(editor, id, { inputs: EMPTY_INPUTS }),
+	);
 }
 
 export function removeAssets(editor: Editor): void {

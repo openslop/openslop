@@ -3,8 +3,13 @@
 import { renderPrompt } from "@/lib/connectors/character-refs";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, History, Pin, RotateCcw } from "@/components/ui/icon";
-import { ICON_SIZES } from "@/components/ui/icon-button";
+import {
+	AlertCircle,
+	History,
+	Maximize2,
+	Pin,
+	RotateCcw,
+} from "@/components/ui/icon";
 import {
 	Popover,
 	PopoverContent,
@@ -28,7 +33,7 @@ import {
 import { AudioPlayer } from "./audio-player";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
-import { MediaViewer } from "./media-viewer";
+import { TilePrimaryAction, useViewLarger } from "./tile-actions";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 
 const PROMPT_LENGTH = 72;
@@ -42,24 +47,29 @@ const Dot = () => (
 );
 
 function ElementVersionThumbnail({
-	result,
+	version: { result, createdAt },
 	name,
 }: {
-	result: ElementVersion["result"];
+	version: ElementVersion;
 	name: string;
 }) {
 	const src = result.videoUrl ?? result.imageUrl;
-	if (!src) return null;
 	const kind = result.videoUrl ? "video" : "image";
+	const viewer = useViewLarger(
+		src
+			? { src, kind, name, context: "Version history", createdAt }
+			: undefined,
+	);
+	if (!src) return null;
 	return (
-		<div className="relative aspect-video w-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+		<div className="group/tile relative aspect-video w-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
 			<MediaWithSkeleton outputKind={kind} src={src} alt="" />
-			<MediaViewer
-				src={src}
-				kind={kind}
-				name={name}
-				className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+			<TilePrimaryAction
+				label={`View ${name} larger`}
+				icon={Maximize2}
+				onSelect={viewer.show}
 			/>
+			{viewer.dialog}
 		</div>
 	);
 }
@@ -86,10 +96,7 @@ function ElementVersionRow({
 			)}
 		>
 			<div className="flex items-center gap-2.5">
-				<ElementVersionThumbnail
-					result={version.result}
-					name={`version ${label}`}
-				/>
+				<ElementVersionThumbnail version={version} name={`version ${label}`} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
 						<span className={cn("font-numeric", active && "text-accent")}>
@@ -163,7 +170,7 @@ export function ElementHistoryPopover({ elementId }: { elementId: string }) {
 			<SimpleTooltip label="Generation history">
 				<PopoverTrigger asChild>
 					<HeaderIconButton ariaLabel="Generation history">
-						<History size={ICON_SIZES.header} />
+						<History />
 					</HeaderIconButton>
 				</PopoverTrigger>
 			</SimpleTooltip>

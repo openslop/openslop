@@ -32,8 +32,8 @@ vi.mock("../../element-history-popover", () => ({
 vi.mock("../../reset-edits-button", () => ({
 	ResetEditsButton: Nothing,
 }));
-vi.mock("../../element-upload-button", () => ({
-	ImageUploadButton: Nothing,
+vi.mock("../../element-media-picker", () => ({
+	AddImageButton: Nothing,
 }));
 vi.mock("../../output-preview", () => ({ OutputPreview: Nothing }));
 vi.mock("../../attributes/model-attribute", () => ({

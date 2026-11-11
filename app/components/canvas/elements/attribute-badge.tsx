@@ -1,13 +1,13 @@
 import { useSlateStatic } from "slate-react";
 import { MediaToggle } from "@/components/ui/media-toggle";
-import { InlineMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
+import { ButtonMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import {
 	isToggleOn,
 	TOGGLE_OFF,
 	TOGGLE_ON,
-	type ContentElement,
+	type GeneratedElement,
 } from "@/lib/canvas/types";
 import { continuityDef } from "@/lib/connectors/video/start-frame";
 import { ContinuityReferencesPopover } from "./attributes/continuity-section";
@@ -26,18 +26,19 @@ function formatValue(value: string, unit?: string): string {
 
 const SECONDS_FIELD = "w-20 font-numeric";
 
-interface AttributeBadgeProps {
-	element: ContentElement;
+export function AttributeBadge({
+	element,
+	def,
+}: {
+	element: GeneratedElement;
 	def: AttributeDef;
-}
-
-export function AttributeBadge({ element, def }: AttributeBadgeProps) {
+}) {
 	const editor = useSlateStatic();
 	const { key: attrKey, label, unit, edit } = def;
 	if (!edit) return null;
 
 	const value = flatAttributes(element)[attrKey] ?? "";
-	const tooltip = `${label}: ${value || UNSET}`;
+	const summary = `${label}: ${value || UNSET}`;
 
 	if (edit.kind === "images") {
 		const popover = { element, attrKey, label };
@@ -64,7 +65,7 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 				attrKey={attrKey}
 				value={value}
 				label={label}
-				tooltip={tooltip}
+				tooltip={summary}
 				placeholder={edit.placeholder}
 				rows={edit.rows}
 			/>
@@ -115,11 +116,12 @@ export function AttributeBadge({ element, def }: AttributeBadgeProps) {
 				value: option,
 				label: formatValue(option, unit),
 			}))}
+			tooltip={label}
 			contentClassName="max-h-64 min-w-24"
 		>
-			<InlineMenuTrigger aria-label={tooltip}>
-				<span className="min-w-0 truncate">{formatValue(value, unit)}</span>
-			</InlineMenuTrigger>
+			<ButtonMenuTrigger icon={<edit.icon />} aria-label={summary}>
+				{formatValue(value, unit)}
+			</ButtonMenuTrigger>
 		</SelectMenu>
 	);
 }

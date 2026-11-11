@@ -17,10 +17,10 @@ import {
 import { AnimateButton } from "./animate-button";
 import { CharacterSwitcher } from "./character-switcher";
 import {
-	AudioUploadButton,
-	ImageUploadButton,
-	VideoUploadButton,
-} from "./element-upload-button";
+	AddAudioButton,
+	AddImageButton,
+	AddVideoButton,
+} from "./element-media-picker";
 import { ElementCaptionsButton } from "./element-captions-button";
 import { ElementVoiceButton } from "./element-voice-button";
 
@@ -77,7 +77,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		iconBgClass: "bg-media-image/15",
 		colorClass: "text-media-image",
 		placeholder: "Describe the image...",
-		actions: [ImageUploadButton, AnimateButton],
+		actions: [AddImageButton, AnimateButton],
 	},
 	video: {
 		label: "Video",
@@ -86,7 +86,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		colorClass: "text-media-video",
 		placeholder: "Describe the video...",
 		tools: [ElementCaptionsButton],
-		actions: [VideoUploadButton],
+		actions: [AddVideoButton],
 	},
 	sound: {
 		label: "Sound",
@@ -102,7 +102,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		colorClass: "text-media-music",
 		placeholder: "Describe the music...",
 		tools: [ElementCaptionsButton],
-		actions: [AudioUploadButton],
+		actions: [AddAudioButton],
 	},
 };
 

@@ -6,6 +6,7 @@ import type { VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { useReturnFocus } from "@/components/ui/return-focus";
 
 function AlertDialog({
 	...props
@@ -31,8 +32,11 @@ function AlertDialogOverlay({
 
 function AlertDialogContent({
 	className,
+	onOpenAutoFocus,
+	onCloseAutoFocus,
 	...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content>) {
+	const returnFocus = useReturnFocus({ onOpenAutoFocus, onCloseAutoFocus });
 	return (
 		<AlertDialogPrimitive.Portal data-slot="alert-dialog-portal">
 			<AlertDialogOverlay />
@@ -43,6 +47,7 @@ function AlertDialogContent({
 					className,
 				)}
 				{...props}
+				{...returnFocus}
 			/>
 		</AlertDialogPrimitive.Portal>
 	);

@@ -20,7 +20,7 @@ import { useCreateConnector } from "@/lib/connectors/use-create-connector";
 import { useVoiceSearch } from "@/lib/connectors/tts/use-voice-search";
 import { toastError } from "@/lib/toast-error";
 import { cn } from "@/lib/utils";
-import { FieldLabel } from "./fields";
+import { FieldHeader, FieldLabel } from "./fields";
 
 function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
@@ -150,17 +150,20 @@ export function VoicePicker({
 
 	return (
 		<div className="flex min-w-0 flex-col gap-1.5">
-			<div className="flex items-center justify-between gap-2">
+			<FieldHeader
+				aside={
+					<ModelSelect
+						type="voice"
+						value={model}
+						onChange={onModelChange}
+						footer={<ConfigureModelsItem />}
+					>
+						<ModelSelectTrigger model={model} label="Voice model" />
+					</ModelSelect>
+				}
+			>
 				<FieldLabel>Voices</FieldLabel>
-				<ModelSelect
-					type="voice"
-					value={model}
-					onChange={onModelChange}
-					footer={<ConfigureModelsItem />}
-				>
-					<ModelSelectTrigger model={model} label="Voice model" />
-				</ModelSelect>
-			</div>
+			</FieldHeader>
 			{search.status === "failed" && (
 				<span role="alert" className="text-label-xs text-destructive">
 					{search.message}

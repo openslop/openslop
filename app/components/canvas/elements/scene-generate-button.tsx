@@ -27,6 +27,7 @@ export function SceneGenerateButton({ scene }: { scene: Scene }) {
 	return (
 		<TooltipIconButton
 			label={scope.description}
+			size="sm"
 			chip
 			unavailable={unavailable}
 			onMouseDown={keepFocus}

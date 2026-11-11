@@ -11,12 +11,10 @@ import type {
 } from "@/lib/connectors/types";
 import { REFERENCE_URLS_ATTR } from "./assets";
 import { flatAttributes } from "./element-attributes";
-import { isAssetType } from "./guards";
 import {
 	connectorOf,
-	CONTENT_TYPES,
-	type AssetType,
 	type ElementType,
+	type ProjectAssetType,
 	type GeneratedElement,
 	type CanvasElement,
 } from "./types";
@@ -47,24 +45,29 @@ export function resolveElementConnector(
 	};
 }
 
-/** An asset's attributes are its own; content takes its connector's. */
-const ASSET_ATTRIBUTES: Record<AssetType, AttributeSchema> = {
+/** A project asset's attributes are its own; content and drafts take their connector's. */
+const OWN_ATTRIBUTES: Partial<Record<ElementType, AttributeSchema>> = {
 	asset_avatar: AttributeSchema.from([nameDef, ...OWN_MODEL_DEFS]),
 	asset_voice: VOICE_ATTRIBUTES,
 	asset_style: AttributeSchema.from([]),
 	asset_references: AttributeSchema.from([
 		{ key: REFERENCE_URLS_ATTR, label: "References" },
 	]),
-};
+} satisfies Record<ProjectAssetType, AttributeSchema>;
 
 export function attributeSchemaFor(
 	type: ElementType,
 	attributes: Record<string, string> = {},
 ): AttributeSchema {
-	if (isAssetType(type)) return ASSET_ATTRIBUTES[type];
-	const { connector } = CONTENT_TYPES[type];
+	const own = OWN_ATTRIBUTES[type];
+	if (own) return own;
+	const connector = connectorOf(type);
+	if (!connector) throw new Error(`"${type}" has no attributes`);
 	return resolveAttributeSchema(connector, resolveModel(connector, attributes));
 }
 
 export const elementSchema = (element: CanvasElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));
+
+export const elementOffers = (element: CanvasElement, key: string): boolean =>
+	elementSchema(element).keys.includes(key);

@@ -1,7 +1,5 @@
 import { RenderElementProps } from "slate-react";
 import type { ContentElement } from "@/lib/canvas/types";
-import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
-import { getElementText } from "@/lib/canvas/osml-serializer";
 import { elementSchema } from "@/lib/canvas/element-connector";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { splitTextDirection } from "../utils/text-direction";
@@ -18,6 +16,7 @@ import { ElementHistoryPopover } from "./element-history-popover";
 import { ResetEditsButton } from "./reset-edits-button";
 import { HeaderIconButton } from "./header-icon-button";
 import { ElementGenerationProvider } from "./element-generation-context";
+import { ElementInput } from "./element-input";
 import { ELEMENT_CONFIGS } from "./element-configs";
 import {
 	Popover,
@@ -27,7 +26,6 @@ import {
 import { SectionTitle } from "@/components/ui/section-title";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { SlidersHorizontal } from "@/components/ui/icon";
-import { ICON_SIZES } from "@/components/ui/icon-button";
 
 function ElementSettings({
 	element,
@@ -42,11 +40,11 @@ function ElementSettings({
 			<SimpleTooltip label="Settings">
 				<PopoverTrigger asChild>
 					<HeaderIconButton ariaLabel="Settings">
-						<SlidersHorizontal size={ICON_SIZES.header} />
+						<SlidersHorizontal />
 					</HeaderIconButton>
 				</PopoverTrigger>
 			</SimpleTooltip>
-			<PopoverContent align="start" className="w-64 border border-border">
+			<PopoverContent align="start" className="w-64">
 				<SectionTitle className="mb-2">Settings</SectionTitle>
 				<div className="flex flex-col gap-2">
 					{defs.map((def) => (
@@ -77,7 +75,6 @@ export function ElementContainer({
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
 	const schema = elementSchema(element);
-	const isEmpty = getElementText(element) === ZERO_WIDTH_SPACE;
 	const { dir, nodeAttributes } = splitTextDirection(attributes);
 
 	return (
@@ -121,19 +118,9 @@ export function ElementContainer({
 								<DeleteButton element={element} />
 							</div>
 						</div>
-						<div
-							dir={dir}
-							className="relative min-w-0 rounded-xl border border-transparent bg-element-input px-3 py-2.5 transition-colors hover:border-element-input-border-hover focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30"
-						>
-							{isEmpty && (
-								<div className="pointer-events-none absolute top-2.5 start-3 text-start text-label text-muted-foreground select-none">
-									{config.placeholder}
-								</div>
-							)}
-							<div className="overflow-hidden text-start text-label leading-relaxed text-foreground transition-[max-height,opacity] duration-200">
-								{children}
-							</div>
-						</div>
+						<ElementInput element={element} dir={dir}>
+							{children}
+						</ElementInput>
 						<div
 							className="mt-2 flex min-w-0 flex-wrap items-center justify-end gap-2 select-none"
 							contentEditable={false}

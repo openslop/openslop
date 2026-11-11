@@ -63,18 +63,23 @@ export function useResize({
 	axis,
 	defaultSize,
 	minSize,
-	maxViewportFraction,
+	maxSize: maxLength = Infinity,
+	maxViewportFraction = 1,
 	invert,
 }: {
 	axis: ResizeAxis;
 	defaultSize: number;
 	minSize: number;
-	maxViewportFraction: number;
+	maxSize?: number;
+	maxViewportFraction?: number;
 	invert?: boolean;
 }) {
 	const [requested, setRequested] = useState(defaultSize);
 	const [resizing, setResizing] = useState(false);
-	const maxSize = useViewportLength(axis) * maxViewportFraction;
+	const maxSize = Math.min(
+		maxLength,
+		useViewportLength(axis) * maxViewportFraction,
+	);
 	const size = clamp(requested, minSize, maxSize);
 	// Where the grab started, so a move is a delta rather than a running total.
 	const origin = useRef({ position: 0, size: defaultSize });

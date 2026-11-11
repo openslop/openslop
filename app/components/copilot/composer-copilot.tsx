@@ -9,15 +9,14 @@ import {
 	Media,
 	Mic,
 	Palette,
-	Plus,
 	Proportions,
 	Translate,
 	User,
 	X,
 } from "@/components/ui/icon";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
-import { ICON_SIZES, IconButton } from "@/components/ui/icon-button";
-import { Spinner } from "@/components/ui/spinner";
+import { IconButton, TooltipIconButton } from "@/components/ui/icon-button";
+import { AddButton } from "@/components/ui/add-button";
 import {
 	SegmentedControl,
 	type SegmentedControlOption,
@@ -52,7 +51,6 @@ import {
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { UploadKindSchema } from "@/lib/upload/upload-files";
 import { cn } from "@/lib/utils";
-import { ActionButton } from "./action-button";
 import {
 	AssetStrip,
 	AssetStripArtStyle,
@@ -61,12 +59,9 @@ import {
 	AssetStripReferences,
 	AssetStripUploading,
 } from "@/app/components/canvas/elements/asset-strip";
-import {
-	SettingPill,
-	SettingPillButton,
-	type SettingPillOption,
-} from "./setting-pill";
+import { SettingPill, type SettingPillOption } from "./setting-pill";
 import { ModelSelect, modelLabel } from "@/app/components/models/model-select";
+import { ButtonMenuTrigger } from "@/components/ui/select-menu";
 import { ProviderIcon } from "@/app/components/models/provider-icon";
 
 /** What the user says they are giving us. Presentation only: Sloppy reads the text itself. */
@@ -159,19 +154,7 @@ function AttachMenu({
 			contentClassName="min-w-36 p-0.5"
 			itemClassName="rounded-lg text-label-xs"
 		>
-			<IconButton
-				ariaLabel="Attach"
-				size="header"
-				variant="quiet"
-				shape="round"
-				disabled={uploading}
-			>
-				{uploading ? (
-					<Spinner size={ICON_SIZES.header} />
-				) : (
-					<Plus size={ICON_SIZES.header} />
-				)}
-			</IconButton>
+			<AddButton label="Attach" disabled={uploading} />
 		</ActionMenu>
 	);
 }
@@ -190,11 +173,11 @@ function TemplatePill({
 		>
 			<IconButton
 				ariaLabel="Remove template"
-				size="sm"
 				shape="round"
+				size="sm"
 				onClick={onRemove}
 			>
-				<X size={ICON_SIZES.sm} />
+				<X />
 			</IconButton>
 			{template.promptPrefix}
 		</span>
@@ -313,14 +296,14 @@ export default function ComposerCopilot({
 						/>
 						<SettingPill
 							name="Aspect ratio"
-							icon={<Proportions className="mr-1 h-3 w-3" />}
+							icon={<Proportions />}
 							value={aspectRatio}
 							options={ASPECT_RATIO_OPTIONS}
 							onChange={(next) => updateVideoSettings({ aspectRatio: next })}
 						/>
 						<SettingPill
 							name="Format"
-							icon={<FilmSlate className="mr-1 h-3 w-3" />}
+							icon={<FilmSlate />}
 							value={videoFormat}
 							options={VIDEO_FORMAT_OPTIONS}
 							disabled={pasting}
@@ -328,7 +311,7 @@ export default function ComposerCopilot({
 						/>
 						<SettingPill
 							name="Language"
-							icon={<Translate className="mr-1 h-3 w-3" />}
+							icon={<Translate />}
 							value={language}
 							options={LANGUAGE_OPTIONS}
 							onChange={(next) => updateScriptSettings({ language: next })}
@@ -338,18 +321,16 @@ export default function ComposerCopilot({
 							value={model}
 							onChange={(llm) => updateModels({ llm })}
 						>
-							<SettingPillButton aria-label={`Model: ${modelLabel(model)}`}>
-								<ProviderIcon
-									provider={model.provider}
-									size={12}
-									className="mr-1"
-								/>
+							<ButtonMenuTrigger
+								icon={<ProviderIcon provider={model.provider} />}
+								aria-label={`Model: ${modelLabel(model)}`}
+							>
 								{model.model}
-							</SettingPillButton>
+							</ButtonMenuTrigger>
 						</ModelSelect>
 						<SettingPill
 							name="Video length"
-							icon={<Hourglass className="mr-1 h-3 w-3" />}
+							icon={<Hourglass />}
 							value={videoLength}
 							options={VIDEO_LENGTH_OPTIONS}
 							disabled={pasting}
@@ -366,12 +347,13 @@ export default function ComposerCopilot({
 							/>
 						)}
 					</div>
-					<ActionButton
+					<TooltipIconButton
 						label="Submit"
-						icon={<CornerDownLeft className="h-4 w-4" />}
 						onClick={handleSubmit}
 						disabled={!hasText}
-					/>
+					>
+						<CornerDownLeft />
+					</TooltipIconButton>
 				</div>
 			</div>
 			{media.isDraggingOver && (

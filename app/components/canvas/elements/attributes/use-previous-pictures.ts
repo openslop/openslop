@@ -4,7 +4,7 @@ import mapValues from "lodash/mapValues";
 import { useEffect, useState } from "react";
 import { useSlateSelector } from "slate-react";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
-import type { ContentElement } from "@/lib/canvas/types";
+import type { GeneratedElement } from "@/lib/canvas/types";
 import { previewFrames } from "@/lib/connectors/video/capture-frames";
 import { FRAMES, type FrameKey } from "@/lib/connectors/video/start-frame";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
@@ -41,7 +41,7 @@ function useDecodedFrames(videoUrl: string | undefined) {
 }
 
 export function usePreviousPictures(
-	element: ContentElement,
+	element: GeneratedElement,
 	frames: readonly FrameKey[],
 ): PreviousPictures {
 	const source = useSlateSelector((editor) =>

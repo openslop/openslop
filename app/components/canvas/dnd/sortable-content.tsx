@@ -4,6 +4,7 @@ import { RenderElementProps, ReactEditor, useSlateStatic } from "slate-react";
 import type { ContentElement, ContentType } from "@/lib/canvas/types";
 import { parentSceneId } from "@/lib/canvas/scenes";
 import { ELEMENT_LIST } from "../elements/element-configs";
+import { ElementTypeIcon } from "../elements/element-type-icon";
 import { insertElement } from "@/lib/canvas/insert-element";
 import { useSceneCollapsed } from "../view-mode-context";
 import { CompactElement } from "../elements/compact-element";
@@ -13,12 +14,10 @@ import { useDropIndex } from "./drag-transfer-context";
 import { InsertMenu, type InsertOption } from "./sortable-actions";
 
 const INSERT_OPTIONS: InsertOption<ContentType>[] = ELEMENT_LIST.map(
-	({ type, label, Icon, iconBgClass, colorClass }) => ({
+	({ type, label }) => ({
 		key: type,
 		label,
-		icon: <Icon size={16} />,
-		iconBgClass,
-		colorClass,
+		icon: <ElementTypeIcon type={type} />,
 	}),
 );
 

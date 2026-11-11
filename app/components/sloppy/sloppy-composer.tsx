@@ -11,7 +11,7 @@ import {
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import { useProject } from "@/lib/project/use-project";
 import { PanelCard } from "../canvas/panel/panel-card";
-import { ActionButton } from "../copilot/action-button";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useSloppy } from "./sloppy-provider";
 import { nextSuggestion, SUGGESTIONS } from "./suggestions";
 
@@ -97,18 +97,17 @@ export function SloppyComposer() {
 					/>
 				</div>
 				{loading ? (
-					<ActionButton
-						label="Stop Sloppy"
-						icon={<SquareFilled className="h-3 w-3" />}
-						onClick={stop}
-					/>
+					<TooltipIconButton label="Stop Sloppy" onClick={stop}>
+						<SquareFilled />
+					</TooltipIconButton>
 				) : (
-					<ActionButton
+					<TooltipIconButton
 						label="Send to Sloppy"
-						icon={<CornerDownLeft className="h-4 w-4" />}
 						onClick={submit}
 						disabled={!hasText}
-					/>
+					>
+						<CornerDownLeft />
+					</TooltipIconButton>
 				)}
 			</div>
 		</PanelCard>

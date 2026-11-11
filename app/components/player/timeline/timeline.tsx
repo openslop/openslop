@@ -13,7 +13,7 @@ import {
 	ZoomIn,
 	ZoomOut,
 } from "@/components/ui/icon";
-import { ICON_SIZES, TooltipIconButton } from "@/components/ui/icon-button";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useElementWidth } from "@/lib/components/use-element-width";
 import { renderPrompt } from "@/lib/connectors/character-refs";
 import { toFrames } from "@/lib/render/frames";
@@ -152,12 +152,12 @@ function Clip({
 						<TooltipIconButton
 							label="Reset trim"
 							side="bottom"
-							size="sm"
 							variant="onMedia"
+							size="sm"
 							onClick={reset}
 							className="opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
 						>
-							<RotateCcw size={ICON_SIZES.sm} />
+							<RotateCcw />
 						</TooltipIconButton>
 					</ClipAction>
 				) : null}
@@ -315,19 +315,19 @@ export function Timeline() {
 					>
 						<TooltipIconButton
 							label="Zoom out"
+							size="sm"
 							onClick={zoomOut}
 							disabled={!canZoomOut}
-							size="sm"
 						>
-							<ZoomOut size={ICON_SIZES.sm} />
+							<ZoomOut />
 						</TooltipIconButton>
 						<TooltipIconButton
 							label={`Zoom in (${Math.round(zoom * 100)}%)`}
+							size="sm"
 							onClick={zoomIn}
 							disabled={!canZoomIn}
-							size="sm"
 						>
-							<ZoomIn size={ICON_SIZES.sm} />
+							<ZoomIn />
 						</TooltipIconButton>
 					</div>
 

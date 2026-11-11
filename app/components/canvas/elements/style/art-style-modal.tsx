@@ -19,8 +19,8 @@ import { useAsset, useAssets } from "@/lib/canvas/use-assets";
 import { setAsset } from "@/lib/canvas/asset-ops";
 import { toastError } from "@/lib/toast-error";
 import { AssetDialog } from "../character/asset-dialog";
-import { FieldLabel, TextAreaField } from "../character/fields";
-import { ReferenceImages } from "../reference-images";
+import { TextAreaField } from "../character/fields";
+import { ReferenceImages } from "./reference-images";
 import { ArtStylePresets } from "./art-style-presets";
 
 export function ArtStyleModal({ onClose }: { onClose: () => void }) {
@@ -61,12 +61,7 @@ export function ArtStyleModal({ onClose }: { onClose: () => void }) {
 			className="max-w-3xl"
 			onClose={onClose}
 		>
-			<section aria-label="Reference images" className="flex flex-col gap-2">
-				<FieldLabel>Reference images</FieldLabel>
-				<div className="flex flex-wrap gap-2">
-					<ReferenceImages />
-				</div>
-			</section>
+			<ReferenceImages />
 
 			<TextAreaField
 				label="Art Style Description"

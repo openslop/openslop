@@ -41,6 +41,16 @@ export const findAsset = <T extends AssetType>(
 ): AssetElement<T> | undefined =>
 	getAssets(nodes).find((node) => isAsset(node, type, name));
 
+export function requireAsset<T extends AssetType>(
+	nodes: readonly unknown[],
+	type: T,
+	name?: string,
+): AssetElement<T> {
+	const asset = findAsset(nodes, type, name);
+	if (!asset) throw new Error(`No "${type}" asset on the canvas`);
+	return asset;
+}
+
 export const NARRATOR = "Narrator";
 
 export const speakerOf = (attrs?: { name?: string }): string =>

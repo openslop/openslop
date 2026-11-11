@@ -3,6 +3,9 @@ import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
 import {
 	addCharacter,
+	addElementReferences,
+	clearDraft,
+	restoreDraft,
 	ensureAsset,
 	removeAsset,
 	removeAssets,
@@ -311,5 +314,86 @@ describe("ensureAsset", () => {
 		ensureAsset(editor, "asset_voice", "Mia");
 
 		expect(editor.children).toEqual([mia]);
+	});
+});
+
+describe("addElementReferences", () => {
+	const imageWith = (attrs: Record<string, string> = {}) =>
+		createCanvasElement("image", { id: "i1", attrs });
+	const ownReferences = (editor: ReturnType<typeof makeEditor>) =>
+		getContentElements(editor.children)[0]?.generationAttributes
+			?.referenceImagesOverride;
+
+	it("starts from the project's references while the element uses them", () => {
+		const editor = makeEditor([
+			references("https://a.png"),
+			scene("s1", imageWith()),
+		]);
+
+		addElementReferences(editor, "i1", "referenceImagesOverride", [
+			"https://b.png",
+		]);
+
+		expect(ownReferences(editor)).toBe("https://a.png,https://b.png");
+	});
+
+	it("adds to the element's own and never repeats one", () => {
+		const editor = makeEditor([
+			references("https://a.png"),
+			scene("s1", imageWith({ referenceImagesOverride: "https://b.png" })),
+		]);
+
+		addElementReferences(editor, "i1", "referenceImagesOverride", [
+			"https://b.png",
+			"https://c.png",
+		]);
+
+		expect(ownReferences(editor)).toBe("https://b.png,https://c.png");
+	});
+});
+
+describe("restoreDraft", () => {
+	const inputs = {
+		prompt: "A wizard {{Mia}}",
+		attributes: { resolution: "720p" },
+		reads: {},
+		dependencies: {},
+	};
+
+	it("puts the draft on the take's inputs", () => {
+		const editor = makeEditor([
+			asset("asset_media_image"),
+			scene("s1", narration("n1")),
+		]);
+
+		restoreDraft(editor, "asset_media_image", { inputs });
+
+		const draft = findAsset(editor.children, "asset_media_image");
+		expect(draft && getPromptText(draft)).toBe("A wizard {{Mia}}");
+		expect(draft?.generationAttributes).toEqual({ resolution: "720p" });
+	});
+});
+
+describe("clearDraft", () => {
+	it("blanks the draft's prompt and settings", () => {
+		const editor = makeEditor([
+			asset("asset_media_image"),
+			scene("s1", narration("n1")),
+		]);
+		restoreDraft(editor, "asset_media_image", {
+			inputs: {
+				prompt: "A wizard",
+				attributes: { resolution: "720p" },
+				reads: {},
+				dependencies: {},
+			},
+		});
+		const id = findAsset(editor.children, "asset_media_image")?.id ?? "";
+
+		clearDraft(editor, id);
+
+		const draft = findAsset(editor.children, "asset_media_image");
+		expect(draft && getPromptText(draft)).toBe("");
+		expect(draft?.generationAttributes ?? {}).toEqual({});
 	});
 });

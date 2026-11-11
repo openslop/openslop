@@ -136,15 +136,57 @@ export const SCENE_TYPE = "scene" as const;
 /** What every element type declares: the connector it generates on, if any. */
 type ElementSpec = { connector?: AssetConnectorType };
 
+/** What the Media panel makes outside any scene, each on its own draft. */
+export const MEDIA_CONTENT_TYPES = [
+	"image",
+	"video",
+	"music",
+] as const satisfies readonly ContentType[];
+
+export type MediaContentType = (typeof MEDIA_CONTENT_TYPES)[number];
+
+export type MediaDraftType = `asset_media_${MediaContentType}`;
+
+export const mediaDraftTypeOf = <T extends MediaContentType>(
+	type: T,
+): `asset_media_${T}` => `asset_media_${type}`;
+
+type MediaDraftSpecs = {
+	[T in MediaContentType as `asset_media_${T}`]: {
+		connector: (typeof CONTENT_TYPES)[T]["connector"];
+		draftOf: T;
+	};
+};
+
+export const MEDIA_DRAFT_TYPES = MEDIA_CONTENT_TYPES.map(mediaDraftTypeOf);
+
+/** A media draft generates exactly like the content type it drafts. */
+const MEDIA_DRAFT_SPECS = Object.fromEntries(
+	MEDIA_CONTENT_TYPES.map((type) => [
+		mediaDraftTypeOf(type),
+		{ connector: CONTENT_TYPES[type].connector, draftOf: type },
+	]),
+) as MediaDraftSpecs;
+
 /** Tiles ahead of the scenes; one with a connector generates like content does. */
 export const ASSET_TYPES = {
 	asset_avatar: { connector: "image" },
 	asset_voice: { connector: "voice" },
 	asset_style: {},
 	asset_references: {},
+	...MEDIA_DRAFT_SPECS,
 } as const satisfies Record<`asset_${string}`, ElementSpec>;
 
 export type AssetType = keyof typeof ASSET_TYPES;
+
+/** The assets every scene draws on; a media draft feeds nothing. */
+export type ProjectAssetType = Exclude<AssetType, MediaDraftType>;
+
+export const isMediaDraftType = (type: string): type is MediaDraftType =>
+	Object.hasOwn(MEDIA_DRAFT_SPECS, type);
+
+export const draftedType = (type: MediaDraftType): MediaContentType =>
+	MEDIA_DRAFT_SPECS[type].draftOf;
 
 export type ElementType = ContentType | AssetType;
 

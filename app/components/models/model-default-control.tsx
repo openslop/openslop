@@ -1,6 +1,5 @@
 "use client";
 
-import { SelectMenuTrigger } from "@/components/ui/select-menu";
 import {
 	defaultModelFor,
 	hasModel,
@@ -10,9 +9,7 @@ import {
 } from "@/lib/connectors/models";
 import { groupModels } from "@/lib/connectors/model-groups";
 import type { ConnectorType } from "@/lib/connectors/types";
-import { cn } from "@/lib/utils";
-import { ModelSelect } from "./model-select";
-import { ProviderIcon } from "./provider-icon";
+import { ModelPanelTrigger, ModelSelect } from "./model-select";
 import { MODEL_PROVENANCE } from "./provenance";
 
 export type DefaultsTier = keyof ModelDefaults;
@@ -48,24 +45,12 @@ export function ModelDefaultControl({
 			}
 			onChange={(picked) => onChange(groupModels(types, picked))}
 		>
-			<SelectMenuTrigger
-				aria-label={`${label} model`}
-				className={cn("min-w-0", className)}
-			>
-				<ProviderIcon
-					provider={model.provider}
-					size={14}
-					className={cn(!pinnedHere && "opacity-70")}
-				/>
-				<span
-					className={cn(
-						"min-w-0 truncate",
-						!pinnedHere && "text-muted-foreground",
-					)}
-				>
-					{model.model}
-				</span>
-			</SelectMenuTrigger>
+			<ModelPanelTrigger
+				model={model}
+				label={`${label} model`}
+				inherited={!pinnedHere}
+				className={className}
+			/>
 		</ModelSelect>
 	);
 }

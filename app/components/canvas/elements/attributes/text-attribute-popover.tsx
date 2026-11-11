@@ -4,12 +4,12 @@ import { useRef, useState } from "react";
 import { useSlateStatic } from "slate-react";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
-import type { ContentElement } from "@/lib/canvas/types";
+import type { GeneratedElement } from "@/lib/canvas/types";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import { AttributeTrigger } from "./attribute-trigger";
 
 interface TextAttributePopoverProps {
-	element: ContentElement;
+	element: GeneratedElement;
 	attrKey: string;
 	value: string;
 	label: string;
