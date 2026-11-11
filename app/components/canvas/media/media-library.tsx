@@ -17,8 +17,10 @@ import {
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { useMediaLibrary } from "@/lib/project/use-media-library";
-import type { UploadKind } from "@/lib/upload/upload-files";
+import { findMedia } from "@/lib/project/media";
+import { useMediaUpload } from "@/lib/project/use-media-upload";
+import { useProject } from "@/lib/project/use-project";
+import { UploadKindSchema, type UploadKind } from "@/lib/upload/upload-files";
 import { AssetTile } from "../elements/asset-tile";
 import { AudioCard } from "../elements/audio-card";
 import { ELEMENT_CONFIGS } from "../elements/element-configs";
@@ -67,21 +69,19 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 /** Every take and upload of one kind, newest first, under whatever the Media panel is making now; switching type shows its kind. */
 export function MediaLibrary({ type }: { type: MediaContentType }) {
 	const { outputKind } = CONTENT_TYPES[type];
-	const {
-		kind,
-		setKind,
-		query,
-		setQuery,
-		items,
-		openPicker,
-		uploadingCount,
-		inputElement,
-	} = useMediaLibrary(outputKind);
+	const [kind, setKind] = useState(outputKind);
 	const [shownFor, setShownFor] = useState(outputKind);
 	if (shownFor !== outputKind) {
 		setShownFor(outputKind);
 		setKind(outputKind);
 	}
+	const [query, setQuery] = useState("");
+	const media = useProject((state) => state.media);
+	const items = findMedia(media, kind, query);
+	const { openPicker, uploadingCount, inputElement } = useMediaUpload({
+		kinds: UploadKindSchema.options,
+		multiple: true,
+	});
 	const referencesOf = useSlateSelector((editor) => {
 		const draft = requireAsset(editor.children, mediaDraftTypeOf(type));
 		return elementOffers(draft, REFERENCE_IMAGES_ATTR) ? draft.id : undefined;
