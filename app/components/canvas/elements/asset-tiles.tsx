@@ -74,44 +74,27 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 	);
 }
 
-type ReferenceTileProps = TileProps & { url: string; index: number };
+type ReferenceTileProps = { url: string; index: number };
 
 const referenceName = (index: number) => `Reference ${index + 1}`;
 
+/** A reference image: its menu takes it off the references, or deletes its file from the project's media and the references both. */
 export function ReferenceTile({
 	url,
 	index,
-	...tile
-}: ReferenceTileProps & {
-	primary?: TilePrimary;
-	menu?: ReactNode;
-	onRemove?: () => void;
-	onDelete?: () => void;
-}) {
-	return (
-		<AssetTile
-			name={referenceName(index)}
-			previewUrl={url}
-			context="Reference image"
-			Icon={Image}
-			{...tile}
-		/>
-	);
-}
-
-/** One of the project's reference images: its menu takes it off the references, or deletes its file from the project's media and the references both. */
-export function ProjectReferenceTile({
+	primary,
 	onRemove,
-	...tile
 }: ReferenceTileProps & { primary?: TilePrimary; onRemove: () => void }) {
-	const item = useProject((state) =>
-		state.media.find(({ url }) => url === tile.url),
-	);
+	const item = useProject((state) => state.media.find((m) => m.url === url));
 	const remove = useDeleteMedia(item?.name ?? "", onRemove);
 	return (
 		<>
-			<ReferenceTile
-				{...tile}
+			<AssetTile
+				name={referenceName(index)}
+				previewUrl={url}
+				context="Reference image"
+				Icon={Image}
+				primary={primary}
 				menu={
 					<TileMenuItem icon={X} onSelect={onRemove}>
 						Remove from references
@@ -130,7 +113,7 @@ export function ReferenceAssetTile(
 ) {
 	const { editAsset } = useAssetEditors();
 	return (
-		<ProjectReferenceTile
+		<ReferenceTile
 			{...tile}
 			primary={editing(referenceName(tile.index), () =>
 				editAsset("asset_references"),
