@@ -44,6 +44,33 @@ const llmStreaming = (bursts: string[][], failure?: Error) => {
 describe("streamScript", () => {
 	const brief = { kind: "brief", brief: "a lighthouse" } as const;
 
+	it("preserves the canvas when stopped while the prompt builder loads", async () => {
+		const editor = makeEditor();
+		Transforms.insertNodes(
+			editor,
+			[asset("asset_style", { text: "muted watercolor" }), oldScene()],
+			{ at: [0] },
+		);
+		const before = structuredClone(editor.children);
+		const { llm, prompts } = llmStreaming([
+			["<narration>A new story</narration>"],
+		]);
+		const controller = new AbortController();
+
+		const drafting = streamScript(
+			editor,
+			DEFAULT_SETTINGS,
+			llm,
+			brief,
+			controller.signal,
+		);
+		controller.abort();
+
+		await expect(drafting).rejects.toMatchObject({ name: "AbortError" });
+		expect(editor.children).toEqual(before);
+		expect(prompts).toEqual([]);
+	});
+
 	it("replaces what was on the canvas with the streamed script", async () => {
 		const editor = makeEditor();
 		Transforms.insertNodes(editor, oldScene(), { at: [0] });

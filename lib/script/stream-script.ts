@@ -14,6 +14,7 @@ export async function streamScript(
 	signal?: AbortSignal,
 ): Promise<void> {
 	const { buildScriptPrompt } = await import("./prompt/build");
+	signal?.throwIfAborted();
 	const write = createScriptWriter(editor);
 	const { system, prompt } = buildScriptPrompt(
 		getAssets(editor.children),
