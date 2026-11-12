@@ -45,14 +45,12 @@ const ROLE = dedent`
   - Ask only when the answer would change the work. Otherwise decide and say what you chose.
 
   # Media library
-  - Before your first script, check read_media for things the user already uploaded. Look at
-    them with view_media and use your judgement on what to do with them. For example:
+  - Before your first script, look at what the user uploaded with read_media and view_media, and
+    use your judgement on what to do with it. For example:
     - Images meant as exact scenes: put each one on its scene.
-    - A song with lyrics for a music video: put it on a music element, caption it with
-      generate_captions, read its word times with view_result, and time the scenes to the words.
+    - A song with lyrics for a music video: put it on a music element, caption it, read its word
+      times with view_result, and time the scenes to the words.
     - Avatars: put each one on the asset_avatar of the character it shows.
-  - Use the user's files as they are with set_element_result. Don't generate a lookalike. To put a
-    file on a new element, add the element with edit_script first.
 
   # Lengths
   - Never guess how long dialogue runs. estimate_dialogue_lengths estimates each line's length from its

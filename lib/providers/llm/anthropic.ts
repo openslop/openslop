@@ -4,10 +4,11 @@ import {
 	generateText,
 	streamText,
 	type FilePart,
-	type LanguageModel,
+	type LanguageModelMiddleware,
 	type LanguageModelUsage,
 	type SystemModelMessage,
 	type TextPart,
+	wrapLanguageModel,
 } from "ai";
 import { z } from "zod";
 import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
@@ -23,6 +24,7 @@ import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
+import { keepLatestPictures } from "./latest-pictures";
 
 /** A refusal mid-stream arrives as the API's error object, not an Error. */
 const StreamFailure = z.object({ message: z.string() });
@@ -109,6 +111,14 @@ const thinking = (effort: ThinkingLevel) => ({
 	effort,
 });
 
+// The API refuses pictures over 3000px once one request holds more than 20.
+const latestPictures = {
+	transformParams: async ({ params }) => ({
+		...params,
+		prompt: keepLatestPictures(params.prompt),
+	}),
+} satisfies LanguageModelMiddleware;
+
 export class AnthropicLLM implements LLMProvider {
 	constructor(private readonly apiKey: string) {}
 
@@ -122,14 +132,17 @@ export class AnthropicLLM implements LLMProvider {
 		});
 	}
 
-	private model(modelId: string): LanguageModel {
+	private model(modelId: string) {
 		return createAnthropic({ apiKey: this.apiKey })(modelId);
 	}
 
 	/** Caching the last block too keeps a turn's transcript warm across its round trips. */
 	agentModel(modelId: string): AgentModel {
 		return {
-			model: this.model(modelId),
+			model: wrapLanguageModel({
+				model: this.model(modelId),
+				middleware: latestPictures,
+			}),
 			modelId,
 			providerOptions: {
 				anthropic: { ...thinking(DEFAULT_THINKING_LEVEL), ...CACHED },

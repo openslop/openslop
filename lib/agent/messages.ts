@@ -80,57 +80,11 @@ const pruneFinished = (message: ModelMessage): ModelMessage => {
  * goes, and so does reasoning, the bulk of a finished turn the next one doesn't need.
  */
 export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
-	const inFlightFrom = messages.findLastIndex(
+	const currentTurnStart = messages.findLastIndex(
 		(message) => message.role === "user",
 	);
-	return keepNewestPictures(
-		messages.map((message, index) =>
-			index < inFlightFrom ? pruneFinished(message) : message,
-		),
-	);
-}
-
-// Anthropic refuses pictures over 2000px once one request holds more than 20.
-const MAX_PICTURES = 20;
-
-const PICTURE_DROPPED = {
-	type: "text" as const,
-	text: "An earlier picture, not kept. Look again if you still need it.",
-};
-
-const countPictures = (messages: ModelMessage[]) =>
-	messages
-		.flatMap((message) => (message.role === "tool" ? message.content : []))
-		.flatMap((part) =>
-			part.type === "tool-result" && part.output.type === "content"
-				? part.output.value
-				: [],
-		)
-		.filter(({ type }) => type === "file").length;
-
-/** However many looks a turn takes, only the newest pictures go out with it. */
-function keepNewestPictures(messages: ModelMessage[]): ModelMessage[] {
-	let excess = countPictures(messages) - MAX_PICTURES;
-	if (excess <= 0) return messages;
-	const dropOldest = <TItem extends { type: string }>(item: TItem) =>
-		item.type === "file" && excess-- > 0 ? PICTURE_DROPPED : item;
-	return messages.map((message) =>
-		message.role === "tool"
-			? {
-					...message,
-					content: message.content.map((part) =>
-						part.type === "tool-result" && part.output.type === "content"
-							? {
-									...part,
-									output: {
-										...part.output,
-										value: part.output.value.map(dropOldest),
-									},
-								}
-							: part,
-					),
-				}
-			: message,
+	return messages.map((message, index) =>
+		index < currentTurnStart ? pruneFinished(message) : message,
 	);
 }
 
