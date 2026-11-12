@@ -103,7 +103,7 @@ function ClipHeader({
 				HEADER_HEIGHT,
 			)}
 		>
-			<Icon size={HEADER_ICON_SIZE} className="shrink-0" />
+			<Icon size={HEADER_ICON_SIZE} />
 			<span dir="auto" className="truncate text-badge-xs text-foreground">
 				{fit(label, width)}
 			</span>

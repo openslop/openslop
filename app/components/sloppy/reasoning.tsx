@@ -18,7 +18,7 @@ export function Reasoning({
 			// once Sloppy moves on, while a reader's own toggle still sticks.
 			key={String(open)}
 			defaultOpen={open}
-			icon={<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />}
+			icon={<Sparkles className="h-3 w-3" />}
 			label={streaming ? "Thinking…" : "Done thinking"}
 			pending={streaming}
 		>
