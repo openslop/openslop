@@ -21,6 +21,7 @@
 		"remotion:studio": "remotion studio",
 		"deploy:remotion-function": "bun scripts/deploy-remotion-function.ts",
 		"deploy:remotion-site": "bun scripts/deploy-remotion-site.ts",
+		"diagrams:dark": "bun scripts/diagrams-dark.ts",
 		"prepare": "husky"
 	},
 	"lint-staged": {
