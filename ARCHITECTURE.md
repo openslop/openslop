@@ -2,9 +2,12 @@
 
 OpenSlop aims to be an expert generative AI agent that combines any models, from video, image and voice to music, sound and 3D, into whatever the user imagines, from a single shot to a film, a podcast or an explainer.
 
-![OpenSlop system architecture](./docs/architecture.svg)
+<p align="center">
+  <img src="./docs/architecture-light.svg#gh-light-mode-only" alt="OpenSlop system architecture" width="100%">
+  <img src="./docs/architecture-dark.svg#gh-dark-mode-only" alt="OpenSlop system architecture" width="100%">
+</p>
 
-> The diagrams are Excalidraw files in [`docs/`](./docs). Edit one at [excalidraw.com](https://excalidraw.com), then re-export its SVG.
+> The diagrams are Excalidraw files in [`docs/`](./docs). Edit one at [excalidraw.com](https://excalidraw.com), re-export it as `<name>-light.svg`, then run `npm run diagrams:dark` to regenerate the dark version.
 
 The project lives in the browser as one document. The server stays thin: it proxies models, runs generation jobs, renders and saves.
 
@@ -19,7 +22,10 @@ The numbers match the diagram.
 
 ## Canvas and generation
 
-![The canvas model: what block, node, element, scene, content and asset mean, and how they nest](./docs/canvas-model.svg)
+<p align="center">
+  <img src="./docs/canvas-model-light.svg#gh-light-mode-only" alt="The canvas model: what block, node, element, scene, content and asset mean, and how they nest" width="100%">
+  <img src="./docs/canvas-model-dark.svg#gh-dark-mode-only" alt="The canvas model: what block, node, element, scene, content and asset mean, and how they nest" width="100%">
+</p>
 
 The canvas is the project. Each term means one thing everywhere in the code:
 
