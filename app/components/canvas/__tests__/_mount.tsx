@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createEditor, type Descendant } from "slate";
 import { Slate, withReact } from "slate-react";
 import type { ElementVersionStorage } from "@/lib/generation/history";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 const untouched = () => Promise.reject(new Error("this test reads no history"));
 
@@ -15,7 +16,7 @@ export const noHistory: ElementVersionStorage = {
 /** A canvas with no editable surface, as an asset dialog sees it. */
 export function mountOnCanvas(children: Descendant[] = []) {
 	const editor = withReact(createEditor());
-	editor.defaultModels = () => ({});
+	editor.defaultModels = () => resolveDefaultModels();
 	editor.children = children;
 	const container = document.body.appendChild(document.createElement("div"));
 	const root = createRoot(container);

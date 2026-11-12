@@ -34,7 +34,10 @@ export function SegmentedControl<T extends string>({
 			value={value}
 			// Radix clears the value when the active segment is pressed again; a
 			// segmented control always keeps one selected.
-			onValueChange={(next) => next && onChange(next as T)}
+			onValueChange={(next) => {
+				const picked = options.find((option) => option.value === next);
+				if (picked) onChange(picked.value);
+			}}
 			className={cn(
 				"inline-flex w-fit items-center gap-1 rounded-lg bg-surface-recessed p-1",
 				className,

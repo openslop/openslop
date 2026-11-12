@@ -122,7 +122,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 
 		expect(result.audioUrl).toBe(`${bundleUrl}/output.wav`);
 		expect(result.textTimestamps).toHaveLength(1);
-		expect(result.textTimestamps[0].text).toBe("hello");
+		expect(result.textTimestamps[0]?.text).toBe("hello");
 		expect(result.originalTextTimestamps).toEqual(result.textTimestamps);
 	});
 
@@ -139,7 +139,7 @@ describe("OpenSlop connectors (via gateways)", () => {
 		const voices = await c.searchVoices({ query: "test" });
 
 		expect(voices).toHaveLength(1);
-		expect(voices[0].id).toBe("v1");
+		expect(voices[0]?.id).toBe("v1");
 	});
 
 	it("Video: generate returns AssetResult with url", async () => {

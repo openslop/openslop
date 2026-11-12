@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { uploadFile } from "../upload-file";
 import { UPLOAD_PATHNAME } from "../upload-files";
+import { at } from "@/lib/utils";
 
 const mockUpload = vi.fn();
 vi.mock("@vercel/blob/client", () => ({
@@ -21,7 +22,7 @@ describe("uploadFile", () => {
 	it("uploads straight to the store through the route for its kind", async () => {
 		await uploadFile("video", file);
 
-		const [pathname, body, options] = mockUpload.mock.calls[0];
+		const [pathname, body, options] = at(mockUpload.mock.calls, 0);
 		expect(pathname).toMatch(UPLOAD_PATHNAME);
 		expect(pathname).toMatch(/\/my_clip\.mp4$/);
 		expect(body).toBe(file);

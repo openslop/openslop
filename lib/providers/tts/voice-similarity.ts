@@ -3,6 +3,7 @@ import compact from "lodash/compact";
 import sortBy from "lodash/sortBy";
 import type { VoiceInfo, VoiceSearchParams } from "@/lib/connectors/types";
 import { embedText, embedTexts } from "../embed";
+import { at } from "@/lib/utils";
 
 const SEMANTIC_FIELDS = [
 	"query",
@@ -31,7 +32,7 @@ export async function rankBySimilarity(
 
 	const scored = voices.map((voice, i) => ({
 		voice,
-		score: cosineSimilarity(queryEmbedding, voiceEmbeddings[i]),
+		score: cosineSimilarity(queryEmbedding, at(voiceEmbeddings, i)),
 	}));
 	return sortBy(scored, ({ score }) => -score).map(({ voice }) => voice);
 }

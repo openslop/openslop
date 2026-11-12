@@ -14,6 +14,7 @@ import { canvasCollisionDetection } from "../dnd/collision-detection";
 import { SortableItem } from "../dnd/sortable-item";
 import { useDragAndDrop } from "../dnd/use-drag-and-drop";
 import { content, scene } from "./fixtures";
+import { at } from "@/lib/utils";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -150,7 +151,7 @@ it("reorders scenes with the keyboard", async () => {
 	const handles = dragHandles();
 	setSortableBounds(handles);
 
-	const [firstHandle] = handles;
+	const firstHandle = at(handles, 0);
 	const instructionId = firstHandle.getAttribute("aria-describedby");
 	expect(instructionId).toBeTruthy();
 	expect(document.getElementById(instructionId ?? "")?.textContent).toContain(
@@ -175,7 +176,7 @@ it("preserves drag-handle focus when another control precedes it", async () => {
 	const handles = dragHandles();
 	setSortableBounds(handles);
 
-	const [firstHandle] = handles;
+	const firstHandle = at(handles, 0);
 	firstHandle.focus();
 	await pressKey(firstHandle, "Space", " ");
 	await pressKey(document, "ArrowDown", "ArrowDown");

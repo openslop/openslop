@@ -35,7 +35,13 @@ export function SelectField<T extends string>({
 	ariaLabel: string;
 }) {
 	return (
-		<Select value={value} onValueChange={(next) => onChange(next as T)}>
+		<Select
+			value={value}
+			onValueChange={(next) => {
+				const picked = options.find((option) => option.value === next);
+				if (picked) onChange(picked.value);
+			}}
+		>
 			<SelectTrigger size="sm" aria-label={ariaLabel}>
 				<SelectValue />
 			</SelectTrigger>

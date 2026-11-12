@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { at } from "@/lib/utils";
 
 const DOCS = path.join(process.cwd(), "docs");
 const LIGHT = "-light.svg";
@@ -17,7 +18,7 @@ const toDark = (hex: string) => {
 	);
 	return HUE_ROTATE_180.map((row) => {
 		const channel = row.reduce(
-			(sum, weight, i) => sum + weight * inverted[i],
+			(sum, weight, i) => sum + weight * at(inverted, i),
 			0,
 		);
 		const byte = Math.round(Math.min(1, Math.max(0, channel)) * 255);

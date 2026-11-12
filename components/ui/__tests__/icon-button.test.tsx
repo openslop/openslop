@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { IconButton } from "../icon-button";
+import { at } from "@/lib/utils";
 
 const classesOf = (node: React.ReactElement) => {
 	const match = renderToStaticMarkup(node).match(/class="([^"]*)"/);
 	if (!match) throw new Error("button has no class attribute");
-	return match[1].split(" ");
+	return at(match, 1).split(" ");
 };
 
 describe("IconButton", () => {

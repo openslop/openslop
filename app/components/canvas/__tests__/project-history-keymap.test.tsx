@@ -8,6 +8,7 @@ import { Editable, Slate, withReact } from "slate-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import { useProjectHistoryHotkeys } from "../project-history-keymap";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -26,7 +27,7 @@ function ProjectHistoryHotkeys({ editor }: { editor: CanvasEditor }) {
 
 function mountHistoryKeymap() {
 	const editor = withHistory(withReact(createEditor()));
-	editor.defaultModels = () => ({});
+	editor.defaultModels = () => resolveDefaultModels();
 	editor.children = [
 		{
 			id: "scene-1",

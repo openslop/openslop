@@ -1,6 +1,7 @@
 import type { Caption } from "@remotion/captions";
 import isEqual from "lodash/isEqual";
 import type { AssetResult } from "@/lib/connectors/types";
+import { at } from "@/lib/utils";
 
 /** Retypes one word, or deletes it once cleared. */
 export function editCaption(
@@ -14,7 +15,7 @@ export function editCaption(
 	return {
 		...result,
 		textTimestamps: word
-			? textTimestamps.with(index, { ...textTimestamps[index], text: word })
+			? textTimestamps.with(index, { ...at(textTimestamps, index), text: word })
 			: textTimestamps.toSpliced(index, 1),
 	};
 }

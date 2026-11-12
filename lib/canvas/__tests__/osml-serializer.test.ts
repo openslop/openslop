@@ -14,6 +14,7 @@ import {
 	type Scene,
 } from "@/lib/canvas/types";
 import { asset, element } from "./_assets";
+import { at } from "@/lib/utils";
 
 const el = (
 	type: ContentElement["type"],
@@ -131,6 +132,6 @@ describe("serialize round trip", () => {
 
 	it("keeps a reloaded empty element recognisably empty", () => {
 		const scene = reload(wrap(createCanvasElement("narration", { id: "e1" })));
-		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
+		expect(Node.string(at(scene.children, 0))).toBe(ZERO_WIDTH_SPACE);
 	});
 });

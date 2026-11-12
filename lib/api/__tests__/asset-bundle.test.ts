@@ -3,6 +3,7 @@ import { z } from "zod";
 import { BLOB_BASE_URL } from "../../blob";
 import { AssetBundle, EmptyRemoteFileError } from "../asset-bundle";
 import type { BundleResponse } from "../asset-bundle";
+import { at } from "@/lib/utils";
 
 describe("AssetBundle", () => {
 	describe("holds", () => {
@@ -223,7 +224,7 @@ describe("AssetBundle", () => {
 				expect.any(ReadableStream),
 				expect.objectContaining({ contentType: "video/mp4", multipart: true }),
 			);
-			const [[, body]] = putMock.mock.calls;
+			const [, body] = at(putMock.mock.calls, 0);
 			await expect(new Response(body).text()).resolves.toBe("fake-video");
 		});
 

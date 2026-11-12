@@ -8,6 +8,7 @@ import {
 	type SceneSegment,
 } from "../scene-segments";
 import { blankScene } from "../blank-scene";
+import { at } from "@/lib/utils";
 
 const seg = (
 	sceneId: string,
@@ -82,13 +83,13 @@ describe("findSegmentIndexAtFrame", () => {
 		(fps) => {
 			const starts = [0, ...[151, 307, 461].map((f) => unalignedStart(f, fps))];
 			const unaligned = starts.map((start, i) =>
-				seg(`s${i}`, start, (starts[i + 1] ?? starts[i] + 2) - start),
+				seg(`s${i}`, start, (starts[i + 1] ?? at(starts, i) + 2) - start),
 			);
 			let index = 0;
 			for (let step = 1; step < unaligned.length; step++) {
 				index = findSegmentIndexAtFrame(
 					unaligned,
-					toFrames(unaligned[index + 1].start, fps),
+					toFrames(at(unaligned, index + 1).start, fps),
 					fps,
 				);
 				expect(index).toBe(step);

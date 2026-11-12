@@ -76,7 +76,10 @@ export function MediaToggle<T extends string>({
 			value={value}
 			// Radix clears the value when the active segment is pressed again; a
 			// segmented control always keeps one selected.
-			onValueChange={(next) => next && onChange(next as T)}
+			onValueChange={(next) => {
+				const picked = options.find((option) => option.value === next);
+				if (picked) onChange(picked.value);
+			}}
 			className={cn(mediaChromePill, className)}
 		>
 			{options.map((option) => (

@@ -11,6 +11,7 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import { content, scene, seedScene } from "./fixtures";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import type { CanvasEditor, Scene } from "@/lib/canvas/types";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
 	const store = { ...initial };
@@ -35,7 +36,7 @@ function makeEditor(seed: Scene) {
 	base.insertTextData = insertTextData;
 
 	const editor = withOSMLClipboard(base);
-	editor.defaultModels = () => ({});
+	editor.defaultModels = () => resolveDefaultModels();
 	seedScene(editor, seed);
 
 	return { editor, insertTextData };

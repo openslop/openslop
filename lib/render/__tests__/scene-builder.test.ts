@@ -6,6 +6,7 @@ import type { BuildLayoutOptions } from "../scene-builder";
 import type { ResolvedElement, Sequence, RenderLayout } from "../types";
 import type { ContentType } from "@/lib/canvas/types";
 import { layoutOf } from "./_layout";
+import { at } from "@/lib/utils";
 
 // The rendered transition overlap: TRANSITION_DURATION_SEC (0.4s) snapped to the
 // 24fps frame grid, which is what <TransitionSeries> actually lays down.
@@ -26,7 +27,7 @@ function el(
 		type: ResolvedElement["type"];
 	},
 ): ResolvedElement {
-	const roles: Record<string, ResolvedElement["role"]> = {
+	const roles: Record<ResolvedElement["type"], ResolvedElement["role"]> = {
 		image: "foreground",
 		video: "foreground",
 		narration: "overlay",
@@ -34,7 +35,7 @@ function el(
 		music: "background",
 		sound: "effect",
 	};
-	const layers: Record<string, ResolvedElement["layer"]> = {
+	const layers: Record<ResolvedElement["type"], ResolvedElement["layer"]> = {
 		image: "visual",
 		video: "visual",
 		narration: "audio",
@@ -99,9 +100,9 @@ describe("buildRenderLayout", () => {
 				el({ id: "img1", type: "image", trimDurationSec: 5 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element?.id).toBe("img1");
-			expect(layout.series[0].start).toBe(0);
-			expect(totalDuration(layout.series[0])).toBe(5);
+			expect(layout.series[0]?.element?.id).toBe("img1");
+			expect(layout.series[0]?.start).toBe(0);
+			expect(totalDuration(at(layout.series, 0))).toBe(5);
 			expect(layout.totalDurationSec).toBe(5);
 		});
 
@@ -111,10 +112,10 @@ describe("buildRenderLayout", () => {
 				el({ id: "video1", type: "video", trimDurationSec: 3 }),
 			]);
 			expect(layout.series).toHaveLength(2);
-			expect(layout.series[0].start).toBe(0);
+			expect(layout.series[0]?.start).toBe(0);
 			// Each foreground past the first overlaps the previous by one rendered
 			// transition to match what <TransitionSeries> renders.
-			expect(layout.series[1].start).toBeCloseTo(5 - OVERLAP, 5);
+			expect(layout.series[1]?.start).toBeCloseTo(5 - OVERLAP, 5);
 			expect(layout.totalDurationSec).toBeCloseTo(8 - OVERLAP, 5);
 		});
 
@@ -124,8 +125,8 @@ describe("buildRenderLayout", () => {
 				el({ id: "img2", type: "image", trimDurationSec: 3 }),
 				el({ id: "n1", type: "narration", trimDurationSec: 2 }),
 			]);
-			expect(layout.series[1].start).toBeCloseTo(5 - OVERLAP, 5);
-			expect(seqs(layout, "narration")[0].start).toBeCloseTo(5 - OVERLAP, 5);
+			expect(layout.series[1]?.start).toBeCloseTo(5 - OVERLAP, 5);
+			expect(seqs(layout, "narration")[0]?.start).toBeCloseTo(5 - OVERLAP, 5);
 			expect(layout.totalDurationSec).toBeCloseTo(8 - OVERLAP, 5);
 		});
 
@@ -138,7 +139,7 @@ describe("buildRenderLayout", () => {
 			});
 			const layout = layoutOf([looped]);
 			expect(layout.series).toHaveLength(1);
-			expect(totalDuration(layout.series[0])).toBe(3);
+			expect(totalDuration(at(layout.series, 0))).toBe(3);
 			expect(layout.sequences.video).toBeUndefined();
 		});
 
@@ -147,8 +148,8 @@ describe("buildRenderLayout", () => {
 				el({ id: "img1", type: "image", trimDurationSec: 0 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(layout.series[0].element?.id).toBe("img1");
-			expect(totalDuration(layout.series[0])).toBe(1);
+			expect(layout.series[0]?.element?.id).toBe("img1");
+			expect(totalDuration(at(layout.series, 0))).toBe(1);
 			expect(layout.totalDurationSec).toBe(1);
 		});
 	});
@@ -171,7 +172,7 @@ describe("buildRenderLayout", () => {
 				{ transitionType: "none" },
 			);
 			expect(layout.transitionDurationSec).toBe(0);
-			expect(layout.series[1].start).toBe(5);
+			expect(layout.series[1]?.start).toBe(5);
 			expect(layout.totalDurationSec).toBe(8);
 		});
 	});
@@ -182,8 +183,8 @@ describe("buildRenderLayout", () => {
 				el({ id: "n1", type: "narration", trimDurationSec: 4 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(totalDuration(layout.series[0])).toBe(4);
+			expect(isBlankScene(at(layout.series, 0).element)).toBe(true);
+			expect(totalDuration(at(layout.series, 0))).toBe(4);
 		});
 
 		it("collapses consecutive leading overlays into one blank scene", () => {
@@ -192,12 +193,12 @@ describe("buildRenderLayout", () => {
 				el({ id: "n2", type: "narration", trimDurationSec: 4 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(totalDuration(layout.series[0])).toBe(7);
-			expect(layout.series[0].minDuration).toBe(7);
+			expect(isBlankScene(at(layout.series, 0).element)).toBe(true);
+			expect(totalDuration(at(layout.series, 0))).toBe(7);
+			expect(layout.series[0]?.minDuration).toBe(7);
 			expect(seqs(layout, "narration")).toHaveLength(2);
-			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(seqs(layout, "narration")[1].start).toBe(3);
+			expect(seqs(layout, "narration")[0]?.start).toBe(0);
+			expect(seqs(layout, "narration")[1]?.start).toBe(3);
 		});
 
 		it("extends the current series entry to fit a longer overlay", () => {
@@ -206,10 +207,10 @@ describe("buildRenderLayout", () => {
 				el({ id: "n1", type: "narration", trimDurationSec: 8 }),
 			]);
 			expect(layout.series).toHaveLength(1);
-			expect(totalDuration(layout.series[0])).toBe(8);
+			expect(totalDuration(at(layout.series, 0))).toBe(8);
 			expect(seqs(layout, "narration")).toHaveLength(1);
-			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "narration")[0])).toBe(8);
+			expect(seqs(layout, "narration")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "narration"), 0))).toBe(8);
 		});
 
 		it("stacks consecutive overlays within the current series entry", () => {
@@ -218,9 +219,9 @@ describe("buildRenderLayout", () => {
 				el({ id: "n1", type: "narration", trimDurationSec: 5 }),
 				el({ id: "c1", type: "character", trimDurationSec: 3 }),
 			]);
-			expect(totalDuration(layout.series[0])).toBe(8);
-			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(seqs(layout, "character")[0].start).toBe(5);
+			expect(totalDuration(at(layout.series, 0))).toBe(8);
+			expect(seqs(layout, "narration")[0]?.start).toBe(0);
+			expect(seqs(layout, "character")[0]?.start).toBe(5);
 		});
 
 		it("holds each scene open for its overlays and the minimum, whether or not they decide the scene", () => {
@@ -250,12 +251,12 @@ describe("buildRenderLayout", () => {
 				el({ id: "img1", type: "image", trimDurationSec: 5 }),
 			]);
 			expect(layout.series).toHaveLength(2);
-			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(totalDuration(layout.series[0])).toBe(9);
-			expect(layout.series[1].element.id).toBe("img1");
-			expect(layout.series[1].start).toBeCloseTo(9 - OVERLAP, 5);
-			expect(totalDuration(layout.series[1])).toBe(5);
-			expect(seqs(layout, "narration")[0].start).toBe(0);
+			expect(isBlankScene(at(layout.series, 0).element)).toBe(true);
+			expect(totalDuration(at(layout.series, 0))).toBe(9);
+			expect(layout.series[1]?.element.id).toBe("img1");
+			expect(layout.series[1]?.start).toBeCloseTo(9 - OVERLAP, 5);
+			expect(totalDuration(at(layout.series, 1))).toBe(5);
+			expect(seqs(layout, "narration")[0]?.start).toBe(0);
 		});
 
 		it("delays the next foreground when an overlay extends past it", () => {
@@ -265,9 +266,9 @@ describe("buildRenderLayout", () => {
 				el({ id: "video1", type: "video", trimDurationSec: 6 }),
 			]);
 			expect(layout.series).toHaveLength(2);
-			expect(layout.series[1].element?.id).toBe("video1");
-			expect(layout.series[1].start).toBeCloseTo(9 - OVERLAP, 5);
-			expect(totalDuration(layout.series[1])).toBe(6);
+			expect(layout.series[1]?.element?.id).toBe("video1");
+			expect(layout.series[1]?.start).toBeCloseTo(9 - OVERLAP, 5);
+			expect(totalDuration(at(layout.series, 1))).toBe(6);
 		});
 
 		it("starts the next foreground immediately when the overlay is shorter", () => {
@@ -277,9 +278,9 @@ describe("buildRenderLayout", () => {
 				el({ id: "video1", type: "video", trimDurationSec: 6 }),
 			]);
 			expect(layout.series).toHaveLength(2);
-			expect(layout.series[1].element?.id).toBe("video1");
-			expect(layout.series[1].start).toBeCloseTo(30 - OVERLAP, 5);
-			expect(totalDuration(layout.series[1])).toBe(6);
+			expect(layout.series[1]?.element?.id).toBe("video1");
+			expect(layout.series[1]?.start).toBeCloseTo(30 - OVERLAP, 5);
+			expect(totalDuration(at(layout.series, 1))).toBe(6);
 		});
 
 		it("stretches the blank scene over the overlays that open the video, before the first visual", () => {
@@ -291,13 +292,13 @@ describe("buildRenderLayout", () => {
 				el({ id: "n3", type: "narration", trimDurationSec: 3 }),
 			]);
 			expect(layout.series).toHaveLength(2);
-			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(totalDuration(layout.series[0])).toBe(12);
-			expect(layout.series[1].element.id).toBe("img1");
-			expect(totalDuration(layout.series[1])).toBeCloseTo(5, 5);
-			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(seqs(layout, "narration")[1].start).toBeCloseTo(12 - OVERLAP, 5);
-			expect(seqs(layout, "narration")[2].start).toBeCloseTo(14 - OVERLAP, 5);
+			expect(isBlankScene(at(layout.series, 0).element)).toBe(true);
+			expect(totalDuration(at(layout.series, 0))).toBe(12);
+			expect(layout.series[1]?.element.id).toBe("img1");
+			expect(totalDuration(at(layout.series, 1))).toBeCloseTo(5, 5);
+			expect(seqs(layout, "narration")[0]?.start).toBe(0);
+			expect(seqs(layout, "narration")[1]?.start).toBeCloseTo(12 - OVERLAP, 5);
+			expect(seqs(layout, "narration")[2]?.start).toBeCloseTo(14 - OVERLAP, 5);
 		});
 	});
 
@@ -308,8 +309,8 @@ describe("buildRenderLayout", () => {
 				el({ id: "img1", type: "image", trimDurationSec: 10 }),
 			]);
 			expect(seqs(layout, "music")).toHaveLength(1);
-			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "music")[0])).toBe(10);
+			expect(seqs(layout, "music")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "music"), 0))).toBe(10);
 		});
 
 		it("drops a background placed after the last scene", () => {
@@ -350,11 +351,11 @@ describe("buildRenderLayout", () => {
 			]);
 			expect(layout.totalDurationSec).toBeCloseTo(16 - OVERLAP, 5);
 			expect(seqs(layout, "music")).toHaveLength(2);
-			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "music")[0])).toBe(10);
-			expect(seqs(layout, "music")[1].start).toBe(10);
+			expect(seqs(layout, "music")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "music"), 0))).toBe(10);
+			expect(seqs(layout, "music")[1]?.start).toBe(10);
 			// m2 trimmed to the rendered total since img1 is overlapped by one transition.
-			expect(totalDuration(seqs(layout, "music")[1])).toBeCloseTo(
+			expect(totalDuration(at(seqs(layout, "music"), 1))).toBeCloseTo(
 				6 - OVERLAP,
 				5,
 			);
@@ -369,8 +370,8 @@ describe("buildRenderLayout", () => {
 				el({ id: "n2", type: "narration", trimDurationSec: 4 }),
 			]);
 			const [m1, m2] = seqs(layout, "music");
-			expect(m1.duration).toBe(3);
-			expect(m2.start).toBe(3);
+			expect(m1?.duration).toBe(3);
+			expect(m2?.start).toBe(3);
 		});
 
 		it("collapses consecutive backgrounds at the same offset to the latest", () => {
@@ -385,11 +386,11 @@ describe("buildRenderLayout", () => {
 			]);
 			expect(layout.totalDurationSec).toBeCloseTo(30 - OVERLAP, 5);
 			expect(seqs(layout, "music")).toHaveLength(2);
-			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "music")[0])).toBe(10);
-			expect(seqs(layout, "music")[1].start).toBe(10);
+			expect(seqs(layout, "music")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "music"), 0))).toBe(10);
+			expect(seqs(layout, "music")[1]?.start).toBe(10);
 			// m5 trimmed to the rendered total since video1 is overlapped by one transition.
-			expect(totalDuration(seqs(layout, "music")[1])).toBeCloseTo(
+			expect(totalDuration(at(seqs(layout, "music"), 1))).toBeCloseTo(
 				20 - OVERLAP,
 				5,
 			);
@@ -420,8 +421,8 @@ describe("buildRenderLayout", () => {
 			expect(music[0]).toMatchObject({ start: 0, duration: 10 });
 			expect(music[1]).toMatchObject({ start: 10, duration: 5 });
 			// m2 trimmed to the rendered total since img2 is overlapped by one transition.
-			expect(music[2].start).toBe(15);
-			expect(totalDuration(music[2])).toBeCloseTo(10 - OVERLAP, 5);
+			expect(music[2]?.start).toBe(15);
+			expect(totalDuration(at(music, 2))).toBeCloseTo(10 - OVERLAP, 5);
 			expect(layout.totalDurationSec).toBeCloseTo(25 - OVERLAP, 5);
 		});
 
@@ -444,17 +445,17 @@ describe("buildRenderLayout", () => {
 				el({ id: "s3", type: "sound", trimDurationSec: 3 }),
 				el({ id: "s4", type: "sound", trimDurationSec: 2 }),
 			]);
-			expect(layout.series[0].start).toBe(0);
-			expect(totalDuration(layout.series[0])).toBe(6);
+			expect(layout.series[0]?.start).toBe(0);
+			expect(totalDuration(at(layout.series, 0))).toBe(6);
 			expect(seqs(layout, "sound")).toHaveLength(4);
-			expect(seqs(layout, "sound")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "sound")[0])).toBe(1);
-			expect(seqs(layout, "sound")[1].start).toBe(0);
-			expect(totalDuration(seqs(layout, "sound")[1])).toBe(5);
-			expect(seqs(layout, "sound")[2].start).toBe(0);
-			expect(totalDuration(seqs(layout, "sound")[2])).toBe(3);
-			expect(seqs(layout, "sound")[3].start).toBe(0);
-			expect(totalDuration(seqs(layout, "sound")[3])).toBe(2);
+			expect(seqs(layout, "sound")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "sound"), 0))).toBe(1);
+			expect(seqs(layout, "sound")[1]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "sound"), 1))).toBe(5);
+			expect(seqs(layout, "sound")[2]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "sound"), 2))).toBe(3);
+			expect(seqs(layout, "sound")[3]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "sound"), 3))).toBe(2);
 		});
 
 		it("trims effects that extend beyond the total duration", () => {
@@ -465,10 +466,10 @@ describe("buildRenderLayout", () => {
 			]);
 			expect(layout.totalDurationSec).toBe(20);
 			expect(seqs(layout, "sound")).toHaveLength(2);
-			expect(seqs(layout, "sound")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "sound")[0])).toBe(20);
-			expect(seqs(layout, "sound")[1].start).toBe(0);
-			expect(totalDuration(seqs(layout, "sound")[1])).toBe(20);
+			expect(seqs(layout, "sound")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "sound"), 0))).toBe(20);
+			expect(seqs(layout, "sound")[1]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "sound"), 1))).toBe(20);
 		});
 
 		it("emits N copies of a looped effect at its native duration, overlapping by the crossfade", () => {
@@ -478,12 +479,12 @@ describe("buildRenderLayout", () => {
 			]);
 			const sound = seqs(layout, "sound");
 			expect(sound).toHaveLength(3);
-			expect(sound[0].start).toBe(0);
-			expect(totalDuration(sound[0])).toBe(4);
-			expect(sound[1].start).toBeCloseTo(4 - LOOP_OVERLAP, 5);
-			expect(totalDuration(sound[1])).toBe(4);
-			expect(sound[2].start).toBeCloseTo(8 - 2 * LOOP_OVERLAP, 5);
-			expect(totalDuration(sound[2])).toBe(4);
+			expect(sound[0]?.start).toBe(0);
+			expect(totalDuration(at(sound, 0))).toBe(4);
+			expect(sound[1]?.start).toBeCloseTo(4 - LOOP_OVERLAP, 5);
+			expect(totalDuration(at(sound, 1))).toBe(4);
+			expect(sound[2]?.start).toBeCloseTo(8 - 2 * LOOP_OVERLAP, 5);
+			expect(totalDuration(at(sound, 2))).toBe(4);
 			expect(sound.every((s) => s.element?.id === "s1")).toBe(true);
 		});
 
@@ -494,10 +495,10 @@ describe("buildRenderLayout", () => {
 			]);
 			const sound = seqs(layout, "sound");
 			expect(sound).toHaveLength(2);
-			expect(sound[0].start).toBe(0);
-			expect(totalDuration(sound[0])).toBe(4);
-			expect(sound[1].start).toBeCloseTo(4 - LOOP_OVERLAP, 5);
-			expect(totalDuration(sound[1])).toBeCloseTo(1 + LOOP_OVERLAP, 5);
+			expect(sound[0]?.start).toBe(0);
+			expect(totalDuration(at(sound, 0))).toBe(4);
+			expect(sound[1]?.start).toBeCloseTo(4 - LOOP_OVERLAP, 5);
+			expect(totalDuration(at(sound, 1))).toBeCloseTo(1 + LOOP_OVERLAP, 5);
 		});
 
 		it("drops effects when no scene exists", () => {
@@ -521,18 +522,18 @@ describe("buildRenderLayout", () => {
 				el({ id: "m2", type: "music", trimDurationSec: 4 }),
 			]);
 			expect(layout.series).toHaveLength(2);
-			expect(isBlankScene(layout.series[0].element)).toBe(true);
-			expect(totalDuration(layout.series[0])).toBe(11);
-			expect(layout.series[1].element.id).toBe("video1");
-			expect(totalDuration(layout.series[1])).toBe(2);
-			expect(seqs(layout, "narration")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "narration")[0])).toBe(4);
-			expect(seqs(layout, "character")[0].start).toBe(4);
-			expect(totalDuration(seqs(layout, "character")[0])).toBe(7);
-			expect(seqs(layout, "music")[0].start).toBe(0);
-			expect(totalDuration(seqs(layout, "music")[0])).toBe(10);
-			expect(seqs(layout, "sound")[0].start).toBe(0);
-			expect(seqs(layout, "sound")[1].start).toBe(4);
+			expect(isBlankScene(at(layout.series, 0).element)).toBe(true);
+			expect(totalDuration(at(layout.series, 0))).toBe(11);
+			expect(layout.series[1]?.element.id).toBe("video1");
+			expect(totalDuration(at(layout.series, 1))).toBe(2);
+			expect(seqs(layout, "narration")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "narration"), 0))).toBe(4);
+			expect(seqs(layout, "character")[0]?.start).toBe(4);
+			expect(totalDuration(at(seqs(layout, "character"), 0))).toBe(7);
+			expect(seqs(layout, "music")[0]?.start).toBe(0);
+			expect(totalDuration(at(seqs(layout, "music"), 0))).toBe(10);
+			expect(seqs(layout, "sound")[0]?.start).toBe(0);
+			expect(seqs(layout, "sound")[1]?.start).toBe(4);
 			expect(seqs(layout, "music")).toHaveLength(1);
 		});
 
@@ -546,10 +547,10 @@ describe("buildRenderLayout", () => {
 			]);
 
 			expect(layout.series).toHaveLength(2);
-			expect(layout.series[0].element?.id).toBe("img1");
-			expect(totalDuration(layout.series[0])).toBe(5);
-			expect(layout.series[1].element?.id).toBe("video1");
-			expect(totalDuration(layout.series[1])).toBeCloseTo(6, 5);
+			expect(layout.series[0]?.element?.id).toBe("img1");
+			expect(totalDuration(at(layout.series, 0))).toBe(5);
+			expect(layout.series[1]?.element?.id).toBe("video1");
+			expect(totalDuration(at(layout.series, 1))).toBeCloseTo(6, 5);
 			expect(layout.totalDurationSec).toBeCloseTo(11 - OVERLAP, 5);
 
 			expect(seqs(layout, "music")).toHaveLength(1);
@@ -595,7 +596,7 @@ describe("buildRenderLayout", () => {
 				layout.series.forEach((scene, i) => {
 					if (i > 0) renderedStart -= overlap;
 					expect(toFrames(scene.start, fps)).toBe(renderedStart);
-					expect(toFrames(seqs(layout, "narration")[i].start, fps)).toBe(
+					expect(toFrames(at(seqs(layout, "narration"), i).start, fps)).toBe(
 						renderedStart,
 					);
 					renderedStart += toFrames(totalDuration(scene), fps);
@@ -628,13 +629,13 @@ describe("buildRenderLayout", () => {
 
 		it("plays a video out in full past shorter dialogue", () => {
 			const layout = layoutOf([video(10), narration(3)]);
-			expect(totalDuration(layout.series[0])).toBe(10);
+			expect(totalDuration(at(layout.series, 0))).toBe(10);
 			expect(layout.totalDurationSec).toBe(10);
 		});
 
 		it("runs past a video's own length for longer dialogue", () => {
 			const layout = layoutOf([video(3), narration(10)]);
-			expect(totalDuration(layout.series[0])).toBe(10);
+			expect(totalDuration(at(layout.series, 0))).toBe(10);
 		});
 	});
 
@@ -660,7 +661,7 @@ describe("buildRenderLayout", () => {
 			let rendered = 0;
 			layout.series.forEach((scene, i) => {
 				if (i > 0) rendered -= overlapFrames;
-				expect(toFrames(seqs(layout, "narration")[i].start, fps)).toBe(
+				expect(toFrames(at(seqs(layout, "narration"), i).start, fps)).toBe(
 					rendered,
 				);
 				rendered += toFrames(totalDuration(scene), fps);

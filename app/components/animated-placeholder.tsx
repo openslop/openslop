@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { at } from "@/lib/utils";
 
 const SUGGESTIONS = [
 	"a claymation children's story about little red riding hood…",
@@ -26,7 +27,7 @@ export default function AnimatedPlaceholder() {
 
 	useEffect(() => {
 		let index = 0;
-		let text = SUGGESTIONS[index];
+		let text = at(SUGGESTIONS, index);
 		let count = 0;
 		let timer = setTimeout(typeStep, TYPING_MS);
 
@@ -50,7 +51,7 @@ export default function AnimatedPlaceholder() {
 
 		function nextSuggestion() {
 			index = (index + 1) % SUGGESTIONS.length;
-			text = SUGGESTIONS[index];
+			text = at(SUGGESTIONS, index);
 			count = 0;
 			typeStep();
 		}

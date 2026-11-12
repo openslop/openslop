@@ -4,6 +4,7 @@ import {
 	VIDEO_LENGTH_SPECS,
 	videoLengthBudget,
 } from "../video-length";
+import { at } from "@/lib/utils";
 
 describe("VIDEO_LENGTH_SPECS", () => {
 	it("translates each runtime into a spoken word budget at 180 wpm", () => {
@@ -48,7 +49,7 @@ describe("VIDEO_LENGTH_SPECS", () => {
 			(length) => VIDEO_LENGTH_SPECS[length],
 		);
 		for (let i = 1; i < specs.length; i++) {
-			expect(specs[i].minSec).toBe(specs[i - 1].maxSec);
+			expect(specs[i]?.minSec).toBe(at(specs, i - 1).maxSec);
 		}
 	});
 });

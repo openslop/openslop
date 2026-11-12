@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { extractPeaks, loadPeaks } from "../peaks";
+import { at } from "@/lib/utils";
 
 describe("extractPeaks", () => {
 	it("extracts correct number of peaks", () => {
@@ -48,10 +49,10 @@ describe("extractPeaks", () => {
 
 	it("averages a bucket rather than following its loudest sample", () => {
 		const data = new Float32Array([1, 0, 0, 0, 0.6, 0.6, 0.6, 0.6]);
-		const [transient, sustained] = extractPeaks(data, 2);
+		const peaks = extractPeaks(data, 2);
 		// Peak-picking would rate the lone spike (1) above the sustained tone
 		// (0.6); by energy the sustained half is the louder of the two.
-		expect(transient).toBeLessThan(sustained);
+		expect(at(peaks, 0)).toBeLessThan(at(peaks, 1));
 	});
 
 	it("handles uniform amplitude", () => {

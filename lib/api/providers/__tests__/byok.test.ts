@@ -10,6 +10,7 @@ import {
 	setKeyStatus,
 } from "../../provider-keys";
 import { byokProviderFor, validateKey, verifyProviderKey } from "../byok";
+import { at } from "@/lib/utils";
 
 vi.mock("../../provider-keys", async (importOriginal) => ({
 	...(await importOriginal<typeof import("../../provider-keys")>()),
@@ -35,7 +36,7 @@ describe("byokProviderFor", () => {
 		await provider.validate();
 
 		expect(readProviderKey).toHaveBeenCalledWith("u1", "runware");
-		const [, init] = fetchMock.mock.calls[0];
+		const [, init] = at(fetchMock.mock.calls, 0);
 		expect(init.body).toContain("rw-stored-key");
 	});
 
@@ -75,7 +76,7 @@ describe("validateKey", () => {
 
 		await validateKey("anthropic", "sk-test");
 
-		const [, init] = fetchMock.mock.calls[0];
+		const [, init] = at(fetchMock.mock.calls, 0);
 		expect(init.headers["x-api-key"]).toBe("sk-test");
 	});
 

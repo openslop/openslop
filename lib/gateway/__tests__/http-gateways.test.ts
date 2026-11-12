@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { ZodError } from "zod";
 import type { ModelRef } from "@/lib/connectors/types";
 import { HttpAssetGateway, HttpLLMGateway, HttpTTSGateway } from "../http";
+import { at } from "@/lib/utils";
 
 /** Routes are app-relative, so they parse against any origin. */
 const parseUrl = (url: string) => new URL(url, "http://localhost");
@@ -70,7 +71,7 @@ describe("HTTP gateways", () => {
 				prompt: "a cat",
 			});
 
-			expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+			expect(JSON.parse(fetchMock.mock.calls[0]?.[1].body)).toEqual({
 				prompt: "a cat",
 				projectId: "project-1",
 			});
@@ -137,7 +138,7 @@ describe("HTTP gateways", () => {
 			expect(
 				await gateway.searchVoices({ gender: "feminine", limit: 5 }),
 			).toEqual(voices);
-			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
+			const url = parseUrl(at(fetchMock.mock.calls, 0)[0] as string);
 			expect(url.pathname).toBe("/api/v1/tts/voices");
 			expect(url.searchParams.get("gender")).toBe("feminine");
 			expect(url.searchParams.get("limit")).toBe("5");
@@ -169,7 +170,7 @@ describe("HTTP gateways", () => {
 				new HttpTTSGateway(config(BYOK_TTS)).voicePreview("v-sol"),
 			).resolves.toEqual(preview);
 
-			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
+			const url = parseUrl(at(fetchMock.mock.calls, 0)[0] as string);
 			expect(url.pathname).toBe("/api/third-party/tts/voices/preview");
 			expect(url.searchParams.get("voiceId")).toBe("v-sol");
 			expect(url.searchParams.get("provider")).toBe("cartesia");
@@ -183,7 +184,7 @@ describe("HTTP gateways", () => {
 				query: undefined,
 			});
 
-			const url = parseUrl(fetchMock.mock.calls[0][0] as string);
+			const url = parseUrl(at(fetchMock.mock.calls, 0)[0] as string);
 			expect(url.pathname).toBe("/api/third-party/tts/voices");
 			expect(url.searchParams.get("provider")).toBe("cartesia");
 			expect(url.searchParams.get("model")).toBe("Sonic 3.6");
@@ -250,7 +251,7 @@ describe("HTTP gateways", () => {
 
 			await call(new HttpLLMGateway(config(HOSTED_LLM)));
 
-			expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+			expect(JSON.parse(fetchMock.mock.calls[0]?.[1].body)).toMatchObject({
 				projectId: "project-1",
 			});
 		});
@@ -267,8 +268,8 @@ describe("HTTP gateways", () => {
 			expect(await Array.fromAsync(gateway.stream({ prompt: "hi" }))).toEqual(
 				chunks,
 			);
-			expect(fetchMock.mock.calls[0][0]).toBe(`/api/third-party/llm`);
-			expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+			expect(fetchMock.mock.calls[0]?.[0]).toBe(`/api/third-party/llm`);
+			expect(JSON.parse(fetchMock.mock.calls[0]?.[1].body)).toMatchObject({
 				stream: true,
 			});
 		});

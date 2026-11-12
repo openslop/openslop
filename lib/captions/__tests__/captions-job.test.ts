@@ -96,7 +96,7 @@ describe("captions jobs", () => {
 		await vi.runAllTimersAsync();
 
 		expect(generateMock).toHaveBeenCalledTimes(1);
-		expect(generateMock.mock.calls[0][0].inputs.attributes).toEqual({
+		expect(generateMock.mock.calls[0]?.[0].inputs.attributes).toEqual({
 			mediaUrl: spoken.audioUrl,
 		});
 	});

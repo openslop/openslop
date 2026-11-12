@@ -7,8 +7,7 @@ import {
 	type ConnectorModels,
 	type ModelDefaults,
 } from "@/lib/connectors/models";
-import { groupModels } from "@/lib/connectors/model-groups";
-import type { ConnectorType } from "@/lib/connectors/types";
+import { groupModels, type ModelGroup } from "@/lib/connectors/model-groups";
 import { ModelPanelTrigger, ModelSelect } from "./model-select";
 import { MODEL_PROVENANCE } from "./provenance";
 
@@ -23,7 +22,7 @@ export function ModelDefaultControl({
 	className,
 }: {
 	/** Every type this control sets; the first decides what it shows. */
-	types: ConnectorType[];
+	types: ModelGroup["types"];
 	tier: DefaultsTier;
 	chain: ModelDefaults;
 	onChange: (models: ConnectorModels) => void;

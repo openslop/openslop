@@ -14,6 +14,7 @@ import { asset, labels } from "@/lib/canvas/__tests__/_assets";
 import { withAssets } from "../plugins/with-assets";
 import { withNodeId } from "../plugins/with-node-id";
 import { content, scene } from "./fixtures";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 const STYLE = asset("asset_style", { text: "noir" });
 const AVATAR = asset("asset_avatar", { name: "Mia", text: "a girl" });
@@ -22,7 +23,7 @@ const REFERENCES = asset("asset_references");
 
 const bare = (children: Descendant[], plugins = withAssets) => {
 	const editor = plugins(withReact(createEditor()));
-	editor.defaultModels = () => ({});
+	editor.defaultModels = () => resolveDefaultModels();
 	editor.children = children;
 	return editor;
 };

@@ -6,6 +6,8 @@ import { asset } from "@/lib/canvas/__tests__/_assets";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { withLayout } from "../plugins/with-layout";
 import { content, scene } from "./fixtures";
+import { at } from "@/lib/utils";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 const ASSETS = [
 	asset("asset_style", { text: "noir" }),
@@ -19,7 +21,7 @@ const normalized = (
 	defaultModels: ConnectorModels = {},
 ) => {
 	const editor = withLayout(withReact(createEditor()));
-	editor.defaultModels = () => defaultModels;
+	editor.defaultModels = () => resolveDefaultModels({ project: defaultModels });
 	editor.children = children;
 	editor.normalize({ force: true });
 	return editor.children;
@@ -51,6 +53,8 @@ describe("withLayout", () => {
 		editor.insertSoftBreak();
 
 		expect(editor.children).toHaveLength(1);
-		expect(Node.string(editor.children[0])).toBe(`hello\n${ZERO_WIDTH_SPACE}`);
+		expect(Node.string(at(editor.children, 0))).toBe(
+			`hello\n${ZERO_WIDTH_SPACE}`,
+		);
 	});
 });

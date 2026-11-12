@@ -4,6 +4,7 @@ import { TOGGLE_OFF } from "@/lib/canvas/types";
 import { conjunction } from "@/lib/format";
 import { toggleValue } from "../attributes/common";
 import type { AttributeDef } from "../attributes/schema";
+import { keysOf } from "@/lib/utils";
 
 export const START_FRAME_ATTR = "startFrame";
 export const PREVIOUS_VISUAL = "previous";
@@ -55,7 +56,7 @@ export const FRAMES = {
 
 export type FrameKey = keyof typeof FRAMES;
 
-export const FRAME_KEYS = Object.keys(FRAMES) as FrameKey[];
+export const FRAME_KEYS = keysOf(FRAMES);
 
 export const frameNames = (keys: readonly FrameKey[]): string =>
 	conjunction(keys.map((key) => FRAMES[key].name.toLowerCase()));

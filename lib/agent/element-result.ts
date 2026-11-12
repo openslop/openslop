@@ -8,6 +8,7 @@ import { captureFrames } from "@/lib/connectors/video/capture-frames";
 import { FRAME_KEYS, FRAMES } from "@/lib/connectors/video/start-frame";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { elementState, type ElementState } from "./element-state";
+import { at } from "@/lib/utils";
 
 /** `at` is seconds into the video a frame sits; a still has none. */
 const PictureSchema = z.object({ url: z.string(), at: z.number().optional() });
@@ -43,7 +44,7 @@ async function pictures(result: AssetResult): Promise<ResultView["pictures"]> {
 	if (!result.videoUrl) return [];
 	const urls = await captureFrames(result.videoUrl, FRAME_KEYS);
 	return FRAME_KEYS.map((key, index) => ({
-		url: urls[index],
+		url: at(urls, index),
 		at: FRAMES[key].at * result.durationSec,
 	}));
 }

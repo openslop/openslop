@@ -1,7 +1,7 @@
-import { sleep } from "@/lib/utils";
+import { at, sleep } from "@/lib/utils";
 
 export function pickRandom<T>(items: T[]): T {
-	return items[Math.floor(Math.random() * items.length)];
+	return at(items, Math.floor(Math.random() * items.length));
 }
 
 export function mockDelay(ms: number): Promise<void> {

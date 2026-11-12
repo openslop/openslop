@@ -6,6 +6,7 @@ import { groupIntoLines, wordsAt } from "@/lib/captions/caption-layout";
 import type { Caption } from "@remotion/captions";
 import { SAMPLE_WORD_MS } from "@/lib/captions/caption-presets";
 import type { CaptionStyle } from "@/lib/captions/caption-style";
+import { at } from "@/lib/utils";
 
 /** Advances through `wordCount` words on a loop while `playing`. */
 export function useCaptionCycle(wordCount: number, playing: boolean): number {
@@ -59,7 +60,7 @@ export function CaptionStage({
 		() => groupIntoLines(captions, lineMs),
 		[captions, lineMs],
 	);
-	const seconds = captions[activeIndex].startMs / 1000;
+	const seconds = at(captions, activeIndex).startMs / 1000;
 	const line = lines.find(
 		({ firstWordIndex, tokens }) =>
 			activeIndex < firstWordIndex + tokens.length,

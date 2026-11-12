@@ -10,6 +10,7 @@ import type { GenerationNode } from "@/lib/generation/graph";
 import { buildNode, GenerationGraph } from "@/lib/generation/generation-graph";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { element } from "@/lib/canvas/__tests__/_assets";
+import { at } from "@/lib/utils";
 
 // No plugins, so no element depends on another and each is judged alone.
 const registry = Object.fromEntries(
@@ -287,7 +288,7 @@ describe("scope description", () => {
 			makeElement("b", "image", "sunrise"),
 		];
 		elements.forEach(commitCurrent);
-		elements[1].children = makeElement("b", "image", "moonrise").children;
+		at(elements, 1).children = makeElement("b", "image", "moonrise").children;
 
 		expect(useDescription(elements, "scene")).toBe(
 			"Regenerate 1 stale element in this scene",

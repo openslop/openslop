@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { validateRunwareKey } from "../runware";
+import { at } from "@/lib/utils";
 
 const fetchMock = vi.fn();
 
@@ -15,7 +16,7 @@ describe("validateRunwareKey", () => {
 
 		await validateRunwareKey("rw-test");
 
-		const [, init] = fetchMock.mock.calls[0];
+		const [, init] = at(fetchMock.mock.calls, 0);
 		expect(JSON.parse(init.body)).toEqual([
 			{ taskType: "authentication", apiKey: "rw-test" },
 		]);

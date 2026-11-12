@@ -56,7 +56,7 @@ describe("deriveArtStyle", () => {
 		const style = await deriveArtStyle(model, ["https://example.com/a.jpg"]);
 
 		expect(style).toBe("Soft watercolor, pastel palette.");
-		expect(model.generate.mock.calls[0][0]).toMatchObject({
+		expect(model.generate.mock.calls[0]?.[0]).toMatchObject({
 			referenceImages: ["https://example.com/a.jpg"],
 		});
 	});

@@ -42,7 +42,7 @@ describe("buildStoryboardItems", () => {
 	it("keeps scenes that have no segment yet", () => {
 		const items = buildStoryboardItems([scene("a", ["narration"])], []);
 		expect(items).toHaveLength(1);
-		expect(items[0].foreground).toBeNull();
+		expect(items[0]?.foreground).toBeNull();
 	});
 
 	it("picks the scene's foreground element", () => {
@@ -50,6 +50,6 @@ describe("buildStoryboardItems", () => {
 			[scene("a", ["narration", "image"])],
 			[],
 		);
-		expect(items[0].foreground?.id).toBe("a-1");
+		expect(items[0]?.foreground?.id).toBe("a-1");
 	});
 });

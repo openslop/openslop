@@ -10,6 +10,7 @@ const { createAnthropic } = vi.hoisted(() => ({ createAnthropic: vi.fn() }));
 vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
 
 import { AnthropicLLM } from "../llm/anthropic";
+import { at } from "@/lib/utils";
 
 const MODEL_ID = "claude-opus-5";
 
@@ -63,7 +64,7 @@ function streamWith(deltas: string[], tail: LanguageModelV3StreamPart[] = []) {
 	};
 }
 
-const lastCall = () => calls[0];
+const lastCall = () => at(calls, 0);
 const userContent = () => lastCall().prompt.at(-1)?.content;
 
 describe("AnthropicLLM", () => {

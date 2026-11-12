@@ -13,10 +13,11 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import type { CanvasEditor, ContentElement } from "@/lib/canvas/types";
 import { withCharacterRefs } from "../plugins/with-character-refs";
 import { content, scene, seedScene } from "./fixtures";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 const editorWith = (element: ContentElement): CanvasEditor => {
 	const editor = withCharacterRefs(withReact(createEditor()));
-	editor.defaultModels = () => ({});
+	editor.defaultModels = () => resolveDefaultModels();
 	seedScene(editor, scene([element]));
 	return editor;
 };

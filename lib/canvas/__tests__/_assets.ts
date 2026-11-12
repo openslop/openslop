@@ -6,6 +6,7 @@ import { isAssetElement, isContentElement } from "../guards";
 import { splitAttributes } from "../element-attributes";
 import { getElementBodyText } from "../osml-serializer";
 import type { AssetElement, AssetType, ContentElement } from "../types";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 /** An asset as the canvas holds it, named when it belongs to a character. */
 export const asset = <T extends AssetType>(
@@ -37,7 +38,7 @@ export function makeEditor(
 	defaultModels: ConnectorModels = {},
 ): Editor {
 	const editor = createEditor();
-	editor.defaultModels = () => defaultModels;
+	editor.defaultModels = () => resolveDefaultModels({ project: defaultModels });
 	editor.children = children;
 	return editor;
 }

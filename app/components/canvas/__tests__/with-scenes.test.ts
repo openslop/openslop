@@ -6,6 +6,7 @@ import { withNodeId } from "../plugins/with-node-id";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { isScene } from "@/lib/canvas/scenes";
 import { content, scene, shape } from "./fixtures";
+import { at } from "@/lib/utils";
 
 function makeEditor() {
 	return withNodeId(withScenes(withReact(createEditor())));
@@ -17,7 +18,7 @@ function setChildren(editor: Editor, children: Element[]) {
 			Transforms.removeNodes(editor, { at: [0] });
 		}
 		for (let i = 0; i < children.length; i++) {
-			Transforms.insertNodes(editor, children[i], { at: [i] });
+			Transforms.insertNodes(editor, at(children, i), { at: [i] });
 		}
 	});
 	Editor.normalize(editor, { force: true });

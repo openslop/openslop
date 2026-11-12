@@ -8,6 +8,7 @@ import {
 	type Scene,
 } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 
 // Real useCallback semantics: the value survives only while its deps are
 // identical, which is the whole subject of these tests.
@@ -35,7 +36,7 @@ vi.mock("react", () => ({
 // One editor for the life of a test, as Slate's own is: only `children` is
 // swapped, and that swap is what a document revision means.
 const editor = createEditor();
-editor.defaultModels = () => ({});
+editor.defaultModels = () => resolveDefaultModels();
 let children: Descendant[] = [];
 Object.defineProperty(editor, "children", {
 	get: () => children,

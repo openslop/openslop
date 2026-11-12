@@ -11,6 +11,7 @@ import {
 import { toCaption } from "@/lib/captions/word-captions";
 import { lineText } from "@/lib/captions/caption-layout";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
+import { at } from "@/lib/utils";
 
 function el(
 	id: string,
@@ -143,7 +144,9 @@ describe("buildTimelineRows", () => {
 		);
 		const rows = buildTimelineRows(layout);
 		expect(rows.filter((row) => row.id === "foreground")).toHaveLength(1);
-		const [a, b] = rows[0].clips;
+		const { clips } = at(rows, 0);
+		const a = at(clips, 0);
+		const b = at(clips, 1);
 		expect(a.start + a.duration - b.start).toBeCloseTo(
 			layout.transitionDurationSec,
 		);
@@ -160,7 +163,7 @@ describe("buildTimelineRows", () => {
 			(row) => row.id === "overlay",
 		);
 		expect(voice).toHaveLength(1);
-		expect(voice[0].clips).toHaveLength(2);
+		expect(voice[0]?.clips).toHaveLength(2);
 	});
 
 	it("drops a clip that starts after the video ends", () => {
@@ -209,7 +212,7 @@ describe("buildTimelineRows", () => {
 		const rows = buildTimelineRows(layoutOf([el("voice", "narration")]));
 		const visual = rows.find((row) => row.id === "foreground");
 		expect(visual?.clips).toHaveLength(1);
-		expect(isBlankScene(visual?.clips[0].element as ResolvedElement)).toBe(
+		expect(isBlankScene(visual?.clips[0]?.element as ResolvedElement)).toBe(
 			true,
 		);
 	});
@@ -232,7 +235,7 @@ describe("buildCaptionRows", () => {
 	it("lays one clip per line, the last ending with its last word", () => {
 		const [row] = buildCaptionRows(twoPerLine(el("a", "image"), narration));
 		expect(
-			row.clips.map(({ start, duration, line }) => ({
+			row?.clips.map(({ start, duration, line }) => ({
 				start,
 				duration,
 				text: lineText(line),

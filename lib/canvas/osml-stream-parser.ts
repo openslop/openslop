@@ -5,6 +5,7 @@ import { createCanvasElement } from "./create-canvas-element";
 import { makeNodeId } from "./node-utils";
 import type { CanvasElement, ElementType } from "./types";
 import { unescapeXml } from "./xml-escape";
+import { at } from "@/lib/utils";
 
 const MIN_BUFFER_LENGTH = 5;
 const TAG_PATTERN = /<(\/?)([^<>/][^<>]*?)>/g;
@@ -46,11 +47,11 @@ export class OSMLStreamParser {
 	private parseTags(): void {
 		let lastIndex = 0;
 		for (const match of this.buffer.matchAll(TAG_PATTERN)) {
-			const [matched, closing, openTag] = match;
+			const [matched, closing] = match;
 			const text = this.buffer.slice(lastIndex, match.index);
 			if (text.trim()) this.grow(text);
 			if (closing) this.current = undefined;
-			else this.open(openTag);
+			else this.open(at(match, 2));
 			lastIndex = match.index + matched.length;
 		}
 		this.buffer = this.buffer.slice(lastIndex);

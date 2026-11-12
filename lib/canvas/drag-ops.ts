@@ -2,6 +2,7 @@ import { Editor, Path, Transforms, type NodeEntry } from "slate";
 import { findBlockById } from "./editor-ops";
 import { isScene } from "./scenes";
 import type { CanvasBlock } from "./types";
+import { at } from "@/lib/utils";
 
 /** What a sortable card tells dnd-kit about itself. */
 export type SortableData = { type: "scene" | "content"; sceneId: string };
@@ -62,5 +63,5 @@ export function crossSceneTransfer(
 	const overEntry = findBlockById(editor, String(over.id));
 	if (!overEntry) return null;
 	const slot = contentSlot(overEntry);
-	return { sceneId: to.sceneId, atIndex: slot[slot.length - 1] };
+	return { sceneId: to.sceneId, atIndex: at(slot, -1) };
 }

@@ -17,7 +17,7 @@ describe("estimateVisualSpans", () => {
 			words: 90,
 			dialogueIds: [narration.id],
 		});
-		expect(second.words).toBe(180);
+		expect(second?.words).toBe(180);
 	});
 
 	it("counts dialogue across scene boundaries, since only a visual ends a span", () => {
@@ -39,8 +39,8 @@ describe("estimateVisualSpans", () => {
 			),
 		]);
 
-		expect(video.durationSec).toBe(8);
-		expect(still.durationSec).toBeUndefined();
+		expect(video?.durationSec).toBe(8);
+		expect(still?.durationSec).toBeUndefined();
 	});
 
 	it("ignores silent elements and dialogue before the first visual", () => {

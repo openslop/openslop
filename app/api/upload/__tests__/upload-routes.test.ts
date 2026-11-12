@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { at } from "@/lib/utils";
 
 const mockGetUser = vi.fn();
 vi.mock("@/lib/api/auth", () => ({
@@ -28,7 +29,7 @@ function makeRequest(body: unknown, kind: string) {
 }
 
 async function tokenOptions() {
-	const [{ onBeforeGenerateToken }] = mockHandleUpload.mock.calls[0];
+	const [{ onBeforeGenerateToken }] = at(mockHandleUpload.mock.calls, 0);
 	return onBeforeGenerateToken();
 }
 

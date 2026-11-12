@@ -36,6 +36,7 @@ import { DEFAULT_DURATION_SEC } from "@/lib/canvas/types";
 import { chargedUsd } from "../base";
 import { RunwareVideo } from "../video/runware";
 import { spyAssetBundle } from "./_asset-bundle";
+import { at } from "@/lib/utils";
 
 const MODEL = "bytedance:seedance@2.0-fast";
 const SEEDANCE_25 = "bytedance:seedance@2.5";
@@ -511,11 +512,11 @@ describe("RunwareVideo", () => {
 					prompt: "they talk",
 					characterAssets: [
 						{
-							...pictured("Blip")[0],
+							...at(pictured("Blip"), 0),
 							voice: { url: "https://audio/blip.mp3", durationSec: 4 },
 						},
 						{
-							...pictured("Long")[0],
+							...at(pictured("Long"), 0),
 							voice: { url: "https://audio/long.mp3", durationSec: 40 },
 						},
 					],

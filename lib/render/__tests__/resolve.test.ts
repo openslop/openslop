@@ -8,6 +8,7 @@ import {
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { splitAttributes } from "@/lib/canvas/element-attributes";
 import { toCaption } from "@/lib/captions/word-captions";
+import { at } from "@/lib/utils";
 
 function makeElement(
 	id: string,
@@ -122,7 +123,7 @@ describe("resolveElements", () => {
 			(id) => snapshots[id] ?? makeSnapshot({ result: null }),
 		);
 		expect(resolved).toHaveLength(1);
-		expect(resolved[0].id).toBe("img1");
+		expect(resolved[0]?.id).toBe("img1");
 	});
 
 	it("returns empty for no elements", () => {
@@ -169,8 +170,8 @@ describe("resolveElements", () => {
 			makeElement("s2", "sound"),
 		];
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].loops).toBe(4);
-		expect(resolved[1].loops).toBe(1);
+		expect(resolved[0]?.loops).toBe(4);
+		expect(resolved[1]?.loops).toBe(1);
 	});
 
 	it("clamps invalid loops attributes to at least 1", () => {
@@ -179,8 +180,8 @@ describe("resolveElements", () => {
 			makeElement("s2", "sound", { loops: "not-a-number" }),
 		];
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].loops).toBe(1);
-		expect(resolved[1].loops).toBe(1);
+		expect(resolved[0]?.loops).toBe(1);
+		expect(resolved[1]?.loops).toBe(1);
 	});
 
 	it("reads volume from the attributes (default 10)", () => {
@@ -190,9 +191,9 @@ describe("resolveElements", () => {
 			makeElement("s3", "music"),
 		];
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].volume).toBe(3);
-		expect(resolved[1].volume).toBe(0);
-		expect(resolved[2].volume).toBe(10);
+		expect(resolved[0]?.volume).toBe(3);
+		expect(resolved[1]?.volume).toBe(0);
+		expect(resolved[2]?.volume).toBe(10);
 	});
 
 	it("clamps volume to 0-10 and falls back on invalid values", () => {
@@ -202,9 +203,9 @@ describe("resolveElements", () => {
 			makeElement("s3", "music", { volume: "not-a-number" }),
 		];
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].volume).toBe(0);
-		expect(resolved[1].volume).toBe(10);
-		expect(resolved[2].volume).toBe(10);
+		expect(resolved[0]?.volume).toBe(0);
+		expect(resolved[1]?.volume).toBe(10);
+		expect(resolved[2]?.volume).toBe(10);
 	});
 
 	it("keeps a blank volume attribute audible in the rendered layout", () => {
@@ -213,8 +214,8 @@ describe("resolveElements", () => {
 			makeElement("s2", "music", { loops: "" }),
 		];
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].volume).toBe(10);
-		expect(resolved[1].loops).toBe(1);
+		expect(resolved[0]?.volume).toBe(10);
+		expect(resolved[1]?.loops).toBe(1);
 	});
 
 	it("skips all elements when none have results", () => {
@@ -243,7 +244,7 @@ describe("resolveElements", () => {
 		};
 		const bySnapshot = (id: string) => snapshots[id] ?? makeSnapshot();
 		const resolveOne = (element: ContentElement) =>
-			resolveElements([wrap([element])], bySnapshot)[0];
+			at(resolveElements([wrap([element])], bySnapshot), 0);
 
 		it("captions an element with the words on its own result, until it ends", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { at } from "@/lib/utils";
 
 /** Multiples of fit-to-width; the timeline never zooms below the whole video. */
 const ZOOM_LEVELS = [
@@ -12,7 +13,7 @@ export function useTimelineZoom(
 	viewportWidth: number,
 ) {
 	const [level, setLevel] = useState(0);
-	const zoom = ZOOM_LEVELS[level];
+	const zoom = at(ZOOM_LEVELS, level);
 	const fitPxPerSec =
 		totalDurationSec > 0 ? viewportWidth / totalDurationSec : 0;
 

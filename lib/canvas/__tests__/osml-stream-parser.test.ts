@@ -5,6 +5,7 @@ import { isAssetElement } from "../guards";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
 import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
+import { at } from "@/lib/utils";
 
 const read = (...chunks: string[]) => {
 	const parser = new OSMLStreamParser();
@@ -62,10 +63,9 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("ends an element at a closing tag split across chunks", () => {
-		const [[narration]] = read(
-			"<narration>Once</narr",
-			"ation> and some",
-			" stray words",
+		const narration = at(
+			at(read("<narration>Once</narr", "ation> and some", " stray words"), 0),
+			0,
 		);
 
 		expect(narration?.text).toBe("Once");
@@ -80,15 +80,18 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("flushes plain text after the buffer threshold", () => {
-		const [, [grown]] = read("<narration>", "Some long narration text here");
+		const grown = at(
+			at(read("<narration>", "Some long narration text here"), 1),
+			0,
+		);
 
 		expect(grown?.text).toBe("Some long narration text here");
 	});
 
 	it("decodes an entity split across chunk boundaries", () => {
-		const [, [grown]] = read(
-			"<narration>Rock &a",
-			"mp; Roll forever</narration>",
+		const grown = at(
+			at(read("<narration>Rock &a", "mp; Roll forever</narration>"), 1),
+			0,
 		);
 
 		expect(grown?.text).toBe("Rock & Roll forever");
@@ -115,8 +118,9 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("takes an id attribute as the element's id and gives the rest one", () => {
-		const [[given, made]] = read(
-			'<sound id="abc">thunder</sound><sound>rain</sound>',
+		const [given, made] = at(
+			read('<sound id="abc">thunder</sound><sound>rain</sound>'),
+			0,
 		);
 
 		expect(given).toMatchObject({ id: "abc", attrs: {} });
@@ -124,7 +128,10 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("keeps the text as written", () => {
-		const [[element]] = read("<narration> Once upon\n a time </narration>");
+		const [element] = at(
+			read("<narration> Once upon\n a time </narration>"),
+			0,
+		);
 
 		expect(element?.text).toBe(" Once upon\n a time ");
 	});
@@ -134,21 +141,26 @@ describe("parseOSML", () => {
 	it("parses a complete OSML string in one shot", () => {
 		const nodes = parseOSML("<narration>Once upon a time</narration>");
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("narration");
-		expect(getElementText(nodes[0])).toContain("Once upon a time");
+		expect(nodes[0]?.type).toBe("narration");
+		expect(getElementText(at(nodes, 0))).toContain("Once upon a time");
 	});
 
 	it("keeps the text as written", () => {
-		const [node] = parseOSML("<narration> Once upon\n a time </narration>");
+		const node = at(
+			parseOSML("<narration> Once upon\n a time </narration>"),
+			0,
+		);
 		expect(getElementBodyText(node)).toBe(" Once upon\n a time ");
 	});
 
 	it("parses asset tags into assets, keeping their ids, attributes and text", () => {
 		const pinned = { provider: "runware", model: "Seedream 5 Lite" };
-		const [avatar, style] = parseOSML(
+		const nodes = parseOSML(
 			'<asset_avatar name="Mia" provider="runware" model="Seedream 5 Lite">Brown hair</asset_avatar>' +
 				'<asset_style id="e9">ink wash</asset_style>',
 		);
+		const avatar = at(nodes, 0);
+		const style = at(nodes, 1);
 
 		expect(isAssetElement(avatar) && isAssetElement(style)).toBe(true);
 		expect(avatar).toMatchObject({
@@ -190,11 +202,11 @@ describe("parseOSML", () => {
 			image: pinned,
 		});
 
-		expect(avatar.generationAttributes).toEqual({ name: "Mia", ...pinned });
+		expect(avatar?.generationAttributes).toEqual({ name: "Mia", ...pinned });
 	});
 
 	it("parses attributes correctly", () => {
-		const [node] = parseOSML('<sound loops="3" volume="8">boom</sound>');
+		const node = at(parseOSML('<sound loops="3" volume="8">boom</sound>'), 0);
 
 		expect(flatAttributes(node)).toMatchObject({
 			loops: "3",
@@ -203,7 +215,7 @@ describe("parseOSML", () => {
 	});
 
 	it("replaces an attribute value the schema doesn't offer with its default", () => {
-		const [node] = parseOSML('<sound volume="loud">boom</sound>');
+		const node = at(parseOSML('<sound volume="loud">boom</sound>'), 0);
 
 		expect(flatAttributes(node).volume).toBe("2");
 	});
@@ -213,20 +225,21 @@ describe("parseOSML", () => {
 			"<sound>thunder</sound><music>epic orchestral</music>",
 		);
 
-		expect(flatAttributes(nodes[0]).loops).toBe("1");
-		expect(flatAttributes(nodes[1]).loops).toBe("1");
+		expect(flatAttributes(at(nodes, 0)).loops).toBe("1");
+		expect(flatAttributes(at(nodes, 1)).loops).toBe("1");
 	});
 
 	it("preserves an explicit id attribute as node.id", () => {
-		const [node] = parseOSML('<sound id="abc">thunder</sound>');
+		const node = at(parseOSML('<sound id="abc">thunder</sound>'), 0);
 
 		expect(node.id).toBe("abc");
 		expect(flatAttributes(node).id).toBeUndefined();
 	});
 
 	it("parses <video> with a startFrame attribute", () => {
-		const [node] = parseOSML(
-			'<video startFrame="previous">a dark forest</video>',
+		const node = at(
+			parseOSML('<video startFrame="previous">a dark forest</video>'),
+			0,
 		);
 
 		expect(node.type).toBe("video");
@@ -235,7 +248,7 @@ describe("parseOSML", () => {
 	});
 
 	it("hydrates the schema's model", () => {
-		const [node] = parseOSML("<image>a sunset</image>");
+		const node = at(parseOSML("<image>a sunset</image>"), 0);
 
 		expect(flatAttributes(node)).toMatchObject(DEFAULT_IMAGE_MODEL);
 	});
@@ -243,8 +256,11 @@ describe("parseOSML", () => {
 	// A saved project is reloaded through here, so a clobbered model would be a
 	// model pick that never survives a reload.
 	it("keeps a model the OSML names over the schema default", () => {
-		const [node] = parseOSML(
-			'<video provider="runware" model="Seedance 2 Fast">a sunset</video>',
+		const node = at(
+			parseOSML(
+				'<video provider="runware" model="Seedance 2 Fast">a sunset</video>',
+			),
+			0,
 		);
 		expect(flatAttributes(node)).toMatchObject({
 			provider: "runware",
@@ -253,7 +269,10 @@ describe("parseOSML", () => {
 	});
 
 	it("replaces a model the catalog no longer offers", () => {
-		const [node] = parseOSML('<video model="Slop Video v0">a sunset</video>');
+		const node = at(
+			parseOSML('<video model="Slop Video v0">a sunset</video>'),
+			0,
+		);
 		expect(flatAttributes(node)).toMatchObject(DEFAULT_VIDEO_MODEL);
 	});
 });

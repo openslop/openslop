@@ -13,6 +13,7 @@ import {
 } from "@/lib/render/caption-rule";
 import { allSequences, totalDuration } from "@/lib/render/sequences";
 import type { Sequence, RenderLayout } from "@/lib/render/types";
+import { at, keysOf } from "@/lib/utils";
 
 export type TimelineClip = Sequence & { key: string };
 
@@ -68,7 +69,7 @@ export function packLanes<
 	const lanes: T[][] = [];
 	for (const clip of clips) {
 		const lane = lanes.find((candidate) => {
-			const last = candidate[candidate.length - 1];
+			const last = at(candidate, -1);
 			return (
 				last.start + totalDuration(last) - toleranceSec - TOUCH_EPSILON <=
 				clip.start
@@ -82,7 +83,7 @@ export function packLanes<
 
 /** Roles with nothing to show are dropped. */
 export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
-	return (Object.keys(ROWS) as ElementRole[]).flatMap((role) => {
+	return keysOf(ROWS).flatMap((role) => {
 		const lanes = packLanes(
 			sequencesForRole(layout, role),
 			layout.transitionDurationSec,
