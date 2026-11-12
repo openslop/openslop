@@ -6,11 +6,7 @@ import {
 	VIDEO_LENGTH_SPECS,
 	VIDEO_LENGTH_TARGETS,
 } from "@/lib/project/video-length";
-import {
-	VIDEO_FORMAT_CHOICES,
-	VIDEO_FORMAT_SPECS,
-	VIDEO_FORMAT_TARGETS,
-} from "@/lib/project/video-format";
+import { VIDEO_FORMAT_CHOICES } from "@/lib/project/video-format";
 import { Hourglass } from "@/components/ui/icon";
 import { conjunction } from "@/lib/format";
 import { defineTool } from "./define-tool";
@@ -27,9 +23,7 @@ export const updateScriptSettings = defineTool({
 	  - length: how long the video runs, as a spoken-word budget.
 	    - auto: no budget. The script runs as long as the material needs.
 	${VIDEO_LENGTH_TARGETS.map((length) => `    - ${length}: ${VIDEO_LENGTH_SPECS[length].minWords} to ${VIDEO_LENGTH_SPECS[length].maxWords} words`).join("\n")}
-	  - format: what the script is made of.
-	    - auto: not classified yet.
-	${VIDEO_FORMAT_TARGETS.map((format) => `    - ${format}: ${VIDEO_FORMAT_SPECS[format].summary}`).join("\n")}
+	  - format: one of the Formats of the finished video, or auto when not chosen yet.
 	`,
 	input: z
 		.object({

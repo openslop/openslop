@@ -228,9 +228,7 @@ describe("buildScriptPrompt", () => {
 		);
 
 		expect(prompt).toBe(script);
-		expect(system).toContain(
-			"If no format is set, pick the closest one from the script and notes",
-		);
+		expect(system).toContain("If no format is set, pick the closest one");
 		expect(system).toContain(notes);
 		expect(system).not.toContain("The format is");
 	});

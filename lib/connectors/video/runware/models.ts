@@ -1,4 +1,5 @@
-const ANIMATION = "Best for animation and anything that isn't live action.";
+const ANIMATION =
+	"Best for animation and anything that isn't live action. Characters speak many languages.";
 
 const LIVE_ACTION =
 	"Best for live action. Characters can only speak English, Chinese, Japanese, Korean or Spanish.";
