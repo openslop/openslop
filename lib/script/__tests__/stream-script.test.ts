@@ -104,6 +104,22 @@ describe("streamScript", () => {
 		expect(systems[0]).toContain("es (ISO 639-1)");
 	});
 
+	it("loads the template prose when writing a script", async () => {
+		const editor = makeEditor();
+		const settings = ScriptSettingsSchema.parse({ template: "pov-life" });
+		const { llm, prompts, systems } = llmStreaming([
+			["<narration>A new story</narration>"],
+		]);
+
+		await streamScript(editor, settings, llm, brief);
+
+		expect(systems[0]).toContain(
+			"The main character (you) is always called Protagonist",
+		);
+		expect(prompts[0]).toContain("<user_input>a lighthouse</user_input>");
+		expect(prompts[0]).toContain("Level 1: The Kid with the Idea");
+	});
+
 	it("lands each burst of chunks as one change to the document", async () => {
 		const editor = makeEditor();
 		editor.onChange = vi.fn();

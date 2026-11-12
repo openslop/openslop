@@ -1,0 +1,31 @@
+{
+	"id": "pov-life",
+	"length": "5-10m",
+	"name": "POV Life",
+	"promptPrefix": "POV: Your life at every stage as a",
+	"color": "#F59E0B",
+	"style": {
+		"description": "2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients"
+	},
+	"referenceImages": ["pov-life-stages-2", "pov-life-stages-3"],
+	"characters": {
+		"Protagonist": {
+			"description": "American male, neutral accent",
+			"appearance": "male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots",
+			"avatar": "pov-life-stages-4"
+		}
+	},
+	"narration": {
+		"gender": "masculine",
+		"age": "adult",
+		"pitch": "medium",
+		"accent": "american",
+		"description": "wise"
+	},
+	"showcase": {
+		"image": "pov-life-stages-1",
+		"title": "POV Your Life as A...",
+		"description": "Long-form, second-person POV voiceover with cartoon illustrations that walk a viewer through ascending stages of a role, career, or world",
+		"examplePrompt": "tech CEO"
+	}
+}

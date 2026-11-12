@@ -1,0 +1,11 @@
+Each template has three files:
+
+- `template.json`: display metadata and project seeds, parsed by `TemplateSchema` in `../templates.ts`. Image fields are asset names under the public Blob store's `/assets/upload/template/` directory.
+- `system-prompt.md`: instructions for script generation.
+- `example.md`: the example story used to build the script prompt.
+
+Register new metadata in `../templates.ts` and statically import its Markdown in `../prompts.ts`. Client components import only `templates.ts`; script generation loads the prompt builder on demand, which imports `prompts.ts`.
+
+Markdown is imported as raw text by Next.js and Vitest. Remotion does not import template data. These files are excluded from Prettier so formatting cannot rewrite prompt text. Template prose is trimmed at load; mock fixtures preserve their exact whitespace.
+
+Run `npm run test:run -- lib/templates lib/script/prompt/__tests__/build.test.ts` after editing. The built prompt snapshots cover every template. Update them deliberately when changing prose.

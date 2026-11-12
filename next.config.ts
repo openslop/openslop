@@ -22,6 +22,13 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+	turbopack: {
+		rules: { "*.md": { type: "text" } },
+	},
+	webpack(config) {
+		config.module.rules.push({ test: /\.md$/, type: "asset/source" });
+		return config;
+	},
 	devIndicators: { position: "bottom-right" },
 	images: {
 		remotePatterns: [
