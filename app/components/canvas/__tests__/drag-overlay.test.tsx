@@ -61,4 +61,13 @@ describe("DragOverlayPreview", () => {
 		expect(document.body.textContent).not.toContain("Unknown character: Mia");
 		expect(document.body.textContent).toContain("Unknown character: Kai");
 	});
+
+	it("draws the gutter's own insert and drag buttons", async () => {
+		await drag(image());
+
+		for (const label of ["Insert item", "Drag to reorder"]) {
+			const button = document.querySelector(`[aria-label="${label}"]`);
+			expect(button?.className).toContain("size-7");
+		}
+	});
 });

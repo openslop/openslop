@@ -76,11 +76,7 @@ export function VolumeControl() {
 				ariaLabel={muted ? "Unmute" : "Mute"}
 				disabled={!player}
 			>
-				{muted || volume === 0 ? (
-					<VolumeX className="h-4 w-4" />
-				) : (
-					<Volume2 className="h-4 w-4" />
-				)}
+				{muted || volume === 0 ? <VolumeX /> : <Volume2 />}
 			</IconButton>
 			<div className="hidden @[420px]:block">
 				<ScrubBar
@@ -109,7 +105,7 @@ export function FullscreenButton() {
 			ariaLabel="Fullscreen"
 			disabled={!player}
 		>
-			<Maximize className="h-4 w-4" />
+			<Maximize />
 		</IconButton>
 	);
 }

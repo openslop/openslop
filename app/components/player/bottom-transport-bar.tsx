@@ -63,7 +63,7 @@ function BottomTransportBarComponent() {
 						disabled={!canSeek}
 						onClick={() => seekToAdjacentScene(-1)}
 					>
-						<ChevronsLeft className="h-4 w-4" />
+						<ChevronsLeft />
 					</TooltipIconButton>
 					<TooltipIconButton
 						label={playing ? "Pause" : "Play"}
@@ -73,18 +73,14 @@ function BottomTransportBarComponent() {
 							player?.toggle();
 						}}
 					>
-						{playing ? (
-							<Pause className="h-4 w-4" />
-						) : (
-							<Play className="h-4 w-4" />
-						)}
+						{playing ? <Pause /> : <Play />}
 					</TooltipIconButton>
 					<TooltipIconButton
 						label="Next scene"
 						disabled={!canSeek}
 						onClick={() => seekToAdjacentScene(1)}
 					>
-						<ChevronsRight className="h-4 w-4" />
+						<ChevronsRight />
 					</TooltipIconButton>
 				</div>
 
