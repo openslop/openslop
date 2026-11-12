@@ -6,6 +6,7 @@ import type { VisualSpan } from "@/lib/render/visual-spans";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
 import type { Provider } from "@/lib/connectors/types";
+import type { ModelDefaults } from "@/lib/connectors/models";
 import type { CaptionsReport } from "@/lib/captions/auto-captions";
 
 export const PROJECT_SETTERS = [
@@ -35,6 +36,7 @@ export type AgentToolContext = Pick<
 	) => Promise<string>;
 	readAssets: () => AssetElement[];
 	readProject: () => ProjectData;
+	modelDefaults: () => ModelDefaults;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;

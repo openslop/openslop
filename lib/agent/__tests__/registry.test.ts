@@ -54,6 +54,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	isScriptEmpty: () => false,
 	readAssets: () => [],
 	readProject: () => project(),
+	modelDefaults: () => ({}),
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
@@ -650,6 +651,8 @@ describe("executeToolCall", () => {
 });
 
 describe("model tools", () => {
+	const SEEDANCE = { provider: "openslop", model: "Seedance 2 Fast" } as const;
+	const KLING = { provider: "openslop", model: "Kling 3 Omni" } as const;
 	const run = (toolName: string, input: unknown, over = {}) =>
 		executeToolCall({ toolName, input }, context(over));
 
@@ -705,6 +708,52 @@ describe("model tools", () => {
 		expect(outcome.ok || outcome.errorText).toMatch(/Not a model of that type/);
 		expect(writes).toEqual([]);
 	});
+
+	it("refuses a default model whose provider isn't connected, writing nothing", async () => {
+		const writes: unknown[] = [];
+		const outcome = await run(
+			"set_default_model",
+			{ type: "voice", provider: "openslop", model: "Sonic 3.6" },
+			{
+				isConnected: () => false,
+				updateModels: (models: unknown) => void writes.push(models),
+			},
+		);
+
+		expect(outcome.ok || outcome.errorText).toMatch(/openslop isn't connected/);
+		expect(writes).toEqual([]);
+	});
+
+	it.each([
+		[
+			"recommended",
+			{},
+			"Kling 3 Omni from openslop, OpenSlop's recommendation",
+		],
+		[
+			"account",
+			{ account: { video: SEEDANCE } },
+			"Seedance 2 Fast from openslop, set on the user's account",
+		],
+		[
+			"project",
+			{ project: { video: SEEDANCE }, account: { video: KLING } },
+			"Seedance 2 Fast from openslop, set on this project",
+		],
+	] as const)(
+		"names each type's default and where it was set, from the %s",
+		async (_, defaults, line) => {
+			const outcome = await run(
+				"list_models",
+				{},
+				{ modelDefaults: () => defaults },
+			);
+
+			expect(String(outcome.ok && outcome.output)).toContain(
+				`Videos (type video)\nDefault: ${line}\n`,
+			);
+		},
+	);
 });
 
 describe("SLOPPY_TOOLS", () => {

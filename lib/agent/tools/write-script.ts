@@ -24,7 +24,9 @@ export const writeScript = defineTool({
 		brief: z
 			.string()
 			.min(1)
-			.describe("What the finished video is about, in a sentence or a few."),
+			.describe(
+				"What the finished video is about, from a one-line premise to a full treatment, in the user's language.",
+			),
 	}),
 	output: z.string(),
 	icon: Film,

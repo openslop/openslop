@@ -10,8 +10,8 @@ export const outlineStory = defineTool({
 	  Develop a brief into a full story outline: a high-concept premise, characters, themes,
 	  conflict, twists, and a resolution. A dedicated pass at structure produces noticeably
 	  better stories than writing straight from an idea, so the outline comes back to you to
-	  review and fold into a write_script brief. A runtime it states sets the length when the
-	  project is on auto.
+	  review and fold into a write_script brief. It never sets how long the video runs; do that
+	  with update_script_settings.
 
 	  Reach for it when inventing a narrative: fiction, a fable, a character-driven piece.
 	  Skip it when the user's request is not story-shaped (a documentary, an explainer, a
