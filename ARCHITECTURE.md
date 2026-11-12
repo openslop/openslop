@@ -1,115 +1,86 @@
 # Architecture
 
+OpenSlop aims to be an expert generative AI agent that combines any models, from video, image and voice to music, sound and 3D, into whatever the user imagines, from a single shot to a film, a podcast or an explainer.
+
 ![OpenSlop system architecture](./docs/architecture.svg)
 
-> To edit the diagram, open [`docs/architecture.excalidraw`](./docs/architecture.excalidraw) at [excalidraw.com](https://excalidraw.com), then re-export the SVG to `docs/architecture.svg`.
+> The diagrams are Excalidraw files in [`docs/`](./docs). Edit one at [excalidraw.com](https://excalidraw.com), then re-export its SVG.
+
+The project lives in the browser as one document. The server stays thin: it proxies models, runs generation jobs, renders and saves.
 
 ## Flows
 
-1. **Write.** Sloppy adds the assets a script needs to the canvas, then sends a prompt to the LLM route, which streams OSML back. The parser inserts elements into the Slate canvas as they arrive.
-2. **Generate.** The client queues stale graph nodes, dependencies first, and posts each to an asset route. The route records a `jobs` row and enqueues it on the Vercel Queue. A worker runs the job's handler, uploads the result to Vercel Blob, and the client polls until it arrives. A video job redelivers itself to poll the vendor.
-3. **Save.** The canvas, the project store (title, render and script settings, pinned models) and the generation snapshots save to the `projects` row, with autosaved history in `canvas_versions`.
-4. **Render.** Remotion Lambdas render chunks in parallel into an MP4 in S3.
+The numbers match the diagram.
 
-## Sloppy
-
-The agent in the editor's left panel (`app/components/sloppy/`, domain in `lib/agent/`, turns run by `lib/api/agent-turn.ts`). The server streams text and tool calls; the client runs each tool against the Slate editor and posts the result back until the model answers in text. Only the client writes the project.
-
-## Vocabulary
-
-- **Model**: a `{ provider, model }` pair, such as Claude Opus 5 on Anthropic.
-- **Provider**: the vendor serving a model (Anthropic, Runware, ElevenLabs, Cartesia, or OpenSlop's hosted gateway). A user connects one by storing a key.
-- **Provider key**: a user's credential for a provider, one row per user and provider in `provider_keys`, stored in Vault.
-- **Connector** (internal): turns a canvas element into a generation request. It decides which attributes the element exposes for its model.
-
-## Layers
-
-- **Connectors** (`lib/connectors/`): what the editor calls. One class per media type, extended by plugins.
-- **Gateways** (`lib/gateway/`): HTTP clients from connectors to our routes. `/api/v1` serves models OpenSlop hosts; `/api/third-party` serves models a user brings a key for.
-- **Providers** (`lib/providers/`): server-side vendor adapters, shared by both route families.
-
-## Models and keys
-
-`MODELS[type][provider][name]` in `lib/connectors/models.ts` lists every model. Each element stores its own pair as attributes. Speech speaks on its speaker's `asset_voice` pair, not its own. The `voice` connector type offers the TTS models. Defaults resolve element, then project, then account, then the recommendation.
-
-The two route families are defined in `lib/api/route-families.ts`. `HOSTED` requires API access, takes a model name and uses our keys. `BYOK` requires a session, takes the pair and uses the user's key. A job stores the pair; the worker builds the provider from it.
-
-User keys live in Supabase Vault. They are read by the service role only for the request that uses them and are never sent to a client. A key is verified by calling the vendor.
+1. **Write.** Sloppy, or the user, writes the script into the canvas.
+2. **Generate.** The client queues stale elements; the server runs each as a job and stores the result in Vercel Blob.
+3. **Save.** The canvas, project store and snapshots save to one `projects` row, with autosaved history in `canvas_versions`.
+4. **Render.** The canvas and its results lay out into one Remotion timeline. The Player previews it in the browser; Lambdas render it in parallel chunks to an MP4 in S3.
 
 ## Canvas and generation
 
 ![The canvas model: what block, node, element, scene, content and asset mean, and how they nest](./docs/canvas-model.svg)
 
-> To edit the diagram, open [`docs/canvas-model.excalidraw`](./docs/canvas-model.excalidraw) at [excalidraw.com](https://excalidraw.com), then re-export the SVG to `docs/canvas-model.svg`.
+- **Canvas** (`lib/canvas/`): the Slate document, and the project itself. It saves as OSML, a tag format the LLM writes too, so Sloppy and the user edit the same thing.
+- **Element**: one block on the canvas, with prompt text and attributes. Its type is declared once in `ELEMENT_TYPES`.
+- **Asset element**: an element ahead of the scenes, named `asset_*`: a character's avatar and voice, the art style, the references. It is known by its type and name, and content uses it by reference, so a character looks and sounds the same everywhere.
+- **Scene**: an ordered group of content elements.
+- **Content element**: an element inside a scene that plays on the timeline: narration, character dialogue, image, video, sound, music.
+- **Generation attributes** shape what a model makes (model, duration, voice). **Layout attributes** shape how a result plays (volume, loop, trim, motion). Layout attributes never make an element stale, so editing the layout never costs a regeneration.
 
-The Slate document (`lib/canvas/`) is the project. Each term below means one thing everywhere in the code:
+Generation is a dependency graph built from the canvas (`lib/generation/`):
 
-| Term          | Type                            | Means                                                                                                                                                                                                                                                                          |
-| ------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Canvas**    | `editor.children`               | The Slate document. It is the project.                                                                                                                                                                                                                                         |
-| **Node**      | Slate `Node`                    | Any Slate node: the editor, a block or a text leaf. A _graph node_ (`GenerationNode`) is separate: one per generated element, in `lib/generation/`.                                                                                                                            |
-| **Block**     | `CanvasBlock`                   | A scene or an element.                                                                                                                                                                                                                                                         |
-| **Scene**     | `Scene`                         | A group of content. A scene is a block, not an element.                                                                                                                                                                                                                        |
-| **Element**   | `CanvasElement`, `ElementOf<T>` | Content or an asset. It holds text and attributes, and its type is an `ElementType` declared in `ELEMENT_TYPES`.                                                                                                                                                               |
-| **Content**   | `ContentElement`                | An element inside a scene. It plays on the timeline; its type is declared in `CONTENT_TYPES` with a role and a layer.                                                                                                                                                          |
-| **Asset**     | `AssetElement`                  | An element ahead of the scenes. Its type is declared in `ASSET_TYPES` and named `asset_*`.                                                                                                                                                                                     |
-| **Generated** | `GeneratedElement`              | An element whose type names a connector: every content type, `asset_avatar` and `asset_voice`. Each is a node in the generation graph.                                                                                                                                         |
-| **Metadata**  |                                 | An asset with no connector: `asset_style` and `asset_references`. Plugins read it; it is never a graph node.                                                                                                                                                                   |
-| **Character** |                                 | An `asset_avatar` and/or an `asset_voice` sharing a `name`. The avatar's text is how they look; the voice's traits are what its search looks for, and its result is the voice found or picked, with a preview to hear it by. The narrator is the `asset_voice` named Narrator. |
+- **Connector** (`lib/connectors/`): turns an element into a generation request, one per media type (LLM, image, video, TTS, voice, STT, music, sound).
+- **Plugins** (`lib/connectors/registry.ts`): per-type behaviour (extra dependencies, metadata reads, prompt hooks) added to the graph instead of special cases in it.
+- **Graph node**: one per generated element, holding its inputs and edges to the elements it uses, so a video depends on its character's avatar. A node is stale when it has no result, a dependency regenerated, or its inputs changed.
+- **Queue** (`GenerationQueue`): runs stale nodes, dependencies first, with a concurrency limit per media type. It rebuilds each node from the live canvas when its job starts, so it never generates from an old prompt.
+- **Snapshot store** (`SnapshotStore`): each element's generation state and the results it has had, keyed by element id. It lives apart from the canvas so typing never churns results and results never rewrite the script. Any past result can be restored from the element's history.
 
-The hierarchy:
+## Project store and media
 
-```
-Canvas
-├─ Asset elements      (block, element, asset)
-└─ Scenes              (block)
-   └─ Content elements (block, element, content)
-      └─ Text leaves   (node)
-```
+- **Project store** (`lib/project/`): a Zustand store for what is not on the canvas: the title, video and script settings, pinned models and media. It owns saving and version history.
+- **Media**: the project's own files, apart from the canvas. Uploads land there through `useMediaUpload`. Every take generated in the Media panel lands there too, via `useAddDraftTakesToMedia`. An item is named after its file, or its type for a take, and removing one never touches the elements that use its URL.
 
-Assets come first, then the scenes. An asset is known by its type and name, never its id, and there is one of each. The asset strip above the script shows the assets, one tile per character, and their nodes stay out of the caret's reach. A type generates, and takes a model, when its spec names a connector. Content takes its connector's attributes; an asset's are its own (`ASSET_ATTRIBUTES` in `lib/canvas/element-connector.ts`).
+## Sloppy
 
-`lib/project/` keeps what is not on the canvas in a Zustand store: the title, the render settings (aspect ratio, captions, caption style, transition), the script settings (language, length, format, template), the project's pinned default models and its media. It also owns saving and version history.
+Sloppy is the agent in the editor's left panel, with a client-side harness:
 
-**Media** holds the project's own files, apart from the canvas: every image, video or audio file the user uploads, whether to the Media panel, an element, a start frame or the references, lands there through `useMediaUpload`, and so does every take generated in the Media panel. Each item is known by a unique name taken from its file, or from its type for a generated take. Removing an item never touches the elements that use its URL.
+- The server (`lib/api/agent-turn.ts`) streams the model's text and tool calls. Its tools have specs but no executors.
+- The browser runs each tool (`lib/agent/tools/`) against the canvas and the project store, then posts the result back, until the model answers in text.
 
-Each generated element is a node in a dependency graph (`lib/generation/`). A node holds the element's text, its attributes, the metadata its plugins read, and edges to the generated elements it uses. Per-type behaviour comes from the plugins installed in `lib/connectors/registry.ts`:
+So Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new skill is a new tool in `lib/agent/tools/registry.ts`, not a new pipeline.
 
-- **Dependencies:** edges to other generated elements, such as a character's avatar or the previous visual.
-- **Reads:** metadata values, recorded under a label. A change makes the result stale, and the stale reason names the label.
-- **Hooks:** `transformPrompt`, `beforeGenerate`, `afterGenerate`.
+## Layout and render
 
-A node regenerates when it has no result, when a dependency regenerates, or when its inputs changed. The queue runs dependencies first, with a concurrency limit per connector type, and builds each node again from the live canvas when its job starts.
+- **Layout** (`lib/render/`): resolves the canvas and its snapshots into a timeline: scene lengths from the speech, visuals spanned across them, transitions, captions. It is the one length model, shared by the preview, the render and Sloppy's estimates.
+- **Remotion** (`remotion/`): one composition draws that timeline as React. The Player previews it in the editor; Lambda renders it for export, so the preview is the export.
 
-Each content type's card controls are declared in `app/components/canvas/elements/element-configs.tsx`.
+## Models and keys
+
+- **Model**: a `{ provider, model }` pair, listed in `MODELS` (`lib/connectors/models.ts`). Each element stores its own; defaults resolve element, then project, then account.
+- **Gateway** (`lib/gateway/`): the HTTP client from a connector to our routes. `/api/v1` serves models OpenSlop hosts; `/api/third-party` serves models a user brings a key for.
+- **Provider** (`lib/providers/`): the server-side vendor adapter, shared by both route families.
+- **Job**: an asset route records a `jobs` row and hands it to a Vercel Queue worker, which calls the provider and uploads the result to Vercel Blob. The client polls the job until it settles.
+- **Provider key**: a user's key for a vendor, kept in Supabase Vault, read by the service role only for the request that uses it, and never sent to a client.
+
+`proxy.ts` refreshes the Supabase session; `withSession` and `withApiAccess` guard the routes.
 
 ## Data
 
-Supabase Postgres with row-level security. Queue workers use the service role.
+Supabase Postgres with row-level security. Generated files live in Vercel Blob.
 
-| Table             | Purpose                                                                                                                                                                                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `projects`        | Canvas (as OSML), project store and generation snapshots                                                                                                                                                                     |
-| `canvas_versions` | Autosaved history of those columns                                                                                                                                                                                           |
-| `jobs`            | Async generation jobs: `pending → processing → completed \| failed`, with `cost_usd` once the vendor has charged, so a job that then fails to store its result still books it. A hosted LLM call books a `completed` row too |
-| `provider_keys`   | One row per user and provider: vault id, last four, status                                                                                                                                                                   |
-| `conversations`   | One Sloppy conversation per project                                                                                                                                                                                          |
-| `messages`        | Its turns                                                                                                                                                                                                                    |
-
-Generated assets live in Vercel Blob as public CDN URLs.
-
-## Auth
-
-`proxy.ts` refreshes the Supabase session on each request. `withApiAccess` guards `/api/v1/*` (a session plus the `api_access` grant); the hosted routes that spend use `withHostedBudget`, which also refuses a user over their monthly budget. `withSession` guards every other signed-in route, including BYOK.
+| Table                          | Holds                                              |
+| ------------------------------ | -------------------------------------------------- |
+| `projects`                     | The canvas (as OSML), project store and snapshots  |
+| `canvas_versions`              | Autosaved history of those columns                 |
+| `jobs`                         | Generation jobs, their status and what they cost   |
+| `provider_keys`                | One row per user and provider: vault id, last four |
+| `conversations` and `messages` | One Sloppy conversation per project, and its turns |
 
 ## Adding things
 
-- **Hosted model:** a row in its type's `openslop/models.ts` and a row in `lib/api/providers/openslop.ts`.
-- **BYOK provider:**
-  - an entry in the provider catalog;
-  - a models map under `lib/connectors/<type>/<provider>/`;
-  - a class per type in the vendor table, each with `validate()`.
-- **New media type:** a connector, a provider, a models map, a row in `lib/api/asset-routes.ts`, and two route files.
-- **Per-type generation behaviour:** a plugin, installed in `lib/connectors/registry.ts`.
-
-Tests live in `__tests__` folders next to the code.
+- **Hosted model:** a row in its type's `openslop/models.ts` and in `lib/api/providers/openslop.ts`.
+- **BYOK provider:** a provider catalog entry, a models map under `lib/connectors/<type>/<provider>/`, and a vendor class per type with `validate()`.
+- **Media type:** a connector, a provider, a models map, a row in `lib/api/asset-routes.ts`, and two route files.
+- **Per-type generation behaviour:** a plugin in `lib/connectors/registry.ts`.
+- **Sloppy tool:** a `defineTool` in `lib/agent/tools/`, added to the registry.
