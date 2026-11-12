@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
-import { AlertCircle, Hourglass, Sparkles } from "@/components/ui/icon";
+import { AlertCircleFilled, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,8 @@ import { useElementGeneration } from "./element-generation-context";
 export function StaleIndicator({ reason }: { reason: string }) {
 	return (
 		<SimpleTooltip label={reason}>
-			<Badge variant="tertiary" className="text-label-xs">
-				<AlertCircle />
+			<Badge variant="indicator" size="xs">
+				<AlertCircleFilled size={12} />
 				Stale
 			</Badge>
 		</SimpleTooltip>
