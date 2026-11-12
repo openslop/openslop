@@ -1,4 +1,5 @@
 import compact from "lodash/compact";
+import zipWith from "lodash/zipWith";
 import { z } from "zod";
 import { referenceUrls } from "@/lib/canvas/assets";
 import { isGenerated, type CanvasElement } from "@/lib/canvas/types";
@@ -8,7 +9,6 @@ import { captureFrames } from "@/lib/connectors/video/capture-frames";
 import { FRAME_KEYS, FRAMES } from "@/lib/connectors/video/start-frame";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { elementState, type ElementState } from "./element-state";
-import { at } from "@/lib/utils";
 
 /** `at` is seconds into the video a frame sits; a still has none. */
 const PictureSchema = z.object({ url: z.string(), at: z.number().optional() });
@@ -43,8 +43,8 @@ async function pictures(result: AssetResult): Promise<ResultView["pictures"]> {
 	if (result.imageUrl) return [{ url: result.imageUrl }];
 	if (!result.videoUrl) return [];
 	const urls = await captureFrames(result.videoUrl, FRAME_KEYS);
-	return FRAME_KEYS.map((key, index) => ({
-		url: at(urls, index),
+	return zipWith(FRAME_KEYS, urls, (key, url) => ({
+		url,
 		at: FRAMES[key].at * result.durationSec,
 	}));
 }

@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { fadeRamp } from "../fade-ramp";
-import { at } from "@/lib/utils";
 
 function isStrictlyIncreasing(arr: readonly number[]): boolean {
 	for (let i = 1; i < arr.length; i++) {
-		if (at(arr, i) <= at(arr, i - 1)) return false;
+		if (arr[i]! <= arr[i - 1]!) return false;
 	}
 	return true;
 }

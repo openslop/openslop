@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { at } from "@/lib/utils";
 
 const mockLLMGenerate = vi.fn();
 const mockLLMStream = vi.fn();
@@ -208,7 +207,7 @@ describe("API routes", () => {
 			);
 			expect(res.status).toBe(200);
 			expect(mockOwnsProject).toHaveBeenCalledExactlyOnceWith(PROJECT_ID);
-			const [args] = at(mockCreateJob.mock.calls, 0);
+			const [args] = mockCreateJob.mock.calls[0]!;
 			expect(args.projectId).toBe(PROJECT_ID);
 			expect(args.request).not.toHaveProperty("projectId");
 		});

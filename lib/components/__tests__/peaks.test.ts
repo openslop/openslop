@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import { extractPeaks, loadPeaks } from "../peaks";
-import { at } from "@/lib/utils";
 
 describe("extractPeaks", () => {
 	it("extracts correct number of peaks", () => {
@@ -52,7 +51,7 @@ describe("extractPeaks", () => {
 		const peaks = extractPeaks(data, 2);
 		// Peak-picking would rate the lone spike (1) above the sustained tone
 		// (0.6); by energy the sustained half is the louder of the two.
-		expect(at(peaks, 0)).toBeLessThan(at(peaks, 1));
+		expect(peaks[0]!).toBeLessThan(peaks[1]!);
 	});
 
 	it("handles uniform amplitude", () => {

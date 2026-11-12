@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useRef, useState, type RefObject } from "react";
-import { at } from "@/lib/utils";
 
 /**
  * Tracks an element's content-box width in whole px (0 until measured).
@@ -21,9 +20,10 @@ export function useElementWidth<T extends HTMLElement>(): {
 		node.current = element;
 		if (!element) return;
 		setWidth(Math.round(element.getBoundingClientRect().width));
-		const observer = new ResizeObserver((entries) =>
-			setWidth(Math.round(at(entries, 0).contentRect.width)),
-		);
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries)
+				setWidth(Math.round(entry.contentRect.width));
+		});
 		observer.observe(element);
 		return () => {
 			node.current = null;

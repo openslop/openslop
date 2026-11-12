@@ -13,7 +13,6 @@ import { buildNode, generatedById } from "../generation-graph";
 import { GenerationQueue } from "../queue";
 import { isNodeStale } from "../staleness";
 import { buildCtx } from "./_context";
-import { at } from "@/lib/utils";
 
 const mediaGenerate =
 	vi.fn<(params: object, context: PluginContext) => Promise<AssetResult>>();
@@ -83,7 +82,7 @@ describe("running a graph", () => {
 			}),
 		];
 		const queue = new GenerationQueue();
-		const avatar = nodeOf(at(canvas, 0).id);
+		const avatar = nodeOf(canvas[0]!.id);
 		queue.commitResult(avatar, { imageUrl: "red.png", durationSec: 0 });
 		const image = Promise.withResolvers<AssetResult>();
 		mediaGenerate.mockReturnValue(image.promise);

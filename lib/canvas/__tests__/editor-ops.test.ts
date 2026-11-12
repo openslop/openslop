@@ -22,7 +22,6 @@ import { isAssetElement } from "../guards";
 import { getContentElements } from "../scenes";
 import { inputsFor } from "@/lib/generation/__tests__/_graph";
 import { asset, makeEditor } from "./_assets";
-import { at } from "@/lib/utils";
 
 /** Mirrors `createCanvasElement`: a caret marker leaf, then the body. */
 function content(
@@ -232,11 +231,7 @@ describe("duplicateElement", () => {
 		duplicateElement(editor, "n1");
 
 		const children = (editor.children[0] as Scene).children;
-		expect(children.map((c) => c.id)).toEqual([
-			"n1",
-			at(children, 1).id,
-			"img1",
-		]);
+		expect(children.map((c) => c.id)).toEqual(["n1", children[1]!.id, "img1"]);
 		expect(Editor.string(editor, [0, 1])).toBe(Editor.string(editor, [0, 0]));
 	});
 
@@ -246,7 +241,7 @@ describe("duplicateElement", () => {
 
 		const copyId = duplicateElement(editor, "c1");
 
-		const copy = at((editor.children[0] as Scene).children, 1);
+		const copy = (editor.children[0] as Scene).children[1]!;
 		expect(copy.id).toBe(copyId);
 		expect(copy.id).not.toBe("c1");
 		expect(flatAttributes(copy)).toEqual({ name: "Lyra" });
@@ -295,7 +290,7 @@ describe("mergeAttrs", () => {
 		mergeAttrs(editor, "n1", { emotion: "excited" });
 
 		const node = editor.children[0] as Scene;
-		expect(flatAttributes(at(node.children, 0))).toEqual({
+		expect(flatAttributes(node.children[0]!)).toEqual({
 			name: "Lyra",
 			emotion: "excited",
 		});
@@ -311,7 +306,7 @@ describe("mergeAttrs", () => {
 		mergeAttrs(editor, "n1", { emotion: null });
 
 		const node = editor.children[0] as Scene;
-		expect(flatAttributes(at(node.children, 0))).toEqual({ name: "Lyra" });
+		expect(flatAttributes(node.children[0]!)).toEqual({ name: "Lyra" });
 	});
 
 	it("handles an element with no attributes yet", () => {
@@ -321,7 +316,7 @@ describe("mergeAttrs", () => {
 		mergeAttrs(editor, "n1", { emotion: "calm" });
 
 		const node = editor.children[0] as Scene;
-		expect(flatAttributes(at(node.children, 0))).toEqual({ emotion: "calm" });
+		expect(flatAttributes(node.children[0]!)).toEqual({ emotion: "calm" });
 	});
 });
 

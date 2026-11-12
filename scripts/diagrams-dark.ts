@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { at } from "@/lib/utils";
+import sum from "lodash/sum";
+import zipWith from "lodash/zipWith";
 
 const DOCS = path.join(process.cwd(), "docs");
 const LIGHT = "-light.svg";
@@ -17,10 +18,7 @@ const toDark = (hex: string) => {
 		(i) => 0.93 - (0.86 * parseInt(hex.slice(i, i + 2), 16)) / 255,
 	);
 	return HUE_ROTATE_180.map((row) => {
-		const channel = row.reduce(
-			(sum, weight, i) => sum + weight * at(inverted, i),
-			0,
-		);
+		const channel = sum(zipWith(row, inverted, (weight, c) => weight * c));
 		const byte = Math.round(Math.min(1, Math.max(0, channel)) * 255);
 		return byte.toString(16).padStart(2, "0");
 	}).join("");

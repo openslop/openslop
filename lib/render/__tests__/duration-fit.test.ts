@@ -6,7 +6,6 @@ import {
 	durationFits,
 	fallsShort,
 } from "../duration-fit";
-import { at } from "@/lib/utils";
 
 const span = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	id: "e1",
@@ -24,7 +23,7 @@ describe("durationFits", () => {
 	});
 
 	it("covers the dialogue under a video, plus the leeway", () => {
-		const fit = at(durationFits([span({ words: 30 })]), 0);
+		const fit = durationFits([span({ words: 30 })])[0]!;
 
 		expect(fit.needed).toBe(10 + DURATION_FIT_LEEWAY_SEC);
 		expect(fit.duration).toBe(11);
@@ -36,7 +35,7 @@ describe("durationFits", () => {
 	});
 
 	it("holds the longest option and reports that it falls short", () => {
-		const fit = at(durationFits([span({ words: 120 })]), 0);
+		const fit = durationFits([span({ words: 120 })])[0]!;
 
 		expect(fit.duration).toBe(15);
 		expect(fallsShort(fit)).toBe(true);

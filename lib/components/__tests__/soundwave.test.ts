@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { buildSoundwaveMask, toBarHeights } from "../soundwave";
-import { at } from "@/lib/utils";
 
 const points = (mask: string) => {
 	const match = decodeURIComponent(mask).match(/points="([^"]+)"/);
@@ -43,8 +42,8 @@ describe("toBarHeights", () => {
 	it("spreads a lone spike into its neighbours", () => {
 		const heights = toBarHeights([0, 0, 1, 0, 0], 5);
 		expect(heights[2]).toBeCloseTo(100 / 3);
-		expect(heights[1]).toBeCloseTo(at(heights, 2));
-		expect(heights[3]).toBeCloseTo(at(heights, 2));
+		expect(heights[1]).toBeCloseTo(heights[2]!);
+		expect(heights[3]).toBeCloseTo(heights[2]!);
 	});
 
 	it("keeps silence on a hairline rather than nothing", () => {

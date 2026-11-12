@@ -21,7 +21,6 @@ import {
 	flatAttributes,
 	splitAttributes,
 } from "@/lib/canvas/element-attributes";
-import { at } from "@/lib/utils";
 
 function content(
 	type: ContentElement["type"],
@@ -232,7 +231,7 @@ describe("applyRefineOp — insert", () => {
 			elements: [{ type: "sound", text: "rain", attrs: { loops: "3" } }],
 		});
 
-		const sound = at(contentElements(editor), 1);
+		const sound = contentElements(editor)[1]!;
 		expect(flatAttributes(sound)).toEqual({
 			loops: "3",
 			volume: "2",

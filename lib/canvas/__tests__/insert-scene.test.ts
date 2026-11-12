@@ -6,7 +6,6 @@ import { isScene } from "../scenes";
 import { insertScene } from "../insert-scene";
 import { flatAttributes } from "../element-attributes";
 import { makeEditor } from "./_assets";
-import { at } from "@/lib/utils";
 
 const seededEditor = (defaultModels: ConnectorModels = {}) =>
 	makeEditor(
@@ -49,7 +48,7 @@ describe("insertScene", () => {
 
 		const inserted = editor.children[0];
 		if (!isScene(inserted)) throw new Error("expected a scene");
-		expect(flatAttributes(at(inserted.children, 0))).toMatchObject(pinned);
+		expect(flatAttributes(inserted.children[0]!)).toMatchObject(pinned);
 	});
 
 	it("inserts at the given path", () => {

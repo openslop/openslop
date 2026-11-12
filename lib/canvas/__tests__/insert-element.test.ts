@@ -7,7 +7,6 @@ import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import { getContentElements } from "../scenes";
 import { element, makeEditor } from "./_assets";
-import { at } from "@/lib/utils";
 
 const seededEditor = (defaultModels: ConnectorModels = {}) =>
 	makeEditor(
@@ -21,7 +20,7 @@ const seededEditor = (defaultModels: ConnectorModels = {}) =>
 		defaultModels,
 	);
 
-const inserted = (editor: Editor) => at(getContentElements(editor.children), 1);
+const inserted = (editor: Editor) => getContentElements(editor.children)[1]!;
 
 describe("insertElement", () => {
 	it("inserts a node with correct type", () => {

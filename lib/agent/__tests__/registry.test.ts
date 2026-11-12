@@ -21,7 +21,6 @@ import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
 import { sloppyInstructions } from "../prompt";
-import { at } from "@/lib/utils";
 
 const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
 	updateScriptSettings: (patch: Partial<ScriptSettings>) =>
@@ -69,7 +68,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 
 describe("script review opt-in", () => {
 	it("asks before reviewing a new or adapted script", () => {
-		const systemPrompt = at(sloppyInstructions({}), 0).content.replace(
+		const systemPrompt = sloppyInstructions({})[0]!.content.replace(
 			/\s+/g,
 			" ",
 		);

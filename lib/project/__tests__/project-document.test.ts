@@ -11,7 +11,6 @@ import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { createProjectDocument } from "../project-document";
 import type { SavedProject } from "../saved-project";
 import { createProjectStore, ProjectDataSchema } from "../store";
-import { at } from "@/lib/utils";
 
 const RECOMMENDED = { provider: "openslop", model: "Seedream 5 Lite" } as const;
 const BYOK = { provider: "runware", model: "Seedream 5 Lite" } as const;
@@ -38,7 +37,7 @@ const firstScene = (editor: Editor) => {
 };
 
 const imageAttrs = (editor: Editor, index: number) =>
-	flatAttributes(at(firstScene(editor).children, index));
+	flatAttributes(firstScene(editor).children[index]!);
 
 const setup = (accountModels: ConnectorModels = {}) => {
 	const editor = withHistory(createEditor());

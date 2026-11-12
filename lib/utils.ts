@@ -53,8 +53,8 @@ export const fromKeys = <K extends string, V>(
 	Object.fromEntries(keys.map((key) => [key, value(key)])) as Record<K, V>;
 
 /** `Array.prototype.at` for an index the caller knows is in range; throws otherwise. */
-export function at<T>(items: ArrayLike<T>, index: number): T {
-	const item = items[index < 0 ? items.length + index : index];
+export function at<T>(items: readonly T[], index: number): T {
+	const item = items.at(index);
 	if (item === undefined)
 		throw new RangeError(`No item at ${index} of ${items.length}`);
 	return item;

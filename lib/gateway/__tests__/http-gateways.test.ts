@@ -2,7 +2,6 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { ZodError } from "zod";
 import type { ModelRef } from "@/lib/connectors/types";
 import { HttpAssetGateway, HttpLLMGateway, HttpTTSGateway } from "../http";
-import { at } from "@/lib/utils";
 
 /** Routes are app-relative, so they parse against any origin. */
 const parseUrl = (url: string) => new URL(url, "http://localhost");
@@ -138,7 +137,7 @@ describe("HTTP gateways", () => {
 			expect(
 				await gateway.searchVoices({ gender: "feminine", limit: 5 }),
 			).toEqual(voices);
-			const url = parseUrl(at(fetchMock.mock.calls, 0)[0] as string);
+			const url = parseUrl(fetchMock.mock.calls[0]![0] as string);
 			expect(url.pathname).toBe("/api/v1/tts/voices");
 			expect(url.searchParams.get("gender")).toBe("feminine");
 			expect(url.searchParams.get("limit")).toBe("5");
@@ -170,7 +169,7 @@ describe("HTTP gateways", () => {
 				new HttpTTSGateway(config(BYOK_TTS)).voicePreview("v-sol"),
 			).resolves.toEqual(preview);
 
-			const url = parseUrl(at(fetchMock.mock.calls, 0)[0] as string);
+			const url = parseUrl(fetchMock.mock.calls[0]![0] as string);
 			expect(url.pathname).toBe("/api/third-party/tts/voices/preview");
 			expect(url.searchParams.get("voiceId")).toBe("v-sol");
 			expect(url.searchParams.get("provider")).toBe("cartesia");
@@ -184,7 +183,7 @@ describe("HTTP gateways", () => {
 				query: undefined,
 			});
 
-			const url = parseUrl(at(fetchMock.mock.calls, 0)[0] as string);
+			const url = parseUrl(fetchMock.mock.calls[0]![0] as string);
 			expect(url.pathname).toBe("/api/third-party/tts/voices");
 			expect(url.searchParams.get("provider")).toBe("cartesia");
 			expect(url.searchParams.get("model")).toBe("Sonic 3.6");

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { groupIntoLines, lineText, wordsAt } from "../caption-layout";
 import { toCaption } from "../word-captions";
-import { at } from "@/lib/utils";
 
 const WORDS = ["one", "two", "three", "four", "five"];
 /** A word a second, each spoken for most of it. */
@@ -12,7 +11,7 @@ const spans = (lines: { firstWordIndex: number; tokens: unknown[] }[]) =>
 	);
 
 describe("wordsAt", () => {
-	const line = at(groupIntoLines(timed.slice(0, 3), 3000), 0);
+	const line = groupIntoLines(timed.slice(0, 3), 3000)[0]!;
 	const active = (seconds: number) =>
 		wordsAt(line.tokens, seconds).find((word) => word.active)?.text;
 

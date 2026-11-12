@@ -6,7 +6,6 @@ import {
 	MOTION_EFFECTS,
 	type MotionEffect,
 } from "../motion-effect-names";
-import { at } from "@/lib/utils";
 
 const ACTIVE: ReadonlyArray<Exclude<MotionEffect, "none">> =
 	MOTION_EFFECTS.filter((e) => e !== "none") as Exclude<MotionEffect, "none">[];
@@ -23,10 +22,10 @@ function parseTransform(t: string): {
 		);
 	if (!m) throw new Error(`unparseable transform: ${t}`);
 	return {
-		tx: parseFloat(at(m, 1)),
-		ty: parseFloat(at(m, 2)),
-		s: parseFloat(at(m, 3)),
-		theta: parseFloat(at(m, 4)),
+		tx: parseFloat(m[1]!),
+		ty: parseFloat(m[2]!),
+		s: parseFloat(m[3]!),
+		theta: parseFloat(m[4]!),
 	};
 }
 

@@ -11,7 +11,6 @@ import {
 import { toCaption } from "@/lib/captions/word-captions";
 import { lineText } from "@/lib/captions/caption-layout";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
-import { at } from "@/lib/utils";
 
 function el(
 	id: string,
@@ -144,9 +143,9 @@ describe("buildTimelineRows", () => {
 		);
 		const rows = buildTimelineRows(layout);
 		expect(rows.filter((row) => row.id === "foreground")).toHaveLength(1);
-		const { clips } = at(rows, 0);
-		const a = at(clips, 0);
-		const b = at(clips, 1);
+		const { clips } = rows[0]!;
+		const a = clips[0]!;
+		const b = clips[1]!;
 		expect(a.start + a.duration - b.start).toBeCloseTo(
 			layout.transitionDurationSec,
 		);

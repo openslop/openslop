@@ -8,7 +8,6 @@ import {
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { splitAttributes } from "@/lib/canvas/element-attributes";
 import { toCaption } from "@/lib/captions/word-captions";
-import { at } from "@/lib/utils";
 
 function makeElement(
 	id: string,
@@ -244,7 +243,7 @@ describe("resolveElements", () => {
 		};
 		const bySnapshot = (id: string) => snapshots[id] ?? makeSnapshot();
 		const resolveOne = (element: ContentElement) =>
-			at(resolveElements([wrap([element])], bySnapshot), 0);
+			resolveElements([wrap([element])], bySnapshot)[0]!;
 
 		it("captions an element with the words on its own result, until it ends", () => {
 			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({

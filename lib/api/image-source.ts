@@ -1,5 +1,3 @@
-import { at } from "@/lib/utils";
-
 const HTTP_URL = /^https?:\/\//i;
 const BASE64_DATA_URI = /^data:(image\/[a-z0-9+.-]+);base64,(.+)$/i;
 
@@ -18,9 +16,7 @@ export function parseImageSource(value: string): ImageSource | null {
 	const match = BASE64_DATA_URI.exec(value);
 	if (!match) return null;
 
-	return {
-		kind: "base64",
-		mediaType: at(match, 1).toLowerCase(),
-		data: at(match, 2),
-	};
+	const [, mediaType, data] = match;
+	if (!mediaType || !data) return null;
+	return { kind: "base64", mediaType: mediaType.toLowerCase(), data };
 }

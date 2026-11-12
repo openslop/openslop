@@ -28,7 +28,6 @@ vi.mock("../conversations", () => conversations);
 import type { LLMProvider } from "@/lib/providers/llm/base";
 import { streamAgentTurn } from "../agent-turn";
 import { logger } from "../logger";
-import { at } from "@/lib/utils";
 
 const USAGE = {
 	inputTokens: { total: 12, noCache: 12, cacheRead: 0, cacheWrite: 0 },
@@ -116,10 +115,7 @@ const finishSeconds = (chunks: Record<string, unknown>[]) => {
 };
 
 const saved = (call: number) =>
-	at(
-		conversations.saveConversationMessage.mock.calls,
-		call,
-	)[1] as SloppyMessage;
+	conversations.saveConversationMessage.mock.calls[call]![1] as SloppyMessage;
 
 beforeEach(() => {
 	calls = [];
@@ -308,7 +304,7 @@ describe("a turn that takes more than one step", () => {
 			message: answered(reading("call-1", "the script")),
 		});
 
-		const offered = at(calls, 0).tools?.map((tool) => tool.name);
+		const offered = calls[0]!.tools?.map((tool) => tool.name);
 		expect(offered).toContain("read_script");
 		expect(offered).toContain("write_script");
 	});
@@ -343,7 +339,7 @@ describe("a turn that takes more than one step", () => {
 			),
 		});
 
-		const sent = JSON.stringify(at(calls, 0).prompt);
+		const sent = JSON.stringify(calls[0]!.prompt);
 		expect(sent).toContain("the script as it was");
 		expect(sent).toContain("the script as it stands");
 	});
@@ -377,7 +373,7 @@ describe("prompt caching", () => {
 	it("sends the standing instructions as one system block, marked as a cached prefix", async () => {
 		await runTurn(TEXT_TURN, { cachedPrefix: MARK });
 
-		const [standing, next] = at(calls, 0).prompt;
+		const [standing, next] = calls[0]!.prompt;
 		expect(standing).toMatchObject({ role: "system", providerOptions: MARK });
 		expect(JSON.stringify(standing)).toContain("You are Sloppy");
 		expect(next?.role).toBe("user");

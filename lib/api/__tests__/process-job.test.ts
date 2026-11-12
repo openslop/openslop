@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChargedError } from "@/lib/providers/base";
-import { at } from "@/lib/utils";
 
 const mockLoadJobForProcessing = vi.fn();
 const mockClaimJob = vi.fn();
@@ -190,7 +189,7 @@ describe("processQueuedJob", () => {
 				delaySeconds: expect.any(Number),
 			});
 			expect(mockUpdateJob.mock.invocationCallOrder[0]).toBeLessThan(
-				at(mockEnqueueJob.mock.invocationCallOrder, 0),
+				mockEnqueueJob.mock.invocationCallOrder[0]!,
 			);
 		});
 
