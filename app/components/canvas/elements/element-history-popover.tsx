@@ -97,7 +97,7 @@ function ElementVersionRow({
 				active && "bg-secondary",
 			)}
 		>
-			<div className="relative flex items-center gap-2.5">
+			<div className="flex items-center gap-2.5">
 				<ElementVersionThumbnail version={version} name={`version ${label}`} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
@@ -125,7 +125,7 @@ function ElementVersionRow({
 				{!active && (
 					<TooltipIconButton
 						label="Restore"
-						className="absolute end-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+						className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
 						onClick={onRestore}
 					>
 						<RotateCcw />

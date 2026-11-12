@@ -5,6 +5,7 @@ import { Editor, Transforms } from "slate";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { getElementText } from "@/lib/canvas/osml-serializer";
+import { resultIdentity } from "@/lib/connectors/asset-url";
 import type { ContentElement } from "@/lib/canvas/types";
 import { Lock } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
@@ -23,20 +24,21 @@ export function ElementInput({
 	element,
 	look = "card",
 	dir,
-	uploaded = false,
+	upload,
 	children,
 }: {
 	element: ContentElement;
 	look?: keyof typeof LOOKS;
 	dir?: string;
-	uploaded?: boolean;
+	/** Identifies the uploaded result whose prompt stays locked until unlocked. */
+	upload?: string;
 	children: ReactNode;
 }) {
 	const editor = useSlateStatic();
-	const [unlocked, setUnlocked] = useState(false);
-	const locked = uploaded && !unlocked;
+	const [unlockedFor, setUnlockedFor] = useState<string>();
+	const locked = upload !== undefined && upload !== unlockedFor;
 	const unlock = () => {
-		setUnlocked(true);
+		setUnlockedFor(upload);
 		Transforms.select(
 			editor,
 			Editor.end(editor, ReactEditor.findPath(editor, element)),
@@ -93,9 +95,10 @@ export function ElementPrompt({
 	dir?: string;
 	children: ReactNode;
 }) {
-	const { uploaded } = useElementGeneration();
+	const { uploaded, result } = useElementGeneration();
+	const upload = uploaded && result ? resultIdentity(result) : undefined;
 	return (
-		<ElementInput element={element} dir={dir} uploaded={uploaded}>
+		<ElementInput element={element} dir={dir} upload={upload}>
 			{children}
 		</ElementInput>
 	);

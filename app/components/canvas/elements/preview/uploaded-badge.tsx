@@ -11,7 +11,8 @@ export function UploadedLabel({ tooltip }: { tooltip: string }) {
 		<SimpleTooltip label={tooltip}>
 			<Badge variant="indicator" size="xs">
 				<CloudUploadFilled size={12} />
-				Uploaded
+				<span aria-hidden="true">Uploaded</span>
+				<span className="sr-only">{tooltip}</span>
 			</Badge>
 		</SimpleTooltip>
 	);

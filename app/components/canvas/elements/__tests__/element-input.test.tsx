@@ -14,15 +14,19 @@ const UNLOCK = "button";
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 
-function mount(uploaded: boolean) {
+function mount(upload?: string) {
 	canvas = mountOnCanvas([content("image", "i", "a red fox")]);
+	return show(upload);
+}
+
+function show(upload?: string) {
 	const renderElement = ({
 		attributes,
 		children,
 		element,
 	}: RenderElementProps) => (
 		<div {...attributes}>
-			<ElementInput element={element as ContentElement} uploaded={uploaded}>
+			<ElementInput element={element as ContentElement} upload={upload}>
 				{children}
 			</ElementInput>
 		</div>
@@ -44,7 +48,7 @@ afterEach(() => canvas.unmount());
 
 describe("ElementInput", () => {
 	it("leaves a generated element's prompt editable, with no lock", async () => {
-		await mount(false);
+		await mount();
 
 		expect(prompt()).toBeNull();
 		expect(unlockButton()).toBeUndefined();
@@ -52,7 +56,7 @@ describe("ElementInput", () => {
 	});
 
 	it("locks an uploaded element's prompt and says why", async () => {
-		await mount(true);
+		await mount("fox.png");
 
 		expect(prompt()?.getAttribute("contenteditable")).toBe("false");
 		expect(prompt()?.textContent).toContain("a red fox");
@@ -60,7 +64,7 @@ describe("ElementInput", () => {
 	});
 
 	it("unlocks for editing from the lock, with the caret at the prompt's end", async () => {
-		await mount(true);
+		await mount("fox.png");
 
 		await click(UNLOCK);
 
@@ -70,5 +74,24 @@ describe("ElementInput", () => {
 			path: [0, 0],
 			offset: "a red fox".length,
 		});
+	});
+
+	it("stays unlocked while the same upload re-renders", async () => {
+		await mount("fox.png");
+		await click(UNLOCK);
+
+		await show("fox.png");
+
+		expect(prompt()).toBeNull();
+	});
+
+	it("locks again when a different file is uploaded over the unlocked one", async () => {
+		await mount("fox.png");
+		await click(UNLOCK);
+
+		await show("wolf.png");
+
+		expect(prompt()?.getAttribute("contenteditable")).toBe("false");
+		expect(unlockButton()).toBeDefined();
 	});
 });
