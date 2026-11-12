@@ -75,13 +75,6 @@ describe("osmlSpec", () => {
 		expect(spec).not.toContain("Start with a visual");
 	});
 
-	it("asks for dead simple dialogue that fits the scene", () => {
-		expect(spec).toContain("Keep dialogue dead simple");
-		expect(spec).toContain(
-			"Every line must make complete sense to the listener",
-		);
-	});
-
 	it("describes every video prompt in detail, standing alone", () => {
 		expect(spec).toContain("Each prompt is standalone");
 	});
@@ -117,7 +110,7 @@ describe("osmlSpec", () => {
 
 	it("keeps a film to videos and music, whatever the other element rules say", () => {
 		expect(spec).toContain(
-			"Cinematic: visuals and music tell the story. Only <video> and <music>",
+			"Cinematic: characters speak on screen, inside the video prompts. Only <video> and <music>",
 		);
 		expect(spec).toContain("The format decides which elements you write.");
 	});

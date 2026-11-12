@@ -10,7 +10,7 @@ export const adaptScript = defineTool({
 	  a draft, prose, a transcript, lyrics, anything already written.
 
 	  Send the script span and nothing else. What you send is converted, not just stored:
-	  prose that carries no annotation becomes narration. A mood note or a "here's my
+	  the project's format decides how their words are spoken. A mood note or a "here's my
 	  script:" caught in the span is read as a line to speak.
 
 	  Screenplay furniture is stripped for you, so leave slug lines, stage directions and

@@ -40,7 +40,6 @@ export function osmlSpec(language: string): string {
 		## Speech
 		- <narration>: what the narrator says. Example: <narration emotion="neutral">The sun was setting in the west.</narration>
 		- <character>: what one character says out loud. name is required and must be a character listed under Characters; with none listed, the narrator tells the whole story. Example: <character name="Lyra" emotion="excited">Truce?</character>
-		- Keep dialogue dead simple: everyday words and short sentences. Every line must make complete sense to the listener.
 		- Both take emotion (${TTS_EMOTIONS.join(", ")}) and speed (${TTS_SPEEDS.join(", ")}).
 		- Never write words in ALL CAPS, because the voice engine mispronounces them. Acronyms like USA stay capitalized.
 		- The only nonverbal cue is [laughter]. Use ... for a pause and ! for strong feeling. Example: <character name="Mia" emotion="happy">[laughter] That's the way I want it!</character>

@@ -2,9 +2,15 @@ import { describe, expect, it } from "vitest";
 import { NARRATOR } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
+import { ADAPT_SCRIPT_RULES } from "../adapt";
 import { buildScriptPrompt, scriptRules } from "../build";
+import { VIDEO_FORMAT_RULES } from "../formats";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
+import {
+	VIDEO_FORMAT_SPECS,
+	VIDEO_FORMAT_TARGETS,
+} from "@/lib/project/video-format";
 import { VIDEO_LENGTH_SPECS } from "@/lib/project/video-length";
 
 const settingsOf = (settings: Partial<ScriptSettings> = {}) =>
@@ -70,6 +76,7 @@ describe("buildScriptPrompt", () => {
 
 		expect(prompt).toBe(script);
 		expect(system).toContain("script-to-XML converter");
+		expect(system).toContain("never change, add or cut dialogue or prose");
 		expect(system).toContain("warm and slow, lots of wide shots");
 		expect(system).not.toContain("# Length");
 		expect(system).not.toContain(getTemplate(template.id).systemPrompt);
@@ -183,18 +190,46 @@ describe("buildScriptPrompt", () => {
 		expect(scriptRules([], settingsOf())).not.toContain("raw XML");
 	});
 
-	it("maps the user's dialogue to <character> lines, or into the video prompts for a cinematic", () => {
-		const { system } = buildScriptPrompt([], settingsOf(), {
-			kind: "adapt",
-			script: "Once upon a time.",
-		});
+	it.each(VIDEO_FORMAT_TARGETS)(
+		"adapts in the project's %s format",
+		(format) => {
+			const script = "INT. CAFE - NIGHT\nMIRA\nWait! Don't leave me here.";
+			const { system, prompt } = buildScriptPrompt([], settingsOf({ format }), {
+				kind: "adapt",
+				script,
+			});
 
-		expect(system).toContain(
-			"In Faceless and Explainer, text no character says in the user's script is narration, and a line a character says is a <character> line.",
+			expect(prompt).toBe(script);
+			expect(system).toContain(
+				`The format is ${VIDEO_FORMAT_SPECS[format].label}. Write in it.`,
+			);
+			expect(system).toContain(ADAPT_SCRIPT_RULES);
+			expect(system).toContain(VIDEO_FORMAT_RULES);
+		},
+	);
+
+	it("keeps the adaptation guidance independent of specific formats and speech elements", () => {
+		expect(ADAPT_SCRIPT_RULES).not.toMatch(
+			/cinematic|faceless|explainer|<narration>|<character>|<video>/i,
 		);
-		expect(system).toContain(
-			"In Cinematic, a character's lines go word for word inside the <video> prompt of the shot they say them in, never in <character>.",
+	});
+
+	it("picks an auto adapt's format from the script and notes", () => {
+		const script = "EXT. FOREST - DAWN\nMIRA\nWe made it.";
+		const notes = "a tense film, no voiceover";
+		const { system, prompt } = buildScriptPrompt(
+			[],
+			settingsOf({ format: "auto" }),
+			{
+				kind: "adapt",
+				script,
+				notes,
+			},
 		);
-		expect(system).not.toContain("Text without tags is narration");
+
+		expect(prompt).toBe(script);
+		expect(system).toContain("If no format is set, pick the closest one");
+		expect(system).toContain(notes);
+		expect(system).not.toContain("The format is");
 	});
 });
