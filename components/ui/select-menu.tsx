@@ -52,7 +52,7 @@ export function SelectMenuItem({
 			className={cn("py-1", className)}
 		>
 			<span className="flex w-3.5 shrink-0 items-center justify-center">
-				{selected && <Check size={ICON_SIZES.header} aria-hidden="true" />}
+				{selected && <Check size={ICON_SIZES.header} />}
 			</span>
 			{children}
 		</DropdownMenuItem>
@@ -76,10 +76,7 @@ export function InlineMenuTrigger({
 			{...props}
 		>
 			{children}
-			<ChevronDown
-				className="h-3 w-3 shrink-0 text-muted-foreground"
-				aria-hidden="true"
-			/>
+			<ChevronDown className="h-3 w-3 text-muted-foreground" />
 		</button>
 	);
 }
@@ -123,7 +120,7 @@ export function SelectMenuTrigger({
 			{...props}
 		>
 			{children}
-			<ChevronDown className="opacity-60" aria-hidden="true" />
+			<ChevronDown className="opacity-60" />
 		</button>
 	);
 }

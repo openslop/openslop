@@ -36,7 +36,7 @@ export function CharacterAvatar({
 				/>
 			)}
 			<AvatarFallback className="bg-transparent text-current">
-				<User size={FALLBACK_ICON_PX[size]} aria-hidden="true" />
+				<User size={FALLBACK_ICON_PX[size]} />
 			</AvatarFallback>
 		</Avatar>
 	);

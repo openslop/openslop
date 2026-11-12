@@ -222,7 +222,7 @@ function ElementVersionList({
 					role="alert"
 					className="flex items-center gap-1.5 text-label-xs text-destructive"
 				>
-					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
+					<AlertCircle className="h-3.5 w-3.5" />
 					Could not load history.
 				</p>
 				<Button

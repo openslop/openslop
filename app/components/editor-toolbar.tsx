@@ -33,7 +33,7 @@ function Breadcrumbs() {
 				<li className="shrink-0">
 					<Button variant="ghost" size="xs" asChild className="font-book">
 						<Link href="/">
-							<Lock className="size-3" aria-hidden="true" />
+							<Lock className="size-3" />
 							Personal
 						</Link>
 					</Button>
@@ -103,7 +103,7 @@ function EditorToolbarComponent() {
 							className="self-center"
 							onClick={onClick}
 						>
-							<X aria-hidden="true" />
+							<X />
 						</TooltipIconButton>
 					))}
 					<Button
@@ -117,13 +117,7 @@ function EditorToolbarComponent() {
 						unavailable={unavailable}
 						onClick={scope.run}
 					>
-						{busy ? (
-							<Spinner />
-						) : allGenerated ? (
-							<Check aria-hidden="true" />
-						) : (
-							<Sparkles aria-hidden="true" />
-						)}
+						{busy ? <Spinner /> : allGenerated ? <Check /> : <Sparkles />}
 						<span className="hidden sm:inline">{generateLabel}</span>
 					</Button>
 					<ExportButton />

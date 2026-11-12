@@ -16,7 +16,7 @@ function BackToMySlopLink() {
 			href="/"
 			className="mb-4 inline-flex items-center gap-2 self-start text-body text-muted-foreground transition-colors hover:text-foreground focus-ring"
 		>
-			<ArrowLeft size={16} aria-hidden="true" />
+			<ArrowLeft size={16} />
 			Back to My Slop
 		</Link>
 	);

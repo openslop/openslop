@@ -40,7 +40,7 @@ export function SettingsNav({
 									: "text-muted-foreground hover:bg-card/60 hover:text-foreground",
 							)}
 						>
-							<Icon className="size-3.5 shrink-0" />
+							<Icon className="size-3.5" />
 							{label}
 						</button>
 					))}

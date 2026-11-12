@@ -59,10 +59,7 @@ export function Tool({ part }: { part: ToolUIPart<SloppyTools> }) {
 	const { icon: Icon, label } = toolPresentation(part);
 	return (
 		<>
-			<Disclosure
-				icon={<Icon className="h-3 w-3 shrink-0" aria-hidden="true" />}
-				label={label}
-			>
+			<Disclosure icon={<Icon className="h-3 w-3" />} label={label}>
 				<DisclosureJson value={part.input} />
 			</Disclosure>
 			{part.state === "output-available" && (
