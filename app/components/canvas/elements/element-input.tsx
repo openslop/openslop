@@ -7,7 +7,8 @@ import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { getElementText } from "@/lib/canvas/osml-serializer";
 import type { ContentElement } from "@/lib/canvas/types";
 import { Lock } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import { Button } from "@/components/ui/button";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ELEMENT_CONFIGS } from "./element-configs";
 import { useElementGeneration } from "./element-generation-context";
@@ -49,7 +50,6 @@ export function ElementInput({
 			className={cn(
 				"relative min-w-0 rounded-xl border border-transparent px-3 py-2.5 transition-colors hover:border-element-input-border-hover focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30",
 				LOOKS[look],
-				locked && "pe-9",
 			)}
 		>
 			{getElementText(element) === ZERO_WIDTH_SPACE && (
@@ -62,7 +62,7 @@ export function ElementInput({
 				aria-readonly={locked || undefined}
 				className={cn(
 					"overflow-hidden text-start text-label leading-relaxed transition-[max-height,opacity] duration-200",
-					locked ? "text-muted-foreground" : "text-foreground",
+					locked ? "text-muted-foreground opacity-40" : "text-foreground",
 				)}
 			>
 				{children}
@@ -70,16 +70,14 @@ export function ElementInput({
 			{locked && (
 				<div
 					contentEditable={false}
-					className="absolute end-1.5 top-1.5 select-none"
+					className="absolute inset-0 flex items-center justify-center select-none"
 				>
-					<TooltipIconButton
-						label="Uploaded, so the prompt doesn't drive this result. Click to edit it anyway."
-						variant="quiet"
-						size="sm"
-						onClick={unlock}
-					>
-						<Lock />
-					</TooltipIconButton>
+					<SimpleTooltip label="Unlock the prompt to regenerate over the upload">
+						<Button variant="secondary" size="xs" onClick={unlock}>
+							<Lock className="size-3" />
+							Unlock
+						</Button>
+					</SimpleTooltip>
 				</div>
 			)}
 		</div>

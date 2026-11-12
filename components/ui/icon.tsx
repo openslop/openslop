@@ -94,6 +94,7 @@ export const ChevronsLeft = icon("chevrons-left");
 export const ChevronsRight = icon("chevrons-right");
 export const ChevronsUpDown = icon("expand");
 export const Circle = icon("circle");
+export const CloudUploadFilled = icon("cloud-upload-filled");
 export const CollapseTimeline = icon("collapse-timeline");
 export const Contrast = icon("contrast");
 export const Coin1 = icon("coin-1");

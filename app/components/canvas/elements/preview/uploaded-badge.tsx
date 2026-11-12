@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Upload } from "@/components/ui/icon";
+import { CloudUploadFilled } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useElementGeneration } from "../element-generation-context";
 
@@ -9,9 +9,9 @@ import { useElementGeneration } from "../element-generation-context";
 export function UploadedLabel({ tooltip }: { tooltip: string }) {
 	return (
 		<SimpleTooltip label={tooltip}>
-			<Badge variant="onMedia">
-				<Upload className="h-3 w-3" />
-				<span className="sr-only">{tooltip}</span>
+			<Badge variant="indicator" size="xs">
+				<CloudUploadFilled size={12} />
+				Uploaded
 			</Badge>
 		</SimpleTooltip>
 	);

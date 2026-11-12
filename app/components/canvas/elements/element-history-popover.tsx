@@ -2,13 +2,15 @@
 
 import { renderPrompt } from "@/lib/connectors/character-refs";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TooltipIconButton } from "@/components/ui/icon-button";
 import {
 	AlertCircle,
+	CloudUploadFilled,
 	History,
 	Maximize2,
 	RotateCcw,
-	Upload,
 } from "@/components/ui/icon";
 import {
 	Popover,
@@ -95,7 +97,7 @@ function ElementVersionRow({
 				active && "bg-secondary",
 			)}
 		>
-			<div className="flex items-center gap-2.5">
+			<div className="relative flex items-center gap-2.5">
 				<ElementVersionThumbnail version={version} name={`version ${label}`} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
@@ -104,10 +106,10 @@ function ElementVersionRow({
 						</span>
 						<Dot />
 						{version.pinned && (
-							<>
-								<Upload className="h-3 w-3" />
-								<span className="sr-only">Uploaded</span>
-							</>
+							<Badge variant="indicator" size="sm">
+								<CloudUploadFilled size={10} />
+								Uploaded
+							</Badge>
 						)}
 						{relativeTime(version.createdAt)}
 					</span>
@@ -121,16 +123,13 @@ function ElementVersionRow({
 					</span>
 				</div>
 				{!active && (
-					<Button
-						type="button"
-						variant="secondary"
-						size="sm"
-						className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+					<TooltipIconButton
+						label="Restore"
+						className="absolute end-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
 						onClick={onRestore}
 					>
-						<RotateCcw aria-hidden="true" />
-						Restore
-					</Button>
+						<RotateCcw />
+					</TooltipIconButton>
 				)}
 			</div>
 			{audioUrl && (

@@ -98,11 +98,7 @@ describe("ElementHistoryPopover", () => {
 		renderPopover();
 		await click('button[aria-label="Generation history"]');
 
-		const restore = Array.from(document.body.querySelectorAll("button")).find(
-			(button) => button.textContent === "Restore",
-		);
-		if (!restore) throw new Error("no Restore button");
-		await act(async () => restore.click());
+		await click('button[aria-label="Restore"]');
 
 		const [take] = history.versions;
 		expect(restoreResult).toHaveBeenCalledWith(take);

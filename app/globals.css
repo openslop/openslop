@@ -220,6 +220,10 @@
 	--on-media: #000; /* chrome floating over media; use /55, /70, /80 */
 	--on-media-foreground: #fff;
 
+	/* Indicator badges: a passive status over media, never a control */
+	--indicator: #f1e0e9;
+	--indicator-foreground: #762e4e;
+
 	/* Media-type tints (element-icon color by type) */
 	--media-character: #d97706;
 	--media-image: #0891b2;
@@ -342,6 +346,9 @@
 	--accent-foreground: #fff;
 	--destructive-foreground: #fff;
 
+	--indicator: #4f273a;
+	--indicator-foreground: #e4b5d4;
+
 	/* Brighter media tints for dark surfaces */
 	--media-character: #fbbf24;
 	--media-image: #22d3ee;
@@ -425,6 +432,8 @@
 	--color-overlay: var(--overlay);
 	--color-on-media: var(--on-media);
 	--color-on-media-foreground: var(--on-media-foreground);
+	--color-indicator: var(--indicator);
+	--color-indicator-foreground: var(--indicator-foreground);
 
 	--color-media-character: var(--media-character);
 	--color-media-image: var(--media-image);

@@ -10,9 +10,7 @@ import { ElementInput } from "../element-input";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-const UNLOCK_LABEL =
-	"Uploaded, so the prompt doesn't drive this result. Click to edit it anyway.";
-const UNLOCK = `button[aria-label="${UNLOCK_LABEL}"]`;
+const UNLOCK = "button";
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 
@@ -37,7 +35,10 @@ function mount(uploaded: boolean) {
 }
 
 const prompt = () => document.body.querySelector("[aria-readonly]");
-const unlockButton = () => document.body.querySelector(UNLOCK);
+const unlockButton = () =>
+	Array.from(document.body.querySelectorAll(UNLOCK)).find(
+		(button) => button.textContent === "Unlock",
+	);
 
 afterEach(() => canvas.unmount());
 
@@ -46,7 +47,7 @@ describe("ElementInput", () => {
 		await mount(false);
 
 		expect(prompt()).toBeNull();
-		expect(unlockButton()).toBeNull();
+		expect(unlockButton()).toBeUndefined();
 		expect(document.body.textContent).toContain("a red fox");
 	});
 
@@ -55,7 +56,7 @@ describe("ElementInput", () => {
 
 		expect(prompt()?.getAttribute("contenteditable")).toBe("false");
 		expect(prompt()?.textContent).toContain("a red fox");
-		expect(unlockButton()).not.toBeNull();
+		expect(unlockButton()).toBeDefined();
 	});
 
 	it("unlocks for editing from the lock, with the caret at the prompt's end", async () => {
@@ -64,7 +65,7 @@ describe("ElementInput", () => {
 		await click(UNLOCK);
 
 		expect(prompt()).toBeNull();
-		expect(unlockButton()).toBeNull();
+		expect(unlockButton()).toBeUndefined();
 		expect(canvas.editor.selection?.anchor).toEqual({
 			path: [0, 0],
 			offset: "a red fox".length,

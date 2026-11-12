@@ -20,11 +20,15 @@ const badgeVariants = cva(
 				tertiary: "border-transparent bg-tertiary text-tertiary-foreground",
 				subtle: "border-transparent bg-foreground/10 text-foreground",
 				muted: "border-transparent bg-muted text-muted-foreground",
+				indicator:
+					"rounded border-transparent bg-indicator text-indicator-foreground",
 				onMedia:
 					"border-transparent bg-on-media/70 text-on-media-foreground shadow-elevation-1",
 			},
 			size: {
 				default: "px-2 py-0.5 text-label [&_svg:not([class*='size-'])]:size-3",
+				/** Matches `Button size="xs"`, for a status shown beside icon-and-label buttons. */
+				xs: "h-6 gap-1 rounded-md px-2 text-label",
 				sm: "gap-1 px-1.5 py-0 text-badge-xs [&_svg:not([class*='size-'])]:size-2.5",
 				icon: "size-6 rounded-md p-0 [&_svg:not([class*='size-'])]:size-4",
 				inline:
