@@ -4,13 +4,13 @@ import { Upload } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import { conjunction, plural } from "@/lib/format";
 import { requireMedia } from "@/lib/project/media";
-import { UPLOAD_KIND_OF } from "@/lib/upload/uploaded-result";
+import { UPLOADABLE_TYPES } from "@/lib/upload/uploaded-result";
 import { defineTool } from "./define-tool";
 
 export const setElementMedia = defineTool({
 	description: dedent`
 	  Put files from read_media on elements, as if the user uploaded them. Generate All leaves
-	  them alone. Works on ${conjunction(Object.keys(UPLOAD_KIND_OF))} elements, and each file
+	  them alone. Works on ${conjunction(UPLOADABLE_TYPES)} elements, and each file
 	  must be the right kind. Get the ids from read_script.
 	`,
 	input: z.object({

@@ -34,7 +34,7 @@ import type { ScriptSource } from "@/lib/script/prompt/build";
 import {
 	commitUploaded,
 	isUploadable,
-	UPLOAD_KIND_OF,
+	uploadKindOf,
 	uploadedResult,
 } from "@/lib/upload/uploaded-result";
 import { streamScript } from "@/lib/script/stream-script";
@@ -131,7 +131,7 @@ export function useAgentTools() {
 				},
 				setElementMedia: (id, { kind, url }) => {
 					const [element] = requireElement(editor, id);
-					if (!isUploadable(element) || UPLOAD_KIND_OF[element.type] !== kind)
+					if (!isUploadable(element) || uploadKindOf(element) !== kind)
 						throw new Error(
 							`${id} is a ${element.type} element and can't take ${kind}.`,
 						);

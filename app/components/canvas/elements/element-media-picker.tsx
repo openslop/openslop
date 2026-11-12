@@ -11,7 +11,7 @@ import type { UploadKind } from "@/lib/upload/upload-files";
 import {
 	commitUploaded,
 	isUploadable,
-	UPLOAD_KIND_OF,
+	uploadKindOf,
 } from "@/lib/upload/uploaded-result";
 import { cn } from "@/lib/utils";
 import { useElementGeneration } from "./element-generation-context";
@@ -48,7 +48,7 @@ export function AddMediaButton() {
 	const queue = useGenerationQueue();
 	const { element, node, status } = useElementGeneration();
 	if (!isUploadable(element)) return null;
-	const kind = UPLOAD_KIND_OF[element.type];
+	const kind = uploadKindOf(element);
 	return (
 		<MediaPicker
 			kind={kind}
