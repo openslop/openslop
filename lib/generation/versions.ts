@@ -25,7 +25,7 @@ export const versionKey = ({
 	inputs,
 	result,
 }: Pick<CommittedVersion, "inputs" | "result">): string =>
-	`${result.uploaded ? "supplied" : "generated"}:${resultIdentity(result)}:${serializeInputs(inputs)}`;
+	`${result.uploaded ? "uploaded" : "generated"}:${resultIdentity(result)}:${serializeInputs(inputs)}`;
 
 /** A failed regeneration nulls `result` but leaves `resultInputs`, so gate on both. */
 export const activeVersionIndex = (
