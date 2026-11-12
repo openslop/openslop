@@ -10,7 +10,7 @@ export function UploadedLabel({ tooltip }: { tooltip: string }) {
 	return (
 		<SimpleTooltip label={tooltip}>
 			<Badge variant="indicator" size="xs">
-				<CloudUploadFilled size={12} />
+				<CloudUploadFilled />
 				<span aria-hidden="true">Uploaded</span>
 				<span className="sr-only">{tooltip}</span>
 			</Badge>
@@ -21,5 +21,5 @@ export function UploadedLabel({ tooltip }: { tooltip: string }) {
 export function UploadedBadge() {
 	const { uploaded } = useElementGeneration();
 	if (!uploaded) return null;
-	return <UploadedLabel tooltip="Uploaded, so it is never regenerated" />;
+	return <UploadedLabel tooltip="Uploaded, so Generate All skips it" />;
 }

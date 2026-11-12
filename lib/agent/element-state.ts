@@ -9,20 +9,20 @@ export type ElementState = {
 		| "generated"
 		| "stale"
 		| "failed"
-		| "pinned";
+		| "uploaded";
 	/** The stale reason or the failure error, in the words the canvas shows. */
 	detail?: string;
 };
 
 export function elementState(
 	id: string,
-	{ status, error, result, pinned }: ElementSnapshot,
+	{ status, error, result }: ElementSnapshot,
 	staleReason: string | null,
 ): ElementState {
 	if (status !== "idle") return { id, state: status };
 	if (error) return { id, state: "failed", detail: error };
 	if (!result) return { id, state: "ungenerated" };
-	if (pinned) return { id, state: "pinned" };
+	if (result.uploaded) return { id, state: "uploaded" };
 	if (staleReason) return { id, state: "stale", detail: staleReason };
 	return { id, state: "generated" };
 }

@@ -165,6 +165,8 @@ export const AssetResultSchema = z.object({
 	/** The words as generated, which a reset brings back. */
 	originalTextTimestamps: WordsSchema,
 	voiceId: z.string().optional(),
+	/** The user supplied it rather than generating it. */
+	uploaded: z.boolean().optional(),
 });
 
 export type AssetResult = z.infer<typeof AssetResultSchema>;

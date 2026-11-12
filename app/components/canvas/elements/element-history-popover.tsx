@@ -105,9 +105,9 @@ function ElementVersionRow({
 							v{label}
 						</span>
 						<Dot />
-						{version.pinned && (
+						{version.result.uploaded && (
 							<Badge variant="indicator" size="sm">
-								<CloudUploadFilled size={10} />
+								<CloudUploadFilled />
 								Uploaded
 							</Badge>
 						)}

@@ -24,28 +24,17 @@ export function ElementInput({
 	element,
 	look = "card",
 	dir,
-	upload,
+	lock,
 	children,
 }: {
 	element: ContentElement;
 	look?: keyof typeof LOOKS;
 	dir?: string;
-	/** Identifies the uploaded result whose prompt stays locked until unlocked. */
-	upload?: string;
+	/** Shown over the prompt, which stays read-only while it is. */
+	lock?: ReactNode;
 	children: ReactNode;
 }) {
-	const editor = useSlateStatic();
-	const [unlockedFor, setUnlockedFor] = useState<string>();
-	const locked = upload !== undefined && upload !== unlockedFor;
-	const unlock = () => {
-		setUnlockedFor(upload);
-		Transforms.select(
-			editor,
-			Editor.end(editor, ReactEditor.findPath(editor, element)),
-		);
-		ReactEditor.focus(editor);
-	};
-
+	const locked = lock !== undefined;
 	return (
 		<div
 			dir={dir}
@@ -61,7 +50,6 @@ export function ElementInput({
 			)}
 			<div
 				contentEditable={locked ? false : undefined}
-				aria-readonly={locked || undefined}
 				className={cn(
 					"overflow-hidden text-start text-label leading-relaxed transition-[max-height,opacity] duration-200",
 					locked ? "text-muted-foreground opacity-40" : "text-foreground",
@@ -74,18 +62,14 @@ export function ElementInput({
 					contentEditable={false}
 					className="absolute inset-0 flex items-center justify-center select-none"
 				>
-					<SimpleTooltip label="Unlock the prompt to regenerate over the upload">
-						<Button variant="secondary" size="xs" onClick={unlock}>
-							<Lock className="size-3" />
-							Unlock
-						</Button>
-					</SimpleTooltip>
+					{lock}
 				</div>
 			)}
 		</div>
 	);
 }
 
+/** An element card's prompt, locked over an upload until the user unlocks that upload. */
 export function ElementPrompt({
 	element,
 	dir,
@@ -95,10 +79,34 @@ export function ElementPrompt({
 	dir?: string;
 	children: ReactNode;
 }) {
-	const { uploaded, result } = useElementGeneration();
-	const upload = uploaded && result ? resultIdentity(result) : undefined;
+	const editor = useSlateStatic();
+	const { result } = useElementGeneration();
+	const [unlockedFor, setUnlockedFor] = useState<string>();
+	const upload = result?.uploaded ? resultIdentity(result) : undefined;
+	const locked = upload !== undefined && upload !== unlockedFor;
+	const unlock = () => {
+		setUnlockedFor(upload);
+		Transforms.select(
+			editor,
+			Editor.end(editor, ReactEditor.findPath(editor, element)),
+		);
+		ReactEditor.focus(editor);
+	};
 	return (
-		<ElementInput element={element} dir={dir} upload={upload}>
+		<ElementInput
+			element={element}
+			dir={dir}
+			lock={
+				locked ? (
+					<SimpleTooltip label="Unlock the prompt to regenerate over the upload">
+						<Button variant="secondary" size="xs" onClick={unlock}>
+							<Lock className="size-3" />
+							Unlock
+						</Button>
+					</SimpleTooltip>
+				) : undefined
+			}
+		>
 			{children}
 		</ElementInput>
 	);

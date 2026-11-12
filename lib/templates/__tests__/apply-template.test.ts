@@ -195,6 +195,7 @@ describe("applyTemplate", () => {
 			getTemplate("pov-life").characters?.Protagonist?.avatar,
 		);
 		expect(snapshot.pinned).toBe(true);
+		expect(snapshot.result?.uploaded).toBeUndefined();
 		expect(needsGeneration(node, queue)).toBe(false);
 	});
 });

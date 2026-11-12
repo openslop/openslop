@@ -16,7 +16,7 @@ const ElementSnapshotSchema = z.object({
 	error: z.string().nullable(),
 	resultInputs: GenerationInputsSchema.nullable(),
 	connectorType: z.enum(ASSET_CONNECTOR_TYPES).nullable(),
-	/** The result was supplied rather than generated, so it is never regenerated. */
+	/** The result is never regenerated, so Generate All and staleness leave it be. */
 	pinned: z.boolean().default(false),
 });
 

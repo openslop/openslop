@@ -15,18 +15,30 @@ describe("uploadedResult", () => {
 	it("shows an image for no time of its own", async () => {
 		await expect(
 			uploadedResult("image", "https://blob/a.png"),
-		).resolves.toEqual({ imageUrl: "https://blob/a.png", durationSec: 0 });
+		).resolves.toEqual({
+			imageUrl: "https://blob/a.png",
+			durationSec: 0,
+			uploaded: true,
+		});
 	});
 
 	it("plays a video for its own length", async () => {
 		await expect(
 			uploadedResult("video", "https://blob/a.mp4"),
-		).resolves.toEqual({ videoUrl: "https://blob/a.mp4", durationSec: 7.5 });
+		).resolves.toEqual({
+			videoUrl: "https://blob/a.mp4",
+			durationSec: 7.5,
+			uploaded: true,
+		});
 	});
 
 	it("plays audio for its own length", async () => {
 		await expect(
 			uploadedResult("audio", "https://blob/a.mp3"),
-		).resolves.toEqual({ audioUrl: "https://blob/a.mp3", durationSec: 7.5 });
+		).resolves.toEqual({
+			audioUrl: "https://blob/a.mp3",
+			durationSec: 7.5,
+			uploaded: true,
+		});
 	});
 });

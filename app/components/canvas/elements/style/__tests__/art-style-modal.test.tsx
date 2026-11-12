@@ -102,7 +102,7 @@ describe("ArtStyleModal", () => {
 		const uploaded = asset("asset_avatar", { name: "Mira" });
 		const generated = asset("asset_avatar", { name: "Generated" });
 		open([references("https://img/reference.png"), uploaded, generated], {
-			[uploaded.id]: { imageUrl: "https://img/uploaded.png", pinned: true },
+			[uploaded.id]: { imageUrl: "https://img/uploaded.png", uploaded: true },
 			[generated.id]: { imageUrl: "https://img/generated.png" },
 		});
 
@@ -151,7 +151,7 @@ describe("ArtStyleModal", () => {
 		]) {
 			await act(async () =>
 				queue.replaceSnapshots(
-					resultQueue({ [avatar.id]: { imageUrl, pinned: true } }).snapshot(),
+					resultQueue({ [avatar.id]: { imageUrl, uploaded: true } }).snapshot(),
 				),
 			);
 			expect(avatarUrls()).toEqual([imageUrl]);

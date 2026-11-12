@@ -19,7 +19,7 @@ describe("artStyleReferences", () => {
 				resultQueue({
 					[mira.id]: {
 						imageUrl: "https://example.com/uploaded.jpg",
-						pinned: true,
+						uploaded: true,
 					},
 					[generated.id]: {
 						imageUrl: "https://example.com/generated.jpg",

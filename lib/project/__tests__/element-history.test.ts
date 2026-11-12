@@ -127,9 +127,26 @@ describe("saveElementVersion", () => {
 
 	it("gives an upload a row of its own", async () => {
 		const generated = await savedRow("p1", makeVersion());
-		const uploaded = await savedRow("p1", makeVersion({ pinned: true }));
+		const uploaded = await savedRow(
+			"p1",
+			makeVersion({
+				result: {
+					durationSec: 0,
+					imageUrl: "https://cdn/a.png",
+					uploaded: true,
+				},
+				pinned: true,
+			}),
+		);
 
 		expect(uploaded.id).not.toBe(generated.id);
+	});
+
+	it("keeps a version on its row whether or not it is pinned", async () => {
+		const generated = await savedRow("p1", makeVersion());
+		const pinned = await savedRow("p1", makeVersion({ pinned: true }));
+
+		expect(pinned.id).toBe(generated.id);
 	});
 
 	it("keeps projects apart when they share an element id", async () => {

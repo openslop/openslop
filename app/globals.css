@@ -220,7 +220,7 @@
 	--on-media: #000; /* chrome floating over media; use /55, /70, /80 */
 	--on-media-foreground: #fff;
 
-	/* Indicator badges: a passive status over media, never a control */
+	/* Indicator badges: a passive status, never a control */
 	--indicator: #f1e0e9;
 	--indicator-foreground: #762e4e;
 
