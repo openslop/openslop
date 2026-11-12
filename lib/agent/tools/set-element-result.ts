@@ -34,7 +34,7 @@ export const setElementResult = defineTool({
 			: "Setting files",
 	execute: async ({ results }, ctx) => {
 		const outcomes = await Promise.allSettled(
-			results.map(({ id, url }) => ctx.setElementResult(id, url)),
+			results.map(async ({ id, url }) => ctx.setElementResult(id, url)),
 		);
 		return outcomes
 			.map((outcome, index) =>

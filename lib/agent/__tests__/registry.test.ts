@@ -270,9 +270,10 @@ describe("executeToolCall", () => {
 
 	it("set_element_result skips an element that can't take the file and sets the rest", async () => {
 		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
-		const setElementResult = vi.fn(async (id: string) => {
+		const setElementResult = vi.fn((id: string) => {
 			if (id === "n1")
 				throw new Error("n1 is a narration element and can't take a file.");
+			return Promise.resolve();
 		});
 		const outcome = await executeToolCall(
 			{
