@@ -18,8 +18,8 @@ export function artStyleReferences(
 	queue: GenerationQueue,
 ): { images: string[]; avatars: CharacterAvatar[] } {
 	const avatars = getAvatars(assets).flatMap(({ id, generationAttributes }) => {
-		const { result, pinned } = queue.getElementSnapshot(id);
-		const url = pinned && getPrimaryUrl(result, "image");
+		const { result } = queue.getElementSnapshot(id);
+		const url = result?.uploaded && getPrimaryUrl(result, "image");
 		const name = generationAttributes?.name;
 		return url && name ? [{ name, url }] : [];
 	});

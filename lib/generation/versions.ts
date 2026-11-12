@@ -12,7 +12,7 @@ export type CommittedVersion = {
 	elementType: ElementType;
 	inputs: GenerationInputs;
 	result: AssetResult;
-	/** The result was supplied rather than generated. */
+	/** The result is never regenerated. */
 	pinned: boolean;
 };
 
@@ -24,21 +24,16 @@ const NO_VERSIONS: readonly ElementVersion[] = [];
 export const versionKey = ({
 	inputs,
 	result,
-	pinned,
-}: Pick<CommittedVersion, "inputs" | "result" | "pinned">): string =>
-	`${pinned ? "supplied" : "generated"}:${resultIdentity(result)}:${serializeInputs(inputs)}`;
+}: Pick<CommittedVersion, "inputs" | "result">): string =>
+	`${result.uploaded ? "uploaded" : "generated"}:${resultIdentity(result)}:${serializeInputs(inputs)}`;
 
 /** A failed regeneration nulls `result` but leaves `resultInputs`, so gate on both. */
 export const activeVersionIndex = (
 	versions: readonly ElementVersion[],
-	{
-		result,
-		resultInputs,
-		pinned,
-	}: Pick<ElementSnapshot, "result" | "resultInputs" | "pinned">,
+	{ result, resultInputs }: Pick<ElementSnapshot, "result" | "resultInputs">,
 ): number => {
 	if (!result || !resultInputs) return -1;
-	const key = versionKey({ inputs: resultInputs, result, pinned });
+	const key = versionKey({ inputs: resultInputs, result });
 	return versions.findIndex((version) => versionKey(version) === key);
 };
 

@@ -16,7 +16,7 @@ import { ElementHistoryPopover } from "./element-history-popover";
 import { ResetEditsButton } from "./reset-edits-button";
 import { HeaderIconButton } from "./header-icon-button";
 import { ElementGenerationProvider } from "./element-generation-context";
-import { ElementInput } from "./element-input";
+import { ElementPrompt } from "./element-input";
 import { ELEMENT_CONFIGS } from "./element-configs";
 import {
 	Popover,
@@ -118,9 +118,9 @@ export function ElementContainer({
 								<DeleteButton element={element} />
 							</div>
 						</div>
-						<ElementInput element={element} dir={dir}>
+						<ElementPrompt element={element} dir={dir}>
 							{children}
-						</ElementInput>
+						</ElementPrompt>
 						<div
 							className="mt-2 flex min-w-0 flex-wrap items-center justify-end gap-2 select-none"
 							contentEditable={false}

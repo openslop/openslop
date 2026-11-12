@@ -48,15 +48,17 @@ describe("elementState", () => {
 		});
 	});
 
-	it("reads an upload as pinned, however far the element has drifted", () => {
+	it("reads an upload as uploaded, however far the element has drifted", () => {
 		const queue = new GenerationQueue();
-		queue.commitResult(node("a", "a knight"), image("up.png"), {
-			pinned: true,
-		});
+		queue.commitResult(
+			node("a", "a knight"),
+			{ ...image("up.png"), uploaded: true },
+			{ pinned: true },
+		);
 
 		expect(stateOf(node("a", "a wizard"), queue)).toEqual({
 			id: "a",
-			state: "pinned",
+			state: "uploaded",
 		});
 	});
 

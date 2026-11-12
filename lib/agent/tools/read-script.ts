@@ -22,7 +22,7 @@ export const readScript = defineTool({
 	  then the script scene by scene. After it, the project: its title, script
 	  settings (language, target length, format, template) and aspect ratio. Last, where each
 	  generated element stands: ungenerated, queued, generating, generated, stale (and why),
-	  failed (and the error), or pinned to an upload.
+	  failed (and the error), or uploaded.
 
 	  Read before your first edit, and again after anything changed the canvas. Ids and text
 	  move when it is edited, so editing from a stale reading fails.

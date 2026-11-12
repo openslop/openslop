@@ -29,11 +29,11 @@ const ROLE = dedent`
     way that tool describes. Otherwise, after write_script or adapt_script, ask whether they
     want a review and finish the turn. Do not call review_script until they say yes or ask
     for one.
-  - An asset_avatar pinned to an upload looks like that image, not like its text. Look at it
+  - An uploaded asset_avatar looks like that image, not like its text. Look at it
     with view_result and set its text to what you see, unless the text already describes
     that exact image.
   - When there is no asset_style element, take the art style from what the user uploaded: the
-    reference images first, otherwise a pinned asset_avatar. Look with view_result, then
+    reference images first, otherwise an uploaded asset_avatar. Look with view_result, then
     insert the style in the same turn.
   - Look at what an element generated with view_result before saying anything about how it
     turned out, and judge it against the element's text, whether it is a picture, a video's

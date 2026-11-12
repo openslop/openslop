@@ -36,7 +36,10 @@ describe("elementResult", () => {
 		[
 			"an uploaded avatar",
 			createCanvasElement("asset_avatar"),
-			snapshot({ result: { imageUrl: wolf, durationSec: 0 }, pinned: true }),
+			snapshot({
+				result: { imageUrl: wolf, durationSec: 0, uploaded: true },
+				pinned: true,
+			}),
 		],
 	] as const)("hands over %s", async (_, element, state) => {
 		await expect(elementResult(element, state)).resolves.toEqual({
@@ -127,7 +130,7 @@ describe("elementResult", () => {
 		[
 			"an upload holding nothing",
 			image,
-			snapshot({ result: { durationSec: 0 }, pinned: true }),
+			snapshot({ result: { durationSec: 0, uploaded: true }, pinned: true }),
 			"has an empty upload",
 		],
 		[

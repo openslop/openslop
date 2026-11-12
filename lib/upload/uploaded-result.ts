@@ -33,6 +33,7 @@ export async function uploadedResult(
 	return {
 		[assetUrlField(kind)]: url,
 		durationSec: await READ_DURATION[kind](url),
+		uploaded: true,
 	};
 }
 

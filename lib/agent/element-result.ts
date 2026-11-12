@@ -31,7 +31,7 @@ const NO_RESULT: Record<ElementState["state"], string> = {
 	failed: "failed to generate",
 	generated: "generated an empty result",
 	stale: "generated an empty result",
-	pinned: "has an empty upload",
+	uploaded: "has an empty upload",
 };
 
 const holdsMedia = (result: AssetResult) =>
