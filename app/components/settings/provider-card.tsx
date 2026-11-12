@@ -7,12 +7,19 @@ import {
 	useTransition,
 	type ReactNode,
 } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import { Pencil, RefreshCw, Trash2 } from "@/components/ui/icon";
+import {
+	AlertCircle,
+	CheckCircle,
+	Hourglass,
+	Pencil,
+	RefreshCw,
+	Trash2,
+} from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Tile } from "@/components/ui/tile";
-import { KeyStatusBadge } from "@/app/components/models/key-status-badge";
 import { ProviderIcon } from "@/app/components/models/provider-icon";
 import { useProviderKey } from "@/app/components/models/use-provider-keys";
 import {
@@ -20,6 +27,7 @@ import {
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
+import type { KeyStatus } from "@/lib/connectors/provider-key";
 import type { Provider } from "@/lib/connectors/types";
 import { scrollIntoContainer } from "@/lib/components/scroll-into-container";
 import { formatDate } from "@/lib/format";
@@ -27,6 +35,22 @@ import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/toast-error";
 import { useAccount } from "@/lib/user/use-account";
 import { ProviderKeyForm } from "./provider-key-form";
+
+const KEY_STATUS = {
+	valid: { variant: "default", Icon: CheckCircle, label: "Connected" },
+	invalid: { variant: "tertiary", Icon: AlertCircle, label: "Not working" },
+	unverified: { variant: "caution", Icon: Hourglass, label: "Unverified" },
+} as const;
+
+function KeyStatusBadge({ status }: { status: KeyStatus }) {
+	const { variant, Icon, label } = KEY_STATUS[status];
+	return (
+		<Badge variant={variant}>
+			<Icon aria-hidden="true" />
+			{label}
+		</Badge>
+	);
+}
 
 function ProviderHeading({
 	provider,

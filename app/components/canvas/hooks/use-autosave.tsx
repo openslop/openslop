@@ -6,9 +6,15 @@ import { createAutosaver, type Autosaver } from "@/lib/project/autosave";
 import type { ProjectDocument } from "@/lib/project/project-document";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
-import { SavedToast } from "../saved-toast";
-
 const AUTOSAVE_TOAST = { id: "autosave", position: "bottom-right" as const };
+
+function SavedToast() {
+	return (
+		<div className="rounded-md border border-border bg-muted px-2.5 py-1.5 text-label text-muted-foreground">
+			Saved
+		</div>
+	);
+}
 
 export function useAutosave(
 	projectId: string,
