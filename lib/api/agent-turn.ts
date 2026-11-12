@@ -26,7 +26,7 @@ import {
 } from "./conversations";
 import { logger } from "./logger";
 
-const MAX_TOOL_CALLS = 30;
+const MAX_TOOL_CALLS = 60;
 
 export const agentTurnSchema = <TModel extends ModelRef>(
 	model: z.ZodType<TModel>,

@@ -18,6 +18,7 @@ import { HeaderIconButton } from "./header-icon-button";
 import { ElementGenerationProvider } from "./element-generation-context";
 import { ElementPrompt } from "./element-input";
 import { ELEMENT_CONFIGS } from "./element-configs";
+import { AddMediaButton } from "./element-media-picker";
 import {
 	Popover,
 	PopoverContent,
@@ -127,6 +128,7 @@ export function ElementContainer({
 						>
 							<ElementStaleIndicator />
 							<ResetEditsButton />
+							<AddMediaButton />
 							{config.actions?.map((Action, index) => (
 								<Action key={index} element={element} />
 							))}
