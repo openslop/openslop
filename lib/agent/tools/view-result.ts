@@ -24,6 +24,18 @@ export const describeResult = ({
 		...words.map(word),
 	].join("\n");
 
+/** A look's output: what the model is about to see, then the pictures themselves. */
+export const viewOutput = {
+	output: ResultViewSchema.extend({ id: z.string() }),
+	icon: Eye,
+	toModelOutput: ({ output }: { output: ResultView & { id: string } }) =>
+		imageOutput(
+			describeResult(output),
+			...output.pictures.map(({ url }) => url),
+		),
+	snapshot: true,
+} as const;
+
 export const viewResult = defineTool({
 	description: dedent`
 	  Look at what an element holds, generated or uploaded, so you can say whether a result
@@ -38,14 +50,8 @@ export const viewResult = defineTool({
 			.min(1)
 			.describe("The element's id, exactly as read_script gives it."),
 	}),
-	output: ResultViewSchema.extend({ id: z.string() }),
-	icon: Eye,
+	...viewOutput,
 	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a result"),
-	toModelOutput: ({ output }) =>
-		imageOutput(
-			describeResult(output),
-			...output.pictures.map(({ url }) => url),
-		),
 	execute: async ({ id }, ctx) => {
 		const result = await ctx.elementResult(id);
 		if (!result)
@@ -58,5 +64,4 @@ export const viewResult = defineTool({
 			);
 		return { id, ...result.view };
 	},
-	snapshot: true,
 });

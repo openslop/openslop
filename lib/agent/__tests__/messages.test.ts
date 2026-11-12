@@ -236,6 +236,29 @@ describe("pruneTranscript", () => {
 		});
 	});
 
+	it("sends only the newest 20 pictures, however many looks the turn takes", async () => {
+		const lookAt = (index: number): SloppyMessage["parts"][number] => ({
+			...look,
+			toolCallId: `v${index}`,
+			output: {
+				id: `img${index}`,
+				durationSec: 0,
+				pictures: [{ url: `https://cdn.test/${index}.png` }],
+				words: [],
+			},
+		});
+		const inFlight = turnWith(
+			"m2",
+			...Array.from({ length: 25 }, (_look, index) => lookAt(index)),
+		);
+		const sent = JSON.stringify(await modelView([asked, inFlight]));
+
+		expect(sent.match(/"type":"file"/g)).toHaveLength(20);
+		expect(sent.match(/An earlier picture, not kept/g)).toHaveLength(5);
+		expect(sent).toContain('"url":"https://cdn.test/5.png"');
+		expect(sent).not.toContain('"url":"https://cdn.test/4.png"');
+	});
+
 	it("keeps every reading the turn in flight has taken", async () => {
 		const inFlight = turnWith(
 			"m2",

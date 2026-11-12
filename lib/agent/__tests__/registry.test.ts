@@ -64,6 +64,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
 	setElementMedia: async () => {},
+	viewMedia: async () => ({ durationSec: 0, pictures: [], words: [] }),
 	...over,
 });
 
@@ -236,33 +237,67 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it("read_media hands back the whole media library", async () => {
-		const media = [
-			{ name: "song", kind: "audio", url: "https://blob/song.mp3" },
-			{ name: "cat", kind: "image", url: "https://blob/cat.png" },
-		] as const;
+	it("view_media shows a library file under its name", async () => {
+		const cat = {
+			name: "cat",
+			kind: "image",
+			url: "https://blob/cat.png",
+		} as const;
+		const viewMedia = vi.fn(async () => ({
+			durationSec: 0,
+			pictures: [{ url: cat.url }],
+			words: [],
+		}));
 		const outcome = await executeToolCall(
-			{ toolName: "read_media", input: {} },
+			{ toolName: "view_media", input: { url: cat.url } },
 			context({
-				readProject: () => ({ ...project(), media: [...media] }),
+				readProject: () => ({ ...project(), media: [cat] }),
+				viewMedia,
 			}),
 		);
 
-		expect(outcome).toEqual({ ok: true, output: media });
+		expect(viewMedia).toHaveBeenCalledWith(cat);
+		expect(outcome).toEqual({
+			ok: true,
+			output: {
+				id: "cat",
+				durationSec: 0,
+				pictures: [{ url: cat.url }],
+				words: [],
+			},
+		});
 	});
 
-	it("set_element_media puts the URL on the element", async () => {
+	it("set_element_media skips a URL that is not in the media library and sets the rest", async () => {
+		const song = {
+			name: "song",
+			kind: "audio",
+			url: "https://blob/song.mp3",
+		} as const;
 		const setElementMedia = vi.fn(async () => {});
 		const outcome = await executeToolCall(
 			{
 				toolName: "set_element_media",
-				input: { id: "m1", url: "https://blob/song.mp3" },
+				input: {
+					files: [
+						{ id: "m1", url: "https://example.com/song.mp3" },
+						{ id: "m2", url: song.url },
+					],
+				},
 			},
-			context({ setElementMedia }),
+			context({
+				readProject: () => ({ ...project(), media: [song] }),
+				setElementMedia,
+			}),
 		);
 
-		expect(setElementMedia).toHaveBeenCalledWith("m1", "https://blob/song.mp3");
-		expect(outcome.ok).toBe(true);
+		expect(setElementMedia).toHaveBeenCalledExactlyOnceWith("m2", song);
+		expect(outcome.ok && outcome.output).toBe(
+			[
+				"Skipped m1: https://example.com/song.mp3 is not in the media library.",
+				"Put the file on m2.",
+			].join("\n"),
+		);
 	});
 
 	it("puts the user's own script on the canvas untouched", async () => {
@@ -750,6 +785,7 @@ describe("SLOPPY_TOOLS", () => {
 			"generate_captions",
 			"view_result",
 			"read_media",
+			"view_media",
 			"set_element_media",
 			"outline_story",
 			"estimate_total_length",
@@ -816,6 +852,7 @@ describe("tool flags", () => {
 			"read_media",
 			"read_script",
 			"review_script",
+			"view_media",
 			"view_result",
 		]);
 	});

@@ -12,6 +12,7 @@ import { listModels } from "./list-models";
 import { outlineStory } from "./outline-story";
 import { readMedia } from "./read-media";
 import { readScript } from "./read-script";
+import { viewMedia } from "./view-media";
 import { reviewScript } from "./review-script";
 import { setDefaultModel } from "./set-default-model";
 import { setElementMedia } from "./set-element-media";
@@ -33,6 +34,7 @@ const TOOLS = {
 	generate_captions: generateCaptions,
 	view_result: viewResult,
 	read_media: readMedia,
+	view_media: viewMedia,
 	set_element_media: setElementMedia,
 	outline_story: outlineStory,
 	estimate_total_length: estimateTotalLength,

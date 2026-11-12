@@ -1,10 +1,11 @@
 import type { AssetElement } from "@/lib/canvas/types";
-import type { ElementResult } from "../element-result";
+import type { ElementResult, ResultView } from "../element-result";
 import type { ElementState } from "../element-state";
 import type { DialogueEstimate } from "@/lib/canvas/spoken-words";
 import type { VisualSpan } from "@/lib/render/visual-spans";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
+import type { MediaItem } from "@/lib/project/media";
 import type { Provider } from "@/lib/connectors/types";
 import type { CaptionsReport } from "@/lib/captions/auto-captions";
 
@@ -40,5 +41,6 @@ export type AgentToolContext = Pick<
 	adaptScript: (script: string, notes?: string) => Promise<void>;
 	isConnected: (provider: Provider) => boolean;
 	generateCaptions: (ids?: string[]) => CaptionsReport;
-	setElementMedia: (id: string, url: string) => Promise<void>;
+	setElementMedia: (id: string, item: MediaItem) => Promise<void>;
+	viewMedia: (item: MediaItem) => Promise<ResultView>;
 };

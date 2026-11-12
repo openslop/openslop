@@ -8,13 +8,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import type { UploadKind } from "@/lib/upload/upload-files";
-import { commitUploaded } from "@/lib/upload/uploaded-result";
+import {
+	commitUploaded,
+	isUploadable,
+	UPLOAD_KIND_OF,
+} from "@/lib/upload/uploaded-result";
 import { cn } from "@/lib/utils";
 import { useElementGeneration } from "./element-generation-context";
 import { MediaPicker, useMediaPickerUploading } from "./media-picker";
 
 /** The element's Add button, a spinner and "Uploading…" while the picker's upload lands. */
-function AddMediaButton({
+function AddMediaPickerButton({
 	kind,
 	disabled,
 	className,
@@ -39,38 +43,18 @@ function AddMediaButton({
 	);
 }
 
-/** Supplies the media an element would otherwise generate. */
-function ElementMediaPicker({
-	kind,
-	className,
-}: {
-	kind: UploadKind;
-	className?: string;
-}) {
+/** Supplies the media an element would otherwise generate, on an element that takes it. */
+export function AddMediaButton() {
 	const queue = useGenerationQueue();
-	const { node, status } = useElementGeneration();
+	const { element, node, status } = useElementGeneration();
+	if (!isUploadable(element)) return null;
+	const kind = UPLOAD_KIND_OF[element.type];
 	return (
 		<MediaPicker
 			kind={kind}
 			onPick={(url) => commitUploaded(queue, node, kind, url)}
 		>
-			<AddMediaButton
-				kind={kind}
-				disabled={isGenerationActive(status)}
-				className={className}
-			/>
+			<AddMediaPickerButton kind={kind} disabled={isGenerationActive(status)} />
 		</MediaPicker>
 	);
 }
-
-export const AddImageButton = ({ className }: { className?: string }) => (
-	<ElementMediaPicker kind="image" className={className} />
-);
-
-export const AddVideoButton = ({ className }: { className?: string }) => (
-	<ElementMediaPicker kind="video" className={className} />
-);
-
-export const AddAudioButton = ({ className }: { className?: string }) => (
-	<ElementMediaPicker kind="audio" className={className} />
-);

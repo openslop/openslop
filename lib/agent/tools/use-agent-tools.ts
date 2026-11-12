@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import pick from "lodash/pick";
 import { getAssets } from "@/lib/canvas/assets";
-import { findElementById } from "@/lib/canvas/editor-ops";
+import { findElementById, requireElement } from "@/lib/canvas/editor-ops";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { getContentElements, isScriptEmpty } from "@/lib/canvas/scenes";
 import {
@@ -35,9 +35,10 @@ import {
 	commitUploaded,
 	isUploadable,
 	UPLOAD_KIND_OF,
+	uploadedResult,
 } from "@/lib/upload/uploaded-result";
 import { streamScript } from "@/lib/script/stream-script";
-import { elementResult } from "../element-result";
+import { elementResult, resultView } from "../element-result";
 import { elementState } from "../element-state";
 import { PROJECT_SETTERS, type AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
@@ -128,23 +129,21 @@ export function useAgentTools() {
 						projectId,
 					);
 				},
-				setElementMedia: (id, url) => {
-					const element = findElementById(editor, id)?.[0];
-					if (!element)
+				setElementMedia: (id, { kind, url }) => {
+					const [element] = requireElement(editor, id);
+					if (!isUploadable(element) || UPLOAD_KIND_OF[element.type] !== kind)
 						throw new Error(
-							`There is no element ${id} on the canvas. Read the script for the ids there are.`,
-						);
-					if (!isUploadable(element))
-						throw new Error(
-							`${id} is a ${element.type} element, which takes no media.`,
+							`${id} is a ${element.type} element and can't take ${kind}.`,
 						);
 					return commitUploaded(
 						queue,
 						buildNode(element, buildContext()),
-						UPLOAD_KIND_OF[element.type],
+						kind,
 						url,
 					);
 				},
+				viewMedia: async ({ kind, url }) =>
+					resultView(await uploadedResult(kind, url)),
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);
