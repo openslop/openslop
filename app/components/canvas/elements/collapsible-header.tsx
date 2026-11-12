@@ -34,7 +34,7 @@ export function CollapsibleHeader({
 			</IconButton>
 			{label}
 			{rightSlot && (
-				<div className="ml-auto opacity-0 group-hover/collapsible:opacity-100 transition-opacity duration-200 p-1">
+				<div className="ml-auto opacity-0 group-hover/collapsible:opacity-100 focus-within:opacity-100 transition-opacity duration-200 p-1">
 					{rightSlot}
 				</div>
 			)}
