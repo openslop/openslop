@@ -21,47 +21,75 @@ The numbers match the diagram.
 
 ![The canvas model: what block, node, element, scene, content and asset mean, and how they nest](./docs/canvas-model.svg)
 
-- **Canvas** (`lib/canvas/`): the Slate document, and the project itself. It saves as OSML, a tag format the LLM writes too, so Sloppy and the user edit the same thing.
-- **Element**: one block on the canvas, with prompt text and attributes. Its type is declared once in `ELEMENT_TYPES`.
-- **Asset element**: an element ahead of the scenes, named `asset_*`: a character's avatar and voice, the art style, the references. It is known by its type and name, and content uses it by reference, so a character looks and sounds the same everywhere.
-- **Scene**: an ordered group of content elements.
-- **Content element**: an element inside a scene that plays on the timeline: narration, character dialogue, image, video, sound, music.
-- **Generation attributes** shape what a model makes (model, duration, voice). **Layout attributes** shape how a result plays (volume, loop, trim, motion). Layout attributes never make an element stale, so editing the layout never costs a regeneration.
+The canvas is the project. Each term means one thing everywhere in the code:
 
-Generation is a dependency graph built from the canvas (`lib/generation/`):
+| Term                      | Where                               | Means                                                                                                                                                              |
+| ------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Canvas**                | `lib/canvas/`                       | The Slate document, and the project itself. Sloppy and the user edit the same one.                                                                                 |
+| **OSML**                  | `osml-serializer.ts`                | The tag format the canvas saves as and the LLM writes, so a model's output streams straight onto the canvas.                                                       |
+| **Node**                  | Slate `Node`                        | Any Slate node: the editor, a block or a text leaf. Not a graph node.                                                                                              |
+| **Block**                 | `CanvasBlock`                       | A scene or an element.                                                                                                                                             |
+| **Scene**                 | `Scene`                             | An ordered group of content. A block, not an element.                                                                                                              |
+| **Element**               | `CanvasElement`                     | Prompt text plus attributes. Its type is declared once in `ELEMENT_TYPES`.                                                                                         |
+| **Content**               | `ContentElement`                    | An element inside a scene that plays on the timeline: narration, character, image, video, sound, music. Its role and layer place it in the mix.                    |
+| **Asset**                 | `AssetElement`                      | An element ahead of the scenes, named `asset_*`, known by type and name. Content uses it by reference, so a character looks and sounds the same everywhere.        |
+| **Character**             | `asset_avatar` + `asset_voice`      | An avatar and/or voice sharing a name. The narrator is the voice named Narrator.                                                                                   |
+| **Generated**             | `GeneratedElement`                  | An element whose type names a connector: every content type, the avatar and the voice.                                                                             |
+| **Metadata**              | `asset_style`, `asset_references`   | An asset with no connector. Plugins read it; it never generates.                                                                                                   |
+| **Media draft**           | `asset_media_<type>`                | A Media panel prompt. It generates like the content type it drafts, outside the script.                                                                            |
+| **Generation attributes** | `generationAttributes`              | What a model makes: model, duration, voice. A change makes the element stale.                                                                                      |
+| **Layout attributes**     | `LAYOUT_ATTRIBUTE_KEYS`             | How a result plays: volume, loop, trim, motion. A change never costs a regeneration.                                                                               |
+| **Connector**             | `lib/connectors/`                   | Turns an element into a generation request, one per media type: LLM, image, video, TTS, voice, STT, music, sound.                                                  |
+| **Plugin**                | `lib/connectors/registry.ts`        | Per-type behaviour: extra dependencies (a shot uses its characters' avatars), metadata reads (art style, references), prompt hooks. No special cases in the graph. |
+| **Graph node**            | `GenerationNode`, `lib/generation/` | One per generated element: its inputs and edges to the elements it uses.                                                                                           |
+| **Stale**                 | `staleness.ts`                      | A node with no result, a regenerated dependency or changed inputs. The stale reason names what changed.                                                            |
+| **Queue**                 | `GenerationQueue`                   | Runs stale nodes, dependencies first, a few per media type at a time. It rebuilds each node from the live canvas when its job starts.                              |
+| **Snapshot store**        | `SnapshotStore`                     | Each element's status, result and error, keyed by element id. Apart from the canvas, so typing never churns results and results never rewrite the script.          |
+| **Take**                  | `versions.ts`                       | One result with the inputs it came from. An element's history lists its takes and restores any of them.                                                            |
+| **Pinned**                | `pinned` on a snapshot              | A result the user supplied, such as an upload. It never regenerates.                                                                                               |
 
-- **Connector** (`lib/connectors/`): turns an element into a generation request, one per media type (LLM, image, video, TTS, voice, STT, music, sound).
-- **Plugins** (`lib/connectors/registry.ts`): per-type behaviour (extra dependencies, metadata reads, prompt hooks) added to the graph instead of special cases in it.
-- **Graph node**: one per generated element, holding its inputs and edges to the elements it uses, so a video depends on its character's avatar. A node is stale when it has no result, a dependency regenerated, or its inputs changed.
-- **Queue** (`GenerationQueue`): runs stale nodes, dependencies first, with a concurrency limit per media type. It rebuilds each node from the live canvas when its job starts, so it never generates from an old prompt.
-- **Snapshot store** (`SnapshotStore`): each element's generation state and the results it has had, keyed by element id. It lives apart from the canvas so typing never churns results and results never rewrite the script. Any past result can be restored from the element's history.
+## Project
 
-## Project store and media
-
-- **Project store** (`lib/project/`): a Zustand store for what is not on the canvas: the title, video and script settings, pinned models and media. It owns saving and version history.
-- **Media**: the project's own files, apart from the canvas. Uploads land there through `useMediaUpload`. Every take generated in the Media panel lands there too, via `useAddDraftTakesToMedia`. An item is named after its file, or its type for a take, and removing one never touches the elements that use its URL.
+| Term                | Where                  | Means                                                                                                                                                                         |
+| ------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Project store**   | `lib/project/store.ts` | A Zustand store for what is not on the canvas: title, settings, pinned models, media. It owns saving and version history.                                                     |
+| **Script settings** | `ScriptSettings`       | Language, length and format, read by the script writer.                                                                                                                       |
+| **Format**          | `video-format.ts`      | Who speaks: cinematic (characters on screen), faceless (a narrator and voices over pictures) or explainer (a voice, nobody on screen).                                        |
+| **Video settings**  | `VideoSettings`        | Aspect ratio, captions, caption style, transition. Layout only.                                                                                                               |
+| **Template**        | `lib/templates/`       | A starting brief with its characters, art style, references and length. Applied before a project has a script.                                                                |
+| **Media**           | `lib/project/media.ts` | The project's own files. Uploads land there through `useMediaUpload`; Media panel takes land via `useAddDraftTakesToMedia`. Removing one never touches the elements using it. |
 
 ## Sloppy
 
-Sloppy is the agent in the editor's left panel, with a client-side harness:
+| Term       | Where                    | Means                                                                                                                                           |
+| ---------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sloppy** | `app/components/sloppy/` | The agent in the editor's left panel.                                                                                                           |
+| **Turn**   | `lib/api/agent-turn.ts`  | One model response. The server streams its text and tool calls; the tools have specs but no executors there.                                    |
+| **Tool**   | `lib/agent/tools/`       | A `defineTool` the browser runs against the canvas, queue and stores. Its result goes back as the next request until the model answers in text. |
 
-- The server (`lib/api/agent-turn.ts`) streams the model's text and tool calls. Its tools have specs but no executors.
-- The browser runs each tool (`lib/agent/tools/`) against the canvas and the project store, then posts the result back, until the model answers in text.
-
-So Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new skill is a new tool in `lib/agent/tools/registry.ts`, not a new pipeline.
+The harness is client-side, so Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new skill is a new tool, not a new pipeline.
 
 ## Layout and render
 
-- **Layout** (`lib/render/`): resolves the canvas and its snapshots into a timeline: scene lengths from the speech, visuals spanned across them, transitions, captions. It is the one length model, shared by the preview, the render and Sloppy's estimates.
-- **Remotion** (`remotion/`): one composition draws that timeline as React. The Player previews it in the editor; Lambda renders it for export, so the preview is the export.
+| Term            | Where                    | Means                                                                                                                                                                                   |
+| --------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Layout**      | `lib/render/`            | Resolves the canvas and snapshots into a timeline: scene lengths from the speech, visuals spanned across them, transitions. The one length model, shared by preview, render and Sloppy. |
+| **Captions**    | `lib/captions/`          | Word timings from an STT job per spoken clip, styled by the video settings.                                                                                                             |
+| **Composition** | `remotion/`              | One Remotion composition that draws the timeline as React.                                                                                                                              |
+| **Player**      | `app/components/player/` | Plays the composition in the editor, so the preview is the export.                                                                                                                      |
+| **Render**      | `/api/render`            | Remotion Lambdas render the same composition in parallel chunks to an MP4 in S3.                                                                                                        |
 
 ## Models and keys
 
-- **Model**: a `{ provider, model }` pair, listed in `MODELS` (`lib/connectors/models.ts`). Each element stores its own; defaults resolve element, then project, then account.
-- **Gateway** (`lib/gateway/`): the HTTP client from a connector to our routes. `/api/v1` serves models OpenSlop hosts; `/api/third-party` serves models a user brings a key for.
-- **Provider** (`lib/providers/`): the server-side vendor adapter, shared by both route families.
-- **Job**: an asset route records a `jobs` row and hands it to a Vercel Queue worker, which calls the provider and uploads the result to Vercel Blob. The client polls the job until it settles.
-- **Provider key**: a user's key for a vendor, kept in Supabase Vault, read by the service role only for the request that uses it, and never sent to a client.
+| Term             | Where                  | Means                                                                                                                                                              |
+| ---------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Model**        | `MODELS`, `models.ts`  | A `{ provider, model }` pair. Each element stores its own; defaults resolve element, then project, then account.                                                   |
+| **Provider**     | `lib/providers/`       | A server-side vendor adapter (Anthropic, Runware, ElevenLabs, Cartesia), shared by both route families.                                                            |
+| **Hosted**       | `/api/v1`              | Models OpenSlop serves on its own keys.                                                                                                                            |
+| **BYOK**         | `/api/third-party`     | Models a user serves on their own key.                                                                                                                             |
+| **Gateway**      | `lib/gateway/`         | The HTTP client from a connector to a route family.                                                                                                                |
+| **Job**          | `jobs`                 | An asset route records a row and hands it to a Vercel Queue worker, which calls the provider and uploads the result to Blob. The client polls it until it settles. |
+| **Provider key** | `provider_keys`, Vault | A user's key for a vendor. Read by the service role only for the request that uses it, never sent to a client.                                                     |
 
 `proxy.ts` refreshes the Supabase session; `withSession` and `withApiAccess` guard the routes.
 
