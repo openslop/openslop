@@ -1,50 +1,44 @@
 import type {
 	LanguageModelV4Message,
 	LanguageModelV4Prompt,
-	LanguageModelV4ToolResultOutput,
+	LanguageModelV4ToolResultPart,
 } from "@ai-sdk/provider";
 
-type Item = Extract<
-	LanguageModelV4ToolResultOutput,
-	{ type: "content" }
->["value"][number];
-
-const PICTURE_DROPPED: Item = {
-	type: "text",
+const PICTURE_DROPPED = {
+	type: "text" as const,
 	text: "An earlier picture, not kept. Look again if you still need it.",
 };
 
-const withoutPicture = (item: Item): Item =>
-	item.type === "file" && item.mediaType.startsWith("image")
-		? PICTURE_DROPPED
-		: item;
+function dropPictures(
+	part: LanguageModelV4ToolResultPart,
+): LanguageModelV4ToolResultPart {
+	if (part.output.type !== "content") return part;
+	const value = part.output.value.map((item) => {
+		if (item.type === "file" && item.mediaType.startsWith("image"))
+			return PICTURE_DROPPED;
+		return item;
+	});
+	return { ...part, output: { ...part.output, value } };
+}
 
-const withoutPictures = (
+function withoutPictures(
 	message: LanguageModelV4Message,
-): LanguageModelV4Message =>
-	message.role === "tool"
-		? {
-				...message,
-				content: message.content.map((part) =>
-					part.type === "tool-result" && part.output.type === "content"
-						? {
-								...part,
-								output: {
-									...part.output,
-									value: part.output.value.map(withoutPicture),
-								},
-							}
-						: part,
-				),
-			}
-		: message;
+): LanguageModelV4Message {
+	if (message.role !== "tool") return message;
+	const content = message.content.map((part) => {
+		if (part.type !== "tool-result") return part;
+		return dropPictures(part);
+	});
+	return { ...message, content };
+}
 
 /** Every tool-result picture before the latest tool message is swapped for a note. */
 export function keepLatestPictures(
 	prompt: LanguageModelV4Prompt,
 ): LanguageModelV4Prompt {
 	const latest = prompt.findLastIndex((message) => message.role === "tool");
-	return prompt.map((message, index) =>
-		index < latest ? withoutPictures(message) : message,
-	);
+	return prompt.map((message, index) => {
+		if (index >= latest) return message;
+		return withoutPictures(message);
+	});
 }
