@@ -63,6 +63,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
+	setElementMedia: async () => {},
 	...over,
 });
 
@@ -233,6 +234,35 @@ describe("executeToolCall", () => {
 
 		expect(titles).toEqual([]);
 		expect(outcome.ok).toBe(false);
+	});
+
+	it("read_media hands back the whole media library", async () => {
+		const media = [
+			{ name: "song", kind: "audio", url: "https://blob/song.mp3" },
+			{ name: "cat", kind: "image", url: "https://blob/cat.png" },
+		] as const;
+		const outcome = await executeToolCall(
+			{ toolName: "read_media", input: {} },
+			context({
+				readProject: () => ({ ...project(), media: [...media] }),
+			}),
+		);
+
+		expect(outcome).toEqual({ ok: true, output: media });
+	});
+
+	it("set_element_media puts the URL on the element", async () => {
+		const setElementMedia = vi.fn(async () => {});
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_element_media",
+				input: { id: "m1", url: "https://blob/song.mp3" },
+			},
+			context({ setElementMedia }),
+		);
+
+		expect(setElementMedia).toHaveBeenCalledWith("m1", "https://blob/song.mp3");
+		expect(outcome.ok).toBe(true);
 	});
 
 	it("puts the user's own script on the canvas untouched", async () => {
@@ -719,6 +749,8 @@ describe("SLOPPY_TOOLS", () => {
 			"update_video_settings",
 			"generate_captions",
 			"view_result",
+			"read_media",
+			"set_element_media",
 			"outline_story",
 			"estimate_total_length",
 			"estimate_dialogue_lengths",
@@ -781,6 +813,7 @@ describe("presentToolCall", () => {
 describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
+			"read_media",
 			"read_script",
 			"review_script",
 			"view_result",

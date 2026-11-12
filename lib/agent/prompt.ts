@@ -38,6 +38,8 @@ const ROLE = dedent`
   - Look at what an element generated with view_result before saying anything about how it
     turned out, and judge it against the element's text, whether it is a picture, a video's
     frames, or the words a voice line says and when.
+  - Use the user's own media as it is: put it on an element with set_element_media, don't
+    generate a lookalike. To put it on a new element, add the element with edit_script first.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it.
   - One short sentence before a tool call, saying what you are about to change. Lead with the outcome.

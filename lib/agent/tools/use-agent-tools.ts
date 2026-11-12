@@ -22,7 +22,7 @@ import {
 import { resolveModel } from "@/lib/connectors/models";
 import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
-import { buildNodes } from "@/lib/generation/generation-graph";
+import { buildNode, buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { useCreateConnector } from "@/lib/connectors/use-create-connector";
@@ -31,6 +31,11 @@ import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
+import {
+	commitUploaded,
+	isUploadable,
+	UPLOAD_KIND_OF,
+} from "@/lib/upload/uploaded-result";
 import { streamScript } from "@/lib/script/stream-script";
 import { elementResult } from "../element-result";
 import { elementState } from "../element-state";
@@ -121,6 +126,23 @@ export function useAgentTools() {
 								),
 						resolveModel("stt", editor.defaultModels().stt),
 						projectId,
+					);
+				},
+				setElementMedia: (id, url) => {
+					const element = findElementById(editor, id)?.[0];
+					if (!element)
+						throw new Error(
+							`There is no element ${id} on the canvas. Read the script for the ids there are.`,
+						);
+					if (!isUploadable(element))
+						throw new Error(
+							`${id} is a ${element.type} element, which takes no media.`,
+						);
+					return commitUploaded(
+						queue,
+						buildNode(element, buildContext()),
+						UPLOAD_KIND_OF[element.type],
+						url,
 					);
 				},
 				...pick(store.getState(), PROJECT_SETTERS),

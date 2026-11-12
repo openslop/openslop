@@ -1,3 +1,8 @@
+import type {
+	CanvasElement,
+	ElementOf,
+	GeneratedType,
+} from "@/lib/canvas/types";
 import { assetUrlField } from "@/lib/connectors/asset-url";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationNode } from "@/lib/generation/graph";
@@ -36,6 +41,20 @@ export async function uploadedResult(
 		uploaded: true,
 	};
 }
+
+/** The elements that take supplied media, and the kind each takes. */
+export const UPLOAD_KIND_OF = {
+	image: "image",
+	video: "video",
+	music: "audio",
+	asset_avatar: "image",
+} as const satisfies Partial<Record<GeneratedType, UploadKind>>;
+
+type UploadableElement = ElementOf<keyof typeof UPLOAD_KIND_OF>;
+
+export const isUploadable = (
+	element: CanvasElement,
+): element is UploadableElement => Object.hasOwn(UPLOAD_KIND_OF, element.type);
 
 /** Pinned, so Generate All never overwrites what the user chose. */
 export async function commitUploaded(
