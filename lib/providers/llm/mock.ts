@@ -5,10 +5,11 @@ import type {
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import omit from "lodash/omit";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
-import type {
-	LLMGenerateParams,
-	LLMGenerateResult,
-	LLMStreamChunk,
+import {
+	type LLMGenerateParams,
+	type LLMGenerateResult,
+	type LLMStreamChunk,
+	MODEL_REF_KEYS,
 } from "@/lib/connectors/types";
 import { SCENE_MARKER_PATTERN } from "@/lib/canvas/constants";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
@@ -50,7 +51,7 @@ const MOCK_ASSETS: RefineOp[] =
 		.map((asset) => ({
 			op: "asset",
 			type: asset.type,
-			attrs: omit(flatAttributes(asset), ["provider", "model"]),
+			attrs: omit(flatAttributes(asset), MODEL_REF_KEYS),
 			text: getElementBodyText(asset),
 		}));
 
