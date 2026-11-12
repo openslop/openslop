@@ -144,7 +144,6 @@ describe("pruneTranscript", () => {
 		state: "output-available",
 		input: { id: "img1" },
 		output: {
-			id: "img1",
 			durationSec: 0,
 			pictures: [{ url: "https://cdn.test/cat.png" }],
 			words: [],
@@ -240,8 +239,8 @@ describe("pruneTranscript", () => {
 		const lookAt = (index: number): SloppyMessage["parts"][number] => ({
 			...look,
 			toolCallId: `v${index}`,
+			input: { id: `img${index}` },
 			output: {
-				id: `img${index}`,
 				durationSec: 0,
 				pictures: [{ url: `https://cdn.test/${index}.png` }],
 				words: [],

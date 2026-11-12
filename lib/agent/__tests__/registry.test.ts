@@ -261,7 +261,6 @@ describe("executeToolCall", () => {
 		expect(outcome).toEqual({
 			ok: true,
 			output: {
-				id: "cat",
 				durationSec: 0,
 				pictures: [{ url: cat.url }],
 				words: [],
@@ -631,7 +630,7 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toEqual({ id: "img-1", ...view });
+		expect(outcome.ok && outcome.output).toEqual(view);
 	});
 
 	it("refuses with the reason an element has no result", async () => {

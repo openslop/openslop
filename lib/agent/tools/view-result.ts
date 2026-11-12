@@ -12,23 +12,18 @@ const word = ({ text, startMs, endMs }: ResultView["words"][number]) =>
 	`[${seconds(startMs / 1000)}-${seconds(endMs / 1000)}] ${text}`;
 
 /** What the model is about to see, URL by URL, then every word with its time. */
-export const describeResult = ({
-	id,
-	durationSec,
-	pictures,
-	words,
-}: ResultView & { id: string }) =>
+export const describeResult = ({ durationSec, pictures, words }: ResultView) =>
 	[
-		`${id}${durationSec > 0 ? `, ${seconds(durationSec)} long` : ""}:`,
+		...(durationSec > 0 ? [`${seconds(durationSec)} long`] : []),
 		...pictures.map(picture),
 		...words.map(word),
 	].join("\n");
 
 /** A look's output: what the model is about to see, then the pictures themselves. */
 export const viewOutput = {
-	output: ResultViewSchema.extend({ id: z.string() }),
+	output: ResultViewSchema,
 	icon: Eye,
-	toModelOutput: ({ output }: { output: ResultView & { id: string } }) =>
+	toModelOutput: ({ output }: { output: ResultView }) =>
 		imageOutput(
 			describeResult(output),
 			...output.pictures.map(({ url }) => url),
@@ -62,6 +57,6 @@ export const viewResult = defineTool({
 			throw new Error(
 				`${id} ${result.reason}, so there is nothing to look at.`,
 			);
-		return { id, ...result.view };
+		return result.view;
 	},
 });

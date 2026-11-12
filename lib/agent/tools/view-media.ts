@@ -14,8 +14,6 @@ export const viewMedia = defineTool({
 	}),
 	...viewOutput,
 	label: "Looking at the media library",
-	execute: async ({ url }, ctx) => {
-		const item = requireMedia(ctx.readProject().media, url);
-		return { id: item.name, ...(await ctx.viewMedia(item)) };
-	},
+	execute: async ({ url }, ctx) =>
+		ctx.viewMedia(requireMedia(ctx.readProject().media, url)),
 });
