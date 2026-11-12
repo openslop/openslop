@@ -51,7 +51,7 @@ const ROLE = dedent`
     - A song with lyrics for a music video: put it on a music element, caption it with
       generate_captions, read its word times with view_result, and time the scenes to the words.
     - Avatars: put each one on the asset_avatar of the character it shows.
-  - Use the user's files as they are with set_element_media. Don't generate a lookalike. To put a
+  - Use the user's files as they are with set_element_result. Don't generate a lookalike. To put a
     file on a new element, add the element with edit_script first.
 
   # Lengths

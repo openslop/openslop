@@ -7,6 +7,7 @@ import {
 	executeToolCall,
 	presentToolCall,
 } from "../tools/registry";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
@@ -63,7 +64,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
-	setElementMedia: async () => {},
+	setElementResult: async () => {},
 	viewMedia: async () => ({ durationSec: 0, pictures: [], words: [] }),
 	...over,
 });
@@ -268,35 +269,48 @@ describe("executeToolCall", () => {
 		});
 	});
 
-	it("set_element_media skips a URL that is not in the media library and sets the rest", async () => {
-		const song = {
-			name: "song",
-			kind: "audio",
-			url: "https://blob/song.mp3",
-		} as const;
-		const setElementMedia = vi.fn(async () => {});
+	it("set_element_result skips an element that can't take the file and sets the rest", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const setElementResult = vi.fn(async (id: string) => {
+			if (id === "n1")
+				throw new Error("n1 is a narration element and can't take a file.");
+		});
 		const outcome = await executeToolCall(
 			{
-				toolName: "set_element_media",
+				toolName: "set_element_result",
 				input: {
-					files: [
-						{ id: "m1", url: "https://example.com/song.mp3" },
-						{ id: "m2", url: song.url },
+					results: [
+						{ id: "n1", url },
+						{ id: "m1", url },
 					],
 				},
 			},
-			context({
-				readProject: () => ({ ...project(), media: [song] }),
-				setElementMedia,
-			}),
+			context({ setElementResult }),
 		);
 
-		expect(setElementMedia).toHaveBeenCalledExactlyOnceWith("m2", song);
+		expect(setElementResult).toHaveBeenNthCalledWith(2, "m1", url);
 		expect(outcome.ok && outcome.output).toBe(
 			[
-				"Skipped m1: https://example.com/song.mp3 is not in the media library.",
-				"Put the file on m2.",
+				"Skipped n1: n1 is a narration element and can't take a file.",
+				"Set m1.",
 			].join("\n"),
+		);
+	});
+
+	it("set_element_result refuses a URL outside our store", async () => {
+		const setElementResult = vi.fn(async () => {});
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_element_result",
+				input: { results: [{ id: "m1", url: "https://example.com/song.mp3" }] },
+			},
+			context({ setElementResult }),
+		);
+
+		expect(setElementResult).not.toHaveBeenCalled();
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain(
+			"Each URL must be a file in our store",
 		);
 	});
 
@@ -786,7 +800,7 @@ describe("SLOPPY_TOOLS", () => {
 			"view_result",
 			"read_media",
 			"view_media",
-			"set_element_media",
+			"set_element_result",
 			"outline_story",
 			"estimate_total_length",
 			"estimate_dialogue_lengths",

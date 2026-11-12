@@ -129,16 +129,16 @@ export function useAgentTools() {
 						projectId,
 					);
 				},
-				setElementMedia: (id, { kind, url }) => {
+				setElementResult: (id, url) => {
 					const [element] = requireElement(editor, id);
-					if (!isUploadable(element) || uploadKindOf(element) !== kind)
+					if (!isUploadable(element))
 						throw new Error(
-							`${id} is a ${element.type} element and can't take ${kind}.`,
+							`${id} is a ${element.type} element and can't take a file.`,
 						);
 					return commitUploaded(
 						queue,
 						buildNode(element, buildContext()),
-						kind,
+						uploadKindOf(element),
 						url,
 					);
 				},
