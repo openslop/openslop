@@ -1,3 +1,45 @@
+import { dedent } from "@/lib/dedent";
+import { templateAsset } from "../template-asset";
+import type { Template } from "../templates";
+
+export const celebrityDeath: Template = {
+	id: "celebrity-death",
+	length: "10-15m",
+	name: "Celebrity Death",
+	promptPrefix: "Death of every",
+	color: "#C7BFB2",
+	style: {
+		description:
+			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
+	},
+	referenceImages: [
+		templateAsset("celebrity-death-1"),
+		templateAsset("celebrity-death-2"),
+		templateAsset("celebrity-death-3"),
+		templateAsset("celebrity-death-4"),
+	],
+	narration: {
+		gender: "masculine",
+		age: "adult",
+		accent: "american",
+		description: "Steady, enunciating, confident young male for narrations",
+	},
+	showcase: {
+		image: templateAsset("celebrity-death-2"),
+		title: "Death of every...",
+		description:
+			"Historical explainer of death of every celebrity of a certain category",
+		examplePrompt: "greatest footballer",
+	},
+	systemPrompt: dedent`
+# Important
+- This is an Explainer: every visual is a <video>, and nobody speaks inside them. The narrator carries every word.
+- Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.
+- Each person's segment opens on the same portrait grid of everyone in the video, zooming smoothly into that person's portrait.
+- Every video in a person's segment shows a white banner at the top reading their name, with dates or ages as small corner text where the narration states them.
+- Never describe the real people's looks in the prompts. Their appearance belongs in their asset_avatar element; refer to them by name only.
+	`,
+	exampleText: dedent`
 #Music: Slow, somber documentary piano over a soft string pad, restrained and respectful
 
 #Video: Shot 1: Wide shot, straight on, slow zoom. A grid of eight framed portraits fills an off-white background, two rows of four, each in a thick black frame with a soft drop shadow, a name label under each portrait: Diego Maradona, Diogo Jota, Pelé, José Antonio Reyes, Emiliano Sala, Gary Speed, Suleiman al-Obeid, Peter Biaksangzuala. The grid holds for a beat, then the camera zooms smoothly into the portrait of Diego Maradona until it fills the frame. Sound: a soft paper rustle as the portrait fills the frame.
@@ -375,3 +417,5 @@
 #Video: Shot 1: Wide shot, straight on, slow tilt down. An off-white ground as a grid of eight framed portraits appears one by one across the upper frame, thick black frames with soft drop shadows, each labeled beneath with its name: Diego Maradona, Diogo Jota, Pelé, José Antonio Reyes, Emiliano Sala, Gary Speed, Suleiman al-Obeid, Peter Biaksangzuala. The camera tilts down below the finished grid to a red subscribe button on the off-white ground as a white cursor arrow slides in, hovers and clicks it, and a small speech bubble pops in beside it reading "Which story next?". Sound: eight soft taps as the frames land, a mouse click, a soft pop as the bubble appears.
 
 #Narration: If you like this video, don't forget to subscribe and tell me which story you want next. Thanks for watching and see you in the next one.
+	`,
+};

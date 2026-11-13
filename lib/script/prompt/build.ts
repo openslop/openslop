@@ -1,7 +1,7 @@
 import compact from "lodash/compact";
 import type { AssetElement } from "@/lib/canvas/types";
 import type { ScriptSettings } from "@/lib/project/types";
-import { getTemplatePromptById } from "@/lib/templates/prompts";
+import { getTemplateById } from "@/lib/templates/templates";
 import { ADAPT_SCRIPT_RULES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
 import { OSML_REPLY_FORMAT, osmlSpec } from "./osml";
@@ -33,7 +33,7 @@ function promptParts(
 			instruction: source.script,
 		};
 
-	const template = getTemplatePromptById(settings.template);
+	const template = getTemplateById(settings.template);
 	if (template)
 		return {
 			guidance: [

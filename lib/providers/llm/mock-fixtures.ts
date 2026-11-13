@@ -1,4 +1,24 @@
-<music>Gentle, playful storybook orchestral bed, 1:40, warm and bright, under a narrator. Opens with a light flute melody over pizzicato strings and soft harp as the village wakes; at 0:25 a warm clarinet takes the tune for Mother and Red in the kitchen; at 0:50 the strings thin and slow as Owl watches from the oak; at 1:10 a low, kindly bassoon enters for Wolf picking berries. Ends on a held, curious string chord as Red and Wolf meet on the path. Mood: cheerful, cosy, a little mysterious. Key: G major. Tempo: 96 BPM, 4/4. Light orchestral film score, no lyrics.</music>
+export const MOCK_TITLE = "Little Red";
+
+export const MOCK_ASSETS_OSML = `<asset_style>Warm, earth tones. Whimsical storybook illustration with soft watercolors, gentle brush strokes, warm lighting.</asset_style>
+
+<asset_voice name="Narrator" gender="feminine" age="adult" pitch="medium" accent="american" description="warm, grandmotherly, kind" language="en"></asset_voice>
+
+<asset_avatar name="Red">A cheerful girl around eight years old with warm brown skin, dark curly hair in two puffs, bright brown eyes, wearing a bright red hooded cloak over a white dress, small brown leather boots.</asset_avatar>
+<asset_voice name="Red" gender="feminine" age="child" pitch="high" accent="american" description="bright, cheerful, youthful" language="en"></asset_voice>
+
+<asset_avatar name="Wolf">A large gray wolf with kind amber eyes, soft thick fur, wearing a worn brown vest with wooden buttons, slightly hunched posture, gentle expression despite sharp teeth.</asset_avatar>
+<asset_voice name="Wolf" gender="masculine" age="adult" pitch="low" accent="american" description="gentle, soft-spoken, kind" language="en"></asset_voice>
+
+<asset_avatar name="Mother">Red's mother, a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron.</asset_avatar>
+<asset_voice name="Mother" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en"></asset_voice>
+
+<asset_avatar name="Granny">Red's grandmother, a small elderly woman with deep brown skin, silver hair in a bun, twinkling hazel eyes behind round spectacles, wearing a soft purple shawl.</asset_avatar>
+<asset_voice name="Granny" gender="feminine" age="adult" pitch="medium" accent="american" description="caring, gentle, melodic" language="en"></asset_voice>
+
+`;
+
+export const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:40, warm and bright, under a narrator. Opens with a light flute melody over pizzicato strings and soft harp as the village wakes; at 0:25 a warm clarinet takes the tune for Mother and Red in the kitchen; at 0:50 the strings thin and slow as Owl watches from the oak; at 1:10 a low, kindly bassoon enters for Wolf picking berries. Ends on a held, curious string chord as Red and Wolf meet on the path. Mood: cheerful, cosy, a little mysterious. Key: G major. Tempo: 96 BPM, 4/4. Light orchestral film score, no lyrics.</music>
 
 <video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
 
@@ -73,3 +93,23 @@
 <video>Shot 1: Slow push-in toward the open door of a small thatched cottage among ancient oaks, smoke curling from the chimney above a window box of marigolds. Sound: birdsong, a fire crackling inside. Shot 2: Medium shot of {{Granny}} stepping into the doorway leaning on a wooden cane, smiling warmly. Shot 3: Close-up of {{Granny}}'s face as her eyes crinkle with delight. Sound: the cane tapping on the stone step.</video>
 
 <character name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</character>
+`;
+
+export const MOCK_STYLE =
+	"Warm, painterly storybook illustration with soft watercolor washes, gentle outlines, and golden hour lighting; whimsical and nostalgic.";
+
+export const MOCK_OUTLINE = `Premise: In a village at the edge of an enchanted forest, a cheerful girl named Red sets out to deliver vegetables to her ailing grandmother and unexpectedly befriends a gentle, vegetarian wolf gathering berries for his own sick mother.
+
+Characters: Red (curious, kind); Wolf (gentle, misunderstood); Mother and Granny (warm anchors of home); Hunter (a watchful protector); Owl (the forest's quiet conscience).
+
+Themes: Looking past appearances; small acts of care; the forest as a shared home.
+
+Conflict: Red has been warned not to dawdle, and Wolf's frightening exterior collides with her mother's caution — both must decide whether to trust what they see.
+
+Twists: The "big bad wolf" is the kindest soul in the forest; Owl has been silently steering their meeting all along.
+
+Resolution: Red and Wolf arrive together at Granny's cottage, share their baskets, and the village learns that friendship can grow in the most unlikely places.`;
+
+/** Long-winded so the mock thinks for a couple of seconds, the way a real model does. */
+export const MOCK_THOUGHT =
+	"Reading the canvas to see what is already on it. Working out which scene the request points at, which elements sit inside that scene, and what the script currently says about each of them. Weighing whether this reads as a question to answer or as an edit to make, since the two want different tools, and a wrong guess there means an edit nobody asked for. Then picking the smallest change that does what was asked, so nothing else in the script has to move around, and nothing already on the canvas gets rewritten by accident. ";

@@ -1,3 +1,42 @@
+import { dedent } from "@/lib/dedent";
+import { templateAsset } from "../template-asset";
+import type { Template } from "../templates";
+
+export const stickExplainer: Template = {
+	id: "stick-explainer",
+	length: "5-10m",
+	name: "Stick Explainer",
+	promptPrefix: "Stickman explainer about",
+	color: "#AA8AB1",
+	style: {
+		description:
+			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
+	},
+	referenceImages: [
+		templateAsset("stick-explainer-1"),
+		templateAsset("stick-explainer-2"),
+		templateAsset("stick-explainer-3"),
+	],
+	narration: {
+		gender: "masculine",
+		age: "adult",
+		accent: "american",
+		description: "Steady, enunciating, confident young male for narrations",
+	},
+	showcase: {
+		image: templateAsset("stick-explainer-3"),
+		title: "Stickman explainer about...",
+		description: "Stickman explainer about a certain topic",
+		examplePrompt: "AI slop",
+	},
+	systemPrompt: dedent`
+# Important
+- Write the script as if writing a Stickman-style explainer video about the topic in the user prompt.
+- This is an Explainer: every visual is a <video>, and nobody speaks inside them; the narrator carries every word.
+- Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.
+- The on-screen presenter is always called Host, referenced by name only, and Host is in the character list of every video he appears in.
+	`,
+	exampleText: dedent`
 #Music: Light, quirky ukulele and pizzicato strings, playful and a little sarcastic
 
 #Video: Shot 1: Medium shot at eye level, static. A plain white space with a single ground line, flat even light. A YouTuber stands center facing camera, holding up a chunky phone at chest height and grinning; the phone shows a fat button reading "CREATE" with a sparkle on it. A giant soup ladle pushes out through the phone screen, swings down to the right and dumps lumpy gray-green stew into a pig trough shaped like a red play button on the ground at right, and as the trough fills the YouTuber pinches their nose with their free hand, cheeks puffed out. Phone and trough in the foreground, empty white space behind. Sound: a wet slurp as the ladle pushes through the glass, then stew splattering into a metal trough, a nasal squeak.
@@ -219,3 +258,5 @@
 #Video: Shot 1: Medium shot at eye level, static. A plain white space with a single ground line and a small scribbled sun in the sky behind, flat light. Host stands center facing camera, waving both arms overhead, eyes curved into happy arcs; a marker cap and a closed sketchbook lie on the ground beside his feet. A whiteboard eraser then sweeps in from the left and wipes the whole drawing away, Host and sun and ground line, leaving blank white. Host in the foreground. Sound: Host's sleeves rustling, a cheerful little bell, the eraser squeaking across the board.
 
 #Narration: I'm Siliconversations. Thanks for watching. See you all next time. Bye for now.
+	`,
+};

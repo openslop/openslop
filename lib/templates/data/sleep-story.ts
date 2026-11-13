@@ -1,3 +1,40 @@
+import { dedent } from "@/lib/dedent";
+import { templateAsset } from "../template-asset";
+import type { Template } from "../templates";
+
+export const sleepStory: Template = {
+	id: "sleep-story",
+	length: "5-10m",
+	name: "Sleep Story",
+	promptPrefix: "A sleep story about",
+	color: "#6366F1",
+	style: {
+		description:
+			"Dreamy painterly storybook illustration with soft visible brush textures, gentle low contrast and soft-focus edges, a warm muted palette of cream, ochre, navy, deep green, silver and dusky rose, tender moonlit and lamplit lighting, cinematic depth of field.",
+	},
+	referenceImages: [
+		templateAsset("sleep-story-1"),
+		templateAsset("sleep-story-3"),
+		templateAsset("sleep-story-4"),
+	],
+	narration: {
+		gender: "masculine",
+		accent: "british",
+		age: "child",
+		description: "Wistful, young male for emotional narrations",
+	},
+	showcase: {
+		image: templateAsset("sleep-story-1"),
+		title: "Get Sleepy with...",
+		description:
+			"Long-form, slow, soothing narration designed to lull listeners to sleep",
+		examplePrompt: "a cat who wanders around gardens at night",
+	},
+	systemPrompt: dedent`
+# Important
+Add motion to all images and videos. All narrations should have speed="slow".
+	`,
+	exampleText: dedent`
 #Music: Soft, slow, welcoming ambient pad with warm analog synth swells and distant felted piano notes, no percussion, like pulling a duvet up to your chin
 
 #Image: A cozy bedroom at night, a low angle across a folded quilt toward a nightstand where a small amber lamp glows, a hardback book lying face-down beside it, a curtained window behind showing a deep indigo sky and a sliver of moon, the far corners of the room fading into soft shadow.
@@ -58,3 +95,5 @@
 #Sound: Soft summer night ambience, faint distant crickets, a single far-off owl hoot, a light breeze through leaves
 #Image: A wide, tranquil view of an empty cottage garden at night under a rising moon, lavender and foxgloves silvered with light, no dog and no people anywhere, a long lichen-topped stone wall stretching away into the distance with Marlowe standing alone and small on top of it, beginning to walk.
 #Narration: Tonight, Beauregard was nowhere to be seen. The garden was empty of dog, empty of human, empty of fuss. Marlowe began to walk the length of the wall.
+	`,
+};

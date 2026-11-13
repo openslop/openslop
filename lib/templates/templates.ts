@@ -1,76 +1,59 @@
-import { z } from "zod";
-import { BLOB_BASE_URL } from "@/lib/blob";
-import { VoiceSchema } from "@/lib/project/types";
-import { VIDEO_LENGTHS } from "@/lib/project/video-length";
-import povLife from "./data/pov-life/template.json";
-import sleepStory from "./data/sleep-story/template.json";
-import financeTips from "./data/finance-tips/template.json";
-import trueCrime from "./data/true-crime/template.json";
-import povFinancialLifestyle from "./data/pov-financial-lifestyle/template.json";
-import celebrityDeath from "./data/celebrity-death/template.json";
-import stickExplainer from "./data/stick-explainer/template.json";
+import { celebrityDeath } from "./data/celebrity-death";
+import { financeTips } from "./data/finance-tips";
+import { povFinancialLifestyle } from "./data/pov-financial-lifestyle";
+import { povLife } from "./data/pov-life";
+import { sleepStory } from "./data/sleep-story";
+import { stickExplainer } from "./data/stick-explainer";
+import { trueCrime } from "./data/true-crime";
+import type { ArtStyle } from "@/lib/project/art-styles";
+import type { Voice } from "@/lib/project/types";
+import type { VideoLength } from "@/lib/project/video-length";
 
-const text = z.string().min(1);
-const templateAsset = text.transform(
-	(name) => `${BLOB_BASE_URL}/assets/upload/template/${name}`,
+export interface TemplateShowcase {
+	image: string;
+	title: string;
+	description: string;
+	examplePrompt: string;
+}
+
+type TemplateCharacter = Voice & {
+	appearance: string;
+	avatar?: string;
+};
+
+export interface Template {
+	id: string;
+	name: string;
+	/** The sentence opener the pill shows and the user's brief starts with. */
+	promptPrefix: string;
+	color: string;
+	exampleText: string;
+	systemPrompt: string;
+	length: VideoLength;
+	style: ArtStyle;
+	referenceImages: string[];
+	characters?: Record<string, TemplateCharacter>;
+	narration: Voice;
+	showcase: TemplateShowcase;
+}
+
+export const TEMPLATES: Template[] = [
+	povLife,
+	sleepStory,
+	financeTips,
+	trueCrime,
+	povFinancialLifestyle,
+	celebrityDeath,
+	stickExplainer,
+];
+
+const TEMPLATE_MAP = new Map<string | undefined, Template>(
+	TEMPLATES.map((t) => [t.id, t]),
 );
-const voice = VoiceSchema.extend({
-	gender: VoiceSchema.shape.gender.unwrap(),
-	age: VoiceSchema.shape.age.unwrap(),
-	pitch: VoiceSchema.shape.pitch.unwrap(),
-	accent: VoiceSchema.shape.accent.unwrap(),
-	description: VoiceSchema.shape.description.unwrap(),
-	language: VoiceSchema.shape.language.unwrap(),
-	pickedVoiceId: VoiceSchema.shape.pickedVoiceId.unwrap(),
-	provider: VoiceSchema.shape.provider.unwrap(),
-	model: VoiceSchema.shape.model.unwrap(),
-}).strict();
-
-export const TemplateSchema = z.strictObject({
-	id: text,
-	name: text,
-	promptPrefix: text,
-	color: z.string().regex(/^#[\da-f]{6}$/i),
-	length: z.enum(VIDEO_LENGTHS),
-	style: z.strictObject({
-		description: text,
-		thumbnail: templateAsset.optional(),
-	}),
-	referenceImages: z.array(templateAsset),
-	characters: z
-		.record(
-			text,
-			voice.extend({ appearance: text, avatar: templateAsset.optional() }),
-		)
-		.optional(),
-	narration: voice,
-	showcase: z.strictObject({
-		image: templateAsset,
-		title: text,
-		description: text,
-		examplePrompt: text,
-	}),
-});
-
-export type Template = z.infer<typeof TemplateSchema>;
-
-export const TEMPLATES = z
-	.array(TemplateSchema)
-	.parse([
-		povLife,
-		sleepStory,
-		financeTips,
-		trueCrime,
-		povFinancialLifestyle,
-		celebrityDeath,
-		stickExplainer,
-	]);
-
-const TEMPLATE_MAP = new Map(TEMPLATES.map((t) => [t.id, t]));
 
 /** Lookup for a stored id, where a miss is a template that has left the catalog. */
 export function getTemplateById(id: string | undefined): Template | undefined {
-	return id === undefined ? undefined : TEMPLATE_MAP.get(id);
+	return TEMPLATE_MAP.get(id);
 }
 
 /** Lookup for ids sourced from `TEMPLATES`, where a miss is a programming error. */

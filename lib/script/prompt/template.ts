@@ -1,8 +1,8 @@
 import { dedent } from "@/lib/dedent";
-import type { TemplatePrompt } from "@/lib/templates/prompts";
+import type { Template } from "@/lib/templates/templates";
 
 export function templatePrompt(
-	template: TemplatePrompt,
+	template: Template,
 	brief: string,
 	language: string,
 ): string {

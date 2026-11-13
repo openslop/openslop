@@ -1,5 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
+import { scriptRules } from "@/lib/script/prompt/build";
 import { NO_FINDINGS, reviewPrompt } from "@/lib/script/prompt/review";
 import { Search } from "@/components/ui/icon";
 import { defineTool } from "./define-tool";
@@ -27,7 +28,6 @@ export const reviewScript = defineTool({
 	execute: async (_input, ctx) => {
 		if (ctx.isScriptEmpty())
 			return "The script is empty, so there is nothing to review.";
-		const { scriptRules } = await import("@/lib/script/prompt/build");
 		const settings = ctx.readProject().scriptSettings;
 		return ctx.generateText(reviewPrompt(ctx.readScript(), settings.format), {
 			systemPrompt: scriptRules(ctx.readAssets(), settings),

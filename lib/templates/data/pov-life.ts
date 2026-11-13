@@ -1,3 +1,50 @@
+import { dedent } from "@/lib/dedent";
+import { templateAsset } from "../template-asset";
+import type { Template } from "../templates";
+
+export const povLife: Template = {
+	id: "pov-life",
+	length: "5-10m",
+	name: "POV Life",
+	promptPrefix: "POV: Your life at every stage as a",
+	color: "#F59E0B",
+	style: {
+		description:
+			"2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients",
+	},
+	referenceImages: [
+		templateAsset("pov-life-stages-2"),
+		templateAsset("pov-life-stages-3"),
+	],
+	characters: {
+		Protagonist: {
+			description: "American male, neutral accent",
+			appearance:
+				"male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots",
+			avatar: templateAsset("pov-life-stages-4"),
+		},
+	},
+	narration: {
+		gender: "masculine",
+		age: "adult",
+		pitch: "medium",
+		accent: "american",
+		description: "wise",
+	},
+	showcase: {
+		image: templateAsset("pov-life-stages-1"),
+		title: "POV Your Life as A...",
+		description:
+			"Long-form, second-person POV voiceover with cartoon illustrations that walk a viewer through ascending stages of a role, career, or world",
+		examplePrompt: "tech CEO",
+	},
+	systemPrompt: dedent`
+# Important
+- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images and videos where appropriate.
+- The Protagonist is already one of the characters: use him like a regular character in the story.
+- Never mention any specific ages in the image and video prompts, just generic ones like young man.
+	`,
+	exampleText: dedent`
 #Image: A title card with a black background and white Arial text that says "Level 1: The Kid with the Idea"
 #Narration: Level 1: The Kid with the Idea
 
@@ -187,3 +234,5 @@
 
 #Image: A close-up of Maya's hopeful face in the coffee shop, her eyes shining as she looks at the check, the Protagonist, an older man, slightly out of focus behind her by the rainy window, watching her with a knowing smile.
 #Narration: She doesn't believe you. You didn't believe it either. The cycle keeps going. It always does.
+	`,
+};

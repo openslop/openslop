@@ -1,3 +1,52 @@
+import { dedent } from "@/lib/dedent";
+import { templateAsset } from "../template-asset";
+import type { Template } from "../templates";
+
+export const financeTips: Template = {
+	id: "finance-tips",
+	length: "5-10m",
+	name: "Finance Tips",
+	promptPrefix: "Finance tips for",
+	color: "#3B82F6",
+	style: {
+		description:
+			"Flat 2D cartoon, bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. Explainer-cartoon aesthetic. Plain white background.",
+	},
+	referenceImages: [
+		templateAsset("finance-tips-2"),
+		templateAsset("finance-tips-3"),
+		templateAsset("finance-tips-4"),
+	],
+	characters: {
+		Ethan: {
+			description: "American male, neutral accent",
+			appearance:
+				"man with short light brown hair parted to the side, oversized rounded head with prominent chin and double-chin, small oval eyes with tiny black pupils, thin arched eyebrows, long pointed nose, small mouth. Bean-shaped body with stubby limbs. Wearing a blue hoodie and blue pants with white sneakers",
+			avatar: templateAsset("finance-tips-1"),
+		},
+	},
+	narration: {
+		gender: "masculine",
+		age: "adult",
+		pitch: "medium",
+		accent: "american",
+		description: "wise",
+	},
+	showcase: {
+		image: templateAsset("finance-tips-4"),
+		title: "Finance tips",
+		description: "Long-form, stories to teach personal finance lessons",
+		examplePrompt:
+			"Subscriptions, bank fees, impulse buys, unused gym memberships - the money leaks most people ignore",
+	},
+	systemPrompt: dedent`
+# Important
+- This is an Explainer: every visual, including every title card, is a <video>. Nobody speaks inside the videos; the narrator carries every word.
+- Every video is a single continuous shot labelled Shot 1, with one camera move or a static frame. Never add a Shot 2.
+- The main character is always called Ethan, and Ethan must always be present in the character list of videos where relevant.
+- Ethan is already one of the characters: use him like a regular character in the story.
+	`,
+	exampleText: dedent`
 #Music: Tense, minimal electronic pulse with a low sub bass and a slow ticking hi-hat, building unease
 
 #Video: Shot 1: Straight-on close-up, static camera, on a solid black ground. White bold sans-serif text types itself out letter by letter across the center of frame reading "You're leaking money every month." and the last period lands with a small pulse. Nothing else in frame. Sound: a single water drip echoing in a quiet room.
@@ -166,3 +215,5 @@
 
 #Video: Shot 1: Medium shot at eye level, static camera. A plain pale gray studio backdrop under soft even light. Ethan stands center facing the camera, thrusting his phone up above his head in one fist with a triumphant grin, the other fist clenched at his side. Bold white text glows into place beside him on the right reading "Audit your bank statement. TONIGHT. 15 minutes." on three lines. Sound: a phone alarm chime, then a satisfying click as the text locks in.
 #Narration: 15 minutes. Open your phone. Tap Settings. Tap Subscriptions. The money is already yours. Go get it back.
+	`,
+};

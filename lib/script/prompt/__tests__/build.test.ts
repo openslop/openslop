@@ -6,8 +6,7 @@ import { ADAPT_SCRIPT_RULES } from "../adapt";
 import { buildScriptPrompt, scriptRules } from "../build";
 import { VIDEO_FORMAT_RULES } from "../formats";
 import { projectPreamble } from "../project";
-import { TEMPLATES } from "@/lib/templates/templates";
-import { getTemplatePromptById } from "@/lib/templates/prompts";
+import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
 import {
 	VIDEO_FORMAT_SPECS,
 	VIDEO_FORMAT_TARGETS,
@@ -80,9 +79,7 @@ describe("buildScriptPrompt", () => {
 		expect(system).toContain("never change, add or cut dialogue or prose");
 		expect(system).toContain("warm and slow, lots of wide shots");
 		expect(system).not.toContain("# Length");
-		expect(system).not.toContain(
-			getTemplatePromptById(template.id)?.systemPrompt,
-		);
+		expect(system).not.toContain(getTemplate(template.id).systemPrompt);
 	});
 
 	it("pastiches the project's template and keeps the brief as the topic", () => {
@@ -92,9 +89,9 @@ describe("buildScriptPrompt", () => {
 			{ kind: "brief", brief: "a barista" },
 		);
 
-		expect(system).toContain(getTemplatePromptById(template.id)?.systemPrompt);
+		expect(system).toContain(getTemplate(template.id).systemPrompt);
 		expect(prompt).toContain("<user_input>a barista</user_input>");
-		expect(prompt).toContain(getTemplatePromptById(template.id)?.exampleText);
+		expect(prompt).toContain(getTemplate(template.id).exampleText);
 	});
 
 	it("writes from the brief alone when the stored template has left the catalog", () => {

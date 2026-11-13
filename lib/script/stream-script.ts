@@ -2,7 +2,7 @@ import type { Editor } from "slate";
 import { getAssets } from "@/lib/canvas/assets";
 import type { LLMConnector } from "@/lib/connectors/types";
 import type { ScriptSettings } from "@/lib/project/types";
-import type { ScriptSource } from "./prompt/build";
+import { buildScriptPrompt, type ScriptSource } from "./prompt/build";
 import { createScriptWriter } from "./script-writer";
 
 /** Replaces the script on the canvas with one the model writes from `source`, against the assets already there. */
@@ -13,8 +13,6 @@ export async function streamScript(
 	source: ScriptSource,
 	signal?: AbortSignal,
 ): Promise<void> {
-	const { buildScriptPrompt } = await import("./prompt/build");
-	signal?.throwIfAborted();
 	const write = createScriptWriter(editor);
 	const { system, prompt } = buildScriptPrompt(
 		getAssets(editor.children),

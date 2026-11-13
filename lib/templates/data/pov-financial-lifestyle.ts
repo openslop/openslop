@@ -1,3 +1,53 @@
+import { dedent } from "@/lib/dedent";
+import { templateAsset } from "../template-asset";
+import type { Template } from "../templates";
+
+export const povFinancialLifestyle: Template = {
+	id: "pov-financial-lifestyle",
+	length: "10-15m",
+	name: "POV Financial Lifestyle",
+	promptPrefix: "POV: You're a",
+	color: "#059669",
+	style: {
+		description:
+			"Flat 2D vector cartoon illustration in a modern animated web-comic style. Bold, clean black outlines of even weight. Smooth cel-shaded coloring with soft gradient lighting, gentle ambient glow, and warm cozy color palettes. Slightly muted, desaturated tones with warm highlights. The Protagonist has rounded, soft proportions and a friendly approachable look, rendered against richly illustrated environments. Clean, polished, professional digital cartoon aesthetic reminiscent of explainer-video and meme-style animation.",
+	},
+	referenceImages: [
+		templateAsset("pov-financial-lifestyle-1"),
+		templateAsset("pov-financial-lifestyle-2"),
+		templateAsset("pov-financial-lifestyle-3"),
+		templateAsset("pov-financial-lifestyle-4"),
+	],
+	characters: {
+		Protagonist: {
+			description: "Young American man",
+			appearance:
+				"A young everyman with a smooth, rounded egg-shaped head, pale skin, no nose, small black dot eyes, thick straight dark eyebrows, and a faint neutral mouth. He wears a navy baseball cap (worn forward or backward) and casual everyday clothing—hoodies, button-up shirts, or jackets in muted tones.",
+			avatar: templateAsset("pov-financial-lifestyle-5"),
+		},
+	},
+	narration: {
+		gender: "masculine",
+		age: "adult",
+		pitch: "medium",
+		accent: "american",
+		description:
+			"Inviting, cheerful young adult male named Corey for casual conversation",
+	},
+	showcase: {
+		image: templateAsset("pov-financial-lifestyle-1"),
+		title: "POV Financial Lifestyle",
+		description:
+			"Walk the viewer through a money-driven lifestyle with advice along the way",
+		examplePrompt: "silent millionaire with $110 million",
+	},
+	systemPrompt: dedent`
+# Important
+- The main character (you) is always called Protagonist, and the Protagonist must always be present in the character list of images and videos where appropriate.
+- The Protagonist is already one of the characters: use him like a regular character in the story.
+- Add appropriate motion to each image.
+	`,
+	exampleText: dedent`
 #Music: Soft, slow ambient piano, calm and quiet, a little mysterious
 
 #Image: A tidy suburban street on a bright, clear morning, small houses with trimmed lawns on both sides. The Protagonist walks along the sidewalk in the middle of frame, relaxed, while neighbors pass with dogs on leashes and a couple pushes a stroller, none of them glancing at him.
@@ -381,3 +431,5 @@
 #Image: A modest house at dusk, The Protagonist stepping through his front door with a shopping bag in hand, the door swinging softly shut behind him, a warm light on inside, the street outside empty and calm.
 
 #Narration: What's different is quieter than that. And it makes you wonder. What are you really building? And who is it for?
+	`,
+};
