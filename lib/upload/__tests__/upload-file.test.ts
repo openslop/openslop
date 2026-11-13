@@ -21,7 +21,7 @@ describe("uploadFile", () => {
 	it("uploads straight to the store through the route for its kind", async () => {
 		await uploadFile("video", file);
 
-		const [pathname, body, options] = mockUpload.mock.calls[0]!;
+		const [pathname, body, options] = mockUpload.mock.calls[0];
 		expect(pathname).toMatch(UPLOAD_PATHNAME);
 		expect(pathname).toMatch(/\/my_clip\.mp4$/);
 		expect(body).toBe(file);

@@ -115,7 +115,7 @@ const finishSeconds = (chunks: Record<string, unknown>[]) => {
 };
 
 const saved = (call: number) =>
-	conversations.saveConversationMessage.mock.calls[call]![1] as SloppyMessage;
+	conversations.saveConversationMessage.mock.calls[call][1] as SloppyMessage;
 
 beforeEach(() => {
 	calls = [];
@@ -304,7 +304,7 @@ describe("a turn that takes more than one step", () => {
 			message: answered(reading("call-1", "the script")),
 		});
 
-		const offered = calls[0]!.tools?.map((tool) => tool.name);
+		const offered = calls[0].tools?.map((tool) => tool.name);
 		expect(offered).toContain("read_script");
 		expect(offered).toContain("write_script");
 	});
@@ -314,7 +314,7 @@ describe("a turn that takes more than one step", () => {
 			message: answered(reading("call-1", "the script")),
 		});
 
-		expect(calls[0]?.toolChoice).toEqual({ type: "auto" });
+		expect(calls[0].toolChoice).toEqual({ type: "auto" });
 	});
 
 	it("withdraws the tools once the turn has spent its budget", async () => {
@@ -326,7 +326,7 @@ describe("a turn that takes more than one step", () => {
 			),
 		});
 
-		expect(calls[0]?.toolChoice).toEqual({ type: "none" });
+		expect(calls[0].toolChoice).toEqual({ type: "none" });
 	});
 
 	it("keeps every reading the turn in flight has taken", async () => {
@@ -339,7 +339,7 @@ describe("a turn that takes more than one step", () => {
 			),
 		});
 
-		const sent = JSON.stringify(calls[0]!.prompt);
+		const sent = JSON.stringify(calls[0].prompt);
 		expect(sent).toContain("the script as it was");
 		expect(sent).toContain("the script as it stands");
 	});
@@ -350,7 +350,7 @@ describe("a turn that takes more than one step", () => {
 			history: recorded(spent, reading("call-1", "a script from last turn")),
 		});
 
-		expect(JSON.stringify(calls[0]?.prompt)).not.toContain(
+		expect(JSON.stringify(calls[0].prompt)).not.toContain(
 			"a script from last turn",
 		);
 	});
@@ -373,7 +373,7 @@ describe("prompt caching", () => {
 	it("sends the standing instructions as one system block, marked as a cached prefix", async () => {
 		await runTurn(TEXT_TURN, { cachedPrefix: MARK });
 
-		const [standing, next] = calls[0]!.prompt;
+		const [standing, next] = calls[0].prompt;
 		expect(standing).toMatchObject({ role: "system", providerOptions: MARK });
 		expect(JSON.stringify(standing)).toContain("You are Sloppy");
 		expect(next?.role).toBe("user");

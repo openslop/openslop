@@ -1,3 +1,4 @@
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEditor, type Descendant } from "slate";
 import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
@@ -8,7 +9,6 @@ import {
 	type Scene,
 } from "@/lib/canvas/types";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 
 // Real useCallback semantics: the value survives only while its deps are
 // identical, which is the whole subject of these tests.

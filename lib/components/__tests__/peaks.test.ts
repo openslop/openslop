@@ -48,10 +48,10 @@ describe("extractPeaks", () => {
 
 	it("averages a bucket rather than following its loudest sample", () => {
 		const data = new Float32Array([1, 0, 0, 0, 0.6, 0.6, 0.6, 0.6]);
-		const peaks = extractPeaks(data, 2);
+		const [transient, sustained] = extractPeaks(data, 2);
 		// Peak-picking would rate the lone spike (1) above the sustained tone
 		// (0.6); by energy the sustained half is the louder of the two.
-		expect(peaks[0]!).toBeLessThan(peaks[1]!);
+		expect(transient).toBeLessThan(sustained);
 	});
 
 	it("handles uniform amplitude", () => {

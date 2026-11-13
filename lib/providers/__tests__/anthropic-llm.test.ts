@@ -63,7 +63,7 @@ function streamWith(deltas: string[], tail: LanguageModelV3StreamPart[] = []) {
 	};
 }
 
-const lastCall = () => calls[0]!;
+const lastCall = () => calls[0];
 const userContent = () => lastCall().prompt.at(-1)?.content;
 
 describe("AnthropicLLM", () => {

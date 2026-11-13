@@ -1,3 +1,4 @@
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { describe, expect, it } from "vitest";
 import { createEditor } from "slate";
 import { withReact } from "slate-react";
@@ -11,7 +12,6 @@ import { withLayout } from "../plugins/with-layout";
 import { withNodeId } from "../plugins/with-node-id";
 import { withScenes } from "../plugins/with-scenes";
 import { shape } from "./fixtures";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 
 const SCRIPT = `<image>A lighthouse at dusk, waves crashing</image>
 <narration>The light had burned for a hundred years.</narration>

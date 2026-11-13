@@ -37,7 +37,7 @@ const firstScene = (editor: Editor) => {
 };
 
 const imageAttrs = (editor: Editor, index: number) =>
-	flatAttributes(firstScene(editor).children[index]!);
+	flatAttributes(firstScene(editor).children[index]);
 
 const setup = (accountModels: ConnectorModels = {}) => {
 	const editor = withHistory(createEditor());

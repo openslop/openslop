@@ -82,7 +82,7 @@ describe("running a graph", () => {
 			}),
 		];
 		const queue = new GenerationQueue();
-		const avatar = nodeOf(canvas[0]!.id);
+		const avatar = nodeOf(canvas[0].id);
 		queue.commitResult(avatar, { imageUrl: "red.png", durationSec: 0 });
 		const image = Promise.withResolvers<AssetResult>();
 		mediaGenerate.mockReturnValue(image.promise);

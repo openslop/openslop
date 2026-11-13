@@ -1,9 +1,9 @@
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { createEditor, type Descendant } from "slate";
 import { Slate, withReact } from "slate-react";
 import type { ElementVersionStorage } from "@/lib/generation/history";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 
 const untouched = () => Promise.reject(new Error("this test reads no history"));
 

@@ -230,7 +230,7 @@ describe("bestMatch", () => {
 		];
 		expect(bestMatch(matches, 30)?.metadata?.duration).toBe(5);
 		expect(bestMatch(matches, undefined)?.metadata?.duration).toBe(5);
-		expect(bestMatch([matches[0]!], 30)).toBeUndefined();
+		expect(bestMatch([matches[0]], 30)).toBeUndefined();
 	});
 
 	it("returns undefined for an empty list", async () => {

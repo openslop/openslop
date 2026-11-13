@@ -5,7 +5,7 @@ import { IconButton } from "../icon-button";
 const classesOf = (node: React.ReactElement) => {
 	const match = renderToStaticMarkup(node).match(/class="([^"]*)"/);
 	if (!match) throw new Error("button has no class attribute");
-	return match[1]!.split(" ");
+	return match[1].split(" ");
 };
 
 describe("IconButton", () => {

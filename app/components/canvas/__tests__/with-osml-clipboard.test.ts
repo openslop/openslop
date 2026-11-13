@@ -1,3 +1,4 @@
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Transforms } from "slate";
 import { withReact } from "slate-react";
@@ -11,7 +12,6 @@ import { getContentElements } from "@/lib/canvas/scenes";
 import { content, scene, seedScene } from "./fixtures";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import type { CanvasEditor, Scene } from "@/lib/canvas/types";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 
 function fakeDataTransfer(initial: Record<string, string> = {}): DataTransfer {
 	const store = { ...initial };

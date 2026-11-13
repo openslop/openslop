@@ -28,7 +28,7 @@ function makeRequest(body: unknown, kind: string) {
 }
 
 async function tokenOptions() {
-	const [{ onBeforeGenerateToken }] = mockHandleUpload.mock.calls[0]!;
+	const [{ onBeforeGenerateToken }] = mockHandleUpload.mock.calls[0];
 	return onBeforeGenerateToken();
 }
 

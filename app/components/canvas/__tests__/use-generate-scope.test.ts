@@ -287,7 +287,7 @@ describe("scope description", () => {
 			makeElement("b", "image", "sunrise"),
 		];
 		elements.forEach(commitCurrent);
-		elements[1]!.children = makeElement("b", "image", "moonrise").children;
+		elements[1].children = makeElement("b", "image", "moonrise").children;
 
 		expect(useDescription(elements, "scene")).toBe(
 			"Regenerate 1 stale element in this scene",

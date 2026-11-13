@@ -15,7 +15,7 @@ describe("validateRunwareKey", () => {
 
 		await validateRunwareKey("rw-test");
 
-		const [, init] = fetchMock.mock.calls[0]!;
+		const [, init] = fetchMock.mock.calls[0];
 		expect(JSON.parse(init.body)).toEqual([
 			{ taskType: "authentication", apiKey: "rw-test" },
 		]);

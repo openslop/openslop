@@ -22,10 +22,10 @@ function parseTransform(t: string): {
 		);
 	if (!m) throw new Error(`unparseable transform: ${t}`);
 	return {
-		tx: parseFloat(m[1]!),
-		ty: parseFloat(m[2]!),
-		s: parseFloat(m[3]!),
-		theta: parseFloat(m[4]!),
+		tx: parseFloat(m[1]),
+		ty: parseFloat(m[2]),
+		s: parseFloat(m[3]),
+		theta: parseFloat(m[4]),
 	};
 }
 

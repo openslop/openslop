@@ -68,10 +68,6 @@ const eslintConfig = defineConfig([
 			"import/no-cycle": "error",
 		},
 	},
-	{
-		files: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
-		rules: { "@typescript-eslint/no-non-null-assertion": "off" },
-	},
 ]);
 
 export default eslintConfig;

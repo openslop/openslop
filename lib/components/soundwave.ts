@@ -46,7 +46,7 @@ export function toBarHeights(peaks: number[], count: number): number[] {
  */
 export function buildSoundwaveMask(heights: number[]) {
 	// A lone height has no span to draw across, so it becomes a flat band.
-	const samples = heights.length === 1 ? [...heights, ...heights] : heights;
+	const samples = heights.length === 1 ? [heights[0], heights[0]] : heights;
 	const step = samples.length > 1 ? 100 / (samples.length - 1) : 0;
 	const at = (i: number) => (i * step).toFixed(2);
 	const top = samples.map((h, i) => `${at(i)},${((100 - h) / 2).toFixed(2)}`);

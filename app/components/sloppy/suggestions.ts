@@ -1,5 +1,3 @@
-import { at } from "@/lib/utils";
-
 /**
  * Starter prompts offered by the composer's lightbulb. Each one must be
  * answerable by a tool in `lib/agent/tools/registry.ts`, and worded plainly:
@@ -16,5 +14,5 @@ export const SUGGESTIONS = [
 
 export function nextSuggestion(current: string): string {
 	const pool = SUGGESTIONS.filter((suggestion) => suggestion !== current);
-	return at(pool, Math.floor(Math.random() * pool.length));
+	return pool[Math.floor(Math.random() * pool.length)];
 }

@@ -511,11 +511,11 @@ describe("RunwareVideo", () => {
 					prompt: "they talk",
 					characterAssets: [
 						{
-							...pictured("Blip")[0]!,
+							...pictured("Blip")[0],
 							voice: { url: "https://audio/blip.mp3", durationSec: 4 },
 						},
 						{
-							...pictured("Long")[0]!,
+							...pictured("Long")[0],
 							voice: { url: "https://audio/long.mp3", durationSec: 40 },
 						},
 					],

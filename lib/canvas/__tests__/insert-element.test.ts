@@ -20,7 +20,7 @@ const seededEditor = (defaultModels: ConnectorModels = {}) =>
 		defaultModels,
 	);
 
-const inserted = (editor: Editor) => getContentElements(editor.children)[1]!;
+const inserted = (editor: Editor) => getContentElements(editor.children)[1];
 
 describe("insertElement", () => {
 	it("inserts a node with correct type", () => {

@@ -231,7 +231,7 @@ describe("duplicateElement", () => {
 		duplicateElement(editor, "n1");
 
 		const children = (editor.children[0] as Scene).children;
-		expect(children.map((c) => c.id)).toEqual(["n1", children[1]!.id, "img1"]);
+		expect(children.map((c) => c.id)).toEqual(["n1", children[1].id, "img1"]);
 		expect(Editor.string(editor, [0, 1])).toBe(Editor.string(editor, [0, 0]));
 	});
 
@@ -241,7 +241,7 @@ describe("duplicateElement", () => {
 
 		const copyId = duplicateElement(editor, "c1");
 
-		const copy = (editor.children[0] as Scene).children[1]!;
+		const copy = (editor.children[0] as Scene).children[1];
 		expect(copy.id).toBe(copyId);
 		expect(copy.id).not.toBe("c1");
 		expect(flatAttributes(copy)).toEqual({ name: "Lyra" });
@@ -258,7 +258,7 @@ describe("replaceGenerationAttrs", () => {
 		replaceGenerationAttrs(editor, [0, 0], { style: "oil" });
 
 		const node = editor.children[0] as Scene;
-		expect(node.children[0]?.generationAttributes).toEqual({ style: "oil" });
+		expect(node.children[0].generationAttributes).toEqual({ style: "oil" });
 	});
 
 	it("leaves the element's layout attributes untouched", () => {
@@ -268,7 +268,7 @@ describe("replaceGenerationAttrs", () => {
 		replaceGenerationAttrs(editor, [0, 0], { style: "oil" });
 
 		const node = editor.children[0] as Scene;
-		expect(node.children[0]?.layoutAttributes).toEqual({ motion: "pan" });
+		expect(node.children[0].layoutAttributes).toEqual({ motion: "pan" });
 	});
 
 	it("stringifies numeric values", () => {
@@ -278,7 +278,7 @@ describe("replaceGenerationAttrs", () => {
 		replaceGenerationAttrs(editor, [0, 0], { seed: 7 });
 
 		const node = editor.children[0] as Scene;
-		expect(node.children[0]?.generationAttributes).toEqual({ seed: "7" });
+		expect(node.children[0].generationAttributes).toEqual({ seed: "7" });
 	});
 });
 
@@ -290,7 +290,7 @@ describe("mergeAttrs", () => {
 		mergeAttrs(editor, "n1", { emotion: "excited" });
 
 		const node = editor.children[0] as Scene;
-		expect(flatAttributes(node.children[0]!)).toEqual({
+		expect(flatAttributes(node.children[0])).toEqual({
 			name: "Lyra",
 			emotion: "excited",
 		});
@@ -306,7 +306,7 @@ describe("mergeAttrs", () => {
 		mergeAttrs(editor, "n1", { emotion: null });
 
 		const node = editor.children[0] as Scene;
-		expect(flatAttributes(node.children[0]!)).toEqual({ name: "Lyra" });
+		expect(flatAttributes(node.children[0])).toEqual({ name: "Lyra" });
 	});
 
 	it("handles an element with no attributes yet", () => {
@@ -316,7 +316,7 @@ describe("mergeAttrs", () => {
 		mergeAttrs(editor, "n1", { emotion: "calm" });
 
 		const node = editor.children[0] as Scene;
-		expect(flatAttributes(node.children[0]!)).toEqual({ emotion: "calm" });
+		expect(flatAttributes(node.children[0])).toEqual({ emotion: "calm" });
 	});
 });
 
@@ -331,7 +331,7 @@ describe("applyElementVersion", () => {
 
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}a wolf`);
 		const node = (editor.children[0] as Scene).children[0];
-		expect(node?.generationAttributes).toEqual({ style: "oil" });
+		expect(node.generationAttributes).toEqual({ style: "oil" });
 	});
 });
 
@@ -347,7 +347,7 @@ describe("resetTrim", () => {
 		resetTrim(editor, "v1");
 
 		const node = (editor.children[0] as Scene).children[0];
-		expect(node?.layoutAttributes).toEqual({ volume: "5" });
+		expect(node.layoutAttributes).toEqual({ volume: "5" });
 	});
 
 	it("drops only the edges it is given", () => {
@@ -360,7 +360,7 @@ describe("resetTrim", () => {
 		resetTrim(editor, "v1", ["end"]);
 
 		const node = (editor.children[0] as Scene).children[0];
-		expect(node?.layoutAttributes).toEqual({ trimStart: "1" });
+		expect(node.layoutAttributes).toEqual({ trimStart: "1" });
 	});
 
 	it("leaves the document untouched when there is no trim", () => {
@@ -383,6 +383,6 @@ describe("setTrimPoint", () => {
 		setTrimPoint(editor, "v1", "start", 1.236);
 
 		const node = (editor.children[0] as Scene).children[0];
-		expect(node?.layoutAttributes).toEqual({ trimStart: "1.24", trimEnd: "4" });
+		expect(node.layoutAttributes).toEqual({ trimStart: "1.24", trimEnd: "4" });
 	});
 });

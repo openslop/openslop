@@ -17,7 +17,7 @@ export interface ModelGroup {
 	label: string;
 	Icon: IconComponent;
 	/** The connector types this group sets, first one deciding what it shows. */
-	types: [ConnectorType, ...ConnectorType[]];
+	types: ConnectorType[];
 }
 
 export const MODEL_GROUPS: ModelGroup[] = [
@@ -73,6 +73,6 @@ export function groupFor(type: ConnectorType): ModelGroup {
 }
 
 export const groupModels = (
-	types: ModelGroup["types"],
+	types: ConnectorType[],
 	model: ModelRef,
 ): ConnectorModels => Object.fromEntries(types.map((type) => [type, model]));

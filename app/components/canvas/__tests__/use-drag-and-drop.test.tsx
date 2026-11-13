@@ -150,7 +150,7 @@ it("reorders scenes with the keyboard", async () => {
 	const handles = dragHandles();
 	setSortableBounds(handles);
 
-	const firstHandle = handles[0]!;
+	const [firstHandle] = handles;
 	const instructionId = firstHandle.getAttribute("aria-describedby");
 	expect(instructionId).toBeTruthy();
 	expect(document.getElementById(instructionId ?? "")?.textContent).toContain(
@@ -175,7 +175,7 @@ it("preserves drag-handle focus when another control precedes it", async () => {
 	const handles = dragHandles();
 	setSortableBounds(handles);
 
-	const firstHandle = handles[0]!;
+	const [firstHandle] = handles;
 	firstHandle.focus();
 	await pressKey(firstHandle, "Space", " ");
 	await pressKey(document, "ArrowDown", "ArrowDown");

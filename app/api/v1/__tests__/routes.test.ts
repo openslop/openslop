@@ -207,7 +207,7 @@ describe("API routes", () => {
 			);
 			expect(res.status).toBe(200);
 			expect(mockOwnsProject).toHaveBeenCalledExactlyOnceWith(PROJECT_ID);
-			const [args] = mockCreateJob.mock.calls[0]!;
+			const [[args]] = mockCreateJob.mock.calls;
 			expect(args.projectId).toBe(PROJECT_ID);
 			expect(args.request).not.toHaveProperty("projectId");
 		});

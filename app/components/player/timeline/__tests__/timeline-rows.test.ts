@@ -143,9 +143,7 @@ describe("buildTimelineRows", () => {
 		);
 		const rows = buildTimelineRows(layout);
 		expect(rows.filter((row) => row.id === "foreground")).toHaveLength(1);
-		const { clips } = rows[0]!;
-		const a = clips[0]!;
-		const b = clips[1]!;
+		const [a, b] = rows[0].clips;
 		expect(a.start + a.duration - b.start).toBeCloseTo(
 			layout.transitionDurationSec,
 		);
@@ -162,7 +160,7 @@ describe("buildTimelineRows", () => {
 			(row) => row.id === "overlay",
 		);
 		expect(voice).toHaveLength(1);
-		expect(voice[0]?.clips).toHaveLength(2);
+		expect(voice[0].clips).toHaveLength(2);
 	});
 
 	it("drops a clip that starts after the video ends", () => {
@@ -211,7 +209,7 @@ describe("buildTimelineRows", () => {
 		const rows = buildTimelineRows(layoutOf([el("voice", "narration")]));
 		const visual = rows.find((row) => row.id === "foreground");
 		expect(visual?.clips).toHaveLength(1);
-		expect(isBlankScene(visual?.clips[0]?.element as ResolvedElement)).toBe(
+		expect(isBlankScene(visual?.clips[0].element as ResolvedElement)).toBe(
 			true,
 		);
 	});
@@ -234,7 +232,7 @@ describe("buildCaptionRows", () => {
 	it("lays one clip per line, the last ending with its last word", () => {
 		const [row] = buildCaptionRows(twoPerLine(el("a", "image"), narration));
 		expect(
-			row?.clips.map(({ start, duration, line }) => ({
+			row.clips.map(({ start, duration, line }) => ({
 				start,
 				duration,
 				text: lineText(line),

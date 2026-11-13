@@ -223,7 +223,7 @@ describe("AssetBundle", () => {
 				expect.any(ReadableStream),
 				expect.objectContaining({ contentType: "video/mp4", multipart: true }),
 			);
-			const [, body] = putMock.mock.calls[0]!;
+			const [[, body]] = putMock.mock.calls;
 			await expect(new Response(body).text()).resolves.toBe("fake-video");
 		});
 

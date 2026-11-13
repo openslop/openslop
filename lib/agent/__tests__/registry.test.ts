@@ -68,10 +68,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 
 describe("script review opt-in", () => {
 	it("asks before reviewing a new or adapted script", () => {
-		const systemPrompt = sloppyInstructions({})[0]!.content.replace(
-			/\s+/g,
-			" ",
-		);
+		const systemPrompt = sloppyInstructions({})[0].content.replace(/\s+/g, " ");
 		const { description } = SLOPPY_TOOLS.review_script;
 		const reviewDescription =
 			typeof description === "string" ? description.replace(/\s+/g, " ") : "";

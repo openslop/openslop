@@ -45,4 +45,4 @@ How we write code here, for humans and agents. The codebase is deliberately rigi
 ## Hard rules
 
 - Fail loudly. Expected failures return a typed result (validation, not-found); the unexpected throws and never passes silently. Never swallow an error on a critical path to keep going. Propagate it or surface it.
-- No non-null assertions (!) outside tests. Use type guards, defaults, or validated helpers; for an index the code knows is in range, `at()` from `lib/utils`. Tests may write `arr[0]!`, since a wrong guess fails the test. Lint-enforced.
+- No non-null assertions (!). Use type guards, defaults, or validated helpers. Lint-enforced.

@@ -17,7 +17,7 @@ function setChildren(editor: Editor, children: Element[]) {
 			Transforms.removeNodes(editor, { at: [0] });
 		}
 		for (let i = 0; i < children.length; i++) {
-			Transforms.insertNodes(editor, children[i]!, { at: [i] });
+			Transforms.insertNodes(editor, children[i], { at: [i] });
 		}
 	});
 	Editor.normalize(editor, { force: true });

@@ -24,7 +24,7 @@ const { upload } = spyAssetBundle();
 const MEDIA_URL = "https://assets.test/assets/video/clip.mp4";
 
 const uploadedCaptions = () => {
-	const file = upload.mock.calls[0]![2][0]!;
+	const [, , [file]] = upload.mock.calls[0];
 	if (!("data" in file)) throw new Error("Captions were not written inline");
 	return JSON.parse(String(file.data));
 };

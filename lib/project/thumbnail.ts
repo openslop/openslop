@@ -19,5 +19,6 @@ export function pickThumbnailUrl(
 
 /** Whether a thumbnail URL points at a video, so the card can render <video>. */
 export function isVideoThumbnailUrl(url: string): boolean {
-	return /^[^?#]*\.(mp4|webm|mov|m4v)(?:[?#]|$)/i.test(url);
+	const path = url.split(/[?#]/, 1)[0].toLowerCase();
+	return /\.(mp4|webm|mov|m4v)$/.test(path);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { at, cn, fromKeys, keysOf } from "../utils";
+import { cn, fromKeys, keysOf } from "../utils";
 
 describe("cn", () => {
 	it("keeps a custom text size beside a text color", () => {
@@ -24,17 +24,5 @@ describe("keysOf / fromKeys", () => {
 			a: 10,
 			b: 20,
 		});
-	});
-});
-
-describe("at", () => {
-	it("reads from either end", () => {
-		expect(at(["a", "b", "c"], 0)).toBe("a");
-		expect(at(["a", "b", "c"], -1)).toBe("c");
-	});
-
-	it("throws past either end", () => {
-		expect(() => at(["a"], 1)).toThrow(RangeError);
-		expect(() => at(["a"], -2)).toThrow(RangeError);
 	});
 });

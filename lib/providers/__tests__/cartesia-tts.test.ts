@@ -43,7 +43,7 @@ vi.mock("ai", () => ({
 	embed: (...args: unknown[]) => mockEmbed(...args),
 	embedMany: (...args: unknown[]) => mockEmbedMany(...args),
 	cosineSimilarity: (a: number[], b: number[]) =>
-		a.reduce((s, x, i) => s + x * b[i]!, 0),
+		a.reduce((s, x, i) => s + x * b[i], 0),
 }));
 
 vi.mock("@ai-sdk/openai", () => ({
@@ -113,8 +113,8 @@ describe("collectVoices", () => {
 		const voices = await collectVoices(stubClient, {}, 250);
 
 		expect(voices).toHaveLength(250);
-		expect(voices[0]?.id).toBe("v0");
-		expect(voices[249]?.id).toBe("v249");
+		expect(voices[0].id).toBe("v0");
+		expect(voices[249].id).toBe("v249");
 		expect(mockGet).toHaveBeenCalledTimes(3);
 		expect(mockGet).toHaveBeenNthCalledWith(
 			2,
@@ -226,7 +226,7 @@ describe("CartesiaTTS", () => {
 
 			expect(result.output.result.audio).toBe("output.wav");
 			expect(result.output.result.timestamps).toBe("timestamps.json");
-			const [, , files] = upload.mock.calls[0]!;
+			const [, , files] = upload.mock.calls[0];
 			const timestamps = files.find((f) => f.key === "timestamps");
 			if (!timestamps || !("data" in timestamps))
 				throw new Error("Captions were not written inline");
@@ -282,7 +282,7 @@ describe("CartesiaTTS", () => {
 				model: MODEL,
 			});
 
-			const [, , files] = upload.mock.calls[0]!;
+			const [, , files] = upload.mock.calls[0];
 			const audio = files.find((file) => file.key === "audio");
 			if (!audio || !("data" in audio) || !Buffer.isBuffer(audio.data))
 				throw new Error("Expected the audio file to carry its bytes");

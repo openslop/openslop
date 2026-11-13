@@ -189,7 +189,7 @@ describe("processQueuedJob", () => {
 				delaySeconds: expect.any(Number),
 			});
 			expect(mockUpdateJob.mock.invocationCallOrder[0]).toBeLessThan(
-				mockEnqueueJob.mock.invocationCallOrder[0]!,
+				mockEnqueueJob.mock.invocationCallOrder[0],
 			);
 		});
 

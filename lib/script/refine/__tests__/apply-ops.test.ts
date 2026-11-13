@@ -231,7 +231,7 @@ describe("applyRefineOp — insert", () => {
 			elements: [{ type: "sound", text: "rain", attrs: { loops: "3" } }],
 		});
 
-		const sound = contentElements(editor)[1]!;
+		const [, sound] = contentElements(editor);
 		expect(flatAttributes(sound)).toEqual({
 			loops: "3",
 			volume: "2",

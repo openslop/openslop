@@ -1,3 +1,4 @@
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { describe, expect, it } from "vitest";
 import {
 	createEditor,
@@ -14,7 +15,6 @@ import { asset, labels } from "@/lib/canvas/__tests__/_assets";
 import { withAssets } from "../plugins/with-assets";
 import { withNodeId } from "../plugins/with-node-id";
 import { content, scene } from "./fixtures";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 
 const STYLE = asset("asset_style", { text: "noir" });
 const AVATAR = asset("asset_avatar", { name: "Mia", text: "a girl" });

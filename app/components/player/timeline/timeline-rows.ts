@@ -13,7 +13,7 @@ import {
 } from "@/lib/render/caption-rule";
 import { allSequences, totalDuration } from "@/lib/render/sequences";
 import type { Sequence, RenderLayout } from "@/lib/render/types";
-import { at, keysOf } from "@/lib/utils";
+import { keysOf } from "@/lib/utils";
 
 export type TimelineClip = Sequence & { key: string };
 
@@ -69,7 +69,7 @@ export function packLanes<
 	const lanes: T[][] = [];
 	for (const clip of clips) {
 		const lane = lanes.find((candidate) => {
-			const last = at(candidate, -1);
+			const last = candidate[candidate.length - 1];
 			return (
 				last.start + totalDuration(last) - toleranceSec - TOUCH_EPSILON <=
 				clip.start

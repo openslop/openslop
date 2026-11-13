@@ -11,7 +11,6 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 import { usePlayerPlaying } from "./use-player-state";
-import { at } from "@/lib/utils";
 
 const OUTLINE =
 	"pointer-events-auto rounded-[0.12em] outline-solid outline-0 outline-offset-[0.1em] outline-ring";
@@ -46,12 +45,12 @@ export function EditableCaptionLine({
 	const open = (index: number) => {
 		scrollToElement(element.id);
 		cancelled.current = false;
-		setDraft({ index, text: at(words, index).text });
+		setDraft({ index, text: words[index].text });
 	};
 
 	const save = ({ index, text }: Draft) => {
 		setDraft(null);
-		if (cancelled.current || text.trim() === at(words, index).text) return;
+		if (cancelled.current || text.trim() === words[index].text) return;
 		queue.reviseResult(element, (result) =>
 			editCaption(result, firstWordIndex + index, text),
 		);

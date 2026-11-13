@@ -11,7 +11,7 @@ const spans = (lines: { firstWordIndex: number; tokens: unknown[] }[]) =>
 	);
 
 describe("wordsAt", () => {
-	const line = groupIntoLines(timed.slice(0, 3), 3000)[0]!;
+	const [line] = groupIntoLines(timed.slice(0, 3), 3000);
 	const active = (seconds: number) =>
 		wordsAt(line.tokens, seconds).find((word) => word.active)?.text;
 

@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { createEditor } from "slate";
@@ -8,7 +9,6 @@ import { Editable, Slate, withReact } from "slate-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import { useProjectHistoryHotkeys } from "../project-history-keymap";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 

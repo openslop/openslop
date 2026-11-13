@@ -2,7 +2,6 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { User } from "@/lib/user/user-provider";
-import { at } from "@/lib/utils";
 
 export function UserAvatar({
 	user,
@@ -11,7 +10,7 @@ export function UserAvatar({
 	user: User;
 	size?: "sm" | "default" | "lg";
 }) {
-	const initials = at(user.email.split("@"), 0).slice(0, 2).toUpperCase();
+	const initials = user.email.split("@")[0].slice(0, 2).toUpperCase();
 
 	return (
 		<Avatar size={size}>

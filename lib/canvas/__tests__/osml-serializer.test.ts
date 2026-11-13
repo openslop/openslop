@@ -131,6 +131,6 @@ describe("serialize round trip", () => {
 
 	it("keeps a reloaded empty element recognisably empty", () => {
 		const scene = reload(wrap(createCanvasElement("narration", { id: "e1" })));
-		expect(Node.string(scene.children[0]!)).toBe(ZERO_WIDTH_SPACE);
+		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
 	});
 });

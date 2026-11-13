@@ -147,7 +147,7 @@ describe("deserializeWithScenes", () => {
 
 		const scenes = scenesOf(serializeOSMLWithScenes(original));
 
-		const character = scenes[0]!.children[0]!;
+		const character = scenes[0].children[0];
 		expect(character.type).toBe("character");
 		expect(character.id).toBe("character-id");
 		expect(flatAttributes(character).name).toBe('a 24" monitor & a <box>');
@@ -171,18 +171,18 @@ describe("deserializeWithScenes", () => {
 
 		expect(scenes).toHaveLength(2);
 
-		const firstImage = scenes[0]!.children[0]!;
+		const firstImage = scenes[0].children[0];
 		expect(firstImage.type).toBe("image");
 		expect(flatAttributes(firstImage).referenceImagesOverride).toBe(
 			"https://cdn/a.png",
 		);
 		expect(flatAttributes(firstImage).motion).toBe("pushIn");
 
-		const firstNarration = scenes[0]!.children[1]!;
+		const firstNarration = scenes[0].children[1];
 		expect(firstNarration.type).toBe("narration");
 		expect(getPromptText(firstNarration)).toContain("hello");
 
-		const secondVideo = scenes[1]!.children[0]!;
+		const secondVideo = scenes[1].children[0];
 		expect(secondVideo.type).toBe("video");
 		expect(flatAttributes(secondVideo).startFrame).toBe("https://cdn/b.png");
 	});
