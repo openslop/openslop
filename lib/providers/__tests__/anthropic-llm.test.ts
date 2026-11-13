@@ -335,53 +335,48 @@ describe("agentModel", () => {
 		});
 	});
 
-	it.each([
-		[20, "cdn.test"],
-		[21, "small.test"],
-	])("sends %i pictures from %s", async (count, host) => {
-		respondWith("ok");
-		const lookAt = (index: number): ModelMessage[] => [
-			{
-				role: "assistant",
-				content: [
-					{
-						type: "tool-call",
-						toolCallId: `v${index}`,
-						toolName: "view_result",
-						input: {},
-					},
-				],
-			},
-			{
-				role: "tool",
-				content: [
-					{
-						type: "tool-result",
-						toolCallId: `v${index}`,
-						toolName: "view_result",
-						output: {
-							type: "content",
-							value: [
-								{
-									type: "file",
-									mediaType: "image",
-									data: {
-										type: "url",
-										url: new URL(`https://cdn.test/${index}.png`),
-									},
+	const lookAt = (index: number): ModelMessage[] => [
+		{
+			role: "assistant",
+			content: [
+				{
+					type: "tool-call",
+					toolCallId: `v${index}`,
+					toolName: "view_result",
+					input: {},
+				},
+			],
+		},
+		{
+			role: "tool",
+			content: [
+				{
+					type: "tool-result",
+					toolCallId: `v${index}`,
+					toolName: "view_result",
+					output: {
+						type: "content",
+						value: [
+							{
+								type: "file",
+								mediaType: "image",
+								data: {
+									type: "url",
+									url: new URL(`https://cdn.test/${index}.png`),
 								},
-							],
-						},
+							},
+						],
 					},
-				],
-			},
-		];
-		const { model: agentModel } = new AnthropicLLM("test-key").agentModel(
-			MODEL_ID,
-		);
+				},
+			],
+		},
+	];
 
+	const sendLooks = async (modelId: string, count: number) => {
+		respondWith("ok");
+		const { model } = new AnthropicLLM("test-key").agentModel(modelId);
 		await generateText({
-			model: agentModel,
+			model,
 			messages: [
 				{ role: "user", content: "look at all of them" },
 				...Array.from({ length: count }, (_look, index) =>
@@ -389,8 +384,24 @@ describe("agentModel", () => {
 				).flat(),
 			],
 		});
-		const sent = JSON.stringify(calls.at(-1)?.prompt);
+		return JSON.stringify(calls.at(-1)?.prompt);
+	};
+
+	it.each([
+		[20, "cdn.test"],
+		[21, "small.test"],
+	])("sends %i pictures from %s", async (count, host) => {
+		const sent = await sendLooks(MODEL_ID, count);
 
 		expect(sent.match(new RegExp(`https://${host}/`, "g"))).toHaveLength(count);
+	});
+
+	it("drops the oldest pictures a batch at a time past the model's limit", async () => {
+		const sent = await sendLooks("claude-haiku-4-5-20251001", 101);
+
+		expect(sent.match(/"type":"file"/g)).toHaveLength(91);
+		expect(sent).not.toContain("small.test/9.png");
+		expect(sent).toContain("small.test/10.png");
+		expect(sent).toContain("small.test/100.png");
 	});
 });

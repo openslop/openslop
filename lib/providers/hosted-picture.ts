@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import PQueue from "p-queue";
 import { AssetBundle, fetchOk } from "@/lib/api/asset-bundle";
 
 const BUNDLE_TYPE = "picture";
@@ -6,6 +7,9 @@ const BUNDLE_TYPE = "picture";
 /** Ours to fetch server side: in our store, or inline bytes. */
 const fetchable = (url: URL) =>
 	url.protocol === "data:" || AssetBundle.holds(url.href);
+
+// Each shrink holds a whole source picture in memory.
+const shrinking = new PQueue({ concurrency: 4 });
 
 async function shrink(url: URL, maxEdge: number): Promise<Buffer> {
 	const response = await fetchOk(url.href, "picture");
@@ -43,7 +47,7 @@ export async function hostedPicture(
 					key: "picture",
 					filename: "picture.webp",
 					contentType: "image/webp",
-					data: await shrink(url, maxEdge),
+					data: await shrinking.add(() => shrink(url, maxEdge)),
 				},
 			],
 			undefined,

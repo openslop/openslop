@@ -25,7 +25,11 @@ import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
-import { mapPictureUrls, pictures } from "./prompt-pictures";
+import {
+	keepNewestPictures,
+	mapPictureUrls,
+	pictures,
+} from "./prompt-pictures";
 
 /** A refusal mid-stream arrives as the API's error object, not an Error. */
 const StreamFailure = z.object({ message: z.string() });
@@ -112,17 +116,35 @@ const thinking = (effort: ThinkingLevel) => ({
 const MANY_PICTURES = 20;
 const MANY_PICTURES_MAX_EDGE = 3000;
 
-const fitManyPictures = {
-	transformParams: async ({ params }) =>
-		pictures(params.prompt).length <= MANY_PICTURES
-			? params
-			: {
-					...params,
-					prompt: await mapPictureUrls(params.prompt, (url) =>
-						hostedPicture("anthropic", url, MANY_PICTURES_MAX_EDGE),
-					),
-				},
-} satisfies LanguageModelMiddleware;
+/** The API caps pictures per request by context window. */
+const MAX_PICTURES: Record<ModelId, number> = {
+	"claude-opus-5": 600,
+	"claude-sonnet-5": 600,
+	"claude-haiku-4-5-20251001": 100,
+};
+const PICTURES_DROPPED_AT_ONCE = 10;
+
+const fitPictures = (modelId: string) => {
+	const limit = MAX_PICTURES[modelId as ModelId];
+	if (!limit)
+		throw new Error(`No picture limit for Anthropic model "${modelId}"`);
+	return {
+		transformParams: async ({ params }) => {
+			const prompt = keepNewestPictures(params.prompt, {
+				limit,
+				batch: PICTURES_DROPPED_AT_ONCE,
+			});
+			if (pictures(prompt).length <= MANY_PICTURES)
+				return { ...params, prompt };
+			return {
+				...params,
+				prompt: await mapPictureUrls(prompt, (url) =>
+					hostedPicture("anthropic", url, MANY_PICTURES_MAX_EDGE),
+				),
+			};
+		},
+	} satisfies LanguageModelMiddleware;
+};
 
 export class AnthropicLLM implements LLMProvider {
 	constructor(private readonly apiKey: string) {}
@@ -146,7 +168,7 @@ export class AnthropicLLM implements LLMProvider {
 		return {
 			model: wrapLanguageModel({
 				model: this.model(modelId),
-				middleware: fitManyPictures,
+				middleware: fitPictures(modelId),
 			}),
 			modelId,
 			providerOptions: {

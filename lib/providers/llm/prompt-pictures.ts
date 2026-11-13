@@ -44,6 +44,25 @@ const mapPictures = (
 		return { ...message, content };
 	});
 
+/** Past `limit`, the oldest pictures become a note, `batch` at a time so a cached prefix moves less. */
+export function keepNewestPictures(
+	prompt: LanguageModelV4Prompt,
+	{ limit, batch }: { limit: number; batch: number },
+): LanguageModelV4Prompt {
+	const all = pictures(prompt);
+	if (all.length <= limit) return prompt;
+	const dropped = new Set(
+		all.slice(0, Math.ceil((all.length - limit) / batch) * batch),
+	);
+	const note: ContentItem = {
+		type: "text",
+		text: `An earlier picture, dropped because only the newest ${limit} pictures stay in view. Go by what you saw of it. To see it again, look at no more than ${limit - batch + 1} pictures at a time.`,
+	};
+	return mapPictures(prompt, (picture) =>
+		dropped.has(picture) ? note : picture,
+	);
+}
+
 /** Every tool-result picture's URL swapped for what `map` gives it, once per URL. */
 export async function mapPictureUrls(
 	prompt: LanguageModelV4Prompt,
