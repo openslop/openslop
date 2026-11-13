@@ -1,8 +1,7 @@
 import { dedent } from "@/lib/dedent";
-import { templateAsset } from "../template-asset";
-import type { Template } from "../templates";
+import type { TemplateInput } from "../templates";
 
-export const stickExplainer: Template = {
+export const stickExplainer = {
 	id: "stick-explainer",
 	length: "5-10m",
 	name: "Stick Explainer",
@@ -13,9 +12,9 @@ export const stickExplainer: Template = {
 			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
 	},
 	referenceImages: [
-		templateAsset("stick-explainer-1"),
-		templateAsset("stick-explainer-2"),
-		templateAsset("stick-explainer-3"),
+		"stick-explainer-1",
+		"stick-explainer-2",
+		"stick-explainer-3",
 	],
 	narration: {
 		gender: "masculine",
@@ -24,7 +23,7 @@ export const stickExplainer: Template = {
 		description: "Steady, enunciating, confident young male for narrations",
 	},
 	showcase: {
-		image: templateAsset("stick-explainer-3"),
+		image: "stick-explainer-3",
 		title: "Stickman explainer about...",
 		description: "Stickman explainer about a certain topic",
 		examplePrompt: "AI slop",
@@ -259,4 +258,4 @@ export const stickExplainer: Template = {
 
 #Narration: I'm Siliconversations. Thanks for watching. See you all next time. Bye for now.
 	`,
-};
+} satisfies TemplateInput;

@@ -1,8 +1,7 @@
 import { dedent } from "@/lib/dedent";
-import { templateAsset } from "../template-asset";
-import type { Template } from "../templates";
+import type { TemplateInput } from "../templates";
 
-export const povLife: Template = {
+export const povLife = {
 	id: "pov-life",
 	length: "5-10m",
 	name: "POV Life",
@@ -12,16 +11,13 @@ export const povLife: Template = {
 		description:
 			"2D cartoon illustration, thick black outlines, muted desaturated colors, cinematic night lighting, flat shading, western animation style, no gradients",
 	},
-	referenceImages: [
-		templateAsset("pov-life-stages-2"),
-		templateAsset("pov-life-stages-3"),
-	],
+	referenceImages: ["pov-life-stages-2", "pov-life-stages-3"],
 	characters: {
 		Protagonist: {
 			description: "American male, neutral accent",
 			appearance:
 				"male, average build, slightly hunched posture, bald, wearing a worn olive green jacket, grey t-shirt underneath, faded blue jeans, brown work boots",
-			avatar: templateAsset("pov-life-stages-4"),
+			avatar: "pov-life-stages-4",
 		},
 	},
 	narration: {
@@ -32,7 +28,7 @@ export const povLife: Template = {
 		description: "wise",
 	},
 	showcase: {
-		image: templateAsset("pov-life-stages-1"),
+		image: "pov-life-stages-1",
 		title: "POV Your Life as A...",
 		description:
 			"Long-form, second-person POV voiceover with cartoon illustrations that walk a viewer through ascending stages of a role, career, or world",
@@ -235,4 +231,4 @@ export const povLife: Template = {
 #Image: A close-up of Maya's hopeful face in the coffee shop, her eyes shining as she looks at the check, the Protagonist, an older man, slightly out of focus behind her by the rainy window, watching her with a knowing smile.
 #Narration: She doesn't believe you. You didn't believe it either. The cycle keeps going. It always does.
 	`,
-};
+} satisfies TemplateInput;

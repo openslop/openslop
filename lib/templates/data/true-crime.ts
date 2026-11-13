@@ -1,8 +1,7 @@
 import { dedent } from "@/lib/dedent";
-import { templateAsset } from "../template-asset";
-import type { Template } from "../templates";
+import type { TemplateInput } from "../templates";
 
-export const trueCrime: Template = {
+export const trueCrime = {
 	id: "true-crime",
 	length: "5-10m",
 	name: "True Crime",
@@ -13,10 +12,10 @@ export const trueCrime: Template = {
 			"Semi-realistic digital comic illustration, cel-shaded with bold ink outlines, muted earthy palette, cinematic dramatic lighting, gritty detailed textures, expressive characters, Rockstar Games concept art style",
 	},
 	referenceImages: [
-		templateAsset("true-crime-1"),
-		templateAsset("true-crime-2"),
-		templateAsset("true-crime-3"),
-		templateAsset("true-crime-4"),
+		"true-crime-1",
+		"true-crime-2",
+		"true-crime-3",
+		"true-crime-4",
 	],
 	narration: {
 		gender: "masculine",
@@ -26,7 +25,7 @@ export const trueCrime: Template = {
 		description: "Friendly young adult male",
 	},
 	showcase: {
-		image: templateAsset("true-crime-5"),
+		image: "true-crime-5",
 		title: "True Crime",
 		description:
 			"Long-form, wild true crime stories told like a buddy spilling the craziest thing he ever heard",
@@ -289,4 +288,4 @@ Each narration sentence has a different image associated with it.
 # CLOSING
 Wrap up with the aftermath, such as arrest, trial, sentence, ironic twist, or grim ending, delivered matter-of-factly. Optional dry one-liner to button it ("All that because of a soccer game.").
 	`,
-};
+} satisfies TemplateInput;

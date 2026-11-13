@@ -1,8 +1,7 @@
 import { dedent } from "@/lib/dedent";
-import { templateAsset } from "../template-asset";
-import type { Template } from "../templates";
+import type { TemplateInput } from "../templates";
 
-export const povFinancialLifestyle: Template = {
+export const povFinancialLifestyle = {
 	id: "pov-financial-lifestyle",
 	length: "10-15m",
 	name: "POV Financial Lifestyle",
@@ -13,17 +12,17 @@ export const povFinancialLifestyle: Template = {
 			"Flat 2D vector cartoon illustration in a modern animated web-comic style. Bold, clean black outlines of even weight. Smooth cel-shaded coloring with soft gradient lighting, gentle ambient glow, and warm cozy color palettes. Slightly muted, desaturated tones with warm highlights. The Protagonist has rounded, soft proportions and a friendly approachable look, rendered against richly illustrated environments. Clean, polished, professional digital cartoon aesthetic reminiscent of explainer-video and meme-style animation.",
 	},
 	referenceImages: [
-		templateAsset("pov-financial-lifestyle-1"),
-		templateAsset("pov-financial-lifestyle-2"),
-		templateAsset("pov-financial-lifestyle-3"),
-		templateAsset("pov-financial-lifestyle-4"),
+		"pov-financial-lifestyle-1",
+		"pov-financial-lifestyle-2",
+		"pov-financial-lifestyle-3",
+		"pov-financial-lifestyle-4",
 	],
 	characters: {
 		Protagonist: {
 			description: "Young American man",
 			appearance:
 				"A young everyman with a smooth, rounded egg-shaped head, pale skin, no nose, small black dot eyes, thick straight dark eyebrows, and a faint neutral mouth. He wears a navy baseball cap (worn forward or backward) and casual everyday clothing—hoodies, button-up shirts, or jackets in muted tones.",
-			avatar: templateAsset("pov-financial-lifestyle-5"),
+			avatar: "pov-financial-lifestyle-5",
 		},
 	},
 	narration: {
@@ -35,7 +34,7 @@ export const povFinancialLifestyle: Template = {
 			"Inviting, cheerful young adult male named Corey for casual conversation",
 	},
 	showcase: {
-		image: templateAsset("pov-financial-lifestyle-1"),
+		image: "pov-financial-lifestyle-1",
 		title: "POV Financial Lifestyle",
 		description:
 			"Walk the viewer through a money-driven lifestyle with advice along the way",
@@ -432,4 +431,4 @@ export const povFinancialLifestyle: Template = {
 
 #Narration: What's different is quieter than that. And it makes you wonder. What are you really building? And who is it for?
 	`,
-};
+} satisfies TemplateInput;

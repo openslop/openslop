@@ -1,8 +1,7 @@
 import { dedent } from "@/lib/dedent";
-import { templateAsset } from "../template-asset";
-import type { Template } from "../templates";
+import type { TemplateInput } from "../templates";
 
-export const sleepStory: Template = {
+export const sleepStory = {
 	id: "sleep-story",
 	length: "5-10m",
 	name: "Sleep Story",
@@ -12,11 +11,7 @@ export const sleepStory: Template = {
 		description:
 			"Dreamy painterly storybook illustration with soft visible brush textures, gentle low contrast and soft-focus edges, a warm muted palette of cream, ochre, navy, deep green, silver and dusky rose, tender moonlit and lamplit lighting, cinematic depth of field.",
 	},
-	referenceImages: [
-		templateAsset("sleep-story-1"),
-		templateAsset("sleep-story-3"),
-		templateAsset("sleep-story-4"),
-	],
+	referenceImages: ["sleep-story-1", "sleep-story-3", "sleep-story-4"],
 	narration: {
 		gender: "masculine",
 		accent: "british",
@@ -24,7 +19,7 @@ export const sleepStory: Template = {
 		description: "Wistful, young male for emotional narrations",
 	},
 	showcase: {
-		image: templateAsset("sleep-story-1"),
+		image: "sleep-story-1",
 		title: "Get Sleepy with...",
 		description:
 			"Long-form, slow, soothing narration designed to lull listeners to sleep",
@@ -96,4 +91,4 @@ Add motion to all images and videos. All narrations should have speed="slow".
 #Image: A wide, tranquil view of an empty cottage garden at night under a rising moon, lavender and foxgloves silvered with light, no dog and no people anywhere, a long lichen-topped stone wall stretching away into the distance with Marlowe standing alone and small on top of it, beginning to walk.
 #Narration: Tonight, Beauregard was nowhere to be seen. The garden was empty of dog, empty of human, empty of fuss. Marlowe began to walk the length of the wall.
 	`,
-};
+} satisfies TemplateInput;

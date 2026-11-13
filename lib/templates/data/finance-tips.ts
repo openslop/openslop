@@ -1,8 +1,7 @@
 import { dedent } from "@/lib/dedent";
-import { templateAsset } from "../template-asset";
-import type { Template } from "../templates";
+import type { TemplateInput } from "../templates";
 
-export const financeTips: Template = {
+export const financeTips = {
 	id: "finance-tips",
 	length: "5-10m",
 	name: "Finance Tips",
@@ -12,17 +11,13 @@ export const financeTips: Template = {
 		description:
 			"Flat 2D cartoon, bold black outlines, cel-shaded flat colors, oversized rounded heads with prominent chins, small oval eyes, bean-shaped bodies, stubby limbs. Vector-style props with thick outlines. Saturated colors. Explainer-cartoon aesthetic. Plain white background.",
 	},
-	referenceImages: [
-		templateAsset("finance-tips-2"),
-		templateAsset("finance-tips-3"),
-		templateAsset("finance-tips-4"),
-	],
+	referenceImages: ["finance-tips-2", "finance-tips-3", "finance-tips-4"],
 	characters: {
 		Ethan: {
 			description: "American male, neutral accent",
 			appearance:
 				"man with short light brown hair parted to the side, oversized rounded head with prominent chin and double-chin, small oval eyes with tiny black pupils, thin arched eyebrows, long pointed nose, small mouth. Bean-shaped body with stubby limbs. Wearing a blue hoodie and blue pants with white sneakers",
-			avatar: templateAsset("finance-tips-1"),
+			avatar: "finance-tips-1",
 		},
 	},
 	narration: {
@@ -33,7 +28,7 @@ export const financeTips: Template = {
 		description: "wise",
 	},
 	showcase: {
-		image: templateAsset("finance-tips-4"),
+		image: "finance-tips-4",
 		title: "Finance tips",
 		description: "Long-form, stories to teach personal finance lessons",
 		examplePrompt:
@@ -216,4 +211,4 @@ export const financeTips: Template = {
 #Video: Shot 1: Medium shot at eye level, static camera. A plain pale gray studio backdrop under soft even light. Ethan stands center facing the camera, thrusting his phone up above his head in one fist with a triumphant grin, the other fist clenched at his side. Bold white text glows into place beside him on the right reading "Audit your bank statement. TONIGHT. 15 minutes." on three lines. Sound: a phone alarm chime, then a satisfying click as the text locks in.
 #Narration: 15 minutes. Open your phone. Tap Settings. Tap Subscriptions. The money is already yours. Go get it back.
 	`,
-};
+} satisfies TemplateInput;

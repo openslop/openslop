@@ -1,8 +1,7 @@
 import { dedent } from "@/lib/dedent";
-import { templateAsset } from "../template-asset";
-import type { Template } from "../templates";
+import type { TemplateInput } from "../templates";
 
-export const celebrityDeath: Template = {
+export const celebrityDeath = {
 	id: "celebrity-death",
 	length: "10-15m",
 	name: "Celebrity Death",
@@ -13,10 +12,10 @@ export const celebrityDeath: Template = {
 			"Hand-drawn digital doodle illustration, thick uneven black ink outlines, flat solid color fills with slight sketchy shading, minimal detail, chibi big-head figures with simple stick limbs, plain flat background with a single horizon line, muted primary palette, white banner with handwritten marker-style caption at top, whiteboard-animation aesthetic. Thick black outlines, flat color, deliberately crude.",
 	},
 	referenceImages: [
-		templateAsset("celebrity-death-1"),
-		templateAsset("celebrity-death-2"),
-		templateAsset("celebrity-death-3"),
-		templateAsset("celebrity-death-4"),
+		"celebrity-death-1",
+		"celebrity-death-2",
+		"celebrity-death-3",
+		"celebrity-death-4",
 	],
 	narration: {
 		gender: "masculine",
@@ -25,7 +24,7 @@ export const celebrityDeath: Template = {
 		description: "Steady, enunciating, confident young male for narrations",
 	},
 	showcase: {
-		image: templateAsset("celebrity-death-2"),
+		image: "celebrity-death-2",
 		title: "Death of every...",
 		description:
 			"Historical explainer of death of every celebrity of a certain category",
@@ -418,4 +417,4 @@ export const celebrityDeath: Template = {
 
 #Narration: If you like this video, don't forget to subscribe and tell me which story you want next. Thanks for watching and see you in the next one.
 	`,
-};
+} satisfies TemplateInput;
