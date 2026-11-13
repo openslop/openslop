@@ -20,10 +20,9 @@ export function useElementWidth<T extends HTMLElement>(): {
 		node.current = element;
 		if (!element) return;
 		setWidth(Math.round(element.getBoundingClientRect().width));
-		const observer = new ResizeObserver((entries) => {
-			for (const entry of entries)
-				setWidth(Math.round(entry.contentRect.width));
-		});
+		const observer = new ResizeObserver(([entry]) =>
+			setWidth(Math.round(entry.contentRect.width)),
+		);
 		observer.observe(element);
 		return () => {
 			node.current = null;

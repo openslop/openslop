@@ -1,4 +1,3 @@
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEditor, type Descendant } from "slate";
 import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
@@ -36,7 +35,7 @@ vi.mock("react", () => ({
 // One editor for the life of a test, as Slate's own is: only `children` is
 // swapped, and that swap is what a document revision means.
 const editor = createEditor();
-editor.defaultModels = () => resolveDefaultModels();
+editor.defaultModels = () => ({});
 let children: Descendant[] = [];
 Object.defineProperty(editor, "children", {
 	get: () => children,

@@ -1,5 +1,4 @@
 import compact from "lodash/compact";
-import zipWith from "lodash/zipWith";
 import { z } from "zod";
 import { referenceUrls } from "@/lib/canvas/assets";
 import { isGenerated, type CanvasElement } from "@/lib/canvas/types";
@@ -43,8 +42,8 @@ async function pictures(result: AssetResult): Promise<ResultView["pictures"]> {
 	if (result.imageUrl) return [{ url: result.imageUrl }];
 	if (!result.videoUrl) return [];
 	const urls = await captureFrames(result.videoUrl, FRAME_KEYS);
-	return zipWith(FRAME_KEYS, urls, (key, url) => ({
-		url,
+	return FRAME_KEYS.map((key, index) => ({
+		url: urls[index],
 		at: FRAMES[key].at * result.durationSec,
 	}));
 }

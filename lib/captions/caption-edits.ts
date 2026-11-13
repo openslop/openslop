@@ -14,9 +14,7 @@ export function editCaption(
 	return {
 		...result,
 		textTimestamps: word
-			? textTimestamps.map((token, i) =>
-					i === index ? { ...token, text: word } : token,
-				)
+			? textTimestamps.with(index, { ...textTimestamps[index], text: word })
 			: textTimestamps.toSpliced(index, 1),
 	};
 }

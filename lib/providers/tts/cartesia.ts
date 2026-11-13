@@ -26,7 +26,6 @@ import type {
 	Voice,
 	VoiceListParams,
 } from "@cartesia/cartesia-js/resources/voices.mjs";
-import zipWith from "lodash/zipWith";
 
 type RawTTSResult = {
 	data: Buffer;
@@ -220,11 +219,7 @@ export class CartesiaTTS
 				if (response.type === "timestamps" && response.word_timestamps) {
 					const { words, start, end } = response.word_timestamps;
 					tokens.push(
-						...zipWith(words, start, end, (text, start, end) => ({
-							text,
-							start,
-							end,
-						})),
+						...words.map((text, i) => ({ text, start: start[i], end: end[i] })),
 					);
 				}
 			}

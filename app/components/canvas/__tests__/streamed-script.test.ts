@@ -1,4 +1,3 @@
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { describe, expect, it } from "vitest";
 import { createEditor } from "slate";
 import { withReact } from "slate-react";
@@ -33,7 +32,7 @@ function written(chunks: string[]): CanvasEditor {
 	const editor = withNodeId(
 		withScenes(withAssets(withLayout(withReact(createEditor())))),
 	);
-	editor.defaultModels = () => resolveDefaultModels();
+	editor.defaultModels = () => ({});
 	chunks.forEach(createScriptWriter(editor));
 	return editor;
 }

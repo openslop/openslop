@@ -24,7 +24,6 @@ import {
 	type AspectRatio,
 	type MediaResolution,
 } from "@/lib/project/aspect-ratio";
-import { fromKeys } from "@/lib/utils";
 
 /**
  * Every model each connector type offers, by the provider serving it.
@@ -134,9 +133,6 @@ export const connectorModelsSchema = z.record(z.string(), modelRefSchema);
 
 export type ConnectorModels = z.infer<typeof connectorModelsSchema>;
 
-/** Every connector type with the model its scopes resolve to. */
-export type ResolvedModels = Record<ConnectorType, ModelRef>;
-
 /**
  * The scopes a model default can come from, outermost last. An element's own
  * pick beats its project's, which beats the account's, which beats the model
@@ -188,6 +184,8 @@ export function differsFromRecommended(models: ConnectorModels): boolean {
 
 export function resolveDefaultModels(
 	defaults: ModelDefaults = {},
-): ResolvedModels {
-	return fromKeys(CONNECTOR_TYPES, (type) => defaultModelFor(type, defaults));
+): ConnectorModels {
+	return Object.fromEntries(
+		CONNECTOR_TYPES.map((type) => [type, defaultModelFor(type, defaults)]),
+	);
 }

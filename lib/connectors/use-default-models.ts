@@ -5,8 +5,8 @@ import { useProject } from "@/lib/project/use-project";
 import { useAccount } from "@/lib/user/use-account";
 import {
 	resolveDefaultModels,
+	type ConnectorModels,
 	type ModelDefaults,
-	type ResolvedModels,
 } from "./models";
 
 export function useModelChain(): ModelDefaults {
@@ -15,7 +15,7 @@ export function useModelChain(): ModelDefaults {
 	return useMemo(() => ({ project, account }), [project, account]);
 }
 
-export function useDefaultModels(): ResolvedModels {
+export function useDefaultModels(): ConnectorModels {
 	const chain = useModelChain();
 	return useMemo(() => resolveDefaultModels(chain), [chain]);
 }

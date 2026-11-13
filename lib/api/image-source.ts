@@ -17,6 +17,5 @@ export function parseImageSource(value: string): ImageSource | null {
 	if (!match) return null;
 
 	const [, mediaType, data] = match;
-	if (!mediaType || !data) return null;
 	return { kind: "base64", mediaType: mediaType.toLowerCase(), data };
 }

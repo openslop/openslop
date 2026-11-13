@@ -19,7 +19,7 @@ import {
 } from "../render/motion-effect-names";
 
 /** Raw attribute keys omitted from generation inputs: layout knobs, and what the card remembers for the user. */
-export const LAYOUT_ATTRIBUTE_KEYS = [
+export const LAYOUT_ATTRIBUTE_KEYS: readonly string[] = [
 	"loops",
 	"loop",
 	"volume",
@@ -27,12 +27,10 @@ export const LAYOUT_ATTRIBUTE_KEYS = [
 	"uploadedFrame",
 	"trimStart",
 	"trimEnd",
-] as const;
-
-const LAYOUT_ATTRIBUTES = new Set<string>(LAYOUT_ATTRIBUTE_KEYS);
+];
 
 export const isLayoutAttribute = (key: string): boolean =>
-	LAYOUT_ATTRIBUTES.has(key);
+	LAYOUT_ATTRIBUTE_KEYS.includes(key);
 
 export const splitAttributes = (
 	attributes: Record<string, string>,

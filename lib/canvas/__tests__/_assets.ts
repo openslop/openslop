@@ -1,7 +1,6 @@
 import compact from "lodash/compact";
 import { createEditor, type Descendant, type Editor } from "slate";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { createCanvasElement } from "../create-canvas-element";
 import { isAssetElement, isContentElement } from "../guards";
 import { splitAttributes } from "../element-attributes";
@@ -38,7 +37,7 @@ export function makeEditor(
 	defaultModels: ConnectorModels = {},
 ): Editor {
 	const editor = createEditor();
-	editor.defaultModels = () => resolveDefaultModels({ project: defaultModels });
+	editor.defaultModels = () => defaultModels;
 	editor.children = children;
 	return editor;
 }

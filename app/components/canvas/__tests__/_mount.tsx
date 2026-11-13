@@ -1,4 +1,3 @@
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { createEditor, type Descendant } from "slate";
@@ -16,7 +15,7 @@ export const noHistory: ElementVersionStorage = {
 /** A canvas with no editable surface, as an asset dialog sees it. */
 export function mountOnCanvas(children: Descendant[] = []) {
 	const editor = withReact(createEditor());
-	editor.defaultModels = () => resolveDefaultModels();
+	editor.defaultModels = () => ({});
 	editor.children = children;
 	const container = document.body.appendChild(document.createElement("div"));
 	const root = createRoot(container);

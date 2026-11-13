@@ -1,6 +1,5 @@
 // @vitest-environment happy-dom
 
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { createEditor } from "slate";
@@ -27,7 +26,7 @@ function ProjectHistoryHotkeys({ editor }: { editor: CanvasEditor }) {
 
 function mountHistoryKeymap() {
 	const editor = withHistory(withReact(createEditor()));
-	editor.defaultModels = () => resolveDefaultModels();
+	editor.defaultModels = () => ({});
 	editor.children = [
 		{
 			id: "scene-1",

@@ -1,4 +1,3 @@
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { describe, expect, it } from "vitest";
 import { createEditor, Editor, Transforms } from "slate";
 import { withReact } from "slate-react";
@@ -17,7 +16,7 @@ import { content, scene, seedScene } from "./fixtures";
 
 const editorWith = (element: ContentElement): CanvasEditor => {
 	const editor = withCharacterRefs(withReact(createEditor()));
-	editor.defaultModels = () => resolveDefaultModels();
+	editor.defaultModels = () => ({});
 	seedScene(editor, scene([element]));
 	return editor;
 };

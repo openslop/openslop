@@ -1,4 +1,3 @@
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { describe, expect, it } from "vitest";
 import {
 	createEditor,
@@ -23,7 +22,7 @@ const REFERENCES = asset("asset_references");
 
 const bare = (children: Descendant[], plugins = withAssets) => {
 	const editor = plugins(withReact(createEditor()));
-	editor.defaultModels = () => resolveDefaultModels();
+	editor.defaultModels = () => ({});
 	editor.children = children;
 	return editor;
 };

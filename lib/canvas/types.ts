@@ -2,7 +2,7 @@ import type { BaseEditor } from "slate";
 import type { HistoryEditor } from "slate-history";
 import type { ReactEditor } from "slate-react";
 import { z } from "zod";
-import type { ResolvedModels } from "@/lib/connectors/models";
+import type { ConnectorModels } from "@/lib/connectors/models";
 import type { AssetConnectorType } from "@/lib/connectors/types";
 import { keysOf } from "@/lib/utils";
 
@@ -227,7 +227,7 @@ export type CanvasEditor = BaseEditor &
 	ReactEditor & {
 		id?: string;
 		/** Resolved per call, since the project's and account's pins change mid-session. */
-		defaultModels: () => ResolvedModels;
+		defaultModels: () => ConnectorModels;
 	};
 
 export type SplitAttributes = {

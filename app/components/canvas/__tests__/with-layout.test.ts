@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { createEditor, Editor, Node, Transforms, type Descendant } from "slate";
 import { withReact } from "slate-react";
 import type { ConnectorModels } from "@/lib/connectors/models";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { withLayout } from "../plugins/with-layout";
@@ -20,7 +19,7 @@ const normalized = (
 	defaultModels: ConnectorModels = {},
 ) => {
 	const editor = withLayout(withReact(createEditor()));
-	editor.defaultModels = () => resolveDefaultModels({ project: defaultModels });
+	editor.defaultModels = () => defaultModels;
 	editor.children = children;
 	editor.normalize({ force: true });
 	return editor.children;

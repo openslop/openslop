@@ -1,4 +1,3 @@
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { describe, expect, it, vi } from "vitest";
 import { createEditor, Transforms } from "slate";
 import { withReact } from "slate-react";
@@ -36,7 +35,7 @@ function makeEditor(seed: Scene) {
 	base.insertTextData = insertTextData;
 
 	const editor = withOSMLClipboard(base);
-	editor.defaultModels = () => resolveDefaultModels();
+	editor.defaultModels = () => ({});
 	seedScene(editor, seed);
 
 	return { editor, insertTextData };
