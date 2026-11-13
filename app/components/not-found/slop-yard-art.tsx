@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 const HAND_FINGERS = [
 	{ x: 4, y: -14, height: 34 },
 	{ x: 18, y: -20, height: 40 },
@@ -88,7 +86,7 @@ export function SceneDefs() {
 	);
 }
 
-export function Skyline({ spinClass }: { spinClass?: string }) {
+export function Skyline({ spinClass }: { spinClass: string }) {
 	return (
 		<g
 			strokeWidth="2"
@@ -118,7 +116,7 @@ export function Skyline({ spinClass }: { spinClass?: string }) {
 	);
 }
 
-export function Yard({ spinClass }: { spinClass?: string }) {
+export function Yard({ spinClass }: { spinClass: string }) {
 	return (
 		<g strokeWidth="2.5">
 			<rect
@@ -168,7 +166,7 @@ export function Yard({ spinClass }: { spinClass?: string }) {
 					r="17"
 					strokeWidth="4"
 					strokeDasharray="14 10"
-					className={cn("stroke-muted-foreground", spinClass)}
+					className={`stroke-muted-foreground ${spinClass}`}
 				/>
 			</g>
 
@@ -249,8 +247,8 @@ export function Sloppy({
 	blinkClass,
 	scanClass,
 }: {
-	blinkClass?: string;
-	scanClass?: string;
+	blinkClass: string;
+	scanClass: string;
 }) {
 	return (
 		<g strokeWidth="3" transform="translate(-24 0)">
@@ -352,16 +350,11 @@ export function Sloppy({
 			<path
 				d="M332 158h136"
 				strokeWidth="3"
-				className={cn("stroke-muted-foreground/50", scanClass)}
+				className={`stroke-muted-foreground/50 ${scanClass}`}
 			/>
 
 			<path d="M400 130v-30l18-14" />
-			<circle
-				cx="420"
-				cy="84"
-				r="8"
-				className={cn("fill-caution", blinkClass)}
-			/>
+			<circle cx="420" cy="84" r="8" className={`fill-caution ${blinkClass}`} />
 
 			<path
 				d="M300 171h14"
