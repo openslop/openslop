@@ -166,15 +166,12 @@ export const setTrimPoint = (
 	sec: number,
 ): void => mergeAttrs(editor, id, { [TRIM_KEYS[edge]]: String(round(sec, 2)) });
 
-/** An element no longer on the canvas has no trim to reset. */
 export function resetTrim(
 	editor: Editor,
 	id: string,
 	edges = BOTH_EDGES,
 ): void {
-	const found = findElementById(editor, id);
-	if (!found) return;
-	const [element, path] = found;
+	const [element, path] = requireElement(editor, id);
 	const layout = element.layoutAttributes ?? {};
 	const keys = edges.map((edge) => TRIM_KEYS[edge]);
 	if (!keys.some((key) => key in layout)) return;

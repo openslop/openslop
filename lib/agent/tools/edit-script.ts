@@ -22,10 +22,11 @@ import { Pencil } from "@/components/ui/icon";
 import { conjunction, plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
-/** Attributes Sloppy can write by hand: those limited to a list of options, and free text. */
+/** Attributes Sloppy can write by hand: a list of options, a count of seconds, and free text. */
 const describeAttribute = ({ key, edit }: AttributeDef): string[] => {
 	if (edit?.kind === "enum" || edit?.kind === "toggle")
 		return [`${key} (${edit.value.options.join(" | ")})`];
+	if (edit?.kind === "seconds") return [`${key} (seconds)`];
 	return edit?.kind === "text" ? [key] : [];
 };
 

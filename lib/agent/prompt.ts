@@ -50,9 +50,9 @@ const ROLE = dedent`
     - Images meant as exact scenes: put each one on its scene.
     - A song with lyrics for a music video: put it on a music element, caption it, read its word
       times with view_result, and time the scenes to the words.
-    - A long video to cut into clips: put it on one video element per clip, caption them, read
-      the word times with view_result, and set each clip's trimStart and trimEnd to the seconds
-      in the video where that clip starts and stops.
+    - A long video to cut into clips: put it on one video element, caption it and read its word
+      times with view_result, then put it on one video element per clip, with trimStart and
+      trimEnd set to the seconds in the video where that clip starts and stops.
     - Avatars: put each one on the asset_avatar of the character it shows.
 
   # Lengths
