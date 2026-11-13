@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
 	CornerDownLeft,
 	FilmSlate,
@@ -17,10 +16,7 @@ import {
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
 import { IconButton, TooltipIconButton } from "@/components/ui/icon-button";
 import { AddButton } from "@/components/ui/add-button";
-import {
-	SegmentedControl,
-	type SegmentedControlOption,
-} from "@/components/ui/segmented-control";
+
 import AnimatedPlaceholder from "@/app/components/animated-placeholder";
 import { useAssetEditors } from "@/app/components/canvas/elements/asset-edit-context";
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
@@ -63,26 +59,6 @@ import { SettingPill, type SettingPillOption } from "./setting-pill";
 import { ModelSelect, modelLabel } from "@/app/components/models/model-select";
 import { ButtonMenuTrigger } from "@/components/ui/select-menu";
 import { ProviderIcon } from "@/app/components/models/provider-icon";
-
-/** What the user says they are giving us. Presentation only: Sloppy reads the text itself. */
-type ComposerIntent = "story" | "script";
-
-const INTENT_OPTIONS: SegmentedControlOption<ComposerIntent>[] = [
-	{ value: "story", label: "Describe a video" },
-	{ value: "script", label: "Paste a script" },
-];
-
-const SCRIPT_PLACEHOLDER = `EXT. NIGHT STARRY SKY
-Soft glowing stars twinkle quietly across a deep blue sky.
-A large silver moon glows softly above peaceful clouds.
-Gentle music begins.
-
-NARRATOR (soft, soothing voice)
-High above the quiet forests and sleepy hills…
-past the drifting clouds…
-there was a small glowing garden hidden on the moon.
-
-And in that garden… lived a little rabbit named Lumi…`;
 
 const ASPECT_RATIO_OPTIONS: SettingPillOption<AspectRatio>[] =
 	ASPECT_RATIOS.map((value) => ({ value, label: value }));
@@ -195,7 +171,6 @@ export default function ComposerCopilot({
 	onValueChange,
 	onSubmit,
 }: ComposerCopilotProps) {
-	const [intent, setIntent] = useState<ComposerIntent>("story");
 	const { template, applyTemplate, clearTemplate } = useTemplate();
 	const aspectRatio = useVideoSetting("aspectRatio");
 	const updateVideoSettings = useProject((state) => state.updateVideoSettings);
@@ -221,18 +196,11 @@ export default function ComposerCopilot({
 		multiple: true,
 	});
 	const hasText = value.trim().length > 0;
-	const pasting = intent === "script";
-	const activeTemplate = pasting ? undefined : template;
 
 	/** A pasted script sets its own length and format, so both go back to auto. */
-	const chooseIntent = (next: ComposerIntent) => {
-		setIntent(next);
-		if (next === "script")
-			updateScriptSettings({ length: "auto", format: "auto" });
-	};
 
 	const handleSubmit = () => {
-		if (hasText) onSubmit(templateBrief(activeTemplate, value));
+		if (hasText) onSubmit(templateBrief(template, value));
 	};
 
 	return (
@@ -244,14 +212,6 @@ export default function ComposerCopilot({
 			)}
 		>
 			<div className="px-4 py-3">
-				<div className="mb-3 flex justify-center">
-					<SegmentedControl
-						value={intent}
-						options={INTENT_OPTIONS}
-						onChange={chooseIntent}
-						ariaLabel="What you are giving Sloppy"
-					/>
-				</div>
 				<AssetStrip>
 					<AssetStripArtStyle />
 					<AssetStripCharacters />
@@ -262,23 +222,22 @@ export default function ComposerCopilot({
 					/>
 				</AssetStrip>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
-					{activeTemplate && (
-						<TemplatePill template={activeTemplate} onRemove={clearTemplate} />
+					{template && (
+						<TemplatePill template={template} onRemove={clearTemplate} />
 					)}
 					<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
 						<textarea
-							rows={pasting ? 8 : 2}
-							aria-label={pasting ? "Paste your script" : "Enter your prompt"}
+							rows={2}
+							aria-label="Enter a prompt or paste a script"
 							value={value}
 							onChange={(e) => onValueChange(e.target.value)}
 							onKeyDown={(e) => {
 								if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
 									handleSubmit();
 							}}
-							placeholder={pasting ? SCRIPT_PLACEHOLDER : undefined}
 							className="field-sizing-content max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
 						/>
-						{!hasText && !activeTemplate && !pasting && (
+						{!hasText && !template && (
 							<div className="pointer-events-none overflow-hidden font-body text-body">
 								<AnimatedPlaceholder />
 							</div>
@@ -306,7 +265,6 @@ export default function ComposerCopilot({
 							icon={<FilmSlate />}
 							value={videoFormat}
 							options={VIDEO_FORMAT_OPTIONS}
-							disabled={pasting}
 							onChange={(next) => updateScriptSettings({ format: next })}
 						/>
 						<SettingPill
@@ -333,15 +291,14 @@ export default function ComposerCopilot({
 							icon={<Hourglass />}
 							value={videoLength}
 							options={VIDEO_LENGTH_OPTIONS}
-							disabled={pasting}
 							onChange={(next) => updateScriptSettings({ length: next })}
 						/>
-						{activeTemplate && (
+						{template && (
 							<SettingPill
 								name="Template"
 								className="relative overflow-hidden"
-								style={{ backgroundColor: activeTemplate.color }}
-								value={activeTemplate.id}
+								style={{ backgroundColor: template.color }}
+								value={template.id}
 								options={TEMPLATE_OPTIONS}
 								onChange={applyTemplate}
 							/>
