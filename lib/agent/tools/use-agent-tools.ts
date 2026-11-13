@@ -101,6 +101,10 @@ export function useAgentTools() {
 				},
 				readAssets: () => getAssets(editor.children),
 				readProject: () => store.getState(),
+				modelDefaults: () => ({
+					project: store.getState().models,
+					account: account.getState().models,
+				}),
 				editScript: (ops) => applyRefineOps(editor, ops),
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
