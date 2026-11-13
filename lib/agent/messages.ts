@@ -80,11 +80,11 @@ const pruneFinished = (message: ModelMessage): ModelMessage => {
  * goes, and so does reasoning, the bulk of a finished turn the next one doesn't need.
  */
 export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
-	const inFlightFrom = messages.findLastIndex(
+	const currentTurnStart = messages.findLastIndex(
 		(message) => message.role === "user",
 	);
 	return messages.map((message, index) =>
-		index < inFlightFrom ? pruneFinished(message) : message,
+		index < currentTurnStart ? pruneFinished(message) : message,
 	);
 }
 

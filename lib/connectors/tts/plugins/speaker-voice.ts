@@ -1,8 +1,9 @@
 import pick from "lodash/pick";
 import { speakerOf, voiceOf } from "@/lib/canvas/assets";
-import type {
-	ConnectorPlugin,
-	TTSGenerateParams,
+import {
+	type ConnectorPlugin,
+	MODEL_REF_KEYS,
+	type TTSGenerateParams,
 } from "@/lib/connectors/types";
 import { foundVoice, speakerVoices } from "@/lib/connectors/voice/voices";
 
@@ -11,7 +12,7 @@ export function createSpeakerVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "speaker-voice",
 		model: ({ generationAttributes: attrs }, canvas) =>
-			pick(voiceOf(canvas, speakerOf(attrs)), ["provider", "model"]),
+			pick(voiceOf(canvas, speakerOf(attrs)), MODEL_REF_KEYS),
 		dependencies: [
 			speakerVoices(({ generationAttributes: attrs }) => [speakerOf(attrs)]),
 		],

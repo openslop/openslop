@@ -7,17 +7,11 @@ import { defineTool } from "./define-tool";
 
 export const outlineStory = defineTool({
 	description: dedent`
-	  Develop a brief into a full story outline: a high-concept premise, characters, themes,
-	  conflict, twists, and a resolution. A dedicated pass at structure produces noticeably
-	  better stories than writing straight from an idea, so the outline comes back to you to
-	  review and fold into a write_script brief. A runtime it states sets the length when the
-	  project is on auto.
+	  Turn a story idea into a full outline: premise, characters, conflict, twists and ending.
+	  You get the outline back to put into a write_script brief.
 
-	  Reach for it when inventing a narrative: fiction, a fable, a character-driven piece.
-	  Skip it when the user's request is not story-shaped (a documentary, an explainer, a
-	  listicle, an ambient piece) or when they already supplied the structure. A template is
-	  supplied structure: when the project has one, write_script already writes to its format
-	  and example story, so go straight there.
+	  Use it for made-up stories. Skip it when the request isn't a story, when the user already
+	  gave the plot, or when the project has a template, since write_script already follows it.
 	`,
 	input: z.object({
 		brief: z

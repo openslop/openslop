@@ -32,7 +32,7 @@ export function ResetButton({
 			onMouseDown={keepFocus}
 			onClick={onClick}
 		>
-			<Undo aria-hidden="true" />
+			<Undo />
 			<span className="hidden sm:inline">Reset</span>
 		</Button>
 	);

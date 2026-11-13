@@ -5,7 +5,7 @@ import { defineTool } from "./define-tool";
 
 export const setTitle = defineTool({
 	description: dedent`
-	  Set the project's title: 1 to 4 words, in the language the script is written in.
+	  Set the project's title: 1 to 4 words, in the language the script is or will be written in.
 	`,
 	input: z.object({ title: z.string().min(1) }),
 	output: z.string(),

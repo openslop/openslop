@@ -157,7 +157,7 @@ function ConnectHint({ provider }: { provider: Provider }) {
 					className: "ml-auto",
 				})}
 			>
-				<Link aria-hidden="true" className="size-2.5" />
+				<Link className="size-2.5" />
 				Connect
 			</span>
 		</SimpleTooltip>

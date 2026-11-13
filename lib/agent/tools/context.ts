@@ -1,11 +1,13 @@
 import type { AssetElement } from "@/lib/canvas/types";
-import type { ElementResult } from "../element-result";
+import type { ElementResult, ResultView } from "../element-result";
 import type { ElementState } from "../element-state";
 import type { DialogueEstimate } from "@/lib/canvas/spoken-words";
 import type { VisualSpan } from "@/lib/render/visual-spans";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
+import type { MediaItem } from "@/lib/project/media";
 import type { Provider } from "@/lib/connectors/types";
+import type { ModelDefaults } from "@/lib/connectors/models";
 import type { CaptionsReport } from "@/lib/captions/auto-captions";
 
 export const PROJECT_SETTERS = [
@@ -35,9 +37,12 @@ export type AgentToolContext = Pick<
 	) => Promise<string>;
 	readAssets: () => AssetElement[];
 	readProject: () => ProjectData;
+	modelDefaults: () => ModelDefaults;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
 	isConnected: (provider: Provider) => boolean;
 	generateCaptions: (ids?: string[]) => CaptionsReport;
+	setElementResult: (id: string, url: string) => Promise<void>;
+	viewMedia: (item: MediaItem) => Promise<ResultView>;
 };

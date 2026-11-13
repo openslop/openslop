@@ -84,6 +84,11 @@ export type ModelsByProvider<E extends ModelEntry = ModelEntry> = Partial<
 /** Names are only unique within a provider, so the pair is the identity everywhere. */
 export type ModelRef = { provider: Provider; model: string };
 
+export const MODEL_REF_KEYS = [
+	"provider",
+	"model",
+] as const satisfies readonly (keyof ModelRef)[];
+
 export type ModelPick = { provider?: string; model?: string };
 
 /** A voice's preview at a URL anyone can fetch, and how long it plays. */

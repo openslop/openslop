@@ -21,6 +21,10 @@ export const setDefaultModel = defineTool({
 	label: ({ model }) =>
 		`Setting the default model${model ? ` to ${model}` : ""}`,
 	execute: async ({ type, ...model }, ctx) => {
+		if (!ctx.isConnected(model.provider))
+			throw new Error(
+				`${model.provider} isn't connected. Pick a pair from list_models.`,
+			);
 		const { label, types } = groupFor(type);
 		ctx.updateModels(groupModels(types, model));
 		return `New ${label.toLowerCase()} elements now get ${model.model} from ${model.provider}.`;

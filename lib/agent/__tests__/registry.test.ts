@@ -7,6 +7,7 @@ import {
 	executeToolCall,
 	presentToolCall,
 } from "../tools/registry";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
@@ -54,6 +55,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	isScriptEmpty: () => false,
 	readAssets: () => [],
 	readProject: () => project(),
+	modelDefaults: () => ({}),
 	editScript: () => ({ applied: 0, failures: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
@@ -63,6 +65,8 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
+	setElementResult: async () => {},
+	viewMedia: async () => ({ durationSec: 0, pictures: [], words: [] }),
 	...over,
 });
 
@@ -233,6 +237,82 @@ describe("executeToolCall", () => {
 
 		expect(titles).toEqual([]);
 		expect(outcome.ok).toBe(false);
+	});
+
+	it("view_media shows a library file under its name", async () => {
+		const cat = {
+			name: "cat",
+			kind: "image",
+			url: "https://blob/cat.png",
+		} as const;
+		const viewMedia = vi.fn(async () => ({
+			durationSec: 0,
+			pictures: [{ url: cat.url }],
+			words: [],
+		}));
+		const outcome = await executeToolCall(
+			{ toolName: "view_media", input: { url: cat.url } },
+			context({
+				readProject: () => ({ ...project(), media: [cat] }),
+				viewMedia,
+			}),
+		);
+
+		expect(viewMedia).toHaveBeenCalledWith(cat);
+		expect(outcome).toEqual({
+			ok: true,
+			output: {
+				durationSec: 0,
+				pictures: [{ url: cat.url }],
+				words: [],
+			},
+		});
+	});
+
+	it("set_element_result skips an element that can't take the file and sets the rest", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const setElementResult = vi.fn((id: string) => {
+			if (id === "n1")
+				throw new Error("n1 is a narration element and can't take a file.");
+			return Promise.resolve();
+		});
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_element_result",
+				input: {
+					results: [
+						{ id: "n1", url },
+						{ id: "m1", url },
+					],
+				},
+			},
+			context({ setElementResult }),
+		);
+
+		expect(setElementResult).toHaveBeenNthCalledWith(2, "m1", url);
+		expect(outcome.ok && outcome.output).toBe(
+			[
+				"Skipped n1: n1 is a narration element and can't take a file.",
+				"Set m1.",
+			].join("\n"),
+		);
+	});
+
+	it("set_element_result refuses a URL outside our store", async () => {
+		const setElementResult = vi.fn(async () => {});
+		const outcome = await executeToolCall(
+			{
+				toolName: "set_element_result",
+				input: { results: [{ id: "m1", url: "https://example.com/song.mp3" }] },
+			},
+			context({ setElementResult }),
+		);
+
+		expect(setElementResult).not.toHaveBeenCalled();
+		expect(outcome.ok).toBe(false);
+		expect(!outcome.ok && outcome.errorText).toContain(
+			"Each URL must be a file in our store",
+		);
 	});
 
 	it("puts the user's own script on the canvas untouched", async () => {
@@ -552,7 +632,7 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toEqual({ id: "img-1", ...view });
+		expect(outcome.ok && outcome.output).toEqual(view);
 	});
 
 	it("refuses with the reason an element has no result", async () => {
@@ -650,6 +730,8 @@ describe("executeToolCall", () => {
 });
 
 describe("model tools", () => {
+	const SEEDANCE = { provider: "openslop", model: "Seedance 2 Fast" } as const;
+	const KLING = { provider: "openslop", model: "Kling 3 Omni" } as const;
 	const run = (toolName: string, input: unknown, over = {}) =>
 		executeToolCall({ toolName, input }, context(over));
 
@@ -705,6 +787,52 @@ describe("model tools", () => {
 		expect(outcome.ok || outcome.errorText).toMatch(/Not a model of that type/);
 		expect(writes).toEqual([]);
 	});
+
+	it("refuses a default model whose provider isn't connected, writing nothing", async () => {
+		const writes: unknown[] = [];
+		const outcome = await run(
+			"set_default_model",
+			{ type: "voice", provider: "openslop", model: "Sonic 3.6" },
+			{
+				isConnected: () => false,
+				updateModels: (models: unknown) => void writes.push(models),
+			},
+		);
+
+		expect(outcome.ok || outcome.errorText).toMatch(/openslop isn't connected/);
+		expect(writes).toEqual([]);
+	});
+
+	it.each([
+		[
+			"recommended",
+			{},
+			"Kling 3 Omni from openslop, OpenSlop's recommendation",
+		],
+		[
+			"account",
+			{ account: { video: SEEDANCE } },
+			"Seedance 2 Fast from openslop, set on the user's account",
+		],
+		[
+			"project",
+			{ project: { video: SEEDANCE }, account: { video: KLING } },
+			"Seedance 2 Fast from openslop, set on this project",
+		],
+	] as const)(
+		"names each type's default and where it was set, from the %s",
+		async (_, defaults, line) => {
+			const outcome = await run(
+				"list_models",
+				{},
+				{ modelDefaults: () => defaults },
+			);
+
+			expect(String(outcome.ok && outcome.output)).toContain(
+				`Videos (type video)\nDefault: ${line}\n`,
+			);
+		},
+	);
 });
 
 describe("SLOPPY_TOOLS", () => {
@@ -719,6 +847,9 @@ describe("SLOPPY_TOOLS", () => {
 			"update_video_settings",
 			"generate_captions",
 			"view_result",
+			"read_media",
+			"view_media",
+			"set_element_result",
 			"outline_story",
 			"estimate_total_length",
 			"estimate_dialogue_lengths",
@@ -781,8 +912,10 @@ describe("presentToolCall", () => {
 describe("tool flags", () => {
 	it("collects the tools whose output only lasts the turn", () => {
 		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
+			"read_media",
 			"read_script",
 			"review_script",
+			"view_media",
 			"view_result",
 		]);
 	});

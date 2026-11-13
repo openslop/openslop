@@ -33,8 +33,8 @@ export function ElementStaleIndicator() {
 
 const GENERATE_ICON: Record<GenerationStatus, ReactNode> = {
 	generating: <Spinner />,
-	queued: <Hourglass aria-hidden="true" />,
-	idle: <Sparkles aria-hidden="true" />,
+	queued: <Hourglass />,
+	idle: <Sparkles />,
 };
 
 function generateLabel(status: GenerationStatus, hasResult: boolean) {

@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useSlateStatic } from "slate-react";
 import pick from "lodash/pick";
 import { getAssets } from "@/lib/canvas/assets";
-import { findElementById } from "@/lib/canvas/editor-ops";
+import { findElementById, requireElement } from "@/lib/canvas/editor-ops";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { getContentElements, isScriptEmpty } from "@/lib/canvas/scenes";
 import {
@@ -22,7 +22,7 @@ import {
 import { resolveModel } from "@/lib/connectors/models";
 import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
-import { buildNodes } from "@/lib/generation/generation-graph";
+import { buildNode, buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { useCreateConnector } from "@/lib/connectors/use-create-connector";
@@ -31,8 +31,14 @@ import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
 import type { ScriptSource } from "@/lib/script/prompt/build";
+import {
+	commitUploaded,
+	isUploadable,
+	uploadKindOf,
+	uploadedResult,
+} from "@/lib/upload/uploaded-result";
 import { streamScript } from "@/lib/script/stream-script";
-import { elementResult } from "../element-result";
+import { elementResult, resultView } from "../element-result";
 import { elementState } from "../element-state";
 import { PROJECT_SETTERS, type AgentToolContext } from "./context";
 import { executeToolCall } from "./registry";
@@ -95,6 +101,10 @@ export function useAgentTools() {
 				},
 				readAssets: () => getAssets(editor.children),
 				readProject: () => store.getState(),
+				modelDefaults: () => ({
+					project: store.getState().models,
+					account: account.getState().models,
+				}),
 				editScript: (ops) => applyRefineOps(editor, ops),
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
@@ -123,6 +133,21 @@ export function useAgentTools() {
 						projectId,
 					);
 				},
+				setElementResult: (id, url) => {
+					const [element] = requireElement(editor, id);
+					if (!isUploadable(element))
+						throw new Error(
+							`${id} is a ${element.type} element and can't take a file.`,
+						);
+					return commitUploaded(
+						queue,
+						buildNode(element, buildContext()),
+						uploadKindOf(element),
+						url,
+					);
+				},
+				viewMedia: async ({ kind, url }) =>
+					resultView(await uploadedResult(kind, url)),
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);

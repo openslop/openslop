@@ -3,6 +3,7 @@ import type {
 	LanguageModelV3CallOptions,
 	LanguageModelV3StreamPart,
 } from "@ai-sdk/provider";
+import { generateText, type ModelMessage } from "ai";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 
 const { createAnthropic } = vi.hoisted(() => ({ createAnthropic: vi.fn() }));
@@ -328,5 +329,60 @@ describe("agentModel", () => {
 		expect(agent.cachedPrefix).toEqual({
 			anthropic: { cacheControl: { type: "ephemeral" } },
 		});
+	});
+
+	it("sends only the pictures of the latest look", async () => {
+		respondWith("ok");
+		const lookAt = (index: number): ModelMessage[] => [
+			{
+				role: "assistant",
+				content: [
+					{
+						type: "tool-call",
+						toolCallId: `v${index}`,
+						toolName: "view_result",
+						input: {},
+					},
+				],
+			},
+			{
+				role: "tool",
+				content: [
+					{
+						type: "tool-result",
+						toolCallId: `v${index}`,
+						toolName: "view_result",
+						output: {
+							type: "content",
+							value: [
+								{
+									type: "file",
+									mediaType: "image",
+									data: {
+										type: "url",
+										url: new URL(`https://cdn.test/${index}.png`),
+									},
+								},
+							],
+						},
+					},
+				],
+			},
+		];
+		const { model: agentModel } = new AnthropicLLM("test-key").agentModel(
+			MODEL_ID,
+		);
+
+		await generateText({
+			model: agentModel,
+			messages: [
+				{ role: "user", content: "look at all of them" },
+				...Array.from({ length: 3 }, (_look, index) => lookAt(index)).flat(),
+			],
+		});
+		const sent = JSON.stringify(calls.at(-1)?.prompt);
+
+		expect(sent.match(/"type":"file"/g)).toHaveLength(1);
+		expect(sent).toContain("https://cdn.test/2.png");
 	});
 });

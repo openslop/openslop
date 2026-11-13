@@ -48,6 +48,13 @@ async function pictures(result: AssetResult): Promise<ResultView["pictures"]> {
 	}));
 }
 
+/** Browser only. What a stored result shows the model: its pictures, length and words. */
+export const resultView = async (result: AssetResult): Promise<ResultView> => ({
+	durationSec: result.durationSec,
+	pictures: await pictures(result),
+	words: result.textTimestamps ?? [],
+});
+
 export async function elementResult(
 	element: CanvasElement,
 	snapshot: ElementSnapshot,
@@ -78,12 +85,5 @@ export async function elementResult(
 			reason: compact([NO_RESULT[state], detail]).join(": "),
 		};
 	}
-	return {
-		ok: true,
-		view: {
-			durationSec: result.durationSec,
-			pictures: await pictures(result),
-			words: result.textTimestamps ?? [],
-		},
-	};
+	return { ok: true, view: await resultView(result) };
 }

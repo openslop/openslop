@@ -144,7 +144,6 @@ describe("pruneTranscript", () => {
 		state: "output-available",
 		input: { id: "img1" },
 		output: {
-			id: "img1",
 			durationSec: 0,
 			pictures: [{ url: "https://cdn.test/cat.png" }],
 			words: [],

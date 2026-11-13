@@ -133,8 +133,8 @@ export const isToggleOn = (value: string | undefined): boolean =>
 
 export const SCENE_TYPE = "scene" as const;
 
-/** What every element type declares: the connector it generates on, if any. */
-type ElementSpec = { connector?: AssetConnectorType };
+/** What every element type declares: the connector it generates on and the kind it makes, if any. */
+type ElementSpec = { connector?: AssetConnectorType; outputKind?: ResultKind };
 
 /** What the Media panel makes outside any scene, each on its own draft. */
 export const MEDIA_CONTENT_TYPES = [
@@ -170,7 +170,7 @@ const MEDIA_DRAFT_SPECS = Object.fromEntries(
 
 /** Tiles ahead of the scenes; one with a connector generates like content does. */
 export const ASSET_TYPES = {
-	asset_avatar: { connector: "image" },
+	asset_avatar: { connector: "image", outputKind: "image" },
 	asset_voice: { connector: "voice" },
 	asset_style: {},
 	asset_references: {},
@@ -211,6 +211,16 @@ export function connectorOf(type: GeneratedType): AssetConnectorType;
 export function connectorOf(type: ElementType): AssetConnectorType | undefined;
 export function connectorOf(type: ElementType) {
 	return ELEMENT_TYPES[type].connector;
+}
+
+export type OutputType = {
+	[T in ElementType]: Specs[T] extends { outputKind: ResultKind } ? T : never;
+}[ElementType];
+
+/** The kind of media a type makes. */
+export function outputKindOf(type: OutputType): ResultKind;
+export function outputKindOf(type: ElementType) {
+	return ELEMENT_TYPES[type].outputKind;
 }
 
 export const isGenerated = (
