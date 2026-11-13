@@ -40,10 +40,18 @@ const impersonate = createPublicQueryRouteHandler({
 	},
 });
 
+const LOOPBACK_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
+
+// Browsers set both headers, so a rebound DNS name or another site's page can't pass.
+const fromThisMachine = (request: NextRequest) =>
+	LOOPBACK_HOSTS.includes(
+		new URL(`http://${request.headers.get("host")}`).hostname,
+	) && request.headers.get("sec-fetch-site") === "same-origin";
+
 // Signs the caller in as an existing user with no email delivery, against
 // whichever Supabase project the environment points at — production included.
 export async function GET(request: NextRequest) {
-	if (process.env.NODE_ENV === "production")
+	if (process.env.NODE_ENV === "production" || !fromThisMachine(request))
 		return new NextResponse(null, { status: 404 });
 
 	return impersonate(request);
