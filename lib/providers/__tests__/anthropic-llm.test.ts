@@ -331,7 +331,7 @@ describe("agentModel", () => {
 		});
 	});
 
-	it("sends only the pictures of the latest look", async () => {
+	it("drops the oldest pictures a batch at a time past 20", async () => {
 		respondWith("ok");
 		const lookAt = (index: number): ModelMessage[] => [
 			{
@@ -377,12 +377,13 @@ describe("agentModel", () => {
 			model: agentModel,
 			messages: [
 				{ role: "user", content: "look at all of them" },
-				...Array.from({ length: 3 }, (_look, index) => lookAt(index)).flat(),
+				...Array.from({ length: 21 }, (_look, index) => lookAt(index)).flat(),
 			],
 		});
 		const sent = JSON.stringify(calls.at(-1)?.prompt);
 
-		expect(sent.match(/"type":"file"/g)).toHaveLength(1);
-		expect(sent).toContain("https://cdn.test/2.png");
+		expect(sent.match(/"type":"file"/g)).toHaveLength(11);
+		expect(sent).not.toContain("https://cdn.test/9.png");
+		expect(sent).toContain("https://cdn.test/20.png");
 	});
 });
