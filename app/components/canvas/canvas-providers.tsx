@@ -21,7 +21,6 @@ import { MediaPanelProvider } from "./media/media-panel-context";
 import { AssetEditProvider } from "./elements/character/asset-edit-provider";
 import { useEditorSession } from "./hooks/use-editor-session";
 import { useProjectHistoryHotkeys } from "./project-history-keymap";
-import { useResetTrimOnNewResult } from "./hooks/use-reset-trim-on-new-result";
 
 const CanvasScopedProviders = composeProviders(
 	WorkspaceProvider,
@@ -49,7 +48,6 @@ const CanvasScopedProviders = composeProviders(
 export function CanvasProviders({ children }: { children: ReactNode }) {
 	const { editor, onDocumentChange, history } = useEditorSession();
 	useProjectHistoryHotkeys(editor);
-	useResetTrimOnNewResult(editor);
 
 	return (
 		<Slate
