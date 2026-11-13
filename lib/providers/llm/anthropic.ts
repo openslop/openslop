@@ -24,7 +24,7 @@ import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
-import { keepLatestPictures } from "./latest-pictures";
+import { keepNewestPictures } from "./newest-pictures";
 
 /** A refusal mid-stream arrives as the API's error object, not an Error. */
 const StreamFailure = z.object({ message: z.string() });
@@ -108,10 +108,12 @@ const thinking = (effort: ThinkingLevel) => ({
 });
 
 // The API refuses pictures over 3000px once one request holds more than 20.
-const latestPictures = {
+const PICTURES = { limit: 20, batch: 10 };
+
+const newestPictures = {
 	transformParams: async ({ params }) => ({
 		...params,
-		prompt: keepLatestPictures(params.prompt),
+		prompt: keepNewestPictures(params.prompt, PICTURES),
 	}),
 } satisfies LanguageModelMiddleware;
 
@@ -137,7 +139,7 @@ export class AnthropicLLM implements LLMProvider {
 		return {
 			model: wrapLanguageModel({
 				model: this.model(modelId),
-				middleware: latestPictures,
+				middleware: newestPictures,
 			}),
 			modelId,
 			providerOptions: {

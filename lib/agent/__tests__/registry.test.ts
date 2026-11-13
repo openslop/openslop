@@ -239,33 +239,44 @@ describe("executeToolCall", () => {
 		expect(outcome.ok).toBe(false);
 	});
 
-	it("view_media shows a library file under its name", async () => {
+	it("view_media shows each library file under its name", async () => {
 		const cat = {
 			name: "cat",
 			kind: "image",
 			url: "https://blob/cat.png",
 		} as const;
-		const viewMedia = vi.fn(async () => ({
+		const dog = { ...cat, name: "dog", url: "https://blob/dog.png" };
+		const viewMedia = vi.fn(async ({ url }: { url: string }) => ({
 			durationSec: 0,
-			pictures: [{ url: cat.url }],
+			pictures: [{ url }],
 			words: [],
 		}));
 		const outcome = await executeToolCall(
-			{ toolName: "view_media", input: { url: cat.url } },
+			{ toolName: "view_media", input: { urls: [cat.url, dog.url] } },
 			context({
-				readProject: () => ({ ...project(), media: [cat] }),
+				readProject: () => ({ ...project(), media: [cat, dog] }),
 				viewMedia,
 			}),
 		);
 
 		expect(viewMedia).toHaveBeenCalledWith(cat);
+		expect(viewMedia).toHaveBeenCalledWith(dog);
 		expect(outcome).toEqual({
 			ok: true,
-			output: {
-				durationSec: 0,
-				pictures: [{ url: cat.url }],
-				words: [],
-			},
+			output: [
+				{
+					name: "cat",
+					durationSec: 0,
+					pictures: [{ url: cat.url }],
+					words: [],
+				},
+				{
+					name: "dog",
+					durationSec: 0,
+					pictures: [{ url: dog.url }],
+					words: [],
+				},
+			],
 		});
 	});
 
