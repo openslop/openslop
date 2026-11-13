@@ -17,15 +17,17 @@ export const adaptScript = defineTool({
 	  character cues where they are. Nothing is invented either: the conversion adds visuals,
 	  sound and music around their words, never new dialogue or prose.
 
-	  Pass the script through EXACTLY as they gave it. Never summarize, rewrite or shorten it,
+	  During adaptation, pass the script through EXACTLY as they gave it. Never summarize, rewrite or shorten it,
 	  however long it is. When you cannot tell where the script starts, keep the text rather than cut it.
 
 	  Everything else in the message is still theirs, so place it:
 	  - what they said about the look, mood, pacing or delivery goes in 'notes'
 	  - a setting they stated outright has its own tool: set_title, update_script_settings,
 	    update_video_settings, or edit_script for a character, a voice or the art style
-	  - an instruction about the text itself ("make this shorter") is carried out with
-	    edit_script after this call, not by editing what you pass in
+	  - after adapting, read the script. If the user asks to change or shorten the text,
+	    use edit_script after this call, not by changing what you pass into adaptation
+	  - if the user explicitly chose a length budget and the script exceeds it,
+	    use edit_script to shorten it to that budget
 	`,
 	input: z.object({
 		script: z

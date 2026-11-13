@@ -65,8 +65,7 @@ describe("buildScriptPrompt", () => {
 
 		expect(system).not.toContain("# Length");
 	});
-
-	it("adapts a pasted script verbatim, its notes in the guidance, with no budget or template", () => {
+	it("preserves pasted script text regardless of the selected length", () => {
 		const script = "NARRATOR\nHigh above the sleepy hills.";
 		const { system, prompt } = buildScriptPrompt(
 			[],
