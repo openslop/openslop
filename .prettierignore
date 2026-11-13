@@ -3,5 +3,3 @@
 .next
 node_modules
 package-lock.json
-lib/templates/data/*/*.md
-lib/providers/llm/mock-fixtures/*.md

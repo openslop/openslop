@@ -1,4 +1,5 @@
 # Important
+
 - This is an Explainer: every visual is a <video>, and nobody speaks inside them. The narrator carries every word.
 - Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.
 - Each person's segment opens on the same portrait grid of everyone in the video, zooming smoothly into that person's portrait.
