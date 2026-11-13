@@ -74,7 +74,13 @@ describe("script review opt-in", () => {
 			typeof description === "string" ? description.replace(/\s+/g, " ") : "";
 
 		expect(systemPrompt).toContain(
-			"after write_script or adapt_script, ask whether they want a review and finish the turn",
+			"If the user explicitly asks for a review, call review_script",
+		);
+		expect(systemPrompt).toContain(
+			"After adapt_script, read the resulting script",
+		);
+		expect(systemPrompt).toContain(
+			"use edit_script to shorten it while preserving its core meaning",
 		);
 		expect(systemPrompt).toContain(
 			"Do not call review_script until they say yes or ask for one",

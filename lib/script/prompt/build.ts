@@ -27,7 +27,6 @@ function promptParts(
 		return {
 			guidance: compact([
 				formatSection(settings),
-				lengthSection(settings),
 				ADAPT_SCRIPT_RULES,
 				source.notes && notesSection(source.notes),
 			]),
