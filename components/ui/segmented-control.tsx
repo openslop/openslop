@@ -1,6 +1,7 @@
 "use client";
 
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
+import { onOptionChange } from "@/components/ui/option-change";
 import { cn } from "@/lib/utils";
 
 export type SegmentedControlOption<T extends string> = {
@@ -32,12 +33,7 @@ export function SegmentedControl<T extends string>({
 			type="single"
 			aria-label={ariaLabel}
 			value={value}
-			// Radix clears the value when the active segment is pressed again; a
-			// segmented control always keeps one selected.
-			onValueChange={(next) => {
-				const picked = options.find((option) => option.value === next);
-				if (picked) onChange(picked.value);
-			}}
+			onValueChange={onOptionChange(options, onChange)}
 			className={cn(
 				"inline-flex w-fit items-center gap-1 rounded-lg bg-surface-recessed p-1",
 				className,
