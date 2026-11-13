@@ -65,8 +65,7 @@ describe("buildScriptPrompt", () => {
 
 		expect(system).not.toContain("# Length");
 	});
-
-	it("adapts a pasted script verbatim, its notes in the guidance, with no budget or template", () => {
+	it("adapts a pasted script with the selected length, its notes, and no template", () => {
 		const script = "NARRATOR\nHigh above the sleepy hills.";
 		const { system, prompt } = buildScriptPrompt(
 			[],
@@ -78,7 +77,8 @@ describe("buildScriptPrompt", () => {
 		expect(system).toContain("script-to-XML converter");
 		expect(system).toContain("never change, add or cut dialogue or prose");
 		expect(system).toContain("warm and slow, lots of wide shots");
-		expect(system).not.toContain("# Length");
+		expect(system).toContain("# Length");
+		expect(system).toContain("Write 180 to 540 words of dialogue");
 		expect(system).not.toContain(getTemplate(template.id).systemPrompt);
 	});
 
