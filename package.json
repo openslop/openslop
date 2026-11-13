@@ -78,6 +78,7 @@
 		"react-colorful": "^5.8.0",
 		"react-dom": "19.2.3",
 		"remotion": "4.0.481",
+		"sharp": "^0.35.5",
 		"slate": "^0.123.0",
 		"slate-history": "^0.113.1",
 		"slate-react": "^0.123.0",

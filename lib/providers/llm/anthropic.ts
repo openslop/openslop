@@ -20,11 +20,12 @@ import {
 	DEFAULT_THINKING_LEVEL,
 	type ThinkingLevel,
 } from "@/lib/connectors/llm/enums";
+import { hostedPicture } from "../hosted-picture";
 import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
-import { keepNewestPictures } from "./newest-pictures";
+import { mapPictureUrls, pictures } from "./prompt-pictures";
 
 /** A refusal mid-stream arrives as the API's error object, not an Error. */
 const StreamFailure = z.object({ message: z.string() });
@@ -108,13 +109,19 @@ const thinking = (effort: ThinkingLevel) => ({
 });
 
 // The API refuses pictures over 3000px once one request holds more than 20.
-const PICTURES = { limit: 20, batch: 10 };
+const MANY_PICTURES = 20;
+const MANY_PICTURES_MAX_EDGE = 3000;
 
-const newestPictures = {
-	transformParams: async ({ params }) => ({
-		...params,
-		prompt: keepNewestPictures(params.prompt, PICTURES),
-	}),
+const fitManyPictures = {
+	transformParams: async ({ params }) =>
+		pictures(params.prompt).length <= MANY_PICTURES
+			? params
+			: {
+					...params,
+					prompt: await mapPictureUrls(params.prompt, (url) =>
+						hostedPicture("anthropic", url, MANY_PICTURES_MAX_EDGE),
+					),
+				},
 } satisfies LanguageModelMiddleware;
 
 export class AnthropicLLM implements LLMProvider {
@@ -139,7 +146,7 @@ export class AnthropicLLM implements LLMProvider {
 		return {
 			model: wrapLanguageModel({
 				model: this.model(modelId),
-				middleware: newestPictures,
+				middleware: fitManyPictures,
 			}),
 			modelId,
 			providerOptions: {

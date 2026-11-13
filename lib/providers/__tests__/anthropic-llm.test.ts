@@ -9,6 +9,10 @@ import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 const { createAnthropic } = vi.hoisted(() => ({ createAnthropic: vi.fn() }));
 
 vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
+vi.mock("../hosted-picture", () => ({
+	hostedPicture: async (_provider: string, url: URL) =>
+		new URL(url.href.replace("cdn.test", "small.test")),
+}));
 
 import { AnthropicLLM } from "../llm/anthropic";
 
@@ -331,7 +335,10 @@ describe("agentModel", () => {
 		});
 	});
 
-	it("drops the oldest pictures a batch at a time past 20", async () => {
+	it.each([
+		[20, "cdn.test"],
+		[21, "small.test"],
+	])("sends %i pictures from %s", async (count, host) => {
 		respondWith("ok");
 		const lookAt = (index: number): ModelMessage[] => [
 			{
@@ -377,13 +384,13 @@ describe("agentModel", () => {
 			model: agentModel,
 			messages: [
 				{ role: "user", content: "look at all of them" },
-				...Array.from({ length: 21 }, (_look, index) => lookAt(index)).flat(),
+				...Array.from({ length: count }, (_look, index) =>
+					lookAt(index),
+				).flat(),
 			],
 		});
 		const sent = JSON.stringify(calls.at(-1)?.prompt);
 
-		expect(sent.match(/"type":"file"/g)).toHaveLength(11);
-		expect(sent).not.toContain("https://cdn.test/9.png");
-		expect(sent).toContain("https://cdn.test/20.png");
+		expect(sent.match(new RegExp(`https://${host}/`, "g"))).toHaveLength(count);
 	});
 });
