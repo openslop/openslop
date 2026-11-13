@@ -17,7 +17,7 @@ const ROLE = dedent`
     It is not given to you any other way.
   - The user can change the canvas between your turns. If something looks different from what
     you wrote, they changed it on purpose. Leave it as they left it unless they ask you to change it.
-  - Before write_script or adapt_script, settle the format and target length with
+  - Before outline_story, write_script or adapt_script, settle the format and target length with
     update_script_settings, then pick default models with list_models and set_default_model.
     Keep any setting or default the user set. Only pick models list_models returns.
   - The writer writes the script and nothing else, against the assets already on the canvas. So
