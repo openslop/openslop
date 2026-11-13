@@ -24,6 +24,7 @@ import {
 	type AspectRatio,
 	type MediaResolution,
 } from "@/lib/project/aspect-ratio";
+import { fromKeys } from "@/lib/utils";
 
 /**
  * Every model each connector type offers, by the provider serving it.
@@ -194,7 +195,5 @@ export function differsFromRecommended(models: ConnectorModels): boolean {
 export function resolveDefaultModels(
 	defaults: ModelDefaults = {},
 ): ConnectorModels {
-	return Object.fromEntries(
-		CONNECTOR_TYPES.map((type) => [type, defaultModelFor(type, defaults)]),
-	);
+	return fromKeys(CONNECTOR_TYPES, (type) => defaultModelFor(type, defaults));
 }

@@ -71,7 +71,7 @@ export const TEMPLATES = z
 	]);
 
 const TEMPLATE_MAP = new Map<string | undefined, Template>(
-	TEMPLATES.map((t) => [t.id, t]),
+	TEMPLATES.map((template) => [template.id, template]),
 );
 
 /** Lookup for a stored id, where a miss is a template that has left the catalog. */

@@ -25,20 +25,20 @@ function AddMediaPickerButton({
 	...props
 }: ComponentProps<typeof Button> & { kind: UploadKind }) {
 	const uploading = useMediaPickerUploading();
-	const shown = uploading ? `Uploading ${kind}…` : `Add ${kind}`;
+	const label = uploading ? `Uploading ${kind}…` : `Add ${kind}`;
 	return (
 		<Button
 			type="button"
 			variant="ghost"
 			size="sm"
-			tooltip={shown}
+			tooltip={label}
 			disabled={disabled || uploading}
 			onMouseDown={keepFocus}
 			className={cn("shrink-0", className)}
 			{...props}
 		>
 			{uploading ? <Spinner /> : <Plus aria-hidden="true" />}
-			<span className="hidden sm:inline">{shown}</span>
+			<span className="hidden sm:inline">{label}</span>
 		</Button>
 	);
 }
