@@ -90,6 +90,24 @@ describe("StartFramePicker", () => {
 		});
 	});
 
+	it("moves the choice with the arrow keys", async () => {
+		openPicker("none", PICTURE);
+		act(() => tile("None")?.focus());
+
+		await act(async () => {
+			tile("None")?.dispatchEvent(
+				new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+			);
+			await new Promise((resolve) => setTimeout(resolve));
+		});
+
+		expect(document.activeElement).toBe(tile("Previous scene"));
+		const [video] = findElementById(canvas.editor, "v1") ?? [];
+		expect(video && flatAttributes(video)).toMatchObject({
+			startFrame: "previous",
+		});
+	});
+
 	it("opens the uploaded picture full size without choosing it", async () => {
 		openPicker("previous", PICTURE);
 
