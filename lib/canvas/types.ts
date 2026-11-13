@@ -4,6 +4,7 @@ import type { ReactEditor } from "slate-react";
 import { z } from "zod";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { AssetConnectorType } from "@/lib/connectors/types";
+import { keysOf } from "@/lib/utils";
 
 export type ResultKind = "image" | "video" | "audio";
 
@@ -81,7 +82,7 @@ export const isSpeechType = (type: ContentType): boolean =>
 export const isCaptionable = (type: ContentType): boolean =>
 	captionSourceOf(type) !== undefined;
 
-const ALL_CONTENT_TYPES = Object.keys(CONTENT_TYPES) as ContentType[];
+const ALL_CONTENT_TYPES = keysOf(CONTENT_TYPES);
 
 export const NON_SPEECH_TYPES = ALL_CONTENT_TYPES.filter(
 	(type) => !isSpeechType(type),
@@ -227,11 +228,9 @@ export const isGenerated = (
 	element: CanvasElement,
 ): element is GeneratedElement => connectorOf(element.type) !== undefined;
 
-export const ElementTypeSchema = z.enum(
-	Object.keys(ELEMENT_TYPES) as ElementType[],
-);
+export const ElementTypeSchema = z.enum(keysOf(ELEMENT_TYPES));
 
-export const AssetTypeSchema = z.enum(Object.keys(ASSET_TYPES) as AssetType[]);
+export const AssetTypeSchema = z.enum(keysOf(ASSET_TYPES));
 
 export type CanvasEditor = BaseEditor &
 	HistoryEditor &

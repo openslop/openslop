@@ -48,9 +48,9 @@ export const VOICE_TRAITS = [
 export function voiceTraitEntries(
 	voice: z.infer<typeof voiceTraitsSchema>,
 ): [string, string][] {
-	return VOICE_TRAITS.flatMap((trait) => {
+	return VOICE_TRAITS.flatMap((trait): [string, string][] => {
 		const value = voice[trait];
-		return value ? [[trait, value] as [string, string]] : [];
+		return value ? [[trait, value]] : [];
 	});
 }
 

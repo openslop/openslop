@@ -40,12 +40,12 @@ function failed(error: unknown): unknown {
 	);
 }
 
-const SUPPORTED_IMAGE_MEDIA_TYPES = [
+const SUPPORTED_IMAGE_MEDIA_TYPES: readonly string[] = [
 	"image/jpeg",
 	"image/png",
 	"image/gif",
 	"image/webp",
-] as const;
+];
 
 function toImagePart(image: string): FilePart {
 	const source = parseImageSource(image);
@@ -57,11 +57,7 @@ function toImagePart(image: string): FilePart {
 	if (source.kind === "url") {
 		return { type: "file", mediaType: "image/*", data: new URL(source.url) };
 	}
-	if (
-		!(SUPPORTED_IMAGE_MEDIA_TYPES as readonly string[]).includes(
-			source.mediaType,
-		)
-	) {
+	if (!SUPPORTED_IMAGE_MEDIA_TYPES.includes(source.mediaType)) {
 		throw new Error(
 			`Anthropic reference image media type "${source.mediaType}" is not supported; expected one of ${SUPPORTED_IMAGE_MEDIA_TYPES.join(", ")}`,
 		);

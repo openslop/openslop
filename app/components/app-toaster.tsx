@@ -4,12 +4,12 @@ import type { CSSProperties } from "react";
 import { Toaster } from "sonner";
 import { useTheme } from "next-themes";
 
-const popoverSurface = {
+const popoverSurface: CSSProperties = {
 	"--normal-bg": "var(--popover)",
 	"--normal-border": "var(--border)",
 	"--normal-text": "var(--popover-foreground)",
 	"--border-radius": "var(--radius-xl)",
-} as CSSProperties;
+};
 
 export function AppToaster() {
 	const { resolvedTheme } = useTheme();

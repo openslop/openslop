@@ -60,7 +60,7 @@ const eslintConfig = defineConfig([
 			"@next/next/no-page-custom-font": "off",
 			// Allow unused vars prefixed with _
 			"@typescript-eslint/no-unused-vars": [
-				"warn",
+				"error",
 				{ argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
 			],
 			"@typescript-eslint/no-non-null-assertion": "error",

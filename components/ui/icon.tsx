@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, CSSProperties } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -33,13 +33,11 @@ export function MaskedIcon({
 		<span
 			aria-hidden="true"
 			className={cn("icon", className)}
-			style={
-				{
-					fontSize: typeof size === "number" ? `${size}px` : size,
-					...style,
-					"--icon-mask": mask,
-				} as CSSProperties
-			}
+			style={{
+				fontSize: typeof size === "number" ? `${size}px` : size,
+				...style,
+				"--icon-mask": mask,
+			}}
 			{...props}
 		/>
 	);

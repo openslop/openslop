@@ -18,6 +18,7 @@ import { AnimateButton } from "./animate-button";
 import { CharacterSwitcher } from "./character-switcher";
 import { ElementCaptionsButton } from "./element-captions-button";
 import { ElementVoiceButton } from "./element-voice-button";
+import { fromKeys, keysOf } from "@/lib/utils";
 
 type ElementControl = ComponentType<{
 	element: ContentElement;
@@ -98,11 +99,9 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 	},
 };
 
-export const ELEMENT_CONFIGS = Object.fromEntries(
-	(Object.keys(CONTENT_TYPES) as ContentType[]).map((type) => [
-		type,
-		{ type, ...CONTENT_TYPES[type], ...PRESENTATION[type] },
-	]),
-) as Record<ContentType, ElementConfig>;
+export const ELEMENT_CONFIGS: Record<ContentType, ElementConfig> = fromKeys(
+	keysOf(CONTENT_TYPES),
+	(type) => ({ type, ...CONTENT_TYPES[type], ...PRESENTATION[type] }),
+);
 
 export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);

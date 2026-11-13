@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { AudioPlayer } from "../audio-player";
 import { useElementGeneration } from "../element-generation-context";
@@ -64,7 +64,7 @@ export function AudioPlaceholder({
 	return (
 		<div
 			className="group relative h-16 w-full overflow-hidden rounded-lg border border-border bg-muted"
-			style={{ "--cancel-offset": "calc(50% - 0.75rem)" } as CSSProperties}
+			style={{ "--cancel-offset": "calc(50% - 0.75rem)" }}
 		>
 			<div className="absolute inset-0 blur-[6px]" aria-hidden="true">
 				<div className="absolute inset-0" style={mask}>

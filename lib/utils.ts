@@ -41,3 +41,13 @@ export function clamp(n: number, min: number, max: number) {
 export function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/** `Object.keys` that keeps the key type, for records whose keys are fixed in code. */
+export const keysOf = <K extends string>(record: Record<K, unknown>): K[] =>
+	Object.keys(record) as K[];
+
+export const fromKeys = <K extends string, V>(
+	keys: readonly K[],
+	value: (key: K) => V,
+): Record<K, V> =>
+	Object.fromEntries(keys.map((key) => [key, value(key)])) as Record<K, V>;
