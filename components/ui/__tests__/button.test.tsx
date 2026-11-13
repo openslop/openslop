@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Button } from "../button";
+import { Button, buttonVariants } from "../button";
 
 const classesOf = (node: React.ReactElement) => {
 	const match = renderToStaticMarkup(node).match(/class="([^"]*)"/);
@@ -17,5 +17,11 @@ describe("Button sizes", () => {
 	it("2xs sits below xs on the scale", () => {
 		expect(classesOf(<Button size="2xs">Connect</Button>)).toContain("h-5");
 		expect(classesOf(<Button size="xs">Connect</Button>)).toContain("h-6");
+	});
+
+	it("xs draws the icon set at 12px, so callers never size it", () => {
+		expect(buttonVariants({ size: "xs" }).split(" ")).toContain(
+			"[&_.icon]:size-3",
+		);
 	});
 });
