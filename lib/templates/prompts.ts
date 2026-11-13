@@ -47,12 +47,12 @@ const data: Record<string, unknown> = {
 	},
 };
 
-const PROMPTS = new Map(
+const PROMPTS = new Map<string | undefined, TemplatePrompt>(
 	TEMPLATES.map(({ id }) => [id, promptSchema.parse(data[id])]),
 );
 
 export function getTemplatePromptById(
 	id: string | undefined,
 ): TemplatePrompt | undefined {
-	return id === undefined ? undefined : PROMPTS.get(id);
+	return PROMPTS.get(id);
 }

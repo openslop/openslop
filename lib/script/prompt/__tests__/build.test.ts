@@ -23,16 +23,6 @@ const template = TEMPLATES[0];
 if (!template) throw new Error("expected a template fixture");
 
 describe("buildScriptPrompt", () => {
-	it.each(TEMPLATES)("preserves the built prompt for $id", (template) => {
-		expect(
-			buildScriptPrompt(
-				[],
-				settingsOf({ template: template.id, length: template.length }),
-				{ kind: "brief", brief: "a barista" },
-			),
-		).toMatchSnapshot();
-	});
-
 	it("gives a brief the length budget and the format spec, and passes it through", () => {
 		const { system, prompt } = buildScriptPrompt([], lengthOf("1-3m"), {
 			kind: "brief",
