@@ -20,16 +20,16 @@ import {
 	DEFAULT_THINKING_LEVEL,
 	type ThinkingLevel,
 } from "@/lib/connectors/llm/enums";
-import { hostedPicture } from "../hosted-picture";
+import { resizedImage } from "../resized-image";
 import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
 import {
-	keepNewestPictures,
-	mapPictureUrls,
-	pictures,
-} from "./prompt-pictures";
+	keepNewestImages,
+	replaceImageUrls,
+	toolResultImages,
+} from "./tool-result-images";
 
 /** A refusal mid-stream arrives as the API's error object, not an Error. */
 const StreamFailure = z.object({ message: z.string() });
@@ -112,34 +112,33 @@ const thinking = (effort: ThinkingLevel) => ({
 	effort,
 });
 
-// The API refuses pictures over 3000px once one request holds more than 20.
-const MANY_PICTURES = 20;
-const MANY_PICTURES_MAX_EDGE = 3000;
-
-/** The API caps pictures per request by context window. */
-const MAX_PICTURES: Record<ModelId, number> = {
+/** The API's cap on images per request, set by the model's context window. */
+const MAX_IMAGES_PER_REQUEST: Record<ModelId, number> = {
 	"claude-opus-5": 600,
 	"claude-sonnet-5": 600,
 	"claude-haiku-4-5-20251001": 100,
 };
-const PICTURES_DROPPED_AT_ONCE = 10;
+const IMAGES_DROPPED_PER_BATCH = 10;
 
-const fitPictures = (modelId: string) => {
-	const limit = MAX_PICTURES[modelId as ModelId];
-	if (!limit)
-		throw new Error(`No picture limit for Anthropic model "${modelId}"`);
+// Past this many images in one request, the API refuses any over MAX_IMAGE_EDGE_PX.
+const MAX_FULL_SIZE_IMAGES = 20;
+const MAX_IMAGE_EDGE_PX = 3000;
+
+const fitImageLimits = (modelId: string) => {
+	const max = MAX_IMAGES_PER_REQUEST[modelId as ModelId];
+	if (!max) throw new Error(`No image limit for Anthropic model "${modelId}"`);
 	return {
 		transformParams: async ({ params }) => {
-			const prompt = keepNewestPictures(params.prompt, {
-				limit,
-				batch: PICTURES_DROPPED_AT_ONCE,
+			const prompt = keepNewestImages(params.prompt, {
+				max,
+				batchSize: IMAGES_DROPPED_PER_BATCH,
 			});
-			if (pictures(prompt).length <= MANY_PICTURES)
+			if (toolResultImages(prompt).length <= MAX_FULL_SIZE_IMAGES)
 				return { ...params, prompt };
 			return {
 				...params,
-				prompt: await mapPictureUrls(prompt, (url) =>
-					hostedPicture("anthropic", url, MANY_PICTURES_MAX_EDGE),
+				prompt: await replaceImageUrls(prompt, (url) =>
+					resizedImage("anthropic", url, MAX_IMAGE_EDGE_PX),
 				),
 			};
 		},
@@ -168,7 +167,7 @@ export class AnthropicLLM implements LLMProvider {
 		return {
 			model: wrapLanguageModel({
 				model: this.model(modelId),
-				middleware: fitPictures(modelId),
+				middleware: fitImageLimits(modelId),
 			}),
 			modelId,
 			providerOptions: {

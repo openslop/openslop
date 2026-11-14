@@ -1,6 +1,6 @@
 import type { LanguageModelV4Prompt } from "@ai-sdk/provider";
 import { describe, expect, it, vi } from "vitest";
-import { keepNewestPictures, mapPictureUrls } from "../llm/prompt-pictures";
+import { keepNewestImages, replaceImageUrls } from "../llm/tool-result-images";
 
 const look = (index: number): LanguageModelV4Prompt[number] => ({
 	role: "tool",
@@ -30,9 +30,9 @@ const look = (index: number): LanguageModelV4Prompt[number] => ({
 const looks = (count: number) =>
 	Array.from({ length: count }, (_look, index) => look(index));
 
-describe("mapPictureUrls", () => {
-	it("swaps every picture's URL and keeps everything else in place", async () => {
-		const mapped = await mapPictureUrls(
+describe("replaceImageUrls", () => {
+	it("swaps every image's URL and keeps everything else in place", async () => {
+		const mapped = await replaceImageUrls(
 			looks(2),
 			async (url) => new URL(url.href.replace("cdn.test", "small.test")),
 		);
@@ -44,32 +44,32 @@ describe("mapPictureUrls", () => {
 		expect(sent).toContain("look 1");
 	});
 
-	it("maps a URL seen twice once", async () => {
+	it("replaces a URL seen twice once", async () => {
 		const map = vi.fn(async (url: URL) => url);
 
-		await mapPictureUrls([look(0), look(0)], map);
+		await replaceImageUrls([look(0), look(0)], map);
 
 		expect(map).toHaveBeenCalledTimes(1);
 	});
 });
 
-describe("keepNewestPictures", () => {
-	it("keeps the newest pictures up to the limit and notes the earlier ones", () => {
+describe("keepNewestImages", () => {
+	it("keeps the newest images up to the max and notes the earlier ones", () => {
 		const sent = JSON.stringify(
-			keepNewestPictures(looks(3), { limit: 2, batch: 1 }),
+			keepNewestImages(looks(3), { max: 2, batchSize: 1 }),
 		);
 
 		expect(sent.match(/"type":"file"/g)).toHaveLength(2);
-		expect(sent).toContain("only the newest 2 pictures stay in view");
-		expect(sent).toContain("no more than 2 pictures at a time");
+		expect(sent).toContain("only the newest 2 images stay in view");
+		expect(sent).toContain("no more than 2 images at a time");
 		expect(sent).not.toContain("https://cdn.test/0.png");
 		expect(sent).toContain("https://cdn.test/2.png");
 		expect(sent).toContain("look 0");
 	});
 
-	it("drops a whole batch at a time so the kept pictures change less often", () => {
+	it("drops a whole batch at a time so the kept images change less often", () => {
 		const sent = JSON.stringify(
-			keepNewestPictures(looks(4), { limit: 3, batch: 2 }),
+			keepNewestImages(looks(4), { max: 3, batchSize: 2 }),
 		);
 
 		expect(sent.match(/"type":"file"/g)).toHaveLength(2);
@@ -77,9 +77,9 @@ describe("keepNewestPictures", () => {
 		expect(sent).toContain("https://cdn.test/2.png");
 	});
 
-	it("leaves a prompt under the limit as it is", () => {
+	it("leaves a prompt under the max as it is", () => {
 		const prompt = looks(3);
 
-		expect(keepNewestPictures(prompt, { limit: 20, batch: 10 })).toBe(prompt);
+		expect(keepNewestImages(prompt, { max: 20, batchSize: 10 })).toBe(prompt);
 	});
 });

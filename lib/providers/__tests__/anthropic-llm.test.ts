@@ -9,8 +9,8 @@ import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 const { createAnthropic } = vi.hoisted(() => ({ createAnthropic: vi.fn() }));
 
 vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
-vi.mock("../hosted-picture", () => ({
-	hostedPicture: async (_provider: string, url: URL) =>
+vi.mock("../resized-image", () => ({
+	resizedImage: async (_provider: string, url: URL) =>
 		new URL(url.href.replace("cdn.test", "small.test")),
 }));
 
@@ -390,13 +390,13 @@ describe("agentModel", () => {
 	it.each([
 		[20, "cdn.test"],
 		[21, "small.test"],
-	])("sends %i pictures from %s", async (count, host) => {
+	])("sends %i images from %s", async (count, host) => {
 		const sent = await sendLooks(MODEL_ID, count);
 
 		expect(sent.match(new RegExp(`https://${host}/`, "g"))).toHaveLength(count);
 	});
 
-	it("drops the oldest pictures a batch at a time past the model's limit", async () => {
+	it("drops the oldest images a batch at a time past the model's limit", async () => {
 		const sent = await sendLooks("claude-haiku-4-5-20251001", 101);
 
 		expect(sent.match(/"type":"file"/g)).toHaveLength(91);

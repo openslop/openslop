@@ -46,7 +46,7 @@ describe("elementResult", () => {
 			ok: true,
 			view: {
 				durationSec: 0,
-				pictures: [{ url: wolf }],
+				images: [{ url: wolf }],
 				words: [],
 			},
 		});
@@ -59,7 +59,7 @@ describe("elementResult", () => {
 			elementResult(references(...urls), snapshot()),
 		).resolves.toMatchObject({
 			ok: true,
-			view: { pictures: urls.map((url) => ({ url })) },
+			view: { images: urls.map((url) => ({ url })) },
 		});
 	});
 
@@ -73,7 +73,7 @@ describe("elementResult", () => {
 			ok: true,
 			view: {
 				durationSec: 6,
-				pictures: [
+				images: [
 					{ url: "https://img/first.jpg", at: 0 },
 					{ url: "https://img/middle.jpg", at: 3 },
 					{ url: "https://img/last.jpg", at: 6 },
@@ -107,7 +107,7 @@ describe("elementResult", () => {
 			ok: true,
 			view: {
 				durationSec: 1.2,
-				pictures: [],
+				images: [],
 				words: words ?? [],
 			},
 		});

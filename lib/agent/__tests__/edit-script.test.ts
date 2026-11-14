@@ -39,7 +39,7 @@ describe("edit_script", () => {
 		const { description } = editScript.spec;
 		expect(description).toContain("- character: name, emotion");
 		expect(description).toContain(
-			"startFrame is none, previous or a picture URL",
+			"startFrame is none, previous or an image URL",
 		);
 	});
 

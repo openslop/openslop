@@ -1,14 +1,14 @@
 import sharp from "sharp";
 import { describe, expect, it, vi } from "vitest";
 import type { BundleFileData } from "@/lib/api/asset-bundle";
-import { hostedPicture } from "../hosted-picture";
+import { resizedImage } from "../resized-image";
 import { spyAssetBundle } from "./_asset-bundle";
 
 const { load, upload } = spyAssetBundle();
 
 const ours = new URL("https://assets.test/assets/upload/user/a/photo.png");
 
-const servePicture = async (width: number, height: number) => {
+const serveImage = async (width: number, height: number) => {
 	const png = await sharp({
 		create: { width, height, channels: 3, background: "#808080" },
 	})
@@ -25,22 +25,22 @@ const uploadedSize = async () => {
 	return { width, height };
 };
 
-describe("hostedPicture", () => {
+describe("resizedImage", () => {
 	it("hosts a copy that fits the edge, keeping the aspect", async () => {
-		await servePicture(4000, 1000);
+		await serveImage(4000, 1000);
 
-		const url = await hostedPicture("anthropic", ours, 3000);
+		const url = await resizedImage("anthropic", ours, 3000);
 
 		expect(await uploadedSize()).toEqual({ width: 3000, height: 750 });
 		expect(url.href).toMatch(
-			/^https:\/\/assets\.test\/assets\/picture\/anthropic\/[0-9a-f]{64}\/picture\.webp$/,
+			/^https:\/\/assets\.test\/assets\/resized-image\/anthropic\/[0-9a-f]{64}\/image\.webp$/,
 		);
 	});
 
-	it("never enlarges a small picture", async () => {
-		await servePicture(400, 300);
+	it("never enlarges a small image", async () => {
+		await serveImage(400, 300);
 
-		await hostedPicture("anthropic", ours, 3000);
+		await resizedImage("anthropic", ours, 3000);
 
 		expect(await uploadedSize()).toEqual({ width: 400, height: 300 });
 	});
@@ -48,20 +48,20 @@ describe("hostedPicture", () => {
 	it("reuses a copy already made", async () => {
 		load.mockResolvedValue({
 			id: "made",
-			type: "picture",
+			type: "resized-image",
 			provider: "anthropic",
-			result: { picture: "picture.webp" },
+			result: { image: "image.webp" },
 		});
 
-		const url = await hostedPicture("anthropic", ours, 3000);
+		const url = await resizedImage("anthropic", ours, 3000);
 
 		expect(upload).not.toHaveBeenCalled();
 		expect(url.href).toBe(
-			"https://assets.test/assets/picture/anthropic/made/picture.webp",
+			"https://assets.test/assets/resized-image/anthropic/made/image.webp",
 		);
 	});
 
-	it("shrinks a picture given inline as a data URI", async () => {
+	it("resizes an image given inline as a data URI", async () => {
 		const png = await sharp({
 			create: { width: 4000, height: 1000, channels: 3, background: "#808080" },
 		})
@@ -69,15 +69,15 @@ describe("hostedPicture", () => {
 			.toBuffer();
 		const inline = new URL(`data:image/png;base64,${png.toString("base64")}`);
 
-		await hostedPicture("anthropic", inline, 3000);
+		await resizedImage("anthropic", inline, 3000);
 
 		expect(await uploadedSize()).toEqual({ width: 3000, height: 750 });
 	});
 
-	it("leaves a picture we don't host as it is", async () => {
+	it("leaves an image we don't host as it is", async () => {
 		const elsewhere = new URL("https://elsewhere.test/photo.png");
 
-		expect(await hostedPicture("anthropic", elsewhere, 3000)).toBe(elsewhere);
+		expect(await resizedImage("anthropic", elsewhere, 3000)).toBe(elsewhere);
 		expect(load).not.toHaveBeenCalled();
 	});
 });
