@@ -138,6 +138,7 @@ export const Minutes3 = icon("minutes-3");
 export const MoreHorizontal = icon("more-horizontal");
 export const MoreVertical = icon("more-vertical");
 export const Mic = icon("mic");
+export const MicOff = icon("mic-off");
 export const Monitor = icon("monitor");
 export const Motion = icon("motion");
 export const MonitorOff = icon("monitor-off");

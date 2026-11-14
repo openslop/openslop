@@ -1,3 +1,4 @@
+import { isToggleOn } from "@/lib/canvas/types";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
 import { audioPromptCache } from "../cache";
@@ -30,6 +31,8 @@ export class ElevenLabsMusic
 	}
 
 	override generate(params: MusicRequest) {
+		// The cache matches on prompt similarity alone, so it can't tell a sung track from an instrumental.
+		if (isToggleOn(params.lyrics)) return super.generate(params);
 		return cache.readThrough(params, () => super.generate(params));
 	}
 
@@ -42,7 +45,7 @@ export class ElevenLabsMusic
 					: undefined,
 			modelId: params.model as "music_v1",
 			outputFormat: toElevenLabsOutputFormat(this.outputFormat),
-			forceInstrumental: true,
+			forceInstrumental: !isToggleOn(params.lyrics),
 		});
 	}
 }

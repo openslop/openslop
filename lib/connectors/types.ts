@@ -218,6 +218,7 @@ export interface LLMConnector extends Connector {
 
 export type MusicGenerateParams = ConnectorGenerateParams & {
 	durationSeconds?: number;
+	lyrics?: string;
 };
 
 export type SFXGenerateParams = ConnectorGenerateParams & {

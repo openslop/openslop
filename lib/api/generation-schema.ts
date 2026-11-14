@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TOGGLE_OFF, TOGGLE_ON } from "@/lib/canvas/types";
 import { IMAGE_FORMATS } from "@/lib/connectors/image/enums";
 import { THINKING_LEVELS } from "@/lib/connectors/llm/enums";
 import { hasModel, listModels } from "@/lib/connectors/models";
@@ -99,6 +100,11 @@ export const TTS_FIELDS = {
 } as const;
 
 export const AUDIO_FIELDS = optionalDurationSeconds;
+
+export const MUSIC_FIELDS = {
+	...AUDIO_FIELDS,
+	lyrics: z.enum([TOGGLE_OFF, TOGGLE_ON]).optional(),
+} as const;
 
 /** Speech to text reads its media alone, so it takes no prompt. */
 export const STT_FIELDS = {

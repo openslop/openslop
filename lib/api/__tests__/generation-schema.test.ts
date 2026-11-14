@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { AssetBundle } from "../asset-bundle";
 import {
+	AUDIO_FIELDS,
 	bodySchema,
 	byokModel,
 	hostedModel,
 	LLM_FIELDS,
+	MUSIC_FIELDS,
 	STT_FIELDS,
 	VIDEO_FIELDS,
 } from "../generation-schema";
@@ -147,6 +149,33 @@ describe("video fields", () => {
 			video({ characterAssets: [{ name: "Sol", voice }] }).error?.issues[0]
 				?.message,
 		).toBe("A character voice must be a file in our store");
+	});
+});
+
+describe("music and SFX fields", () => {
+	const music = (lyrics: unknown) =>
+		bodySchema(hostedModel("music"), MUSIC_FIELDS).safeParse({
+			prompt: "a ballad about the sea",
+			model: "Eleven Music v1",
+			lyrics,
+		});
+
+	it.each(["true", "false"])("takes lyrics %j on music", (lyrics) => {
+		expect(music(lyrics).data?.lyrics).toBe(lyrics);
+	});
+
+	it.each(["yes", true])("refuses lyrics %j on music", (lyrics) => {
+		expect(music(lyrics).success).toBe(false);
+	});
+
+	it("drops lyrics from an SFX request", () => {
+		const sfx = bodySchema(hostedModel("sfx"), AUDIO_FIELDS).parse({
+			prompt: "a door slams",
+			model: "Eleven Text to Sound v2",
+			lyrics: "true",
+		});
+
+		expect(sfx).not.toHaveProperty("lyrics");
 	});
 });
 
