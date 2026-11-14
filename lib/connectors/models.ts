@@ -24,6 +24,7 @@ import {
 	type AspectRatio,
 	type MediaResolution,
 } from "@/lib/project/aspect-ratio";
+import { fromKeys } from "@/lib/utils";
 
 /**
  * Every model each connector type offers, by the provider serving it.
@@ -145,6 +146,8 @@ export type ModelDefaults = {
 
 export type ModelSource = "element" | "project" | "account" | "recommended";
 
+export type DefaultSource = Exclude<ModelSource, "element">;
+
 export function defaultModelFor(
 	type: ConnectorType,
 	defaults: ModelDefaults = {},
@@ -164,6 +167,13 @@ export function modelSourceFor(
 	defaults: ModelDefaults = {},
 ): ModelSource {
 	if (!sameModel(model, defaultModelFor(type, defaults))) return "element";
+	return defaultSourceFor(type, defaults);
+}
+
+export function defaultSourceFor(
+	type: ConnectorType,
+	defaults: ModelDefaults = {},
+): DefaultSource {
 	if (hasModel(type, defaults.project?.[type])) return "project";
 	if (hasModel(type, defaults.account?.[type])) return "account";
 	return "recommended";
@@ -185,7 +195,5 @@ export function differsFromRecommended(models: ConnectorModels): boolean {
 export function resolveDefaultModels(
 	defaults: ModelDefaults = {},
 ): ConnectorModels {
-	return Object.fromEntries(
-		CONNECTOR_TYPES.map((type) => [type, defaultModelFor(type, defaults)]),
-	);
+	return fromKeys(CONNECTOR_TYPES, (type) => defaultModelFor(type, defaults));
 }

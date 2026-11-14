@@ -869,47 +869,6 @@ describe("GenerationQueue", () => {
 		});
 	});
 
-	describe("new results", () => {
-		let newResult: Mock<(elementId: string) => void>;
-		const image = { imageUrl: "a.png", durationSec: 0 };
-
-		beforeEach(() => {
-			newResult = vi.fn();
-			generationQueue.onNewResult(newResult);
-		});
-
-		it("announces a generated, uploaded or restored result", async () => {
-			generateMock.mockResolvedValue(image);
-			generationQueue.enqueueGraph([makeJob("r1")]);
-			await vi.runAllTimersAsync();
-			generationQueue.commitResult(makeJob("r2"), image, { pinned: true });
-			generationQueue.restoreResult({
-				elementId: "r3",
-				elementType: "image",
-				connectorType: "image",
-				inputs: inputsFor("p"),
-				result: image,
-				pinned: false,
-			});
-
-			expect(newResult.mock.calls.flat()).toEqual(["r1", "r2", "r3"]);
-		});
-
-		it("stays quiet when a result is only revised", async () => {
-			generateMock.mockResolvedValue(image);
-			generationQueue.enqueueGraph([makeJob("r1")]);
-			await vi.runAllTimersAsync();
-			newResult.mockClear();
-
-			generationQueue.reviseResult({ id: "r1", type: "image" }, (current) => ({
-				...current,
-				imageUrl: "b.png",
-			}));
-
-			expect(newResult).not.toHaveBeenCalled();
-		});
-	});
-
 	describe("snapshot", () => {
 		const idleEntry = {
 			status: "idle" as const,

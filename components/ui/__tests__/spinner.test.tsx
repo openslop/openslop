@@ -4,10 +4,11 @@ import { ICON_SIZES } from "../icon-button";
 import { Spinner } from "../spinner";
 
 describe("Spinner", () => {
-	it("announces itself as loading", () => {
+	it("stays out of the name of the control it sits in, like every icon", () => {
 		const html = renderToStaticMarkup(<Spinner />);
-		expect(html).toContain('role="status"');
-		expect(html).toContain('aria-label="Loading"');
+		expect(html).toContain('aria-hidden="true"');
+		expect(html).not.toContain("role=");
+		expect(html).not.toContain("aria-label");
 	});
 
 	it("is an icon at 16 by default", () => {

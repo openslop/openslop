@@ -60,7 +60,7 @@ function CanvasVersionRow({
 						size="sm"
 						onClick={onRestore}
 					>
-						<RotateCcw aria-hidden="true" />
+						<RotateCcw />
 						Restore
 					</Button>
 				)}
@@ -72,7 +72,7 @@ function CanvasVersionRow({
 						onClick={onView}
 						className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
 					>
-						<Eye aria-hidden="true" />
+						<Eye />
 						View
 					</Button>
 				)}
@@ -107,7 +107,7 @@ export function CanvasHistoryPanel() {
 					role="alert"
 					className="flex items-center gap-1.5 text-label-xs text-destructive"
 				>
-					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
+					<AlertCircle className="h-3.5 w-3.5" />
 					Could not load history.
 				</p>
 				<Button

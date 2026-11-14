@@ -5,7 +5,7 @@ import { BLOB_BASE_URL } from "../blob";
 const httpError = (response: Response, label: string) =>
 	new Error(`${label} (${response.status} ${response.statusText})`);
 
-async function fetchOk(url: string, key: string): Promise<Response> {
+export async function fetchOk(url: string, key: string): Promise<Response> {
 	const response = await fetch(url);
 	if (!response.ok) throw httpError(response, `Failed to fetch "${key}"`);
 	return response;

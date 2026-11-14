@@ -46,7 +46,7 @@ function KeyStatusBadge({ status }: { status: KeyStatus }) {
 	const { variant, Icon, label } = KEY_STATUS[status];
 	return (
 		<Badge variant={variant}>
-			<Icon aria-hidden="true" />
+			<Icon />
 			{label}
 		</Badge>
 	);

@@ -22,10 +22,11 @@ import { Pencil } from "@/components/ui/icon";
 import { conjunction, plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
-/** Attributes Sloppy can write by hand: those limited to a list of options, and free text. */
+/** Attributes Sloppy can write by hand: a list of options, a count of seconds, and free text. */
 const describeAttribute = ({ key, edit }: AttributeDef): string[] => {
 	if (edit?.kind === "enum" || edit?.kind === "toggle")
 		return [`${key} (${edit.value.options.join(" | ")})`];
+	if (edit?.kind === "seconds") return [`${key} (seconds)`];
 	return edit?.kind === "text" ? [key] : [];
 };
 
@@ -51,7 +52,7 @@ const ASSETS = dedent`
 	  character does, and has no avatar.
 	- asset_style: the art style every visual is drawn in, as its text: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
-	- asset_references: the pictures every visual is drawn after. The user uploads these.
+	- asset_references: the images every visual is drawn after. The user uploads these.
 	- asset_media_<type>: the user's Media panel drafts. Ignore them for now.
 `;
 
@@ -82,7 +83,7 @@ export const editScript = defineTool({
 	  Attributes by type:
 	  ${ATTRIBUTES_BY_TYPE}
 
-	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or a picture URL: a picture's URL from
+	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or an image URL: an image's or frame's URL from
 	  view_result. Leave a URL already set alone.
 
 	  The attributes above work with every model. Some models have extra attributes of their own;

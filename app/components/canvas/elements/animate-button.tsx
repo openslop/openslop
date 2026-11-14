@@ -37,7 +37,7 @@ export function AnimateButton({ element }: { element: ContentElement }) {
 				);
 			}}
 		>
-			<MagicVideo aria-hidden="true" />
+			<MagicVideo />
 			<span className="hidden @sm:inline">Animate</span>
 		</Button>
 	);

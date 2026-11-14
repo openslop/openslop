@@ -45,7 +45,7 @@ export default function TemplateGallery({
 								<span className="truncate text-body font-semibold text-foreground">
 									{template.showcase.title}
 								</span>
-								<ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+								<ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
 							</span>
 							<span className="mt-1 line-clamp-2 text-label text-muted-foreground">
 								{template.showcase.description}

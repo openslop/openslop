@@ -36,7 +36,7 @@ export function CanvasVersionBanner() {
 		<div role="status">
 			{previewId && (
 				<div className="mx-2 mt-3 mb-2 flex items-center justify-center gap-2 rounded-md bg-caution-soft px-3 py-1.5 text-center text-caution-soft-foreground">
-					<History className="size-4 shrink-0" />
+					<History className="size-4" />
 					<p className="text-label leading-5 font-medium">
 						{version
 							? `Viewing an older version from ${relativeTime(version.updatedAt)}.`

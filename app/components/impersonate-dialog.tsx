@@ -65,7 +65,7 @@ function ImpersonateDialogBody() {
 				</DialogHeader>
 
 				<p className="flex gap-2 rounded-md bg-caution-soft p-3 text-label-xs text-caution-soft-foreground">
-					<AlertCircle className="mt-0.5 shrink-0" />
+					<AlertCircle className="mt-0.5" />
 					<span>
 						Any changes you make as this user are written to production.
 					</span>

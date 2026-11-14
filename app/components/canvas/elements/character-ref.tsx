@@ -99,7 +99,7 @@ function UnknownCharacter({ name }: { name: string }) {
 	return (
 		<SimpleTooltip label={`No character named ${name}`}>
 			<Badge variant="caution" size="inline" className="group/chip relative">
-				<AlertTriangle aria-hidden="true" />
+				<AlertTriangle />
 				<span className="sr-only">Unknown character: </span>
 				<span className="min-w-0 self-baseline truncate">{name}</span>
 				{!readOnly && <CreateCharacterButton name={name} />}

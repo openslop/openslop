@@ -61,7 +61,8 @@ export function MediaViewerDialog({
 				// The first button is a tooltip trigger, which would take the first Escape.
 				onOpenAutoFocus={(event) => {
 					event.preventDefault();
-					(event.currentTarget as HTMLElement).focus();
+					if (event.currentTarget instanceof HTMLElement)
+						event.currentTarget.focus();
 				}}
 				showCloseButton={false}
 				className="max-w-4xl gap-2"

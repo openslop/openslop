@@ -114,7 +114,7 @@ export function VoiceRow({
 							{tag}
 						</Badge>
 					))}
-					{selected && <Check className="h-3 w-3 shrink-0 text-accent" />}
+					{selected && <Check className="h-3 w-3 text-accent" />}
 				</span>
 				{voice.description && (
 					<span className="truncate text-label text-muted-foreground">

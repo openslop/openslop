@@ -46,7 +46,7 @@ function SuggestionButton({
 			onClick={onPick}
 			className={inlineControlClassName}
 		>
-			<Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+			<Lightbulb className="h-3.5 w-3.5" />
 		</button>
 	);
 }

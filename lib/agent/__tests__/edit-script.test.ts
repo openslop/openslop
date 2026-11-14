@@ -35,11 +35,17 @@ describe("edit_script", () => {
 		expect(editScript.spec.description).toContain("continuity (false | true)");
 	});
 
+	it("offers trim points in seconds", () => {
+		expect(editScript.spec.description).toMatch(
+			/- video: .*trimStart \(seconds\), trimEnd \(seconds\)/,
+		);
+	});
+
 	it("teaches a character line's name and a video's start frame", () => {
 		const { description } = editScript.spec;
 		expect(description).toContain("- character: name, emotion");
 		expect(description).toContain(
-			"startFrame is none, previous or a picture URL",
+			"startFrame is none, previous or an image URL",
 		);
 	});
 

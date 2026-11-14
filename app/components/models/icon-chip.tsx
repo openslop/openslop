@@ -14,7 +14,7 @@ export function IconChip({
 	return (
 		<SimpleTooltip label={label}>
 			<Badge size="icon" className="text-foreground">
-				<Icon aria-hidden="true" className={iconClassName} />
+				<Icon className={iconClassName} />
 				<span className="sr-only">{label}</span>
 			</Badge>
 		</SimpleTooltip>

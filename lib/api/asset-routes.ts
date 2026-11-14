@@ -13,6 +13,7 @@ import {
 import { failIfExpired } from "./job-deadline";
 import {
 	AUDIO_FIELDS,
+	MUSIC_FIELDS,
 	bodySchema,
 	IMAGE_FIELDS,
 	STT_FIELDS,
@@ -33,7 +34,7 @@ const ASSET_ROUTES: Record<
 	image: { fields: IMAGE_FIELDS, label: "Image generation" },
 	video: { fields: VIDEO_FIELDS, label: "Video submission" },
 	tts: { fields: TTS_FIELDS, label: "TTS generation" },
-	music: { fields: AUDIO_FIELDS, label: "Music generation" },
+	music: { fields: MUSIC_FIELDS, label: "Music generation" },
 	sfx: { fields: AUDIO_FIELDS, label: "SFX generation" },
 	stt: { fields: STT_FIELDS, label: "Speech to text" },
 };

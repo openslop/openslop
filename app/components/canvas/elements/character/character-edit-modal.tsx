@@ -16,7 +16,7 @@ import {
 } from "../generate-button";
 import { ElementHistoryPopover } from "../element-history-popover";
 import { ResetEditsButton } from "../reset-edits-button";
-import { AddImageButton } from "../element-media-picker";
+import { AddMediaButton } from "../element-media-picker";
 import { OutputPreview } from "../output-preview";
 import { AssetDialog } from "./asset-dialog";
 import { deleteCharacter } from "../delete-asset";
@@ -88,7 +88,7 @@ export function CharacterEditModal({
 							<div className="flex items-center justify-end gap-2">
 								<ElementStaleIndicator />
 								<ResetEditsButton />
-								<AddImageButton />
+								<AddMediaButton />
 								<ElementGenerateButton />
 							</div>
 						</div>

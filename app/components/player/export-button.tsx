@@ -47,7 +47,7 @@ export function ExportButton() {
 					aria-label="Export"
 					disabled={disabled}
 				>
-					<Download aria-hidden="true" />
+					<Download />
 					<span className="hidden sm:inline">Export</span>
 				</Button>
 			</PopoverTrigger>
@@ -89,7 +89,7 @@ export function ExportButton() {
 						</div>
 						<Button asChild variant="generate" size="sm" className="w-full">
 							<a href={state.url} download>
-								<Download aria-hidden="true" />
+								<Download />
 								Download
 							</a>
 						</Button>
@@ -130,7 +130,7 @@ export function ExportButton() {
 							disabled={disabled}
 							className="w-full"
 						>
-							<Download aria-hidden="true" />
+							<Download />
 							Export
 						</Button>
 					</>

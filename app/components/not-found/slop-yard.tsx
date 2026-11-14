@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	useRef,
-	type CSSProperties,
-	type PointerEvent,
-	type ReactNode,
-} from "react";
+import { useRef, type PointerEvent, type ReactNode } from "react";
 import styles from "./slop-yard.module.css";
 import {
 	RegeneratedTwin,
@@ -18,7 +13,7 @@ import {
 
 function Layer({ depth, children }: { depth: number; children: ReactNode }) {
 	return (
-		<g className={styles.layer} style={{ "--depth": depth } as CSSProperties}>
+		<g className={styles.layer} style={{ "--depth": depth }}>
 			{children}
 		</g>
 	);

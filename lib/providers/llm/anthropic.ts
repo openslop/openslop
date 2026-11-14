@@ -4,10 +4,11 @@ import {
 	generateText,
 	streamText,
 	type FilePart,
-	type LanguageModel,
+	type LanguageModelMiddleware,
 	type LanguageModelUsage,
 	type SystemModelMessage,
 	type TextPart,
+	wrapLanguageModel,
 } from "ai";
 import { z } from "zod";
 import type { LLMGenerateResult, LLMStreamChunk } from "@/lib/connectors/types";
@@ -19,10 +20,16 @@ import {
 	DEFAULT_THINKING_LEVEL,
 	type ThinkingLevel,
 } from "@/lib/connectors/llm/enums";
+import { resizedImage } from "../resized-image";
 import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
+import {
+	keepNewestImages,
+	replaceImageUrls,
+	toolResultImages,
+} from "./tool-result-images";
 
 /** A refusal mid-stream arrives as the API's error object, not an Error. */
 const StreamFailure = z.object({ message: z.string() });
@@ -38,12 +45,12 @@ function failed(error: unknown): unknown {
 	);
 }
 
-const SUPPORTED_IMAGE_MEDIA_TYPES = [
+const SUPPORTED_IMAGE_MEDIA_TYPES: readonly string[] = [
 	"image/jpeg",
 	"image/png",
 	"image/gif",
 	"image/webp",
-] as const;
+];
 
 function toImagePart(image: string): FilePart {
 	const source = parseImageSource(image);
@@ -55,11 +62,7 @@ function toImagePart(image: string): FilePart {
 	if (source.kind === "url") {
 		return { type: "file", mediaType: "image/*", data: new URL(source.url) };
 	}
-	if (
-		!(SUPPORTED_IMAGE_MEDIA_TYPES as readonly string[]).includes(
-			source.mediaType,
-		)
-	) {
+	if (!SUPPORTED_IMAGE_MEDIA_TYPES.includes(source.mediaType)) {
 		throw new Error(
 			`Anthropic reference image media type "${source.mediaType}" is not supported; expected one of ${SUPPORTED_IMAGE_MEDIA_TYPES.join(", ")}`,
 		);
@@ -109,6 +112,38 @@ const thinking = (effort: ThinkingLevel) => ({
 	effort,
 });
 
+/** The API's cap on images per request. Models with a 200k-token context window take fewer. */
+const MAX_IMAGES_PER_REQUEST = 600;
+const MAX_IMAGES_PER_REQUEST_BY_MODEL: Partial<Record<string, number>> = {
+	"claude-haiku-4-5-20251001": 100,
+};
+const IMAGES_DROPPED_PER_BATCH = 10;
+
+// Past this many images in one request, the API refuses any over MAX_IMAGE_EDGE_PX.
+const MAX_FULL_SIZE_IMAGES = 20;
+const MAX_IMAGE_EDGE_PX = 3000;
+
+const fitImageLimits = (modelId: string) => {
+	const max =
+		MAX_IMAGES_PER_REQUEST_BY_MODEL[modelId] ?? MAX_IMAGES_PER_REQUEST;
+	return {
+		transformParams: async ({ params }) => {
+			const prompt = keepNewestImages(params.prompt, {
+				max,
+				batchSize: IMAGES_DROPPED_PER_BATCH,
+			});
+			if (toolResultImages(prompt).length <= MAX_FULL_SIZE_IMAGES)
+				return { ...params, prompt };
+			return {
+				...params,
+				prompt: await replaceImageUrls(prompt, (url) =>
+					resizedImage("anthropic", url, MAX_IMAGE_EDGE_PX),
+				),
+			};
+		},
+	} satisfies LanguageModelMiddleware;
+};
+
 export class AnthropicLLM implements LLMProvider {
 	constructor(private readonly apiKey: string) {}
 
@@ -122,14 +157,17 @@ export class AnthropicLLM implements LLMProvider {
 		});
 	}
 
-	private model(modelId: string): LanguageModel {
+	private model(modelId: string) {
 		return createAnthropic({ apiKey: this.apiKey })(modelId);
 	}
 
 	/** Caching the last block too keeps a turn's transcript warm across its round trips. */
 	agentModel(modelId: string): AgentModel {
 		return {
-			model: this.model(modelId),
+			model: wrapLanguageModel({
+				model: this.model(modelId),
+				middleware: fitImageLimits(modelId),
+			}),
 			modelId,
 			providerOptions: {
 				anthropic: { ...thinking(DEFAULT_THINKING_LEVEL), ...CACHED },

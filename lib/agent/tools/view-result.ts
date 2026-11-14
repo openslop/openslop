@@ -5,29 +5,24 @@ import { FRAME_KEYS, frameNames } from "@/lib/connectors/video/start-frame";
 import { ResultViewSchema, type ResultView } from "../element-result";
 import { defineTool, imageOutput, seconds } from "./define-tool";
 
-const picture = ({ url, at }: ResultView["pictures"][number]) =>
-	at === undefined ? `picture: ${url}` : `frame at ${seconds(at)}: ${url}`;
+const image = ({ url, at }: ResultView["images"][number]) =>
+	at === undefined ? `image: ${url}` : `frame at ${seconds(at)}: ${url}`;
 
 const word = ({ text, startMs, endMs }: ResultView["words"][number]) =>
 	`[${seconds(startMs / 1000)}-${seconds(endMs / 1000)}] ${text}`;
 
 /** What the model is about to see, URL by URL, then every word with its time. */
-export const describeResult = ({
-	id,
-	durationSec,
-	pictures,
-	words,
-}: ResultView & { id: string }) =>
+export const describeResult = ({ durationSec, images, words }: ResultView) =>
 	[
-		`${id}${durationSec > 0 ? `, ${seconds(durationSec)} long` : ""}:`,
-		...pictures.map(picture),
+		...(durationSec > 0 ? [`${seconds(durationSec)} long`] : []),
+		...images.map(image),
 		...words.map(word),
 	].join("\n");
 
 export const viewResult = defineTool({
 	description: dedent`
 	  Look at what an element holds, generated or uploaded, so you can say whether a result
-	  matches what its text asks for. Pictures come back as the images themselves. A video
+	  matches what its text asks for. An image comes back as itself. A video
 	  comes back as frames from its ${frameNames(FRAME_KEYS)}, each with its time, and its
 	  length. A voice line, sound or music comes back as its length, with every word and when
 	  it is said where there are words. Take the id from read_script.
@@ -38,14 +33,12 @@ export const viewResult = defineTool({
 			.min(1)
 			.describe("The element's id, exactly as read_script gives it."),
 	}),
-	output: ResultViewSchema.extend({ id: z.string() }),
+	output: ResultViewSchema,
 	icon: Eye,
-	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a result"),
 	toModelOutput: ({ output }) =>
-		imageOutput(
-			describeResult(output),
-			...output.pictures.map(({ url }) => url),
-		),
+		imageOutput(describeResult(output), ...output.images.map(({ url }) => url)),
+	snapshot: true,
+	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a result"),
 	execute: async ({ id }, ctx) => {
 		const result = await ctx.elementResult(id);
 		if (!result)
@@ -56,7 +49,6 @@ export const viewResult = defineTool({
 			throw new Error(
 				`${id} ${result.reason}, so there is nothing to look at.`,
 			);
-		return { id, ...result.view };
+		return result.view;
 	},
-	snapshot: true,
 });

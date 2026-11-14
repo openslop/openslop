@@ -31,7 +31,7 @@ export function Disclosure({
 				aria-controls={bodyId}
 				className="flex items-center gap-1.5 self-start rounded-md px-1 py-0.5 text-left text-label-xs text-muted-foreground transition-colors hover:text-foreground focus-ring"
 			>
-				<Chevron className="h-3 w-3 shrink-0" aria-hidden="true" />
+				<Chevron className="h-3 w-3" />
 				{icon}
 				<span className={pending ? "shimmer" : undefined}>{label}</span>
 			</button>

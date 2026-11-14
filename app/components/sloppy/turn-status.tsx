@@ -32,7 +32,7 @@ export function WorkingStatus({ status }: { status: string }) {
 export function WorkedStatus({ seconds }: { seconds: number | undefined }) {
 	return (
 		<StatusRow>
-			<Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
+			<Sparkles className="h-3 w-3" />
 			<span>{seconds === undefined ? "Worked" : `Worked for ${seconds}s`}</span>
 		</StatusRow>
 	);

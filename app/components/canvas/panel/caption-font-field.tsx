@@ -47,7 +47,7 @@ export function CaptionFontField({
 					<span style={{ fontFamily: captionFontStack(value) }}>
 						{captionFontLabel(value)}
 					</span>
-					<ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+					<ChevronDown className="h-4 w-4 text-muted-foreground" />
 				</PopoverTrigger>
 			</SimpleTooltip>
 			<PopoverContent
@@ -79,7 +79,7 @@ export function CaptionFontField({
 									{captionFontLabel(font)}
 								</span>
 								{font === value && (
-									<Check className="h-3.5 w-3.5 shrink-0 text-accent" />
+									<Check className="h-3.5 w-3.5 text-accent" />
 								)}
 							</button>
 						</li>

@@ -1,7 +1,7 @@
-import isNil from "lodash/isNil";
+import isString from "lodash/isString";
 import mapValues from "lodash/mapValues";
 import omit from "lodash/omit";
-import omitBy from "lodash/omitBy";
+import pickBy from "lodash/pickBy";
 import round from "lodash/round";
 import { Editor, Element, type NodeEntry, Path, Transforms } from "slate";
 import type { CanvasBlock, CanvasElement } from "./types";
@@ -129,8 +129,7 @@ export type AttributeChanges = Record<string, string | null | undefined>;
 export const withAttrs = (
 	attributes: Record<string, string>,
 	changes: AttributeChanges,
-): Record<string, string> =>
-	omitBy({ ...attributes, ...changes }, isNil) as Record<string, string>;
+): Record<string, string> => pickBy({ ...attributes, ...changes }, isString);
 
 /** Reconciled against the schema the merged attributes name, so a new model drops the old one's attributes. */
 export function mergeAttrs(
@@ -167,15 +166,12 @@ export const setTrimPoint = (
 	sec: number,
 ): void => mergeAttrs(editor, id, { [TRIM_KEYS[edge]]: String(round(sec, 2)) });
 
-/** An element no longer on the canvas has no trim to reset. */
 export function resetTrim(
 	editor: Editor,
 	id: string,
 	edges = BOTH_EDGES,
 ): void {
-	const found = findElementById(editor, id);
-	if (!found) return;
-	const [element, path] = found;
+	const [element, path] = requireElement(editor, id);
 	const layout = element.layoutAttributes ?? {};
 	const keys = edges.map((edge) => TRIM_KEYS[edge]);
 	if (!keys.some((key) => key in layout)) return;

@@ -37,7 +37,6 @@ export class GenerationQueue {
 	private active = new Map<string, ActiveJob>();
 	private readonly limits: ConcurrencyLimits;
 	private readonly committed = createEmitter<CommittedVersion>();
-	private readonly newResult = createEmitter<string>();
 
 	constructor({
 		limits,
@@ -51,8 +50,6 @@ export class GenerationQueue {
 	}
 
 	onCommitted = this.committed.subscribe;
-	/** Generated, uploaded or restored; revising the held result is not new. */
-	onNewResult = this.newResult.subscribe;
 
 	subscribe = (listener: () => void) => this.snapshots.subscribe(listener);
 	getElementSnapshot = (id: string): ElementSnapshot => this.snapshots.get(id);
@@ -155,7 +152,7 @@ export class GenerationQueue {
 		if (!result || !resultInputs || !connectorType)
 			throw new Error("There is nothing here to edit yet");
 		if (isGenerationActive(status)) throw new Error("This is still generating");
-		this.record({
+		this.commit({
 			elementId,
 			elementType,
 			connectorType,
@@ -180,18 +177,12 @@ export class GenerationQueue {
 			pinned,
 		});
 		this.snapshots.notify();
-		this.newResult.notify(elementId);
-	}
-
-	private record(version: CommittedVersion): void {
-		this.snapshots.commit(version);
-		this.snapshots.notify();
-		this.committed.notify(version);
 	}
 
 	private commit(version: CommittedVersion): void {
-		this.record(version);
-		this.newResult.notify(version.elementId);
+		this.snapshots.commit(version);
+		this.snapshots.notify();
+		this.committed.notify(version);
 	}
 
 	private land(id: NodeId, { on, revise }: Landing, result: AssetResult) {

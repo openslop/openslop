@@ -1,5 +1,5 @@
-import isNil from "lodash/isNil";
-import omitBy from "lodash/omitBy";
+import isString from "lodash/isString";
+import pickBy from "lodash/pickBy";
 import uniq from "lodash/uniq";
 import { Editor, Transforms } from "slate";
 import { HistoryEditor } from "slate-history";
@@ -40,7 +40,7 @@ export function setAsset(
 		Transforms.insertNodes(
 			editor,
 			createCanvasElement(type, {
-				attrs: omitBy({ name, ...attrs }, isNil) as Record<string, string>,
+				attrs: pickBy({ name, ...attrs }, isString),
 				text: text?.trim(),
 				defaultModels: editor.defaultModels(),
 			}),

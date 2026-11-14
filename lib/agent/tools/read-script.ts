@@ -20,9 +20,10 @@ export const readScript = defineTool({
 	description: dedent`
 	  Read the project: the canvas as XML with the \`id\` of every element, first the assets,
 	  then the script scene by scene. After it, the project: its title, script
-	  settings (language, target length, format, template) and aspect ratio. Last, where each
-	  generated element stands: ungenerated, queued, generating, generated, stale (and why),
-	  failed (and the error), or uploaded.
+	  settings (language, target length, format, template) and aspect ratio. The template
+	  can't be changed, and write_script follows it. Last, where each generated element
+	  stands: ungenerated, queued, generating, generated, stale (and why), failed (and the
+	  error), or uploaded.
 
 	  Read before your first edit, and again after anything changed the canvas. Ids and text
 	  move when it is edited, so editing from a stale reading fails.

@@ -10,9 +10,5 @@ export const IMAGE_MIME_TYPES: Record<ImageFormat, string> = {
 	webp: "image/webp",
 };
 
-export enum EffectType {
-	smoke = "smoke",
-	rain = "rain",
-	orbs = "orbs",
-	lightning = "lightning",
-}
+export const EFFECT_TYPES = ["smoke", "rain", "orbs", "lightning"] as const;
+export type EffectType = (typeof EFFECT_TYPES)[number];

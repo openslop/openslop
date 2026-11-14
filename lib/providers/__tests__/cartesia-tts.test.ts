@@ -51,7 +51,6 @@ vi.mock("@ai-sdk/openai", () => ({
 }));
 
 import type Cartesia from "@cartesia/cartesia-js";
-import { TTSEmotion } from "@/lib/connectors/tts/enums";
 import { CartesiaTTS, collectVoices } from "../tts/cartesia";
 import { spyAssetBundle } from "./_asset-bundle";
 
@@ -387,7 +386,7 @@ describe("CartesiaTTS", () => {
 				prompt: "test",
 				voiceId: "v1",
 				model: MODEL,
-				emotion: TTSEmotion.Excited,
+				emotion: "excited",
 			});
 
 			expect(mockGenerate).toHaveBeenCalledWith(

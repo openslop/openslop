@@ -10,9 +10,12 @@ import { fitDurations } from "./fit-durations";
 import { generateCaptions } from "./generate-captions";
 import { listModels } from "./list-models";
 import { outlineStory } from "./outline-story";
+import { readMedia } from "./read-media";
 import { readScript } from "./read-script";
+import { viewMedia } from "./view-media";
 import { reviewScript } from "./review-script";
 import { setDefaultModel } from "./set-default-model";
+import { setElementResult } from "./set-element-result";
 import { setTitle } from "./set-title";
 import { updateScriptSettings } from "./update-script-settings";
 import { updateVideoSettings } from "./update-video-settings";
@@ -30,6 +33,9 @@ const TOOLS = {
 	update_video_settings: updateVideoSettings,
 	generate_captions: generateCaptions,
 	view_result: viewResult,
+	read_media: readMedia,
+	view_media: viewMedia,
+	set_element_result: setElementResult,
 	outline_story: outlineStory,
 	estimate_total_length: estimateTotalLength,
 	estimate_dialogue_lengths: estimateDialogueLengths,

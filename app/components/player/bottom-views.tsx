@@ -8,6 +8,7 @@ import {
 import { ToastErrorBoundary } from "../toast-error-boundary";
 import { Storyboard } from "./storyboard/storyboard";
 import { Timeline } from "./timeline/timeline";
+import { keysOf } from "@/lib/utils";
 
 interface BottomViewConfig {
 	label: string;
@@ -49,4 +50,4 @@ export const BOTTOM_VIEWS = {
 
 export type BottomView = keyof typeof BOTTOM_VIEWS;
 
-export const BOTTOM_VIEW_KEYS = Object.keys(BOTTOM_VIEWS) as BottomView[];
+export const BOTTOM_VIEW_KEYS = keysOf(BOTTOM_VIEWS);

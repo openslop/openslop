@@ -320,7 +320,7 @@ describe("a turn that takes more than one step", () => {
 	it("withdraws the tools once the turn has spent its budget", async () => {
 		await runTurn(TEXT_TURN, {
 			message: answered(
-				...Array.from({ length: 30 }, (_part, index) =>
+				...Array.from({ length: 60 }, (_part, index) =>
 					reading(`call-${index}`, "the script"),
 				),
 			),

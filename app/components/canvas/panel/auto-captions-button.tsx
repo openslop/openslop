@@ -52,7 +52,7 @@ export function AutoCaptionsButton() {
 			unavailable={active || pending === 0}
 			onClick={() => generateSTT(uncaptioned(queue))}
 		>
-			<MagicCaptions aria-hidden="true" />
+			<MagicCaptions />
 			Auto captions
 		</Button>
 	);

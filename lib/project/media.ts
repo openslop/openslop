@@ -40,6 +40,12 @@ export function toMediaItems(
 	}));
 }
 
+export function requireMedia(media: MediaItem[], url: string): MediaItem {
+	const item = media.find((candidate) => candidate.url === url);
+	if (!item) throw new Error(`${url} is not in the media library.`);
+	return item;
+}
+
 /** The media of one kind whose name matches the query, best match first; ties newest first. */
 export const findMedia = (
 	media: MediaItem[],

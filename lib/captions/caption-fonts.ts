@@ -1,3 +1,5 @@
+import { keysOf } from "@/lib/utils";
+
 /**
  * The caption faces, self-hosted so the editor preview and the Lambda render
  * draw with the same glyphs. Each entry names a real font family, so one
@@ -90,7 +92,7 @@ export const CAPTION_FONT_SPECS = {
 	},
 } as const satisfies Record<string, CaptionFontSpec>;
 
-export const CAPTION_FONTS = Object.keys(CAPTION_FONT_SPECS) as CaptionFont[];
+export const CAPTION_FONTS = keysOf(CAPTION_FONT_SPECS);
 
 export type CaptionFont = keyof typeof CAPTION_FONT_SPECS;
 

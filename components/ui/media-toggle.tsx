@@ -3,6 +3,7 @@
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
 import type { IconComponent } from "@/components/ui/icon";
 import { ICON_SIZES } from "@/components/ui/icon-button";
+import { onOptionChange } from "@/components/ui/option-change";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -74,9 +75,7 @@ export function MediaToggle<T extends string>({
 			type="single"
 			aria-label={ariaLabel}
 			value={value}
-			// Radix clears the value when the active segment is pressed again; a
-			// segmented control always keeps one selected.
-			onValueChange={(next) => next && onChange(next as T)}
+			onValueChange={onOptionChange(options, onChange)}
 			className={cn(mediaChromePill, className)}
 		>
 			{options.map((option) => (

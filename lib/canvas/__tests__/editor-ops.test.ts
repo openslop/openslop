@@ -368,7 +368,6 @@ describe("resetTrim", () => {
 		const before = editor.children;
 
 		resetTrim(editor, "v1");
-		resetTrim(editor, "gone");
 		resetTrim(editor, "v1", ["start"]);
 
 		expect(editor.children).toBe(before);

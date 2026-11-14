@@ -33,7 +33,7 @@ vi.mock("../../reset-edits-button", () => ({
 	ResetEditsButton: Nothing,
 }));
 vi.mock("../../element-media-picker", () => ({
-	AddImageButton: Nothing,
+	AddMediaButton: Nothing,
 }));
 vi.mock("../../output-preview", () => ({ OutputPreview: Nothing }));
 vi.mock("../../attributes/model-attribute", () => ({

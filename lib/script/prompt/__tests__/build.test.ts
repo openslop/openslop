@@ -219,11 +219,7 @@ describe("buildScriptPrompt", () => {
 		const { system, prompt } = buildScriptPrompt(
 			[],
 			settingsOf({ format: "auto" }),
-			{
-				kind: "adapt",
-				script,
-				notes,
-			},
+			{ kind: "adapt", script, notes },
 		);
 
 		expect(prompt).toBe(script);

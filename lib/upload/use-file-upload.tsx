@@ -106,7 +106,11 @@ export function useFileUpload({
 			setIsDraggingOver(true);
 		},
 		onDragLeave: (e: React.DragEvent) => {
-			if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+			if (
+				e.relatedTarget instanceof Node &&
+				e.currentTarget.contains(e.relatedTarget)
+			)
+				return;
 			setIsDraggingOver(false);
 		},
 		onDrop: (e: React.DragEvent) => {

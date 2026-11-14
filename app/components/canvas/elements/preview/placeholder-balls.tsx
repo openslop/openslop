@@ -40,18 +40,16 @@ function PlaceholderBalls({ generating }: { generating: boolean }) {
 					? loaderStyles.ball
 					: `${loaderStyles.ball} ${loaderStyles.ballStatic}`
 			}
-			style={
-				{
-					"--color": ball.color,
-					"--i": ball.size,
-					"--d": ball.duration,
-					"--x": ball.x,
-					"--y": ball.y,
-					...(!generating && {
-						"--rotation": `${staticRotations[i]}deg`,
-					}),
-				} as React.CSSProperties
-			}
+			style={{
+				"--color": ball.color,
+				"--i": ball.size,
+				"--d": ball.duration,
+				"--x": ball.x,
+				"--y": ball.y,
+				...(!generating && {
+					"--rotation": `${staticRotations[i]}deg`,
+				}),
+			}}
 		/>
 	));
 }

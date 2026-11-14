@@ -185,12 +185,10 @@ export function ScrubBar({
 				SCRUB_BAR_HEIGHT,
 				className,
 			)}
-			style={
-				{
-					"--scrub-pos": value,
-					"--scrub-preview": hoverRatio ?? 0,
-				} as CSSProperties
-			}
+			style={{
+				"--scrub-pos": value,
+				"--scrub-preview": hoverRatio ?? 0,
+			}}
 			{...drag}
 			onPointerMove={onPointerMove}
 			onPointerLeave={onPointerLeave}

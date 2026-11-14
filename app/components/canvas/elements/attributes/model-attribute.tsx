@@ -37,12 +37,7 @@ export function ModelAttribute({
 			value={value}
 			tooltip={`${label} · ${MODEL_PROVENANCE[modelSourceFor(type, value, chain)]}`}
 			footer={<ConfigureModelsItem />}
-			onChange={(next) =>
-				mergeAttrs(editor, element.id, {
-					provider: next.provider,
-					model: next.model,
-				})
-			}
+			onChange={(next) => mergeAttrs(editor, element.id, next)}
 		>
 			{look === "panel" ? (
 				<ModelPanelTrigger model={value} label={label} className={className} />

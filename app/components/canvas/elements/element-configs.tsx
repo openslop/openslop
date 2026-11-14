@@ -16,13 +16,9 @@ import {
 } from "@/lib/canvas/types";
 import { AnimateButton } from "./animate-button";
 import { CharacterSwitcher } from "./character-switcher";
-import {
-	AddAudioButton,
-	AddImageButton,
-	AddVideoButton,
-} from "./element-media-picker";
 import { ElementCaptionsButton } from "./element-captions-button";
 import { ElementVoiceButton } from "./element-voice-button";
+import { fromKeys, keysOf } from "@/lib/utils";
 
 type ElementControl = ComponentType<{
 	element: ContentElement;
@@ -76,7 +72,7 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		iconBgClass: "bg-media-image/15",
 		colorClass: "text-media-image",
 		placeholder: "Describe the image...",
-		actions: [AddImageButton, AnimateButton],
+		actions: [AnimateButton],
 	},
 	video: {
 		label: "Video",
@@ -85,7 +81,6 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		colorClass: "text-media-video",
 		placeholder: "Describe the video...",
 		tools: [ElementCaptionsButton],
-		actions: [AddVideoButton],
 	},
 	sound: {
 		label: "Sound",
@@ -101,15 +96,12 @@ const PRESENTATION: Record<ContentType, ElementPresentation> = {
 		colorClass: "text-media-music",
 		placeholder: "Describe the music...",
 		tools: [ElementCaptionsButton],
-		actions: [AddAudioButton],
 	},
 };
 
-export const ELEMENT_CONFIGS = Object.fromEntries(
-	(Object.keys(CONTENT_TYPES) as ContentType[]).map((type) => [
-		type,
-		{ type, ...CONTENT_TYPES[type], ...PRESENTATION[type] },
-	]),
-) as Record<ContentType, ElementConfig>;
+export const ELEMENT_CONFIGS: Record<ContentType, ElementConfig> = fromKeys(
+	keysOf(CONTENT_TYPES),
+	(type) => ({ type, ...CONTENT_TYPES[type], ...PRESENTATION[type] }),
+);
 
 export const ELEMENT_LIST = Object.values(ELEMENT_CONFIGS);
