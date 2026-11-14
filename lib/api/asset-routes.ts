@@ -22,22 +22,18 @@ import {
 } from "./generation-schema";
 import { withOwnedProject } from "./with-owned-project";
 import { notFound } from "./response";
+import { rowId } from "./request-schema-fields";
 import type { RouteFamily } from "./route-families";
 
-type AssetBody = ModelRef & { projectId?: string } & Record<string, unknown>;
-
 /** What each asset route takes beyond the prompt and model, and how the log names it. */
-const ASSET_ROUTES: Record<
-	JobConnectorType,
-	{ fields: z.ZodRawShape; label: string }
-> = {
+const ASSET_ROUTES = {
 	image: { fields: IMAGE_FIELDS, label: "Image generation" },
 	video: { fields: VIDEO_FIELDS, label: "Video submission" },
 	tts: { fields: TTS_FIELDS, label: "TTS generation" },
 	music: { fields: MUSIC_FIELDS, label: "Music generation" },
 	sfx: { fields: AUDIO_FIELDS, label: "SFX generation" },
 	stt: { fields: STT_FIELDS, label: "Speech to text" },
-};
+} satisfies Record<JobConnectorType, { fields: z.ZodRawShape; label: string }>;
 
 export const createAssetRouteHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,
@@ -45,8 +41,7 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 ) => {
 	const { fields, label } = ASSET_ROUTES[type];
 	return family.createHandler({
-		// Every route's body is this shape; the fields only add optional keys.
-		schema: bodySchema(family.model(type), fields) as z.ZodType<AssetBody>,
+		schema: bodySchema(family.model(type), fields),
 		label,
 		handle: withOwnedProject(async ({ user, input }) => {
 			const { projectId, ...request } = input;
@@ -74,9 +69,7 @@ export const createJobPollHandler = (
 	family: Pick<RouteFamily<ModelRef>, "createParamHandler">,
 ) =>
 	family.createParamHandler({
-		// A malformed id makes Postgres throw on the cast; guid() matches every
-		// shape it accepts, so anything else is a 404 before the query.
-		schema: z.object({ jobId: z.guid() }),
+		schema: z.object({ jobId: rowId }),
 		label: "Job poll",
 		handle: async ({ user, params }) => {
 			const found = await getJob(params.jobId, user.id);
