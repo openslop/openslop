@@ -145,7 +145,7 @@ describe("pruneTranscript", () => {
 		input: { id: "img1" },
 		output: {
 			durationSec: 0,
-			pictures: [{ url: "https://cdn.test/cat.png" }],
+			images: [{ url: "https://cdn.test/cat.png" }],
 			words: [],
 		},
 	};
@@ -223,7 +223,7 @@ describe("pruneTranscript", () => {
 		expect(sent).toContain("Applied 1 operation.");
 	});
 
-	it("keeps a finished turn's look as a look, without the picture", async () => {
+	it("keeps a finished turn's look as a look, without the image", async () => {
 		const looked = turnWith("m2", say("let me see"), look, step, say("cute"));
 		const [, , result] = await modelView([asked, looked, asked]);
 

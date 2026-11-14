@@ -30,7 +30,7 @@ export const viewMedia = defineTool({
 	toModelOutput: ({ output }) =>
 		imageOutput(
 			output.map(describeMedia).join("\n\n"),
-			...output.flatMap(({ pictures }) => pictures.map(({ url }) => url)),
+			...output.flatMap(({ images }) => images.map(({ url }) => url)),
 		),
 	snapshot: true,
 	label: "Looking at the media library",

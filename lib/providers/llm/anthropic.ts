@@ -20,11 +20,16 @@ import {
 	DEFAULT_THINKING_LEVEL,
 	type ThinkingLevel,
 } from "@/lib/connectors/llm/enums";
+import { resizedImage } from "../resized-image";
 import { validateByProbe } from "../validate";
 import type { Priced } from "../base";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider, LLMRequest } from "./base";
-import { keepNewestPictures } from "./newest-pictures";
+import {
+	keepNewestImages,
+	replaceImageUrls,
+	toolResultImages,
+} from "./tool-result-images";
 
 /** A refusal mid-stream arrives as the API's error object, not an Error. */
 const StreamFailure = z.object({ message: z.string() });
@@ -107,15 +112,37 @@ const thinking = (effort: ThinkingLevel) => ({
 	effort,
 });
 
-// The API refuses pictures over 3000px once one request holds more than 20.
-const PICTURES = { limit: 20, batch: 10 };
+/** The API's cap on images per request. Models with a 200k-token context window take fewer. */
+const MAX_IMAGES_PER_REQUEST = 600;
+const MAX_IMAGES_PER_REQUEST_BY_MODEL: Partial<Record<string, number>> = {
+	"claude-haiku-4-5-20251001": 100,
+};
+const IMAGES_DROPPED_PER_BATCH = 10;
 
-const newestPictures = {
-	transformParams: async ({ params }) => ({
-		...params,
-		prompt: keepNewestPictures(params.prompt, PICTURES),
-	}),
-} satisfies LanguageModelMiddleware;
+// Past this many images in one request, the API refuses any over MAX_IMAGE_EDGE_PX.
+const MAX_FULL_SIZE_IMAGES = 20;
+const MAX_IMAGE_EDGE_PX = 3000;
+
+const fitImageLimits = (modelId: string) => {
+	const max =
+		MAX_IMAGES_PER_REQUEST_BY_MODEL[modelId] ?? MAX_IMAGES_PER_REQUEST;
+	return {
+		transformParams: async ({ params }) => {
+			const prompt = keepNewestImages(params.prompt, {
+				max,
+				batchSize: IMAGES_DROPPED_PER_BATCH,
+			});
+			if (toolResultImages(prompt).length <= MAX_FULL_SIZE_IMAGES)
+				return { ...params, prompt };
+			return {
+				...params,
+				prompt: await replaceImageUrls(prompt, (url) =>
+					resizedImage("anthropic", url, MAX_IMAGE_EDGE_PX),
+				),
+			};
+		},
+	} satisfies LanguageModelMiddleware;
+};
 
 export class AnthropicLLM implements LLMProvider {
 	constructor(private readonly apiKey: string) {}
@@ -139,7 +166,7 @@ export class AnthropicLLM implements LLMProvider {
 		return {
 			model: wrapLanguageModel({
 				model: this.model(modelId),
-				middleware: newestPictures,
+				middleware: fitImageLimits(modelId),
 			}),
 			modelId,
 			providerOptions: {

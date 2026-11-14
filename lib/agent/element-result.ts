@@ -10,11 +10,11 @@ import type { ElementSnapshot } from "@/lib/generation/snapshots";
 import { elementState, type ElementState } from "./element-state";
 
 /** `at` is seconds into the video a frame sits; a still has none. */
-const PictureSchema = z.object({ url: z.string(), at: z.number().optional() });
+const ImageSchema = z.object({ url: z.string(), at: z.number().optional() });
 
 export const ResultViewSchema = z.object({
 	durationSec: z.number(),
-	pictures: z.array(PictureSchema),
+	images: z.array(ImageSchema),
 	words: z.array(CaptionSchema),
 });
 
@@ -38,7 +38,9 @@ const holdsMedia = (result: AssetResult) =>
 	ASSET_URL_FIELDS.some((field) => result[field]);
 
 /** Browser only for a video, whose frames are decoded and hosted for the model to fetch. */
-async function pictures(result: AssetResult): Promise<ResultView["pictures"]> {
+async function resultImages(
+	result: AssetResult,
+): Promise<ResultView["images"]> {
 	if (result.imageUrl) return [{ url: result.imageUrl }];
 	if (!result.videoUrl) return [];
 	const urls = await captureFrames(result.videoUrl, FRAME_KEYS);
@@ -48,10 +50,10 @@ async function pictures(result: AssetResult): Promise<ResultView["pictures"]> {
 	}));
 }
 
-/** Browser only. What a stored result shows the model: its pictures, length and words. */
+/** Browser only. What a stored result shows the model: its images, length and words. */
 export const resultView = async (result: AssetResult): Promise<ResultView> => ({
 	durationSec: result.durationSec,
-	pictures: await pictures(result),
+	images: await resultImages(result),
 	words: result.textTimestamps ?? [],
 });
 
@@ -66,7 +68,7 @@ export async function elementResult(
 					ok: true,
 					view: {
 						durationSec: 0,
-						pictures: urls.map((url) => ({ url })),
+						images: urls.map((url) => ({ url })),
 						words: [],
 					},
 				}

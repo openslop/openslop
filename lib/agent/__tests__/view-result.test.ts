@@ -3,21 +3,21 @@ import { toCaption } from "@/lib/captions/word-captions";
 import { describeResult } from "../tools/view-result";
 
 describe("describeResult", () => {
-	it("names a picture by its URL", () => {
+	it("names an image by its URL", () => {
 		expect(
 			describeResult({
 				durationSec: 0,
-				pictures: [{ url: "https://example.com/wolf.jpg" }],
+				images: [{ url: "https://example.com/wolf.jpg" }],
 				words: [],
 			}),
-		).toBe("picture: https://example.com/wolf.jpg");
+		).toBe("image: https://example.com/wolf.jpg");
 	});
 
 	it("gives a video its length and each frame its time", () => {
 		expect(
 			describeResult({
 				durationSec: 6,
-				pictures: [
+				images: [
 					{ url: "https://example.com/first.jpg", at: 0 },
 					{ url: "https://example.com/last.jpg", at: 6 },
 				],
@@ -36,7 +36,7 @@ describe("describeResult", () => {
 		expect(
 			describeResult({
 				durationSec: 1.2,
-				pictures: [],
+				images: [],
 				words: [toCaption("hello", 0, 0.4), toCaption("there", 0.5, 1.1)],
 			}),
 		).toBe(["1.2s long", "[0.0s-0.4s] hello", "[0.5s-1.1s] there"].join("\n"));

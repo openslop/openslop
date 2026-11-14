@@ -66,7 +66,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
 	setElementResult: async () => {},
-	viewMedia: async () => ({ durationSec: 0, pictures: [], words: [] }),
+	viewMedia: async () => ({ durationSec: 0, images: [], words: [] }),
 	...over,
 });
 
@@ -248,7 +248,7 @@ describe("executeToolCall", () => {
 		const dog = { ...cat, name: "dog", url: "https://blob/dog.png" };
 		const viewMedia = vi.fn(async ({ url }: { url: string }) => ({
 			durationSec: 0,
-			pictures: [{ url }],
+			images: [{ url }],
 			words: [],
 		}));
 		const outcome = await executeToolCall(
@@ -267,13 +267,13 @@ describe("executeToolCall", () => {
 				{
 					name: "cat",
 					durationSec: 0,
-					pictures: [{ url: cat.url }],
+					images: [{ url: cat.url }],
 					words: [],
 				},
 				{
 					name: "dog",
 					durationSec: 0,
-					pictures: [{ url: dog.url }],
+					images: [{ url: dog.url }],
 					words: [],
 				},
 			],
@@ -632,7 +632,7 @@ describe("executeToolCall", () => {
 	it("hands over an element's result", async () => {
 		const view = {
 			durationSec: 0,
-			pictures: [{ url: "https://example.com/a.jpg" }],
+			images: [{ url: "https://example.com/a.jpg" }],
 			words: [],
 		};
 		const outcome = await executeToolCall(
