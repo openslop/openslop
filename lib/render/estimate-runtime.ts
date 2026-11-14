@@ -32,20 +32,21 @@ const scriptedSnapshot = (element: ContentElement): ElementSnapshot => ({
 	},
 });
 
-/** The runtime the layout lays down once every element is generated at the length the script sets. */
+/** The runtime the layout lays down once every element is generated at the length the script sets; pinned media keeps its own. */
 export const estimateRuntime = (
 	descendants: Descendant[],
 	settings: BuildLayoutOptions,
+	getSnapshot: (id: string) => ElementSnapshot,
 ): number => {
 	const scenes = descendants.filter(isScene);
-	const snapshots = new Map(
+	const scripted = new Map(
 		scenes
 			.flatMap(({ children }) => children)
 			.map((element) => [element.id, scriptedSnapshot(element)]),
 	);
-	const resolved = resolveElements(
-		scenes,
-		(id) => snapshots.get(id) ?? EMPTY_SNAPSHOT,
-	);
+	const resolved = resolveElements(scenes, (id) => {
+		const held = getSnapshot(id);
+		return held.pinned ? held : (scripted.get(id) ?? EMPTY_SNAPSHOT);
+	});
 	return buildRenderLayout(resolved, settings).totalDurationSec;
 };
