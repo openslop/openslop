@@ -100,7 +100,7 @@ export function ElementPrompt({
 				locked ? (
 					<SimpleTooltip label="Unlock the prompt to regenerate over the upload">
 						<Button variant="secondary" size="xs" onClick={unlock}>
-							<Lock className="size-3" />
+							<Lock />
 							Unlock
 						</Button>
 					</SimpleTooltip>

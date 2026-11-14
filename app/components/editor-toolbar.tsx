@@ -33,7 +33,7 @@ function Breadcrumbs() {
 				<li className="shrink-0">
 					<Button variant="ghost" size="xs" asChild className="font-book">
 						<Link href="/">
-							<Lock className="size-3" />
+							<Lock />
 							Personal
 						</Link>
 					</Button>

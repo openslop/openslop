@@ -25,7 +25,7 @@ export function AttributeTrigger({
 				className="max-w-[140px]"
 			>
 				<span className="min-w-0 truncate">{children}</span>
-				<ChevronDown className="h-3 w-3 text-foreground" />
+				<ChevronDown className="text-foreground" />
 			</Button>
 		</PopoverTrigger>
 	);
