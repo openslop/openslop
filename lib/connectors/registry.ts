@@ -1,10 +1,10 @@
 import {
-	MEDIA_CONTENT_TYPES,
-	mediaDraftTypeOf,
+	draftedType,
+	MEDIA_DRAFT_TYPES,
 	type ContentType,
 	type GeneratedType,
-	type MediaDraftType,
 } from "@/lib/canvas/types";
+import { fromKeys } from "@/lib/utils";
 import { createArtStylePlugin } from "./image/plugins/art-style";
 import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
 import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
@@ -36,9 +36,10 @@ const CONTENT = {
 } satisfies Record<ContentType, ConnectorConfig>;
 
 /** A draft generates on the plugins of the type it drafts. */
-const DRAFTS = Object.fromEntries(
-	MEDIA_CONTENT_TYPES.map((type) => [mediaDraftTypeOf(type), CONTENT[type]]),
-) as Record<MediaDraftType, ConnectorConfig>;
+const DRAFTS = fromKeys(
+	MEDIA_DRAFT_TYPES,
+	(type) => CONTENT[draftedType(type)],
+);
 
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	...CONTENT,
