@@ -404,4 +404,10 @@ describe("agentModel", () => {
 		expect(sent).toContain("small.test/10.png");
 		expect(sent).toContain("small.test/100.png");
 	});
+
+	it("gives a model it doesn't list the default image limit", async () => {
+		const sent = await sendLooks("claude-next", 601);
+
+		expect(sent.match(/"type":"file"/g)).toHaveLength(591);
+	});
 });

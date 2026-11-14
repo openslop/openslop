@@ -112,10 +112,9 @@ const thinking = (effort: ThinkingLevel) => ({
 	effort,
 });
 
-/** The API's cap on images per request, set by the model's context window. */
-const MAX_IMAGES_PER_REQUEST: Record<ModelId, number> = {
-	"claude-opus-5": 600,
-	"claude-sonnet-5": 600,
+/** The API's cap on images per request. Models with a 200k-token context window take fewer. */
+const MAX_IMAGES_PER_REQUEST = 600;
+const MAX_IMAGES_PER_REQUEST_BY_MODEL: Partial<Record<string, number>> = {
 	"claude-haiku-4-5-20251001": 100,
 };
 const IMAGES_DROPPED_PER_BATCH = 10;
@@ -125,8 +124,8 @@ const MAX_FULL_SIZE_IMAGES = 20;
 const MAX_IMAGE_EDGE_PX = 3000;
 
 const fitImageLimits = (modelId: string) => {
-	const max = MAX_IMAGES_PER_REQUEST[modelId as ModelId];
-	if (!max) throw new Error(`No image limit for Anthropic model "${modelId}"`);
+	const max =
+		MAX_IMAGES_PER_REQUEST_BY_MODEL[modelId] ?? MAX_IMAGES_PER_REQUEST;
 	return {
 		transformParams: async ({ params }) => {
 			const prompt = keepNewestImages(params.prompt, {
