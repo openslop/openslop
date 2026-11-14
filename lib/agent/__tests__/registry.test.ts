@@ -80,7 +80,7 @@ describe("script review opt-in", () => {
 			"After adapt_script, read the resulting script",
 		);
 		expect(systemPrompt).toContain(
-			"use edit_script to shorten it while preserving its core meaning",
+			"use edit_script to fit the script to that budget",
 		);
 		expect(systemPrompt).toContain(
 			"Do not call review_script until they say yes or ask for one",

@@ -197,8 +197,6 @@ export default function ComposerCopilot({
 	});
 	const hasText = value.trim().length > 0;
 
-	/** A pasted script sets its own length and format, so both go back to auto. */
-
 	const handleSubmit = () => {
 		if (hasText) onSubmit(templateBrief(template, value));
 	};

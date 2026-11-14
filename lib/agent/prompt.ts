@@ -27,11 +27,12 @@ const ROLE = dedent`
     picture shows, and the art style. An asset the user already set stands.
   - If the user explicitly asks for a review, call review_script and work its findings
     the way that tool describes. Otherwise, after write_script, ask whether they want
-    a review and finish the turn. After adapt_script, read the resulting script.
-    If the user explicitly selected a length budget and the script exceeds it, use
-    edit_script to shorten it while preserving its core meaning. Read the updated
-    script before finishing. Then ask whether they want a review. Do not call
-    review_script until they say yes or ask for one.
+    a review and finish the turn.
+  - After adapt_script, read the resulting script. If the user explicitly selected a
+    length budget, use edit_script to fit the script to that budget: expand it with relevant dialogue if it is too short, or shorten it if it is too long, while
+    preserving its core meaning and intent. Aim for the selected budget's word range.
+    Read the updated script before finishing. Then ask whether they want a review.
+    Do not call review_script until they say yes or ask for one.
   - An uploaded asset_avatar looks like that image, not like its text. Look at it
     with view_result and set its text to what you see, unless the text already describes
     that exact image.
