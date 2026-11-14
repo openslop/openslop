@@ -1,4 +1,4 @@
-import { Mic, Music } from "@/components/ui/icon";
+import { Mic, MicOff } from "@/components/ui/icon";
 import { TOGGLE_OFF } from "@/lib/canvas/types";
 import { type AttributeDef, AttributeSchema } from "../attributes/schema";
 import {
@@ -16,7 +16,7 @@ const lyricsDef: AttributeDef = {
 	edit: {
 		kind: "toggle",
 		value: toggleValue,
-		off: { icon: Music, label: "Instrumental" },
+		off: { icon: MicOff, label: "Instrumental" },
 		on: { icon: Mic, label: "With lyrics" },
 	},
 	default: TOGGLE_OFF,
