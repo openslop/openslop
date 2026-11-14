@@ -6,9 +6,10 @@ import { keepFocus } from "@/components/ui/keep-focus";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-	Thumbnail,
 	ThumbnailCaption,
 	ThumbnailFace,
+	ThumbnailRadio,
+	ThumbnailRadioGrid,
 	THUMBNAIL_POPOVER_WIDTH,
 } from "@/components/ui/thumbnail";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -67,26 +68,22 @@ function FrameTile({
 	);
 	return (
 		<div className="group/tile relative">
-			<Thumbnail asChild>
-				<button
-					type="button"
-					role="radio"
-					aria-checked={selected}
-					aria-label={label}
-					onMouseDown={keepFocus}
-					onClick={onSelect}
-					className="focus-ring"
-				>
-					<ThumbnailFace selected={selected}>
-						{picture ? (
-							<MediaWithSkeleton outputKind="image" src={picture} alt="" />
-						) : (
-							children
-						)}
-					</ThumbnailFace>
-					<ThumbnailCaption>{label}</ThumbnailCaption>
-				</button>
-			</Thumbnail>
+			<ThumbnailRadio
+				value={kind}
+				aria-label={label}
+				onMouseDown={keepFocus}
+				onClick={onSelect}
+				className="focus-ring"
+			>
+				<ThumbnailFace selected={selected}>
+					{picture ? (
+						<MediaWithSkeleton outputKind="image" src={picture} alt="" />
+					) : (
+						children
+					)}
+				</ThumbnailFace>
+				<ThumbnailCaption>{label}</ThumbnailCaption>
+			</ThumbnailRadio>
 			{(viewer.item || onRemove) && (
 				<TileMenu label={label}>
 					{viewer.item}
@@ -148,7 +145,7 @@ function StartFrameOptions({ element, attrKey, label }: AttributeTarget) {
 				</MediaPicker>
 			}
 		>
-			<TileRow columns={2} radiogroup={label}>
+			<ThumbnailRadioGrid columns={2} value={source.kind} aria-label={label}>
 				<FrameTile
 					kind="none"
 					current={source.kind}
@@ -172,7 +169,7 @@ function StartFrameOptions({ element, attrKey, label }: AttributeTarget) {
 						onRemove={() => setFrame(NO_FRAME, null)}
 					/>
 				)}
-			</TileRow>
+			</ThumbnailRadioGrid>
 		</AttributePopoverSection>
 	);
 }

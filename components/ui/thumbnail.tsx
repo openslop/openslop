@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Slot } from "radix-ui";
+import { RadioGroup, Slot } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
@@ -105,10 +105,36 @@ function ThumbnailGrid({
 	);
 }
 
+/** A {@link ThumbnailGrid} choosing one {@link ThumbnailRadio}, with arrow keys between them. */
+function ThumbnailRadioGrid({
+	className,
+	columns,
+	...props
+}: React.ComponentProps<typeof RadioGroup.Root> &
+	Required<VariantProps<typeof thumbnailGridVariants>>) {
+	return (
+		<RadioGroup.Root
+			data-slot="thumbnail-grid"
+			className={cn(thumbnailGridVariants({ columns }), className)}
+			{...props}
+		/>
+	);
+}
+
+function ThumbnailRadio(props: React.ComponentProps<typeof RadioGroup.Item>) {
+	return (
+		<Thumbnail asChild>
+			<RadioGroup.Item {...props} />
+		</Thumbnail>
+	);
+}
+
 export {
 	Thumbnail,
 	ThumbnailCaption,
 	ThumbnailFace,
 	ThumbnailGrid,
+	ThumbnailRadio,
+	ThumbnailRadioGrid,
 	THUMBNAIL_POPOVER_WIDTH,
 };
