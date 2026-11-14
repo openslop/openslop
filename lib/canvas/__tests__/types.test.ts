@@ -5,8 +5,8 @@ import {
 	DURATION_MAX,
 	isSpeechType,
 	snapDurationUp,
-	type ContentType,
 } from "../types";
+import { keysOf } from "@/lib/utils";
 
 describe("snapDurationUp", () => {
 	it("takes the shortest option that still covers the seconds asked for", () => {
@@ -24,7 +24,7 @@ describe("snapDurationUp", () => {
 });
 
 describe("isSpeechType", () => {
-	it.each(Object.keys(CONTENT_TYPES) as ContentType[])(
+	it.each(keysOf(CONTENT_TYPES))(
 		"%s is captioned from speech exactly when it is speech",
 		(type) => {
 			expect(captionSourceOf(type) === "speech").toBe(isSpeechType(type));
