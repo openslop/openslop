@@ -70,7 +70,7 @@ export function GenerateButton({
 			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}
 		>
 			{GENERATE_ICON[status]}
-			{label}
+			<span className="@max-sm/element:hidden">{label}</span>
 		</Button>
 	);
 }

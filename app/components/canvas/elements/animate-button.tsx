@@ -38,7 +38,7 @@ export function AnimateButton({ element }: { element: ContentElement }) {
 			}}
 		>
 			<MagicVideo />
-			<span className="hidden @sm:inline">Animate</span>
+			<span className="@max-sm/element:hidden">Animate</span>
 		</Button>
 	);
 }

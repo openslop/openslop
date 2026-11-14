@@ -70,7 +70,7 @@ export function CharacterEditModal({
 			{avatar && (
 				<ElementGenerationProvider element={avatar}>
 					<div className="grid gap-4 sm:grid-cols-2">
-						<div className="flex min-w-0 flex-col gap-2">
+						<div className="@container/element flex min-w-0 flex-col gap-2">
 							<TextAreaField
 								className="min-h-0 flex-1"
 								label="Appearance"

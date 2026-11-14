@@ -38,7 +38,7 @@ function AddMediaPickerButton({
 			{...props}
 		>
 			{uploading ? <Spinner /> : <Plus aria-hidden="true" />}
-			<span className="hidden sm:inline">{label}</span>
+			<span className="@max-sm/element:hidden">{label}</span>
 		</Button>
 	);
 }
