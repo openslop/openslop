@@ -257,6 +257,8 @@ export function Timeline() {
 		useTimelineZoom(
 			layout.totalDurationSec,
 			viewportWidth - GUTTER_PX - RULER_TAIL_PX,
+			viewport,
+			() => (player?.getCurrentFrame() ?? 0) / layout.fps,
 		);
 
 	const scrub = usePlayerScrub();
