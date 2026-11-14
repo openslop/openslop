@@ -33,7 +33,7 @@ export function ResetButton({
 			onClick={onClick}
 		>
 			<Undo />
-			<span className="hidden sm:inline">Reset</span>
+			<span className="@max-sm/element:hidden">Reset</span>
 		</Button>
 	);
 }
