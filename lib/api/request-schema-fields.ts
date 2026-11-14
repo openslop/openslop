@@ -7,6 +7,9 @@ import { parseImageSource } from "./image-source";
 
 export const byokProviderField = z.enum(BYOK_PROVIDERS);
 
+// A malformed id makes Postgres throw on the cast; guid() matches every shape it accepts.
+export const rowId = z.guid();
+
 const POSITIVE_NUMBER = "must be a positive number";
 
 const positiveNumber = z

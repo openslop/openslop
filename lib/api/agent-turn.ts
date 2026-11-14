@@ -25,6 +25,7 @@ import {
 	saveConversationMessage,
 } from "./conversations";
 import { logger } from "./logger";
+import { rowId } from "./request-schema-fields";
 
 const MAX_TOOL_CALLS = 60;
 
@@ -33,7 +34,7 @@ export const agentTurnSchema = <TModel extends ModelRef>(
 ) =>
 	z
 		.object({
-			projectId: z.uuid(),
+			projectId: rowId,
 			message: z.unknown(),
 		})
 		.and(model);

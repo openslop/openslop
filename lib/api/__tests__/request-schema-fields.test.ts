@@ -4,6 +4,7 @@ import {
 	optionalDurationSeconds,
 	optionalImageDimensions,
 	optionalVideoDuration,
+	rowId,
 } from "../request-schema-fields";
 
 const schema = z.object({
@@ -48,4 +49,19 @@ describe("durationSeconds", () => {
 	])("refuses a %s", (_label, value) => {
 		expect(schema.safeParse({ durationSeconds: value }).success).toBe(false);
 	});
+});
+
+describe("rowId", () => {
+	it("takes any id Postgres stores, not only RFC uuids", () => {
+		expect(rowId.parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")).toBe(
+			"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+		);
+	});
+
+	it.each(["", "not-a-uuid", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa"])(
+		"rejects %o",
+		(id) => {
+			expect(rowId.safeParse(id).success).toBe(false);
+		},
+	);
 });
