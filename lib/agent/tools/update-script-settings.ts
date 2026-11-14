@@ -15,9 +15,8 @@ import { atLeastOne } from "./inputs";
 export const updateScriptSettings = defineTool({
 	description: dedent`
 	  Store the language, length and format the script should have, so you remember them; the
-	  script tools read them from here. adapt_script preserves the user's words during
-	  initial conversion. After it, the agent uses edit_script to fit the selected
-	  length budget. Send only what changes.
+	  script tools read them from here. adapt_script keeps the user's words and honors the
+	  format, but ignores the length budget. Send only what changes.
 
 	  - language: what narration and dialogue are written in. "auto" follows whatever language
 	    the user writes in. ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}

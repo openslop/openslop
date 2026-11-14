@@ -26,9 +26,6 @@ export const adaptScript = defineTool({
 	    update_video_settings, or edit_script for a character, a voice or the art style
 	  - after adapting, read the script. If the user asks to change or shorten the text,
 	    use edit_script after this call, not by changing what you pass into adaptation
-	  - when a length budget is selected, use edit_script after adaptation to fit the
-           script to the budget: expand it with relevant dialogue if it is too short, or
-           shorten it if it is too long, preserving its meaning and intent
 	`,
 	input: z.object({
 		script: z
