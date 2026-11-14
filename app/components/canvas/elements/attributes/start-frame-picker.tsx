@@ -54,7 +54,6 @@ function FrameTile({
 	onRemove?: () => void;
 	children?: React.ReactNode;
 }) {
-	const selected = kind === current;
 	const label = FRAME_SOURCE_LABEL[kind];
 	const viewer = useViewLarger(
 		picture
@@ -75,7 +74,7 @@ function FrameTile({
 				onClick={onSelect}
 				className="focus-ring"
 			>
-				<ThumbnailFace selected={selected}>
+				<ThumbnailFace selected={kind === current}>
 					{picture ? (
 						<MediaWithSkeleton outputKind="image" src={picture} alt="" />
 					) : (
