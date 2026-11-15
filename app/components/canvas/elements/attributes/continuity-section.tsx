@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { AssetTile } from "../asset-tile";
 import { TileRow } from "./tile-row";
 import {
+	AddedReferences,
 	ReferenceImagesPopover,
 	type ReferenceImagesPopoverProps,
 } from "./reference-images-popover";
@@ -38,11 +39,7 @@ export function ContinuityReferencesPopover({
 
 	return (
 		<ReferenceImagesPopover {...popover} added={linked ? pictures.length : 0}>
-			<section className="mt-3 border-t border-border pt-3">
-				<div className="mb-2 flex items-center justify-between gap-2">
-					<p className="text-label">{caption(previous, linked)}</p>
-					{toggle}
-				</div>
+			<AddedReferences caption={caption(previous, linked)} action={toggle}>
 				{pictures.length > 0 && (
 					<div className={cn("transition-opacity", !linked && "opacity-40")}>
 						<TileRow columns={2}>
@@ -58,7 +55,7 @@ export function ContinuityReferencesPopover({
 						</TileRow>
 					</div>
 				)}
-			</section>
+			</AddedReferences>
 		</ReferenceImagesPopover>
 	);
 }
