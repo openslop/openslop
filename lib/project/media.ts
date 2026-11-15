@@ -2,6 +2,7 @@ import kebabCase from "lodash/kebabCase";
 import { matchSorter } from "match-sorter";
 import { z } from "zod";
 import {
+	UPLOAD_KINDS,
 	UploadKindSchema,
 	type Upload,
 	type UploadKind,
@@ -44,6 +45,18 @@ export function requireMedia(media: MediaItem[], url: string): MediaItem {
 	const item = media.find((candidate) => candidate.url === url);
 	if (!item) throw new Error(`${url} is not in the media library.`);
 	return item;
+}
+
+export function checkMediaKind(
+	media: MediaItem[],
+	url: string,
+	kind: UploadKind,
+): void {
+	const item = media.find((candidate) => candidate.url === url);
+	if (item && item.kind !== kind)
+		throw new Error(
+			`${item.name} is ${UPLOAD_KINDS[item.kind].noun}, not ${UPLOAD_KINDS[kind].noun}.`,
+		);
 }
 
 /** The media of one kind whose name matches the query, best match first; ties newest first. */

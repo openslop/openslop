@@ -20,6 +20,7 @@ import {
 	withoutCaptions,
 } from "@/lib/captions/auto-captions";
 import { resolveModel } from "@/lib/connectors/models";
+import { checkMediaKind } from "@/lib/project/media";
 import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNode, buildNodes } from "@/lib/generation/generation-graph";
@@ -143,10 +144,12 @@ export function useAgentTools() {
 						throw new Error(
 							`${id} is a ${element.type} element and can't take a file.`,
 						);
+					const kind = uploadKindOf(element);
+					checkMediaKind(store.getState().media, url, kind);
 					return commitUploaded(
 						queue,
 						buildNode(element, buildContext()),
-						uploadKindOf(element),
+						kind,
 						url,
 					);
 				},
