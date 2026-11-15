@@ -12,32 +12,40 @@ import {
 	SPEECH_TYPES,
 	type ElementType,
 } from "@/lib/canvas/types";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { listModels } from "@/lib/connectors/models";
+import type { ModelRef } from "@/lib/connectors/types";
 import { conjunction } from "@/lib/format";
 
 const ELEMENT_TEXT = `The element's content: the spoken line for ${conjunction(SPEECH_TYPES)}; the prompt for ${conjunction(NON_SPEECH_TYPES)}; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
 
-/** Every attribute an element of `type` can hold, under any of its models. */
-const defsOf = (type: ElementType) => {
+type TypedDef = { type: ElementType; model?: ModelRef; def: AttributeDef };
+
+/** Every attribute an element of `type` can hold, under each of its models. */
+const defsOf = (type: ElementType): TypedDef[] => {
 	const connector = connectorOf(type);
 	const models = connector ? listModels(connector) : [undefined];
-	return models.flatMap((model) => attributeSchemaFor(type, model).defs);
+	return models.flatMap((model) =>
+		attributeSchemaFor(type, model).defs.map((def) => ({ type, model, def })),
+	);
 };
 
-const TYPED_DEFS = ElementTypeSchema.options.flatMap((type) =>
-	defsOf(type).map((def) => ({ type, def })),
-);
+const TYPED_DEFS = ElementTypeSchema.options.flatMap(defsOf);
+
+const optionsOf = ({ edit }: AttributeDef): readonly string[] =>
+	edit?.kind === "enum" || edit?.kind === "toggle" ? edit.value.options : [];
+
+const optionsByModel = (typed: TypedDef[]): string =>
+	uniq(
+		typed.flatMap(({ model, def }) =>
+			model ? [`${model.model}: ${optionsOf(def).join(", ")}.`] : [],
+		),
+	).join(" ");
 
 /** A key's value on every type and model that carries it: their options merged, else the value they share. */
-function attributeValue(typed: typeof TYPED_DEFS): z.ZodType<string> {
+function attributeValue(typed: TypedDef[]): z.ZodType<string> {
 	const [{ def }] = typed;
-	const options = uniq(
-		typed.flatMap(({ def: { edit } }) =>
-			edit?.kind === "enum" || edit?.kind === "toggle"
-				? edit.value.options
-				: [],
-		),
-	);
+	const options = uniq(typed.flatMap(({ def }) => optionsOf(def)));
 	const value =
 		options.length > 0 ? z.enum(options) : (def.edit?.value ?? z.string());
 	const types = uniq(typed.map(({ type }) => type));
@@ -46,7 +54,7 @@ function attributeValue(typed: typeof TYPED_DEFS): z.ZodType<string> {
 			value.description,
 			`On ${conjunction(types)}.`,
 			def.unit && `Unit: ${def.unit}.`,
-			def.perModel && "The options depend on the model.",
+			def.perModel && `By model: ${optionsByModel(typed)}`,
 		]
 			.filter(Boolean)
 			.join(" "),
