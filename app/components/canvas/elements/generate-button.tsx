@@ -1,17 +1,15 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { AlertCircleFilled, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { keepFocus } from "@/components/ui/keep-focus";
 import { Spinner } from "@/components/ui/spinner";
 import {
 	isGenerationActive,
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
+import { ElementActionButton } from "./element-action-button";
 import { useElementGeneration } from "./element-generation-context";
 
 export function StaleIndicator({ reason }: { reason: string }) {
@@ -58,20 +56,16 @@ export function GenerateButton({
 }) {
 	const label = generateLabel(status, hasResult);
 	return (
-		<Button
-			type="button"
+		<ElementActionButton
+			icon={GENERATE_ICON[status]}
+			label={label}
 			variant="generate"
-			size="sm"
-			className={cn("shrink-0", className)}
+			className={className}
 			disabled={disabled}
-			onMouseDown={keepFocus}
 			onClick={onGenerate}
 			aria-label={label}
 			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}
-		>
-			{GENERATE_ICON[status]}
-			<span className="@max-sm/element:hidden">{label}</span>
-		</Button>
+		/>
 	);
 }
 

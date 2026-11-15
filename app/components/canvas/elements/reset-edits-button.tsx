@@ -1,16 +1,14 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useSlateStatic } from "slate-react";
 import { Undo } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
-import { keepFocus } from "@/components/ui/keep-focus";
 import { applyElementVersion } from "@/lib/canvas/editor-ops";
 import {
 	useGenerationQueue,
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 import { hasEditsSinceResult } from "@/lib/generation/stale-reason";
+import { ElementActionButton } from "./element-action-button";
 import { useElementGeneration } from "./element-generation-context";
 
 export function ResetButton({
@@ -23,18 +21,13 @@ export function ResetButton({
 	className?: string;
 }) {
 	return (
-		<Button
-			type="button"
-			variant="ghost"
-			size="sm"
+		<ElementActionButton
+			icon={<Undo />}
+			label="Reset"
 			tooltip={tooltip}
-			className={cn("shrink-0", className)}
-			onMouseDown={keepFocus}
+			className={className}
 			onClick={onClick}
-		>
-			<Undo />
-			<span className="@max-sm/element:hidden">Reset</span>
-		</Button>
+		/>
 	);
 }
 
