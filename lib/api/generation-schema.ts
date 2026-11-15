@@ -21,6 +21,7 @@ import {
 	optionalVideoDuration,
 	optionalResolution,
 	requiredVoiceId,
+	rowId,
 	storedUrl,
 } from "./request-schema-fields";
 
@@ -66,7 +67,7 @@ export const bodySchema = <
 				prompt: z.string({ error: "prompt is required" }).min(1, {
 					error: "prompt is required",
 				}),
-				projectId: z.uuid().optional(),
+				projectId: rowId.optional(),
 				...shape,
 			},
 			"Request body must be a JSON object",

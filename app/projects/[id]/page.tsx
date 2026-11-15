@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
-import { z } from "zod";
 import { loadTranscript } from "@/lib/api/conversations";
 import { listProviderKeys } from "@/lib/api/provider-keys";
+import { rowId } from "@/lib/api/request-schema-fields";
 import {
 	SAVED_PROJECT_COLUMNS,
 	parseSavedProject,
@@ -16,8 +16,7 @@ export default async function ProjectPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = await params;
-	// A malformed id makes Postgres throw on the cast; guid() matches every shape it accepts.
-	if (!z.guid().safeParse(id).success) notFound();
+	if (!rowId.safeParse(id).success) notFound();
 
 	const supabase = await createClient();
 	// Safe to run concurrently: row access is enforced by RLS, not by this user read.
