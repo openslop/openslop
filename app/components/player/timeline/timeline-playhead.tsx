@@ -1,46 +1,23 @@
 "use client";
 
-import { useEffect, type RefObject } from "react";
+import { useEffect } from "react";
 import { usePlayerFrame } from "../use-player-state";
 import { useLayout } from "../render-layout-context";
+import { useTimelineZoomContext } from "./timeline-zoom-context";
 
-/** Keeps the playhead on screen once zooming makes the timeline scrollable. */
-function useFollow(
-	viewport: RefObject<HTMLDivElement | null>,
-	x: number,
-	leadingInset: number,
-	viewportWidth: number,
-	scrollable: boolean,
-) {
-	useEffect(() => {
-		const element = viewport.current;
-		if (!element || !scrollable) return;
-		const left = element.scrollLeft;
-		const contentX = x + leadingInset;
-		if (contentX >= left + leadingInset && contentX <= left + viewportWidth)
-			return;
-		element.scrollTo({ left: Math.max(0, contentX - viewportWidth / 2) });
-	}, [viewport, x, leadingInset, viewportWidth, scrollable]);
-}
-
-export function TimelinePlayhead({
-	pxPerSec,
-	viewport,
-	viewportWidth,
-	leadingInset,
-	scrollable,
-}: {
-	pxPerSec: number;
-	viewport: RefObject<HTMLDivElement | null>;
-	viewportWidth: number;
-	/** Width of the sticky gutter covering the scroller's leading edge. */
-	leadingInset: number;
-	scrollable: boolean;
-}) {
+export function TimelinePlayhead() {
 	const { layout } = useLayout();
+	const { viewport, viewportWidth, pxPerSec } = useTimelineZoomContext();
 	const frame = usePlayerFrame();
 	const x = (frame / layout.fps) * pxPerSec;
-	useFollow(viewport, x, leadingInset, viewportWidth, scrollable);
+
+	useEffect(() => {
+		const element = viewport.current;
+		if (!element) return;
+		const left = element.scrollLeft;
+		if (x >= left && x <= left + viewportWidth) return;
+		element.scrollTo({ left: Math.max(0, x - viewportWidth / 2) });
+	}, [viewport, x, viewportWidth]);
 
 	return (
 		<div

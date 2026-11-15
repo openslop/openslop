@@ -1,11 +1,3 @@
-import {
-	Captions,
-	Film,
-	Music,
-	Voice,
-	Waveform,
-	type IconComponent,
-} from "@/components/ui/icon";
 import type { ElementRole, LayerType } from "@/lib/canvas/types";
 import {
 	layoutCaptions,
@@ -21,7 +13,6 @@ export type TimelineRow = {
 	key: string;
 	id: ElementRole;
 	label: string;
-	icon: IconComponent;
 	kind: LayerType;
 	/** Only the scene lane carries scene numbers; the rest sit under it unlabelled. */
 	numbered: boolean;
@@ -31,17 +22,16 @@ export type TimelineRow = {
 /** One lane per role, in stacking order, mirroring `buildRenderLayout`'s cases. */
 const ROWS: Record<
 	ElementRole,
-	{ label: string; icon: IconComponent; kind: LayerType; numbered: boolean }
+	{ label: string; kind: LayerType; numbered: boolean }
 > = {
-	foreground: { label: "Visuals", icon: Film, kind: "visual", numbered: true },
-	overlay: { label: "Voice", icon: Voice, kind: "audio", numbered: false },
-	effect: { label: "Effects", icon: Waveform, kind: "audio", numbered: false },
-	background: { label: "Music", icon: Music, kind: "audio", numbered: false },
+	foreground: { label: "Visuals", kind: "visual", numbered: true },
+	overlay: { label: "Voice", kind: "audio", numbered: false },
+	effect: { label: "Effects", kind: "audio", numbered: false },
+	background: { label: "Music", kind: "audio", numbered: false },
 };
 
 const CAPTION_ROW = {
 	label: "Captions",
-	icon: Captions,
 	kind: "captions",
 } as const;
 
@@ -105,7 +95,6 @@ export type CaptionClip = CaptionSequence & { key: string };
 export type CaptionRow = {
 	key: string;
 	label: string;
-	icon: IconComponent;
 	kind: "captions";
 	clips: CaptionClip[];
 };

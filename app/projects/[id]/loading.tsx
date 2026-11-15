@@ -1,7 +1,6 @@
 import { Rail } from "@/app/components/canvas/panel/rail";
 import {
 	DOCK_DEFAULT_HEIGHT,
-	GUTTER_PX,
 	LANE_HEIGHT,
 	RULER_HEIGHT,
 	RULER_LABEL_OFFSET,
@@ -42,21 +41,6 @@ const LANES: { height: string; clips: [start: number, width: number][] }[] = [
 function TimelineSkeleton() {
 	return (
 		<div className="flex min-h-0 flex-1 overflow-hidden">
-			<div
-				className="flex shrink-0 flex-col border-r border-border"
-				style={{ width: GUTTER_PX }}
-			>
-				<div className={`shrink-0 border-b border-border ${RULER_HEIGHT}`} />
-				{LANES.map(({ height }, lane) => (
-					<div
-						key={lane}
-						className={`flex shrink-0 items-center justify-center border-b border-border/50 ${height}`}
-					>
-						<Skeleton className="size-3.5 rounded-xs" />
-					</div>
-				))}
-			</div>
-
 			<div className="flex min-w-0 flex-1 flex-col">
 				<div className={`relative shrink-0 ${RULER_HEIGHT}`}>
 					{[0, 0.2, 0.4, 0.6, 0.8].map((at) => (
