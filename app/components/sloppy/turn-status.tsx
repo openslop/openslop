@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { Sparkles } from "@/components/ui/icon";
+import { useElapsedSeconds } from "@/lib/components/use-elapsed-seconds";
 import OrbLoader from "../orb-loader";
 
 function StatusRow({ children }: { children: ReactNode }) {
@@ -14,12 +15,8 @@ function StatusRow({ children }: { children: ReactNode }) {
 }
 
 export function WorkingStatus({ status }: { status: string }) {
-	const [elapsed, setElapsed] = useState(0);
-
-	useEffect(() => {
-		const id = setInterval(() => setElapsed((prev) => prev + 1), 1000);
-		return () => clearInterval(id);
-	}, []);
+	const [startedAt] = useState(Date.now);
+	const elapsed = useElapsedSeconds(startedAt);
 
 	return (
 		<StatusRow>
