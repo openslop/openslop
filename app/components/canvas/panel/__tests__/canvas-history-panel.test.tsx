@@ -92,44 +92,31 @@ const press = (row: number, label: string) =>
 	});
 
 describe("CanvasHistoryPanel", () => {
-	it("shows the newest version as current, with nothing to do", async () => {
+	it("offers View on every version while nothing is previewed", async () => {
 		await open(setUp().history);
-		expect(buttons(0)).toEqual([]);
-		expect(buttons(1)).toEqual(["View"]);
-		expect(buttons(2)).toEqual(["View"]);
-	});
-
-	it("offers the newest version while an older one is previewed", async () => {
-		const { history, onCanvas } = setUp();
-		await open(history);
-		await press(2, "View");
-		expect(onCanvas()).toBe("v1");
-		expect(buttons(0)).toEqual(["View"]);
-		expect(buttons(1)).toEqual(["View"]);
-		expect(buttons(2)).toEqual(["Restore"]);
-	});
-
-	it("returns to latest from the newest row, unsaved edits included", async () => {
-		const { history, onCanvas } = setUp();
-		await open(history);
-		await press(1, "View");
-		await press(0, "View");
-		expect(onCanvas()).toBe("unsaved edits");
-		expect(history.getState().previewId).toBeNull();
 		expect(rows().map((_, row) => buttons(row))).toEqual([
-			[],
+			["View"],
 			["View"],
 			["View"],
 		]);
 	});
 
-	it("reveals the newest row's View on hover and focus, like the others", async () => {
+	it("previews the newest version like any other", async () => {
+		const { history, onCanvas } = setUp();
+		await open(history);
+		await press(0, "View");
+		expect(onCanvas()).toBe("v3");
+		expect(history.getState().previewId).toBe("v3");
+	});
+
+	it("offers Restore on the previewed version only", async () => {
 		const { history } = setUp();
 		await open(history);
 		await press(2, "View");
-		const view = (row: number) =>
-			rows()[row]?.querySelector("button")?.className;
-		expect(view(0)).toBe(view(1));
-		expect(view(0)).toContain("group-focus-within:opacity-100");
+		expect(rows().map((_, row) => buttons(row))).toEqual([
+			["View"],
+			["View"],
+			["Restore"],
+		]);
 	});
 });
