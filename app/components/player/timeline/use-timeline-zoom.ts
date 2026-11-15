@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type RefObject } from "react";
+import { flushSync } from "react-dom";
 
 /** Multiples of fit-to-width; the timeline never zooms below the whole video. */
 const ZOOM_LEVELS = [
@@ -10,18 +11,30 @@ const ZOOM_LEVELS = [
 export function useTimelineZoom(
 	totalDurationSec: number,
 	viewportWidth: number,
+	viewport: RefObject<HTMLElement | null>,
+	playheadSec: () => number,
 ) {
 	const [level, setLevel] = useState(0);
-	const zoom = ZOOM_LEVELS[level];
 	const fitPxPerSec =
 		totalDurationSec > 0 ? viewportWidth / totalDurationSec : 0;
+	const pxPerSecAt = (l: number) => fitPxPerSec * ZOOM_LEVELS[l];
+
+	const zoomTo = (next: number) => {
+		const element = viewport.current;
+		const scrollLeft =
+			(element?.scrollLeft ?? 0) +
+			playheadSec() * (pxPerSecAt(next) - pxPerSecAt(level));
+		flushSync(() => setLevel(next));
+		element?.scrollTo({ left: scrollLeft });
+	};
 
 	return {
-		zoom,
-		pxPerSec: fitPxPerSec * zoom,
+		zoom: ZOOM_LEVELS[level],
+		pxPerSec: pxPerSecAt(level),
 		canZoomIn: level < ZOOM_LEVELS.length - 1,
 		canZoomOut: level > 0,
-		zoomIn: () => setLevel((l) => Math.min(l + 1, ZOOM_LEVELS.length - 1)),
-		zoomOut: () => setLevel((l) => Math.max(l - 1, 0)),
+		zoomIn: () => zoomTo(level + 1),
+		zoomOut: () => zoomTo(level - 1),
+		zoomToFit: () => zoomTo(0),
 	};
 }

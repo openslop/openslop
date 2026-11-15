@@ -9,6 +9,7 @@ import { RenderLayoutProvider } from "../player/render-layout-context";
 import { BottomViewProvider } from "../player/bottom-view-context";
 import { PlayerPlacementProvider } from "../player/player-placement-context";
 import { PlayerControlProvider } from "../player/player-control-context";
+import { TimelineZoomProvider } from "../player/timeline/timeline-zoom-context";
 import { ActiveSceneProvider } from "../scene-selection/active-scene-context";
 import { AutoScrollProvider } from "../scene-selection/auto-scroll-context";
 import { ViewModeProvider } from "./view-mode-context";
@@ -29,6 +30,7 @@ const CanvasScopedProviders = composeProviders(
 	PlayerPlacementProvider,
 	BottomViewProvider,
 	PlayerControlProvider,
+	TimelineZoomProvider,
 	ActiveSceneProvider,
 	AutoScrollProvider,
 	ViewModeProvider,

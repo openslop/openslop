@@ -13,6 +13,7 @@ import { useLayout } from "./render-layout-context";
 import { usePlayerPlaying } from "./use-player-state";
 import { SCRUB_BAR_HEIGHT } from "./scrub-bar";
 import { SegmentedSeekBar } from "./segmented-seek-bar";
+import { TimelineZoomControl } from "./timeline/timeline-zoom-control";
 import {
 	FullscreenButton,
 	ScenePill,
@@ -47,7 +48,7 @@ function BottomTransportBarComponent() {
 			<div className={cn("flex w-full items-center", SCRUB_BAR_HEIGHT)}>
 				<SegmentedSeekBar />
 			</div>
-			<div className="flex items-center gap-2">
+			<div className="scrollbar-overlay flex min-w-0 items-center gap-2 overflow-x-auto @max-[580px]:mask-r-from-85%">
 				<div className="flex flex-1 items-center gap-2">
 					{canSeek && <TimeDisplay />}
 					{canSeek && (
@@ -85,6 +86,7 @@ function BottomTransportBarComponent() {
 				</div>
 
 				<div className="flex flex-1 items-center justify-end gap-1.5">
+					<TimelineZoomControl />
 					<VolumeControl />
 					<FullscreenButton />
 					<BottomViewToggle />

@@ -25,7 +25,7 @@ export function TimeDisplay() {
 		0,
 	);
 	return (
-		<span className="shrink-0 font-numeric text-label text-muted-foreground">
+		<span className="shrink-0 whitespace-nowrap font-numeric text-label text-muted-foreground">
 			<span className="text-foreground">{formatTime(seconds)}</span> /{" "}
 			{formatTime(layout.totalDurationSec)}
 		</span>

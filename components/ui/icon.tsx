@@ -132,6 +132,7 @@ export const MagicVideo = icon("magic-video");
 export const Mail = icon("mail");
 export const Maximize = icon("maximize");
 export const Maximize2 = icon("maximize-2");
+export const Minus = icon("minus");
 export const Minutes1 = icon("minutes-1");
 export const Minutes2 = icon("minutes-2");
 export const Minutes3 = icon("minutes-3");

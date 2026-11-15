@@ -7,14 +7,8 @@ import {
 	type ComponentProps,
 	type ReactNode,
 } from "react";
-import {
-	RotateCcw,
-	Timeline as TimelineIcon,
-	ZoomIn,
-	ZoomOut,
-} from "@/components/ui/icon";
+import { RotateCcw, Timeline as TimelineIcon } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useElementWidth } from "@/lib/components/use-element-width";
 import { renderPrompt } from "@/lib/connectors/character-refs";
 import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
@@ -32,7 +26,7 @@ import {
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
 import { TimelineSnapGuide } from "./timeline-snap-guide";
-import { GUTTER_PX, LANE_HEIGHT, RULER_HEIGHT } from "../dock-layout";
+import { LANE_HEIGHT } from "../dock-layout";
 import { TimelineRuler } from "./timeline-ruler";
 import {
 	buildCaptionRows,
@@ -40,36 +34,12 @@ import {
 	type CaptionClip as CaptionClipData,
 	type TimelineClip as TimelineClipData,
 } from "./timeline-rows";
-import { useTimelineZoom } from "./use-timeline-zoom";
+import { RULER_TAIL_PX, useTimelineZoomContext } from "./timeline-zoom-context";
 import { TimelineTrimHandles } from "./timeline-trim-handle";
 import { useClipTrim } from "./use-clip-trim";
 import { useTrimSnap, type TrimSnap } from "./use-trim-snap";
 
-/** Runway past the last tick, so its label isn't cut off by the end. */
-const RULER_TAIL_PX = 32;
 const MIN_CLIP_WIDTH_PX = 2;
-
-/**
- * A lane's height and rule, shared by the track and the gutter cell beside it.
- * They are drawn in separate grid columns and have to line up exactly.
- */
-function Lane({
-	kind,
-	className,
-	children,
-}: {
-	kind: keyof typeof LANE_HEIGHT;
-	className?: string;
-	children: ReactNode;
-}) {
-	return (
-		<div
-			className={cn("border-b border-border/50", LANE_HEIGHT[kind], className)}
-		>
-			{children}
-		</div>
-	);
-}
 
 type ClipProps<T> = {
 	clip: T;
@@ -220,11 +190,16 @@ function Track({
 	children: ReactNode;
 }) {
 	return (
-		<Lane kind={row.kind} className="relative">
+		<div
+			className={cn(
+				"relative border-b border-border/50",
+				LANE_HEIGHT[row.kind],
+			)}
+		>
 			<ul aria-label={row.label} className="absolute inset-0">
 				{children}
 			</ul>
-		</Lane>
+		</div>
 	);
 }
 
@@ -245,19 +220,10 @@ export function Timeline() {
 	const selectScene = useSelectScene();
 	const [selectedKey, setSelectedKey] = useState<string | null>(null);
 	const hoverHead = useRef<HoverHeadHandle>(null);
-	const {
-		ref: viewportRef,
-		node: viewport,
-		width: viewportWidth,
-	} = useElementWidth<HTMLDivElement>();
 	const rows = useMemo(() => buildTimelineRows(layout), [layout]);
 	const captionRows = useMemo(() => buildCaptionRows(layout), [layout]);
 	const { snap, guide: snapGuide } = useTrimSnap(rows, layout.fps);
-	const { zoom, pxPerSec, zoomIn, zoomOut, canZoomIn, canZoomOut } =
-		useTimelineZoom(
-			layout.totalDurationSec,
-			viewportWidth - GUTTER_PX - RULER_TAIL_PX,
-		);
+	const { viewportRef, pxPerSec } = useTimelineZoomContext();
 
 	const scrub = usePlayerScrub();
 	const seek = (seconds: number) =>
@@ -290,7 +256,7 @@ export function Timeline() {
 					ref={viewportRef}
 					className="grid min-h-0 flex-1 overflow-auto"
 					style={{
-						gridTemplateColumns: `${GUTTER_PX}px ${
+						gridTemplateColumns: `${
 							pxPerSec * layout.totalDurationSec + RULER_TAIL_PX
 						}px`,
 						// Spare height goes to the lanes, not to the ruler.
@@ -301,38 +267,13 @@ export function Timeline() {
 						const x =
 							event.clientX - rect.left + event.currentTarget.scrollLeft;
 						hoverHead.current?.show(
-							clamp((x - GUTTER_PX) / pxPerSec, 0, layout.totalDurationSec),
+							clamp(x / pxPerSec, 0, layout.totalDurationSec),
 						);
 					}}
 					onPointerLeave={() => hoverHead.current?.hide()}
 				>
 					<div
 						style={{ gridArea: "1 / 1" }}
-						className={cn(
-							"sticky top-0 left-0 z-40 flex items-center justify-center border-r border-b border-border bg-element-card",
-							RULER_HEIGHT,
-						)}
-					>
-						<TooltipIconButton
-							label="Zoom out"
-							size="sm"
-							onClick={zoomOut}
-							disabled={!canZoomOut}
-						>
-							<ZoomOut />
-						</TooltipIconButton>
-						<TooltipIconButton
-							label={`Zoom in (${Math.round(zoom * 100)}%)`}
-							size="sm"
-							onClick={zoomIn}
-							disabled={!canZoomIn}
-						>
-							<ZoomIn />
-						</TooltipIconButton>
-					</div>
-
-					<div
-						style={{ gridArea: "1 / 2" }}
 						className="sticky top-0 z-20 bg-element-card"
 					>
 						<TimelineRuler
@@ -344,7 +285,7 @@ export function Timeline() {
 						/>
 					</div>
 
-					<div style={{ gridArea: "2 / 2" }}>
+					<div style={{ gridArea: "2 / 1" }}>
 						{captionRows.map((row) => (
 							<Track key={row.key} row={row}>
 								{row.clips.map((clip) => (
@@ -377,33 +318,12 @@ export function Timeline() {
 
 					{/* Spans both rows so the heads run through the ruler. */}
 					<div
-						style={{ gridArea: "1 / 2 / 3 / 3" }}
+						style={{ gridArea: "1 / 1 / 3 / 2" }}
 						className="pointer-events-none relative z-20"
 					>
 						<TimelineHoverHead ref={hoverHead} pxPerSec={pxPerSec} />
 						<TimelineSnapGuide ref={snapGuide} pxPerSec={pxPerSec} />
-						<TimelinePlayhead
-							pxPerSec={pxPerSec}
-							viewport={viewport}
-							viewportWidth={viewportWidth}
-							leadingInset={GUTTER_PX}
-							scrollable={zoom > 1}
-						/>
-					</div>
-
-					<div
-						style={{ gridArea: "2 / 1" }}
-						className="sticky left-0 z-30 border-r border-border bg-element-card"
-					>
-						{[...captionRows, ...rows].map((row) => (
-							<Lane
-								key={row.key}
-								kind={row.kind}
-								className="flex items-center justify-center text-muted-foreground"
-							>
-								<row.icon size={14} />
-							</Lane>
-						))}
+						<TimelinePlayhead />
 					</div>
 				</div>
 			)}
