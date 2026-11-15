@@ -33,9 +33,7 @@ function renderTimelineHook(
 
 	const container = document.createElement("div");
 	const root = createRoot(container);
-	act(() => {
-		root.render(<TestHarness />);
-	});
+	act(() => root.render(<TestHarness />));
 
 	return {
 		scroller,
@@ -44,29 +42,21 @@ function renderTimelineHook(
 			return latest;
 		},
 		zoomIn() {
-			act(() => {
-				this.current.zoomIn();
-			});
+			act(() => this.current.zoomIn());
 		},
 		zoomOut() {
-			act(() => {
-				this.current.zoomOut();
-			});
+			act(() => this.current.zoomOut());
 		},
 		zoomToFit() {
-			act(() => {
-				this.current.zoomToFit();
-			});
+			act(() => this.current.zoomToFit());
 		},
 		unmount() {
-			act(() => {
-				root.unmount();
-			});
+			act(() => root.unmount());
 		},
 	};
 }
 
-describe("useTimelineZoom behavior", () => {
+describe("useTimelineZoom", () => {
 	it("initializes at fit-to-width (zoom 1x) with canZoomOut disabled", () => {
 		const hook = renderTimelineHook(100, 1000);
 		expect(hook.current.zoom).toBe(1);

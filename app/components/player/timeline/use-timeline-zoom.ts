@@ -17,7 +17,7 @@ export function useTimelineZoom(
 	const [level, setLevel] = useState(0);
 	const fitPxPerSec =
 		totalDurationSec > 0 ? viewportWidth / totalDurationSec : 0;
-	const pxPerSecAt = (l: number) => fitPxPerSec * ZOOM_LEVELS[l];
+	const pxPerSecAt = (index: number) => fitPxPerSec * ZOOM_LEVELS[index];
 
 	const zoomTo = (next: number) => {
 		const element = viewport.current;
