@@ -15,5 +15,4 @@ export const readMedia = defineTool({
 	label: "Reading the media library",
 	execute: async (_input, ctx) => ctx.readProject().media,
 	snapshot: true,
-	strict: true,
 });

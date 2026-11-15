@@ -68,7 +68,7 @@ describe("refine op attributes", () => {
 		expect(voice({ name: "Mia", gender: "robot" }).success).toBe(false);
 	});
 
-	it("drops an attribute set to null, which only a set can send", () => {
+	it("takes null for an attribute only on a set", () => {
 		expect(setAttrs({ trimEnd: null }).success).toBe(true);
 		expect(voice({ name: null }).success).toBe(false);
 	});

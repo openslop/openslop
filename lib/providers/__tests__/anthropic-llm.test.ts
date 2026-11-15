@@ -3,7 +3,8 @@ import type {
 	LanguageModelV3CallOptions,
 	LanguageModelV3StreamPart,
 } from "@ai-sdk/provider";
-import { generateText, type ModelMessage } from "ai";
+import { generateText, tool, type ModelMessage } from "ai";
+import { z } from "zod";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 
 const { createAnthropic } = vi.hoisted(() => ({ createAnthropic: vi.fn() }));
@@ -409,5 +410,31 @@ describe("agentModel", () => {
 		const sent = await sendLooks("claude-next", 601);
 
 		expect(sent.match(/"type":"file"/g)).toHaveLength(591);
+	});
+
+	it("runs strict only the tools whose schema it can compile", async () => {
+		respondWith("ok");
+		const { model } = new AnthropicLLM("test-key").agentModel(MODEL_ID);
+		await generateText({
+			model,
+			prompt: "hi",
+			tools: {
+				set_title: tool({ inputSchema: z.object({ title: z.string() }) }),
+				name_scene: tool({
+					inputSchema: z.object({ name: z.string().min(1) }),
+				}),
+				tag: tool({
+					inputSchema: z.object({ tags: z.record(z.string(), z.string()) }),
+				}),
+			},
+		});
+
+		expect(
+			calls.at(-1)?.tools?.map((sent) => [sent.name, "strict" in sent]),
+		).toEqual([
+			["set_title", true],
+			["name_scene", false],
+			["tag", false],
+		]);
 	});
 });

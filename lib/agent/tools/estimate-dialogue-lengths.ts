@@ -23,5 +23,4 @@ export const estimateDialogueLengths = defineTool({
 		if (estimates.length === 0) return "No dialogue on the canvas yet.";
 		return estimates.map(line).join("\n");
 	},
-	strict: true,
 });

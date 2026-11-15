@@ -41,5 +41,4 @@ export const estimateTotalLength = defineTool({
 
 		return `${estimate} Target: ${length} (${seconds(minSec)} to ${seconds(maxSec)}) - ${verdict}.`;
 	},
-	strict: true,
 });

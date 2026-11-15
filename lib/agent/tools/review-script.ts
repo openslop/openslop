@@ -35,5 +35,4 @@ export const reviewScript = defineTool({
 	},
 	snapshot: true,
 	draftsScript: true,
-	strict: true,
 });

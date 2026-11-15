@@ -51,5 +51,4 @@ export const readScript = defineTool({
 		].join("\n\n");
 	},
 	snapshot: true,
-	strict: true,
 });
