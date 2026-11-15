@@ -70,11 +70,7 @@ export function useAgentTools() {
 				estimateDialogueLengths: () => estimateDialogueLengths(editor.children),
 				estimateVisualSpans: () => estimateVisualSpans(editor.children),
 				estimateRuntime: () =>
-					estimateRuntime(
-						editor.children,
-						store.getState().videoSettings,
-						queue.getElementSnapshot,
-					),
+					estimateRuntime(editor.children, store.getState().videoSettings),
 				elementResult: async (id) => {
 					const element = findElementById(editor, id)?.[0];
 					return (
