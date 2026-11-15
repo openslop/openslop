@@ -18,6 +18,7 @@ See [Getting started](README.md#getting-started) in the README:
 - Node 20.9+, CI is on 22
 - We do not yet support [local mode](https://github.com/openslop/openslop/issues/379), so until then you'll need to link to your own Supabase and Vercel accounts via filling in .env.local
 - Supabase is the only hard requirement. Vercel Blob is needed for real generations (that's where providers store output), mocks skip it. Provider keys go in the app, leave them out and you get mocks, so no need to pay for an API
+- On a Windows clone made before `.gitattributes` landed, run `git rm --cached -r . -q && git reset --hard` once to re-check files out with LF line endings
 
 ### Running the generation queue
 
