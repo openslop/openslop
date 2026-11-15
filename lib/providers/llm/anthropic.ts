@@ -144,6 +144,45 @@ const fitImageLimits = (modelId: string) => {
 	} satisfies LanguageModelMiddleware;
 };
 
+type SchemaNode = Record<string, unknown>;
+
+const schemaNodes = (schema: unknown): SchemaNode[] =>
+	typeof schema === "object" && schema !== null
+		? [schema as SchemaNode, ...Object.values(schema).flatMap(schemaNodes)]
+		: [];
+
+// https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-schema-limitations
+const UNCOMPILABLE_KEYWORDS = [
+	"oneOf",
+	"propertyNames",
+	"minimum",
+	"maximum",
+	"exclusiveMinimum",
+	"exclusiveMaximum",
+	"multipleOf",
+	"minLength",
+	"maxLength",
+	"maxItems",
+];
+
+const uncompilable = (node: SchemaNode) =>
+	UNCOMPILABLE_KEYWORDS.some((keyword) => keyword in node) ||
+	(node.type === "object" && node.additionalProperties !== false) ||
+	(typeof node.minItems === "number" && node.minItems > 1);
+
+/** Marks each tool whose schema strict tool use compiles, so its input always parses. */
+const strictTools = {
+	transformParams: async ({ params }) => ({
+		...params,
+		tools: params.tools?.map((tool) =>
+			tool.type === "function" &&
+			!schemaNodes(tool.inputSchema).some(uncompilable)
+				? { ...tool, strict: true }
+				: tool,
+		),
+	}),
+} satisfies LanguageModelMiddleware;
+
 export class AnthropicLLM implements LLMProvider {
 	constructor(private readonly apiKey: string) {}
 
@@ -166,7 +205,7 @@ export class AnthropicLLM implements LLMProvider {
 		return {
 			model: wrapLanguageModel({
 				model: this.model(modelId),
-				middleware: fitImageLimits(modelId),
+				middleware: [fitImageLimits(modelId), strictTools],
 			}),
 			modelId,
 			providerOptions: {

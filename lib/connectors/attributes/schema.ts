@@ -24,7 +24,7 @@ type AttributeEdit =
 	/** A count of seconds typed in, at least `min`. Empty leaves it unset. */
 	| { kind: "seconds"; value: z.ZodType<string>; min: number }
 	/** Image URLs as tiles; `continuity` adds the previous visual's pictures and their link toggle. */
-	| { kind: "images"; value?: undefined; continuity?: true }
+	| { kind: "images"; value: z.ZodType<string>; continuity?: true }
 	/** One picture to open on: the visual before, or an image URL. */
 	| { kind: "frame"; value: z.ZodType<string> };
 
@@ -43,9 +43,13 @@ export interface AttributeDef {
 	perModel?: boolean;
 }
 
+/** The values a menu or toggle offers; none for a free-form attribute. */
+export const optionsOf = ({ edit }: AttributeDef): readonly string[] =>
+	edit?.kind === "enum" || edit?.kind === "toggle" ? edit.value.options : [];
+
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {
-	private constructor(private readonly defs: readonly AttributeDef[]) {}
+	private constructor(readonly defs: readonly AttributeDef[]) {}
 
 	static from(defs: readonly AttributeDef[]): AttributeSchema {
 		return new AttributeSchema(defs);

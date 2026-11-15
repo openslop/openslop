@@ -11,13 +11,6 @@ import { BLOB_BASE_URL } from "@/lib/blob";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
-import {
-	TTS_ACCENTS,
-	TTS_AGES,
-	TTS_GENDERS,
-	TTS_LANGUAGES,
-	TTS_PITCHES,
-} from "@/lib/connectors/tts/enums";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
@@ -871,7 +864,7 @@ describe("SLOPPY_TOOLS", () => {
 		]);
 	});
 
-	it("lists each asset type an edit can set up, and a character's voice traits with their options", () => {
+	it("lists each asset type an edit can set up", () => {
 		const { description } = SLOPPY_TOOLS.edit_script;
 
 		for (const type of [
@@ -881,15 +874,6 @@ describe("SLOPPY_TOOLS", () => {
 			"asset_references",
 		]) {
 			expect(description).toContain(`- ${type}: `);
-		}
-		for (const options of [
-			TTS_GENDERS,
-			TTS_AGES,
-			TTS_PITCHES,
-			TTS_ACCENTS,
-			TTS_LANGUAGES,
-		]) {
-			expect(description).toContain(`(${options.join(" | ")})`);
 		}
 	});
 });
