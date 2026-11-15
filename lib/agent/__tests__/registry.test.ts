@@ -519,7 +519,7 @@ describe("executeToolCall", () => {
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
 		expect(outcome.ok && outcome.output).toContain(
-			"1 image or video without dialogue left alone.",
+			"1 image or video left alone.",
 		);
 	});
 
@@ -616,7 +616,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"No video elements with dialogue under them in scope.",
+			"No video element to generate has dialogue under it in scope.",
 		);
 	});
 
