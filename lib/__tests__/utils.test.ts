@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cn, fromKeys, keysOf } from "../utils";
+import { cn, fromKeys, keysOf, pickOther } from "../utils";
 
 describe("cn", () => {
 	it("keeps a custom text size beside a text color", () => {
@@ -24,5 +24,23 @@ describe("keysOf / fromKeys", () => {
 			a: 10,
 			b: 20,
 		});
+	});
+});
+
+describe("pickOther", () => {
+	const items = ["a", "b", "c"];
+
+	it("never returns the current item", () => {
+		for (const current of items) {
+			for (let attempt = 0; attempt < 50; attempt++) {
+				const picked = pickOther(items, current);
+				expect(items).toContain(picked);
+				expect(picked).not.toBe(current);
+			}
+		}
+	});
+
+	it("picks from the whole list when nothing is current", () => {
+		expect(items).toContain(pickOther(items, ""));
 	});
 });

@@ -27,7 +27,7 @@ function AddMediaPickerButton({
 	const label = uploading ? `Uploading ${kind}…` : `Add ${kind}`;
 	return (
 		<ElementActionButton
-			icon={uploading ? <Spinner /> : <Plus aria-hidden="true" />}
+			icon={uploading ? <Spinner /> : <Plus />}
 			label={label}
 			tooltip={label}
 			disabled={disabled || uploading}

@@ -11,8 +11,3 @@ export const IDEAS = [
 	"Create a colorful animated children's story about a young rabbit",
 	"Create a calming bedtime documentary about life in a medieval village",
 ];
-
-export function nextIdea(current: string): string {
-	const pool = IDEAS.filter((idea) => idea !== current);
-	return pool[Math.floor(Math.random() * pool.length)];
-}
