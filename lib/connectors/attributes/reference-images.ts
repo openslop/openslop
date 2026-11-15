@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { AttributeDef } from "./schema";
 
 export const REFERENCE_IMAGES_ATTR = "referenceImagesOverride";
@@ -19,9 +20,14 @@ export function parseReferenceImages(
 export const serializeReferenceImages = (urls: string[]): string =>
 	urls.join(",");
 
+export const imagesEdit = {
+	kind: "images",
+	value: z.string().describe("Image URLs, comma-separated. Empty clears them."),
+} as const;
+
 /** No default: an absent value is what makes an element inherit the project's references. */
 export const referenceImagesDef: AttributeDef = {
 	key: REFERENCE_IMAGES_ATTR,
 	label: "References",
-	edit: { kind: "images" },
+	edit: imagesEdit,
 };

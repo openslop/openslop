@@ -13,19 +13,13 @@ import {
 	SPEECH_TYPES,
 	type ElementType,
 } from "@/lib/canvas/types";
-import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { listModels } from "@/lib/connectors/models";
-import { MODEL_REF_KEYS } from "@/lib/connectors/types";
 import { conjunction } from "@/lib/format";
 
 const ELEMENT_TEXT = `The element's content: the spoken line for ${conjunction(SPEECH_TYPES)}; the prompt for ${conjunction(NON_SPEECH_TYPES)}; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
 
-/** Attributes Sloppy writes by hand: options, seconds, a start frame, free text, and the model pair. */
-const writable = ({ key, edit }: AttributeDef) =>
-	edit ? edit.kind !== "images" : MODEL_REF_KEYS.some((ref) => ref === key);
-
 /** Every attribute an element of `type` can hold, under any of its models. */
-const defsOf = (type: ElementType): AttributeDef[] => {
+const defsOf = (type: ElementType) => {
 	const connector = connectorOf(type);
 	const models = connector ? listModels(connector) : [undefined];
 	return models.flatMap((model) => attributeSchemaFor(type, model).defs);
@@ -33,11 +27,7 @@ const defsOf = (type: ElementType): AttributeDef[] => {
 
 const TYPED_DEFS = ElementTypeSchema.options
 	.filter((type) => !isMediaDraftType(type))
-	.flatMap((type) =>
-		defsOf(type)
-			.filter(writable)
-			.map((def) => ({ type, def })),
-	);
+	.flatMap((type) => defsOf(type).map((def) => ({ type, def })));
 
 /** A key's value on every type and model that carries it: their options merged, else the value they share. */
 function attributeValue(typed: typeof TYPED_DEFS): z.ZodType<string> {
@@ -54,6 +44,7 @@ function attributeValue(typed: typeof TYPED_DEFS): z.ZodType<string> {
 	const types = uniq(typed.map(({ type }) => type));
 	return value.describe(
 		[
+			value.description,
 			`On ${conjunction(types)}.`,
 			def.unit && `Unit: ${def.unit}.`,
 			def.perModel && "The options depend on the model.",

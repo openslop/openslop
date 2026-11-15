@@ -68,6 +68,23 @@ describe("refine op attributes", () => {
 		expect(voice({ name: "Mia", gender: "robot" }).success).toBe(false);
 	});
 
+	it("sets what the user would otherwise pick or upload", () => {
+		expect(
+			setAttrs({
+				referenceImagesOverride: "https://a.test/1.png,https://a.test/2.png",
+				uploadedFrame: "https://a.test/frame.png",
+			}).success,
+		).toBe(true);
+		expect(voice({ name: "Mia", pickedVoiceId: "v1" }).success).toBe(true);
+		expect(
+			refineOpSchema.safeParse({
+				op: "asset",
+				type: "asset_references",
+				attrs: { images: "https://a.test/1.png" },
+			}).success,
+		).toBe(true);
+	});
+
 	it("takes null for an attribute only on a set", () => {
 		expect(setAttrs({ trimEnd: null }).success).toBe(true);
 		expect(voice({ name: null }).success).toBe(false);

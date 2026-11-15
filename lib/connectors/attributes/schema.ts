@@ -24,7 +24,7 @@ type AttributeEdit =
 	/** A count of seconds typed in, at least `min`. Empty leaves it unset. */
 	| { kind: "seconds"; value: z.ZodType<string>; min: number }
 	/** Image URLs as tiles; `continuity` adds the previous visual's pictures and their link toggle. */
-	| { kind: "images"; value?: undefined; continuity?: true }
+	| { kind: "images"; value: z.ZodType<string>; continuity?: true }
 	/** One picture to open on: the visual before, or an image URL. */
 	| { kind: "frame"; value: z.ZodType<string> };
 

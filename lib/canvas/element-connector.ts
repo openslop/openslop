@@ -1,4 +1,5 @@
 import { nameDef, OWN_MODEL_DEFS } from "@/lib/connectors/attributes/common";
+import { referenceImagesDef } from "@/lib/connectors/attributes/reference-images";
 import { AttributeSchema } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
 import { resolveModel } from "@/lib/connectors/models";
@@ -51,7 +52,7 @@ const OWN_ATTRIBUTES: Partial<Record<ElementType, AttributeSchema>> = {
 	asset_voice: VOICE_ATTRIBUTES,
 	asset_style: AttributeSchema.from([]),
 	asset_references: AttributeSchema.from([
-		{ key: REFERENCE_URLS_ATTR, label: "References" },
+		{ ...referenceImagesDef, key: REFERENCE_URLS_ATTR, hidden: true },
 	]),
 } satisfies Record<ProjectAssetType, AttributeSchema>;
 
