@@ -22,7 +22,6 @@ export function SettingPill<T extends string>({
 	value,
 	options,
 	onChange,
-	disabled = false,
 	className,
 	style,
 }: {
@@ -31,8 +30,6 @@ export function SettingPill<T extends string>({
 	value: T;
 	options: SettingPillOption<T>[];
 	onChange: (value: T) => void;
-	/** Pinned to `value`: shown, greyed, and not openable. */
-	disabled?: boolean;
 	className?: string;
 	style?: CSSProperties;
 }) {
@@ -59,7 +56,6 @@ export function SettingPill<T extends string>({
 			<ButtonMenuTrigger
 				icon={icon}
 				aria-label={`${name}: ${selected.label}`}
-				disabled={disabled}
 				className={className}
 				style={style}
 			>

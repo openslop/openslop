@@ -1,7 +1,9 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Film } from "@/components/ui/icon";
+import { videoLengthBudget } from "@/lib/project/video-length";
 import { defineTool } from "./define-tool";
+import { runtimeVerdict } from "./estimate-total-length";
 
 export const adaptScript = defineTool({
 	description: dedent`
@@ -17,15 +19,15 @@ export const adaptScript = defineTool({
 	  character cues where they are. Nothing is invented either: the conversion adds visuals,
 	  sound and music around their words, never new dialogue or prose.
 
-	  During adaptation, pass the script through EXACTLY as they gave it. Never summarize, rewrite or shorten it,
+	  Pass the script through EXACTLY as they gave it. Never summarize, rewrite or shorten it,
 	  however long it is. When you cannot tell where the script starts, keep the text rather than cut it.
 
 	  Everything else in the message is still theirs, so place it:
 	  - what they said about the look, mood, pacing or delivery goes in 'notes'
 	  - a setting they stated outright has its own tool: set_title, update_script_settings,
 	    update_video_settings, or edit_script for a character, a voice or the art style
-	  - after adapting, read the script. If the user asks to change or shorten the text,
-	    use edit_script after this call, not by changing what you pass into adaptation
+	  - an instruction about the text itself ("make this shorter") is carried out with
+	    edit_script after this call, not by editing what you pass in
 	`,
 	input: z.object({
 		script: z
@@ -46,7 +48,13 @@ export const adaptScript = defineTool({
 	label: "Putting your script on the canvas",
 	execute: async ({ script, notes }, ctx) => {
 		await ctx.adaptScript(script, notes);
-		return "Put that script onto the canvas. Read it to see what landed.";
+		const landed =
+			"Put that script onto the canvas. Read it to see what landed.";
+		const { length } = ctx.readProject().scriptSettings;
+		const budget = videoLengthBudget(length);
+		const verdict = budget && runtimeVerdict(ctx.estimateRuntime(), budget);
+		if (!verdict) return landed;
+		return `${landed} It runs ${verdict} against the ${length} target, so fit it with edit_script, keeping as much of their wording as you can, until estimate_total_length lands in range.`;
 	},
 	draftsScript: true,
 });

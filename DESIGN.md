@@ -37,7 +37,7 @@ Sizes: `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-b
 
 ## Spacing, radius, elevation
 
-4px base spacing. Radius from `--radius`: cards `rounded-xl`, overlays and form controls `rounded-md`, pills `rounded-full`. Depth is `shadow-elevation-1/3/5/10`, never glow; popovers and menus sit at 3.
+4px base spacing. Radius from `--radius`: cards `rounded-xl`, overlays and form controls `rounded-md`, pills `rounded-full`. Depth is `shadow-elevation-1/3/5/10`, never glow; popovers and menus sit at 3. The one exception is ambient light (below).
 
 ## Motion
 
@@ -48,6 +48,7 @@ Eases `--ease-casual` / `--ease-productive` / `--ease-expressive`, durations `--
 Two opt-in treatments, both quiet:
 
 - `.grain`: film grain (`--grain-opacity`) on raised surfaces (dialogs, panel cards, the canvas card, onboarding, the inline copilot). Needs a positioned element and paints through `::after`. Not on dense element cards.
+- Ambient light, hero composer only: `<LightRays />` (`components/ui/light-rays.tsx`) paints still-grained rays from the top-left over the dot grid, and `.ambient-glow` wraps the composer in the same light, breathing slowly and brighter on focus. Both take `--ambient-light` (the indicator berry, deep wine in light and rose in dark). Nowhere else.
 - `.dot-grid-bg`: the "+" grid behind the editor and gallery. Reach for `<DotGrid />` (`components/ui/dot-grid.tsx`), which renders it `aria-hidden` and `pointer-events-none`, behind content.
 
 ## Components

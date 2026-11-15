@@ -3,11 +3,22 @@ import { z } from "zod";
 import {
 	NARRATION_WORDS_PER_MINUTE,
 	videoLengthBudget,
+	type VideoLengthSpec,
 } from "@/lib/project/video-length";
 import { Hourglass } from "@/components/ui/icon";
 import { defineTool, seconds } from "./define-tool";
 
 const minutes = (sec: number) => (sec / 60).toFixed(1);
+
+/** How far a runtime falls outside its budget, or nothing when it fits. */
+export function runtimeVerdict(
+	runtime: number,
+	{ minSec, maxSec }: VideoLengthSpec,
+): string | undefined {
+	if (runtime < minSec) return `under by ${seconds(minSec - runtime)}`;
+	if (runtime > maxSec) return `over by ${seconds(runtime - maxSec)}`;
+	return undefined;
+}
 
 export const estimateTotalLength = defineTool({
 	description: dedent`
@@ -33,14 +44,6 @@ export const estimateTotalLength = defineTool({
 		const budget = videoLengthBudget(length);
 		if (!budget) return `${estimate} Target: auto, so any length is fine.`;
 
-		const { minSec, maxSec } = budget;
-		const verdict =
-			runtime < minSec
-				? `under by ${seconds(minSec - runtime)}`
-				: runtime > maxSec
-					? `over by ${seconds(runtime - maxSec)}`
-					: "within the target range";
-
-		return `${estimate} Target: ${length} (${seconds(minSec)} to ${seconds(maxSec)}) - ${verdict}.`;
+		return `${estimate} Target: ${length} (${seconds(budget.minSec)} to ${seconds(budget.maxSec)}) - ${runtimeVerdict(runtime, budget) ?? "within the target range"}.`;
 	},
 });

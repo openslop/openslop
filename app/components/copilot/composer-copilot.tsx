@@ -1,10 +1,13 @@
 "use client";
 
+import TextareaAutosize from "react-textarea-autosize";
+import { useRef } from "react";
 import {
 	CornerDownLeft,
 	FilmSlate,
 	Hourglass,
 	ImagePlus,
+	Lightbulb,
 	Media,
 	Mic,
 	Palette,
@@ -16,8 +19,6 @@ import {
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
 import { IconButton, TooltipIconButton } from "@/components/ui/icon-button";
 import { AddButton } from "@/components/ui/add-button";
-
-import AnimatedPlaceholder from "@/app/components/animated-placeholder";
 import { useAssetEditors } from "@/app/components/canvas/elements/asset-edit-context";
 import { TEMPLATES, type Template } from "@/lib/templates/templates";
 import { templateBrief } from "@/lib/templates/template-brief";
@@ -46,7 +47,6 @@ import {
 } from "@/lib/project/video-format";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { UploadKindSchema } from "@/lib/upload/upload-files";
-import { cn } from "@/lib/utils";
 import {
 	AssetStrip,
 	AssetStripArtStyle,
@@ -56,6 +56,7 @@ import {
 	AssetStripUploading,
 } from "@/app/components/canvas/elements/asset-strip";
 import { SettingPill, type SettingPillOption } from "./setting-pill";
+import { IDEAS, nextIdea } from "./ideas";
 import { ModelSelect, modelLabel } from "@/app/components/models/model-select";
 import { ButtonMenuTrigger } from "@/components/ui/select-menu";
 import { ProviderIcon } from "@/app/components/models/provider-icon";
@@ -75,6 +76,8 @@ const VIDEO_FORMAT_OPTIONS: SettingPillOption<VideoFormat>[] =
 
 const LANGUAGE_OPTIONS: SettingPillOption<LanguageChoice>[] =
 	LANGUAGE_CHOICES.map((value) => ({ value, label: languageLabel(value) }));
+
+const PROMPT_LABEL = "Describe your slop or paste a script";
 
 const TEMPLATE_OPTIONS: SettingPillOption<string>[] = TEMPLATES.map(
 	({ id, name }) => ({ value: id, label: name }),
@@ -196,18 +199,21 @@ export default function ComposerCopilot({
 		multiple: true,
 	});
 	const hasText = value.trim().length > 0;
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const handleSubmit = () => {
 		if (hasText) onSubmit(templateBrief(template, value));
 	};
 
+	const suggestIdea = () => {
+		onValueChange(nextIdea(value));
+		textareaRef.current?.focus();
+	};
+
 	return (
 		<div
 			{...media.dropZoneProps}
-			className={cn(
-				"relative w-full rounded-xl border bg-card transition-shadow focus-within:shadow-elevation-5",
-				media.isDraggingOver ? "border-accent" : "border-accent/30",
-			)}
+			className="ambient-glow relative w-full rounded-xl bg-card transition-shadow focus-within:shadow-elevation-5"
 		>
 			<div className="px-4 py-3">
 				<AssetStrip>
@@ -223,27 +229,20 @@ export default function ComposerCopilot({
 					{template && (
 						<TemplatePill template={template} onRemove={clearTemplate} />
 					)}
-					<div className="min-w-0 flex-1 grid [&>*]:[grid-area:1/1]">
-						<textarea
-							rows={2}
-							aria-label="Enter a prompt or paste a script"
-							value={value}
-							onChange={(e) => onValueChange(e.target.value)}
-							onKeyDown={(e) => {
-								if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
-									handleSubmit();
-							}}
-							className="field-sizing-content max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
-						/>
-						{!hasText && !template && (
-							<div className="pointer-events-none overflow-hidden font-body text-body">
-								<AnimatedPlaceholder />
-							</div>
-						)}
-					</div>
+					<TextareaAutosize
+						ref={textareaRef}
+						aria-label={PROMPT_LABEL}
+						placeholder={template ? undefined : PROMPT_LABEL}
+						value={value}
+						onChange={(e) => onValueChange(e.target.value)}
+						onKeyDown={(e) => {
+							if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSubmit();
+						}}
+						className="max-h-[40vh] min-w-0 flex-1 resize-none overflow-y-auto bg-transparent font-body text-body text-foreground caret-accent placeholder:text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:rounded-sm"
+					/>
 				</div>
-				<div className="flex items-center justify-between pt-2">
-					<div className="flex min-w-0 flex-wrap items-center gap-2">
+				<div className="flex items-center justify-between gap-2 pt-2">
+					<div className="scrollbar-overlay flex min-w-0 items-center gap-1 overflow-x-auto mask-r-from-85% *:shrink-0 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:mask-none">
 						{references.inputElement}
 						{media.inputElement}
 						<AttachMenu
@@ -302,13 +301,22 @@ export default function ComposerCopilot({
 							/>
 						)}
 					</div>
-					<TooltipIconButton
-						label="Submit"
-						onClick={handleSubmit}
-						disabled={!hasText}
-					>
-						<CornerDownLeft />
-					</TooltipIconButton>
+					<div className="flex shrink-0 items-center gap-1">
+						<TooltipIconButton
+							label="Suggest an idea"
+							onClick={suggestIdea}
+							disabled={hasText && !IDEAS.includes(value)}
+						>
+							<Lightbulb />
+						</TooltipIconButton>
+						<TooltipIconButton
+							label="Submit"
+							onClick={handleSubmit}
+							disabled={!hasText}
+						>
+							<CornerDownLeft />
+						</TooltipIconButton>
+					</div>
 				</div>
 			</div>
 			{media.isDraggingOver && (
