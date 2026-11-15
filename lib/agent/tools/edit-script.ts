@@ -100,7 +100,8 @@ export const editScript = defineTool({
 
 	  Send the fewest operations that do the job. Write element text in the language of the
 	  surrounding script, whatever language the request is in. Prompts for ${conjunction(NON_SPEECH_TYPES)},
-	  and avatar and style text, are always in English, except speech quoted inside a video prompt.
+	  and avatar and style text, are always in English, except speech quoted inside a video prompt
+	  and the lyrics in a music prompt.
 	`,
 	input: z.object({
 		ops: z

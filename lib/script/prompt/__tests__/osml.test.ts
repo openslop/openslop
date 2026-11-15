@@ -115,6 +115,19 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("The format decides which elements you write.");
 	});
 
+	it("sings a music cue only when the story calls for a song, with its lyrics in the prompt", () => {
+		expect(spec).toContain(
+			'lyrics: "true" makes the cue a song, sung over the scenes (default "false", instrumental)',
+		);
+		expect(spec).toContain("never under narration or dialogue");
+		expect(spec).toContain(
+			'Instrumental with no lyrics, unless lyrics="true": then the vocal style too, and the prompt ends with Lyrics:',
+		);
+		expect(spec).toContain(
+			"Only speech quoted inside a <video> prompt and the lyrics of a <music> prompt are in the script language.",
+		);
+	});
+
 	it("deters motion on video, which competes with the motion the video model generates", () => {
 		expect(spec).toMatch(/motion: normally set to "none"/);
 		expect(spec).not.toMatch(/<video[^>]*\smotion=/);

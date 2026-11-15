@@ -4,12 +4,14 @@ import {
 	DEFAULT_LOOPS,
 	DURATION_OPTIONS,
 	LOOPS_OPTIONS,
+	TOGGLE_ON,
 } from "@/lib/canvas/types";
 import {
 	DEFAULT_MOTION,
 	MOTION_EFFECTS,
 } from "@/lib/render/motion-effect-names";
 import { loopDef } from "@/lib/connectors/attributes/common";
+import { lyricsDef } from "@/lib/connectors/music/attributes";
 import {
 	CONTINUITY_ATTR,
 	START_FRAME_ATTR,
@@ -74,6 +76,7 @@ export function osmlSpec(language: string): string {
 		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the Music prompts section says.
 		- Place it ahead of the first visual it plays under, so it starts with that scene.
 		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. A cue written to its runtime plays once; use more only for a short bed that should repeat.
+		- ${lyricsDef.key}: "${TOGGLE_ON}" makes the cue a song, sung over the scenes (default "${lyricsDef.default}", instrumental). Set it only when the story calls for a song, like a music video, a theme song or a character singing, and never under narration or dialogue, where the singing would fight the voice.
 
 		${MUSIC_PROMPT_FORMAT}
 	`;

@@ -1,11 +1,13 @@
 import { dedent } from "@/lib/dedent";
+import { TOGGLE_ON } from "@/lib/canvas/types";
+import { lyricsDef } from "@/lib/connectors/music/attributes";
 import { NARRATION_WORDS_PER_SECOND } from "@/lib/project/video-length";
 import { VIDEO_FORMAT } from "./formats";
 
 export const MUSIC_PROMPT_FORMAT = dedent`
 	## Music prompts
 	A <music> prompt is a cue for the run of scenes it plays under, from where it sits to the next <music>, written like a line on a film cue sheet. The music model reads nothing but the prompt and takes its length from it, so the cue says:
-	- Genre, instrumentation and production style, instrumental with no lyrics.
+	- Genre, instrumentation and production style. Instrumental with no lyrics, unless ${lyricsDef.key}="${TOGGLE_ON}": then the vocal style too, and the prompt ends with Lyrics: and every line to sing, in the script language.
 	- Estimated runtime, as m:ss: the visuals it covers added up, each lasting its video's duration or the speech after it at ${NARRATION_WORDS_PER_SECOND} words a second, whichever is longer.
 	- An arc: how it opens, each turn timestamped to what is on screen at that moment in those scenes, and how it ends.
 	- Mood, key, tempo in BPM and meter.

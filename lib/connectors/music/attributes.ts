@@ -10,7 +10,7 @@ import {
 	volumeDef,
 } from "../attributes/common";
 
-const lyricsDef: AttributeDef = {
+export const lyricsDef: AttributeDef = {
 	key: "lyrics",
 	label: "Lyrics",
 	edit: {
