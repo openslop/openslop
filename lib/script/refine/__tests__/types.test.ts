@@ -2,7 +2,7 @@ import groupBy from "lodash/groupBy";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import { ElementTypeSchema, isMediaDraftType } from "@/lib/canvas/types";
+import { ElementTypeSchema } from "@/lib/canvas/types";
 import { TTS_GENDERS, TTS_LANGUAGES } from "@/lib/connectors/tts/enums";
 import { refineOpSchema } from "../types";
 
@@ -91,9 +91,9 @@ describe("refine op attributes", () => {
 	});
 
 	it("gives a key the same values on every type that shares it", () => {
-		const defs = ElementTypeSchema.options
-			.filter((type) => !isMediaDraftType(type))
-			.flatMap((type) => attributeSchemaFor(type).baseDefs);
+		const defs = ElementTypeSchema.options.flatMap(
+			(type) => attributeSchemaFor(type).baseDefs,
+		);
 		const byKey = groupBy(defs, (def) => def.key);
 
 		for (const shared of Object.values(byKey)) {

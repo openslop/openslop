@@ -8,7 +8,6 @@ import {
 	connectorOf,
 	ContentTypeSchema,
 	ElementTypeSchema,
-	isMediaDraftType,
 	NON_SPEECH_TYPES,
 	SPEECH_TYPES,
 	type ElementType,
@@ -25,9 +24,9 @@ const defsOf = (type: ElementType) => {
 	return models.flatMap((model) => attributeSchemaFor(type, model).defs);
 };
 
-const TYPED_DEFS = ElementTypeSchema.options
-	.filter((type) => !isMediaDraftType(type))
-	.flatMap((type) => defsOf(type).map((def) => ({ type, def })));
+const TYPED_DEFS = ElementTypeSchema.options.flatMap((type) =>
+	defsOf(type).map((def) => ({ type, def })),
+);
 
 /** A key's value on every type and model that carries it: their options merged, else the value they share. */
 function attributeValue(typed: typeof TYPED_DEFS): z.ZodType<string> {
