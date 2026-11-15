@@ -151,6 +151,7 @@ const schemaNodes = (schema: unknown): SchemaNode[] =>
 		? [schema as SchemaNode, ...Object.values(schema).flatMap(schemaNodes)]
 		: [];
 
+// https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-schema-limitations
 const UNCOMPILABLE_KEYWORDS = [
 	"oneOf",
 	"propertyNames",
