@@ -18,8 +18,11 @@ import { cn } from "@/lib/utils";
 
 const SKELETON_ROWS = [0, 1, 2];
 
-/** The newest version is the live project, so it is neither viewed nor restored. */
-type RowState = "current" | "previewing" | "older";
+/**
+ * The newest version is the live project: with no preview it needs no action,
+ * and during one, viewing it returns to latest. Only the previewed row restores.
+ */
+type RowState = "current" | "previewing" | "viewable";
 
 function CanvasVersionRow({
 	version,
@@ -64,7 +67,7 @@ function CanvasVersionRow({
 						Restore
 					</Button>
 				)}
-				{state === "older" && (
+				{state === "viewable" && (
 					<Button
 						type="button"
 						variant="secondary"
@@ -132,7 +135,7 @@ export function CanvasHistoryPanel() {
 
 	const rowState = (version: CanvasVersion, index: number): RowState => {
 		if (version.id === previewId) return "previewing";
-		return index === 0 ? "current" : "older";
+		return index === 0 && !previewId ? "current" : "viewable";
 	};
 
 	return (
@@ -142,10 +145,13 @@ export function CanvasHistoryPanel() {
 					key={version.id}
 					version={version}
 					state={rowState(version, index)}
-					onView={() =>
-						history.preview(version.id).catch((error: unknown) => {
-							toastError(error, "Opening this version failed");
-						})
+					onView={
+						index === 0
+							? history.backToLatest
+							: () =>
+									history.preview(version.id).catch((error: unknown) => {
+										toastError(error, "Opening this version failed");
+									})
 					}
 					onRestore={history.restore}
 				/>
