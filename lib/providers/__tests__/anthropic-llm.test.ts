@@ -68,8 +68,8 @@ function streamWith(deltas: string[], tail: LanguageModelV3StreamPart[] = []) {
 	};
 }
 
-const lastCall = () => calls[0];
-const userContent = () => lastCall().prompt.at(-1)?.content;
+const firstCall = () => calls[0];
+const userContent = () => firstCall().prompt.at(-1)?.content;
 
 describe("AnthropicLLM", () => {
 	beforeEach(() => {
@@ -89,7 +89,7 @@ describe("AnthropicLLM", () => {
 				usage: { inputTokens: 10, outputTokens: 5 },
 			});
 			expect(createAnthropic).toHaveBeenCalledWith({ apiKey: "test-key" });
-			expect(lastCall().maxOutputTokens).toBe(65536);
+			expect(firstCall().maxOutputTokens).toBe(65536);
 			expect(userContent()).toEqual([{ type: "text", text: "hi" }]);
 		});
 
@@ -101,7 +101,7 @@ describe("AnthropicLLM", () => {
 				model: MODEL_ID,
 			});
 
-			expect(lastCall().providerOptions?.anthropic).toEqual({
+			expect(firstCall().providerOptions?.anthropic).toEqual({
 				thinking: { type: "adaptive", display: "summarized" },
 				effort: "high",
 			});
@@ -118,13 +118,13 @@ describe("AnthropicLLM", () => {
 				thinkingLevel: "low",
 			});
 
-			expect(lastCall().maxOutputTokens).toBe(100);
-			expect(lastCall().prompt[0]).toEqual({
+			expect(firstCall().maxOutputTokens).toBe(100);
+			expect(firstCall().prompt[0]).toEqual({
 				role: "system",
 				content: "You are helpful",
 				providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
 			});
-			expect(lastCall().providerOptions?.anthropic).toMatchObject({
+			expect(firstCall().providerOptions?.anthropic).toMatchObject({
 				effort: "low",
 			});
 		});
@@ -138,7 +138,7 @@ describe("AnthropicLLM", () => {
 				temperature: 0.5,
 			});
 
-			expect(lastCall().temperature).toBeUndefined();
+			expect(firstCall().temperature).toBeUndefined();
 		});
 
 		it("includes reference images before the text", async () => {
