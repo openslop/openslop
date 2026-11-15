@@ -85,7 +85,7 @@ export function ElementContainer({
 				data-element-id={element.id}
 				{...nodeAttributes}
 			>
-				<div className="group/card @container relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
+				<div className="group/card @container/element relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-element-card p-3">
 					<div className="relative z-10 min-w-0">
 						<div
 							className="mb-2 flex items-start gap-1.5 select-none"

@@ -1,8 +1,6 @@
 "use client";
 
 import { ReactEditor, useSlateStatic } from "slate-react";
-import { Button } from "@/components/ui/button";
-import { keepFocus } from "@/components/ui/keep-focus";
 import { MagicVideo } from "@/components/ui/icon";
 import { useSloppy } from "@/app/components/sloppy/sloppy-provider";
 import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
@@ -10,6 +8,7 @@ import type { ContentElement } from "@/lib/canvas/types";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { animateImagePrompt } from "@/lib/script/refine/animate-prompt";
 import { useEditorPanel } from "../panel/editor-panel-context";
+import { ElementActionButton } from "./element-action-button";
 import { useElementGeneration } from "./element-generation-context";
 
 export function AnimateButton({ element }: { element: ContentElement }) {
@@ -19,14 +18,11 @@ export function AnimateButton({ element }: { element: ContentElement }) {
 	const { setActive } = useEditorPanel();
 
 	return (
-		<Button
-			type="button"
-			variant="ghost"
-			size="sm"
+		<ElementActionButton
+			icon={<MagicVideo />}
+			label="Animate"
 			tooltip={`Turn this into a video element${result?.imageUrl ? " that starts from this image" : ""}`}
-			className="shrink-0"
 			disabled={loading || isGenerationActive(status)}
-			onMouseDown={keepFocus}
 			onClick={() => {
 				const path = ReactEditor.findPath(editor, element);
 				setActive("sloppy");
@@ -36,9 +32,6 @@ export function AnimateButton({ element }: { element: ContentElement }) {
 					),
 				);
 			}}
-		>
-			<MagicVideo />
-			<span className="hidden @sm:inline">Animate</span>
-		</Button>
+		/>
 	);
 }

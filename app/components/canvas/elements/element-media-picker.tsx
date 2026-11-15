@@ -1,9 +1,7 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import { Button } from "@/components/ui/button";
 import { Plus } from "@/components/ui/icon";
-import { keepFocus } from "@/components/ui/keep-focus";
 import { Spinner } from "@/components/ui/spinner";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
@@ -13,7 +11,7 @@ import {
 	isUploadable,
 	uploadKindOf,
 } from "@/lib/upload/uploaded-result";
-import { cn } from "@/lib/utils";
+import { ElementActionButton } from "./element-action-button";
 import { useElementGeneration } from "./element-generation-context";
 import { MediaPicker, useMediaPickerUploading } from "./media-picker";
 
@@ -21,25 +19,20 @@ import { MediaPicker, useMediaPickerUploading } from "./media-picker";
 function AddMediaPickerButton({
 	kind,
 	disabled,
-	className,
 	...props
-}: ComponentProps<typeof Button> & { kind: UploadKind }) {
+}: Omit<ComponentProps<typeof ElementActionButton>, "icon" | "label"> & {
+	kind: UploadKind;
+}) {
 	const uploading = useMediaPickerUploading();
 	const label = uploading ? `Uploading ${kind}…` : `Add ${kind}`;
 	return (
-		<Button
-			type="button"
-			variant="ghost"
-			size="sm"
+		<ElementActionButton
+			icon={uploading ? <Spinner /> : <Plus aria-hidden="true" />}
+			label={label}
 			tooltip={label}
 			disabled={disabled || uploading}
-			onMouseDown={keepFocus}
-			className={cn("shrink-0", className)}
 			{...props}
-		>
-			{uploading ? <Spinner /> : <Plus aria-hidden="true" />}
-			<span className="hidden sm:inline">{label}</span>
-		</Button>
+		/>
 	);
 }
 
