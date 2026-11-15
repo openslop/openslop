@@ -14,18 +14,17 @@ import { element, scene, words } from "./_script";
 const runtime = (
 	script: Descendant[],
 	transitionType: TransitionType = "none",
-	held: Record<string, ElementSnapshot> = {},
+	snapshots: Record<string, ElementSnapshot> = {},
 ) =>
 	estimateRuntime(
 		script,
 		{ ...VideoSettingsSchema.parse({}), transitionType },
-		(id) => held[id] ?? EMPTY_SNAPSHOT,
+		(id) => snapshots[id] ?? EMPTY_SNAPSHOT,
 	);
 
-const video = (durationSec: number, pinned: boolean): ElementSnapshot => ({
+const video = (durationSec: number): ElementSnapshot => ({
 	...EMPTY_SNAPSHOT,
 	result: { videoUrl: "https://example.com/clip.mp4", durationSec },
-	pinned,
 });
 
 describe("estimateRuntime", () => {
@@ -53,24 +52,27 @@ describe("estimateRuntime", () => {
 		).toBe(5 + estimateSpeechSec(90));
 	});
 
-	it("cuts an uploaded video's trims from its own length, not the scripted duration", () => {
+	it("cuts a video's trims from its media length, not the scripted duration", () => {
 		const first = element("video", "", { trimStart: "30", trimEnd: "45" });
 		const second = element("video", "", { trimStart: "60", trimEnd: "80" });
 
 		expect(
 			runtime([scene(first, second)], "none", {
-				[first.id]: video(120, true),
-				[second.id]: video(120, true),
+				[first.id]: video(120),
+				[second.id]: video(120),
 			}),
 		).toBe(15 + 20);
 	});
 
-	it("counts a generated video at its scripted duration, which a regeneration makes it", () => {
-		const clip = element("video", "A fox runs.", { duration: "8" });
+	it("counts a video at its media length once it has one, else its scripted duration", () => {
+		const generated = element("video", "A fox runs.", { duration: "8" });
+		const pending = element("video", "A fox sleeps.", { duration: "8" });
 
-		expect(runtime([scene(clip)], "none", { [clip.id]: video(5, false) })).toBe(
-			8,
-		);
+		expect(
+			runtime([scene(generated, pending)], "none", {
+				[generated.id]: video(5),
+			}),
+		).toBe(5 + 8);
 	});
 
 	it("holds a still for the dialogue after it, and at least a second", () => {
