@@ -11,11 +11,12 @@ const minutes = (sec: number) => (sec / 60).toFixed(1);
 
 export const estimateTotalLength = defineTool({
 	description: dedent`
-	  Estimate how long the finished video will run, from the script alone, against the
-	  project's target length. Speech counts at ${NARRATION_WORDS_PER_MINUTE} words a minute
-	  (narration and dialogue only; prompts and attributes are silent), and each video counts
-	  its \`duration\` or trim even with nothing spoken over it. Speech before the first visual
-	  plays over a blank screen. For each line of dialogue, use estimate_dialogue_lengths.
+	  Estimate how long the finished video will run, from the script and any uploaded files,
+	  against the project's target length. Speech counts at ${NARRATION_WORDS_PER_MINUTE} words a
+	  minute (narration and dialogue only; prompts and attributes are silent), and each video
+	  counts its \`duration\` (an uploaded file, its own length), cut to its trim, even with
+	  nothing spoken over it. Speech before the first visual plays over a blank screen. For
+	  each line of dialogue, use estimate_dialogue_lengths.
 
 	  You cannot judge length by looking at a script, so run this after writing or editing
 	  whenever length matters, and edit until the estimate lands in the target range.

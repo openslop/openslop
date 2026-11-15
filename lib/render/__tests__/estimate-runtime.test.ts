@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
 import { estimateSpeechSec } from "@/lib/project/video-length";
+import {
+	EMPTY_SNAPSHOT,
+	type ElementSnapshot,
+} from "@/lib/generation/snapshots";
 import type { TransitionType } from "../transitions";
 import { estimateRuntime } from "../estimate-runtime";
 import { layoutOf } from "./_layout";
@@ -10,11 +14,19 @@ import { element, scene, words } from "./_script";
 const runtime = (
 	script: Descendant[],
 	transitionType: TransitionType = "none",
+	held: Record<string, ElementSnapshot> = {},
 ) =>
-	estimateRuntime(script, {
-		...VideoSettingsSchema.parse({}),
-		transitionType,
-	});
+	estimateRuntime(
+		script,
+		{ ...VideoSettingsSchema.parse({}), transitionType },
+		(id) => held[id] ?? EMPTY_SNAPSHOT,
+	);
+
+const video = (durationSec: number, pinned: boolean): ElementSnapshot => ({
+	...EMPTY_SNAPSHOT,
+	result: { videoUrl: "https://example.com/clip.mp4", durationSec },
+	pinned,
+});
 
 describe("estimateRuntime", () => {
 	it("adds up every visual's time on screen, not just the speech over it", () => {
@@ -41,15 +53,42 @@ describe("estimateRuntime", () => {
 		).toBe(5 + estimateSpeechSec(90));
 	});
 
-	it("counts a trimmed video from trim start to trim end, past its scripted duration", () => {
+	it("cuts an uploaded video's trims from its own length, not the scripted duration", () => {
+		const first = element("video", "", { trimStart: "30", trimEnd: "45" });
+		const second = element("video", "", { trimStart: "60", trimEnd: "80" });
+
 		expect(
-			runtime([
-				scene(
-					element("video", "", { trimStart: "30", trimEnd: "45" }),
-					element("video", "", { trimStart: "60", trimEnd: "80" }),
-				),
-			]),
+			runtime([scene(first, second)], "none", {
+				[first.id]: video(120, true),
+				[second.id]: video(120, true),
+			}),
 		).toBe(15 + 20);
+	});
+
+	it("counts an untrimmed upload at its own length", () => {
+		const clip = element("video", "");
+
+		expect(runtime([scene(clip)], "none", { [clip.id]: video(60, true) })).toBe(
+			60,
+		);
+	});
+
+	it("counts a pinned video whose regeneration failed at its scripted duration", () => {
+		const clip = element("video", "A fox runs.", { duration: "8" });
+
+		expect(
+			runtime([scene(clip)], "none", {
+				[clip.id]: { ...EMPTY_SNAPSHOT, pinned: true },
+			}),
+		).toBe(8);
+	});
+
+	it("counts a generated video at its scripted duration, which a regeneration makes it", () => {
+		const clip = element("video", "A fox runs.", { duration: "8" });
+
+		expect(runtime([scene(clip)], "none", { [clip.id]: video(5, false) })).toBe(
+			8,
+		);
 	});
 
 	it("holds a still for the dialogue after it, and at least a second", () => {
