@@ -78,7 +78,7 @@ describe("script review opt-in", () => {
 			typeof description === "string" ? description.replace(/\s+/g, " ") : "";
 
 		expect(systemPrompt).toContain(
-			"after write_script or adapt_script, ask whether they want a review and finish the turn",
+			"length fitting with edit_script has landed, ask whether they want a review and finish the turn",
 		);
 		expect(systemPrompt).toContain(
 			"Do not call review_script until they say yes or ask for one",
@@ -341,30 +341,6 @@ describe("executeToolCall", () => {
 
 		expect(adapted).toEqual([script]);
 		expect(outcome.ok).toBe(true);
-	});
-
-	it.each([
-		["over", 400, "It runs over by 100.0s against the 3-5m target"],
-		["under", 100, "It runs under by 80.0s against the 3-5m target"],
-	])(
-		"adapt_script says when the pasted script runs %s the target length",
-		async (_, runtime, verdict) => {
-			const outcome = await executeToolCall(
-				{ toolName: "adapt_script", input: { script: "NARRATOR\nHi." } },
-				context({ estimateRuntime: () => runtime }),
-			);
-
-			expect(outcome.ok && outcome.output).toContain(verdict);
-		},
-	);
-
-	it("adapt_script says nothing of length when the script fits", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "adapt_script", input: { script: "NARRATOR\nHi." } },
-			context({ estimateRuntime: () => 240 }),
-		);
-
-		expect(outcome.ok && outcome.output).not.toContain("target");
 	});
 
 	it("update_script_settings stores only the settings it was given", async () => {

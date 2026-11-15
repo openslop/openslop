@@ -1,9 +1,7 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { Film } from "@/components/ui/icon";
-import { videoLengthBudget } from "@/lib/project/video-length";
 import { defineTool } from "./define-tool";
-import { runtimeVerdict } from "./estimate-total-length";
 
 export const adaptScript = defineTool({
 	description: dedent`
@@ -48,13 +46,7 @@ export const adaptScript = defineTool({
 	label: "Putting your script on the canvas",
 	execute: async ({ script, notes }, ctx) => {
 		await ctx.adaptScript(script, notes);
-		const landed =
-			"Put that script onto the canvas. Read it to see what landed.";
-		const { length } = ctx.readProject().scriptSettings;
-		const budget = videoLengthBudget(length);
-		const verdict = budget && runtimeVerdict(ctx.estimateRuntime(), budget);
-		if (!verdict) return landed;
-		return `${landed} It runs ${verdict} against the ${length} target, so fit it with edit_script, keeping as much of their wording as you can, until estimate_total_length lands in range.`;
+		return "Put that script onto the canvas. Read it to see what landed.";
 	},
 	draftsScript: true,
 });
