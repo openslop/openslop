@@ -41,14 +41,12 @@ const FRAME_SOURCE_LABEL: Record<FrameSource["kind"], string> = {
 
 function FrameTile({
 	kind,
-	current,
 	onSelect,
 	picture,
 	onRemove,
 	children,
 }: {
 	kind: FrameSource["kind"];
-	current: FrameSource["kind"];
 	onSelect: () => void;
 	picture?: string;
 	onRemove?: () => void;
@@ -74,7 +72,7 @@ function FrameTile({
 				onClick={onSelect}
 				className="focus-ring"
 			>
-				<ThumbnailFace selected={kind === current}>
+				<ThumbnailFace>
 					{picture ? (
 						<MediaWithSkeleton outputKind="image" src={picture} alt="" />
 					) : (
@@ -96,22 +94,15 @@ function FrameTile({
 
 function PreviousFrameTile({
 	element,
-	current,
 	onSelect,
 }: {
 	element: GeneratedElement;
-	current: FrameSource["kind"];
 	onSelect: () => void;
 }) {
 	const previous = usePreviousPictures(element, [START_FRAME]);
 	const [opening] = previous.kind === "ready" ? previous.pictures : [];
 	return (
-		<FrameTile
-			kind="previous"
-			current={current}
-			onSelect={onSelect}
-			picture={opening?.url}
-		>
+		<FrameTile kind="previous" onSelect={onSelect} picture={opening?.url}>
 			{previous.kind === "loading" ? (
 				<Skeleton className="absolute inset-0" />
 			) : (
@@ -145,24 +136,18 @@ function StartFrameOptions({ element, attrKey, label }: AttributeTarget) {
 			}
 		>
 			<ThumbnailRadioGrid columns={2} value={source.kind} aria-label={label}>
-				<FrameTile
-					kind="none"
-					current={source.kind}
-					onSelect={() => setFrame(NO_FRAME)}
-				>
+				<FrameTile kind="none" onSelect={() => setFrame(NO_FRAME)}>
 					<Forbidden className="h-5 w-5" />
 				</FrameTile>
 				{isContentElement(element) && (
 					<PreviousFrameTile
 						element={element}
-						current={source.kind}
 						onSelect={() => setFrame(PREVIOUS_VISUAL)}
 					/>
 				)}
 				{uploaded && (
 					<FrameTile
 						kind="upload"
-						current={source.kind}
 						onSelect={() => setFrame(uploaded)}
 						picture={uploaded}
 						onRemove={() => setFrame(NO_FRAME, null)}

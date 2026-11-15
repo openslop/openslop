@@ -24,7 +24,7 @@ function Thumbnail({
 }
 
 const thumbnailFaceVariants = cva(
-	"relative flex aspect-video items-center justify-center overflow-hidden rounded-md border text-muted-foreground",
+	"relative flex aspect-video items-center justify-center overflow-hidden rounded-md border text-muted-foreground group-data-[state=checked]/thumbnail-radio:border-accent group-data-[state=checked]/thumbnail-radio:ring-2 group-data-[state=checked]/thumbnail-radio:ring-accent",
 	{
 		variants: {
 			look: {
@@ -121,10 +121,17 @@ function ThumbnailRadioGrid({
 	);
 }
 
-function ThumbnailRadio(props: React.ComponentProps<typeof RadioGroup.Item>) {
+/** Its {@link ThumbnailFace} shows itself selected while checked. */
+function ThumbnailRadio({
+	className,
+	...props
+}: React.ComponentProps<typeof RadioGroup.Item>) {
 	return (
 		<Thumbnail asChild>
-			<RadioGroup.Item {...props} />
+			<RadioGroup.Item
+				className={cn("group/thumbnail-radio", className)}
+				{...props}
+			/>
 		</Thumbnail>
 	);
 }
