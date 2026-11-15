@@ -1,9 +1,8 @@
 import groupBy from "lodash/groupBy";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import { connectorOf, ElementTypeSchema } from "@/lib/canvas/types";
-import { listModels } from "@/lib/connectors/models";
+import { everyAttributeDef } from "@/lib/canvas/element-connector";
+import { optionsOf } from "@/lib/connectors/attributes/schema";
 import { TTS_GENDERS, TTS_LANGUAGES } from "@/lib/connectors/tts/enums";
 import { refineOpSchema } from "../types";
 
@@ -94,31 +93,18 @@ describe("refine op attributes", () => {
 	it("names each model's own options on a key that varies by model", () => {
 		const schema = JSON.stringify(z.toJSONSchema(refineOpSchema));
 
-		for (const connector of ["image", "video"] as const) {
-			for (const model of listModels(connector)) {
-				const resolution = attributeSchemaFor(connector, model).defs.find(
-					({ key }) => key === "resolution",
-				);
-				const options =
-					resolution?.edit?.kind === "enum"
-						? resolution.edit.value.options
-						: [];
-				expect(schema).toContain(`${model.model}: ${options.join(", ")}.`);
-			}
+		for (const { model, def } of everyAttributeDef()) {
+			if (!def.perModel || !model) continue;
+			expect(schema).toContain(`${model.model}: ${optionsOf(def).join(", ")}.`);
 		}
 	});
 
 	it("gives a key one shape on every type and model that carries it", () => {
-		const defs = ElementTypeSchema.options.flatMap((type) => {
-			const connector = connectorOf(type);
-			return (connector ? listModels(connector) : [undefined]).flatMap(
-				(model) => attributeSchemaFor(type, model).defs,
-			);
-		});
+		const byKey = groupBy(everyAttributeDef(), ({ def }) => def.key);
 
-		for (const shared of Object.values(groupBy(defs, (def) => def.key))) {
+		for (const shared of Object.values(byKey)) {
 			const shapes = new Set(
-				shared.map(({ edit, unit, perModel }) =>
+				shared.map(({ def: { edit, unit, perModel } }) =>
 					JSON.stringify({
 						kind: edit?.kind,
 						unit,

@@ -43,6 +43,10 @@ export interface AttributeDef {
 	perModel?: boolean;
 }
 
+/** The values a menu or toggle offers; none for a free-form attribute. */
+export const optionsOf = ({ edit }: AttributeDef): readonly string[] =>
+	edit?.kind === "enum" || edit?.kind === "toggle" ? edit.value.options : [];
+
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {
 	private constructor(readonly defs: readonly AttributeDef[]) {}
