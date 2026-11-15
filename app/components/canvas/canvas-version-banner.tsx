@@ -39,8 +39,8 @@ export function CanvasVersionBanner() {
 					<History className="size-4" />
 					<p className="text-label leading-5 font-medium">
 						{version
-							? `Viewing an older version from ${relativeTime(version.updatedAt)}.`
-							: "Viewing an older version."}{" "}
+							? `Viewing the version from ${relativeTime(version.updatedAt)}.`
+							: "Viewing a saved version."}{" "}
 						Edits made here aren&apos;t saved unless you either{" "}
 						<BannerAction onClick={history.restore}>
 							restore this version

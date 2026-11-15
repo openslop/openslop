@@ -18,22 +18,18 @@ import { cn } from "@/lib/utils";
 
 const SKELETON_ROWS = [0, 1, 2];
 
-/** The newest version is the live project, so it is neither viewed nor restored. */
-type RowState = "current" | "previewing" | "older";
-
 function CanvasVersionRow({
 	version,
-	state,
+	previewing,
 	onView,
 	onRestore,
 }: {
 	version: CanvasVersion;
-	state: RowState;
+	previewing: boolean;
 	onView: () => void;
 	onRestore: () => void;
 }) {
 	const user = useUser();
-	const previewing = state === "previewing";
 
 	return (
 		<li
@@ -53,7 +49,7 @@ function CanvasVersionRow({
 						{relativeTime(version.updatedAt)}
 					</span>
 				</div>
-				{previewing && (
+				{previewing ? (
 					<Button
 						type="button"
 						variant="secondary"
@@ -63,8 +59,7 @@ function CanvasVersionRow({
 						<RotateCcw />
 						Restore
 					</Button>
-				)}
-				{state === "older" && (
+				) : (
 					<Button
 						type="button"
 						variant="secondary"
@@ -130,18 +125,13 @@ export function CanvasHistoryPanel() {
 			</p>
 		);
 
-	const rowState = (version: CanvasVersion, index: number): RowState => {
-		if (version.id === previewId) return "previewing";
-		return index === 0 ? "current" : "older";
-	};
-
 	return (
 		<ul className="flex flex-col gap-3">
-			{versions.map((version, index) => (
+			{versions.map((version) => (
 				<CanvasVersionRow
 					key={version.id}
 					version={version}
-					state={rowState(version, index)}
+					previewing={version.id === previewId}
 					onView={() =>
 						history.preview(version.id).catch((error: unknown) => {
 							toastError(error, "Opening this version failed");
