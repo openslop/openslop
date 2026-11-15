@@ -39,27 +39,27 @@ const TYPED_DEFS = ElementTypeSchema.options
 			.map((def) => ({ type, def })),
 	);
 
-/** One key's value across its types and models: their options merged, or the value they share. */
-function attributeValue(
-	typed: typeof TYPED_DEFS,
-	key: string,
-): z.ZodType<string> {
-	const defs = typed.map(({ def }) => def);
+/** A key's value on every type and model that carries it: their options merged, else the value they share. */
+function attributeValue(typed: typeof TYPED_DEFS): z.ZodType<string> {
+	const [{ def }] = typed;
 	const options = uniq(
-		defs.flatMap(({ edit }) =>
+		typed.flatMap(({ def: { edit } }) =>
 			edit?.kind === "enum" || edit?.kind === "toggle"
 				? edit.value.options
 				: [],
 		),
 	);
-	const [first] = defs;
 	const value =
-		options.length > 0 ? z.enum(options) : (first?.edit?.value ?? z.string());
-	const unit = first?.unit ? ` (${first.unit})` : "";
-	const perModel = first?.perModel ? " The options depend on the model." : "";
+		options.length > 0 ? z.enum(options) : (def.edit?.value ?? z.string());
 	const types = uniq(typed.map(({ type }) => type));
 	return value.describe(
-		`${first?.label ?? key}${unit}, on ${conjunction(types)}.${perModel}`,
+		[
+			`On ${conjunction(types)}.`,
+			def.unit && `Unit: ${def.unit}.`,
+			def.perModel && "The options depend on the model.",
+		]
+			.filter(Boolean)
+			.join(" "),
 	);
 }
 
