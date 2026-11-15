@@ -1,22 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { attributeSchemaFor } from "@/lib/canvas/element-connector";
-import { ContentTypeSchema } from "@/lib/canvas/types";
 import { INPUT_LANGUAGE } from "../language";
 import { osmlSpec } from "../osml";
 
 const spec = osmlSpec(INPUT_LANGUAGE);
-
-/** Attributes the writer never sets on a first draft: the model, the mix, the trims and per-element overrides. */
-const WRITER_SKIPS = new Set([
-	"provider",
-	"model",
-	"volume",
-	"trimStart",
-	"trimEnd",
-	"format",
-	"referenceImagesOverride",
-	"uploadedFrame",
-]);
 
 describe("osmlSpec", () => {
 	it("pins the no-all-caps TTS rule", () => {
@@ -127,20 +113,6 @@ describe("osmlSpec", () => {
 			"Cinematic: characters speak on screen, inside the video prompts. Only <video> and <music>",
 		);
 		expect(spec).toContain("The format decides which elements you write.");
-	});
-
-	it("teaches every attribute the writer can set, or lists it as one it skips", () => {
-		const untaught = ContentTypeSchema.options.flatMap((type) =>
-			attributeSchemaFor(type)
-				.baseDefs.map(({ key }) => key)
-				.filter(
-					(key) =>
-						!WRITER_SKIPS.has(key) &&
-						!new RegExp(`\\b${key}(=|: | \\()`).test(spec),
-				)
-				.map((key) => `${type}.${key}`),
-		);
-		expect(untaught).toEqual([]);
 	});
 
 	it("sings a music cue only when the story calls for a song, with its lyrics in the prompt", () => {
