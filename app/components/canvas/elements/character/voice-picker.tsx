@@ -18,6 +18,7 @@ import type {
 } from "@/lib/connectors/types";
 import { useCreateConnector } from "@/lib/connectors/use-create-connector";
 import { useVoiceSearch } from "@/lib/connectors/tts/use-voice-search";
+import { startPlayback } from "@/lib/components/start-playback";
 import { toastError } from "@/lib/toast-error";
 import { cn } from "@/lib/utils";
 import { FieldHeader, FieldLabel } from "./fields";
@@ -27,9 +28,6 @@ function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 	const [playing, setPlaying] = useState(false);
 	const [loading, startLoading] = useTransition();
 
-	const play = (audio: HTMLAudioElement) =>
-		void audio.play().catch(() => setPlaying(false));
-
 	const toggle = () => {
 		const audio = audioRef.current;
 		if (!audio) return;
@@ -38,13 +36,13 @@ function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 			return;
 		}
 		if (audio.src) {
-			play(audio);
+			startPlayback(audio);
 			return;
 		}
 		startLoading(async () => {
 			try {
 				audio.src = await load();
-				play(audio);
+				startPlayback(audio);
 			} catch (error) {
 				toastError(error, "Couldn't load the preview");
 			}
@@ -59,6 +57,7 @@ function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}
 				onEnded={() => setPlaying(false)}
+				onError={() => setPlaying(false)}
 			/>
 			<TooltipIconButton
 				label={playing ? "Pause" : "Play"}

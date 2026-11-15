@@ -120,4 +120,25 @@ describe("VoiceRow", () => {
 		await act(async () => request.resolve("blob:preview"));
 		expect(previewButton().getAttribute("aria-label")).toBe("Pause");
 	});
+
+	it("toasts a preview the browser refuses to play", async () => {
+		const refusal = new DOMException("Not allowed", "NotAllowedError");
+		vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValueOnce(refusal);
+		render(false);
+
+		await act(async () => previewButton().click());
+
+		expect(toastError).toHaveBeenCalledWith(refusal, "Could not play audio");
+	});
+
+	it("offers Play again when the preview fails mid-play", async () => {
+		render(false);
+		await act(async () => previewButton().click());
+		expect(previewButton().getAttribute("aria-label")).toBe("Pause");
+
+		const audio = container.querySelector("audio");
+		act(() => audio?.dispatchEvent(new Event("error")));
+
+		expect(previewButton().getAttribute("aria-label")).toBe("Play");
+	});
 });
