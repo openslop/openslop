@@ -14,7 +14,11 @@ import {
 } from "@/app/components/canvas/__tests__/_mount";
 import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
 import { ContinuityReferencesPopover } from "../continuity-section";
-import { ReferenceImagesPopover } from "../reference-images-popover";
+import { PanelSection } from "@/app/components/canvas/panel/panel-card";
+import {
+	ReferenceImagesEditor,
+	ReferenceImagesPopover,
+} from "../reference-images-popover";
 
 vi.mock("@/app/components/canvas/workspace-context", () => ({
 	useShowWorkspace: () => true,
@@ -67,28 +71,34 @@ let canvas: ReturnType<typeof mountOnCanvas>;
 
 afterEach(() => canvas.unmount());
 
-function open(element: ContentElement, continuity = false) {
+const target = (element: ContentElement) => ({
+	element: element as GeneratedElement,
+	attrKey: "images",
+	label: "References",
+});
+
+function mount(element: ContentElement, children: React.ReactNode) {
 	canvas = mountOnCanvas([mia, ned, vox, element]);
-	const target = {
-		element: element as GeneratedElement,
-		attrKey: "images",
-		label: "References",
-	};
 	canvas.render(
 		<TooltipProvider>
 			<GenerationQueueProvider
 				initialState={resultQueue({ [mia.id]: { imageUrl: MIA } }).snapshot()}
 				storage={noHistory}
 			>
-				<EditorPanelProvider>
-					{continuity ? (
-						<ContinuityReferencesPopover {...target} toggle={null} />
-					) : (
-						<ReferenceImagesPopover {...target} />
-					)}
-				</EditorPanelProvider>
+				<EditorPanelProvider>{children}</EditorPanelProvider>
 			</GenerationQueueProvider>
 		</TooltipProvider>,
+	);
+}
+
+function open(element: ContentElement, continuity = false) {
+	mount(
+		element,
+		continuity ? (
+			<ContinuityReferencesPopover {...target(element)} toggle={null} />
+		) : (
+			<ReferenceImagesPopover {...target(element)} />
+		),
 	);
 	const trigger = document.body.querySelector<HTMLButtonElement>(
 		'[aria-label^="References:"]',
@@ -135,5 +145,16 @@ describe("ReferenceImagesPopover", () => {
 		);
 		expect(document.body.textContent).toContain("+1 from tagged characters");
 		expect(document.body.textContent).toContain("+1 from the previous scene");
+	});
+
+	it("shows them in the media panel too", () => {
+		const element = tagging("image", "Mia", "Ned");
+		mount(
+			element,
+			<ReferenceImagesEditor {...target(element)} Section={PanelSection} />,
+		);
+		expect(document.body.textContent).toContain("+1 from tagged characters");
+		expect(tile("Mia")).not.toBeNull();
+		expect(tile("Ned")).toBeNull();
 	});
 });

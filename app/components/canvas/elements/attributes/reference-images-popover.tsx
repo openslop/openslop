@@ -19,6 +19,7 @@ import { AssetTile } from "../asset-tile";
 import { ReferenceTile } from "../asset-tiles";
 import { NoReferenceImages } from "../reference-images";
 import { TileRow } from "./tile-row";
+import type { GeneratedElement } from "@/lib/canvas/types";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
 import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
 import { useTaggedAvatars } from "./use-tagged-avatars";
@@ -40,6 +41,7 @@ const ownReferences = ({ element, attrKey }: AttributeTarget) =>
 /**
  * The element's reference images as tiles, under the menu that adds more. With no
  * override they are the project's; the first add or remove copies them onto it.
+ * Under them, read-only, the avatars its tagged characters add.
  */
 export function ReferenceImagesEditor({
 	Section,
@@ -99,6 +101,7 @@ export function ReferenceImagesEditor({
 			) : (
 				empty
 			)}
+			<TaggedReferences element={element} />
 		</Section>
 	);
 }
@@ -132,6 +135,20 @@ function TaggedAvatarTile({ name }: { name: string }) {
 	);
 }
 
+function TaggedReferences({ element }: { element: GeneratedElement }) {
+	const tagged = useTaggedAvatars(element);
+	if (tagged.count === 0) return null;
+	return (
+		<AddedReferences caption={`+${tagged.count} from tagged characters`}>
+			<TileRow columns={2}>
+				{tagged.names.map((name) => (
+					<TaggedAvatarTile key={name} name={name} />
+				))}
+			</TileRow>
+		</AddedReferences>
+	);
+}
+
 export function ReferenceImagesPopover({
 	added = 0,
 	children,
@@ -155,15 +172,6 @@ export function ReferenceImagesPopover({
 					Section={AttributePopoverSection}
 					empty={<NoReferenceImages />}
 				/>
-				{tagged.count > 0 && (
-					<AddedReferences caption={`+${tagged.count} from tagged characters`}>
-						<TileRow columns={2}>
-							{tagged.names.map((name) => (
-								<TaggedAvatarTile key={name} name={name} />
-							))}
-						</TileRow>
-					</AddedReferences>
-				)}
 				{children}
 			</PopoverContent>
 		</Popover>
