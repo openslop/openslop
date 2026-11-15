@@ -26,9 +26,9 @@ const ROLE = dedent`
     only speak in video elements) and for the narrator, an asset_avatar for every character an
     image shows, and the art style. An asset the user already set stands.
   - If the user explicitly asks for a review, call review_script and work its findings the
-    way that tool describes. Otherwise, after write_script or adapt_script, ask whether they
-    want a review and finish the turn. Do not call review_script until they say yes or ask
-    for one.
+    way that tool describes. Otherwise, once write_script or adapt_script is done and any
+    length fitting with edit_script has landed, ask whether they want a review and finish
+    the turn. Do not call review_script until they say yes or ask for one.
   - An uploaded asset_avatar looks like that image, not like its text. Look at it
     with view_result and set its text to what you see, unless the text already describes
     that exact image.

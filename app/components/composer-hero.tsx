@@ -2,23 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "@/components/ui/icon";
+import { ArrowLeft, RobotFill } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { useOpenWorkspace } from "./canvas/workspace-context";
 import { useTemplate } from "@/lib/templates/use-template";
 import { useSloppy } from "./sloppy/sloppy-provider";
 import ComposerCopilot from "./copilot/composer-copilot";
 import TemplateGallery from "./template-gallery";
+import { greetingFor } from "./greetings";
+import { useProjectId } from "@/lib/project/project-provider";
 
 function BackToMySlopLink() {
 	return (
-		<Link
-			href="/"
-			className="mb-4 inline-flex items-center gap-2 self-start text-body text-muted-foreground transition-colors hover:text-foreground focus-ring"
-		>
-			<ArrowLeft size={16} />
-			Back to My Slop
-		</Link>
+		<Button variant="panel" size="sm" asChild className="mb-4 self-start">
+			<Link href="/">
+				<ArrowLeft />
+				Back to My Slop
+			</Link>
+		</Button>
 	);
 }
 
@@ -27,6 +28,7 @@ export default function ComposerHero() {
 	const { applyTemplate } = useTemplate();
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
+	const greeting = greetingFor(useProjectId());
 
 	const start = (brief: string) => {
 		openWorkspace();
@@ -37,7 +39,8 @@ export default function ComposerHero() {
 		<div className="flex w-full max-w-4xl flex-col items-center px-4">
 			<BackToMySlopLink />
 			<h1 className="mb-6 text-center font-serif text-hero text-balance text-foreground">
-				Describe your slop
+				<RobotFill size="1em" className="mr-[0.2em] align-[-0.15em]" />
+				{greeting}
 			</h1>
 
 			<ComposerCopilot
@@ -50,9 +53,9 @@ export default function ComposerHero() {
 			/>
 
 			<Button
-				variant="ghost"
+				variant="panel"
 				size="sm"
-				className="mt-3 text-muted-foreground"
+				className="mt-3"
 				onClick={openWorkspace}
 			>
 				Skip to a blank canvas

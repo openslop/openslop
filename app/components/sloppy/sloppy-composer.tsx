@@ -1,5 +1,6 @@
 "use client";
 
+import TextareaAutosize from "react-textarea-autosize";
 import { useRef, useState } from "react";
 import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
@@ -71,9 +72,8 @@ export function SloppyComposer() {
 
 	return (
 		<PanelCard>
-			<textarea
+			<TextareaAutosize
 				ref={textareaRef}
-				rows={2}
 				name="message"
 				autoComplete="off"
 				aria-label="Message Sloppy"
@@ -86,7 +86,7 @@ export function SloppyComposer() {
 					}
 				}}
 				placeholder="Write or change the script…"
-				className="field-sizing-content max-h-40 w-full resize-none overflow-y-auto bg-transparent font-body text-label text-panel-fg caret-accent outline-none placeholder:text-muted-foreground focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30"
+				className="max-h-40 w-full resize-none overflow-y-auto bg-transparent font-body text-label text-panel-fg caret-accent outline-none placeholder:text-muted-foreground focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/30"
 			/>
 			<div className="flex items-center justify-between gap-2">
 				<div className="flex min-w-0 items-center gap-1">

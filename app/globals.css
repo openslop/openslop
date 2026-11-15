@@ -236,6 +236,7 @@
 	--grain-opacity: 0.2;
 	--grain-bg-opacity: 0.26;
 	--glow: var(--blurple-500-a);
+	--ambient-light: var(--indicator-foreground);
 	--resizer: #dddadb;
 	--resizer-shadow: #f3f1f0;
 	--resizer-hover: #998c93;
@@ -585,6 +586,153 @@
 
 .dark .dot-grid-bg {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 12 12'%3E%3Cpath fill='%23f1eaed' fill-opacity='0.08' d='M3 2h2v1H3v2H2V3H0V2h2V0h1z'/%3E%3C/svg%3E");
+}
+
+/* Ambient light: skewed rays falling from the top-left, behind the hero composer */
+.light-rays {
+	--grain-opacity: 1;
+	overflow: hidden;
+	background: radial-gradient(100% 100% at 0% 0%, var(--card), transparent 70%);
+	mask-image: radial-gradient(
+		125% 100% at 0% 0%,
+		#000 0%,
+		rgb(0 0 0 / 0.22) 88%,
+		transparent 100%
+	);
+}
+
+.light-rays > span {
+	position: absolute;
+	inset: 0 -40%;
+	background: linear-gradient(var(--ambient-light), transparent);
+	opacity: 0.22;
+	transform: skewX(45deg);
+	mask-image: var(--ray);
+}
+
+.light-rays > span:nth-child(1) {
+	--ray: linear-gradient(
+		90deg,
+		transparent 0%,
+		#000 20%,
+		transparent 36%,
+		#000 55%,
+		rgb(0 0 0 / 0.13) 67%,
+		#000 78%,
+		transparent 97%
+	);
+}
+
+.light-rays > span:nth-child(2) {
+	--ray: linear-gradient(
+		90deg,
+		transparent 11%,
+		#000 25%,
+		rgb(0 0 0 / 0.55) 41%,
+		rgb(0 0 0 / 0.13) 67%,
+		#000 78%,
+		transparent 97%
+	);
+}
+
+.light-rays > span:nth-child(3) {
+	--ray: linear-gradient(
+		90deg,
+		transparent 9%,
+		#000 20%,
+		rgb(0 0 0 / 0.55) 28%,
+		rgb(0 0 0 / 0.42) 40%,
+		#000 48%,
+		rgb(0 0 0 / 0.27) 54%,
+		rgb(0 0 0 / 0.13) 78%,
+		#000 88%,
+		transparent 97%
+	);
+}
+
+.light-rays > span:nth-child(4) {
+	--ray: linear-gradient(
+		90deg,
+		transparent 0%,
+		#000 17%,
+		rgb(0 0 0 / 0.55) 26%,
+		#000 35%,
+		transparent 47%,
+		rgb(0 0 0 / 0.13) 69%,
+		#000 79%,
+		transparent 97%
+	);
+}
+
+.light-rays > span:nth-child(5) {
+	--ray: linear-gradient(
+		90deg,
+		transparent 0%,
+		#000 20%,
+		rgb(0 0 0 / 0.55) 27%,
+		#000 42%,
+		transparent 48%,
+		rgb(0 0 0 / 0.13) 67%,
+		#000 74%,
+		#000 82%,
+		rgb(0 0 0 / 0.47) 88%,
+		transparent 97%
+	);
+}
+
+.dark .light-rays {
+	--grain-opacity: 0.9;
+}
+
+.light-rays::after {
+	mix-blend-mode: overlay;
+}
+
+/* The same light wrapping a surface: a soft halo off every edge, with a wider one fading in and out */
+.ambient-glow {
+	isolation: isolate;
+}
+
+.ambient-glow::before,
+.ambient-glow::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border-radius: inherit;
+	pointer-events: none;
+}
+
+.ambient-glow::before {
+	box-shadow:
+		0 0 12px color-mix(in oklab, var(--ambient-light) 45%, transparent),
+		0 0 32px color-mix(in oklab, var(--ambient-light) 25%, transparent);
+	opacity: 0.6;
+	transition: opacity var(--duration-fast) var(--ease-casual);
+}
+
+.ambient-glow:focus-within::before {
+	opacity: 1;
+}
+
+.ambient-glow::after {
+	box-shadow:
+		0 0 20px 2px color-mix(in oklab, var(--ambient-light) 30%, transparent),
+		0 0 48px 4px color-mix(in oklab, var(--ambient-light) 18%, transparent);
+	opacity: 0;
+	animation: ambient-breathe 4s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-breathe {
+	to {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ambient-glow::after {
+		animation: none;
+	}
 }
 
 /* Active (currently playing) scene. Painted on the scene's content box, not on
