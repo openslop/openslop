@@ -43,4 +43,5 @@ export const viewMedia = defineTool({
 			}),
 		);
 	},
+	strict: true,
 });

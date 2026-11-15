@@ -64,4 +64,5 @@ export const listModels = defineTool({
 			groupSection(group, ctx.isConnected, defaults),
 		).join("\n\n");
 	},
+	strict: true,
 });

@@ -42,4 +42,5 @@ export const updateScriptSettings = defineTool({
 		);
 		return `Stored ${conjunction(changed)}.`;
 	},
+	strict: true,
 });

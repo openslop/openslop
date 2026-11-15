@@ -1,17 +1,85 @@
+import groupBy from "lodash/groupBy";
+import mapValues from "lodash/mapValues";
+import uniq from "lodash/uniq";
 import { z } from "zod";
+import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
 	AssetTypeSchema,
+	connectorOf,
 	ContentTypeSchema,
+	ElementTypeSchema,
+	isMediaDraftType,
 	NON_SPEECH_TYPES,
 	SPEECH_TYPES,
+	type ElementType,
 } from "@/lib/canvas/types";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
+import { listModels } from "@/lib/connectors/models";
+import { MODEL_REF_KEYS } from "@/lib/connectors/types";
 import { conjunction } from "@/lib/format";
 
 const ELEMENT_TEXT = `The element's content: the spoken line for ${conjunction(SPEECH_TYPES)}; the prompt for ${conjunction(NON_SPEECH_TYPES)}; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
 
+/** Attributes Sloppy writes by hand: options, seconds, a start frame, free text, and the model pair. */
+const writable = ({ key, edit }: AttributeDef) =>
+	edit ? edit.kind !== "images" : MODEL_REF_KEYS.some((ref) => ref === key);
+
+/** Every attribute an element of `type` can hold, under any of its models. */
+const defsOf = (type: ElementType): AttributeDef[] => {
+	const connector = connectorOf(type);
+	const models = connector ? listModels(connector) : [undefined];
+	return models.flatMap((model) => attributeSchemaFor(type, model).defs);
+};
+
+const TYPED_DEFS = ElementTypeSchema.options
+	.filter((type) => !isMediaDraftType(type))
+	.flatMap((type) =>
+		defsOf(type)
+			.filter(writable)
+			.map((def) => ({ type, def })),
+	);
+
+/** One key's value across its types and models: their options merged, or the value they share. */
+function attributeValue(
+	typed: typeof TYPED_DEFS,
+	key: string,
+): z.ZodType<string> {
+	const defs = typed.map(({ def }) => def);
+	const options = uniq(
+		defs.flatMap(({ edit }) =>
+			edit?.kind === "enum" || edit?.kind === "toggle"
+				? edit.value.options
+				: [],
+		),
+	);
+	const [first] = defs;
+	const value =
+		options.length > 0 ? z.enum(options) : (first?.edit?.value ?? z.string());
+	const unit = first?.unit ? ` (${first.unit})` : "";
+	const perModel = first?.perModel ? " The options depend on the model." : "";
+	const types = uniq(typed.map(({ type }) => type));
+	return value.describe(
+		`${first?.label ?? key}${unit}, on ${conjunction(types)}.${perModel}`,
+	);
+}
+
+const ATTRIBUTES = mapValues(
+	groupBy(TYPED_DEFS, ({ def }) => def.key),
+	attributeValue,
+);
+
+// A generated key infers as possibly undefined, which parsed JSON never holds.
+const attrs = z.strictObject(ATTRIBUTES).partial() as z.ZodType<
+	Record<string, string>
+>;
+
+const attrEdits = z
+	.strictObject(mapValues(ATTRIBUTES, (value) => value.nullable()))
+	.partial() as z.ZodType<Record<string, string | null>>;
+
 const newElement = z.object({
 	type: ContentTypeSchema,
-	attrs: z.record(z.string(), z.string()).optional(),
+	attrs: attrs.optional(),
 	text: z.string().optional().describe(ELEMENT_TEXT),
 });
 
@@ -37,7 +105,7 @@ const insertOp = z.object({
 const assetOp = z.object({
 	op: z.literal("asset"),
 	type: AssetTypeSchema,
-	attrs: z.record(z.string(), z.string()).optional(),
+	attrs: attrs.optional(),
 	text: z.string().optional().describe(ELEMENT_TEXT),
 });
 
@@ -55,7 +123,7 @@ const moveOp = z.object({
 const setOp = z.object({
 	op: z.literal("set"),
 	id: z.string(),
-	attrs: z.record(z.string(), z.string().nullable()).optional().nullable(),
+	attrs: attrEdits.optional().nullable(),
 	text: z.string().optional().describe(ELEMENT_TEXT),
 });
 

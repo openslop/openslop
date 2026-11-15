@@ -1,16 +1,8 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { NARRATOR } from "@/lib/canvas/assets";
-import { attributeSchemaFor } from "@/lib/canvas/element-connector";
+import { ContentTypeSchema, NON_SPEECH_TYPES } from "@/lib/canvas/types";
 import {
-	ContentTypeSchema,
-	ElementTypeSchema,
-	isMediaDraftType,
-	NON_SPEECH_TYPES,
-} from "@/lib/canvas/types";
-import type { AttributeDef } from "@/lib/connectors/attributes/schema";
-import {
-	NO_FRAME,
 	PREVIOUS_VISUAL,
 	START_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
@@ -21,25 +13,6 @@ import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
 import { conjunction, plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
-
-/** Attributes Sloppy can write by hand: a list of options, a count of seconds, and free text. */
-const describeAttribute = ({ key, edit }: AttributeDef): string[] => {
-	if (edit?.kind === "enum" || edit?.kind === "toggle")
-		return [`${key} (${edit.value.options.join(" | ")})`];
-	if (edit?.kind === "seconds") return [`${key} (seconds)`];
-	return edit?.kind === "text" ? [key] : [];
-};
-
-// TODO(#743): an element's model-specific options show only as the value it already holds.
-// Sloppy needs a tool that resolves one element's schema.
-const ATTRIBUTES_BY_TYPE = ElementTypeSchema.options
-	.filter((type) => !isMediaDraftType(type))
-	.flatMap((type) => {
-		const attributes =
-			attributeSchemaFor(type).baseDefs.flatMap(describeAttribute);
-		return attributes.length > 0 ? [`- ${type}: ${attributes.join(", ")}`] : [];
-	})
-	.join("\n");
 
 const ASSETS = dedent`
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
@@ -80,14 +53,8 @@ export const editScript = defineTool({
 
 	  ${ASSETS}
 
-	  Attributes by type:
-	  ${ATTRIBUTES_BY_TYPE}
-
-	  A video's ${START_FRAME_ATTR} is ${NO_FRAME}, ${PREVIOUS_VISUAL} or an image URL: an image's or frame's URL from
-	  view_result. Leave a URL already set alone.
-
-	  The attributes above work with every model. Some models have extra attributes of their own;
-	  read_script shows the ones an element already has.
+	  A video's ${START_FRAME_ATTR} URL is an image's or frame's URL from view_result, and
+	  ${PREVIOUS_VISUAL} opens on the visual before it. Leave a URL already set alone.
 
 	  To change a model, set provider and model to a pair from list_models. Narration and
 	  character lines have none of their own: they speak with their asset_voice's.

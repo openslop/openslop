@@ -29,4 +29,5 @@ export const setDefaultModel = defineTool({
 		ctx.updateModels(groupModels(types, model));
 		return `New ${label.toLowerCase()} elements now get ${model.model} from ${model.provider}.`;
 	},
+	strict: true,
 });

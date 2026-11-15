@@ -2,6 +2,7 @@ import {
 	consumeStream,
 	convertToModelMessages,
 	createUIMessageStreamResponse,
+	InvalidToolInputError,
 	pruneMessages,
 	streamText,
 	toUIMessageStream,
@@ -120,7 +121,13 @@ export async function streamAgentTurn(
 			onEnd: ({ responseMessage }) =>
 				saveConversationMessage(conversationId, responseMessage),
 			onError: (error) => {
-				logger.error(error, "Sloppy turn");
+				// The SDK hands over an invalid call's error twice: as the error, then as its text.
+				if (typeof error === "string") return error;
+				if (InvalidToolInputError.isInstance(error)) {
+					logger.warn(error, `Sloppy sent ${error.toolName} invalid input`);
+				} else {
+					logger.error(error, "Sloppy turn");
+				}
 				return errorMessage(error);
 			},
 		}),

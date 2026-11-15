@@ -216,6 +216,28 @@ describe("streamAgentTurn", () => {
 		expect(chunks.map((chunk) => chunk.type)).not.toContain("error");
 	});
 
+	it("logs input the model will retry as a warning naming the tool", async () => {
+		const warn = vi.spyOn(logger, "warn").mockImplementation(() => {});
+		const error = vi.spyOn(logger, "error").mockImplementation(() => {});
+
+		await runTurn([
+			{ type: "stream-start", warnings: [] },
+			{
+				type: "tool-call",
+				toolCallId: "call-1",
+				toolName: "set_title",
+				input: JSON.stringify({ title: 3 }),
+			},
+			{ ...finish, finishReason: { unified: "tool-calls", raw: "tool_use" } },
+		]);
+
+		expect(warn).toHaveBeenCalledWith(
+			expect.objectContaining({ toolName: "set_title" }),
+			"Sloppy sent set_title invalid input",
+		);
+		expect(error).not.toHaveBeenCalled();
+	});
+
 	it("surfaces a tool call for the editor to run", async () => {
 		const chunks = await runTurn([
 			{ type: "stream-start", warnings: [] },

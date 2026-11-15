@@ -1,3 +1,5 @@
+import { asSchema, type Tool } from "ai";
+import sum from "lodash/sum";
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
 import {
@@ -11,13 +13,6 @@ import { BLOB_BASE_URL } from "@/lib/blob";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
-import {
-	TTS_ACCENTS,
-	TTS_AGES,
-	TTS_GENDERS,
-	TTS_LANGUAGES,
-	TTS_PITCHES,
-} from "@/lib/connectors/tts/enums";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
@@ -871,7 +866,7 @@ describe("SLOPPY_TOOLS", () => {
 		]);
 	});
 
-	it("lists each asset type an edit can set up, and a character's voice traits with their options", () => {
+	it("lists each asset type an edit can set up", () => {
 		const { description } = SLOPPY_TOOLS.edit_script;
 
 		for (const type of [
@@ -881,15 +876,6 @@ describe("SLOPPY_TOOLS", () => {
 			"asset_references",
 		]) {
 			expect(description).toContain(`- ${type}: `);
-		}
-		for (const options of [
-			TTS_GENDERS,
-			TTS_AGES,
-			TTS_PITCHES,
-			TTS_ACCENTS,
-			TTS_LANGUAGES,
-		]) {
-			expect(description).toContain(`(${options.join(" | ")})`);
 		}
 	});
 });
@@ -939,5 +925,76 @@ describe("tool flags", () => {
 			"review_script",
 			"write_script",
 		]);
+	});
+});
+
+type SchemaNode = Record<string, unknown>;
+
+const schemaNodes = (schema: unknown): SchemaNode[] =>
+	typeof schema === "object" && schema !== null
+		? [schema as SchemaNode, ...Object.values(schema).flatMap(schemaNodes)]
+		: [];
+
+const UNSTRICT_KEYWORDS = [
+	"oneOf",
+	"propertyNames",
+	"minimum",
+	"maximum",
+	"exclusiveMinimum",
+	"exclusiveMaximum",
+	"multipleOf",
+	"minLength",
+	"maxLength",
+	"maxItems",
+];
+
+/** What Anthropic's strict tool use refuses to compile in one schema. */
+const strictProblems = (schema: unknown): string[] =>
+	schemaNodes(schema).flatMap((node) => [
+		...UNSTRICT_KEYWORDS.filter((keyword) => keyword in node),
+		...(node.type === "object" && node.additionalProperties !== false
+			? ["an open object"]
+			: []),
+		...(typeof node.minItems === "number" && node.minItems > 1
+			? ["minItems above 1"]
+			: []),
+	]);
+
+const optionalParams = ({ properties, required }: SchemaNode): number =>
+	typeof properties === "object" && properties !== null
+		? Object.keys(properties).filter(
+				(key) => !(Array.isArray(required) && required.includes(key)),
+			).length
+		: 0;
+
+const toolSchemas = () =>
+	Promise.all(
+		Object.entries<Tool>(SLOPPY_TOOLS).map(async ([name, spec]) => ({
+			name,
+			strict: spec.strict === true,
+			schema: await asSchema(spec.inputSchema).jsonSchema,
+		})),
+	);
+
+describe("strict tool use", () => {
+	it("stays within Anthropic's limits per request", async () => {
+		const strict = (await toolSchemas()).filter((tool) => tool.strict);
+		const nodes = strict.flatMap(({ schema }) => schemaNodes(schema));
+
+		expect(strict.length).toBeLessThanOrEqual(20);
+		expect(sum(nodes.map(optionalParams))).toBeLessThanOrEqual(24);
+		expect(
+			nodes.filter((node) => "anyOf" in node || Array.isArray(node.type))
+				.length,
+		).toBeLessThanOrEqual(16);
+	});
+
+	it("is on for exactly the tools whose schema it can compile", async () => {
+		for (const { name, strict, schema } of await toolSchemas()) {
+			expect({ name, strict }).toEqual({
+				name,
+				strict: strictProblems(schema).length === 0,
+			});
+		}
 	});
 });

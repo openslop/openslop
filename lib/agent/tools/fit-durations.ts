@@ -105,4 +105,5 @@ export const fitDurations = defineTool({
 		);
 	},
 	draftsScript: true,
+	strict: true,
 });

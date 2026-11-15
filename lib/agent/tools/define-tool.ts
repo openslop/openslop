@@ -22,6 +22,8 @@ export function defineTool<Input, Output>(def: {
 	snapshot?: true;
 	/** The call is part of writing the script, so what is rendered from the canvas is mid-change. */
 	draftsScript?: true;
+	/** The provider samples the input from its schema, so a call always parses. Only for a schema within Anthropic's strict limits. */
+	strict?: true;
 }) {
 	const {
 		input,

@@ -45,7 +45,7 @@ export interface AttributeDef {
 
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {
-	private constructor(private readonly defs: readonly AttributeDef[]) {}
+	private constructor(readonly defs: readonly AttributeDef[]) {}
 
 	static from(defs: readonly AttributeDef[]): AttributeSchema {
 		return new AttributeSchema(defs);
