@@ -51,6 +51,10 @@ const RESULT_FIELDS = ["result", "resultInputs", "pinned"] as const;
 /** The part of a snapshot the result version tracks. */
 export type HeldResult = Pick<ElementSnapshot, (typeof RESULT_FIELDS)[number]>;
 
+/** Media that Generate All leaves be, so it keeps its own length. */
+export const holdsPinnedResult = ({ pinned, result }: HeldResult): boolean =>
+	pinned && result !== null;
+
 export type ActiveGenerationStatus = Exclude<GenerationStatus, "idle">;
 
 /** A generation is active from the moment it is queued until it settles. */

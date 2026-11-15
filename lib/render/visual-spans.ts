@@ -3,6 +3,10 @@ import { isSpeech } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
 import { spokenWords } from "@/lib/canvas/spoken-words";
 import { CONTENT_TYPES, type ContentType } from "@/lib/canvas/types";
+import {
+	holdsPinnedResult,
+	type ElementSnapshot,
+} from "@/lib/generation/snapshots";
 import { getDuration } from "../canvas/element-attributes";
 
 /** One visual and the dialogue after it, up to the next visual. */
@@ -12,13 +16,14 @@ export type VisualSpan = {
 	sceneNumber: number;
 	words: number;
 	dialogueIds: string[];
-	/** Its `duration` attribute, where its type has one. */
+	/** Its `duration` attribute, where generating it sets its length. */
 	durationSec?: number;
 };
 
 /** Dialogue before the first visual belongs to no visual. */
 export const estimateVisualSpans = (
 	descendants: Descendant[],
+	getSnapshot: (id: string) => ElementSnapshot,
 ): VisualSpan[] => {
 	const spans: VisualSpan[] = [];
 
@@ -32,7 +37,10 @@ export const estimateVisualSpans = (
 					sceneNumber: sceneIndex + 1,
 					words: 0,
 					dialogueIds: [],
-					...(outputKind === "video" && { durationSec: getDuration(element) }),
+					...(outputKind === "video" &&
+						!holdsPinnedResult(getSnapshot(element.id)) && {
+							durationSec: getDuration(element),
+						}),
 				});
 				continue;
 			}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Descendant } from "slate";
+import { EMPTY_SNAPSHOT } from "@/lib/generation/snapshots";
 import { estimateVisualSpans, type VisualSpan } from "../visual-spans";
 import {
 	DURATION_FIT_LEEWAY_SEC,
@@ -80,7 +81,9 @@ describe("durationFits over an estimated canvas", () => {
 			},
 		] as unknown as Descendant[];
 
-		const [fit] = durationFits(estimateVisualSpans(script));
+		const [fit] = durationFits(
+			estimateVisualSpans(script, () => EMPTY_SNAPSHOT),
+		);
 
 		expect(fit.span.id).toBe("video1");
 		expect(fit.duration).toBe(11);

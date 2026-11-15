@@ -5,6 +5,7 @@ import { spokenWords } from "@/lib/canvas/spoken-words";
 import { CONTENT_TYPES, type ContentElement } from "@/lib/canvas/types";
 import {
 	EMPTY_SNAPSHOT,
+	holdsPinnedResult,
 	type ElementSnapshot,
 } from "@/lib/generation/snapshots";
 import { getDuration } from "../canvas/element-attributes";
@@ -46,7 +47,7 @@ export const estimateRuntime = (
 				const held = getSnapshot(element.id);
 				return [
 					element.id,
-					held.pinned && held.result ? held : scriptedSnapshot(element),
+					holdsPinnedResult(held) ? held : scriptedSnapshot(element),
 				];
 			}),
 	);

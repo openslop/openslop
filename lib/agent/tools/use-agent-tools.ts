@@ -69,7 +69,8 @@ export function useAgentTools() {
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				estimateDialogueLengths: () => estimateDialogueLengths(editor.children),
-				estimateVisualSpans: () => estimateVisualSpans(editor.children),
+				estimateVisualSpans: () =>
+					estimateVisualSpans(editor.children, queue.getElementSnapshot),
 				estimateRuntime: () =>
 					estimateRuntime(
 						editor.children,

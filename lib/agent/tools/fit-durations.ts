@@ -47,7 +47,7 @@ type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
 
 const headline = ({ fits, changes, short, applied }: Counts) => {
 	if (fits === 0)
-		return "No video elements with dialogue under them in scope. Images already stretch to the dialogue under them.";
+		return "No video element to generate has dialogue under it in scope. Images stretch to the dialogue under them; uploaded videos keep their own length.";
 	if (changes > 0)
 		return `Fitted ${applied} of ${changes}. Those elements are stale now and need regenerating.`;
 	if (short > 0)
@@ -66,9 +66,9 @@ export const fitDurations = defineTool({
 	  not a scene boundary falls between them, so this is scoped by element, never by scene.
 	  Send \`element_ids\` to fit only those, or nothing for the whole canvas.
 
-	  Images already stretch, and videos with no dialogue under them have nothing to fit,
-	  so both are left alone. Changing a duration stales the element: tell the user to
-	  regenerate it afterwards.
+	  Images already stretch, uploaded videos keep their own length, and videos with no
+	  dialogue under them have nothing to fit, so all three are left alone. Changing a
+	  duration stales the element: tell the user to regenerate it afterwards.
 	`,
 	input: z.object({
 		element_ids: z.array(z.string()).min(1).optional(),
@@ -97,7 +97,7 @@ export const fitDurations = defineTool({
 			...changes.map(changeLine),
 			...short.map(shortLine),
 			leftAlone > 0 &&
-				`${leftAlone} ${plural(leftAlone, "image")} or ${plural(leftAlone, "video")} without dialogue left alone.`,
+				`${leftAlone} ${plural(leftAlone, "image")} or ${plural(leftAlone, "video")} left alone.`,
 			unknown.length > 0 &&
 				`Not a visual on the canvas: ${unknown.join(", ")}. Read the script again.`,
 			failures.length > 0 &&
