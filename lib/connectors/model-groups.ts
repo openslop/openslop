@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/icon";
 import type { ConnectorModels } from "./models";
 import type { ConnectorType, ModelRef } from "./types";
+import { fromKeys } from "@/lib/utils";
 
 /** What a person picks a model for. */
 export interface ModelGroup {
@@ -75,4 +76,4 @@ export function groupFor(type: ConnectorType): ModelGroup {
 export const groupModels = (
 	types: ConnectorType[],
 	model: ModelRef,
-): ConnectorModels => Object.fromEntries(types.map((type) => [type, model]));
+): ConnectorModels => fromKeys(types, () => model);
