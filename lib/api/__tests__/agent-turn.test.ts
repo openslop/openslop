@@ -181,6 +181,7 @@ describe("streamAgentTurn", () => {
 			type: "error",
 			errorText: "model overloaded",
 		});
+		expect(error).toHaveBeenCalledOnce();
 		expect(error).toHaveBeenCalledWith(failure, "Sloppy turn");
 	});
 
@@ -233,7 +234,7 @@ describe("streamAgentTurn", () => {
 
 		expect(warn).toHaveBeenCalledWith(
 			expect.objectContaining({ toolName: "set_title" }),
-			"Sloppy sent set_title invalid input",
+			"Sloppy made an invalid set_title call",
 		);
 		expect(error).not.toHaveBeenCalled();
 	});

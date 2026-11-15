@@ -2,7 +2,6 @@ import {
 	consumeStream,
 	convertToModelMessages,
 	createUIMessageStreamResponse,
-	InvalidToolInputError,
 	pruneMessages,
 	streamText,
 	toUIMessageStream,
@@ -96,6 +95,12 @@ export async function streamAgentTurn(
 		// left to call, so it answers the user instead of looping again.
 		toolChoice: toolCallsMade(messages) >= MAX_TOOL_CALLS ? "none" : "auto",
 		providerOptions,
+		onError: ({ error }) => logger.error(error, "Sloppy turn"),
+		onStepEnd: ({ dynamicToolCalls }) => {
+			for (const call of dynamicToolCalls.filter(({ invalid }) => invalid)) {
+				logger.warn(call.error, `Sloppy made an invalid ${call.toolName} call`);
+			}
+		},
 		onEnd: async ({ usage }) => {
 			logger.info({ usage }, "Sloppy turn usage");
 			// The SDK drops anything a callback throws, so a lost ledger row has to be logged here.
@@ -120,16 +125,7 @@ export async function streamAgentTurn(
 			},
 			onEnd: ({ responseMessage }) =>
 				saveConversationMessage(conversationId, responseMessage),
-			onError: (error) => {
-				// The SDK hands over an invalid call's error twice: as the error, then as its text.
-				if (typeof error === "string") return error;
-				if (InvalidToolInputError.isInstance(error)) {
-					logger.warn(error, `Sloppy sent ${error.toolName} invalid input`);
-				} else {
-					logger.error(error, "Sloppy turn");
-				}
-				return errorMessage(error);
-			},
+			onError: errorMessage,
 		}),
 		consumeSseStream: consumeStream,
 	});
