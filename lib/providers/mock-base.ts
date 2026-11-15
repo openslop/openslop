@@ -1,7 +1,8 @@
 import type { BundleResponse } from "@/lib/api/asset-bundle";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 import type { Priced } from "./base";
-import { mockDelay, pickRandom } from "./mock-utils";
+import { pickRandom } from "@/lib/utils";
+import { mockDelay } from "./mock-utils";
 
 type MockVariant = Omit<BundleResponse, "provider" | "type">;
 

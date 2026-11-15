@@ -42,6 +42,14 @@ export function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export function pickRandom<T>(items: readonly T[]): T {
+	return items[Math.floor(Math.random() * items.length)];
+}
+
+export function pickOther<T>(items: readonly T[], current: T): T {
+	return pickRandom(items.filter((item) => item !== current));
+}
+
 /** `Object.keys` that keeps the key type, for records whose keys are fixed in code. */
 export const keysOf = <K extends string>(record: Record<K, unknown>): K[] =>
 	Object.keys(record) as K[];

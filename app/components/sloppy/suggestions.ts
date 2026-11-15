@@ -11,8 +11,3 @@ export const SUGGESTIONS = [
 	"End every third scene on a cliffhanger",
 	"Match the caption style to the mood",
 ];
-
-export function nextSuggestion(current: string): string {
-	const pool = SUGGESTIONS.filter((suggestion) => suggestion !== current);
-	return pool[Math.floor(Math.random() * pool.length)];
-}

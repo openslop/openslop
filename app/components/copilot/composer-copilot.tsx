@@ -47,6 +47,7 @@ import {
 } from "@/lib/project/video-format";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { UploadKindSchema } from "@/lib/upload/upload-files";
+import { pickOther } from "@/lib/utils";
 import {
 	AssetStrip,
 	AssetStripArtStyle,
@@ -56,7 +57,7 @@ import {
 	AssetStripUploading,
 } from "@/app/components/canvas/elements/asset-strip";
 import { SettingPill, type SettingPillOption } from "./setting-pill";
-import { IDEAS, nextIdea } from "./ideas";
+import { IDEAS } from "./ideas";
 import { ModelSelect, modelLabel } from "@/app/components/models/model-select";
 import { ButtonMenuTrigger } from "@/components/ui/select-menu";
 import { ProviderIcon } from "@/app/components/models/provider-icon";
@@ -206,7 +207,7 @@ export default function ComposerCopilot({
 	};
 
 	const suggestIdea = () => {
-		onValueChange(nextIdea(value));
+		onValueChange(pickOther(IDEAS, value));
 		textareaRef.current?.focus();
 	};
 

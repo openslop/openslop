@@ -11,10 +11,11 @@ import {
 } from "@/app/components/models/model-select";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import { useProject } from "@/lib/project/use-project";
+import { pickOther } from "@/lib/utils";
 import { PanelCard } from "../canvas/panel/panel-card";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useSloppy } from "./sloppy-provider";
-import { nextSuggestion, SUGGESTIONS } from "./suggestions";
+import { SUGGESTIONS } from "./suggestions";
 
 function ModelPicker() {
 	const model = useDefaultModels().llm;
@@ -60,7 +61,7 @@ export function SloppyComposer() {
 	const showsSuggestion = SUGGESTIONS.includes(value);
 
 	const suggest = () => {
-		setValue(nextSuggestion(value));
+		setValue(pickOther(SUGGESTIONS, value));
 		textareaRef.current?.focus();
 	};
 
