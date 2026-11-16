@@ -63,8 +63,8 @@ describe("OSMLStreamParser", () => {
 
 	it("ends an element at a closing tag split across chunks", () => {
 		const [[speech]] = read(
-			"<speech>Once</narr",
-			"ation> and some",
+			"<speech>Once</spe",
+			"ech> and some",
 			" stray words",
 		);
 
