@@ -40,14 +40,14 @@ describe("estimateRuntime", () => {
 		).toBe(18);
 	});
 
-	it("holds a video for its trim, or longer for the dialogue after it", () => {
+	it("holds a video for its trim, or longer for the speech after it", () => {
 		expect(
 			runtime([
 				scene(
 					element("video", "A pan.", { duration: "8", trimEnd: "5" }),
-					element("narration", words(9)),
+					element("speech", words(9)),
 					element("video", "A zoom.", { duration: "4" }),
-					element("narration", words(90)),
+					element("speech", words(90)),
 				),
 			]),
 		).toBe(5 + estimateSpeechSec(90));
@@ -91,12 +91,12 @@ describe("estimateRuntime", () => {
 		);
 	});
 
-	it("holds a still for the dialogue after it, and at least a second", () => {
+	it("holds a still for the speech after it, and at least a second", () => {
 		expect(
 			runtime([
 				scene(
 					element("image", "A forest."),
-					element("narration", words(90)),
+					element("speech", words(90)),
 					element("image", "A clearing."),
 					element("music", "Soft piano."),
 				),
@@ -104,17 +104,17 @@ describe("estimateRuntime", () => {
 		).toBe(estimateSpeechSec(90) + 1);
 	});
 
-	it("counts dialogue before the first visual, which plays over a blank scene", () => {
+	it("counts speech before the first visual, which plays over a blank scene", () => {
 		expect(
 			runtime([
-				scene(element("narration", words(180)), element("image", "A forest.")),
+				scene(element("speech", words(180)), element("image", "A forest.")),
 			]),
 		).toBe(estimateSpeechSec(180) + 1);
 	});
 
 	it("overlaps each scene after the first by the transition the layout snaps to frames", () => {
 		const script = [
-			scene(element("narration", words(30))),
+			scene(element("speech", words(30))),
 			scene(element("image", "A forest."), element("image", "A river.")),
 		];
 
@@ -124,8 +124,8 @@ describe("estimateRuntime", () => {
 		);
 	});
 
-	it("estimates a narration-only script by its speech", () => {
-		expect(runtime([scene(element("narration", words(90)))])).toBe(
+	it("estimates a speech-only script by its speech", () => {
+		expect(runtime([scene(element("speech", words(90)))])).toBe(
 			estimateSpeechSec(90),
 		);
 	});

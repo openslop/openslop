@@ -24,7 +24,7 @@ export function createScriptWriter(editor: Editor): (chunk: string) => void {
 		if (!text) return;
 		if (findElementById(editor, id)) return updateElementText(editor, id, text);
 
-		// One normalization, so withLayout seeds no narration back over the empty script it replaces.
+		// One normalization, so withLayout seeds no speech back over the empty script it replaces.
 		Editor.withoutNormalizing(editor, () => {
 			if (isScriptEmpty(editor.children)) clearScript(editor);
 			Transforms.insertNodes(

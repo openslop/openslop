@@ -10,7 +10,7 @@ import { applyScriptToEditor } from "@/lib/project/apply-script";
 import { withMediaDrafts } from "../plugins/with-media-drafts";
 import { content, scene } from "./fixtures";
 
-const SCRIPT = [scene([content("narration", "n1", "hello")])];
+const SCRIPT = [scene([content("speech", "n1", "hello")])];
 
 const editorWith = (children: Descendant[]): CanvasEditor => {
 	const editor = withMediaDrafts(withHistory(withReact(makeEditor(children))));

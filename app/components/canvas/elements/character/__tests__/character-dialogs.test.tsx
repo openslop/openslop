@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
-import { characterNames, findAsset, NARRATOR } from "@/lib/canvas/assets";
+import { characterNames, findAsset } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
@@ -105,7 +105,7 @@ describe("NewCharacterDialog", () => {
 		);
 		await click('button[type="submit"]');
 
-		expect(onCreated).toHaveBeenCalledWith(NARRATOR);
+		expect(onCreated).toHaveBeenCalledWith("Narrator");
 		expect(canvas.editor.children).toEqual([]);
 	});
 
@@ -189,7 +189,7 @@ describe("CharacterEditModal", () => {
 	});
 
 	it("starts a name no character has with the avatar and voice off", () => {
-		canvas = mountOnCanvas([scene([content("narration", "n1", "hello")])]);
+		canvas = mountOnCanvas([scene([content("speech", "n1", "hello")])]);
 
 		open();
 
@@ -203,7 +203,7 @@ describe("CharacterEditModal", () => {
 		canvas = mountOnCanvas([
 			mia("a girl"),
 			miaVoice(),
-			asset("asset_voice", { name: NARRATOR }),
+			asset("asset_voice", { name: "Narrator" }),
 		]);
 		open();
 
@@ -212,14 +212,14 @@ describe("CharacterEditModal", () => {
 		);
 		await act(async () => remove?.click());
 
-		expect(characterNames(canvas.editor.children)).toEqual([NARRATOR]);
+		expect(characterNames(canvas.editor.children)).toEqual(["Narrator"]);
 		expect(onClose).toHaveBeenCalledOnce();
 
 		const [message, { action }] = toast.mock.lastCall ?? [];
 		act(() => action.props.onClick());
 
 		expect(message).toBe("Deleted Mia");
-		expect(characterNames(canvas.editor.children)).toEqual(["Mia", NARRATOR]);
+		expect(characterNames(canvas.editor.children)).toEqual(["Mia", "Narrator"]);
 		expect(appearanceOf("Mia")).toBe("a girl");
 		expect(toast.dismiss).toHaveBeenCalledOnce();
 	});

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { NARRATOR } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { ADAPT_SCRIPT_RULES } from "../adapt";
@@ -106,12 +105,12 @@ describe("buildScriptPrompt", () => {
 		).toEqual(buildScriptPrompt([], settingsOf(), source));
 	});
 
-	it("carries the art style, narrator and characters on the canvas", () => {
+	it("carries the art style and every character on the canvas, voiced or drawn", () => {
 		const { system } = buildScriptPrompt(
 			[
 				asset("asset_style", { text: "muted watercolor" }),
 				asset("asset_voice", {
-					name: NARRATOR,
+					name: "Narrator",
 					attrs: { gender: "feminine" },
 				}),
 				asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" }),
@@ -122,11 +121,9 @@ describe("buildScriptPrompt", () => {
 
 		expect(system).toContain("# Art Style");
 		expect(system).toContain("muted watercolor");
-		expect(system).toContain("# Narration Voice");
-		expect(system).toContain("- gender: feminine");
 		expect(system).toContain("# Characters");
-		expect(system).toContain("a small grey rabbit");
-		expect(system).not.toContain(`## ${NARRATOR}`);
+		expect(system).toContain("## Narrator\n\n- gender: feminine");
+		expect(system).toContain("## Lumi\n\n- appearance: a small grey rabbit");
 	});
 
 	it.each([
@@ -137,7 +134,7 @@ describe("buildScriptPrompt", () => {
 				asset("asset_voice", { name: "Mira", attrs: { age: "child" } }),
 			],
 			"## Mira\n\n- age: child\n- appearance: a freckled girl",
-			"# Narration Voice",
+			"- pitch:",
 		],
 		[
 			"a voice-only character with their voice and no appearance",
@@ -149,7 +146,7 @@ describe("buildScriptPrompt", () => {
 			"a character with no voice by their appearance alone",
 			[asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" })],
 			"## Lumi\n\n- appearance: a small grey rabbit",
-			"# Narration Voice",
+			"- age:",
 		],
 	])("lists %s", (_, canvas, listed, absent) => {
 		const preamble = projectPreamble(canvas);
@@ -210,7 +207,7 @@ describe("buildScriptPrompt", () => {
 
 	it("keeps the adaptation guidance independent of specific formats and speech elements", () => {
 		expect(ADAPT_SCRIPT_RULES).not.toMatch(
-			/cinematic|faceless|explainer|<narration>|<character>|<video>/i,
+			/cinematic|faceless|explainer|<speech>|<speech>|<video>/i,
 		);
 	});
 

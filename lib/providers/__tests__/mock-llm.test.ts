@@ -18,7 +18,7 @@ describe("MockLLM", () => {
 		});
 
 		expect(text).toContain("Premise:");
-		expect(text).not.toContain("<narration");
+		expect(text).not.toContain("<speech");
 	});
 
 	it("answers a review with no findings, so a mock run ends the loop", async () => {
@@ -38,7 +38,7 @@ describe("MockLLM", () => {
 			prompt: "write me a video",
 		});
 
-		expect(text).toContain("<narration");
+		expect(text).toContain("<speech");
 	});
 });
 
@@ -50,7 +50,7 @@ const WRITTEN_CANVAS = [
 	"```xml",
 	'<asset_avatar id="avatar" name="Red">A girl in a red cloak.</asset_avatar>',
 	"--- Scene 1 ---",
-	'<narration id="n1">Once upon a time.</narration>',
+	'<speech id="n1">Once upon a time.</speech>',
 	'<image id="img1">A cottage at dawn.</image>',
 	"```",
 ].join("\n");

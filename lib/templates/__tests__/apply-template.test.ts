@@ -7,7 +7,6 @@ import {
 	findAsset,
 	getAssets,
 	getCanvasElements,
-	NARRATOR,
 	referenceUrls,
 	voiceOf,
 } from "@/lib/canvas/assets";
@@ -50,20 +49,21 @@ describe("applyTemplate", () => {
 		} = getTemplate("pov-life").characters?.Protagonist ?? {};
 
 		expect(avatarNames(assets())).toEqual(["Protagonist"]);
+		expect(characterNames(assets())).toEqual(["Protagonist", "Narrator"]);
 		expect(assetText(assets(), "asset_avatar", "Protagonist")).toBe(appearance);
 		expect(voiceOf(assets(), "Protagonist")).toMatchObject(voice);
 	});
 
-	it("gives the narrator the template's narration voice in place of the user's, and no avatar", () => {
-		setAsset(editor, "asset_voice", NARRATOR, {
+	it("gives a character with no appearance the template's voice in place of the user's, and no avatar", () => {
+		setAsset(editor, "asset_voice", "Narrator", {
 			attrs: { accent: "british", voiceId: "v-mine" },
 		});
 
 		apply("pov-life");
 
-		expect(findAsset(assets(), "asset_avatar", NARRATOR)).toBeUndefined();
-		expect(voiceOf(assets())).toEqual({
-			...VoiceSchema.parse(getTemplate("pov-life").narration),
+		expect(findAsset(assets(), "asset_avatar", "Narrator")).toBeUndefined();
+		expect(voiceOf(assets(), "Narrator")).toEqual({
+			...VoiceSchema.parse(getTemplate("pov-life").characters.Narrator),
 			...DEFAULT_MODELS.tts,
 		});
 	});
@@ -73,10 +73,9 @@ describe("applyTemplate", () => {
 		expect(characterNames(assets())).toContain("Protagonist");
 
 		apply("sleep-story");
-		expect(characterNames(assets())).toEqual([
-			NARRATOR,
-			...Object.keys(getTemplate("sleep-story").characters ?? {}),
-		]);
+		expect(characterNames(assets())).toEqual(
+			Object.keys(getTemplate("sleep-story").characters),
+		);
 	});
 
 	it("records which template the project writes against", () => {
@@ -171,7 +170,7 @@ describe("applyTemplate", () => {
 				children: [
 					{
 						id: "line",
-						type: "narration",
+						type: "speech",
 						children: [{ id: "line-t", text: "hello" }],
 					},
 				],

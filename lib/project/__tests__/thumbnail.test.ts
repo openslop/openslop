@@ -12,7 +12,7 @@ const element = (
 	children: [{ id: `${id}-t`, text: "" }],
 });
 
-const SCRIPT = [element("1", "narration"), element("2", "video"), element("3")];
+const SCRIPT = [element("1", "speech"), element("2", "video"), element("3")];
 
 describe("pickThumbnailUrl", () => {
 	it.each([

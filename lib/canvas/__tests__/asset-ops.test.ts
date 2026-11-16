@@ -18,7 +18,6 @@ import {
 	characterNames,
 	findAsset,
 	getAssets,
-	NARRATOR,
 	referenceUrls,
 } from "../assets";
 import { createCanvasElement } from "../create-canvas-element";
@@ -30,7 +29,7 @@ import { asset, labels, makeEditor, references } from "./_assets";
 const PINNED = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
 
-const narration = (id: string) => createCanvasElement("narration", { id });
+const speech = (id: string) => createCanvasElement("speech", { id });
 
 const scene = (id: string, ...children: ContentElement[]): Scene => ({
 	id,
@@ -45,7 +44,7 @@ describe("setAsset", () => {
 	it("adds a new asset at the top, ahead of the script", () => {
 		const editor = makeEditor([
 			asset("asset_avatar", { name: "Kai" }),
-			scene("s1", narration("n1")),
+			scene("s1", speech("n1")),
 		]);
 
 		setAsset(editor, "asset_style", undefined);
@@ -159,7 +158,7 @@ describe("setReferenceImages", () => {
 	it("holds the deduped list on one references element, kept when emptied", () => {
 		const editor = makeEditor([
 			references("https://img/x.png"),
-			scene("s1", narration("n1")),
+			scene("s1", speech("n1")),
 		]);
 
 		setReferenceImages(editor, [
@@ -183,12 +182,12 @@ describe("setReferenceImages", () => {
 
 describe("removeAssets", () => {
 	it("removes every asset and keeps the scenes", () => {
-		const first = scene("s1", narration("n1"));
+		const first = scene("s1", speech("n1"));
 		const editor = makeEditor([
 			asset("asset_style", { text: "ink wash" }),
 			asset("asset_avatar", { name: "Mia" }),
 			asset("asset_voice", { name: "Mia" }),
-			asset("asset_voice", { name: NARRATOR }),
+			asset("asset_voice", { name: "Narrator" }),
 			first,
 		]);
 
@@ -210,7 +209,7 @@ describe("removeAsset and removeCharacter", () => {
 			asset("asset_avatar", { name: "Mia" }),
 			asset("asset_voice", { name: "Mia" }),
 			asset("asset_avatar", { name: "Bob" }),
-			asset("asset_voice", { name: NARRATOR }),
+			asset("asset_voice", { name: "Narrator" }),
 			scene(
 				"s1",
 				showing("image", "i1", "{{Mia}} and {{Bob}}"),
@@ -230,7 +229,7 @@ describe("removeAsset and removeCharacter", () => {
 			"asset_avatar:Bob",
 			"asset_voice:Narrator",
 		]);
-		expect(characterNames(editor.children)).toEqual(["Bob", NARRATOR]);
+		expect(characterNames(editor.children)).toEqual(["Bob", "Narrator"]);
 		expect(shownBy(editor)).toEqual(shown);
 	});
 
@@ -243,7 +242,7 @@ describe("removeAsset and removeCharacter", () => {
 		expect(getAssets(editor.children).map(flatAttributes)).toEqual(
 			expect.arrayContaining(before),
 		);
-		expect(characterNames(editor.children)).toEqual(["Mia", "Bob", NARRATOR]);
+		expect(characterNames(editor.children)).toEqual(["Mia", "Bob", "Narrator"]);
 	});
 
 	it("removes only the avatar, so the character keeps its voice and drops out of pictures", () => {
@@ -277,7 +276,7 @@ describe("removeAsset and removeCharacter", () => {
 
 describe("addCharacter", () => {
 	it("gives a new character a look and a voice", () => {
-		const editor = makeEditor([scene("s1", narration("n1"))]);
+		const editor = makeEditor([scene("s1", speech("n1"))]);
 
 		addCharacter(editor, "Mia");
 
@@ -285,19 +284,11 @@ describe("addCharacter", () => {
 			expect.arrayContaining(["asset_avatar:Mia", "asset_voice:Mia"]),
 		);
 	});
-
-	it("gives the narrator a voice alone", () => {
-		const editor = makeEditor([scene("s1", narration("n1"))]);
-
-		addCharacter(editor, NARRATOR);
-
-		expect(labels(editor.children)).toEqual(["asset_voice:Narrator", "s1"]);
-	});
 });
 
 describe("ensureAsset", () => {
 	it("adds an empty art style", () => {
-		const editor = makeEditor([scene("s1", narration("n1"))]);
+		const editor = makeEditor([scene("s1", speech("n1"))]);
 
 		ensureAsset(editor, "asset_style");
 
@@ -363,7 +354,7 @@ describe("restoreDraft", () => {
 	it("puts the draft on the take's inputs", () => {
 		const editor = makeEditor([
 			asset("asset_media_image"),
-			scene("s1", narration("n1")),
+			scene("s1", speech("n1")),
 		]);
 
 		restoreDraft(editor, "asset_media_image", { inputs });
@@ -378,7 +369,7 @@ describe("clearDraft", () => {
 	it("blanks the draft's prompt and settings", () => {
 		const editor = makeEditor([
 			asset("asset_media_image"),
-			scene("s1", narration("n1")),
+			scene("s1", speech("n1")),
 		]);
 		restoreDraft(editor, "asset_media_image", {
 			inputs: {

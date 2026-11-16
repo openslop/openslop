@@ -81,7 +81,7 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 ### 是分镜板，不是提示框
 
-每个场景是一叠卡片：旁白、角色、图片、视频、音效、音乐。改任意一条提示词，为每张卡片单独选模型，拖动排序，鼠标停在哪里就能在哪里插入。
+每个场景是一叠卡片：语音、图片、视频、音效、音乐。改任意一条提示词，为每张卡片单独选模型，拖动排序，鼠标停在哪里就能在哪里插入。
 
 [文档模型 →](../../lib/canvas)
 
@@ -144,7 +144,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 - **[导出最高 4K](../../app/components/player/export-button.tsx)** — 在 Remotion Lambda 上分块并行渲染，交给你一个 MP4。
 - **[版本历史](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 边做边自动保存，合并成检查点。查看任意版本并恢复。
 - **[角色和画风](../../app/components/canvas/elements/asset-strip.tsx)** — 给角色起一次名，每张图片、每句配音和每个头像都保持一致。
-- **[模板](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime 等等。每个模板都预设了一种风格、一位旁白和一个时长。
+- **[模板](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime 等等。每个模板都预设了一种风格、一组角色和一个时长。
 - **[开发用的 mock](../../.env.example)** — 不填某个提供商的密钥，它的调用就会回退到预置结果，让你不花钱也能开发。
 
 ## 快速开始

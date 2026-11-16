@@ -30,14 +30,14 @@ const wrap = (...children: ContentElement[]): Scene => ({
 describe("serializeOSMLWithScenes", () => {
 	it("writes each scene under its marker, attributes after the id", () => {
 		const result = serializeOSMLWithScenes([
-			wrap(el("narration", "Once upon a time")),
+			wrap(el("speech", "Once upon a time")),
 			wrap(
-				el("character", "Hello!", { name: "Bob", emotion: "excited" }),
+				el("speech", "Hello!", { name: "Bob", emotion: "excited" }),
 				el("image", "forest"),
 			),
 		]);
 		expect(result).toBe(
-			'--- Scene 1 ---\n<narration id="e1">Once upon a time</narration>\n\n--- Scene 2 ---\n<character id="e1" name="Bob" emotion="excited">Hello!</character>\n<image id="e1">forest</image>',
+			'--- Scene 1 ---\n<speech id="e1">Once upon a time</speech>\n\n--- Scene 2 ---\n<speech id="e1" name="Bob" emotion="excited">Hello!</speech>\n<image id="e1">forest</image>',
 		);
 	});
 
@@ -53,7 +53,7 @@ describe("serializeOSMLWithScenes", () => {
 		});
 		const result = serializeOSMLWithScenes([
 			style,
-			wrap(el("narration", "Hello")),
+			wrap(el("speech", "Hello")),
 			voice,
 		]);
 
@@ -62,32 +62,32 @@ describe("serializeOSMLWithScenes", () => {
 			`<asset_voice id="${voice.id}" name="Mia &amp; Co" gender="feminine" provider="cartesia" model="Sonic 3.6"></asset_voice>`,
 			"",
 			"--- Scene 1 ---",
-			'<narration id="e1">Hello</narration>',
+			'<speech id="e1">Hello</speech>',
 		]);
 	});
 });
 
 describe("getElementText", () => {
 	it("extracts joined text from children", () => {
-		const narration: ContentElement = {
+		const speech: ContentElement = {
 			id: "e1",
-			type: "narration",
+			type: "speech",
 			children: [
 				{ id: "t1", text: "Hello " },
 				{ id: "t2", text: "world" },
 			],
 		};
-		expect(getElementText(narration)).toBe("Hello world");
+		expect(getElementText(speech)).toBe("Hello world");
 	});
 });
 
 describe("getElementBodyText", () => {
 	const marked = (...texts: string[]): ContentElement => ({
 		id: "e1",
-		type: "narration",
+		type: "speech",
 		children: texts.map((text, i) => ({
 			id: `t${i}`,
-			type: "narration",
+			type: "speech",
 			text,
 		})),
 	});
@@ -117,7 +117,7 @@ describe("serialize round trip", () => {
 
 	it("does not grow the script each time it is saved and reloaded", () => {
 		let scene = wrap(
-			createCanvasElement("narration", {
+			createCanvasElement("speech", {
 				id: "e1",
 				text: "hello",
 			}),
@@ -130,7 +130,7 @@ describe("serialize round trip", () => {
 	});
 
 	it("keeps a reloaded empty element recognisably empty", () => {
-		const scene = reload(wrap(createCanvasElement("narration", { id: "e1" })));
+		const scene = reload(wrap(createCanvasElement("speech", { id: "e1" })));
 		expect(Node.string(scene.children[0])).toBe(ZERO_WIDTH_SPACE);
 	});
 });

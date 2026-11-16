@@ -51,18 +51,18 @@ describe("searchProviders", () => {
 
 	it("narrows to the capability being browsed", () => {
 		expect(names("", capabilities("videos"))).toEqual(["openslop", "runware"]);
-		expect(names("", capabilities("voice"))).toEqual(["openslop", "cartesia"]);
+		expect(names("", capabilities("speech"))).toEqual(["openslop", "cartesia"]);
 	});
 
 	// A model can only be reached through a provider the filter still allows.
 	it("keeps the capability filter over a model match", () => {
-		expect(names("seedream", capabilities("voice"))).toEqual([]);
+		expect(names("seedream", capabilities("speech"))).toEqual([]);
 	});
 
 	// Under a capability tab only that tab's models can match or be the reason.
 	it("ignores a model match outside the browsed capability", () => {
-		expect(searchProviders("image", capabilities("voice"))).toEqual([]);
-		expect(searchProviders("scribe", capabilities("voice"))).toEqual([]);
+		expect(searchProviders("image", capabilities("speech"))).toEqual([]);
+		expect(searchProviders("scribe", capabilities("speech"))).toEqual([]);
 	});
 
 	it("finds nothing for a query no one matches", () => {

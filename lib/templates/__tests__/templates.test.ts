@@ -19,7 +19,7 @@ describe("templates", () => {
 		["empty system prompt", { systemPrompt: "" }],
 		["unknown length", { length: "forever" }],
 		["invalid color", { color: "orange" }],
-		["invalid narration", { narration: { gender: "typo" } }],
+		["invalid speech", { speech: { gender: "typo" } }],
 		[
 			"invalid character voice",
 			{ characters: { Protagonist: { appearance: "a man", pitch: "typo" } } },

@@ -37,9 +37,9 @@ const project = (
 	});
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
-	readScript: () => "<narration>hi</narration>",
+	readScript: () => "<speech>hi</speech>",
 	countSpokenWords: () => 1,
-	estimateDialogueLengths: () => [],
+	estimateSpeechLengths: () => [],
 	estimateVisualSpans: () => [],
 	estimateRuntime: () => 0,
 	generateText: async () => "an outline",
@@ -126,7 +126,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain("- title: Moon Cat");
-		expect(outcome.ok && outcome.output).toContain("<narration>hi</narration>");
+		expect(outcome.ok && outcome.output).toContain("<speech>hi</speech>");
 		expect(outcome.ok && outcome.output).toContain("- length: 3-5m");
 		expect(outcome.ok && outcome.output).toContain("- template: none");
 		expect(outcome.ok && outcome.output).toContain("- aspect ratio: 9:16");
@@ -277,7 +277,7 @@ describe("executeToolCall", () => {
 		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
 		const setElementResult = vi.fn((id: string) => {
 			if (id === "n1")
-				throw new Error("n1 is a narration element and can't take a file.");
+				throw new Error("n1 is a speech element and can't take a file.");
 			return Promise.resolve();
 		});
 		const outcome = await executeToolCall(
@@ -296,7 +296,7 @@ describe("executeToolCall", () => {
 		expect(setElementResult).toHaveBeenNthCalledWith(2, "m1", url);
 		expect(outcome.ok && outcome.output).toBe(
 			[
-				"Skipped n1: n1 is a narration element and can't take a file.",
+				"Skipped n1: n1 is a speech element and can't take a file.",
 				"Set m1.",
 			].join("\n"),
 		);
@@ -461,23 +461,23 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).not.toContain("over by");
 	});
 
-	it("estimates how long each line of dialogue runs", async () => {
+	it("estimates how long each line of speech runs", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "estimate_dialogue_lengths", input: {} },
+			{ toolName: "estimate_speech_lengths", input: {} },
 			context({
-				estimateDialogueLengths: () => [
-					{ id: "nar1", type: "narration", words: 90, seconds: 30 },
-					{ id: "chr1", type: "character", words: 6, seconds: 2 },
+				estimateSpeechLengths: () => [
+					{ id: "s1", words: 90, seconds: 30 },
+					{ id: "s2", words: 6, seconds: 2 },
 				],
 			}),
 		);
 
 		expect(outcome.ok && outcome.output).toBe(
-			"narration nar1: 90 words, about 30.0s\ncharacter chr1: 6 words, about 2.0s",
+			"speech s1: 90 words, about 30.0s\nspeech s2: 6 words, about 2.0s",
 		);
 	});
 
-	it("fits each video element to the dialogue under it and says it went stale", async () => {
+	it("fits each video element to the speech under it and says it went stale", async () => {
 		const ops: RefineOp[][] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
@@ -488,7 +488,7 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						dialogueIds: ["nar1"],
+						speechIds: ["nar1"],
 						durationSec: 10,
 					},
 					{
@@ -496,7 +496,7 @@ describe("executeToolCall", () => {
 						type: "image",
 						sceneNumber: 1,
 						words: 90,
-						dialogueIds: ["nar2"],
+						speechIds: ["nar2"],
 					},
 				],
 				editScript: (applied) => {
@@ -508,7 +508,7 @@ describe("executeToolCall", () => {
 
 		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
 		expect(outcome.ok && outcome.output).toContain(
-			"Scene 1 video ai1: 10s to 5s, for about 5.0s of estimated dialogue and leeway.",
+			"Scene 1 video ai1: 10s to 5s, for about 5.0s of estimated speech and leeway.",
 		);
 		expect(outcome.ok && outcome.output).toContain("need regenerating");
 		expect(outcome.ok && outcome.output).toContain(
@@ -516,7 +516,7 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("names a video element whose dialogue outruns the longest option instead of hiding the clamp", async () => {
+	it("names a video element whose speech outruns the longest option instead of hiding the clamp", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
@@ -526,7 +526,7 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						dialogueIds: [],
+						speechIds: [],
 						durationSec: 10,
 					},
 					{
@@ -534,7 +534,7 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 2,
 						words: 180,
-						dialogueIds: ["nar2"],
+						speechIds: ["nar2"],
 						durationSec: 15,
 					},
 				],
@@ -542,12 +542,12 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toContain("Scene 2 video vid1 needs");
-		expect(outcome.ok && outcome.output).toContain("split the dialogue");
+		expect(outcome.ok && outcome.output).toContain("split the speech");
 		expect(outcome.ok && outcome.output).not.toContain("ai1");
 		expect(outcome.ok && outcome.output).not.toContain("already cover");
 	});
 
-	it("leaves durations alone when every video element already covers its dialogue", async () => {
+	it("leaves durations alone when every video element already covers its speech", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: { element_ids: ["vid1"] } },
 			context({
@@ -557,7 +557,7 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						dialogueIds: ["nar1"],
+						speechIds: ["nar1"],
 						durationSec: 5,
 					},
 				],
@@ -580,7 +580,7 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						dialogueIds: ["nar1"],
+						speechIds: ["nar1"],
 						durationSec: 5,
 					},
 				],
@@ -602,24 +602,24 @@ describe("executeToolCall", () => {
 						type: "image",
 						sceneNumber: 1,
 						words: 90,
-						dialogueIds: ["nar1"],
+						speechIds: ["nar1"],
 					},
 				],
 			}),
 		);
 
 		expect(outcome.ok && outcome.output).toContain(
-			"No video element to generate has dialogue under it in scope.",
+			"No video element to generate has speech under it in scope.",
 		);
 	});
 
-	it("says the canvas has no dialogue rather than reporting an empty table", async () => {
+	it("says the canvas has no speech rather than reporting an empty table", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "estimate_dialogue_lengths", input: {} },
+			{ toolName: "estimate_speech_lengths", input: {} },
 			context(),
 		);
 
-		expect(outcome.ok && outcome.output).toBe("No dialogue on the canvas yet.");
+		expect(outcome.ok && outcome.output).toBe("No speech on the canvas yet.");
 	});
 
 	it("hands over an element's result", async () => {
@@ -695,7 +695,7 @@ describe("executeToolCall", () => {
 		);
 
 		expect(outcome.ok && outcome.output).toBe(NO_FINDINGS);
-		expect(calls[0]?.prompt).toContain("<narration>hi</narration>");
+		expect(calls[0]?.prompt).toContain("<speech>hi</speech>");
 		expect(calls[0]?.prompt).toContain("intended as a Cinematic");
 		expect(calls[0]?.systemPrompt).toContain(
 			"The story script must be written",
@@ -856,7 +856,7 @@ describe("SLOPPY_TOOLS", () => {
 			"set_element_result",
 			"outline_story",
 			"estimate_total_length",
-			"estimate_dialogue_lengths",
+			"estimate_speech_lengths",
 			"fit_durations",
 			"set_title",
 			"list_models",

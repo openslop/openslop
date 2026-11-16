@@ -1,5 +1,5 @@
 import { Editor } from "slate";
-import { findAsset, NARRATOR } from "@/lib/canvas/assets";
+import { findAsset } from "@/lib/canvas/assets";
 import {
 	removeAssets,
 	setAsset,
@@ -28,17 +28,17 @@ export function applyTemplate(
 		length: template.length,
 	});
 
-	const characters = Object.entries(template.characters ?? {});
+	const characters = Object.entries(template.characters);
 	Editor.withoutNormalizing(editor, () => {
 		removeAssets(editor);
 
 		setAsset(editor, "asset_style", undefined, {
 			text: template.style.description,
 		});
-		setAsset(editor, "asset_voice", NARRATOR, { attrs: template.narration });
 		setReferenceImages(editor, template.referenceImages);
 		for (const [name, { appearance, avatar: _, ...voice }] of characters) {
-			setAsset(editor, "asset_avatar", name, { text: appearance });
+			if (appearance)
+				setAsset(editor, "asset_avatar", name, { text: appearance });
 			setAsset(editor, "asset_voice", name, { attrs: voice });
 		}
 	});

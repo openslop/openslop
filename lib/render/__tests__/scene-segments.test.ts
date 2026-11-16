@@ -194,8 +194,8 @@ describe("buildSceneSegments", () => {
 	});
 
 	it("gives a blank scene the scene of the element that opened it", () => {
-		const narration = resolved("n.mp3", { id: "s2", number: 2 });
-		const [segment] = segmentsOf([sequence(0, 2, blankScene(narration))]);
+		const speech = resolved("n.mp3", { id: "s2", number: 2 });
+		const [segment] = segmentsOf([sequence(0, 2, blankScene(speech))]);
 		expect(segment).toMatchObject({
 			sceneId: "s2",
 			label: "Scene 2",

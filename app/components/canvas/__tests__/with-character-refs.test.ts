@@ -48,13 +48,13 @@ describe("withCharacterRefs", () => {
 	});
 
 	it("leaves braces in speech as text", () => {
-		const editor = editorWith(content("narration", "n", "Hi {{Red}}"));
+		const editor = editorWith(content("speech", "n", "Hi {{Red}}"));
 
 		expect(refNames(editor)).toEqual([]);
 	});
 
 	it("names a character plainly in speech", () => {
-		const editor = editorWith(content("narration", "n", "Hi !"));
+		const editor = editorWith(content("speech", "n", "Hi !"));
 
 		Transforms.insertNodes(editor, createCharacterRef("Red"), {
 			at: { path: [0, 0, 0], offset: 3 },

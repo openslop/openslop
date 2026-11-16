@@ -29,10 +29,10 @@ import type { RouteFamily } from "./route-families";
 const ASSET_ROUTES = {
 	image: { fields: IMAGE_FIELDS, label: "Image generation" },
 	video: { fields: VIDEO_FIELDS, label: "Video submission" },
-	tts: { fields: TTS_FIELDS, label: "TTS generation" },
+	tts: { fields: TTS_FIELDS, label: "Speech generation" },
 	music: { fields: MUSIC_FIELDS, label: "Music generation" },
 	sfx: { fields: AUDIO_FIELDS, label: "SFX generation" },
-	stt: { fields: STT_FIELDS, label: "Speech to text" },
+	stt: { fields: STT_FIELDS, label: "Captions generation" },
 } satisfies Record<JobConnectorType, { fields: z.ZodRawShape; label: string }>;
 
 export const createAssetRouteHandler = <TPicked extends ModelRef>(

@@ -100,10 +100,10 @@ const sampleCaptions = (sentence: string): Caption[] =>
 		confidence: null,
 	}));
 
-/** Stand-in narration for the panel preview. */
+/** Stand-in speech for the panel preview. */
 export const CAPTION_SAMPLE = sampleCaptions(
 	"Style your captions exactly how you like them",
 );
 
-/** Stand-in narration for the preset thumbnails. */
+/** Stand-in speech for the preset thumbnails. */
 export const CAPTION_THUMBNAIL_SAMPLE = sampleCaptions("Look at this");

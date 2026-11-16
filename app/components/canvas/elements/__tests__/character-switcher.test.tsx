@@ -15,7 +15,7 @@ import { CharacterSwitcher } from "../character-switcher";
 const MISSING = 'aria-label="Character missing"';
 
 function render(name: string | undefined, characters: string[]) {
-	const line = element("el", "character", "", name ? { name } : {});
+	const line = element("el", "speech", "", name ? { name } : {});
 	const nodes = [
 		...characters.map((character) => asset("asset_voice", { name: character })),
 		line,

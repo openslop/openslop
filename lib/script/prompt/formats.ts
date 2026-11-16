@@ -20,8 +20,8 @@ export const VIDEO_FORMAT = {
 } as const;
 
 export const VIDEO_FORMATS = dedent`
-	- ${VIDEO_FORMAT.cinematic}: characters speak on screen, inside the video prompts. Only <video> and <music>, with occasional <narration>.
-	- ${VIDEO_FORMAT.faceless}: a narrator and character voices tell the story over images and video. All elements.
+	- ${VIDEO_FORMAT.cinematic}: characters speak on screen, inside the video prompts. Only <video> and <music>, with occasional <speech>.
+	- ${VIDEO_FORMAT.faceless}: voices tell the story over images and video. All elements.
 	- ${VIDEO_FORMAT.explainer}: a voice over video in which nobody speaks. All elements except <image>.
 `;
 

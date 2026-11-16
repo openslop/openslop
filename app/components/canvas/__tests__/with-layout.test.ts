@@ -12,7 +12,7 @@ const ASSETS = [
 	asset("asset_avatar", { name: "Mia", text: "a girl" }),
 ];
 
-const SCRIPT = [scene([content("narration", "n1", "hello")])];
+const SCRIPT = [scene([content("speech", "n1", "hello")])];
 
 const normalized = (
 	children: Descendant[],
@@ -26,15 +26,15 @@ const normalized = (
 };
 
 describe("withLayout", () => {
-	it("seeds an empty document with one narration", () => {
-		expect(normalized([])).toMatchObject([{ type: "narration" }]);
+	it("seeds an empty document with one speech", () => {
+		expect(normalized([])).toMatchObject([{ type: "speech" }]);
 	});
 
-	it("seeds a document that holds only assets with one narration, after the last of them", () => {
+	it("seeds a document that holds only assets with one speech, after the last of them", () => {
 		const children = normalized([...ASSETS]);
 
 		expect(children.slice(0, -1)).toEqual(ASSETS);
-		expect(children.at(-1)).toMatchObject({ type: "narration" });
+		expect(children.at(-1)).toMatchObject({ type: "speech" });
 	});
 
 	it("leaves a document that holds a script alone", () => {
@@ -45,7 +45,7 @@ describe("withLayout", () => {
 
 	it("keeps a soft break inside its element", () => {
 		const editor = withLayout(withReact(createEditor()));
-		editor.children = [scene([content("narration", "n1", "hello")])];
+		editor.children = [scene([content("speech", "n1", "hello")])];
 		Transforms.select(editor, Editor.end(editor, [0]));
 
 		editor.insertSoftBreak();

@@ -44,11 +44,11 @@ describe("splitScenes", () => {
 	});
 
 	it("splits a multi-scene OSML string", () => {
-		const osml = `--- Scene 1 ---\n<image id="a"></image>\n--- Scene 2 ---\n<narration id="b">hi</narration>`;
+		const osml = `--- Scene 1 ---\n<image id="a"></image>\n--- Scene 2 ---\n<speech id="b">hi</speech>`;
 		const parts = splitScenes(osml);
 		expect(parts).toHaveLength(2);
 		expect(parts[0]).toContain('<image id="a"></image>');
-		expect(parts[1]).toContain("<narration");
+		expect(parts[1]).toContain("<speech");
 	});
 });
 
@@ -59,7 +59,7 @@ describe("deserializeWithScenes", () => {
 
 	it("names scenes with the given id factory", () => {
 		const scenes = scenesOf(
-			"<narration>a</narration>\n--- Scene 2 ---\n<narration>b</narration>",
+			"<speech>a</speech>\n--- Scene 2 ---\n<speech>b</speech>",
 			undefined,
 			(index) => `scene-${index}`,
 		);
@@ -68,11 +68,9 @@ describe("deserializeWithScenes", () => {
 	});
 
 	it("keeps tags the canvas does not know out of the document", () => {
-		expect(
-			scenesOf("<unknown>x</unknown><narration>hello</narration>"),
-		).toEqual([
+		expect(scenesOf("<unknown>x</unknown><speech>hello</speech>")).toEqual([
 			expect.objectContaining({
-				children: [expect.objectContaining({ type: "narration" })],
+				children: [expect.objectContaining({ type: "speech" })],
 			}),
 		]);
 	});
@@ -81,10 +79,10 @@ describe("deserializeWithScenes", () => {
 		const nodes = deserializeWithScenes(
 			[
 				'<asset_style id="style">noir</asset_style>',
-				"<narration>a</narration>",
+				"<speech>a</speech>",
 				"--- Scene 2 ---",
 				'<asset_avatar id="ada" name="Ada" provider="runware" model="Seedream 5 Lite">tall</asset_avatar>',
-				"<narration>b</narration>",
+				"<speech>b</speech>",
 			].join("\n"),
 		);
 
@@ -106,7 +104,7 @@ describe("deserializeWithScenes", () => {
 		expect(isAssetElement(avatar) && getPromptText(avatar)).toBe("tall");
 		expect(
 			scenesOf(
-				'<asset_avatar name="Ada">tall</asset_avatar><narration>b</narration>',
+				'<asset_avatar name="Ada">tall</asset_avatar><speech>b</speech>',
 			)[0]?.children,
 		).toHaveLength(1);
 	});
@@ -139,7 +137,7 @@ describe("deserializeWithScenes", () => {
 	it("round-trips quotes and angle brackets in attributes and text", () => {
 		const original = [
 			makeScene([
-				makeEl("character", "5 < 10 & 20 > 15", {
+				makeEl("speech", "5 < 10 & 20 > 15", {
 					name: 'a 24" monitor & a <box>',
 				}),
 			]),
@@ -147,11 +145,11 @@ describe("deserializeWithScenes", () => {
 
 		const scenes = scenesOf(serializeOSMLWithScenes(original));
 
-		const character = scenes[0].children[0];
-		expect(character.type).toBe("character");
-		expect(character.id).toBe("character-id");
-		expect(flatAttributes(character).name).toBe('a 24" monitor & a <box>');
-		expect(getElementText(character)).toContain("5 < 10 & 20 > 15");
+		const speech = scenes[0].children[0];
+		expect(speech.type).toBe("speech");
+		expect(speech.id).toBe("speech-id");
+		expect(flatAttributes(speech).name).toBe('a 24" monitor & a <box>');
+		expect(getElementText(speech)).toContain("5 < 10 & 20 > 15");
 	});
 
 	it("round-trips with serializeWithScenes preserving attributes", () => {
@@ -161,7 +159,7 @@ describe("deserializeWithScenes", () => {
 					referenceImagesOverride: "https://cdn/a.png",
 					motion: "pushIn",
 				}),
-				makeEl("narration", "hello"),
+				makeEl("speech", "hello"),
 			]),
 			makeScene([makeEl("video", "", { startFrame: "https://cdn/b.png" })]),
 		];
@@ -178,9 +176,9 @@ describe("deserializeWithScenes", () => {
 		);
 		expect(flatAttributes(firstImage).motion).toBe("pushIn");
 
-		const firstNarration = scenes[0].children[1];
-		expect(firstNarration.type).toBe("narration");
-		expect(getPromptText(firstNarration)).toContain("hello");
+		const firstSpeech = scenes[0].children[1];
+		expect(firstSpeech.type).toBe("speech");
+		expect(getPromptText(firstSpeech)).toContain("hello");
 
 		const secondVideo = scenes[1].children[0];
 		expect(secondVideo.type).toBe("video");

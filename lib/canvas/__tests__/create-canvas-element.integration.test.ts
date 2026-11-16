@@ -6,18 +6,8 @@ import { DEFAULT_VIDEO_MODEL } from "@/lib/connectors/video/models";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 
 describe("createCanvasElement — schema defaults (integration)", () => {
-	it("applies full TTS defaults for narration", () => {
-		const node = createCanvasElement("narration");
-		expect(flatAttributes(node)).toMatchObject({
-			emotion: "neutral",
-			speed: "medium",
-			volume: "10",
-			...DEFAULT_TTS_MODEL,
-		});
-	});
-
-	it("applies the same TTS defaults for character", () => {
-		const node = createCanvasElement("character");
+	it("applies full TTS defaults for speech", () => {
+		const node = createCanvasElement("speech");
 		expect(flatAttributes(node)).toMatchObject({
 			emotion: "neutral",
 			speed: "medium",

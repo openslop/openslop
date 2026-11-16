@@ -1,11 +1,5 @@
 import { dedent } from "@/lib/dedent";
-import without from "lodash/without";
-import {
-	assetText,
-	characterNames,
-	NARRATOR,
-	voiceOf,
-} from "@/lib/canvas/assets";
+import { assetText, characterNames, voiceOf } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -45,16 +39,7 @@ export function projectPreamble(assets: AssetElement[]): string {
 			${style}`);
 	}
 
-	const voice = renderVoice(voiceOf(assets));
-	if (voice)
-		sections.push(dedent`
-			# Narration Voice
-
-			The narrator speaks in this voice.
-
-			${voice}`);
-
-	const characters = without(characterNames(assets), NARRATOR);
+	const characters = characterNames(assets);
 	if (characters.length > 0) {
 		sections.push(dedent`
 			# Characters
@@ -86,6 +71,6 @@ export function lengthSection({ length }: ScriptSettings): string {
 	return dedent`
 		# Length
 
-		Write ${minWords} to ${maxWords} words of dialogue. Only spoken words count;
+		Write ${minWords} to ${maxWords} words of speech. Only spoken words count;
 		prompts and attributes do not.`;
 }

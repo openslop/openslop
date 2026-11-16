@@ -40,7 +40,6 @@ describe("createConnector", () => {
 
 describe("resolveAttributeSchema", () => {
 	it("resolves the connector type's base schema, keyed by connector type not element type", () => {
-		// narration and character both resolve through "tts" and get the same schema.
 		expect(resolveAttributeSchema("tts", DEFAULT_MODELS.tts).keys).toEqual([
 			"name",
 			"provider",

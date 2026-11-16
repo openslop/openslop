@@ -51,7 +51,7 @@ describe("BaseTTSConnector", () => {
 		};
 
 		const result = await connector.generate(
-			{ prompt: "hello" },
+			{ prompt: "hello", name: "Narrator" },
 			{ dependencies },
 		);
 

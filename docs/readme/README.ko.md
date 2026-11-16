@@ -81,7 +81,7 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 
 ### 프롬프트 상자가 아니라 스토리보드
 
-모든 장면은 카드 묶음입니다: 내레이션, 캐릭터, 이미지, 동영상, 효과음, 음악. 어떤 프롬프트든 고치고, 카드마다 모델을 고르고, 끌어서 순서를 바꾸고, 마우스를 올린 곳 어디든 끼워 넣으세요.
+모든 장면은 카드 묶음입니다: 음성, 이미지, 동영상, 효과음, 음악. 어떤 프롬프트든 고치고, 카드마다 모델을 고르고, 끌어서 순서를 바꾸고, 마우스를 올린 곳 어디든 끼워 넣으세요.
 
 [문서 모델 →](../../lib/canvas)
 
@@ -144,7 +144,7 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 - **[최대 4K로 내보내기](../../app/components/player/export-button.tsx)** — Remotion Lambda에서 여러 조각을 동시에 렌더링해 MP4를 건네줍니다.
 - **[버전 기록](../../app/components/canvas/panel/canvas-history-panel.tsx)** — 작업하는 동안 자동 저장되고, 체크포인트로 묶입니다. 어떤 버전이든 보고 되돌릴 수 있습니다.
 - **[캐릭터와 화풍](../../app/components/canvas/elements/asset-strip.tsx)** — 캐릭터 이름을 한 번만 정하면 모든 이미지, 음성 대사, 아바타가 일관되게 유지됩니다.
-- **[템플릿](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime 등. 각각 스타일, 내레이터, 길이를 미리 채워 줍니다.
+- **[템플릿](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime 등. 각각 스타일, 캐릭터, 길이를 미리 채워 줍니다.
 - **[개발용 목(mock)](../../.env.example)** — 공급자 키를 비워 두면 그 호출은 미리 준비된 결과로 대체되어, 돈을 내지 않고도 개발할 수 있습니다.
 
 ## 시작하기

@@ -3,7 +3,7 @@ import type { ContentElement, Scene } from "@/lib/canvas/types";
 import { crossSceneTransfer, moveDraggedElement } from "../drag-ops";
 import { element, makeEditor } from "./_assets";
 
-const content = (id: string) => element(id, "narration");
+const content = (id: string) => element(id, "speech");
 
 function scene(id: string, children: ContentElement[]): Scene {
 	return { id, type: "scene", children };

@@ -40,13 +40,13 @@ export const TemplateSchema = z.strictObject({
 		thumbnail: templateAsset.optional(),
 	}),
 	referenceImages: z.array(templateAsset),
-	characters: z
-		.record(
-			text,
-			voice.extend({ appearance: text, avatar: templateAsset.optional() }),
-		)
-		.optional(),
-	narration: voice,
+	characters: z.record(
+		text,
+		voice.extend({
+			appearance: text.optional(),
+			avatar: templateAsset.optional(),
+		}),
+	),
 	showcase: z.strictObject({
 		image: templateAsset,
 		title: text,

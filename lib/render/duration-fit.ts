@@ -2,16 +2,16 @@ import { DURATION_MAX, snapDurationUp } from "@/lib/canvas/types";
 import type { VisualSpan } from "./visual-spans";
 import { estimateSpeechSec } from "../project/video-length";
 
-/** Breathing room on top of the dialogue a visual has to cover. */
+/** Breathing room on top of the speech a visual has to cover. */
 export const DURATION_FIT_LEEWAY_SEC = 1;
 
 type FittableSpan = VisualSpan & { durationSec: number };
 
-/** The `duration` that covers a video's dialogue, against the one it is set to. */
+/** The `duration` that covers a video's speech, against the one it is set to. */
 export type DurationFit = {
 	span: FittableSpan;
 	duration: number;
-	/** Dialogue plus leeway, which no option covers once it passes DURATION_MAX. */
+	/** Speech plus leeway, which no option covers once it passes DURATION_MAX. */
 	needed: number;
 };
 

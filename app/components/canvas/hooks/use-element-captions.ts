@@ -16,7 +16,7 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 
-/** Generates speech to text on each element's result, with the project's Speech to Text pick at the time. */
+/** Generates speech to text on each element's result, with the project's Captions pick at the time. */
 export function useGenerateSTT() {
 	const queue = useGenerationQueue();
 	const editor = useSlateStatic();

@@ -81,7 +81,7 @@ El copiloto vive en el panel izquierdo. Lee el guion, esboza la historia, escrib
 
 ### Un storyboard, no una caja de prompt
 
-Cada escena es una pila de tarjetas: narración, personaje, imagen, vídeo, sonido, música. Edita cualquier prompt, elige un modelo por tarjeta, arrastra para reordenar e inserta donde pases el ratón.
+Cada escena es una pila de tarjetas: voz, imagen, vídeo, sonido, música. Edita cualquier prompt, elige un modelo por tarjeta, arrastra para reordenar e inserta donde pases el ratón.
 
 [El modelo de documento →](../../lib/canvas)
 
@@ -144,7 +144,7 @@ Los modelos alojados vienen con tu cuenta. Pega una clave de Anthropic, Runware,
 - **[Exporta hasta 4K](../../app/components/player/export-button.tsx)** — Renderiza en Remotion Lambda en fragmentos paralelos y te entrega un MP4.
 - **[Historial de versiones](../../app/components/canvas/panel/canvas-history-panel.tsx)** — Guarda automáticamente mientras trabajas, agrupado en puntos de control. Mira cualquier versión y restáurala.
 - **[Personajes y estilo artístico](../../app/components/canvas/elements/asset-strip.tsx)** — Nombra un personaje una vez y cada imagen, línea de voz y avatar se mantiene coherente.
-- **[Plantillas](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime y más. Cada una siembra un estilo, un narrador y una duración.
+- **[Plantillas](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime y más. Cada una siembra un estilo, sus personajes y una duración.
 - **[Mocks para desarrollo](../../.env.example)** — Deja sin definir la clave de un proveedor y sus llamadas devuelven resultados de prueba, así puedes construir sin pagar.
 
 ## Primeros pasos

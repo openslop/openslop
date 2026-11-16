@@ -2,7 +2,7 @@
 
 import { act, useSyncExternalStore, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { findAsset, NARRATOR } from "@/lib/canvas/assets";
+import { findAsset } from "@/lib/canvas/assets";
 import { useAsset } from "@/lib/canvas/use-assets";
 import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { asset } from "@/lib/canvas/__tests__/_assets";
@@ -109,16 +109,16 @@ const voice = (name: string, attrs: Record<string, string> = {}) =>
 
 describe("VoiceEditor", () => {
 	it("writes a trait onto the voice and searches by it", async () => {
-		const narrator = voice(NARRATOR, { age: "child" });
+		const narrator = voice("Narrator", { age: "child" });
 		editing = narrator.id;
 		canvas = mountOnCanvas([narrator]);
-		canvas.render(<VoiceOf name={NARRATOR} />);
+		canvas.render(<VoiceOf name={"Narrator"} />);
 
 		await pick("feminine");
 
 		expect(canvas.editor.children).toHaveLength(1);
-		expect(voiceOn(NARRATOR)).toEqual({
-			name: NARRATOR,
+		expect(voiceOn("Narrator")).toEqual({
+			name: "Narrator",
 			...DEFAULT_MODELS.voice,
 			age: "child",
 			gender: "feminine",
@@ -127,14 +127,14 @@ describe("VoiceEditor", () => {
 	});
 
 	it("shows the voice its traits found", () => {
-		const narrator = voice(NARRATOR);
+		const narrator = voice("Narrator");
 		editing = narrator.id;
 		queue.commitResult(jobNode(narrator.id), {
 			voiceId: "v-found",
 			durationSec: 2,
 		});
 		canvas = mountOnCanvas([narrator]);
-		canvas.render(<VoiceOf name={NARRATOR} />);
+		canvas.render(<VoiceOf name={"Narrator"} />);
 
 		expect(picker.selectedVoiceId).toBe("v-found");
 	});
@@ -143,7 +143,7 @@ describe("VoiceEditor", () => {
 		const mia = voice("Mia");
 		editing = mia.id;
 		queue.commitResult(jobNode(mia.id), { voiceId: "v-found", durationSec: 2 });
-		canvas = mountOnCanvas([voice(NARRATOR), mia]);
+		canvas = mountOnCanvas([voice("Narrator"), mia]);
 		canvas.render(<VoiceOf name="Mia" />);
 
 		await click('[data-pick="voice"]');
@@ -153,23 +153,23 @@ describe("VoiceEditor", () => {
 			...DEFAULT_MODELS.voice,
 			pickedVoiceId: "aria",
 		});
-		expect(voiceOn(NARRATOR)).toEqual({
-			name: NARRATOR,
+		expect(voiceOn("Narrator")).toEqual({
+			name: "Narrator",
 			...DEFAULT_MODELS.voice,
 		});
 		expect(picker.selectedVoiceId).toBe("aria");
 	});
 
 	it("drops a picked voice when the voice moves to another model", async () => {
-		const narrator = voice(NARRATOR);
+		const narrator = voice("Narrator");
 		editing = narrator.id;
 		canvas = mountOnCanvas([narrator]);
-		canvas.render(<VoiceOf name={NARRATOR} />);
+		canvas.render(<VoiceOf name={"Narrator"} />);
 		await click('[data-pick="voice"]');
 
 		await click('[data-pick="model"]');
 
-		expect(voiceOn(NARRATOR)).toEqual({ name: NARRATOR, ...OTHER });
+		expect(voiceOn("Narrator")).toEqual({ name: "Narrator", ...OTHER });
 		expect(picker.selectedVoiceId).toBeUndefined();
 	});
 });

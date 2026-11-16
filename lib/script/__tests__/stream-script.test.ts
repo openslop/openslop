@@ -11,7 +11,7 @@ import { streamScript } from "../stream-script";
 const oldScene = (): Scene => ({
 	id: "old-scene",
 	type: SCENE_TYPE,
-	children: [createCanvasElement("narration", { text: "the old script" })],
+	children: [createCanvasElement("speech", { text: "the old script" })],
 });
 
 const topLevelTypes = (editor: Editor) =>
@@ -48,8 +48,8 @@ describe("streamScript", () => {
 		const editor = makeEditor();
 		Transforms.insertNodes(editor, oldScene(), { at: [0] });
 		const { llm, prompts } = llmStreaming([
-			["<narration>A new "],
-			["story</narration>\n<image>a lighth"],
+			["<speech>A new "],
+			["story</speech>\n<image>a lighth"],
 			["ouse at dusk</image>"],
 		]);
 
@@ -57,9 +57,9 @@ describe("streamScript", () => {
 
 		expect(prompts).toHaveLength(1);
 		expect(prompts[0]).toContain("a lighthouse");
-		expect(topLevelTypes(editor)).toEqual(["narration", "image"]);
+		expect(topLevelTypes(editor)).toEqual(["speech", "image"]);
 		expect(elements(editor)).toEqual([
-			["narration", "A new story"],
+			["speech", "A new story"],
 			["image", "a lighthouse at dusk"],
 		]);
 	});
@@ -74,7 +74,7 @@ describe("streamScript", () => {
 			at: [0],
 		});
 		const { llm, prompts, systems } = llmStreaming([
-			["<narration>A new story</narration>"],
+			["<speech>A new story</speech>"],
 		]);
 
 		await streamScript(editor, DEFAULT_SETTINGS, llm, brief);
@@ -86,7 +86,7 @@ describe("streamScript", () => {
 		expect(topLevelTypes(editor)).toEqual([
 			"asset_style",
 			"asset_avatar",
-			"narration",
+			"speech",
 		]);
 	});
 
@@ -96,7 +96,7 @@ describe("streamScript", () => {
 			length: "1-3m",
 			language: "es",
 		});
-		const { llm, systems } = llmStreaming([["<narration>Hola</narration>"]]);
+		const { llm, systems } = llmStreaming([["<speech>Hola</speech>"]]);
 
 		await streamScript(editor, settings, llm, brief);
 
@@ -108,8 +108,8 @@ describe("streamScript", () => {
 		const editor = makeEditor();
 		editor.onChange = vi.fn();
 		const { llm } = llmStreaming([
-			["<narration>", "Once", " upon", " a time"],
-			[", far", " away", "</narration>"],
+			["<speech>", "Once", " upon", " a time"],
+			[", far", " away", "</speech>"],
 		]);
 
 		await streamScript(editor, DEFAULT_SETTINGS, llm, brief);
@@ -117,21 +117,21 @@ describe("streamScript", () => {
 
 		expect(editor.onChange).toHaveBeenCalledTimes(2);
 		expect(elements(editor)).toEqual([
-			["narration", "Once upon a time, far away"],
+			["speech", "Once upon a time, far away"],
 		]);
 	});
 
 	it("lands what arrived before the stream failed", async () => {
 		const editor = makeEditor();
 		const { llm } = llmStreaming(
-			[["<narration>", "Once upon a time"]],
+			[["<speech>", "Once upon a time"]],
 			new Error("the connection dropped"),
 		);
 
 		await expect(
 			streamScript(editor, DEFAULT_SETTINGS, llm, brief),
 		).rejects.toThrow("the connection dropped");
-		expect(elements(editor)).toEqual([["narration", "Once upon a time"]]);
+		expect(elements(editor)).toEqual([["speech", "Once upon a time"]]);
 	});
 
 	it("rejects when a write fails mid-stream", async () => {
@@ -140,8 +140,8 @@ describe("streamScript", () => {
 			throw new Error("the document refused the write");
 		});
 		const { llm } = llmStreaming([
-			["<narration>", "Once upon a time"],
-			[", far away</narration>"],
+			["<speech>", "Once upon a time"],
+			[", far away</speech>"],
 		]);
 
 		await expect(

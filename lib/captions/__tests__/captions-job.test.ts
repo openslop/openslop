@@ -25,7 +25,7 @@ vi.mock("@/lib/generation/generate-for-element", () => ({
 
 const spoken = { audioUrl: "https://example.com/a.wav", durationSec: 2 };
 const heard = [toCaption("hi", 0, 1)];
-const element = { id: "narration", type: "narration" } as const;
+const element = { id: "speech", type: "speech" } as const;
 const stt = (result: AssetResult = spoken) =>
 	captionsNode(element, result, DEFAULT_MODELS.stt, "project-1");
 
@@ -41,7 +41,7 @@ describe("captions jobs", () => {
 		record = vi.fn();
 		stopRecording = queue.onCommitted(record);
 		generateMock.mockResolvedValue(spoken);
-		queue.enqueueGraph([jobNode("narration")]);
+		queue.enqueueGraph([jobNode("speech")]);
 		await vi.runAllTimersAsync();
 	});
 
@@ -51,24 +51,22 @@ describe("captions jobs", () => {
 	});
 
 	it("lands the words on the element, under its inputs, and records no version of their own", async () => {
-		const made = queue.getElementSnapshot("narration").resultInputs;
+		const made = queue.getElementSnapshot("speech").resultInputs;
 		generateMock.mockResolvedValue({ durationSec: 2, textTimestamps: heard });
 		queue.enqueueGraph([stt()]);
 		await vi.runAllTimersAsync();
 
-		expect(queue.getElementSnapshot("narration")).toMatchObject({
+		expect(queue.getElementSnapshot("speech")).toMatchObject({
 			result: { ...spoken, textTimestamps: heard },
 			resultInputs: made,
 		});
-		expect(queue.getElementSnapshot(captionsNodeId("narration"))).toMatchObject(
-			{
-				result: null,
-				error: null,
-			},
-		);
+		expect(queue.getElementSnapshot(captionsNodeId("speech"))).toMatchObject({
+			result: null,
+			error: null,
+		});
 		expect(record.mock.calls.map(([version]) => version.elementId)).toEqual([
-			"narration",
-			"narration",
+			"speech",
+			"speech",
 		]);
 	});
 
@@ -78,13 +76,13 @@ describe("captions jobs", () => {
 		queue.enqueueGraph([stt()]);
 		await vi.advanceTimersByTimeAsync(0);
 		const remade = { ...spoken, audioUrl: "https://example.com/b.wav" };
-		queue.commitResult(jobNode("narration"), remade);
+		queue.commitResult(jobNode("speech"), remade);
 
 		landing.resolve({ durationSec: 2, textTimestamps: heard });
 		await vi.runAllTimersAsync();
 
-		expect(queue.getElementSnapshot("narration").result).toEqual(remade);
-		expect(queue.getElementSnapshot(captionsNodeId("narration")).error).toMatch(
+		expect(queue.getElementSnapshot("speech").result).toEqual(remade);
+		expect(queue.getElementSnapshot(captionsNodeId("speech")).error).toMatch(
 			/changed/,
 		);
 	});

@@ -20,35 +20,35 @@ describe("OSMLStreamParser", () => {
 
 	it("reads a tag and its text split across chunks", () => {
 		const parser = new OSMLStreamParser();
-		parser.appendChunk("<char");
-		parser.appendChunk('acter name="Al');
+		parser.appendChunk("<spe");
+		parser.appendChunk('ech name="Al');
 		const [opened] = parser.appendChunk('ice">Hello');
-		const [grown] = parser.appendChunk(" world</character>");
+		const [grown] = parser.appendChunk(" world</speech>");
 
 		expect(grown).toBe(opened);
 		expect(grown).toMatchObject({
-			type: "character",
+			type: "speech",
 			attrs: { name: "Alice" },
 			text: "Hello world",
 		});
 	});
 
 	it("returns an element once per chunk, however often the chunk touches it", () => {
-		const [elements] = read("<narration>Once</narration><image>");
+		const [elements] = read("<speech>Once</speech><image>");
 
 		expect(elements).toMatchObject([
-			{ type: "narration", text: "Once" },
+			{ type: "speech", text: "Once" },
 			{ type: "image", text: "" },
 		]);
 	});
 
 	it("ends an element at its closing tag, so text between elements is dropped", () => {
 		const [elements] = read(
-			"<narration>Once</narration>\n--- Scene 2 ---\n<image>a hill</image> Hope this helps!",
+			"<speech>Once</speech>\n--- Scene 2 ---\n<image>a hill</image> Hope this helps!",
 		);
 
 		expect(elements).toMatchObject([
-			{ type: "narration", text: "Once" },
+			{ type: "speech", text: "Once" },
 			{ type: "image", text: "a hill" },
 		]);
 	});
@@ -62,17 +62,17 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("ends an element at a closing tag split across chunks", () => {
-		const [[narration]] = read(
-			"<narration>Once</narr",
+		const [[speech]] = read(
+			"<speech>Once</narr",
 			"ation> and some",
 			" stray words",
 		);
 
-		expect(narration?.text).toBe("Once");
+		expect(speech?.text).toBe("Once");
 	});
 
 	it("returns nothing for a chunk that changes nothing", () => {
-		expect(read("<narration>Once</narration>", "\n", "<unk")).toEqual([
+		expect(read("<speech>Once</speech>", "\n", "<unk")).toEqual([
 			[expect.objectContaining({ text: "Once" })],
 			[],
 			[],
@@ -80,38 +80,35 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("flushes plain text after the buffer threshold", () => {
-		const [, [grown]] = read("<narration>", "Some long narration text here");
+		const [, [grown]] = read("<speech>", "Some long speech text here");
 
-		expect(grown?.text).toBe("Some long narration text here");
+		expect(grown?.text).toBe("Some long speech text here");
 	});
 
 	it("decodes an entity split across chunk boundaries", () => {
-		const [, [grown]] = read(
-			"<narration>Rock &a",
-			"mp; Roll forever</narration>",
-		);
+		const [, [grown]] = read("<speech>Rock &a", "mp; Roll forever</speech>");
 
 		expect(grown?.text).toBe("Rock & Roll forever");
 	});
 
 	it("drops an unknown tag along with its text", () => {
 		const [elements] = read(
-			"<narration>Once</narration><unknowntag>stray words</unknowntag>",
+			"<speech>Once</speech><unknowntag>stray words</unknowntag>",
 		);
 
-		expect(elements).toMatchObject([{ type: "narration", text: "Once" }]);
+		expect(elements).toMatchObject([{ type: "speech", text: "Once" }]);
 	});
 
 	it("reads assets and content in the order they were written", () => {
 		const types = read(
 			"<asset_style>dark moody tones</asset_style>",
-			"<narration>Once upon a time</narration>",
+			"<speech>Once upon a time</speech>",
 			'<asset_avatar name="Bob">tall and thin</asset_avatar>',
 		)
 			.flat()
 			.map((element) => element.type);
 
-		expect(types).toEqual(["asset_style", "narration", "asset_avatar"]);
+		expect(types).toEqual(["asset_style", "speech", "asset_avatar"]);
 	});
 
 	it("takes an id attribute as the element's id and gives the rest one", () => {
@@ -124,7 +121,7 @@ describe("OSMLStreamParser", () => {
 	});
 
 	it("keeps the text as written", () => {
-		const [[element]] = read("<narration> Once upon\n a time </narration>");
+		const [[element]] = read("<speech> Once upon\n a time </speech>");
 
 		expect(element?.text).toBe(" Once upon\n a time ");
 	});
@@ -132,14 +129,14 @@ describe("OSMLStreamParser", () => {
 
 describe("parseOSML", () => {
 	it("parses a complete OSML string in one shot", () => {
-		const nodes = parseOSML("<narration>Once upon a time</narration>");
+		const nodes = parseOSML("<speech>Once upon a time</speech>");
 		expect(nodes).toHaveLength(1);
-		expect(nodes[0].type).toBe("narration");
+		expect(nodes[0].type).toBe("speech");
 		expect(getElementText(nodes[0])).toContain("Once upon a time");
 	});
 
 	it("keeps the text as written", () => {
-		const [node] = parseOSML("<narration> Once upon\n a time </narration>");
+		const [node] = parseOSML("<speech> Once upon\n a time </speech>");
 		expect(getElementBodyText(node)).toBe(" Once upon\n a time ");
 	});
 

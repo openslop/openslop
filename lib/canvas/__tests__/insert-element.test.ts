@@ -14,7 +14,7 @@ const seededEditor = (defaultModels: ConnectorModels = {}) =>
 			{
 				id: "scene-1",
 				type: "scene",
-				children: [element("nar-1", "narration", "hello")],
+				children: [element("nar-1", "speech", "hello")],
 			},
 		],
 		defaultModels,
@@ -26,11 +26,11 @@ describe("insertElement", () => {
 	it("inserts a node with correct type", () => {
 		const editor = seededEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "narration", [0, 1]);
+			insertElement(editor, "speech", [0, 1]);
 		});
 
 		const node = inserted(editor);
-		expect(node.type).toBe("narration");
+		expect(node.type).toBe("speech");
 		expect(node.id).toBeDefined();
 		expect(node.children).toBeDefined();
 	});
@@ -38,7 +38,7 @@ describe("insertElement", () => {
 	it("applies default attributes from element config", () => {
 		const editor = seededEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "narration", [0, 1]);
+			insertElement(editor, "speech", [0, 1]);
 		});
 
 		expect(flatAttributes(inserted(editor)).emotion).toBe("neutral");
@@ -68,7 +68,7 @@ describe("insertElement", () => {
 	it("trims the text it is given", () => {
 		const editor = seededEditor();
 		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "narration", [0, 1], { text: "  hello  " });
+			insertElement(editor, "speech", [0, 1], { text: "  hello  " });
 		});
 
 		expect(Editor.string(editor, [0, 1])).toBe(`${ZERO_WIDTH_SPACE}hello`);

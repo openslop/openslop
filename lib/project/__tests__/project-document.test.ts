@@ -77,7 +77,7 @@ describe("createProjectDocument.write", () => {
 });
 
 const ASSETS = `<asset_style id="style">noir</asset_style>\n<asset_avatar id="avatar" name="Ada" provider="openslop" model="Seedream 5 Lite">tall</asset_avatar>\n<asset_voice id="voice" provider="openslop" model="Sonic 3.6" name="Ada"></asset_voice>`;
-const SCENE = `--- Scene 1 ---\n<narration id="line">hello</narration>\n<image id="shot">a sunset</image>`;
+const SCENE = `--- Scene 1 ---\n<speech id="line">hello</speech>\n<image id="shot">a sunset</image>`;
 
 describe("createProjectDocument.read", () => {
 	it("reads back the assets and scenes a version wrote", () => {
@@ -86,7 +86,7 @@ describe("createProjectDocument.read", () => {
 		document.write(contentWith(`${ASSETS}\n${SCENE}`));
 		const { script } = document.read();
 
-		expect(script).toContain(`${ASSETS}\n\n--- Scene 1 ---\n<narration`);
+		expect(script).toContain(`${ASSETS}\n\n--- Scene 1 ---\n<speech`);
 		document.write(contentWith(script));
 		expect(document.read().script).toBe(script);
 	});

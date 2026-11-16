@@ -10,13 +10,13 @@ describe("createScriptWriter", () => {
 		const editor = makeEditor();
 		const write = createScriptWriter(editor);
 
-		write("<narration>");
+		write("<speech>");
 		write("Once upon");
-		expect(elements(editor)).toEqual([["narration", "Once upon"]]);
+		expect(elements(editor)).toEqual([["speech", "Once upon"]]);
 
 		write(" a time, far away");
 		expect(elements(editor)).toEqual([
-			["narration", "Once upon a time, far away"],
+			["speech", "Once upon a time, far away"],
 		]);
 	});
 
@@ -26,19 +26,19 @@ describe("createScriptWriter", () => {
 				id: "s1",
 				type: SCENE_TYPE,
 				children: [
-					element("old1", "narration", "Old"),
-					element("old2", "narration", "Older"),
+					element("old1", "speech", "Old"),
+					element("old2", "speech", "Older"),
 				],
 			},
 		]);
 
 		createScriptWriter(editor)(
-			'<narration id="old1">A</narration>\n<narration>B</narration>\n',
+			'<speech id="old1">A</speech>\n<speech>B</speech>\n',
 		);
 
 		expect(elements(editor)).toEqual([
-			["narration", "A"],
-			["narration", "B"],
+			["speech", "A"],
+			["speech", "B"],
 		]);
 	});
 
@@ -56,7 +56,7 @@ describe("createScriptWriter", () => {
 	it("writes later text through the editor, never into the node it inserted", () => {
 		const editor = makeEditor();
 		const write = createScriptWriter(editor);
-		write("<narration>");
+		write("<speech>");
 		write("Once upon");
 		const inserted = editor.children[0];
 
@@ -72,13 +72,13 @@ describe("createScriptWriter", () => {
 		const editor = makeEditor();
 		const write = createScriptWriter(editor);
 
-		write("<image>a wolf</image>\n<narration>");
+		write("<image>a wolf</image>\n<speech>");
 		expect(elements(editor)).toEqual([["image", "a wolf"]]);
 
 		write("The wolf howled at the moon");
 		expect(elements(editor)).toEqual([
 			["image", "a wolf"],
-			["narration", "The wolf howled at the moon"],
+			["speech", "The wolf howled at the moon"],
 		]);
 	});
 
@@ -87,10 +87,10 @@ describe("createScriptWriter", () => {
 		const lines = ["one", "two", "three", "four", "five"];
 
 		createScriptWriter(editor)(
-			lines.map((line) => `<narration>${line}</narration>`).join("\n"),
+			lines.map((line) => `<speech>${line}</speech>`).join("\n"),
 		);
 
-		expect(elements(editor)).toEqual(lines.map((line) => ["narration", line]));
+		expect(elements(editor)).toEqual(lines.map((line) => ["speech", line]));
 	});
 
 	it("leaves an asset tag the model wrote off the canvas", () => {
@@ -98,10 +98,10 @@ describe("createScriptWriter", () => {
 		const write = createScriptWriter(editor);
 
 		write('<asset_avatar name="Ayla">A tall hunter in furs</asset_avatar>\n');
-		write("<narration>Snow fell.</narration>");
+		write("<speech>Snow fell.</speech>");
 
 		expect(editor.children.map((node) => "type" in node && node.type)).toEqual([
-			"narration",
+			"speech",
 		]);
 	});
 });

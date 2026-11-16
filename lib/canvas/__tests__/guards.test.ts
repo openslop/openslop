@@ -16,7 +16,7 @@ describe("guards", () => {
 		["asset_references", true, true, false, false],
 		["image", true, false, true, true],
 		["music", true, false, true, false],
-		["narration", true, false, true, false],
+		["speech", true, false, true, false],
 		["scene", false, false, false, false],
 		["toString", false, false, false, false],
 	])(

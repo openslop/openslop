@@ -79,11 +79,9 @@ export function DraftCard({
 				onChange={onTypeChange}
 				options={TYPE_OPTIONS}
 			/>
-			{!ELEMENT_CONFIGS[type].hidesModel && (
-				<PanelField label="Model">
-					<ModelAttribute element={draft} label="Model" look="panel" />
-				</PanelField>
-			)}
+			<PanelField label="Model">
+				<ModelAttribute element={draft} label="Model" look="panel" />
+			</PanelField>
 			<ElementGenerationProvider element={draft}>
 				<DraftPictures element={draft} />
 				<DraftPrompt draft={draft} />

@@ -1829,13 +1829,13 @@
       "boundElements": [
         {
           "type": "text",
-          "id": "chip-narration-label"
+          "id": "chip-speech-label"
         }
       ],
       "updated": 1781285536270,
       "link": null,
       "locked": false,
-      "id": "chip-narration",
+      "id": "chip-speech",
       "type": "rectangle",
       "x": 115,
       "y": 805,
@@ -1863,20 +1863,20 @@
       "updated": 1781285536270,
       "link": null,
       "locked": false,
-      "id": "chip-narration-label",
+      "id": "chip-speech-label",
       "type": "text",
       "x": 160.84375,
       "y": 816.5,
-      "width": 43.3125,
+      "width": 28.875,
       "height": 15,
-      "text": "narration",
-      "originalText": "narration",
+      "text": "speech",
+      "originalText": "speech",
       "fontSize": 12,
       "fontFamily": 1,
       "textAlign": "center",
       "verticalAlign": "middle",
       "lineHeight": 1.25,
-      "containerId": "chip-narration",
+      "containerId": "chip-speech",
       "autoResize": true,
       "index": "an"
     },

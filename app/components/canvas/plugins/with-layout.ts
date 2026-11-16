@@ -12,7 +12,7 @@ export const withLayout = (editor: CanvasEditor): CanvasEditor => {
 
 	editor.normalizeNode = ([node, path]) => {
 		if (path.length === 0 && editor.children.every(isAssetElement)) {
-			insertElement(editor, "narration", [editor.children.length]);
+			insertElement(editor, "speech", [editor.children.length]);
 		}
 		return normalizeNode([node, path]);
 	};

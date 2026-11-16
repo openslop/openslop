@@ -47,7 +47,7 @@ const getSnapshot = (id: string): ElementSnapshot => ({
 	...snapshots[id],
 });
 
-const element = (id: string, type: ContentType = "narration") => ({ id, type });
+const element = (id: string, type: ContentType = "speech") => ({ id, type });
 
 const plan = (elements: ReturnType<typeof element>[]) => {
 	const { ready, skipped } = planCaptions(elements, getSnapshot);
@@ -61,7 +61,7 @@ describe("autoCaptionElements", () => {
 				id: "s1",
 				type: "scene" as const,
 				children: [
-					scriptElement("n1", "narration"),
+					scriptElement("n1", "speech"),
 					scriptElement("p1", "image"),
 					scriptElement("v1", "video"),
 					scriptElement("m1", "music"),

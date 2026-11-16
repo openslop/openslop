@@ -27,7 +27,7 @@ const bare = (children: Descendant[], plugins = withAssets) => {
 	return editor;
 };
 
-const script = (id = "s1") => scene([content("narration", id, "hello")], id);
+const script = (id = "s1") => scene([content("speech", id, "hello")], id);
 
 const indexOf = (editor: Editor, type: string) =>
 	editor.children.findIndex(

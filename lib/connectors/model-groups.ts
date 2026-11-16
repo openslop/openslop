@@ -35,14 +35,14 @@ export const MODEL_GROUPS: ModelGroup[] = [
 		types: ["video"],
 	},
 	{
-		key: "voice",
-		label: "Text to Speech",
+		key: "speech",
+		label: "Speech",
 		Icon: Voice,
 		types: ["voice", "tts"],
 	},
 	{
-		key: "stt",
-		label: "Speech to Text",
+		key: "captions",
+		label: "Captions",
 		Icon: Captions,
 		types: ["stt"],
 	},
