@@ -4,27 +4,21 @@ import type { IconComponent } from "@/components/ui/icon";
 import { chipControlClassName } from "@/components/ui/chip-control";
 import { ICON_SIZES } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { useNumberScrub } from "@/components/ui/use-number-scrub";
+import {
+	useNumberScrub,
+	type NumberScrubOptions,
+} from "@/components/ui/use-number-scrub";
 import { cn } from "@/lib/utils";
 
 /** Compact numeric field on the panel's toggle pill; see useNumberScrub. */
 export function NumberScrubber({
-	value,
-	min,
-	max,
-	step,
-	onChange,
 	label,
 	tooltip,
 	suffix = "",
 	icon: Icon,
 	className,
-}: {
-	value: number;
-	min: number;
-	max: number;
-	step: number;
-	onChange: (value: number) => void;
+	...scrub
+}: NumberScrubOptions & {
 	label: string;
 	/** Hover hint; defaults to the accessible label. */
 	tooltip?: string;
@@ -32,13 +26,8 @@ export function NumberScrubber({
 	icon?: IconComponent;
 	className?: string;
 }) {
-	const { editing, inputProps, scrubProps } = useNumberScrub({
-		value,
-		min,
-		max,
-		step,
-		onChange,
-	});
+	const { editing, inputProps, scrubProps } = useNumberScrub(scrub);
+	const { value, max } = scrub;
 
 	const shell = cn(chipControlClassName, className);
 	// Reserving the widest value keeps the box one size, whether it is showing
