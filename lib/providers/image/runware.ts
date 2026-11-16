@@ -6,8 +6,8 @@ import {
 	type ImageFormat,
 } from "@/lib/connectors/image/enums";
 import { BaseProvider, type RawResult } from "../base";
-import { renderPrompt } from "@/lib/connectors/character-refs";
-import { characterAvatars } from "@/lib/connectors/characters";
+import { renderPrompt, seats } from "@/lib/connectors/character-refs";
+import { pictured } from "@/lib/connectors/characters";
 import { validateRunwareKey, withRunware } from "../runware";
 import { renderSize, type VendorParams } from "@/lib/connectors/models";
 import { RUNWARE_IMAGE_MODELS } from "@/lib/connectors/image/runware/models";
@@ -17,6 +17,8 @@ import type { ImageProvider } from "../types";
 type RawImageResult = { data: string; format: ImageFormat } & RawResult;
 
 const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
+
+const imageRef = (seat: number) => `the character from Image ${seat}`;
 
 const runwareModel = (model: string) =>
 	Object.values(RUNWARE_IMAGE_MODELS).find(({ id }) => id === model);
@@ -51,13 +53,14 @@ export class RunwareImage
 		const entry = runwareModel(params.model);
 		if (!entry) throw new Error(`Runware has no image model "${params.model}"`);
 		const size = renderSize(entry, DEFAULT_ASPECT_RATIO, params.resolution);
+		const cast = pictured(params.characterAssets ?? []);
 		const referenceImages = [
-			...characterAvatars(params.characterAssets ?? []),
+			...cast.map(({ avatarUrl }) => avatarUrl),
 			...(params.referenceImages ?? []),
 		];
 		return withRunware(this.apiKey, async (runware) => {
 			const results = await runware.imageInference({
-				positivePrompt: renderPrompt(params.prompt),
+				positivePrompt: renderPrompt(params.prompt, seats(cast, imageRef)),
 				model: params.model,
 				width: params.width ?? size.width,
 				height: params.height ?? size.height,

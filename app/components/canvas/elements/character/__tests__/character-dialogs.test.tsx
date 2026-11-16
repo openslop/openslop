@@ -36,6 +36,7 @@ vi.mock("../../element-media-picker", () => ({
 	AddMediaButton: Nothing,
 }));
 vi.mock("../../output-preview", () => ({ OutputPreview: Nothing }));
+vi.mock("../../element-settings", () => ({ ElementSettings: Nothing }));
 vi.mock("../../attributes/model-attribute", () => ({
 	ModelAttribute: () => <button type="button">Avatar model</button>,
 }));

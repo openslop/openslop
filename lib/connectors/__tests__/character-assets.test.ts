@@ -80,7 +80,7 @@ describe("character-assets plugin", () => {
 				},
 			),
 		).toEqual({
-			prompt: "{{Granny}} hugs {{Red}}, and {{Granny}} smiles. No nameplates",
+			prompt: "{{Granny}} hugs {{Red}}, and {{Granny}} smiles",
 			characterAssets: [
 				{ name: "Granny", avatarUrl: GRANNY },
 				{ name: "Red", avatarUrl: RED, voice: redVoice },
@@ -88,7 +88,7 @@ describe("character-assets plugin", () => {
 		});
 	});
 
-	it("keeps a voice for a character with no avatar, without asking for no nameplates", () => {
+	it("keeps a voice for a character with no avatar", () => {
 		expect(
 			before({ prompt: "{{Red}} sings" }, { "Red's voice": voice(redVoice) }),
 		).toEqual({

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createCharacterAvatarPlugin } from "@/lib/connectors/image/plugins/character-avatar";
 
 describe("character-avatar plugin", () => {
-	it("frames the character's appearance as their portrait, named after them, beside the other params", () => {
+	it("frames the character's appearance as their turnaround sheet, with no text drawn on it, beside the other params", () => {
 		const { beforeGenerate } = createCharacterAvatarPlugin();
 		const params = {
 			prompt: "A young girl with red hair",
@@ -11,12 +11,12 @@ describe("character-avatar plugin", () => {
 		};
 		expect(beforeGenerate?.(params, {})).toEqual({
 			prompt:
-				'Character portrait of Alice. A young girl with red hair. A small rectangular nameplate at the bottom of the frame reads "Alice" in clean sans-serif lettering. Plain solid white background, with no scenery, objects or location behind them',
+				"Character turnaround sheet of Alice: a close-up of the face, plus full-body front, side and three-quarter views. A young girl with red hair. Same look and outfit in every view. Plain light gray background with nothing else on it. No text",
 			model: "Seedream 5 Lite",
 		});
 	});
 
-	it("refuses to draw a portrait of nobody rather than one of 'undefined'", () => {
+	it("refuses to draw a sheet of nobody rather than one of 'undefined'", () => {
 		const { beforeGenerate } = createCharacterAvatarPlugin();
 		expect(() =>
 			beforeGenerate?.({ prompt: "A young girl with red hair" }, {}),

@@ -44,23 +44,32 @@ describe("RunwareImage", () => {
 		expect(mockDisconnect).toHaveBeenCalled();
 	});
 
-	it("names the characters plainly, their avatars ahead of the other reference images", async () => {
+	it("points each character at its avatar by position, avatars ahead of the other reference images", async () => {
 		mockImageInference.mockResolvedValue([
 			{ imageBase64Data: "abc", cost: 0.02 },
 		]);
 
 		await new RunwareImage("test-key").generate({
-			prompt: "{{Red}} pets a cat",
+			prompt: "{{Red}} hands {{Wolf}} a cup and {{Granny}} smiles",
 			model: MODEL,
-			characterAssets: [{ name: "Red", avatarUrl: "https://img/red.png" }],
+			characterAssets: [
+				{ name: "Red", avatarUrl: "https://img/red.png" },
+				{ name: "Granny", voice: { url: "https://a/g.mp3", durationSec: 3 } },
+				{ name: "Wolf", avatarUrl: "https://img/wolf.png" },
+			],
 			referenceImages: ["https://img/style.png"],
 		});
 
 		expect(mockImageInference).toHaveBeenCalledWith(
 			expect.objectContaining({
-				positivePrompt: "Red pets a cat",
+				positivePrompt:
+					"the character from Image 1 hands the character from Image 2 a cup and Granny smiles",
 				inputs: {
-					referenceImages: ["https://img/red.png", "https://img/style.png"],
+					referenceImages: [
+						"https://img/red.png",
+						"https://img/wolf.png",
+						"https://img/style.png",
+					],
 				},
 			}),
 		);

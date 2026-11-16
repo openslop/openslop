@@ -1,3 +1,4 @@
+import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import { describe, expect, it } from "vitest";
 import { imageAttributesFor } from "@/lib/connectors/image/attributes";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
@@ -167,13 +168,15 @@ describe("asset schemas", () => {
 		]);
 	});
 
-	it("gives every asset but a voice nothing to set beside its text", () => {
-		for (const type of [
-			"asset_avatar",
-			"asset_style",
-			"asset_references",
-		] as const)
+	it("gives the style and references assets nothing to set beside their text", () => {
+		for (const type of ["asset_style", "asset_references"] as const)
 			expect(attributeSchemaFor(type).settingsDefs).toEqual([]);
+	});
+
+	it("lets an avatar override the project's reference images", () => {
+		expect(
+			attributeSchemaFor("asset_avatar").settingsDefs.map(({ key }) => key),
+		).toEqual([REFERENCE_IMAGES_ATTR]);
 	});
 
 	it("drops what an asset holds outside its schema when it is created", () => {
