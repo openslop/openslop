@@ -53,7 +53,7 @@ export function ReferenceImagesEditor({
 	const { urls: projectImages } = useReferenceImages();
 	const override = ownReferences(target);
 	const urls = override ?? projectImages;
-	const set = (next: string[] | null) =>
+	const setOverride = (next: string[] | null) =>
 		mergeAttrs(editor, element.id, {
 			[attrKey]: next && serializeReferenceImages(next),
 		});
@@ -66,7 +66,7 @@ export function ReferenceImagesEditor({
 						<TooltipIconButton
 							label="Reset references"
 							variant="inherit"
-							onClick={() => set(null)}
+							onClick={() => setOverride(null)}
 						>
 							<RotateCcw />
 						</TooltipIconButton>
@@ -93,7 +93,7 @@ export function ReferenceImagesEditor({
 								key={url}
 								url={url}
 								index={index}
-								onRemove={() => set(urls.filter((_, i) => i !== index))}
+								onRemove={() => setOverride(urls.filter((_, i) => i !== index))}
 							/>
 						))}
 					</TileRow>
