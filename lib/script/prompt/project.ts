@@ -1,5 +1,11 @@
 import { dedent } from "@/lib/dedent";
-import { assetText, characterNames, voiceOf } from "@/lib/canvas/assets";
+import {
+	assetText,
+	characterNames,
+	findAsset,
+	voiceOf,
+} from "@/lib/canvas/assets";
+import { characterRef } from "@/lib/connectors/character-refs";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -15,15 +21,28 @@ function renderVoice(voice: Voice): string {
 		.join("\n");
 }
 
+/** What the writer may do with a character: speech needs a voice, and only an avatar shows how they look. */
+function renderRoles(assets: AssetElement[], name: string): string {
+	const speaks = findAsset(assets, "asset_voice", name)
+		? "Speaks in <speech> lines."
+		: "No voice: never give them a <speech> line.";
+	const drawn = findAsset(assets, "asset_avatar", name)
+		? `Drawn from an avatar: write them as ${characterRef(name)} in prompts.`
+		: `No avatar: still write them as ${characterRef(name)} in prompts, and describe how they look.`;
+	return `${speaks} ${drawn}`;
+}
+
 function renderCharacter(assets: AssetElement[], name: string): string {
 	const appearance = assetText(assets, "asset_avatar", name);
-	const body = [
+	const traits = [
 		renderVoice(voiceOf(assets, name)),
 		appearance && `- appearance: ${appearance}`,
 	]
 		.filter(Boolean)
 		.join("\n");
-	return `## ${name}\n\n${body}`;
+	return [`## ${name}`, renderRoles(assets, name), traits]
+		.filter(Boolean)
+		.join("\n\n");
 }
 
 export function projectPreamble(assets: AssetElement[]): string {

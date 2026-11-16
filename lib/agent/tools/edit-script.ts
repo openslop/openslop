@@ -21,7 +21,8 @@ const ASSETS = dedent`
 	  avatar.
 	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described by
 	  its traits, or pinned by a pickedVoiceId you read; always set its language to the one its
-	  lines are in. A narrator, for example, is just a voice with no avatar.
+	  lines are in. Only a character with one speaks: a speech line's \`name\` must be an
+	  asset_voice's, so add the voice first. A narrator, for example, is just a voice with no avatar.
 	- asset_style: the art style every visual is drawn in, as its text: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
 	- asset_references: the images every visual is drawn after, usually the user's uploads.

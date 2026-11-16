@@ -39,6 +39,15 @@ describe("osmlSpec", () => {
 		);
 	});
 
+	it("keeps {{Name}} for a character with no avatar but has them described, and gives lines only to characters who speak", () => {
+		expect(spec).toContain(
+			"A character with no avatar has nothing for the model to see: still write {{Name}}, so a video model can give them their voice, and describe how they look.",
+		);
+		expect(spec).toContain(
+			"must be a character listed under Characters who speaks",
+		);
+	});
+
 	it("names the loop counts an element keeps, for sound and for music", () => {
 		const allowed = "Allowed values: 1, 2, 3, 4, 5, 6, 7, 8.";
 		expect(spec).toContain(`${allowed} Use more for a sound`);

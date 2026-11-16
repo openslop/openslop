@@ -122,8 +122,12 @@ describe("buildScriptPrompt", () => {
 		expect(system).toContain("# Art Style");
 		expect(system).toContain("muted watercolor");
 		expect(system).toContain("# Characters");
-		expect(system).toContain("## Narrator\n\n- gender: feminine");
-		expect(system).toContain("## Lumi\n\n- appearance: a small grey rabbit");
+		expect(system).toContain(
+			"## Narrator\n\nSpeaks in <speech> lines. No avatar: still write them as {{Narrator}} in prompts, and describe how they look.\n\n- gender: feminine",
+		);
+		expect(system).toContain(
+			"## Lumi\n\nNo voice: never give them a <speech> line. Drawn from an avatar: write them as {{Lumi}} in prompts.\n\n- appearance: a small grey rabbit",
+		);
 	});
 
 	it.each([
@@ -133,19 +137,19 @@ describe("buildScriptPrompt", () => {
 				asset("asset_avatar", { name: "Mira", text: "a freckled girl" }),
 				asset("asset_voice", { name: "Mira", attrs: { age: "child" } }),
 			],
-			"## Mira\n\n- age: child\n- appearance: a freckled girl",
+			"## Mira\n\nSpeaks in <speech> lines. Drawn from an avatar: write them as {{Mira}} in prompts.\n\n- age: child\n- appearance: a freckled girl",
 			"- pitch:",
 		],
 		[
-			"a voice-only character with their voice and no appearance",
+			"a voice-only character with their voice, as one to describe in prompts",
 			[asset("asset_voice", { name: "Voice", attrs: { pitch: "low" } })],
-			"## Voice\n\n- pitch: low",
+			"## Voice\n\nSpeaks in <speech> lines. No avatar: still write them as {{Voice}} in prompts, and describe how they look.\n\n- pitch: low",
 			"- appearance:",
 		],
 		[
-			"a character with no voice by their appearance alone",
+			"a character with no voice by their appearance alone, as one who never speaks",
 			[asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" })],
-			"## Lumi\n\n- appearance: a small grey rabbit",
+			"## Lumi\n\nNo voice: never give them a <speech> line. Drawn from an avatar: write them as {{Lumi}} in prompts.\n\n- appearance: a small grey rabbit",
 			"- age:",
 		],
 	])("lists %s", (_, canvas, listed, absent) => {
