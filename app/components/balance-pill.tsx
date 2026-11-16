@@ -14,13 +14,10 @@ export function BalancePill() {
 	const usd = useBalance();
 
 	return (
-		<SimpleTooltip
-			label="Your balance. Each generation on OpenSlop's models spends what the provider charged for it."
-			side="bottom"
-		>
+		<SimpleTooltip label="Your balance for OpenSlop's models" side="bottom">
 			<Badge
 				variant="indicator"
-				className="h-8 gap-2 rounded-lg border-indicator-foreground/20 px-2.5"
+				className="h-8 gap-2 rounded-lg border-indicator-foreground/20 px-2.5 text-label-xs"
 			>
 				<CreditCard />
 				<span className="sr-only">Balance</span>

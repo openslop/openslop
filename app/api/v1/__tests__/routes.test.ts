@@ -159,7 +159,7 @@ describe("API routes", () => {
 
 				expect(res.status).toBe(402);
 				expect((await res.json()).error).toBe(
-					"You're out of balance. To top up, email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
+					"You're out of balance. Questions? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
 				);
 				expect(mockCreateJob).not.toHaveBeenCalled();
 			},

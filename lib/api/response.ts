@@ -35,7 +35,7 @@ export function outOfBalance() {
 	return errorResponse(
 		{
 			error:
-				"You're out of balance. To top up, email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
+				"You're out of balance. Questions? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
 		},
 		402,
 	);
