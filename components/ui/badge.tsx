@@ -22,12 +22,17 @@ const badgeVariants = cva(
 				muted: "border-transparent bg-muted text-muted-foreground",
 				indicator:
 					"rounded border-transparent bg-indicator text-indicator-foreground",
+				/** `indicator` with a hairline, for a pill that stands alone in chrome. */
+				indicatorOutline:
+					"rounded border-indicator-foreground/20 bg-indicator text-indicator-foreground",
 				onMedia:
 					"border-transparent bg-on-media/70 text-on-media-foreground shadow-elevation-1",
 			},
 			size: {
 				default: "px-2 py-0.5 text-label [&_svg:not([class*='size-'])]:size-3",
 				xs: "h-6 gap-1 px-2 text-label [&_.icon]:size-3",
+				/** Toolbar height, to sit beside `sm` buttons. */
+				lg: "h-8 gap-2 rounded-lg px-2.5 text-label-xs",
 				sm: "gap-1 px-1.5 py-0 text-badge-xs [&_.icon]:size-2.5 [&_svg:not([class*='size-'])]:size-2.5",
 				icon: "size-6 rounded-md p-0 [&_svg:not([class*='size-'])]:size-4",
 				inline:
