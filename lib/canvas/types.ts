@@ -19,7 +19,7 @@ export type ContentSpec = {
 	outputKind: ResultKind;
 	role: ElementRole;
 	layer: LayerType;
-	captionSource?: "speech" | "video" | "music";
+	captionable?: true;
 };
 
 export const CONTENT_TYPES = {
@@ -28,7 +28,7 @@ export const CONTENT_TYPES = {
 		outputKind: "audio",
 		role: "overlay",
 		layer: "audio",
-		captionSource: "speech",
+		captionable: true,
 	},
 	image: {
 		connector: "image",
@@ -41,7 +41,7 @@ export const CONTENT_TYPES = {
 		outputKind: "video",
 		role: "foreground",
 		layer: "visual",
-		captionSource: "video",
+		captionable: true,
 	},
 	sound: {
 		connector: "sfx",
@@ -54,21 +54,16 @@ export const CONTENT_TYPES = {
 		outputKind: "audio",
 		role: "background",
 		layer: "audio",
-		captionSource: "music",
+		captionable: true,
 	},
 } as const satisfies Record<string, ContentSpec>;
 
 export type ContentType = keyof typeof CONTENT_TYPES;
 
-export function captionSourceOf(
-	type: ContentType,
-): ContentSpec["captionSource"] {
+export const isCaptionable = (type: ContentType): boolean => {
 	const spec: ContentSpec = CONTENT_TYPES[type];
-	return spec.captionSource;
-}
-
-export const isCaptionable = (type: ContentType): boolean =>
-	captionSourceOf(type) !== undefined;
+	return spec.captionable === true;
+};
 
 export const ContentTypeSchema = z.enum(keysOf(CONTENT_TYPES));
 
