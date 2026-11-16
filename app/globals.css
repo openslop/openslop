@@ -448,7 +448,7 @@
 	--font-weight-book: 475;
 
 	/* Semantic type scale (DESIGN.md typography) */
-	--text-badge-xs: 0.5625rem; /* 9px — uppercase micro tags */
+	--text-badge-xs: 0.5625rem; /* 9px — micro tags */
 	--text-badge: 0.625rem; /* 10px — badges, tags, micro labels */
 	--text-label-xs: 0.6875rem; /* 11px — small labels */
 	--text-label-xs--line-height: 1rem; /* 16px — dense control leading */

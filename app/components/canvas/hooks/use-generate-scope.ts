@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import type { Editor } from "slate";
 import { useSlateStatic } from "slate-react";
+import { plural } from "@/lib/format";
 import {
 	useGenerationQueue,
 	useQueueSelector,
@@ -35,15 +36,13 @@ export type GenerateCounts = Pick<
 	"empty" | "active" | "pending" | "stale"
 >;
 
-const noun = (count: number) => (count === 1 ? "element" : "elements");
-
 /** Covers every reason there is no work: no elements, none with a prompt, or a
  * script still being written. */
 export const NOTHING_TO_GENERATE = "Nothing to generate right now";
 
 /** Button-sized version of {@link describe}. */
 export const countPhrase = ({ pending, stale }: GenerateCounts): string =>
-	`${stale === pending ? "Regenerate" : "Generate"} ${pending} ${noun(pending)}`;
+	`${stale === pending ? "Regenerate" : "Generate"} ${pending} ${plural(pending, "element")}`;
 
 function describe(
 	{ empty, active, pending, stale }: GenerateCounts,
@@ -54,10 +53,11 @@ function describe(
 	if (pending === 0) return `Everything in this ${subject} is generated`;
 
 	const fresh = pending - stale;
-	if (stale === 0) return `Generate ${fresh} ${noun(fresh)} in this ${subject}`;
+	if (stale === 0)
+		return `Generate ${fresh} ${plural(fresh, "element")} in this ${subject}`;
 	if (fresh === 0)
-		return `Regenerate ${stale} stale ${noun(stale)} in this ${subject}`;
-	return `Generate ${fresh} ${noun(fresh)} and regenerate ${stale} stale in this ${subject}`;
+		return `Regenerate ${stale} stale ${plural(stale, "element")} in this ${subject}`;
+	return `Generate ${fresh} ${plural(fresh, "element")} and regenerate ${stale} stale in this ${subject}`;
 }
 
 /**

@@ -3,7 +3,10 @@
 import * as React from "react";
 
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { useNumberScrub } from "@/components/ui/use-number-scrub";
+import {
+	useNumberScrub,
+	type NumberScrubOptions,
+} from "@/components/ui/use-number-scrub";
 import { cn } from "@/lib/utils";
 
 const SEGMENT_HOVER = "rounded-sm hover:bg-media-toggle-hover-bg";
@@ -51,7 +54,7 @@ function StepperScrubValue({
 	suffix,
 	disabled,
 	...scrub
-}: Parameters<typeof useNumberScrub>[0] & {
+}: NumberScrubOptions & {
 	label: string;
 	suffix: string;
 	disabled: boolean;

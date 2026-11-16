@@ -19,6 +19,15 @@ function quantize(value: number, min: number, max: number, step: number) {
 	return clamp(snapped, min, max);
 }
 
+export type NumberScrubOptions = {
+	value: number;
+	min: number;
+	max: number;
+	step: number;
+	onChange: (value: number) => void;
+	resetValue?: number;
+};
+
 export function useNumberScrub({
 	value,
 	min,
@@ -26,14 +35,7 @@ export function useNumberScrub({
 	step,
 	onChange,
 	resetValue,
-}: {
-	value: number;
-	min: number;
-	max: number;
-	step: number;
-	onChange: (value: number) => void;
-	resetValue?: number;
-}) {
+}: NumberScrubOptions) {
 	const [draft, setDraft] = useState<string | null>(null);
 	const drag = useRef<{ x: number; y: number; from: number; moved: boolean }>(
 		null,
