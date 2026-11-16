@@ -87,8 +87,8 @@ Every scene is a stack of cards: speech, image, video, sound, music. Edit any pr
 
 </td>
 <td width="50%">
-  <img src="./assets/features/canvas-light.svg#gh-light-mode-only" alt="Hovering a row opens the insert menu with the six element types and a new Sound card appears" width="100%">
-  <img src="./assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Hovering a row opens the insert menu with the six element types and a new Sound card appears" width="100%">
+  <img src="./assets/features/canvas-light.svg#gh-light-mode-only" alt="Hovering a row opens the insert menu with the five element types and a new Sound card appears" width="100%">
+  <img src="./assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Hovering a row opens the insert menu with the five element types and a new Sound card appears" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,7 +111,7 @@ Generate all queues every element and runs dependencies first: the video card a 
 
 ### Player and timeline
 
-Watch the cut as it fills in, captions word by word. Four lanes underneath: visuals, voice, effects, music. Scrub the ruler, jump by scene, or switch to the storyboard strip.
+Watch the cut as it fills in, captions word by word. Four lanes underneath: visuals, speech, effects, music. Scrub the ruler, jump by scene, or switch to the storyboard strip.
 
 [The player →](app/components/player)
 
