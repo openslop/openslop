@@ -47,8 +47,8 @@ function renderTimelineHook(
 		zoomOut() {
 			act(() => this.current.zoomOut());
 		},
-		zoomToFit() {
-			act(() => this.current.zoomToFit());
+		setZoom(percent: number) {
+			act(() => this.current.setZoom(percent));
 		},
 		unmount() {
 			act(() => root.unmount());
@@ -57,84 +57,55 @@ function renderTimelineHook(
 }
 
 describe("useTimelineZoom", () => {
-	it("initializes at fit-to-width (zoom 1x) with canZoomOut disabled", () => {
+	it("starts at fit-to-width", () => {
 		const hook = renderTimelineHook(100, 1000);
-		expect(hook.current.zoom).toBe(1);
+		expect(hook.current.zoom).toBe(100);
 		expect(hook.current.pxPerSec).toBe(10);
-		expect(hook.current.canZoomOut).toBe(false);
-		expect(hook.current.canZoomIn).toBe(true);
 		hook.unmount();
 	});
 
-	it("steps through zoom levels on zoomIn up to maximum 64x and disables canZoomIn", () => {
-		const hook = renderTimelineHook(100, 1000);
-
-		while (hook.current.canZoomIn) {
-			const before = hook.current.zoom;
-			hook.zoomIn();
-			expect(hook.current.zoom).toBeGreaterThan(before);
-			expect(hook.current.canZoomOut).toBe(true);
-		}
-
-		expect(hook.current.zoom).toBe(64);
-		expect(hook.current.canZoomIn).toBe(false);
-
-		hook.unmount();
-	});
-
-	it("steps down through zoom levels on zoomOut to 1x", () => {
-		const hook = renderTimelineHook(100, 1000);
-
-		hook.zoomIn();
-		hook.zoomIn();
-		expect(hook.current.zoom).toBe(1.5);
-
-		hook.zoomOut();
-		expect(hook.current.zoom).toBe(1.25);
-		expect(hook.current.canZoomOut).toBe(true);
-
-		hook.zoomOut();
-		expect(hook.current.zoom).toBe(1);
-		expect(hook.current.canZoomOut).toBe(false);
-
-		hook.unmount();
-	});
-
-	it("calculates pxPerSec proportionally to duration and viewport", () => {
+	it("scales pxPerSec by the zoom percent", () => {
 		const hook = renderTimelineHook(50, 1000);
 		expect(hook.current.pxPerSec).toBe(20);
 
-		hook.zoomIn();
-		expect(hook.current.pxPerSec).toBe(25);
+		hook.setZoom(250);
+		expect(hook.current.zoom).toBe(250);
+		expect(hook.current.pxPerSec).toBe(50);
 		hook.unmount();
 	});
 
-	it("keeps the playhead at the same place on screen through every zoom step", () => {
+	it("keeps the playhead at the same place on screen through every zoom", () => {
 		const hook = renderTimelineHook(100, 1000, 50);
 		const playheadOnScreen = () =>
 			50 * hook.current.pxPerSec - hook.scroller.scrollLeft;
 		expect(playheadOnScreen()).toBe(500);
 
-		while (hook.current.canZoomIn) {
-			hook.zoomIn();
+		for (const percent of [125, 400, 6400, 175]) {
+			hook.setZoom(percent);
 			expect(playheadOnScreen()).toBeCloseTo(500);
 		}
-		while (hook.current.canZoomOut) {
-			hook.zoomOut();
-			expect(playheadOnScreen()).toBeCloseTo(500);
-		}
+		hook.setZoom(100);
 		expect(hook.scroller.scrollLeft).toBe(0);
 		hook.unmount();
 	});
 
-	it("zooms straight back to fit-to-width", () => {
-		const hook = renderTimelineHook(100, 1000, 50);
-		hook.zoomIn();
-		hook.zoomIn();
-		hook.zoomToFit();
-		expect(hook.current.zoom).toBe(1);
+	it("steps the buttons through the zoom stops, from wherever a drag left off", () => {
+		const hook = renderTimelineHook(100, 1000);
 		expect(hook.current.canZoomOut).toBe(false);
-		expect(hook.scroller.scrollLeft).toBe(0);
+
+		hook.zoomIn();
+		expect(hook.current.zoom).toBe(125);
+		hook.setZoom(175);
+		hook.zoomIn();
+		expect(hook.current.zoom).toBe(200);
+		hook.setZoom(175);
+		hook.zoomOut();
+		expect(hook.current.zoom).toBe(150);
+
+		while (hook.current.canZoomIn) hook.zoomIn();
+		expect(hook.current.zoom).toBe(6400);
+		while (hook.current.canZoomOut) hook.zoomOut();
+		expect(hook.current.zoom).toBe(100);
 		hook.unmount();
 	});
 });
