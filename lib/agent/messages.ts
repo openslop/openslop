@@ -7,7 +7,11 @@ import {
 	type ToolContent,
 } from "ai";
 import { SLOPPY_TOOLS, SNAPSHOT_TOOLS } from "./tools/registry";
-import { sloppyMetadataSchema, type SloppyMessage } from "./types";
+import {
+	sloppyDataSchemas,
+	sloppyMetadataSchema,
+	type SloppyMessage,
+} from "./types";
 
 export function upsertMessage(
 	messages: SloppyMessage[],
@@ -97,7 +101,11 @@ export async function parseSloppyMessages(
 ): Promise<SloppyMessage[]> {
 	// The validator refuses an empty array; a new conversation is one.
 	if (messages.length === 0) return [];
-	return validateUIMessages<SloppyMessage>({ messages, metadataSchema });
+	return validateUIMessages<SloppyMessage>({
+		messages,
+		metadataSchema,
+		dataSchemas: sloppyDataSchemas,
+	});
 }
 
 /** One message off the wire. Null is the caller's 400, never a thrown 500. */
@@ -107,6 +115,7 @@ export async function parseSloppyMessage(
 	const parsed = await safeValidateUIMessages<SloppyMessage>({
 		messages: [message],
 		metadataSchema,
+		dataSchemas: sloppyDataSchemas,
 		tools: SLOPPY_TOOLS,
 	});
 	return parsed.success ? (parsed.data[0] ?? null) : null;

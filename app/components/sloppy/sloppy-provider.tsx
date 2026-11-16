@@ -7,14 +7,20 @@ import {
 	lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { useChat } from "@ai-sdk/react";
+import { useSlateStatic } from "slate-react";
 import { agentPathFor } from "@/lib/agent/client";
+import { selectedFocus } from "@/lib/agent/focus";
 import type { ModelRef } from "@/lib/connectors/types";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import {
 	hasPendingToolCall,
 	settleUnansweredCalls,
 } from "@/lib/agent/messages";
-import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
+import {
+	sloppyDataSchemas,
+	sloppyMetadataSchema,
+	type SloppyMessage,
+} from "@/lib/agent/types";
 import { DRAFTING_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/use-agent-tools";
 import { createRequiredContext } from "@/lib/components/create-required-context";
@@ -47,6 +53,7 @@ export { useSloppyMessages, useSloppy };
  * answers with text instead of another call.
  */
 export function SloppyProvider({ children }: { children: ReactNode }) {
+	const editor = useSlateStatic();
 	const projectId = useProjectId();
 	const initialTranscript = useInitialTranscript();
 	const runTool = useAgentTools();
@@ -59,6 +66,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 		useChat<SloppyMessage>({
 			messages: initialTranscript,
 			messageMetadataSchema: sloppyMetadataSchema,
+			dataPartSchemas: sloppyDataSchemas,
 			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
 			transport: new DefaultChatTransport<SloppyMessage>({
 				prepareSendMessagesRequest: ({ messages, body }) => {
@@ -105,7 +113,13 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			send: (message) => {
 				turnModel.current = model;
 				turn.current = new AbortController();
-				void sendMessage({ text: message });
+				const focus = selectedFocus(editor);
+				void sendMessage({
+					parts: [
+						{ type: "text", text: message },
+						...(focus ? [{ type: "data-focus" as const, data: focus }] : []),
+					],
+				});
 			},
 			stop: () => {
 				turn.current?.abort();
@@ -115,7 +129,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			loading,
 			writingScript,
 		}),
-		[sendMessage, setMessages, stop, loading, writingScript, model],
+		[sendMessage, setMessages, stop, loading, writingScript, model, editor],
 	);
 
 	return (

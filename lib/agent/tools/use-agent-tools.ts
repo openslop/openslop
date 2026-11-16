@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useSlateStatic } from "slate-react";
 import pick from "lodash/pick";
 import { getAssets } from "@/lib/canvas/assets";
@@ -46,6 +46,7 @@ import { executeToolCall } from "./registry";
 
 export function useAgentTools() {
 	const editor = useSlateStatic();
+	const lastRead = useRef<typeof editor.children>(undefined);
 	const store = useProjectStoreHandle();
 	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
@@ -65,7 +66,12 @@ export function useAgentTools() {
 					signal,
 				);
 			const ctx: AgentToolContext = {
-				readScript: () => serializeOSMLWithScenes(editor.children),
+				readScript: () => {
+					const script = serializeOSMLWithScenes(editor.children);
+					if (call.toolName === "read_script")
+						lastRead.current = editor.children;
+					return script;
+				},
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				estimateSpeechLengths: () => estimateSpeechLengths(editor.children),
@@ -111,7 +117,21 @@ export function useAgentTools() {
 					project: store.getState().models,
 					account: account.getState().models,
 				}),
-				editScript: (ops) => applyRefineOps(editor, ops),
+				editScript: (ops) => {
+					if (
+						call.toolName === "edit_script" &&
+						editor.children !== lastRead.current
+					)
+						throw new Error(
+							"The canvas changed since you last read it, or has not been read yet. Call read_script before editing; the user or another tool may have changed it.",
+						);
+					const result = applyRefineOps(editor, ops);
+					if (call.toolName === "edit_script")
+						lastRead.current = result.failures.length
+							? undefined
+							: editor.children;
+					return result;
+				},
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),

@@ -64,6 +64,16 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 });
 
 describe("script review opt-in", () => {
+	it("batches independent looks while keeping canvas writes alone", () => {
+		const prompt = sloppyInstructions({})[0].content.replace(/\s+/g, " ");
+
+		expect(prompt).toContain("Make independent look-ups in the same step");
+		expect(prompt).toContain("view_result for several elements");
+		expect(prompt).toContain(
+			"Never put write_script, adapt_script or edit_script in a step with another call",
+		);
+	});
+
 	it("asks before reviewing a new or adapted script", () => {
 		const systemPrompt = sloppyInstructions({})[0].content.replace(/\s+/g, " ");
 		const { description } = SLOPPY_TOOLS.review_script;

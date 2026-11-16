@@ -6,7 +6,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChatOnToolCallCallback } from "ai";
 import type { SloppyMessage } from "@/lib/agent/types";
 import type { ToolOutcome } from "@/lib/agent/tools/registry";
+import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
+import { makeEditor } from "@/lib/canvas/__tests__/_assets";
 import { SloppyProvider, useSloppy } from "../sloppy-provider";
+
+const editor = makeEditor();
+
+vi.mock("slate-react", () => ({ useSlateStatic: () => editor }));
 
 const state = vi.hoisted(() => ({
 	messages: [] as SloppyMessage[],
@@ -80,6 +86,20 @@ function Probe({
 }
 
 beforeEach(() => {
+	editor.children = [
+		createCanvasElement("asset_style", { id: "style", text: "Watercolor" }),
+		{
+			type: "scene",
+			id: "scene-1",
+			children: [createCanvasElement("image", { id: "image-1" })],
+		},
+		{
+			type: "scene",
+			id: "scene-2",
+			children: [createCanvasElement("speech", { id: "speech-2" })],
+		},
+	];
+	editor.selection = null;
 	state.messages = [asked, pending];
 	vi.clearAllMocks();
 	root = createRoot(container);
@@ -89,6 +109,47 @@ beforeEach(() => {
 				<Probe onControl={(next) => (control = next)} />
 			</SloppyProvider>,
 		);
+	});
+});
+
+describe("SloppyProvider selection context", () => {
+	it("sends the selection at send time, numbered independently of assets", () => {
+		editor.selection = {
+			anchor: { path: [2, 0, 1], offset: 0 },
+			focus: { path: [2, 0, 1], offset: 0 },
+		};
+		act(() => current().send("make this funnier"));
+
+		expect(state.sendMessage).toHaveBeenCalledWith({
+			parts: [
+				{ type: "text", text: "make this funnier" },
+				{
+					type: "data-focus",
+					data: { elementId: "speech-2", sceneNumber: 2 },
+				},
+			],
+		});
+	});
+
+	it("sends only the text when nothing is selected", () => {
+		act(() => current().send("make it funnier"));
+
+		expect(state.sendMessage).toHaveBeenCalledWith({
+			parts: [{ type: "text", text: "make it funnier" }],
+		});
+	});
+
+	it("can point at an asset outside the scenes", () => {
+		editor.selection = {
+			anchor: { path: [0, 1], offset: 0 },
+			focus: { path: [0, 1], offset: 0 },
+		};
+		act(() => current().send("change this"));
+
+		expect(state.sendMessage.mock.calls[0]?.[0].parts[1]).toEqual({
+			type: "data-focus",
+			data: { elementId: "style" },
+		});
 	});
 });
 

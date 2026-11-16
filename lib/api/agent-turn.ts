@@ -77,9 +77,18 @@ export async function streamAgentTurn(
 
 	const modelMessages = pruneMessages({
 		messages: pruneTranscript(
-			await convertToModelMessages(messages, {
+			await convertToModelMessages<SloppyMessage>(messages, {
 				tools: SLOPPY_TOOLS,
 				ignoreIncompleteToolCalls: true,
+				convertDataPart: (part) => {
+					if (part.type === "data-focus") {
+						const { elementId, sceneNumber } = part.data;
+						return {
+							type: "text",
+							text: `The user has element ${elementId}${sceneNumber ? ` (scene ${sceneNumber})` : ""} selected.`,
+						};
+					}
+				},
 			}),
 		),
 		emptyMessages: "remove",
