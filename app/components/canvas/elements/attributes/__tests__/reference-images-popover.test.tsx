@@ -13,7 +13,7 @@ import {
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
 import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
-import { ContinuityReferencesPopover } from "../continuity-section";
+import { ContinuityReferencesPopover } from "../continuity-references-popover";
 import { PanelSection } from "@/app/components/canvas/panel/panel-card";
 import {
 	ReferenceImagesEditor,

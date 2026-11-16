@@ -10,7 +10,7 @@ import {
 	type GeneratedElement,
 } from "@/lib/canvas/types";
 import { continuityDef } from "@/lib/connectors/video/start-frame";
-import { ContinuityReferencesPopover } from "./attributes/continuity-section";
+import { ContinuityReferencesPopover } from "./attributes/continuity-references-popover";
 import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
