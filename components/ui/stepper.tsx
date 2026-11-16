@@ -1,6 +1,9 @@
+"use client";
+
 import * as React from "react";
 
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { useNumberScrub } from "@/components/ui/use-number-scrub";
 import { cn } from "@/lib/utils";
 
 const SEGMENT_HOVER = "rounded-sm hover:bg-media-toggle-hover-bg";
@@ -30,18 +33,57 @@ function StepperButton({
 	);
 }
 
+const VALUE =
+	"h-7 min-w-12 px-1 font-numeric text-label text-foreground transition-colors focus-ring unavailable:opacity-40";
+
 function StepperValue({ className, ...props }: React.ComponentProps<"button">) {
 	return (
 		<button
 			type="button"
-			className={cn(
-				"h-7 min-w-12 px-1 font-numeric text-label text-foreground transition-colors focus-ring unavailable:opacity-40",
-				SEGMENT_HOVER,
-				className,
-			)}
+			className={cn(VALUE, SEGMENT_HOVER, className)}
 			{...props}
 		/>
 	);
 }
 
-export { Stepper, StepperButton, StepperValue };
+function StepperScrubValue({
+	label,
+	suffix,
+	disabled,
+	...scrub
+}: Parameters<typeof useNumberScrub>[0] & {
+	label: string;
+	suffix: string;
+	disabled: boolean;
+}) {
+	const { editing, inputProps, scrubProps } = useNumberScrub(scrub);
+	const text = `${scrub.value}${suffix}`;
+
+	if (editing) {
+		return (
+			<input
+				{...inputProps}
+				aria-label={label}
+				className={cn(VALUE, "w-12 rounded-sm bg-transparent text-center")}
+			/>
+		);
+	}
+	return (
+		<div
+			{...scrubProps}
+			tabIndex={disabled ? -1 : 0}
+			aria-disabled={disabled}
+			aria-label={label}
+			aria-valuetext={text}
+			className={cn(
+				VALUE,
+				SEGMENT_HOVER,
+				"flex cursor-ew-resize touch-none select-none items-center justify-center unavailable:pointer-events-none",
+			)}
+		>
+			{text}
+		</div>
+	);
+}
+
+export { Stepper, StepperButton, StepperScrubValue, StepperValue };

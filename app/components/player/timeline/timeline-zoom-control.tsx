@@ -1,59 +1,35 @@
 "use client";
 
-import { ActionMenu } from "@/components/ui/action-menu";
+import { Minus, Plus } from "@/components/ui/icon";
 import {
-	ArrowsStretch,
-	Minus,
-	Plus,
-	ZoomIn,
-	ZoomOut,
-} from "@/components/ui/icon";
-import { Stepper, StepperButton, StepperValue } from "@/components/ui/stepper";
+	Stepper,
+	StepperButton,
+	StepperScrubValue,
+} from "@/components/ui/stepper";
 import { useBottomView } from "../bottom-view-context";
 import { useTimelineZoomContext } from "./timeline-zoom-context";
+import { ZOOM_RANGE } from "./use-timeline-zoom";
 
 export function TimelineZoomControl() {
 	const { view } = useBottomView();
-	const { zoom, zoomIn, zoomOut, zoomToFit, canZoomIn, canZoomOut } =
+	const { zoom, setZoom, zoomIn, zoomOut, canZoomIn, canZoomOut } =
 		useTimelineZoomContext();
-	const percent = `${Math.round(zoom * 100)}%`;
+	const disabled = view !== "timeline";
 
 	return (
-		<Stepper aria-label="Timeline zoom" disabled={view !== "timeline"}>
+		<Stepper aria-label="Timeline zoom" disabled={disabled}>
 			<StepperButton label="Zoom out" onClick={zoomOut} disabled={!canZoomOut}>
 				<Minus />
 			</StepperButton>
-			<ActionMenu
-				side="top"
-				align="center"
-				items={[
-					{
-						key: "in",
-						label: "Zoom in",
-						icon: <ZoomIn />,
-						onSelect: zoomIn,
-						disabled: !canZoomIn,
-					},
-					{
-						key: "out",
-						label: "Zoom out",
-						icon: <ZoomOut />,
-						onSelect: zoomOut,
-						disabled: !canZoomOut,
-					},
-					{
-						key: "fit",
-						label: "Zoom to 100%",
-						icon: <ArrowsStretch />,
-						onSelect: zoomToFit,
-						disabled: !canZoomOut,
-					},
-				]}
-			>
-				<StepperValue aria-label={`Zoom options (${percent})`}>
-					{percent}
-				</StepperValue>
-			</ActionMenu>
+			<StepperScrubValue
+				label="Zoom, drag to change, double-click to reset"
+				value={zoom}
+				suffix="%"
+				{...ZOOM_RANGE}
+				resetValue={ZOOM_RANGE.min}
+				disabled={disabled}
+				onChange={setZoom}
+			/>
 			<StepperButton label="Zoom in" onClick={zoomIn} disabled={!canZoomIn}>
 				<Plus />
 			</StepperButton>
