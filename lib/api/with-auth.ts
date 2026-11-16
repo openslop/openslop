@@ -1,10 +1,17 @@
 import type { User } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { getUser } from "./auth";
-import { refuseOverBudget } from "./budget";
+import { createClient } from "@/lib/supabase/server";
+import { readBalanceUsd } from "@/lib/user/balance";
 import { hasApiAccess, MissingProviderKeyError } from "./provider-keys";
 import { logger } from "./logger";
-import { badRequest, forbidden, serverError, unauthorized } from "./response";
+import {
+	badRequest,
+	forbidden,
+	outOfBalance,
+	serverError,
+	unauthorized,
+} from "./response";
 
 type RouteBody = (user: User) => Promise<Response>;
 type Authorize = (user: User) => Promise<Response | null>;
@@ -48,8 +55,12 @@ const requireApiAccess: Authorize = async (user) =>
 export const withApiAccess = (label: string, run: RouteBody) =>
 	guard(label, run, requireApiAccess);
 
-export const withHostedBudget = (label: string, run: RouteBody) =>
-	guard(label, run, requireApiAccess, refuseOverBudget);
+// Post-paid: jobs already running may take the balance a little below zero.
+const refuseWithoutBalance: Authorize = async () =>
+	(await readBalanceUsd(await createClient())) > 0 ? null : outOfBalance();
+
+export const withHostedBalance = (label: string, run: RouteBody) =>
+	guard(label, run, requireApiAccess, refuseWithoutBalance);
 
 export const withSession = (label: string, run: RouteBody) => guard(label, run);
 

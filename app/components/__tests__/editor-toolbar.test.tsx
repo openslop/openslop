@@ -21,6 +21,8 @@ vi.mock("@/lib/generation/generation-queue-provider", () => ({
 		select({ isBusy: () => state.generating }),
 }));
 
+vi.mock("../balance-pill", () => ({ BalancePill: () => null }));
+
 vi.mock("@/lib/project/use-project", () => ({
 	useProject: (select: (state: { title: string }) => unknown) =>
 		select({ title: "Test project" }),

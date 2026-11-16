@@ -1,15 +1,9 @@
 import pick from "lodash/pick";
 import { describe, expect, it, vi } from "vitest";
-import {
-	getJob,
-	JOB_CONNECTOR_TYPES,
-	loadJobForProcessing,
-	spentSince,
-} from "../jobs";
+import { getJob, JOB_CONNECTOR_TYPES, loadJobForProcessing } from "../jobs";
 
 type Answer = { data: unknown; error: { message: string } | null };
 
-const rpc = vi.fn();
 const table = {
 	answer: { data: null, error: null } as Answer,
 	select: vi.fn(() => table),
@@ -26,7 +20,6 @@ function answerWith(answer: Answer) {
 
 vi.mock("@/lib/supabase/service", () => ({
 	createServiceClient: () => ({
-		rpc: (...args: unknown[]) => rpc(...args),
 		from: () => table,
 	}),
 }));
@@ -35,7 +28,6 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 vi.mock("@vercel/queue", () => ({ send: vi.fn() }));
 
-const SINCE = new Date("2026-10-01T00:00:00Z");
 const JOB_ID = "00000000-0000-0000-0000-000000000001";
 
 const STORED_JOB = {
@@ -108,33 +100,5 @@ describe("loadJobForProcessing", () => {
 		});
 
 		await expect(loadJobForProcessing(JOB_ID)).rejects.toThrow();
-	});
-});
-
-describe("spentSince", () => {
-	it("sums the account's spend on a provider since an instant", async () => {
-		rpc.mockResolvedValue({ data: 3.25, error: null });
-
-		expect(await spentSince("u1", "openslop", SINCE)).toBe(3.25);
-		expect(rpc).toHaveBeenCalledWith("spend_since", {
-			p_user_id: "u1",
-			p_provider: "openslop",
-			p_since: "2026-10-01T00:00:00.000Z",
-		});
-	});
-
-	// PostgREST can serialise a numeric as a string to keep its precision.
-	it("reads a numeric sent as a string", async () => {
-		rpc.mockResolvedValue({ data: "0.180000", error: null });
-
-		expect(await spentSince("u1", "openslop", SINCE)).toBe(0.18);
-	});
-
-	it("throws when the query fails", async () => {
-		rpc.mockResolvedValue({ data: null, error: { message: "db down" } });
-
-		await expect(spentSince("u1", "openslop", SINCE)).rejects.toThrow(
-			"Failed to read spend: db down",
-		);
 	});
 });

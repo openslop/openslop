@@ -15,8 +15,10 @@ vi.mock("../jobs", () => ({
 	enqueueJob: vi.fn(),
 	getJob: (...args: unknown[]) => mockGetJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
-	spentSince: async () => 0,
 }));
+
+vi.mock("@/lib/user/balance", () => ({ readBalanceUsd: async () => 5 }));
+vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
 
 vi.mock("../logger", () => ({
 	logger: { warn: vi.fn(), error: vi.fn() },

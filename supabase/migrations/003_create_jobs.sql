@@ -9,6 +9,9 @@ create table if not exists jobs (
   result jsonb,
   metadata jsonb not null default '{}'::jsonb,
   error text,
+  -- Set once the vendor has charged, so a job that failed before the vendor call
+  -- or is still running costs nothing.
+  cost_usd numeric,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
