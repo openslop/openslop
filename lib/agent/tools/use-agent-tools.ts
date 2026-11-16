@@ -17,7 +17,7 @@ import { estimateVisualSpans } from "@/lib/render/visual-spans";
 import {
 	captionElements,
 	autoCaptionElements,
-	withoutCaptions,
+	needsCaptions,
 } from "@/lib/captions/auto-captions";
 import { resolveModel } from "@/lib/connectors/models";
 import { checkMediaKind } from "@/lib/project/media";
@@ -131,7 +131,7 @@ export function useAgentTools() {
 						queue,
 						ids
 							? ids.map(named)
-							: withoutCaptions(
+							: needsCaptions(
 									autoCaptionElements(editor.children),
 									queue.getElementSnapshot,
 								),

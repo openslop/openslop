@@ -23,21 +23,26 @@ type SkippedElement = { id: string; reason: string };
 
 export type CaptionsReport = { queued: string[]; skipped: SkippedElement[] };
 
-const hasWords = ({ type, generationAttributes }: ContentElement) =>
-	type !== "music" || isToggleOn(generationAttributes?.lyrics);
-
 export const autoCaptionElements = (nodes: Descendant[]): ContentElement[] =>
-	getContentElements(nodes).filter(
-		(element) => isCaptionable(element.type) && hasWords(element),
-	);
+	getContentElements(nodes).filter(({ type }) => isCaptionable(type));
 
-export const withoutCaptions = (
+const resultHasWords = (
+	{ type }: ContentRef,
+	{ resultInputs }: ElementSnapshot,
+) => type !== "music" || isToggleOn(String(resultInputs?.attributes.lyrics));
+
+/** The elements whose current result has words and no captions yet. */
+export const needsCaptions = (
 	elements: ContentRef[],
 	getSnapshot: GetSnapshot,
 ) =>
-	elements.filter(
-		({ id }) => getSnapshot(id).result?.textTimestamps === undefined,
-	);
+	elements.filter((element) => {
+		const snapshot = getSnapshot(element.id);
+		return (
+			snapshot.result?.textTimestamps === undefined &&
+			resultHasWords(element, snapshot)
+		);
+	});
 
 export const isCaptioning = (getSnapshot: GetSnapshot, id: string) =>
 	isGenerationActive(getSnapshot(captionsNodeId(id)).status);

@@ -5,7 +5,7 @@ import { element as scriptElement } from "@/lib/canvas/__tests__/_assets";
 import {
 	autoCaptionElements,
 	planCaptions,
-	withoutCaptions,
+	needsCaptions,
 } from "../auto-captions";
 import { captionsNodeId } from "../captions-job";
 import { toCaption } from "../word-captions";
@@ -29,8 +29,18 @@ const captioned = {
 };
 const edited = { ...captioned, textTimestamps: [toCaption("hey", 0, 1)] };
 
+const generatedWith = (lyrics: string) => ({
+	prompt: "",
+	attributes: { lyrics },
+	reads: {},
+	dependencies: {},
+});
+
 const snapshots: Record<string, Partial<ElementSnapshot>> = {
 	fresh: { result: spoken },
+	song: { result: spoken, resultInputs: generatedWith("true") },
+	instrumental: { result: spoken, resultInputs: generatedWith("false") },
+	uploadedSong: { result: spoken },
 	captioned: { result: captioned },
 	edited: { result: edited },
 	ungenerated: {},
@@ -55,7 +65,7 @@ const plan = (elements: ReturnType<typeof element>[]) => {
 };
 
 describe("autoCaptionElements", () => {
-	it("gives every element in the scenes whose type shows captions, and music only with lyrics", () => {
+	it("gives every element in the scenes whose type shows captions", () => {
 		const nodes = [
 			{
 				id: "s1",
@@ -65,7 +75,6 @@ describe("autoCaptionElements", () => {
 					scriptElement("p1", "image"),
 					scriptElement("v1", "video"),
 					scriptElement("m1", "music"),
-					scriptElement("m2", "music", "", { lyrics: "true" }),
 					scriptElement("fx1", "sound"),
 				],
 			},
@@ -73,19 +82,32 @@ describe("autoCaptionElements", () => {
 		expect(autoCaptionElements(nodes).map(({ id }) => id)).toEqual([
 			"n1",
 			"v1",
-			"m2",
+			"m1",
 		]);
 	});
 });
 
-describe("withoutCaptions", () => {
+describe("needsCaptions", () => {
 	it("keeps only the elements that have no words yet", () => {
 		expect(
-			withoutCaptions(
+			needsCaptions(
 				[element("fresh"), element("captioned"), element("edited")],
 				getSnapshot,
 			).map(({ id }) => id),
 		).toEqual(["fresh"]);
+	});
+
+	it("keeps music only when its result was generated with lyrics", () => {
+		expect(
+			needsCaptions(
+				[
+					element("song", "music"),
+					element("instrumental", "music"),
+					element("uploadedSong", "music"),
+				],
+				getSnapshot,
+			).map(({ id }) => id),
+		).toEqual(["song"]);
 	});
 });
 

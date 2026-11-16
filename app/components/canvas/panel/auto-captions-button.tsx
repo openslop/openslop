@@ -8,7 +8,7 @@ import {
 	autoCaptionElements,
 	isCaptioning,
 	planCaptions,
-	withoutCaptions,
+	needsCaptions,
 } from "@/lib/captions/auto-captions";
 import { plural } from "@/lib/format";
 import {
@@ -35,7 +35,7 @@ export function AutoCaptionsButton() {
 	);
 	const uncaptioned = (q: GenerationQueue) =>
 		planCaptions(
-			withoutCaptions(captionable, q.getElementSnapshot),
+			needsCaptions(captionable, q.getElementSnapshot),
 			q.getElementSnapshot,
 		).ready;
 	const pending = useQueueSelector((q) => uncaptioned(q).length);
