@@ -15,6 +15,7 @@ import {
 	ElementStaleIndicator,
 } from "../generate-button";
 import { ElementHistoryPopover } from "../element-history-popover";
+import { ElementSettings } from "../element-settings";
 import { ResetEditsButton } from "../reset-edits-button";
 import { AddMediaButton } from "../element-media-picker";
 import { OutputPreview } from "../output-preview";
@@ -78,6 +79,7 @@ export function CharacterEditModal({
 								aside={
 									<div className="flex items-center gap-1">
 										<ModelAttribute element={avatar} label="Avatar model" />
+										<ElementSettings element={avatar} />
 										<ElementHistoryPopover elementId={avatar.id} />
 									</div>
 								}

@@ -52,7 +52,11 @@ export function resolveElementConnector(
 
 /** A project asset's attributes are its own; content and drafts take their connector's. */
 const OWN_ATTRIBUTES: Partial<Record<ElementType, AttributeSchema>> = {
-	asset_avatar: AttributeSchema.from([nameDef, ...OWN_MODEL_DEFS]),
+	asset_avatar: AttributeSchema.from([
+		nameDef,
+		...OWN_MODEL_DEFS,
+		referenceImagesDef,
+	]),
 	asset_voice: VOICE_ATTRIBUTES,
 	asset_style: AttributeSchema.from([]),
 	asset_references: AttributeSchema.from([

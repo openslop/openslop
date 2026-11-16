@@ -60,13 +60,7 @@ export function createCharacterAssetsPlugin({
 				.filter((character) => isPictured(character) || isVoiced(character));
 			if (characters.length === 0) return params;
 
-			return {
-				...params,
-				prompt: characters.some(isPictured)
-					? `${params.prompt}. No nameplates`
-					: params.prompt,
-				characterAssets: characters,
-			};
+			return { ...params, characterAssets: characters };
 		},
 	};
 }

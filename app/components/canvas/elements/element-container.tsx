@@ -1,12 +1,9 @@
 import { RenderElementProps } from "slate-react";
 import type { ContentElement } from "@/lib/canvas/types";
-import { elementSchema } from "@/lib/canvas/element-connector";
-import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { splitTextDirection } from "../utils/text-direction";
 import { OutputPreview } from "./output-preview";
 import { DeleteButton } from "./delete-button";
 import { DuplicateButton } from "./duplicate-button";
-import { AttributeBadge } from "./attribute-badge";
 import { ModelAttribute } from "./attributes/model-attribute";
 import {
 	ElementGenerateButton,
@@ -14,54 +11,11 @@ import {
 } from "./generate-button";
 import { ElementHistoryPopover } from "./element-history-popover";
 import { ResetEditsButton } from "./reset-edits-button";
-import { HeaderIconButton } from "./header-icon-button";
 import { ElementGenerationProvider } from "./element-generation-context";
+import { ElementSettings } from "./element-settings";
 import { ElementPrompt } from "./element-input";
 import { ELEMENT_CONFIGS } from "./element-configs";
 import { AddMediaButton } from "./element-media-picker";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { SectionTitle } from "@/components/ui/section-title";
-import { SimpleTooltip } from "@/components/ui/tooltip";
-import { SlidersHorizontal } from "@/components/ui/icon";
-
-function ElementSettings({
-	element,
-	defs,
-}: {
-	element: ContentElement;
-	defs: AttributeDef[];
-}) {
-	if (defs.length === 0) return null;
-	return (
-		<Popover>
-			<SimpleTooltip label="Settings">
-				<PopoverTrigger asChild>
-					<HeaderIconButton ariaLabel="Settings">
-						<SlidersHorizontal />
-					</HeaderIconButton>
-				</PopoverTrigger>
-			</SimpleTooltip>
-			<PopoverContent align="start" className="w-64">
-				<SectionTitle className="mb-2">Settings</SectionTitle>
-				<div className="flex flex-col gap-2">
-					{defs.map((def) => (
-						<div
-							key={def.key}
-							className="flex items-center justify-between gap-3"
-						>
-							<span className="shrink-0 text-label">{def.label}</span>
-							<AttributeBadge element={element} def={def} />
-						</div>
-					))}
-				</div>
-			</PopoverContent>
-		</Popover>
-	);
-}
 
 interface ElementContainerProps {
 	attributes: RenderElementProps["attributes"];
@@ -75,7 +29,6 @@ export function ElementContainer({
 	element,
 }: ElementContainerProps) {
 	const config = ELEMENT_CONFIGS[element.type];
-	const schema = elementSchema(element);
 	const { dir, nodeAttributes } = splitTextDirection(attributes);
 
 	return (
@@ -108,7 +61,7 @@ export function ElementContainer({
 										className="text-label-xs"
 									/>
 								)}
-								<ElementSettings element={element} defs={schema.settingsDefs} />
+								<ElementSettings element={element} />
 								{config.tools?.map((Tool, index) => (
 									<Tool key={index} element={element} />
 								))}
