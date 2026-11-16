@@ -55,7 +55,7 @@ const plan = (elements: ReturnType<typeof element>[]) => {
 };
 
 describe("autoCaptionElements", () => {
-	it("gives every element in the scenes whose type shows captions, except music", () => {
+	it("gives every element in the scenes whose type shows captions, and music only with lyrics", () => {
 		const nodes = [
 			{
 				id: "s1",
@@ -65,6 +65,7 @@ describe("autoCaptionElements", () => {
 					scriptElement("p1", "image"),
 					scriptElement("v1", "video"),
 					scriptElement("m1", "music"),
+					scriptElement("m2", "music", "", { lyrics: "true" }),
 					scriptElement("fx1", "sound"),
 				],
 			},
@@ -72,6 +73,7 @@ describe("autoCaptionElements", () => {
 		expect(autoCaptionElements(nodes).map(({ id }) => id)).toEqual([
 			"n1",
 			"v1",
+			"m2",
 		]);
 	});
 });

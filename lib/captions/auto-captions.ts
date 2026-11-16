@@ -2,6 +2,7 @@ import type { Descendant } from "slate";
 import { getContentElements } from "@/lib/canvas/scenes";
 import {
 	isCaptionable,
+	isToggleOn,
 	type ContentElement,
 	type ElementRef,
 } from "@/lib/canvas/types";
@@ -22,10 +23,12 @@ type SkippedElement = { id: string; reason: string };
 
 export type CaptionsReport = { queued: string[]; skipped: SkippedElement[] };
 
-// TODO: auto caption music once we support lyric models like Suno; today's tracks are instrumental.
+const hasWords = ({ type, generationAttributes }: ContentElement) =>
+	type !== "music" || isToggleOn(generationAttributes?.lyrics);
+
 export const autoCaptionElements = (nodes: Descendant[]): ContentElement[] =>
 	getContentElements(nodes).filter(
-		({ type }) => isCaptionable(type) && type !== "music",
+		(element) => isCaptionable(element.type) && hasWords(element),
 	);
 
 export const withoutCaptions = (
