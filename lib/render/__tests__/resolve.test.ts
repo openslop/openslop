@@ -52,7 +52,7 @@ describe("resolveElements", () => {
 	it("resolves elements with results", () => {
 		const elements = [
 			makeElement("img1", "image"),
-			makeElement("nar1", "narration"),
+			makeElement("nar1", "speech"),
 		];
 		const snapshots: Record<string, ElementSnapshot> = {
 			img1: makeSnapshot({
@@ -88,7 +88,7 @@ describe("resolveElements", () => {
 		});
 		expect(resolved[1]).toEqual({
 			id: "nar1",
-			type: "narration",
+			type: "speech",
 			role: "overlay",
 			layer: "audio",
 			sceneId: "scene-1",
@@ -108,7 +108,7 @@ describe("resolveElements", () => {
 	it("skips elements without results", () => {
 		const elements = [
 			makeElement("img1", "image"),
-			makeElement("nar1", "narration"),
+			makeElement("nar1", "speech"),
 		];
 		const snapshots: Record<string, ElementSnapshot> = {
 			img1: makeSnapshot({
@@ -134,8 +134,7 @@ describe("resolveElements", () => {
 		const types: ContentElement["type"][] = [
 			"image",
 			"video",
-			"narration",
-			"character",
+			"speech",
 			"music",
 			"sound",
 		];
@@ -146,8 +145,7 @@ describe("resolveElements", () => {
 		expect(roleMap).toEqual({
 			image: "foreground",
 			video: "foreground",
-			narration: "overlay",
-			character: "overlay",
+			speech: "overlay",
 			music: "background",
 			sound: "effect",
 		});
@@ -156,8 +154,7 @@ describe("resolveElements", () => {
 		expect(layerMap).toEqual({
 			image: "visual",
 			video: "visual",
-			narration: "audio",
-			character: "audio",
+			speech: "audio",
 			music: "audio",
 			sound: "audio",
 		});
@@ -220,7 +217,7 @@ describe("resolveElements", () => {
 	it("skips all elements when none have results", () => {
 		const elements = [
 			makeElement("img1", "image"),
-			makeElement("nar1", "narration"),
+			makeElement("nar1", "speech"),
 		];
 		const noResult = makeSnapshot({ status: "idle", result: null });
 		const resolved = resolveElements([wrap(elements)], () => noResult);

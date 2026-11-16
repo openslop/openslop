@@ -84,7 +84,7 @@ describe("buildTimelineRows", () => {
 			el("bgm", "music"),
 			el("img", "image"),
 			el("sfx", "sound"),
-			el("voice", "narration"),
+			el("voice", "speech"),
 		]);
 		const rows = buildTimelineRows(layout);
 		expect(rows.map((row) => row.id)).toEqual([
@@ -101,11 +101,11 @@ describe("buildTimelineRows", () => {
 		]);
 	});
 
-	it("merges narration and character into the voice lane, ordered by start", () => {
+	it("merges speech into one lane, ordered by start", () => {
 		const layout = layoutOf([
-			el("n1", "narration", { trimDurationSec: 2 }),
-			el("c1", "character", { trimDurationSec: 3 }),
-			el("n2", "narration", { trimDurationSec: 1 }),
+			el("n1", "speech", { trimDurationSec: 2 }),
+			el("c1", "speech", { trimDurationSec: 3 }),
+			el("n2", "speech", { trimDurationSec: 1 }),
 		]);
 		const voice = buildTimelineRows(layout).find((row) => row.id === "overlay");
 		expect(voice?.clips.map((clip) => clip.element?.id)).toEqual([
@@ -151,9 +151,9 @@ describe("buildTimelineRows", () => {
 
 	it("keeps voices on one lane across a scene transition", () => {
 		const layout = layoutOf([
-			el("n1", "narration", { trimDurationSec: 3 }),
+			el("n1", "speech", { trimDurationSec: 3 }),
 			el("a", "image", { trimDurationSec: 3 }),
-			el("n2", "narration", { trimDurationSec: 3 }),
+			el("n2", "speech", { trimDurationSec: 3 }),
 			el("b", "image", { trimDurationSec: 3 }),
 		]);
 		const voice = buildTimelineRows(layout).filter(
@@ -206,7 +206,7 @@ describe("buildTimelineRows", () => {
 	});
 
 	it("opens a blank scene when an overlay leads the video", () => {
-		const rows = buildTimelineRows(layoutOf([el("voice", "narration")]));
+		const rows = buildTimelineRows(layoutOf([el("voice", "speech")]));
 		const visual = rows.find((row) => row.id === "foreground");
 		expect(visual?.clips).toHaveLength(1);
 		expect(isBlankScene(visual?.clips[0].element as ResolvedElement)).toBe(
@@ -219,7 +219,7 @@ describe("buildCaptionRows", () => {
 	const words = ["one", "two", "three"].map((text, at) =>
 		toCaption(text, at, at + 1),
 	);
-	const narration = el("n", "narration", {
+	const speech = el("n", "speech", {
 		captions: { trimIndexOffset: 0, words },
 	});
 	const twoPerLine = (...elements: ResolvedElement[]) => {
@@ -230,7 +230,7 @@ describe("buildCaptionRows", () => {
 	};
 
 	it("lays one clip per line, the last ending with its last word", () => {
-		const [row] = buildCaptionRows(twoPerLine(el("a", "image"), narration));
+		const [row] = buildCaptionRows(twoPerLine(el("a", "image"), speech));
 		expect(
 			row.clips.map(({ start, duration, line }) => ({
 				start,

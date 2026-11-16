@@ -23,10 +23,10 @@ function hasNestedScene(editor: Editor): boolean {
 describe("withFlatPaste", () => {
 	it("flattens scene wrappers in pasted fragments", () => {
 		const editor = makeEditor();
-		seedScene(editor, scene([content("narration", "n0")]));
+		seedScene(editor, scene([content("speech", "n0")]));
 
 		editor.insertFragment([
-			scene([content("image", "i1"), content("narration", "n1")], "ps1"),
+			scene([content("image", "i1"), content("speech", "n1")], "ps1"),
 		]);
 
 		expect(hasNestedScene(editor)).toBe(false);
@@ -34,7 +34,7 @@ describe("withFlatPaste", () => {
 
 	it("passes through bare content elements unchanged", () => {
 		const editor = makeEditor();
-		seedScene(editor, scene([content("narration", "n0")]));
+		seedScene(editor, scene([content("speech", "n0")]));
 
 		editor.insertFragment([content("sound", "snd1")]);
 
@@ -45,7 +45,7 @@ describe("withFlatPaste", () => {
 
 	it("handles a mixed fragment of scenes and bare content", () => {
 		const editor = makeEditor();
-		seedScene(editor, scene([content("narration", "n0")]));
+		seedScene(editor, scene([content("speech", "n0")]));
 
 		editor.insertFragment([
 			scene([content("image", "i1")], "ps1"),
@@ -62,7 +62,7 @@ describe("withFlatPaste", () => {
 
 	it("lifts the tiles of a pasted fragment out of the scenes", () => {
 		const editor = withAssets(makeEditor());
-		seedScene(editor, scene([content("narration", "n0")]));
+		seedScene(editor, scene([content("speech", "n0")]));
 
 		editor.insertFragment([
 			scene([content("image", "i1")], "ps1"),

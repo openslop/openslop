@@ -101,7 +101,7 @@ describe("useGenerateAll", () => {
 	it("enqueues every element without a result", async () => {
 		const ids = useGenerateAllFor([
 			makeElement("a", "image", "sunset"),
-			makeElement("b", "narration", "hello"),
+			makeElement("b", "speech", "hello"),
 		]);
 		expect(ids).toEqual(["a", "b"]);
 	});
@@ -110,7 +110,7 @@ describe("useGenerateAll", () => {
 		const a = makeElement("a", "image", "sunset");
 		commitCurrent(a);
 
-		const ids = useGenerateAllFor([a, makeElement("b", "narration", "hello")]);
+		const ids = useGenerateAllFor([a, makeElement("b", "speech", "hello")]);
 		expect(ids).toEqual(["b"]);
 	});
 
@@ -119,16 +119,16 @@ describe("useGenerateAll", () => {
 
 		const ids = useGenerateAllFor([
 			makeElement("a", "image", "new prompt"),
-			makeElement("b", "narration", "hello"),
+			makeElement("b", "speech", "hello"),
 		]);
 		expect(ids).toEqual(["a", "b"]);
 	});
 
 	it("re-generates an element whose attributes drifted", async () => {
-		commitCurrent(makeElement("a", "narration", "hello", { emotion: "calm" }));
+		commitCurrent(makeElement("a", "speech", "hello", { emotion: "calm" }));
 
 		const ids = useGenerateAllFor([
-			makeElement("a", "narration", "hello", { emotion: "happy" }),
+			makeElement("a", "speech", "hello", { emotion: "happy" }),
 			makeElement("b", "image", "sunset"),
 		]);
 		expect(ids).toEqual(["a", "b"]);
@@ -137,7 +137,7 @@ describe("useGenerateAll", () => {
 	it("enqueues nothing when every element is current", async () => {
 		const elements = [
 			makeElement("a", "image", "sunset"),
-			makeElement("b", "narration", "hello"),
+			makeElement("b", "speech", "hello"),
 		];
 		elements.forEach(commitCurrent);
 
@@ -147,7 +147,7 @@ describe("useGenerateAll", () => {
 	it("reports no pending work once every element is current", async () => {
 		const elements = [
 			makeElement("a", "image", "sunset"),
-			makeElement("b", "narration", "hello"),
+			makeElement("b", "speech", "hello"),
 		];
 		elements.forEach(commitCurrent);
 
@@ -164,7 +164,7 @@ describe("useGenerateAll", () => {
 		commitCurrent(a);
 
 		expect(
-			useScopeForAll([a, makeElement("b", "narration", "hello")]),
+			useScopeForAll([a, makeElement("b", "speech", "hello")]),
 		).toMatchObject({ pending: 1, stale: 0 });
 	});
 
@@ -181,7 +181,7 @@ describe("useGenerateAll", () => {
 
 		const ids = useGenerateAllFor([
 			uploaded,
-			makeElement("b", "narration", "hello"),
+			makeElement("b", "speech", "hello"),
 		]);
 		expect(ids).toEqual(["b"]);
 	});
@@ -189,7 +189,7 @@ describe("useGenerateAll", () => {
 	it("skips elements with blank prompts", async () => {
 		const ids = useGenerateAllFor([
 			makeElement("a", "image", "sunset"),
-			makeElement("b", "narration", "   "),
+			makeElement("b", "speech", "   "),
 		]);
 		expect(ids).toEqual(["a"]);
 	});
@@ -198,7 +198,7 @@ describe("useGenerateAll", () => {
 describe("useGenerateScope", () => {
 	const sceneOne = [
 		makeElement("a", "image", "sunset"),
-		makeElement("b", "narration", "hello"),
+		makeElement("b", "speech", "hello"),
 	];
 	const sceneTwo = [makeElement("c", "image", "a scene away")];
 
@@ -250,7 +250,7 @@ describe("scope description", () => {
 	it("names the whole scope when none of it has run", () => {
 		const elements = [
 			makeElement("a", "image", "sunset"),
-			makeElement("b", "narration", "hello"),
+			makeElement("b", "speech", "hello"),
 		];
 		expect(useDescription(elements)).toBe(
 			"Generate 2 elements in this project",
@@ -302,7 +302,7 @@ describe("scope description", () => {
 		const elements = [
 			drifted,
 			makeElement("b", "image", "sunrise"),
-			makeElement("c", "narration", "hello"),
+			makeElement("c", "speech", "hello"),
 		];
 		expect(useDescription(elements, "scene")).toBe(
 			"Generate 2 elements and regenerate 1 stale in this scene",

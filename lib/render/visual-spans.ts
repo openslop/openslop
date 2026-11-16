@@ -9,18 +9,18 @@ import {
 } from "@/lib/generation/snapshots";
 import { getDuration } from "../canvas/element-attributes";
 
-/** One visual and the dialogue after it, up to the next visual. */
+/** One visual and the speech after it, up to the next visual. */
 export type VisualSpan = {
 	id: string;
 	type: ContentType;
 	sceneNumber: number;
 	words: number;
-	dialogueIds: string[];
+	speechIds: string[];
 	/** Its `duration` attribute, where generating it sets its length. */
 	durationSec?: number;
 };
 
-/** Dialogue before the first visual belongs to no visual. */
+/** Speech before the first visual belongs to no visual. */
 export const estimateVisualSpans = (
 	descendants: Descendant[],
 	getSnapshot: (id: string) => ElementSnapshot,
@@ -36,7 +36,7 @@ export const estimateVisualSpans = (
 					type: element.type,
 					sceneNumber: sceneIndex + 1,
 					words: 0,
-					dialogueIds: [],
+					speechIds: [],
 					...(outputKind === "video" &&
 						!holdsPinnedResult(getSnapshot(element.id)) && {
 							durationSec: getDuration(element),
@@ -47,7 +47,7 @@ export const estimateVisualSpans = (
 			const open = spans.at(-1);
 			if (!open || !isSpeech(element)) continue;
 			open.words += spokenWords(element);
-			open.dialogueIds.push(element.id);
+			open.speechIds.push(element.id);
 		}
 	}
 

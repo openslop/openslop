@@ -33,8 +33,8 @@ function mountHistoryKeymap() {
 			type: "scene",
 			children: [
 				{
-					id: "narration-1",
-					type: "narration",
+					id: "speech-1",
+					type: "speech",
 					children: [{ id: "text-1", text: "" }],
 				},
 			],

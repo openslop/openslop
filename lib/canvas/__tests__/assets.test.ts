@@ -7,7 +7,6 @@ import {
 	findAsset,
 	getAssets,
 	getCanvasElements,
-	NARRATOR,
 	referenceUrls,
 	voiceFrom,
 	voiceOf,
@@ -16,8 +15,8 @@ import { createCanvasElement } from "../create-canvas-element";
 import type { Scene } from "../types";
 import { asset, references } from "./_assets";
 
-const narration = createCanvasElement("narration", { id: "n1", text: "hello" });
-const scene: Scene = { id: "s1", type: "scene", children: [narration] };
+const speech = createCanvasElement("speech", { id: "n1", text: "hello" });
+const scene: Scene = { id: "s1", type: "scene", children: [speech] };
 
 describe("getAssets and getCanvasElements", () => {
 	it("pick the assets out in order, then the content of each scene", () => {
@@ -28,7 +27,7 @@ describe("getAssets and getCanvasElements", () => {
 		expect(getCanvasElements([style, scene, mia])).toEqual([
 			style,
 			mia,
-			narration,
+			speech,
 		]);
 	});
 
@@ -83,13 +82,13 @@ describe("characterNames and avatarNames", () => {
 	const nodes = [
 		asset("asset_avatar", { name: "Mia" }),
 		asset("asset_voice", { name: "Mia" }),
-		asset("asset_voice", { name: NARRATOR }),
+		asset("asset_voice", { name: "Narrator" }),
 		scene,
 		asset("asset_avatar", { name: "Bob" }),
 	];
 
 	it("lists everyone with a look or a voice once, the narrator among them", () => {
-		expect(characterNames(nodes)).toEqual(["Mia", "Bob", NARRATOR]);
+		expect(characterNames(nodes)).toEqual(["Mia", "Bob", "Narrator"]);
 	});
 
 	it("lists only who has an avatar as who a picture can show", () => {
@@ -98,10 +97,10 @@ describe("characterNames and avatarNames", () => {
 });
 
 describe("voiceOf", () => {
-	it("reads a speaker's voice, the narrator's when no one is named", () => {
+	it("reads the voice of the speaker it names", () => {
 		const nodes = [
 			asset("asset_voice", {
-				name: NARRATOR,
+				name: "Narrator",
 				attrs: { gender: "masculine" },
 			}),
 			asset("asset_avatar", { name: "Mia", text: "Brown hair" }),
@@ -111,7 +110,7 @@ describe("voiceOf", () => {
 			}),
 		];
 
-		expect(voiceOf(nodes)).toEqual({
+		expect(voiceOf(nodes, "Narrator")).toEqual({
 			...DEFAULT_TTS_MODEL,
 			gender: "masculine",
 		});
@@ -123,7 +122,7 @@ describe("voiceOf", () => {
 	});
 
 	it("is empty, never missing, for a speaker nothing is known of", () => {
-		expect(voiceOf([])).toEqual({});
+		expect(voiceOf([], "Mia")).toEqual({});
 		expect(voiceOf([asset("asset_voice", { name: "Mia" })], "Ghost")).toEqual(
 			{},
 		);

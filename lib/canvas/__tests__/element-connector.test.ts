@@ -6,7 +6,6 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { TTS_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { videoAttributesFor } from "@/lib/connectors/video/attributes";
-import { NARRATOR } from "../assets";
 import { createCanvasElement } from "../create-canvas-element";
 import {
 	attributeSchemaFor,
@@ -27,7 +26,7 @@ const imageDefaults = registry.image;
 
 describe("resolveElementConnector", () => {
 	it("maps the element type to its connector type", () => {
-		expect(resolveElementConnector(el("narration"), registry, []).type).toBe(
+		expect(resolveElementConnector(el("speech"), registry, []).type).toBe(
 			"tts",
 		);
 		expect(resolveElementConnector(el("video"), registry, []).type).toBe(
@@ -63,14 +62,14 @@ describe("resolveElementConnector", () => {
 
 describe("resolveElementConnector for speech", () => {
 	const voiced = (pair: typeof DEFAULT_MODELS.tts) => [
-		asset("asset_voice", { name: NARRATOR, attrs: pair }),
+		asset("asset_voice", { name: "Narrator", attrs: pair }),
 	];
 	const own = { provider: "cartesia", model: "Sonic 3.6" };
 
 	it("speaks with the pair its voice picked, over its own", () => {
 		expect(
 			resolveElementConnector(
-				el("narration", own),
+				el("speech", { name: "Narrator", ...own }),
 				registry,
 				voiced(DEFAULT_MODELS.tts),
 			).model,
@@ -79,11 +78,11 @@ describe("resolveElementConnector for speech", () => {
 
 	it("speaks with its own pair while its speaker has no voice", () => {
 		expect(
-			resolveElementConnector(el("narration", own), registry, []).model,
+			resolveElementConnector(el("speech", own), registry, []).model,
 		).toEqual(own);
 		expect(
 			resolveElementConnector(
-				el("character", { name: "Red", ...own }),
+				el("speech", { name: "Red", ...own }),
 				registry,
 				voiced(DEFAULT_MODELS.tts),
 			).model,
@@ -91,9 +90,9 @@ describe("resolveElementConnector for speech", () => {
 	});
 
 	it("falls back to the recommendation when neither names a model", () => {
-		expect(
-			resolveElementConnector(el("character"), registry, []).model,
-		).toEqual(DEFAULT_MODELS.tts);
+		expect(resolveElementConnector(el("speech"), registry, []).model).toEqual(
+			DEFAULT_MODELS.tts,
+		);
 	});
 });
 
@@ -133,14 +132,13 @@ describe("elementSchema", () => {
 		expect(elementSchema(el("video")).keys).toEqual(
 			expect.arrayContaining(videoAttributesFor(DEFAULT_MODELS.video).keys),
 		);
-		expect(elementSchema(el("narration")).keys).toEqual(
+		expect(elementSchema(el("speech")).keys).toEqual(
 			expect.arrayContaining(TTS_ATTRIBUTES.keys),
 		);
 	});
 
 	it("lets any speech line name its speaker", () => {
-		expect(attributeSchemaFor("character").keys).toContain("name");
-		expect(attributeSchemaFor("narration").keys).toContain("name");
+		expect(attributeSchemaFor("speech").keys).toContain("name");
 	});
 
 	it("offers every attribute an element is created with, and no made-up key", () => {

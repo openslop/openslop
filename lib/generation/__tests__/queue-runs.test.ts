@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NARRATOR } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
 import type { CanvasElement } from "@/lib/canvas/types";
@@ -103,10 +102,11 @@ describe("running a graph", () => {
 		canvas = [
 			createCanvasElement("asset_voice", {
 				id: "voice",
-				attrs: { name: NARRATOR },
+				attrs: { name: "Narrator" },
 			}),
-			createCanvasElement("narration", {
+			createCanvasElement("speech", {
 				id: "line",
+				attrs: { name: "Narrator" },
 				text: "Once upon a time",
 			}),
 		];

@@ -48,7 +48,7 @@ function scene(children: ContentElement[], id = "s1"): Scene {
 describe("findElementById", () => {
 	it("finds a content element by id", () => {
 		const editor = makeEditor([
-			scene([content("narration", "n1"), content("image", "img1")]),
+			scene([content("speech", "n1"), content("image", "img1")]),
 		]);
 
 		const entry = findElementById(editor, "img1");
@@ -58,12 +58,12 @@ describe("findElementById", () => {
 	});
 
 	it("returns null for nonexistent id", () => {
-		const editor = makeEditor([scene([content("narration", "n1")])]);
+		const editor = makeEditor([scene([content("speech", "n1")])]);
 		expect(findElementById(editor, "nope")).toBeNull();
 	});
 
 	it("does not match scene elements", () => {
-		const editor = makeEditor([scene([content("narration", "n1")], "s1")]);
+		const editor = makeEditor([scene([content("speech", "n1")], "s1")]);
 		expect(findElementById(editor, "s1")).toBeNull();
 	});
 });
@@ -74,7 +74,7 @@ describe("writes by id", () => {
 		const editor = makeEditor([
 			asset("asset_style"),
 			voice,
-			scene([content("narration", "n1"), content("image", "img1")]),
+			scene([content("speech", "n1"), content("image", "img1")]),
 		]);
 
 		mergeAttrs(editor, "img1", { format: "png" });
@@ -90,7 +90,7 @@ describe("writes by id", () => {
 	});
 
 	it("throw for an element that is not on the canvas, and change nothing", () => {
-		const editor = makeEditor([scene([content("narration", "n1")])]);
+		const editor = makeEditor([scene([content("speech", "n1")])]);
 		const before = JSON.stringify(editor.children);
 
 		expect(() => mergeAttrs(editor, "gone", { style: "ink" })).toThrow(
@@ -106,26 +106,26 @@ describe("writes by id", () => {
 describe("findBlockById", () => {
 	it("finds a content element by id", () => {
 		const editor = makeEditor([
-			scene([content("narration", "n1"), content("image", "img1")]),
+			scene([content("speech", "n1"), content("image", "img1")]),
 		]);
 		expect(findBlockById(editor, "img1")?.[1]).toEqual([0, 1]);
 	});
 
 	it("finds a scene by id", () => {
 		const editor = makeEditor([
-			scene([content("narration", "n1")], "s1"),
+			scene([content("speech", "n1")], "s1"),
 			scene([content("image", "img1")], "s2"),
 		]);
 		expect(findBlockById(editor, "s2")?.[1]).toEqual([1]);
 	});
 
 	it("does not match text leaves", () => {
-		const editor = makeEditor([scene([content("narration", "n1")])]);
+		const editor = makeEditor([scene([content("speech", "n1")])]);
 		expect(findBlockById(editor, "n1-t")).toBeNull();
 	});
 
 	it("returns null for nonexistent id", () => {
-		const editor = makeEditor([scene([content("narration", "n1")])]);
+		const editor = makeEditor([scene([content("speech", "n1")])]);
 		expect(findBlockById(editor, "nope")).toBeNull();
 	});
 });
@@ -136,7 +136,7 @@ describe("removeBlock", () => {
 		["a content element", "n1", ["n2", "img1"]],
 	])("removes %s by id", (_, id, left) => {
 		const editor = makeEditor([
-			scene([content("narration", "n1"), content("narration", "n2")], "s1"),
+			scene([content("speech", "n1"), content("speech", "n2")], "s1"),
 			scene([content("image", "img1")], "s2"),
 		]);
 		removeBlock(editor, id);
@@ -144,21 +144,21 @@ describe("removeBlock", () => {
 	});
 
 	it("throws for an id not on the canvas", () => {
-		const editor = makeEditor([scene([content("narration", "n1")])]);
+		const editor = makeEditor([scene([content("speech", "n1")])]);
 		expect(() => removeBlock(editor, "nope")).toThrow();
 	});
 });
 
 describe("updateElementText", () => {
 	it("no-ops when text is identical", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 		const before = JSON.stringify(editor.children);
 		updateElementText(editor, "n1", "hello");
 		expect(JSON.stringify(editor.children)).toBe(before);
 	});
 
 	it("appends diff when new text is a prefix extension", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hel")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hel")])]);
 		updateElementText(editor, "n1", "hello world");
 		expect(Editor.string(editor, [0, 0])).toBe(
 			`${ZERO_WIDTH_SPACE}hello world`,
@@ -166,22 +166,20 @@ describe("updateElementText", () => {
 	});
 
 	it("replaces full text when not a prefix extension", () => {
-		const editor = makeEditor([
-			scene([content("narration", "n1", "old text")]),
-		]);
+		const editor = makeEditor([scene([content("speech", "n1", "old text")])]);
 		updateElementText(editor, "n1", "new text");
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}new text`);
 	});
 
 	it("no-ops when the caller re-sends text that carries the marker", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 		const before = JSON.stringify(editor.children);
 		updateElementText(editor, "n1", `${ZERO_WIDTH_SPACE}hello`);
 		expect(JSON.stringify(editor.children)).toBe(before);
 	});
 
 	it("leaves the marker in place when the text is cleared", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 		updateElementText(editor, "n1", "");
 		expect(Editor.string(editor, [0, 0])).toBe(ZERO_WIDTH_SPACE);
 	});
@@ -189,7 +187,7 @@ describe("updateElementText", () => {
 	it("restores the marker on an element that lost it", () => {
 		const stripped: ContentElement = {
 			id: "n1",
-			type: "narration",
+			type: "speech",
 			children: [{ id: "n1-t", text: "hello" }],
 		};
 		const editor = makeEditor([scene([stripped])]);
@@ -204,7 +202,7 @@ describe("updateElementText on an asset", () => {
 	// Assets are void on the canvas, which a plain text edit would skip.
 	it("rewrites a void asset's text", () => {
 		const style = asset("asset_style", { text: "ink wash" });
-		const editor = makeEditor([style, scene([content("narration", "n1")])]);
+		const editor = makeEditor([style, scene([content("speech", "n1")])]);
 		editor.isVoid = (element) => isAssetElement(element);
 
 		updateElementText(editor, style.id, "oil paint");
@@ -223,7 +221,7 @@ describe("duplicateElement", () => {
 	it("inserts the copy directly after the original", () => {
 		const editor = makeEditor([
 			scene([
-				content("narration", "n1", "hello"),
+				content("speech", "n1", "hello"),
 				content("image", "img1", "a cat"),
 			]),
 		]);
@@ -236,7 +234,7 @@ describe("duplicateElement", () => {
 	});
 
 	it("gives the copy and its leaves fresh ids, keeping the attributes", () => {
-		const el = content("character", "c1", "line", { name: "Lyra" });
+		const el = content("speech", "c1", "line", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
 		const copyId = duplicateElement(editor, "c1");
@@ -284,7 +282,7 @@ describe("replaceGenerationAttrs", () => {
 
 describe("mergeAttrs", () => {
 	it("merges new attrs into existing", () => {
-		const el = content("character", "n1", "", { name: "Lyra" });
+		const el = content("speech", "n1", "", { name: "Lyra" });
 		const editor = makeEditor([scene([el])]);
 
 		mergeAttrs(editor, "n1", { emotion: "excited" });
@@ -297,7 +295,7 @@ describe("mergeAttrs", () => {
 	});
 
 	it("removes attrs set to null", () => {
-		const el = content("character", "n1", "", {
+		const el = content("speech", "n1", "", {
 			name: "Lyra",
 			emotion: "excited",
 		});
@@ -310,7 +308,7 @@ describe("mergeAttrs", () => {
 	});
 
 	it("handles an element with no attributes yet", () => {
-		const el = content("narration", "n1");
+		const el = content("speech", "n1");
 		const editor = makeEditor([scene([el])]);
 
 		mergeAttrs(editor, "n1", { emotion: "calm" });

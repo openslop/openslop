@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { NO_FINDINGS, REVIEW_INSTRUCTION, reviewPrompt } from "../review";
 
-const script = '<narration id="n1">Once upon a time.</narration>';
+const script = '<speech id="n1">Once upon a time.</speech>';
 
 describe("reviewPrompt", () => {
 	it("opens with the instruction, which is how a mock knows its own prompt", () => {

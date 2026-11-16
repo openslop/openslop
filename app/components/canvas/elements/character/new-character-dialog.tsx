@@ -10,7 +10,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { NARRATOR } from "@/lib/canvas/assets";
 import { useCharacterNames } from "@/lib/canvas/use-assets";
 import { normalizeCharacterName } from "@/lib/project/character-name";
 
@@ -38,8 +37,7 @@ export function NewCharacterDialog({
 				<DialogHeader>
 					<DialogTitle>New character</DialogTitle>
 					<DialogDescription>
-						Pick a name, or {NARRATOR} for the voice that reads the narration.
-						You can fill in the details next.
+						Pick a name. You can fill in the details next.
 					</DialogDescription>
 				</DialogHeader>
 

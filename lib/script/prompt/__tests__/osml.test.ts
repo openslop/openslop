@@ -29,9 +29,9 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("Write the story and nothing else");
 	});
 
-	it("ties each image to the moment its narration describes without dropping the standalone-prompt rule", () => {
+	it("ties each image to the moment its speech describes without dropping the standalone-prompt rule", () => {
 		expect(spec).toContain(
-			"Depict the specific moment described by the narration and dialogue that follow it",
+			"Depict the specific moment described by the speech that follows it",
 		);
 		expect(spec).toContain("<image> prompt must stand alone");
 		expect(spec).toContain(
@@ -119,7 +119,7 @@ describe("osmlSpec", () => {
 		expect(spec).toContain(
 			'lyrics: "true" makes the cue a song, sung over the scenes (default "false", instrumental)',
 		);
-		expect(spec).toContain("never under narration or dialogue");
+		expect(spec).toContain("never under speech");
 		expect(spec).toContain(
 			'Instrumental with no lyrics, unless lyrics="true": then the vocal style too, and the prompt ends with Lyrics:',
 		);

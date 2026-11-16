@@ -40,16 +40,13 @@ describe("buildStoryboardItems", () => {
 	});
 
 	it("keeps scenes that have no segment yet", () => {
-		const items = buildStoryboardItems([scene("a", ["narration"])], []);
+		const items = buildStoryboardItems([scene("a", ["speech"])], []);
 		expect(items).toHaveLength(1);
 		expect(items[0].foreground).toBeNull();
 	});
 
 	it("picks the scene's foreground element", () => {
-		const items = buildStoryboardItems(
-			[scene("a", ["narration", "image"])],
-			[],
-		);
+		const items = buildStoryboardItems([scene("a", ["speech", "image"])], []);
 		expect(items[0].foreground?.id).toBe("a-1");
 	});
 });

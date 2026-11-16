@@ -75,9 +75,9 @@ describe("audioFadeSec", () => {
 		expect(audioFadeSec(el({ loops: 3 }))).toBe(LOOP_CROSSFADE_SEC);
 	});
 
-	it("holds a one-shot effect and narration at full volume", () => {
+	it("holds a one-shot effect and speech at full volume", () => {
 		expect(audioFadeSec(el({ loops: 1 }))).toBe(0);
-		expect(audioFadeSec(el({ type: "narration", role: "overlay" }))).toBe(0);
+		expect(audioFadeSec(el({ type: "speech", role: "overlay" }))).toBe(0);
 	});
 });
 

@@ -25,7 +25,7 @@ const ROWS: Record<
 	{ label: string; kind: LayerType; numbered: boolean }
 > = {
 	foreground: { label: "Visuals", kind: "visual", numbered: true },
-	overlay: { label: "Voice", kind: "audio", numbered: false },
+	overlay: { label: "Speech", kind: "audio", numbered: false },
 	effect: { label: "Effects", kind: "audio", numbered: false },
 	background: { label: "Music", kind: "audio", numbered: false },
 };

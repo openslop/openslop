@@ -8,7 +8,7 @@ function makeEditor() {
 	editor.children = [
 		{
 			id: "root",
-			type: "narration",
+			type: "speech",
 			children: [{ id: "t0", text: "Hello" }],
 		},
 	];
@@ -35,7 +35,7 @@ describe("withNodeId", () => {
 			const editor = makeEditor();
 			const node = {
 				id: "keep-me",
-				type: "character" as const,
+				type: "speech" as const,
 				children: [{ id: "ct", text: "line" }],
 			} as Element;
 

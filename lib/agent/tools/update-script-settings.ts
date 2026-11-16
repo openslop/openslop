@@ -18,7 +18,7 @@ export const updateScriptSettings = defineTool({
 	  script tools read them from here. adapt_script keeps the user's words and honors the
 	  format, but not the length budget. Send only what changes.
 
-	  - language: what narration and dialogue are written in. "auto" follows the language of
+	  - language: what speech is written in. "auto" follows the language of
 	    the brief or pasted script. ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}
 	  - length: how long the video runs, as a spoken-word budget.
 	    - auto: no budget. The script runs as long as the material needs.

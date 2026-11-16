@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { NARRATOR } from "@/lib/canvas/assets";
 import { element as elementWithText } from "@/lib/canvas/__tests__/_assets";
 import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
 import {
@@ -32,7 +31,7 @@ const avatar = (name: string, appearance: string) =>
 
 const element = (
 	id: string,
-	type: "image" | "video" | "narration",
+	type: "image" | "video" | "speech",
 	attributes?: Record<string, string>,
 ) => elementWithText(id, type, "a sunset", attributes);
 
@@ -85,7 +84,7 @@ describe("buildNode", () => {
 
 	it.each([
 		["image", "image"],
-		["narration", "tts"],
+		["speech", "tts"],
 		["asset_avatar", "image"],
 	] as const)("builds a %s on the %s connector", (type, connectorType) => {
 		assets = [];
@@ -244,10 +243,15 @@ describe("buildNode", () => {
 	});
 
 	describe("speech and the voice it is spoken in", () => {
-		const line = element("line", "narration");
+		const line = element("line", "speech", { name: "Narrator" });
 		const voice = (attrs: Record<string, string>) => {
 			assets = [
-				make("asset_voice", "", { name: NARRATOR, ...attrs }, "narrator-voice"),
+				make(
+					"asset_voice",
+					"",
+					{ name: "Narrator", ...attrs },
+					"narrator-voice",
+				),
 			];
 		};
 

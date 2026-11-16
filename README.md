@@ -81,7 +81,7 @@ The copilot lives in the left panel. It reads the script, outlines the story, wr
 
 ### A storyboard, not a prompt box
 
-Every scene is a stack of cards: narration, character, image, video, sound, music. Edit any prompt, pick a model per card, drag to reorder, and insert wherever you hover.
+Every scene is a stack of cards: speech, image, video, sound, music. Edit any prompt, pick a model per card, drag to reorder, and insert wherever you hover.
 
 [The document model →](lib/canvas)
 
@@ -144,7 +144,7 @@ Hosted models come with your account. Paste a key for Anthropic, Runware, Cartes
 - **[Export up to 4K](app/components/player/export-button.tsx)** — Renders on Remotion Lambda in parallel chunks and hands you an MP4.
 - **[Version history](app/components/canvas/panel/canvas-history-panel.tsx)** — Autosaves as you work, folded into checkpoints. View any version and restore it.
 - **[Characters and art style](app/components/canvas/elements/asset-strip.tsx)** — Name a character once and every image, voice line, and avatar stays consistent.
-- **[Templates](lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, and more. Each seeds a style, a narrator, and a length.
+- **[Templates](lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, and more. Each seeds a style, its characters, and a length.
 - **[Mocks for development](.env.example)** — Leave a provider key unset and its calls fall back to canned results, so you can build without paying.
 
 ## Supported providers

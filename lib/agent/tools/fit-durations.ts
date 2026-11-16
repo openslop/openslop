@@ -17,10 +17,10 @@ const where = ({ sceneNumber, type, id }: VisualSpan) =>
 	`${sceneLabel(sceneNumber)} ${type} ${id}`;
 
 const changeLine = ({ span, duration, needed }: DurationFit) =>
-	`${where(span)}: ${span.durationSec}s to ${duration}s, for about ${seconds(needed)} of estimated dialogue and leeway.`;
+	`${where(span)}: ${span.durationSec}s to ${duration}s, for about ${seconds(needed)} of estimated speech and leeway.`;
 
 const shortLine = ({ span, needed }: DurationFit) =>
-	`${where(span)} needs about ${seconds(needed)} but ${DURATION_MAX}s is the longest a video element can be generated at; split the dialogue after it across more visuals.`;
+	`${where(span)} needs about ${seconds(needed)} but ${DURATION_MAX}s is the longest a video element can be generated at; split the speech after it across more visuals.`;
 
 const report = (...lines: (string | false)[]) =>
 	lines.filter(Boolean).join("\n");
@@ -47,27 +47,27 @@ type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
 
 const headline = ({ fits, changes, short, applied }: Counts) => {
 	if (fits === 0)
-		return "No video element to generate has dialogue under it in scope. Images stretch to the dialogue under them; uploaded videos keep their own length.";
+		return "No video element to generate has speech under it in scope. Images stretch to the speech under them; uploaded videos keep their own length.";
 	if (changes > 0)
 		return `Fitted ${applied} of ${changes}. Those elements are stale now and need regenerating.`;
 	if (short > 0)
 		return "Nothing to change: the ones that fall short are already at the longest option.";
-	return `All ${fits} already cover their dialogue; nothing to change.`;
+	return `All ${fits} already cover their speech; nothing to change.`;
 };
 
 export const fitDurations = defineTool({
 	description: dedent`
-	  Fit every video element to the dialogue that runs under it: set each one's
+	  Fit every video element to the speech that runs under it: set each one's
 	  \`duration\` to just cover the estimated speech that follows it, up to the next visual, plus
-	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter ones freeze or loop under long dialogue;
+	  ${DURATION_FIT_LEEWAY_SEC}s of leeway. Shorter ones freeze or loop under long speech;
 	  longer ones hold the next line back until they finish.
 
-	  The dialogue under a visual is every line between it and the next visual, whether or
+	  The speech under a visual is every line between it and the next visual, whether or
 	  not a scene boundary falls between them, so this is scoped by element, never by scene.
 	  Send \`element_ids\` to fit only those, or nothing for the whole canvas.
 
 	  Images already stretch, uploaded videos keep their own length, and videos with no
-	  dialogue under them have nothing to fit, so all three are left alone. Changing a
+	  speech under them have nothing to fit, so all three are left alone. Changing a
 	  duration stales the element: tell the user to regenerate it afterwards.
 	`,
 	input: z.object({
@@ -75,7 +75,7 @@ export const fitDurations = defineTool({
 	}),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Fitting video elements to the dialogue",
+	label: "Fitting video elements to the speech",
 	execute: async ({ element_ids }, ctx) => {
 		const { scoped, unknown } = scopeTo(ctx.estimateVisualSpans(), element_ids);
 		const fits = durationFits(scoped);

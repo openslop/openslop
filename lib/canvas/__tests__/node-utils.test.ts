@@ -21,7 +21,7 @@ describe("makeNodeId", () => {
 describe("assignIdRecursively", () => {
 	it("assigns an ID to an element without one", () => {
 		const node = {
-			type: "narration" as const,
+			type: "speech" as const,
 			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 
@@ -33,7 +33,7 @@ describe("assignIdRecursively", () => {
 	it("preserves an existing ID", () => {
 		const node = {
 			id: "existing-id",
-			type: "narration" as const,
+			type: "speech" as const,
 			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 
@@ -43,11 +43,11 @@ describe("assignIdRecursively", () => {
 
 	it("recurses into nested children", () => {
 		const child = {
-			type: "character" as const,
+			type: "speech" as const,
 			children: [{ text: "inner", id: "t1" }],
 		} as Element;
 		const parent = {
-			type: "narration" as const,
+			type: "speech" as const,
 			children: [child],
 		} as unknown as Element;
 
@@ -67,7 +67,7 @@ describe("stripIds", () => {
 	it("removes id from an element", () => {
 		const node = {
 			id: "abc",
-			type: "narration" as const,
+			type: "speech" as const,
 			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 
@@ -78,12 +78,12 @@ describe("stripIds", () => {
 	it("recurses into element children", () => {
 		const child = {
 			id: "child-el",
-			type: "character" as const,
+			type: "speech" as const,
 			children: [{ text: "inner", id: "t1" }],
 		} as Element;
 		const node = {
 			id: "parent",
-			type: "narration" as const,
+			type: "speech" as const,
 			children: [child],
 		} as unknown as Element;
 
@@ -95,7 +95,7 @@ describe("stripIds", () => {
 	it("clones text node children preserving their properties", () => {
 		const node = {
 			id: "parent",
-			type: "narration" as const,
+			type: "speech" as const,
 			children: [{ text: "hi", id: "t1" }],
 		} as Element;
 

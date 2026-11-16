@@ -17,9 +17,9 @@ const scene = (id: string, children: ContentElement[] = []): Scene => ({
 	children,
 });
 
-const narration = (id: string, body = ""): ContentElement => ({
+const speech = (id: string, body = ""): ContentElement => ({
 	id,
-	type: "narration",
+	type: "speech",
 	children: [
 		{ id: `${id}-marker`, text: ZERO_WIDTH_SPACE },
 		{ id: `${id}-body`, text: body },
@@ -32,19 +32,19 @@ describe("isScriptEmpty", () => {
 	});
 
 	it("treats the normalized placeholder element as empty", () => {
-		const nodes = [scene("s1", [narration("n1", "")])];
+		const nodes = [scene("s1", [speech("n1", "")])];
 		expect(isScriptEmpty(nodes)).toBe(true);
 	});
 
 	it("treats whitespace-only text as empty", () => {
-		const nodes = [scene("s1", [narration("n1", "  \n")])];
+		const nodes = [scene("s1", [speech("n1", "  \n")])];
 		expect(isScriptEmpty(nodes)).toBe(true);
 	});
 
 	it("sees authored text anywhere on the canvas", () => {
 		const nodes = [
-			scene("s1", [narration("n1", "")]),
-			scene("s2", [narration("n2", "A story begins.")]),
+			scene("s1", [speech("n1", "")]),
+			scene("s2", [speech("n2", "A story begins.")]),
 		];
 		expect(isScriptEmpty(nodes)).toBe(false);
 	});
@@ -66,7 +66,7 @@ describe("sceneIndexOf", () => {
 	});
 
 	it("ignores non-scene siblings when counting", () => {
-		const nodes = [narration("t1"), scene("a"), narration("t2"), scene("b")];
+		const nodes = [speech("t1"), scene("a"), speech("t2"), scene("b")];
 		expect(sceneIndexOf(nodes, "a")).toBe(1);
 		expect(sceneIndexOf(nodes, "b")).toBe(2);
 	});
@@ -80,7 +80,7 @@ describe("parentSceneId", () => {
 	};
 
 	it("returns the id of the scene holding the node", () => {
-		const editor = editorWith([scene("s1"), scene("s2", [narration("n1")])]);
+		const editor = editorWith([scene("s1"), scene("s2", [speech("n1")])]);
 		expect(parentSceneId(editor, [1, 0])).toBe("s2");
 	});
 
@@ -93,12 +93,12 @@ describe("parentSceneId", () => {
 describe("previousVisual", () => {
 	const elements = [
 		element("a", "image"),
-		element("n", "narration"),
+		element("n", "speech"),
 		element("b", "video"),
 		element("c", "video"),
 	];
 
-	it("skips dialogue to the visual before", () => {
+	it("skips speech to the visual before", () => {
 		expect(previousVisual(elements, "b")?.id).toBe("a");
 		expect(previousVisual(elements, "c")?.id).toBe("b");
 	});
@@ -112,8 +112,8 @@ describe("previousVisual", () => {
 describe("sceneVisuals", () => {
 	it("numbers each scene's foreground and skips scenes without one", () => {
 		const nodes = [
-			scene("s1", [narration("n1"), element("i1", "image")]),
-			scene("s2", [narration("n2")]),
+			scene("s1", [speech("n1"), element("i1", "image")]),
+			scene("s2", [speech("n2")]),
 			scene("s3", [element("v1", "video")]),
 		];
 		expect(

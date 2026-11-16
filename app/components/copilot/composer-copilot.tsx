@@ -9,7 +9,6 @@ import {
 	ImagePlus,
 	Lightbulb,
 	Media,
-	Mic,
 	Palette,
 	Proportions,
 	Translate,
@@ -25,7 +24,6 @@ import { templateBrief } from "@/lib/templates/template-brief";
 import { useTemplate } from "@/lib/templates/use-template";
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
 import { useProject } from "@/lib/project/use-project";
-import { NARRATOR } from "@/lib/canvas/assets";
 import {
 	LANGUAGE_CHOICES,
 	languageLabel,
@@ -113,12 +111,6 @@ function AttachMenu({
 			label: "Create character",
 			icon: <User className={iconClass} />,
 			onSelect: openCreateCharacter,
-		},
-		{
-			key: "narrator",
-			label: "Select narrator voice",
-			icon: <Mic className={iconClass} />,
-			onSelect: () => editAsset("asset_voice", NARRATOR),
 		},
 		{
 			key: "art-style",

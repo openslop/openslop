@@ -2,7 +2,6 @@ import type { ComponentType } from "react";
 import {
 	Voice,
 	Music,
-	User,
 	Image as ImageIcon,
 	Video,
 	Waveform,
@@ -47,22 +46,13 @@ type ElementPresentation = {
 type ElementConfig = ContentSpec & ElementPresentation & { type: ContentType };
 
 const PRESENTATION: Record<ContentType, ElementPresentation> = {
-	narration: {
-		label: "Narration",
+	speech: {
+		label: "Speech",
 		hidesModel: true,
 		Icon: Voice,
-		iconBgClass: "bg-media-narration/15",
-		colorClass: "text-media-narration",
-		placeholder: "Write the narration...",
-		tools: [ElementVoiceButton, ElementCaptionsButton],
-	},
-	character: {
-		label: "Character",
-		hidesModel: true,
-		Icon: User,
-		iconBgClass: "bg-media-character/15",
-		colorClass: "text-media-character",
-		placeholder: "What does this character say?",
+		iconBgClass: "bg-media-speech/15",
+		colorClass: "text-media-speech",
+		placeholder: "What is said...",
 		lead: CharacterSwitcher,
 		tools: [ElementVoiceButton, ElementCaptionsButton],
 	},

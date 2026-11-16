@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { NARRATOR } from "@/lib/canvas/assets";
 import { createCanvasElement } from "@/lib/canvas/create-canvas-element";
 import { resolveElementConnector } from "@/lib/canvas/element-connector";
 import { createSpeakerVoicePlugin } from "@/lib/connectors/tts/plugins/speaker-voice";
@@ -14,10 +13,8 @@ const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
 
 const plugin = createSpeakerVoicePlugin();
 
-const line = (name?: string, attrs: Record<string, string> = {}) =>
-	name
-		? createCanvasElement("character", { id: "c1", attrs: { name, ...attrs } })
-		: createCanvasElement("narration", { id: "n1", attrs });
+const line = (name?: string) =>
+	createCanvasElement("speech", { id: "s1", attrs: name ? { name } : {} });
 
 const voice = (name: string, attrs: Partial<Voice> = {}) =>
 	asset("asset_voice", { name, attrs });
@@ -39,16 +36,13 @@ const before = async (
 
 describe("createSpeakerVoicePlugin", () => {
 	describe("what it depends on", () => {
-		it("depends on the narrator's voice, and on the voice of the character a line names", () => {
-			const narrator = voice(NARRATOR);
+		it("depends on the voice of the speaker a line names, and none while it names no one", () => {
 			const red = voice("Red");
 
-			expect(dependenciesOf(plugin, line(), [narrator, red])).toEqual({
-				"Narrator's voice": narrator.id,
-			});
-			expect(dependenciesOf(plugin, line("Red"), [narrator, red])).toEqual({
+			expect(dependenciesOf(plugin, line("Red"), [red])).toEqual({
 				"Red's voice": red.id,
 			});
+			expect(dependenciesOf(plugin, line(), [red])).toEqual({});
 		});
 
 		it("depends on no voice while the speaker has none", () => {
@@ -58,8 +52,8 @@ describe("createSpeakerVoicePlugin", () => {
 
 	it("speaks on its voice's model", () => {
 		expect(
-			resolveElementConnector(line(), DEFAULT_CONNECTOR_REGISTRY, [
-				voice(NARRATOR, CARTESIA),
+			resolveElementConnector(line("Red"), DEFAULT_CONNECTOR_REGISTRY, [
+				voice("Red", CARTESIA),
 			]).model,
 		).toEqual(CARTESIA);
 	});
@@ -78,6 +72,12 @@ describe("createSpeakerVoicePlugin", () => {
 				voiceId: "v-red",
 				speed: "fast",
 			});
+		});
+
+		it("throws while it names no speaker", async () => {
+			await expect(before({ prompt: "hi" }, speaking("Red"))).rejects.toThrow(
+				"Pick who says this line",
+			);
 		});
 
 		it("throws while its speaker has no voice", async () => {

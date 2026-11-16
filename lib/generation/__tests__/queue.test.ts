@@ -571,10 +571,7 @@ describe("GenerationQueue", () => {
 			generationQueue.enqueueGraph([makeJob("rv1", [], made)]);
 			await vi.runAllTimersAsync();
 
-			generationQueue.reviseResult(
-				{ id: "rv1", type: "narration" },
-				() => edited,
-			);
+			generationQueue.reviseResult({ id: "rv1", type: "speech" }, () => edited);
 
 			expect(generationQueue.getElementSnapshot("rv1")).toMatchObject({
 				result: edited,
@@ -603,7 +600,7 @@ describe("GenerationQueue", () => {
 
 			expect(() =>
 				generationQueue.reviseResult(
-					{ id: "rv3", type: "narration" },
+					{ id: "rv3", type: "speech" },
 					() => edited,
 				),
 			).toThrow(/generating/);
@@ -613,7 +610,7 @@ describe("GenerationQueue", () => {
 		it("refuses an element with no result to edit", () => {
 			expect(() =>
 				generationQueue.reviseResult(
-					{ id: "rv2", type: "narration" },
+					{ id: "rv2", type: "speech" },
 					() => edited,
 				),
 			).toThrow(/nothing here to edit/);

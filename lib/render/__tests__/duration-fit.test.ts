@@ -13,17 +13,17 @@ const span = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	type: "video",
 	sceneNumber: 1,
 	words: 30,
-	dialogueIds: ["n1"],
+	speechIds: ["n1"],
 	durationSec: 10,
 	...over,
 });
 
 describe("durationFits", () => {
-	it("leaves out a video with no dialogue under it, which plays its own length", () => {
-		expect(durationFits([span({ words: 0, dialogueIds: [] })])).toEqual([]);
+	it("leaves out a video with no speech under it, which plays its own length", () => {
+		expect(durationFits([span({ words: 0, speechIds: [] })])).toEqual([]);
 	});
 
-	it("covers the dialogue under a video, plus the leeway", () => {
+	it("covers the speech under a video, plus the leeway", () => {
 		const [fit] = durationFits([span({ words: 30 })]);
 
 		expect(fit.needed).toBe(10 + DURATION_FIT_LEEWAY_SEC);
@@ -53,7 +53,7 @@ const words = (count: number) => Array(count).fill("word").join(" ");
 
 const node = (
 	id: string,
-	type: "video" | "narration",
+	type: "video" | "speech",
 	text: string,
 	generationAttributes?: Record<string, string>,
 ) => ({
@@ -64,20 +64,20 @@ const node = (
 });
 
 describe("durationFits over an estimated canvas", () => {
-	it("fits a video to the dialogue that runs on past the scene it sits in", () => {
+	it("fits a video to the speech that runs on past the scene it sits in", () => {
 		const script = [
 			{
 				id: "s1",
 				type: "scene",
 				children: [
 					node("video1", "video", "A pan.", { duration: "4" }),
-					node("n1", "narration", words(15)),
+					node("n1", "speech", words(15)),
 				],
 			},
 			{
 				id: "s2",
 				type: "scene",
-				children: [node("n2", "narration", words(15))],
+				children: [node("n2", "speech", words(15))],
 			},
 		] as unknown as Descendant[];
 

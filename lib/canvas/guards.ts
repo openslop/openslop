@@ -4,7 +4,6 @@ import {
 	CHARACTER_REF_TYPE,
 	CONTENT_TYPES,
 	ELEMENT_TYPES,
-	isSpeechType,
 	type AssetElement,
 	type AssetType,
 	type ContentElement,
@@ -12,6 +11,7 @@ import {
 	type ElementType,
 	type CanvasElement,
 	type CharacterRefElement,
+	type ElementOf,
 } from "./types";
 
 export const isContentType = (type: string): type is ContentType =>
@@ -29,8 +29,8 @@ export const castsCharacters = (node: unknown): node is ContentElement =>
 export const isCharacterRef = (node: unknown): node is CharacterRefElement =>
 	Element.isElement(node) && node.type === CHARACTER_REF_TYPE;
 
-export const isSpeech = (node: unknown): boolean =>
-	isContentElement(node) && isSpeechType(node.type);
+export const isSpeech = (node: unknown): node is ElementOf<"speech"> =>
+	isContentElement(node) && node.type === "speech";
 
 export const isAssetType = (type: string): type is AssetType =>
 	Object.hasOwn(ASSET_TYPES, type);

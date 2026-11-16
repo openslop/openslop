@@ -194,9 +194,9 @@
 <g class="s42"><text x="463.0" y="99.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="7.5" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Generating 5s</text></g>
 <g>
 <rect x="22" y="174" width="362" height="90" rx="10" fill="#231e21" stroke="#332a2e" stroke-width="1" opacity="1" />
-<rect x="30" y="180" width="64.3048" height="18" rx="9.0" fill="#352e32" opacity="1" />
+<rect x="30" y="180" width="57.2452" height="18" rx="9.0" fill="#352e32" opacity="1" />
 <g color="#9d8b93" opacity="1" transform="translate(35,183.5) scale(0.6875)"><g><path fill='currentColor' d='M8 16H9V0h-1z m-4-3h1V3h-1z m8-1H13V4h-1zM15 9H16V7h-1z m-15 0h1V7h-1z'/></g></g>
-<text x="50" y="192.24" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="500" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Narration</text>
+<text x="50" y="192.24" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="500" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Speech</text>
 <g color="#9d8b93" opacity="0.8" transform="translate(358,183) scale(0.7500)"><path fill='currentColor' d='M11 9.5A2.5 2.5 0 0 1 13.45 11.5H15V12.5H13.45A2.501 2.501 0 0 1 8.55 12.5H1V11.5H8.55A2.5 2.5 0 0 1 11 9.5M11 10.5A1.5 1.5 0 1 0 11 13.5 1.5 1.5 0 0 0 11 10.5M5 1.5A2.5 2.5 0 0 1 7.45 3.5H15V4.5H7.45A2.501 2.501 0 0 1 2.55 4.5H1V3.5H2.55A2.5 2.5 0 0 1 5 1.5M5 2.5A1.5 1.5 0 1 0 5 5.5 1.5 1.5 0 0 0 5 2.5'/></g>
 <g color="#9d8b93" opacity="0.8" transform="translate(340,183) scale(0.7500)"><g><path fill='currentColor' d='M8 16H9V0h-1z m-4-3h1V3h-1z m8-1H13V4h-1zM15 9H16V7h-1z m-15 0h1V7h-1z'/></g></g>
 <rect x="30" y="202" width="346" height="34" rx="7" fill="#2e282b" opacity="1" />

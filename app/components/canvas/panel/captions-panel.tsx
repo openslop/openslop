@@ -36,7 +36,7 @@ import { CaptionPreview } from "./caption-preview";
 import { CaptionTextStyleFields } from "./caption-text-style-fields";
 import { PanelCard, PanelField } from "./panel-card";
 
-const SPEECH_TO_TEXT = groupFor("stt");
+const CAPTIONS = groupFor("stt");
 
 const CASE_OPTIONS: MediaToggleOption<CaptionCasing>[] = [
 	{ value: "none", label: "Standard case", text: "Ab" },
@@ -81,14 +81,14 @@ export function CaptionsPanel() {
 				{captionsEnabled && (
 					<>
 						<PanelField
-							label={SPEECH_TO_TEXT.label}
+							label={CAPTIONS.label}
 							info="Existing captions are unaffected."
 						>
 							<ModelDefaultControl
-								types={SPEECH_TO_TEXT.types}
+								types={CAPTIONS.types}
 								tier="project"
 								chain={chain}
-								label={SPEECH_TO_TEXT.label}
+								label={CAPTIONS.label}
 								onChange={updateModels}
 							/>
 						</PanelField>

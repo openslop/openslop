@@ -34,8 +34,8 @@ describe("withScenes", () => {
 
 		it("wraps a single non-foreground at root in a scene (leading orphan)", () => {
 			const editor = makeEditor();
-			setChildren(editor, [content("narration", "n1")]);
-			expect(shape(editor)).toEqual([["narration"]]);
+			setChildren(editor, [content("speech", "n1")]);
+			expect(shape(editor)).toEqual([["speech"]]);
 			expect(isScene(editor.children[0])).toBe(true);
 		});
 
@@ -43,36 +43,36 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("image", "i1")], "s1"),
-				content("narration", "n1"),
+				content("speech", "n1"),
 			]);
-			expect(shape(editor)).toEqual([["image", "narration"]]);
+			expect(shape(editor)).toEqual([["image", "speech"]]);
 		});
 
 		it("absorbs multiple trailing loose non-foregrounds into the previous scene", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("image", "i1")], "s1"),
-				content("narration", "n1"),
+				content("speech", "n1"),
 				content("sound", "snd1"),
 				content("music", "m1"),
 			]);
-			expect(shape(editor)).toEqual([["image", "narration", "sound", "music"]]);
+			expect(shape(editor)).toEqual([["image", "speech", "sound", "music"]]);
 		});
 
-		it("collapses loose [narration, image] at root into a single scene", () => {
+		it("collapses loose [speech, image] at root into a single scene", () => {
 			const editor = makeEditor();
-			setChildren(editor, [content("narration", "n1"), content("image", "i1")]);
-			expect(shape(editor)).toEqual([["narration", "image"]]);
+			setChildren(editor, [content("speech", "n1"), content("image", "i1")]);
+			expect(shape(editor)).toEqual([["speech", "image"]]);
 		});
 
-		it("collapses loose [narration, narration, image] at root into a single scene", () => {
+		it("collapses loose [speech, speech, image] at root into a single scene", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
-				content("narration", "n1"),
-				content("narration", "n2"),
+				content("speech", "n1"),
+				content("speech", "n2"),
 				content("image", "i1"),
 			]);
-			expect(shape(editor)).toEqual([["narration", "narration", "image"]]);
+			expect(shape(editor)).toEqual([["speech", "speech", "image"]]);
 		});
 	});
 
@@ -89,16 +89,13 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([
-					content("narration", "n1"),
+					content("speech", "n1"),
 					content("image", "i1"),
-					content("character", "ch1"),
+					content("speech", "ch1"),
 					content("video", "v1"),
 				]),
 			]);
-			expect(shape(editor)).toEqual([
-				["narration", "image", "character"],
-				["video"],
-			]);
+			expect(shape(editor)).toEqual([["speech", "image", "speech"], ["video"]]);
 		});
 
 		it("moves overlays after the second foreground into the split scene", () => {
@@ -129,16 +126,16 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([
-					content("narration", "n1"),
+					content("speech", "n1"),
 					content("image", "i1"),
-					content("character", "ch1"),
+					content("speech", "ch1"),
 					content("video", "v1"),
 					content("sound", "snd1"),
 					content("music", "m1"),
 				]),
 			]);
 			expect(shape(editor)).toEqual([
-				["narration", "image", "character"],
+				["speech", "image", "speech"],
 				["video", "sound", "music"],
 			]);
 		});
@@ -158,34 +155,34 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("image", "i1")], "s1"),
-				scene([content("narration", "n1"), content("sound", "snd1")], "s2"),
+				scene([content("speech", "n1"), content("sound", "snd1")], "s2"),
 			]);
-			expect(shape(editor)).toEqual([["image", "narration", "sound"]]);
+			expect(shape(editor)).toEqual([["image", "speech", "sound"]]);
 		});
 
 		it("leaves a solitary orphan scene when there is no previous scene", () => {
 			const editor = makeEditor();
-			setChildren(editor, [scene([content("narration", "n1")], "s1")]);
-			expect(shape(editor)).toEqual([["narration"]]);
+			setChildren(editor, [scene([content("speech", "n1")], "s1")]);
+			expect(shape(editor)).toEqual([["speech"]]);
 		});
 
 		it("collapses a leading orphan with a foreground scene below", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
-				scene([content("narration", "n1")], "s1"),
+				scene([content("speech", "n1")], "s1"),
 				scene([content("image", "i1")], "s2"),
 			]);
-			expect(shape(editor)).toEqual([["narration", "image"]]);
+			expect(shape(editor)).toEqual([["speech", "image"]]);
 		});
 
 		it("chains orphan merges up across multiple trailing orphans", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("image", "i1")], "s1"),
-				scene([content("narration", "n1")], "s2"),
+				scene([content("speech", "n1")], "s2"),
 				scene([content("music", "m1")], "s3"),
 			]);
-			expect(shape(editor)).toEqual([["image", "narration", "music"]]);
+			expect(shape(editor)).toEqual([["image", "speech", "music"]]);
 		});
 	});
 
@@ -198,7 +195,7 @@ describe("withScenes", () => {
 
 		it("removes a scene when its only content child is deleted", () => {
 			const editor = makeEditor();
-			setChildren(editor, [scene([content("narration", "n1")], "s1")]);
+			setChildren(editor, [scene([content("speech", "n1")], "s1")]);
 			Transforms.removeNodes(editor, { at: [0, 0] });
 			expect(editor.children).toEqual([]);
 		});
@@ -209,31 +206,31 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("image", "i1")], "s1"),
-				scene([content("character", "ch1"), content("video", "v1")], "s2"),
+				scene([content("speech", "ch1"), content("video", "v1")], "s2"),
 			]);
-			expect(shape(editor)).toEqual([["image"], ["character", "video"]]);
+			expect(shape(editor)).toEqual([["image"], ["speech", "video"]]);
 			Transforms.removeNodes(editor, { at: [1, 1] });
-			expect(shape(editor)).toEqual([["image", "character"]]);
+			expect(shape(editor)).toEqual([["image", "speech"]]);
 		});
 
 		it("replacing a foreground before removing it keeps the scene's overlays with the replacement", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([content("image", "i1")], "s1"),
-				scene([content("narration", "n1"), content("image", "i2")], "s2"),
+				scene([content("speech", "n1"), content("image", "i2")], "s2"),
 			]);
 			Transforms.insertNodes(editor, content("video", "v1"), { at: [1, 1] });
 			Transforms.removeNodes(editor, { at: [2, 0] });
-			expect(shape(editor)).toEqual([["image"], ["narration", "video"]]);
+			expect(shape(editor)).toEqual([["image"], ["speech", "video"]]);
 		});
 
 		it("streaming inserts collect overlays into the correct scenes", () => {
 			const editor = makeEditor();
 			const sequence: ContentElement[] = [
-				content("narration", "n1"),
-				content("narration", "n2"),
+				content("speech", "n1"),
+				content("speech", "n2"),
 				content("image", "i1"),
-				content("narration", "n3"),
+				content("speech", "n3"),
 				content("video", "v1"),
 				content("sound", "snd1"),
 			];
@@ -243,7 +240,7 @@ describe("withScenes", () => {
 				});
 			}
 			expect(shape(editor)).toEqual([
-				["narration", "narration", "image", "narration"],
+				["speech", "speech", "image", "speech"],
 				["video", "sound"],
 			]);
 		});
@@ -263,8 +260,8 @@ describe("withScenes", () => {
 		it("does not mutate scene ids during a no-op normalization", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
-				scene([content("narration", "n1"), content("image", "i1")], "s1"),
-				scene([content("character", "ch1"), content("video", "v1")], "s2"),
+				scene([content("speech", "n1"), content("image", "i1")], "s1"),
+				scene([content("speech", "ch1"), content("video", "v1")], "s2"),
 			]);
 			const before = editor.children.map((n) => (n as Scene).id);
 			Editor.normalize(editor, { force: true });
@@ -277,8 +274,8 @@ describe("withScenes", () => {
 		it("leaves an already-normalized tree untouched", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
-				scene([content("narration", "n1"), content("image", "i1")], "s1"),
-				scene([content("character", "ch1"), content("video", "v1")], "s2"),
+				scene([content("speech", "n1"), content("image", "i1")], "s1"),
+				scene([content("speech", "ch1"), content("video", "v1")], "s2"),
 			]);
 			const snapshot = JSON.parse(JSON.stringify(editor.children));
 			Editor.normalize(editor, { force: true });
@@ -289,7 +286,7 @@ describe("withScenes", () => {
 			const editor = makeEditor();
 			setChildren(editor, [
 				scene([
-					content("narration", "n1"),
+					content("speech", "n1"),
 					content("image", "i1"),
 					content("sound", "snd1"),
 					content("video", "v1"),
@@ -298,7 +295,7 @@ describe("withScenes", () => {
 				]),
 			]);
 			expect(shape(editor)).toEqual([
-				["narration", "image", "sound"],
+				["speech", "image", "sound"],
 				["video", "music"],
 				["image"],
 			]);

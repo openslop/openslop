@@ -23,14 +23,7 @@ export type ContentSpec = {
 };
 
 export const CONTENT_TYPES = {
-	narration: {
-		connector: "tts",
-		outputKind: "audio",
-		role: "overlay",
-		layer: "audio",
-		captionSource: "speech",
-	},
-	character: {
+	speech: {
 		connector: "tts",
 		outputKind: "audio",
 		role: "overlay",
@@ -74,21 +67,10 @@ export function captionSourceOf(
 	return spec.captionSource;
 }
 
-export const SPEECH_TYPES: readonly ContentType[] = ["narration", "character"];
-
-export const isSpeechType = (type: ContentType): boolean =>
-	SPEECH_TYPES.includes(type);
-
 export const isCaptionable = (type: ContentType): boolean =>
 	captionSourceOf(type) !== undefined;
 
-const ALL_CONTENT_TYPES = keysOf(CONTENT_TYPES);
-
-export const NON_SPEECH_TYPES = ALL_CONTENT_TYPES.filter(
-	(type) => !isSpeechType(type),
-);
-
-export const ContentTypeSchema = z.enum(ALL_CONTENT_TYPES);
+export const ContentTypeSchema = z.enum(keysOf(CONTENT_TYPES));
 
 export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
 	String(i + 4),

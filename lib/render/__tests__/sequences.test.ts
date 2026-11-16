@@ -4,11 +4,11 @@ import { extensionDuration, totalDuration } from "../sequences";
 describe("extensionDuration", () => {
 	const scene = { minDuration: 8 };
 
-	it("extends a video trimmed under its scene's dialogue", () => {
+	it("extends a video trimmed under its scene's speech", () => {
 		expect(extensionDuration(scene, 3)).toBe(5);
 	});
 
-	it("has none once the video outruns its dialogue", () => {
+	it("has none once the video outruns its speech", () => {
 		expect(extensionDuration(scene, 10)).toBe(0);
 	});
 });

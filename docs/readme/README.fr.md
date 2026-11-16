@@ -81,7 +81,7 @@ Le copilote vit dans le panneau de gauche. Il lit le script, structure l'histoir
 
 ### Un storyboard, pas une zone de prompt
 
-Chaque scène est une pile de cartes : narration, personnage, image, vidéo, son, musique. Modifiez n'importe quel prompt, choisissez un modèle par carte, glissez pour réordonner, et insérez là où vous survolez.
+Chaque scène est une pile de cartes : voix, image, vidéo, son, musique. Modifiez n'importe quel prompt, choisissez un modèle par carte, glissez pour réordonner, et insérez là où vous survolez.
 
 [Le modèle de document →](../../lib/canvas)
 
@@ -144,7 +144,7 @@ Les modèles hébergés viennent avec votre compte. Collez une clé Anthropic, R
 - **[Export jusqu'en 4K](../../app/components/player/export-button.tsx)** — Rend sur Remotion Lambda en morceaux parallèles et vous livre un MP4.
 - **[Historique des versions](../../app/components/canvas/panel/canvas-history-panel.tsx)** — Sauvegarde automatique pendant que vous travaillez, regroupée en points de contrôle. Consultez n'importe quelle version et restaurez-la.
 - **[Personnages et style graphique](../../app/components/canvas/elements/asset-strip.tsx)** — Nommez un personnage une fois et chaque image, réplique et avatar reste cohérent.
-- **[Modèles](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, et plus. Chacun amorce un style, un narrateur et une durée.
+- **[Modèles](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, et plus. Chacun amorce un style, ses personnages et une durée.
 - **[Mocks pour le développement](../../.env.example)** — Laissez une clé de fournisseur vide et ses appels retombent sur des résultats préenregistrés, pour que vous puissiez développer sans payer.
 
 ## Démarrer

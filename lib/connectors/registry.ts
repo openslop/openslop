@@ -18,11 +18,8 @@ import type { ConnectorConfig } from "./types";
 /** The plugins each generated type installs: all a type does that another does not. */
 export type ConnectorRegistry = Record<GeneratedType, ConnectorConfig>;
 
-const speech: ConnectorConfig = { plugins: [createSpeakerVoicePlugin()] };
-
 const CONTENT = {
-	narration: speech,
-	character: speech,
+	speech: { plugins: [createSpeakerVoicePlugin()] },
 	image: { plugins: buildVisualPlugins("image") },
 	video: {
 		plugins: [

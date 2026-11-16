@@ -10,7 +10,6 @@ import {
 import {
 	findAsset,
 	isAsset,
-	NARRATOR,
 	REFERENCE_URLS_ATTR,
 	referenceUrls,
 	requireAsset,
@@ -123,10 +122,9 @@ export function removeAsset(
 	});
 }
 
-/** A new character speaks, and is drawn unless they are the narrator. */
 export function addCharacter(editor: Editor, name: string): void {
 	ensureAsset(editor, "asset_voice", name);
-	if (name !== NARRATOR) ensureAsset(editor, "asset_avatar", name);
+	ensureAsset(editor, "asset_avatar", name);
 }
 
 /** Removes a character's look and voice, returning what puts them back. */

@@ -58,7 +58,7 @@ describe("withOSMLClipboard copy", () => {
 		const { editor } = makeEditor(
 			scene([
 				{
-					...content("character", "c1", "Hi there"),
+					...content("speech", "c1", "Hi there"),
 					generationAttributes: { name: "Lyra" },
 				},
 			]),
@@ -66,13 +66,13 @@ describe("withOSMLClipboard copy", () => {
 		Transforms.select(editor, []);
 
 		expect(copy(editor)).toBe(
-			'--- Scene 1 ---\n<character id="c1" name="Lyra">Hi there</character>',
+			'--- Scene 1 ---\n<speech id="c1" name="Lyra">Hi there</speech>',
 		);
 	});
 
 	it("leaves a partial selection inside one element as plain text", () => {
 		const { editor } = makeEditor(
-			scene([content("narration", "n1", "Hello world")]),
+			scene([content("speech", "n1", "Hello world")]),
 		);
 		const path = [0, 0, 0];
 		Transforms.select(editor, {
@@ -84,7 +84,7 @@ describe("withOSMLClipboard copy", () => {
 	});
 
 	it("leaves a caret in an empty element as plain text", () => {
-		const { editor } = makeEditor(scene([content("narration", "n1")]));
+		const { editor } = makeEditor(scene([content("speech", "n1")]));
 
 		expect(copy(editor)).toBe("");
 	});
@@ -92,24 +92,26 @@ describe("withOSMLClipboard copy", () => {
 
 describe("withOSMLClipboard paste", () => {
 	it("rebuilds elements with their attributes in place of the empty element at the caret", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0")]));
+		const { editor } = makeEditor(scene([content("speech", "n0")]));
 
 		const handled = paste(
 			editor,
-			'<image id="i1">a sunset</image>\n<character id="c1" name="Lyra">Hi there</character>',
+			'<image id="i1">a sunset</image>\n<speech id="c1" name="Lyra">Hi there</speech>',
 		);
 
 		expect(handled).toBe(true);
 		const image = elementOfType(editor, "image");
 		expect(image && getElementBodyText(image)).toBe("a sunset");
-		expect(elementOfType(editor, "character")?.generationAttributes?.name).toBe(
+		expect(elementOfType(editor, "speech")?.generationAttributes?.name).toBe(
 			"Lyra",
 		);
-		expect(elementOfType(editor, "narration")).toBeUndefined();
+		expect(getContentElements(editor.children).map(({ type }) => type)).toEqual(
+			["image", "speech"],
+		);
 	});
 
 	it("keeps the assets a script carries", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0")]));
+		const { editor } = makeEditor(scene([content("speech", "n0")]));
 
 		paste(
 			editor,
@@ -122,16 +124,16 @@ describe("withOSMLClipboard paste", () => {
 	});
 
 	it("merges the first element's text into a non-empty element at the caret, as any paste does", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0", "start")]));
+		const { editor } = makeEditor(scene([content("speech", "n0", "start")]));
 
 		paste(editor, '<image id="i1">a sunset</image>');
 
-		const narration = elementOfType(editor, "narration");
-		expect(narration && getElementBodyText(narration)).toBe("starta sunset");
+		const speech = elementOfType(editor, "speech");
+		expect(speech && getElementBodyText(speech)).toBe("starta sunset");
 	});
 
 	it("strips scene markers instead of folding them into element text", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0")]));
+		const { editor } = makeEditor(scene([content("speech", "n0")]));
 
 		paste(
 			editor,
@@ -146,7 +148,7 @@ describe("withOSMLClipboard paste", () => {
 	});
 
 	it("mints fresh ids so pasted elements do not share generation state", () => {
-		const { editor } = makeEditor(scene([content("narration", "n0")]));
+		const { editor } = makeEditor(scene([content("speech", "n0")]));
 
 		paste(editor, '<image id="i1">a sunset</image>');
 
@@ -157,7 +159,7 @@ describe("withOSMLClipboard paste", () => {
 
 	it("defers text that parses to no elements", () => {
 		const { editor, insertTextData } = makeEditor(
-			scene([content("narration", "n0", "start")]),
+			scene([content("speech", "n0", "start")]),
 		);
 
 		paste(editor, "just some prose, no tags here");

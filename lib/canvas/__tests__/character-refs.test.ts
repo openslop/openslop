@@ -74,7 +74,7 @@ describe("mentionAt", () => {
 	});
 
 	it.each([
-		["speech", element("n", "narration", "Mail me @Gr")],
+		["speech", element("n", "speech", "Mail me @Gr")],
 		["an @ inside a word", element("i", "image", "me@Gr")],
 		["an @ right after another", element("i", "image", "A field with @@")],
 	])("finds nothing in %s", (_, content) => {

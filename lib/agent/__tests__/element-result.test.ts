@@ -87,7 +87,7 @@ describe("elementResult", () => {
 	it.each([
 		[
 			"a voice line with every word and when it is said",
-			createCanvasElement("narration"),
+			createCanvasElement("speech"),
 			[toCaption("hello", 0, 0.4), toCaption("there", 0.5, 1.1)],
 		],
 		["music with no words", createCanvasElement("music"), undefined],

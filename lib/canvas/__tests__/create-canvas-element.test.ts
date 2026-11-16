@@ -68,7 +68,7 @@ describe("createCanvasElement", () => {
 
 	it("gives speech a model of its own, like every other type", () => {
 		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
-		const node = createCanvasElement("narration", {
+		const node = createCanvasElement("speech", {
 			defaultModels: { tts: pinned },
 		});
 		expect(flatAttributes(node)).toMatchObject(pinned);
@@ -112,7 +112,7 @@ describe("createCanvasElement", () => {
 	});
 
 	it("creates [ZWSP, text] leaves holding only an id and the text as given", () => {
-		const node = createCanvasElement("narration", {
+		const node = createCanvasElement("speech", {
 			text: "  hello  ",
 		});
 		expect(node.children).toEqual([
@@ -122,7 +122,7 @@ describe("createCanvasElement", () => {
 	});
 
 	it("defaults text child to empty string", () => {
-		const node = createCanvasElement("narration");
+		const node = createCanvasElement("speech");
 		expect(node.children[1]).toMatchObject({ text: "" });
 	});
 

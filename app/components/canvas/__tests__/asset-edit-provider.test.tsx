@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
-import { findAsset, NARRATOR } from "@/lib/canvas/assets";
+import { findAsset } from "@/lib/canvas/assets";
 import {
 	useAssetEditors,
 	type AssetEditors,
@@ -63,7 +63,7 @@ describe("AssetEditProvider", () => {
 		act(() => editors.editAsset("asset_references"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("asset_voice", NARRATOR));
+		act(() => editors.editAsset("asset_voice", "Narrator"));
 		expect(openDialogs()).toEqual(["character Narrator"]);
 
 		act(() => editors.editAsset("asset_style"));

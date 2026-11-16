@@ -17,19 +17,17 @@ export type VideoLength = (typeof VIDEO_LENGTHS)[number];
 
 export const DEFAULT_VIDEO_LENGTH: VideoLength = "auto";
 
-export const NARRATION_WORDS_PER_MINUTE = 180;
+export const SPEECH_WORDS_PER_MINUTE = 180;
 
 /** The rate a prompt quotes to its reader, so a whole number. */
-export const NARRATION_WORDS_PER_SECOND = Math.round(
-	NARRATION_WORDS_PER_MINUTE / 60,
-);
+export const SPEECH_WORDS_PER_SECOND = Math.round(SPEECH_WORDS_PER_MINUTE / 60);
 
 const wordsForSeconds = (sec: number): number =>
-	Math.round((sec * NARRATION_WORDS_PER_MINUTE) / 600) * 10;
+	Math.round((sec * SPEECH_WORDS_PER_MINUTE) / 600) * 10;
 
 /** The one rate the app estimates speech with. */
 export const estimateSpeechSec = (words: number): number =>
-	(words * 60) / NARRATION_WORDS_PER_MINUTE;
+	(words * 60) / SPEECH_WORDS_PER_MINUTE;
 
 export type VideoLengthSpec = {
 	label: string;

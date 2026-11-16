@@ -40,7 +40,7 @@ function renderElement(props: RenderElementProps) {
 
 const script = [
 	scene([
-		content("narration", "good", "still here"),
+		content("speech", "good", "still here"),
 		content("image", "bad", "a broken card"),
 	]),
 ];

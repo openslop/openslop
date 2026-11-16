@@ -9,7 +9,7 @@ import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { getContentElements, isScriptEmpty } from "@/lib/canvas/scenes";
 import {
 	countSpokenWords,
-	estimateDialogueLengths,
+	estimateSpeechLengths,
 } from "@/lib/canvas/spoken-words";
 import { isGenerated } from "@/lib/canvas/types";
 import { estimateRuntime } from "@/lib/render/estimate-runtime";
@@ -68,7 +68,7 @@ export function useAgentTools() {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
-				estimateDialogueLengths: () => estimateDialogueLengths(editor.children),
+				estimateSpeechLengths: () => estimateSpeechLengths(editor.children),
 				estimateVisualSpans: () =>
 					estimateVisualSpans(editor.children, queue.getElementSnapshot),
 				estimateRuntime: () =>

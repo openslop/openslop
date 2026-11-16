@@ -1,5 +1,6 @@
+import compact from "lodash/compact";
 import pick from "lodash/pick";
-import { speakerOf, voiceOf } from "@/lib/canvas/assets";
+import { voiceOf } from "@/lib/canvas/assets";
 import {
 	type ConnectorPlugin,
 	MODEL_REF_KEYS,
@@ -12,12 +13,15 @@ export function createSpeakerVoicePlugin(): ConnectorPlugin<TTSGenerateParams> {
 	return {
 		name: "speaker-voice",
 		model: ({ generationAttributes: attrs }, canvas) =>
-			pick(voiceOf(canvas, speakerOf(attrs)), MODEL_REF_KEYS),
+			attrs?.name ? pick(voiceOf(canvas, attrs.name), MODEL_REF_KEYS) : {},
 		dependencies: [
-			speakerVoices(({ generationAttributes: attrs }) => [speakerOf(attrs)]),
+			speakerVoices(({ generationAttributes: attrs }) =>
+				compact([attrs?.name]),
+			),
 		],
 		beforeGenerate: (params, ctx) => {
-			const name = speakerOf(params);
+			const { name } = params;
+			if (!name) throw new Error("Pick who says this line");
 			const voiceId = foundVoice(ctx, name)?.voiceId;
 			if (!voiceId) throw new Error(`${name} has no voice`);
 			return { ...params, voiceId };

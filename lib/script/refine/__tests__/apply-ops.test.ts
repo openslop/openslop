@@ -9,7 +9,7 @@ import type {
 
 import { applyRefineOp, applyRefineOps } from "../apply-ops";
 import type { RefineOp } from "../types";
-import { getAssets, NARRATOR } from "@/lib/canvas/assets";
+import { getAssets } from "@/lib/canvas/assets";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import { isContentElement } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
@@ -63,7 +63,7 @@ function getNode(editor: Editor, id: string): CanvasElement {
 
 describe("applyRefineOp — insert", () => {
 	it("appends to end when no anchor_id", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		applyRefineOp(editor, {
 			op: "insert",
@@ -76,8 +76,8 @@ describe("applyRefineOp — insert", () => {
 	it("inserts after an anchored element", () => {
 		const editor = makeEditor([
 			scene([
-				content("narration", "n1", "first"),
-				content("narration", "n2", "second"),
+				content("speech", "n1", "first"),
+				content("speech", "n2", "second"),
 			]),
 		]);
 
@@ -92,7 +92,7 @@ describe("applyRefineOp — insert", () => {
 	});
 
 	it("inserts before an anchored element", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "first")])]);
 
 		applyRefineOp(editor, {
 			op: "insert",
@@ -113,8 +113,8 @@ describe("applyRefineOp — insert", () => {
 		(position, expected) => {
 			const editor = makeEditor([
 				scene([
-					content("narration", "n1", "first"),
-					content("narration", "n2", "last"),
+					content("speech", "n1", "first"),
+					content("speech", "n2", "last"),
 				]),
 			]);
 
@@ -130,26 +130,26 @@ describe("applyRefineOp — insert", () => {
 	);
 
 	it("inserts none of the elements when one is invalid", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOp(editor, {
 			op: "insert",
 			anchor_id: "n1",
 			elements: [
 				{ type: "sound", text: "rain" },
-				{ type: "narration", text: " " },
+				{ type: "speech", text: " " },
 			],
 		});
 
 		expect(result).toEqual({
 			ok: false,
-			reason: "insert: narration needs text",
+			reason: "insert: speech needs text",
 		});
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
 	it("refuses an attribute value the type does not offer", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOp(editor, {
 			op: "insert",
@@ -166,7 +166,7 @@ describe("applyRefineOp — insert", () => {
 	});
 
 	it("reports every problem across an insert's elements at once", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOp(editor, {
 			op: "insert",
@@ -176,20 +176,20 @@ describe("applyRefineOp — insert", () => {
 					text: "rain",
 					attrs: { loops: "unoffered", trimStart: "unoffered" },
 				},
-				{ type: "narration", text: "", attrs: { emotion: "unoffered" } },
+				{ type: "speech", text: "", attrs: { emotion: "unoffered" } },
 			],
 		});
 
 		expect(result).toEqual({
 			ok: false,
 			reason:
-				'insert: sound offers no loops "unoffered", trimStart "unoffered"; narration offers no emotion "unoffered"; narration needs text',
+				'insert: sound offers no loops "unoffered", trimStart "unoffered"; speech offers no emotion "unoffered"; speech needs text',
 		});
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
 	it("reports a missing anchor instead of appending somewhere else", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOp(editor, {
 			op: "insert",
@@ -207,24 +207,24 @@ describe("applyRefineOp — insert", () => {
 	it.each([undefined, "", "   "])(
 		"refuses a script element with no text: %j",
 		(text) => {
-			const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+			const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 			const result = applyRefineOp(editor, {
 				op: "insert",
 				anchor_id: "n1",
-				elements: [{ type: "narration", text }],
+				elements: [{ type: "speech", text }],
 			});
 
 			expect(result).toEqual({
 				ok: false,
-				reason: "insert: narration needs text",
+				reason: "insert: speech needs text",
 			});
 			expect(getContentTexts(editor)).toEqual(["hello"]);
 		},
 	);
 
 	it("uses custom attrs from the op", () => {
-		const editor = makeEditor([scene([content("narration", "n1")])]);
+		const editor = makeEditor([scene([content("speech", "n1")])]);
 
 		applyRefineOp(editor, {
 			op: "insert",
@@ -244,8 +244,8 @@ describe("applyRefineOp — remove", () => {
 	it("removes a node by id", () => {
 		const editor = makeEditor([
 			scene([
-				content("narration", "n1", "first"),
-				content("narration", "n2", "second"),
+				content("speech", "n1", "first"),
+				content("speech", "n2", "second"),
 			]),
 		]);
 
@@ -255,7 +255,7 @@ describe("applyRefineOp — remove", () => {
 	});
 
 	it("leaves the canvas alone when no element has the id", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		applyRefineOp(editor, { op: "remove", id: "nonexistent" });
 
@@ -271,13 +271,13 @@ describe("applyRefineOp — move", () => {
 			scene(
 				[
 					content("image", "i1", "a", { model: "flux" }),
-					content("narration", "n1", "one"),
-					content("narration", "n2", "two"),
+					content("speech", "n1", "one"),
+					content("speech", "n2", "two"),
 				],
 				"s1",
 			),
 			scene(
-				[content("image", "i2", "b"), content("narration", "n3", "three")],
+				[content("image", "i2", "b"), content("speech", "n3", "three")],
 				"s2",
 			),
 		]);
@@ -370,7 +370,7 @@ describe("applyRefineOp — move", () => {
 
 describe("applyRefineOp — set", () => {
 	it("updates text content", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "old")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "old")])]);
 
 		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" });
 
@@ -380,7 +380,7 @@ describe("applyRefineOp — set", () => {
 	it("merges attrs into the existing attributes", () => {
 		const editor = makeEditor([
 			scene([
-				content("character", "n1", "hello", {
+				content("speech", "n1", "hello", {
 					name: "Lyra",
 					emotion: "neutral",
 				}),
@@ -402,7 +402,7 @@ describe("applyRefineOp — set", () => {
 	it("removes attrs set to null", () => {
 		const editor = makeEditor([
 			scene([
-				content("character", "n1", "hello", {
+				content("speech", "n1", "hello", {
 					name: "Lyra",
 					emotion: "neutral",
 				}),
@@ -416,7 +416,7 @@ describe("applyRefineOp — set", () => {
 
 	it("applies attrs and text together", () => {
 		const editor = makeEditor([
-			scene([content("character", "n1", "old", { name: "Lyra" })]),
+			scene([content("speech", "n1", "old", { name: "Lyra" })]),
 		]);
 
 		applyRefineOp(editor, {
@@ -432,7 +432,7 @@ describe("applyRefineOp — set", () => {
 	});
 
 	it("refuses an attribute value the type does not offer, changing nothing", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOp(editor, {
 			op: "set",
@@ -443,13 +443,13 @@ describe("applyRefineOp — set", () => {
 
 		expect(result).toEqual({
 			ok: false,
-			reason: 'set: narration offers no emotion "unoffered"',
+			reason: 'set: speech offers no emotion "unoffered"',
 		});
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
 	it("keeps the caret marker when text is replaced or cleared", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "old")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "old")])]);
 
 		applyRefineOp(editor, { op: "set", id: "n1", text: "new" });
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}new`);
@@ -459,7 +459,7 @@ describe("applyRefineOp — set", () => {
 	});
 
 	it("leaves the canvas alone when no element has the id", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		applyRefineOp(editor, { op: "set", id: "nonexistent", text: "new" });
 
@@ -471,9 +471,9 @@ describe("applyRefineOp — insert positioning edge cases", () => {
 	it("inserts at different anchors independently", () => {
 		const editor = makeEditor([
 			scene([
-				content("narration", "n1", "first"),
-				content("narration", "n2", "second"),
-				content("narration", "n3", "third"),
+				content("speech", "n1", "first"),
+				content("speech", "n2", "second"),
+				content("speech", "n3", "third"),
 			]),
 		]);
 
@@ -493,7 +493,7 @@ describe("applyRefineOp — insert positioning edge cases", () => {
 	});
 
 	it("multiple appends to end stack in order", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "first")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "first")])]);
 
 		applyRefineOp(editor, {
 			op: "insert",
@@ -515,7 +515,7 @@ describe("applyRefineOp — insert positioning edge cases", () => {
 
 describe("applyRefineOp — mixed operations", () => {
 	it("handles insert then remove sequence", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		applyRefineOp(editor, {
 			op: "insert",
@@ -528,9 +528,7 @@ describe("applyRefineOp — mixed operations", () => {
 	});
 
 	it("handles set then insert at same anchor", () => {
-		const editor = makeEditor([
-			scene([content("narration", "n1", "old text")]),
-		]);
+		const editor = makeEditor([scene([content("speech", "n1", "old text")])]);
 
 		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" });
 		applyRefineOp(editor, {
@@ -556,7 +554,7 @@ describe("applyRefineOp — assets", () => {
 
 	const makeCanvas = (
 		assets: AssetElement[],
-		children: ContentElement[] = [content("narration", "n1", "hello")],
+		children: ContentElement[] = [content("speech", "n1", "hello")],
 	) => {
 		const editor = makeEditor([scene(children)]);
 		editor.children = [...assets, ...editor.children];
@@ -643,13 +641,13 @@ describe("applyRefineOp — assets", () => {
 			{
 				op: "asset",
 				type: "asset_voice",
-				attrs: { name: NARRATOR, age: "adult" },
+				attrs: { name: "Narrator", age: "adult" },
 				text: "",
 			},
 			{
 				op: "asset",
 				type: "asset_voice",
-				attrs: { name: NARRATOR, pitch: "low" },
+				attrs: { name: "Narrator", pitch: "low" },
 				text: "",
 			},
 		);
@@ -657,7 +655,7 @@ describe("applyRefineOp — assets", () => {
 		expect(describeAssets(editor)).toEqual([
 			[
 				"asset_voice:Narrator",
-				{ ...VOICE, name: NARRATOR, age: "adult", pitch: "low" },
+				{ ...VOICE, name: "Narrator", age: "adult", pitch: "low" },
 				"",
 			],
 			["asset_style", {}, "muted watercolor"],
@@ -850,14 +848,14 @@ describe("applyRefineOp — assets", () => {
 		]);
 		expect(contentElements(editor).map(({ type }) => type)).toEqual([
 			"sound",
-			"narration",
+			"speech",
 		]);
 	});
 });
 
 describe("applyRefineOps", () => {
 	it("applies a turn's ops in order and counts them", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOps(editor, [
 			{ op: "set", id: "n1", text: "goodbye" },
@@ -873,7 +871,7 @@ describe("applyRefineOps", () => {
 	});
 
 	it("keeps going past a failed op and reports why it failed", () => {
-		const editor = makeEditor([scene([content("narration", "n1", "hello")])]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOps(editor, [
 			{ op: "set", id: "gone", text: "nope" },

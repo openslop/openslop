@@ -1,7 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
-import { NARRATOR } from "@/lib/canvas/assets";
-import { ContentTypeSchema, NON_SPEECH_TYPES } from "@/lib/canvas/types";
+import { ContentTypeSchema } from "@/lib/canvas/types";
 import {
 	PREVIOUS_VISUAL,
 	START_FRAME_ATTR,
@@ -11,7 +10,7 @@ import { MUSIC_PROMPT_FORMAT } from "@/lib/script/prompt/music-prompt";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
-import { conjunction, plural } from "@/lib/format";
+import { plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
 const ASSETS = dedent`
@@ -22,8 +21,7 @@ const ASSETS = dedent`
 	  avatar.
 	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described by
 	  its traits, or pinned by a pickedVoiceId you read; always set its language to the one its
-	  lines are in. The narrator is the asset_voice named ${NARRATOR}: it speaks every line no
-	  character does, and has no avatar.
+	  lines are in. A narrator, for example, is just a voice with no avatar.
 	- asset_style: the art style every visual is drawn in, as its text: the medium,
 	  linework, colors and lighting. Never a place, setting, subject or time of day.
 	- asset_references: the images every visual is drawn after, usually the user's uploads.
@@ -57,8 +55,9 @@ export const editScript = defineTool({
 	  A video's ${START_FRAME_ATTR} URL is an image's or frame's URL from view_result, and
 	  ${PREVIOUS_VISUAL} opens on the visual before it. Leave a URL already set alone.
 
-	  To change a model, set provider and model to a pair from list_models. Narration and
-	  character lines have none of their own: they speak with their asset_voice's.
+	  To change a model, set provider and model to a pair from list_models. A speech element has
+	  none of its own: it speaks with the asset_voice its \`name\` names, so it always
+	  needs one.
 
 	  ${CHARACTER_REFS_RULE}
 
@@ -67,9 +66,9 @@ export const editScript = defineTool({
 	  ${MUSIC_PROMPT_FORMAT}
 
 	  Send the fewest operations that do the job. Write element text in the language of the
-	  surrounding script, whatever language the request is in. Prompts for ${conjunction(NON_SPEECH_TYPES)},
-	  and avatar and style text, are always in English, except speech quoted inside a video prompt
-	  and the lyrics in a music prompt.
+	  surrounding script, whatever language the request is in. Every other element's prompt, and
+	  avatar and style text, are always in English, except speech quoted inside a video prompt and
+	  the lyrics in a music prompt.
 	`,
 	input: z.object({
 		ops: z

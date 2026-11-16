@@ -11,8 +11,8 @@ const sceneWithId = (id: string): Scene => ({
 	type: SCENE_TYPE,
 	children: [
 		{
-			id: `${id}-narration`,
-			type: "narration",
+			id: `${id}-speech`,
+			type: "speech",
 			children: [{ id: `${id}-text`, text: "hello" }],
 		},
 	],

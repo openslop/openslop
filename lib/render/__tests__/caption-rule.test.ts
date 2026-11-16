@@ -84,21 +84,21 @@ describe("layoutCaptions", () => {
 	it("captions the speech instead of a video when its scene's speech has words", () => {
 		expect(
 			spans(
-				layoutOf([el("vid", "video", heard), el("nar", "narration", heard)]),
+				layoutOf([el("vid", "video", heard), el("nar", "speech", heard)]),
 			).map(({ id }) => id),
 		).toEqual(["nar"]);
 	});
 
 	it("keeps a video's captions while its scene's speech has no words", () => {
 		expect(
-			spans(layoutOf([el("vid", "video", heard), el("nar", "narration")])).map(
+			spans(layoutOf([el("vid", "video", heard), el("nar", "speech")])).map(
 				({ id }) => id,
 			),
 		).toEqual(["vid"]);
 	});
 
 	it("keeps a video's captions when the speech is in another scene", () => {
-		const speech = { ...el("nar", "narration", heard), sceneId: "s2" };
+		const speech = { ...el("nar", "speech", heard), sceneId: "s2" };
 		expect(
 			spans(layoutOf([el("vid", "video", heard), speech])).map(({ id }) => id),
 		).toEqual(["vid", "nar"]);

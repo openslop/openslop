@@ -104,28 +104,28 @@ describe("GenerationGraph", () => {
 
 	it("keeps a node that reads as it did a revision ago", () => {
 		const image = element("img", "image", "a sunset");
-		edit(image, element("nar", "narration", "hello"));
+		edit(image, element("nar", "speech", "hello"));
 		const before = nodeOf(image);
 
-		edit(image, element("nar", "narration", "hello there"));
+		edit(image, element("nar", "speech", "hello there"));
 
 		expect(nodeOf(image)).toBe(before);
 	});
 
 	it("replaces an edited node and every node that depends on it", () => {
 		const second = element("second", "video", "a zoom", linked);
-		const narration = element("nar", "narration", "hello");
-		edit(element("first", "video", "a pan", linked), second, narration);
+		const speech = element("nar", "speech", "hello");
+		edit(element("first", "video", "a pan", linked), second, speech);
 		const dependent = nodeOf(second);
-		const bystander = nodeOf(narration);
+		const bystander = nodeOf(speech);
 
-		edit(element("first", "video", "a slow pan", linked), second, narration);
+		edit(element("first", "video", "a slow pan", linked), second, speech);
 
 		expect(nodeOf(second)).not.toBe(dependent);
 		expect(nodeOf(second).dependsOn[PREVIOUS]?.inputs.prompt).toBe(
 			"a slow pan",
 		);
-		expect(nodeOf(narration)).toBe(bystander);
+		expect(nodeOf(speech)).toBe(bystander);
 	});
 
 	it("replaces a node whose dependency became another element", () => {
@@ -143,17 +143,17 @@ describe("GenerationGraph", () => {
 
 	it("reads the assets again when they change, keeping what reads the same", () => {
 		const image = element("img", "image", "a sunset");
-		const narration = element("nar", "narration", "hi");
-		edit(image, narration);
+		const speech = element("nar", "speech", "hi");
+		edit(image, speech);
 		const styled = nodeOf(image);
-		const spoken = nodeOf(narration);
+		const spoken = nodeOf(speech);
 
 		assets = [createCanvasElement("asset_style", { text: "noir" })];
 		graph = new GenerationGraph(contextNow(), graph);
 
 		expect(nodeOf(image)).not.toBe(styled);
 		expect(nodeOf(image).inputs.reads["the art style"]).toBe("noir");
-		expect(nodeOf(narration)).toBe(spoken);
+		expect(nodeOf(speech)).toBe(spoken);
 	});
 
 	it("throws the same for every reader of a node that cannot be built", () => {

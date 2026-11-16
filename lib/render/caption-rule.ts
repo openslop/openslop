@@ -1,4 +1,4 @@
-import { captionSourceOf, isSpeechType } from "@/lib/canvas/types";
+import { captionSourceOf } from "@/lib/canvas/types";
 import {
 	groupIntoLines,
 	type CaptionLine,
@@ -44,7 +44,8 @@ export function layoutCaptions(
 	const sequences = allSequences(layout);
 	const scenesWithCaptionedSpeech = sceneIdsOf(
 		sequences.filter(
-			({ element }) => element.captions && isSpeechType(element.type),
+			({ element }) =>
+				element.captions && captionSourceOf(element.type) === "speech",
 		),
 	);
 	return sequences

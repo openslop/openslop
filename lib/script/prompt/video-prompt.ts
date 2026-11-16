@@ -23,7 +23,7 @@ export const VIDEO_PROMPT_FORMAT = dedent`
 
 	- Keep the geography steady from shot to shot: a character on the left of frame stays on the left unless the shot shows them moving, and eyelines match (when {{Kai}} looks up at {{Mia}}, {{Mia}} looks down at {{Kai}}).
 	- Outside spoken lines, every mention of a character is their {{Name}}, every time, in every shot. Never refer to one with a pronoun (he, she, they, him, her, his) or a stand-in like "the boy", since the model only knows who a character is from their {{Name}}.
-	- Sound: name what makes the noise and how near it is ("rain drumming on a tin roof, a car passing far off"), never a mood. NEVER include music or narration in the video prompt.
+	- Sound: name what makes the noise and how near it is ("rain drumming on a tin roof, a car passing far off"), never a mood. NEVER include music or voice-over in the video prompt.
 	- Speech: Write it as {{Name}} (tone): "line". Ensure the speech is perfectly idiomatic, appropriate, and realistic for the shot.
 	- A video that continues from the one before (${START_FRAME_ATTR}="${PREVIOUS_VISUAL}") starts exactly on the visual before it: that image, or the end of that video's last shot. Shot 1 keeps its place, framing, characters and action identically, then moves on from there.
 	- Example, 15 seconds (for ${VIDEO_FORMAT.cinematic} type):

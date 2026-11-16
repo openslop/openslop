@@ -51,11 +51,6 @@ export function requireAsset<T extends AssetType>(
 	return asset;
 }
 
-export const NARRATOR = "Narrator";
-
-export const speakerOf = (attrs?: { name?: string }): string =>
-	attrs?.name ?? NARRATOR;
-
 const assetsOf =
 	<T extends AssetType>(type: T) =>
 	(nodes: readonly unknown[]): AssetElement<T>[] =>
@@ -70,7 +65,7 @@ const getVoices = assetsOf("asset_voice");
 const namesOf = (assets: AssetElement[]): string[] =>
 	compact(assets.map((asset) => asset.generationAttributes?.name));
 
-/** Everyone with a look or a voice, the narrator included. */
+/** Everyone with a look or a voice. */
 export const characterNames = (nodes: readonly unknown[]): string[] =>
 	uniq(namesOf([...getAvatars(nodes), ...getVoices(nodes)]));
 
@@ -102,5 +97,5 @@ export const referenceUrls = (nodes: readonly unknown[]): string[] =>
 export const voiceFrom = (voice?: AssetElement<"asset_voice">): Voice =>
 	VoiceSchema.parse(flatAttributes(voice ?? {}));
 
-export const voiceOf = (nodes: readonly unknown[], name = NARRATOR): Voice =>
+export const voiceOf = (nodes: readonly unknown[], name: string): Voice =>
 	voiceFrom(findAsset(nodes, "asset_voice", name));

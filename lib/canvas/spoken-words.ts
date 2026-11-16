@@ -12,26 +12,25 @@ export const countWords = (text: string) =>
 export const spokenWords = (element: ContentElement) =>
 	countWords(getElementBodyText(element));
 
-/** Words the TTS engine will speak: narration and dialogue, nothing else. */
+/** Words the TTS engine will speak: speech, nothing else. */
 export function countSpokenWords(descendants: Descendant[]): number {
 	return sumBy(getContentElements(descendants).filter(isSpeech), spokenWords);
 }
 
-export type DialogueEstimate = Pick<ContentElement, "id" | "type"> & {
+export type SpeechEstimate = Pick<ContentElement, "id"> & {
 	words: number;
 	seconds: number;
 };
 
-export const estimateDialogueLengths = (
+export const estimateSpeechLengths = (
 	descendants: Descendant[],
-): DialogueEstimate[] =>
+): SpeechEstimate[] =>
 	getContentElements(descendants)
 		.filter(isSpeech)
 		.map((element) => {
 			const words = spokenWords(element);
 			return {
 				id: element.id,
-				type: element.type,
 				words,
 				seconds: estimateSpeechSec(words),
 			};
