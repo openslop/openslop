@@ -56,7 +56,7 @@ function ClipSlot({
 	return (
 		<li
 			{...props}
-			className={cn("group/clip absolute inset-y-0.5 isolate", className)}
+			className={cn("absolute inset-y-0.5 isolate", className)}
 			style={{ left: start, width }}
 		/>
 	);
