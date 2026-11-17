@@ -53,7 +53,7 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("Estimated runtime, as m:ss");
 		expect(spec).toContain("each turn timestamped to what is on screen");
 		expect(spec).toContain(
-			"In Faceless and Explainer the music sits under speech",
+			"In Faceless, Explainer and Audiobook the music sits under speech",
 		);
 	});
 
@@ -113,6 +113,12 @@ describe("osmlSpec", () => {
 			"Cinematic: characters speak on screen, inside the video prompts. Only <video> and <music>",
 		);
 		expect(spec).toContain("The format decides which elements you write.");
+	});
+
+	it("keeps an audiobook to voices, sound and music, with nothing on screen", () => {
+		expect(spec).toContain(
+			"Audiobook: voices tell the story over sound and music, with nothing on screen. Only <speech>, <sound> and <music>, never <image> or <video>.",
+		);
 	});
 
 	it("sings a music cue only when the story calls for a song, with its lyrics in the prompt", () => {

@@ -207,7 +207,7 @@ describe("buildScriptPrompt", () => {
 
 	it("keeps the adaptation guidance independent of specific formats and speech elements", () => {
 		expect(ADAPT_SCRIPT_RULES).not.toMatch(
-			/cinematic|faceless|explainer|<speech>|<speech>|<video>/i,
+			/cinematic|faceless|explainer|audiobook|<speech>|<video>/i,
 		);
 	});
 
