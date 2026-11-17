@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
 	checkMediaKind,
 	findMedia,
+	MediaItemSchema,
 	toMediaItems,
 	type MediaItem,
 } from "../media";
+import { toCaption } from "@/lib/captions/word-captions";
 
 const upload = (name: string, kind: MediaItem["kind"] = "image") => ({
 	kind,
@@ -36,6 +38,18 @@ describe("toMediaItems", () => {
 
 	it("falls back to the kind when the file name has no words", () => {
 		expect(toMediaItems([], [upload(".mp3", "audio")])[0]?.name).toBe("audio");
+	});
+});
+
+describe("MediaItemSchema", () => {
+	it("keeps timed captions on a file and accepts older rows without them", () => {
+		const item = upload("interview.mp4", "video");
+		const captions = [toCaption("hello", 0, 0.4)];
+
+		expect(MediaItemSchema.parse({ ...item, captions }).captions).toEqual(
+			captions,
+		);
+		expect(MediaItemSchema.parse(item).captions).toBeUndefined();
 	});
 });
 

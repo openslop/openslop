@@ -205,7 +205,7 @@ export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
 }
 
 /** Audio has no face to choose, so its request is always in the menu. */
-function MediaAudioRow({ item, menu }: MediaTileProps) {
+function MediaAudioRow({ item, menu, children }: MediaTileProps) {
 	const remove = useDeleteMedia(item.name);
 	const request = useLoadRequest(item);
 	return (
@@ -221,6 +221,7 @@ function MediaAudioRow({ item, menu }: MediaTileProps) {
 				}
 			>
 				<AudioPlayer src={item.url} tone="panel" />
+				{children}
 			</AudioCard>
 			{remove.dialog}
 		</>
@@ -230,7 +231,9 @@ function MediaAudioRow({ item, menu }: MediaTileProps) {
 /** A piece of media as a library lists it: pictures and video as tiles, audio a row wide. */
 export function MediaLibraryItem({ item, menu, children }: MediaTileProps) {
 	return item.kind === "audio" ? (
-		<MediaAudioRow item={item} menu={menu} />
+		<MediaAudioRow item={item} menu={menu}>
+			{children}
+		</MediaAudioRow>
 	) : (
 		<LibraryMediaTile item={item} menu={menu}>
 			{children}

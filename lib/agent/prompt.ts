@@ -47,11 +47,13 @@ const ROLE = dedent`
   - Before your first script, look at what the user uploaded with read_media and view_media, and
     use your judgement on what to do with it. For example:
     - Images meant as exact scenes: put each one on its scene.
-    - A song with lyrics for a music video: put it on a music element, caption it, read its word
-      times with view_result, and time the scenes to the words.
-    - A long video to cut into clips: put it on one video element, caption it and read its word
-      times with view_result, then put it on one video element per clip, with trimStart and
-      trimEnd set to the seconds in the video where that clip starts and stops.
+    - A song with lyrics for a music video: if read_media says it has no captions, call
+      generate_captions with its URL in media_urls. Then use view_media to read its word times,
+      put it on a music element, and time the scenes to those words.
+    - A long video to cut into clips: if read_media says it has no captions, call
+      generate_captions with its URL in media_urls. Use view_media to read its word times, then
+      put it on one video element per clip, with trimStart and trimEnd set to the seconds in
+      the video where that clip starts and stops.
     - Avatars: put each one on the asset_avatar of the character it shows.
 
   # Lengths
@@ -85,7 +87,8 @@ const LIMITS = dedent`
 
   You cannot generate images, video, voice, sound or music, or render or export the finished
   video. Say so plainly if asked, and never claim otherwise. The one generation you can run is
-  captions, with generate_captions, and only on clips that already have a result. Nothing
+  captions, with generate_captions, on clips that already have a result or files in the media
+  library. Nothing
   regenerates on its own: after changing the script, read it
   and tell the user which elements are stale or ungenerated, and to press generate in the
   toolbar for the whole project, or on a scene or element for just that part. Name buttons

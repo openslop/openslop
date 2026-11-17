@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
 import { executeToolCall, presentToolCall } from "../tools/registry";
 import { BLOB_BASE_URL } from "@/lib/blob";
+import type { MediaItem } from "@/lib/project/media";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
@@ -9,6 +10,7 @@ import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import { listModels as catalogModels } from "@/lib/connectors/models";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
+import { toCaption } from "@/lib/captions/word-captions";
 
 const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
 	updateScriptSettings: (patch: Partial<ScriptSettings>) =>
@@ -52,6 +54,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
+	generateMediaCaptions: async () => ({ name: "song", wordCount: 0 }),
 	setElementResult: async () => {},
 	viewMedia: async () => ({ durationSec: 0, images: [], words: [] }),
 	...over,
@@ -73,6 +76,54 @@ describe("executeToolCall", () => {
 		expect(outcome).toEqual({
 			ok: true,
 			output: "Captioning n1, v2.\nSkipped n3: it isn't generated yet.",
+		});
+	});
+
+	it("generates captions for a media URL and points to its timed words", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const generateCaptions = vi.fn(() => ({ queued: [], skipped: [] }));
+		const generateMediaCaptions = vi.fn(async () => ({
+			name: "song",
+			wordCount: 3,
+		}));
+
+		const outcome = await executeToolCall(
+			{
+				toolName: "generate_captions",
+				input: { media_urls: [url] },
+			},
+			context({ generateCaptions, generateMediaCaptions }),
+		);
+
+		expect(generateMediaCaptions).toHaveBeenCalledWith(url);
+		expect(generateCaptions).not.toHaveBeenCalled();
+		expect(outcome).toEqual({
+			ok: true,
+			output: `Captions ready for song (3 words). Call view_media with ${url} to read the word timings.`,
+		});
+	});
+
+	it("lists whether each media file already has a transcript", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const captions = [toCaption("hello", 0, 0.4)];
+		const media = ProjectDataSchema.parse({
+			media: [
+				{ name: "song", kind: "audio", url, captions },
+				{ name: "ambient", kind: "audio", url: `${url}.2` },
+			],
+		});
+
+		const outcome = await executeToolCall(
+			{ toolName: "read_media", input: {} },
+			context({ readProject: () => media }),
+		);
+
+		expect(outcome).toEqual({
+			ok: true,
+			output: [
+				{ name: "song", kind: "audio", url, hasCaptions: true },
+				{ name: "ambient", kind: "audio", url: `${url}.2`, hasCaptions: false },
+			],
 		});
 	});
 
@@ -228,6 +279,32 @@ describe("executeToolCall", () => {
 				},
 			],
 		});
+	});
+
+	it("view_media returns timed words saved on a library file", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const captions = [toCaption("hello", 0, 0.4)];
+		const song = { name: "song", kind: "audio" as const, url, captions };
+		const viewMedia = vi.fn(async (item: MediaItem) => ({
+			durationSec: 2,
+			images: [],
+			words: item.captions ?? [],
+		}));
+
+		const outcome = await executeToolCall(
+			{ toolName: "view_media", input: { urls: [url] } },
+			context({
+				readProject: () => ProjectDataSchema.parse({ media: [song] }),
+				viewMedia,
+			}),
+		);
+
+		expect(viewMedia).toHaveBeenCalledWith(
+			expect.objectContaining({ name: "song", captions }),
+		);
+		expect(outcome.ok && outcome.output).toEqual([
+			{ name: "song", durationSec: 2, images: [], words: captions },
+		]);
 	});
 
 	it("set_element_result skips an element that can't take the file and sets the rest", async () => {

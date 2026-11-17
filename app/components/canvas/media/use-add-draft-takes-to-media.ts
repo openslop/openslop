@@ -11,6 +11,7 @@ import { useProject } from "@/lib/project/use-project";
 export function useAddDraftTakesToMedia(): void {
 	const queue = useGenerationQueue();
 	const addMedia = useProject((state) => state.addMedia);
+	const saveMediaCaptions = useProject((state) => state.saveMediaCaptions);
 	useEffect(
 		() =>
 			queue.onCommitted(({ elementType, result }) => {
@@ -20,7 +21,9 @@ export function useAddDraftTakesToMedia(): void {
 				const url = getPrimaryUrl(result, kind);
 				if (!url) throw new Error(`The ${name} came back without its ${kind}`);
 				addMedia([{ kind, name, url }]);
+				if (result.textTimestamps !== undefined)
+					saveMediaCaptions(url, result.textTimestamps);
 			}),
-		[queue, addMedia],
+		[queue, addMedia, saveMediaCaptions],
 	);
 }
