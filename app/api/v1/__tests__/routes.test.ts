@@ -497,6 +497,34 @@ describe("API routes", () => {
 			});
 		});
 
+		it("books a streamed call's cost when the client disconnects mid-stream", async () => {
+			const { POST } = await import("@/app/api/v1/llm/route");
+			const { promise: disconnected, resolve: disconnect } =
+				Promise.withResolvers<void>();
+			mockLLMStream.mockReturnValue(
+				(async function* () {
+					yield { text: "Hi", done: false };
+					await disconnected;
+					yield { text: "", done: true };
+					return 0.003;
+				})(),
+			);
+
+			const res = await POST(
+				makeRequest("/api/v1/llm", { prompt: "hi", stream: true }),
+			);
+			const reader = res.body?.getReader();
+			await reader?.read();
+			await reader?.cancel();
+			disconnect();
+
+			await vi.waitFor(() =>
+				expect(mockCreateJob).toHaveBeenCalledWith(
+					expect.objectContaining({ costUsd: 0.003 }),
+				),
+			);
+		});
+
 		it("records what the call cost", async () => {
 			const { POST } = await import("@/app/api/v1/llm/route");
 			mockLLMGenerate.mockResolvedValue({
