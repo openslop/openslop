@@ -49,7 +49,7 @@ type CharacterTileProps = TileProps & { name: string; onDelete: () => void };
 
 /** A character by their look, or by their voice when they have no look. */
 export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
-	const { editAsset } = useAssetEditors();
+	const { editCharacter } = useAssetEditors();
 	const hasAvatar = useHasAsset("asset_avatar", name);
 	const avatar = useCharacterAvatar(name);
 	return hasAvatar ? (
@@ -60,7 +60,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 			Icon={User}
 			status={avatar.status}
 			startedAt={avatar.startedAt}
-			primary={editing(name, () => editAsset("asset_avatar", name))}
+			primary={editing(name, () => editCharacter("asset_avatar", name))}
 			{...tile}
 		/>
 	) : (
@@ -68,7 +68,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 			name={name}
 			Icon={Mic}
 			fallback="icon"
-			primary={editing(name, () => editAsset("asset_voice", name))}
+			primary={editing(name, () => editCharacter("asset_voice", name))}
 			{...tile}
 		/>
 	);

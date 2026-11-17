@@ -116,12 +116,13 @@ describe("NewCharacterDialog", () => {
 		canvas = mountOnCanvas([held()]);
 		open();
 
-		await type(
-			field<HTMLInputElement>('input[aria-label="Character name"]'),
-			"Mia",
-		);
+		const input = field<HTMLInputElement>('input[aria-label="Character name"]');
+		await type(input, "Mia");
 
-		expect(field('[role="alert"]').textContent).toContain("already exists");
+		const alert = field('[role="alert"]');
+		expect(alert.textContent).toContain("already exists");
+		expect(input.getAttribute("aria-invalid")).toBe("true");
+		expect(input.getAttribute("aria-describedby")).toBe(alert.id);
 		expect(field<HTMLButtonElement>('button[type="submit"]').disabled).toBe(
 			true,
 		);

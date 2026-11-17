@@ -59,14 +59,14 @@ function CharacterActionButton({
 }
 
 function EditCharacterButton({ name }: { name: string }) {
-	const { editAsset } = useAssetEditors();
+	const { editCharacter } = useAssetEditors();
 	const hasAvatar = useHasAsset("asset_avatar", name);
 	return (
 		<CharacterActionButton
 			label={`Edit ${name}`}
 			icon={Pencil}
 			onClick={() =>
-				editAsset(hasAvatar ? "asset_avatar" : "asset_voice", name)
+				editCharacter(hasAvatar ? "asset_avatar" : "asset_voice", name)
 			}
 		/>
 	);

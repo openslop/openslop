@@ -8,7 +8,7 @@ import { HeaderIconButton } from "./header-icon-button";
 
 /** Opens the editor of the voice its speaker speaks with, once it has one. */
 export function ElementVoiceButton({ element }: { element: ContentElement }) {
-	const { editAsset } = useAssetEditors();
+	const { editCharacter } = useAssetEditors();
 	const name = element.generationAttributes?.name;
 	if (!name) return null;
 
@@ -16,7 +16,7 @@ export function ElementVoiceButton({ element }: { element: ContentElement }) {
 		<SimpleTooltip label="Edit voice">
 			<HeaderIconButton
 				ariaLabel="Edit voice"
-				onClick={() => editAsset("asset_voice", name)}
+				onClick={() => editCharacter("asset_voice", name)}
 			>
 				<Mic />
 			</HeaderIconButton>

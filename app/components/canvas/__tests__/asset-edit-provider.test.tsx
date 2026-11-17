@@ -63,13 +63,13 @@ describe("AssetEditProvider", () => {
 		act(() => editors.editAsset("asset_references"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("asset_voice", "Narrator"));
+		act(() => editors.editCharacter("asset_voice", "Narrator"));
 		expect(openDialogs()).toEqual(["character Narrator"]);
 
 		act(() => editors.editAsset("asset_style"));
 		expect(openDialogs()).toEqual(["asset_style"]);
 
-		act(() => editors.editAsset("asset_avatar", "Mia"));
+		act(() => editors.editCharacter("asset_avatar", "Mia"));
 		expect(openDialogs()).toEqual(["character Mia"]);
 	});
 
@@ -84,7 +84,7 @@ describe("AssetEditProvider", () => {
 	});
 
 	it("adds only the asset it opens", () => {
-		act(() => editors.editAsset("asset_voice", "Kai"));
+		act(() => editors.editCharacter("asset_voice", "Kai"));
 
 		expect(findAsset(editor().children, "asset_voice", "Kai")).toBeDefined();
 		expect(findAsset(editor().children, "asset_avatar", "Kai")).toBeUndefined();

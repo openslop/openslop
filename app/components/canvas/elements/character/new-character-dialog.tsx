@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,7 @@ export function NewCharacterDialog({
 	onCreated: (name: string) => void;
 }) {
 	const names = useCharacterNames();
+	const errorId = useId();
 	const [name, setName] = useState("");
 
 	const normalized = normalizeCharacterName(name);
@@ -48,10 +49,16 @@ export function NewCharacterDialog({
 					onChange={(e) => setName(e.target.value)}
 					placeholder="Character name"
 					aria-label="Character name"
+					aria-invalid={collision}
+					aria-describedby={collision ? errorId : undefined}
 				/>
 
 				{collision && (
-					<span className="text-label-xs text-destructive" role="alert">
+					<span
+						id={errorId}
+						className="text-label-xs text-destructive"
+						role="alert"
+					>
 						A character named &quot;{normalized}&quot; already exists.
 					</span>
 				)}
