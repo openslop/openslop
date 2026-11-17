@@ -18,7 +18,7 @@ export function useBalance(): number | null {
 				.then((balance) => {
 					if (!cancelled) setUsd(balance);
 				});
-		const reread = debounce(read, 5000, { maxWait: 5000 });
+		const reread = debounce(read, 1000, { maxWait: 1000 });
 		read();
 		// Row-level security already limits these to the user's own rows.
 		const channel = supabase
