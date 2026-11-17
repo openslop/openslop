@@ -32,6 +32,7 @@ const nextConfig: NextConfig = {
 		],
 	},
 	experimental: {
+		agentUpgrade: "security",
 		optimizePackageImports: [
 			"radix-ui",
 			"@dnd-kit/core",
