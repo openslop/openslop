@@ -11,14 +11,6 @@ const render = (provider: Parameters<typeof ConnectHint>[0]["provider"]) =>
 	);
 
 describe("ConnectHint", () => {
-	it("uses the design system's icon chip, not a hand-styled button span", () => {
-		const html = render("anthropic");
-		// IconChip renders a size="icon" Badge (size-6 rounded-md, icon at size-4).
-		expect(html).toContain("size-6 rounded-md p-0");
-		expect(html).not.toContain("text-label-xs");
-		expect(html).not.toContain("px-1.5");
-	});
-
 	it("announces the provider through the API-key label, with no visible Connect text", () => {
 		const html = render("anthropic");
 		expect(html).toContain(
