@@ -17,6 +17,7 @@ export function languagePrompt(language: string): string {
 	return dedent`
 		## Language
 		The script language is ${language}.
-		- Write all <speech> in the script language.
-		- Write all <image>, <video>, <sound> and <music> prompts in English. Only speech quoted inside a <video> prompt and the lyrics of a <music> prompt are in the script language.`;
+		- Every spoken or sung line is in the script language, wherever the format puts it: a <speech> element, speech quoted in a <video> prompt, or the lyrics of a <music> prompt.
+		- Everything else in <image>, <video>, <sound> and <music> prompts is in English.
+		- The language never decides which element a line goes in; the format does.`;
 }

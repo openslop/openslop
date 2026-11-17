@@ -11,7 +11,18 @@ describe("osmlSpec", () => {
 
 	it("writes spoken text in the user's language while pinning prompts to English", () => {
 		expect(spec).toContain("the language of the user's own topic");
-		expect(spec).toMatch(/prompts in English/);
+		expect(spec).toContain(
+			"Everything else in <image>, <video>, <sound> and <music> prompts is in English.",
+		);
+	});
+
+	it("leaves where a line goes to the format, whatever its language", () => {
+		const spanish = osmlSpec("es (ISO 639-1)");
+		expect(spanish).toContain(
+			"The language never decides which element a line goes in; the format does.",
+		);
+		expect(spanish).not.toMatch(/Write all <speech> in the script language/);
+		expect(spanish).not.toMatch(/Only speech quoted inside a <video> prompt/);
 	});
 
 	it("names English as the fallback rather than ruling any language out", () => {
@@ -124,7 +135,7 @@ describe("osmlSpec", () => {
 			'Instrumental with no lyrics, unless lyrics="true": then the vocal style too, and the prompt ends with Lyrics:',
 		);
 		expect(spec).toContain(
-			"Only speech quoted inside a <video> prompt and the lyrics of a <music> prompt are in the script language.",
+			"Every spoken or sung line is in the script language, wherever the format puts it: a <speech> element, speech quoted in a <video> prompt, or the lyrics of a <music> prompt.",
 		);
 	});
 
