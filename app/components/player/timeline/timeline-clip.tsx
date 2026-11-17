@@ -17,7 +17,6 @@ import type {
 } from "./timeline-rows";
 
 const HEADER_ICON_SIZE = 9;
-const HEADER_HEIGHT = "h-3.5";
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 
@@ -39,13 +38,7 @@ function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
 	);
 }
 
-function Preview({
-	width,
-	children,
-}: {
-	width?: number;
-	children: React.ReactNode;
-}) {
+function Preview({ width, children }: { width?: number; children: ReactNode }) {
 	return (
 		<div
 			className={cn(
@@ -97,12 +90,7 @@ function ClipHeader({
 	width: number;
 }) {
 	return (
-		<span
-			className={cn(
-				"relative z-10 flex shrink-0 items-center gap-1 px-1",
-				HEADER_HEIGHT,
-			)}
-		>
+		<span className="relative z-10 flex h-3.5 shrink-0 items-center gap-1 px-1">
 			<Icon size={HEADER_ICON_SIZE} />
 			<span dir="auto" className="truncate text-badge-xs text-foreground">
 				{fit(label, width)}
