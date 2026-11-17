@@ -4,7 +4,6 @@ import TextareaAutosize from "react-textarea-autosize";
 import { useRef, useState } from "react";
 import { CornerDownLeft, Lightbulb, SquareFilled } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
-import { inlineControlClassName } from "@/components/ui/select-menu";
 import {
 	ModelSelect,
 	ModelSelectTrigger,
@@ -40,16 +39,16 @@ function SuggestionButton({
 	disabled: boolean;
 }) {
 	return (
-		<button
-			type="button"
-			aria-label="Suggest a prompt"
+		<TooltipIconButton
+			label="Suggest a prompt"
+			variant="quiet"
+			size="sm"
 			disabled={disabled}
 			onMouseDown={keepFocus}
 			onClick={onPick}
-			className={inlineControlClassName}
 		>
-			<Lightbulb className="h-3.5 w-3.5" />
-		</button>
+			<Lightbulb />
+		</TooltipIconButton>
 	);
 }
 
