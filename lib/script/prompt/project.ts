@@ -5,7 +5,6 @@ import {
 	findAsset,
 	voiceOf,
 } from "@/lib/canvas/assets";
-import { characterRef } from "@/lib/connectors/character-refs";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -21,15 +20,15 @@ function renderVoice(voice: Voice): string {
 		.join("\n");
 }
 
-/** What the writer may do with a character: speech needs a voice, and only an avatar shows how they look. */
-function renderRoles(assets: AssetElement[], name: string): string {
-	const speaks = findAsset(assets, "asset_voice", name)
-		? "Speaks in <speech> lines."
-		: "No voice: never give them a <speech> line.";
-	const drawn = findAsset(assets, "asset_avatar", name)
-		? `Drawn from an avatar: write them as ${characterRef(name)} in prompts.`
-		: `No avatar: still write them as ${characterRef(name)} in prompts, and describe how they look.`;
-	return `${speaks} ${drawn}`;
+/** Which assets a character has; CHARACTER_REFS_RULE and the <speech> rule say what follows from them. */
+function renderAssetFacts(assets: AssetElement[], name: string): string {
+	const voice = findAsset(assets, "asset_voice", name)
+		? "Has a voice."
+		: "No voice.";
+	const avatar = findAsset(assets, "asset_avatar", name)
+		? "Has an avatar."
+		: "No avatar.";
+	return `${voice} ${avatar}`;
 }
 
 function renderCharacter(assets: AssetElement[], name: string): string {
@@ -40,7 +39,7 @@ function renderCharacter(assets: AssetElement[], name: string): string {
 	]
 		.filter(Boolean)
 		.join("\n");
-	return [`## ${name}`, renderRoles(assets, name), traits]
+	return [`## ${name}`, renderAssetFacts(assets, name), traits]
 		.filter(Boolean)
 		.join("\n\n");
 }

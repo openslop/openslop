@@ -44,7 +44,7 @@ describe("osmlSpec", () => {
 			"A character with no avatar has nothing for the model to see: still write {{Name}}, so a video model can give them their voice, and describe how they look.",
 		);
 		expect(spec).toContain(
-			"must be a character listed under Characters who speaks",
+			"must be a character listed under Characters who has a voice",
 		);
 	});
 
