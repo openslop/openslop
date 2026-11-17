@@ -26,7 +26,7 @@ const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
 	sm: { wrapper: "h-4 w-4 bg-on-media/55", icon: "h-2.5 w-2.5" },
 	md: {
 		wrapper:
-			"h-7 w-7 bg-on-media/55 hover:bg-on-media/70 grain ring-1 ring-inset ring-border",
+			"h-7 w-7 bg-on-media/55 hover:bg-on-media/70 grain ring-1 ring-inset ring-border md:w-auto md:gap-1.5 md:px-2.5",
 		icon: "h-3 w-3",
 	},
 };
@@ -58,7 +58,17 @@ export function GenerationIndicator({
 					className,
 				)}
 			>
-				<Icon className={cn(sizes.icon, animation)} />
+				<Icon className={cn("shrink-0", sizes.icon, animation)} />
+				{size === "md" && (
+					// Hidden from screen readers: the live region would read every tick; its aria-label names it.
+					// The shimmer is drawn from --muted-foreground, made light here to read on the media scrim.
+					<span
+						aria-hidden
+						className="shimmer hidden text-label-xs [--muted-foreground:var(--on-media-foreground)] md:inline"
+					>
+						{label}
+					</span>
+				)}
 			</span>
 		</SimpleTooltip>
 	);
