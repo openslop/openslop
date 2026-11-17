@@ -10,9 +10,14 @@ vi.mock("../../hooks/use-character-avatar", () => ({
 	useCharacterAvatar: () => ({ url: "" }),
 }));
 
+vi.mock("../asset-edit-context", () => ({
+	useAssetEditors: () => ({ openCreateCharacter: () => {} }),
+}));
+
 import { CharacterSwitcher } from "../character-switcher";
 
-const MISSING = 'aria-label="Character missing"';
+const LABEL = "Select which character speaks";
+const label = (html: string) => /aria-label="([^"]*)"/.exec(html)?.[1];
 
 function render(name: string | undefined, characters: string[]) {
 	const line = element("el", "speech", "", name ? { name } : {});
@@ -30,25 +35,25 @@ function render(name: string | undefined, characters: string[]) {
 }
 
 describe("CharacterSwitcher", () => {
-	it("flags a line with no character picked", () => {
-		const html = render(undefined, ["Hero"]);
-		expect(html).toContain(MISSING);
-		expect(html).toContain(
-			'aria-label="Character missing. Select which character speaks"',
+	it("says a line has no character picked", () => {
+		expect(label(render(undefined, ["Hero"]))).toBe(
+			`No character picked for this line. ${LABEL}`,
 		);
 	});
 
-	it("flags a line whose character is gone", () => {
-		expect(render("Ghost", ["Hero"])).toContain(MISSING);
+	it("says a line's character doesn't exist", () => {
+		expect(label(render("Ghost", ["Hero"]))).toBe(
+			`No character named Ghost. ${LABEL}`,
+		);
 	});
 
-	it("flags an unset line even before the project has characters", () => {
-		expect(render(undefined, [])).toContain(MISSING);
+	it("opens the picker even before the project has characters", () => {
+		expect(label(render(undefined, []))).toBe(
+			`No character picked for this line. ${LABEL}`,
+		);
 	});
 
-	it("shows no alert for a known character", () => {
-		const html = render("Hero", ["Hero"]);
-		expect(html).not.toContain(MISSING);
-		expect(html).toContain('aria-label="Select which character speaks"');
+	it("shows no problem for a known character", () => {
+		expect(label(render("Hero", ["Hero"]))).toBe(LABEL);
 	});
 });

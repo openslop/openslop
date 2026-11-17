@@ -141,6 +141,7 @@ export function SelectMenu<T extends string>({
 	tooltip,
 	contentClassName,
 	itemClassName,
+	footer,
 }: {
 	value: T;
 	onChange: (value: T) => void;
@@ -151,6 +152,7 @@ export function SelectMenu<T extends string>({
 	tooltip?: ReactNode;
 	contentClassName?: string;
 	itemClassName?: string;
+	footer?: ReactNode;
 }) {
 	return (
 		<Tooltip>
@@ -178,6 +180,7 @@ export function SelectMenu<T extends string>({
 							{option.label}
 						</SelectMenuItem>
 					))}
+					{footer}
 				</DropdownMenuContent>
 			</DropdownMenu>
 			{tooltip && (
