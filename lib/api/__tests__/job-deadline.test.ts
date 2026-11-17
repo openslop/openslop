@@ -22,6 +22,7 @@ function job(overrides: Partial<JobRow> & { ageMs: number }): JobRow {
 		result: null,
 		metadata: {},
 		error: null,
+		cost_usd: null,
 		created_at: new Date(Date.now() - ageMs).toISOString(),
 		updated_at: new Date().toISOString(),
 		...rest,

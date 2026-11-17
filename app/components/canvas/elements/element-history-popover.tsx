@@ -34,6 +34,7 @@ import {
 } from "../hooks/use-element-history";
 import { AudioPlayer } from "./audio-player";
 import { useElementGeneration } from "./element-generation-context";
+import { GenerationCost } from "./generation-cost";
 import { HeaderIconButton } from "./header-icon-button";
 import { TilePrimaryAction, useViewLarger } from "./tile-actions";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
@@ -111,6 +112,7 @@ function ElementVersionRow({
 								Uploaded
 							</Badge>
 						)}
+						<GenerationCost costUsd={version.result.costUsd} size="sm" />
 						{relativeTime(version.createdAt)}
 					</span>
 					<span className="w-full truncate text-label-xs text-muted-foreground">

@@ -10,6 +10,7 @@ type TestResult = { imageUrl?: string; durationSec: number };
 
 function makeGateway(
 	generateImpl: (params: TestParams) => Promise<BundleResponse>,
+	costUsd: number | null = null,
 ): AssetGateway<TestParams> {
 	const generate = vi.fn(async (params: TestParams) => {
 		// Eagerly run the underlying op so errors surface and results cache.
@@ -34,6 +35,7 @@ function makeGateway(
 				status: "completed",
 				result: r._result as BundleResponse,
 				error: null,
+				costUsd,
 			};
 		},
 	};
@@ -46,6 +48,7 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 	constructor(
 		config: ResolvedConnectorConfig,
 		generateFn?: (params: TestParams) => Promise<BundleResponse>,
+		costUsd?: number | null,
 	) {
 		super(
 			makeGateway(
@@ -56,6 +59,7 @@ class TestAssetConnector extends BaseAssetConnector<TestParams, TestResult> {
 						provider: "mock",
 						result: {},
 					})),
+				costUsd,
 			),
 			config,
 		);
@@ -141,6 +145,22 @@ describe("BaseAssetConnector", () => {
 				"https://blob.example.com/assets/image/mock/abc/output.png",
 			);
 			expect(result.durationSec).toBe(5);
+		});
+
+		it("carries the job's cost onto the result", async () => {
+			const connector = new TestAssetConnector(
+				config,
+				vi.fn().mockResolvedValue({
+					id: "abc",
+					type: "image",
+					provider: "mock",
+					result: { image: "output.png" },
+				}),
+				0.04,
+			);
+
+			const result = await connector.generate({ prompt: "test" });
+			expect(result).toMatchObject({ costUsd: 0.04 });
 		});
 
 		it("propagates gateway errors", async () => {

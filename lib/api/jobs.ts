@@ -33,6 +33,7 @@ const JobRowSchema = z.object({
 	result: BundleResponseSchema.nullable(),
 	metadata: z.record(z.string(), z.unknown()),
 	error: z.string().nullable(),
+	cost_usd: z.number().nullable(),
 	created_at: z.string(),
 	updated_at: z.string(),
 });
@@ -46,6 +47,7 @@ const JobPollRowSchema = JobRowSchema.pick({
 	status: true,
 	result: true,
 	error: true,
+	cost_usd: true,
 	created_at: true,
 });
 
