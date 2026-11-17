@@ -16,11 +16,7 @@ export function BalancePill() {
 			<Badge variant="indicatorOutline" size="lg">
 				<CreditCard />
 				<span className="sr-only">Balance</span>
-				{usd === null ? (
-					"…"
-				) : (
-					<NumberFlow value={usd} locales="en-US" format={USD} />
-				)}
+				<NumberFlow value={usd} locales="en-US" format={USD} />
 			</Badge>
 		</SimpleTooltip>
 	);

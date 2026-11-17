@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { readBalanceUsd } from "./balance";
 
-/** Null until the first read lands, $0 if it can't be read. */
-export function useBalance(): number | null {
-	const [usd, setUsd] = useState<number | null>(null);
+/** $0 until the first read lands, and if it can't be read. */
+export function useBalance(): number {
+	const [usd, setUsd] = useState(0);
 
 	useEffect(() => {
 		const supabase = createClient();
@@ -38,8 +38,7 @@ export function useBalance(): number | null {
 				{ event: "*", schema: "public", table: "funds" },
 				reread,
 			);
-		// supabase-js can send the join before the session loads and never
-		// resend it, leaving the channel anonymous so RLS hides every row.
+		// supabase-js can join before the session loads and never resend the token.
 		void supabase.realtime.setAuth().then(() => {
 			if (!cancelled) channel.subscribe();
 		});
