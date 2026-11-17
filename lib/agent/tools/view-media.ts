@@ -17,7 +17,7 @@ export const viewMedia = defineTool({
 	description: dedent`
 	  Look at files from read_media, every one you need in a single call so you see them side
 	  by side. An image comes back as itself, a video as a few timed frames plus its length,
-	  and audio as its length.
+	  and audio as its length. If captions exist, every timed word is included.
 	`,
 	input: z.object({
 		urls: z

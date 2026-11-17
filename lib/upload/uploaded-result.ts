@@ -4,6 +4,7 @@ import {
 	type OutputType,
 	outputKindOf,
 } from "@/lib/canvas/types";
+import type { Caption } from "@remotion/captions";
 import { assetUrlField } from "@/lib/connectors/asset-url";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationNode } from "@/lib/generation/graph";
@@ -35,11 +36,15 @@ const READ_DURATION: Record<UploadKind, (url: string) => Promise<number>> = {
 export async function uploadedResult(
 	kind: UploadKind,
 	url: string,
+	captions?: Caption[],
 ): Promise<AssetResult> {
 	return {
 		[assetUrlField(kind)]: url,
 		durationSec: await READ_DURATION[kind](url),
 		uploaded: true,
+		...(captions === undefined
+			? {}
+			: { textTimestamps: captions, originalTextTimestamps: captions }),
 	};
 }
 
@@ -67,6 +72,9 @@ export async function commitUploaded(
 	node: GenerationNode,
 	kind: UploadKind,
 	url: string,
+	captions?: Caption[],
 ): Promise<void> {
-	queue.commitResult(node, await uploadedResult(kind, url), { pinned: true });
+	queue.commitResult(node, await uploadedResult(kind, url, captions), {
+		pinned: true,
+	});
 }

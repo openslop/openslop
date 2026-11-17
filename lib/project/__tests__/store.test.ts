@@ -7,6 +7,7 @@ import {
 } from "../store";
 import { ScriptSettingsSchema } from "../types";
 import { VideoSettingsSchema } from "../video-settings";
+import { toCaption } from "@/lib/captions/word-captions";
 
 const RUNWARE = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const SLOP = { provider: "openslop", model: "Seedream 5 Lite" } as const;
@@ -106,6 +107,22 @@ describe("store snapshot", () => {
 		store.getState().removeMedia("cat");
 
 		expect(store.getState().media).toEqual([]);
+	});
+
+	it("stores captions once per media file and round-trips them", () => {
+		const store = createProjectStore();
+		const url = "https://blob/interview.mp4";
+		const captions = [toCaption("hello", 0, 0.4)];
+		store.getState().addMedia([{ kind: "video", name: "interview.mp4", url }]);
+
+		store.getState().saveMediaCaptions(url, captions);
+		store.getState().saveMediaCaptions(url, [toCaption("overwritten", 0, 0.4)]);
+
+		expect(store.getState().media[0]?.captions).toEqual(captions);
+		expect(
+			createProjectStore(extractStoreSnapshot(store)).getState().media[0]
+				?.captions,
+		).toEqual(captions);
 	});
 
 	it("round-trips through createProjectStore", () => {
