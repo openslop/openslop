@@ -24,6 +24,7 @@ import { animateImageScene } from "@/lib/script/refine/animate-prompt";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { sleep } from "@/lib/utils";
 import type { Priced } from "../base";
+import { MOCK_COST_USD } from "../mock-utils";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider } from "./base";
 import {
@@ -70,7 +71,7 @@ export class MockLLM implements LLMProvider {
 				model: "mock",
 				usage: { inputTokens: 0, outputTokens: 0 },
 			},
-			costUsd: 0,
+			costUsd: MOCK_COST_USD,
 		};
 	}
 
@@ -87,7 +88,7 @@ export class MockLLM implements LLMProvider {
 			offset += size;
 		}
 		yield { text: "", done: true };
-		return 0;
+		return MOCK_COST_USD;
 	}
 
 	agentModel(modelId: string): AgentModel {
@@ -96,7 +97,7 @@ export class MockLLM implements LLMProvider {
 			modelId,
 			providerOptions: {},
 			cachedPrefix: {},
-			costOf: () => 0,
+			costOf: () => MOCK_COST_USD,
 		};
 	}
 }
