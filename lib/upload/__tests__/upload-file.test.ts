@@ -29,7 +29,17 @@ describe("uploadFile", () => {
 			access: "public",
 			handleUploadUrl: "/api/upload/video",
 			contentType: "video/mp4",
+			multipart: false,
 		});
+	});
+
+	it("uploads a large file in parts", async () => {
+		const large = new File(["x"], "long.mp4", { type: "video/mp4" });
+		Object.defineProperty(large, "size", { value: 200 * 1024 * 1024 });
+
+		await uploadFile("video", large);
+
+		expect(mockUpload.mock.calls[0][2]).toMatchObject({ multipart: true });
 	});
 
 	it("propagates upload failures", async () => {

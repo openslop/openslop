@@ -68,3 +68,4 @@ public/assets/
 .env*.local
 
 .remotion
+.remotion/bundle

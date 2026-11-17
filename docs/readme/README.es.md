@@ -7,6 +7,7 @@
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="Estado: beta privada"></a>
+  <a href="#local-mode"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="Funciona en macOS, Windows y Linux"></a>
   <a href="https://github.com/openslop/openslop/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/openslop/openslop/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="Licencia: Apache-2.0"></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16"></a>
@@ -35,7 +36,7 @@
 ---
 
 > **Beta privada.** Por ahora solo con invitación.
-> [Apúntate a la lista de espera en openslop.ai](https://openslop.ai) para entrar.
+> [Apúntate a la lista de espera en openslop.ai](https://openslop.ai), o [usa el modo local](#local-mode) para usarlo hoy en tu propio ordenador.
 
 ## Resumen
 
@@ -136,6 +137,21 @@ Los modelos alojados vienen con tu cuenta. Pega una clave de Anthropic, Runware,
   <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Se pega y valida una clave de Cartesia, pasando de Unverified a Connected" width="100%">
 </td>
 </tr>
+<tr>
+<td width="50%" valign="middle">
+
+### Úsalo en tu ordenador
+
+Usa OpenSlop en tu propio Mac, Windows o Linux. Tus proyectos y vídeos se quedan contigo.
+
+[Modo local →](#local-mode)
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="Un terminal ejecuta npm run local y OpenSlop se abre en localhost:3000 con proyectos guardados en este ordenador" width="100%">
+  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="Un terminal ejecuta npm run local y OpenSlop se abre en localhost:3000 con proyectos guardados en este ordenador" width="100%">
+</td>
+</tr>
 </table>
 
 **También en la caja:**
@@ -149,12 +165,122 @@ Los modelos alojados vienen con tu cuenta. Pega una clave de Anthropic, Runware,
 
 ## Primeros pasos
 
-### Requisitos
+Puedes usar OpenSlop de dos formas:
+
+- **En línea** en [app.openslop.ai](https://app.openslop.ai). No hay nada que instalar. Por ahora es solo con invitación, así que [apúntate a la lista de espera](https://openslop.ai).
+- **Modo local** en tu propio ordenador. Sigue los pasos de abajo.
+
+<a name="local-mode"></a>
+
+### Modo local
+
+<p>
+  <img src="https://img.shields.io/badge/macOS-Apple%20silicon%20%7C%20Intel-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: Apple silicon, Intel">
+  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMy40IDkuOCAydjkuNkgwek0xMSAxLjkgMjQgMHYxMS42SDExek0wIDEyLjRoOS44VjIyTDAgMjAuNnpNMTEgMTIuNGgxM1YyNGwtMTMtMS45eiIvPjwvc3ZnPg==" alt="Windows 10, 11">
+  <img src="https://img.shields.io/badge/Linux-x64%20%7C%20arm64-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: x64, arm64">
+</p>
+
+Tus proyectos y vídeos se quedan en tu ordenador. Solo tus peticiones a los servicios de IA salen a internet.
+
+<table>
+<tr>
+<td width="50%" valign="middle">
+
+#### 1. Instala Node.js
+
+Ve a la [página de descarga de Node.js](https://nodejs.org/en/download). Haz clic en el botón verde del instalador (**Windows Installer** o **macOS Installer**), abre el archivo y sigue los pasos. Sirve cualquier versión desde la 22.
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-node-light.svg#gh-light-mode-only" alt="En nodejs.org se pulsa Windows Installer, el instalador se ejecuta y Node.js queda instalado" width="100%">
+  <img src="../../assets/features/local-step-node-dark.svg#gh-dark-mode-only" alt="En nodejs.org se pulsa Windows Installer, el instalador se ejecuta y Node.js queda instalado" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 2. Instala Docker Desktop (solo Windows y Mac con Intel)
+
+_Sáltate este paso en Linux o en un Mac con chip M1 o más nuevo (M2, M3, etc.). Para ver el de tu Mac, abre el menú Apple > **Acerca de este Mac** y mira **Chip**._
+
+En [docker.com](https://www.docker.com/products/docker-desktop/), haz clic en **Download Docker Desktop**, elige tu ordenador e instálalo. Ábrelo y déjalo abierto mientras usas OpenSlop.
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-docker-light.svg#gh-light-mode-only" alt="En docker.com se elige la descarga para Windows y Docker Desktop se abre con el motor en marcha" width="100%">
+  <img src="../../assets/features/local-step-docker-dark.svg#gh-dark-mode-only" alt="En docker.com se elige la descarga para Windows y Docker Desktop se abre con el motor en marcha" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 3. Descarga OpenSlop
+
+En la [página de OpenSlop en GitHub](https://github.com/openslop/openslop), haz clic en el botón verde **Code** y luego en **Download ZIP**. También puedes [descargar el ZIP directamente](https://github.com/openslop/openslop/archive/refs/heads/master.zip).
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-download-light.svg#gh-light-mode-only" alt="En GitHub, el botón verde Code abre un menú y se pulsa Download ZIP" width="100%">
+  <img src="../../assets/features/local-step-download-dark.svg#gh-dark-mode-only" alt="En GitHub, el botón verde Code abre un menú y se pulsa Download ZIP" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 4. Descomprímelo y arranca OpenSlop
+
+En Windows, clic derecho en el ZIP > **Extract All**, y luego clic derecho en la carpeta nueva > **Open in Terminal**. En Mac, haz doble clic en el ZIP y luego clic derecho en la carpeta nueva > **New Terminal at Folder**. En el terminal, ejecuta:
+
+```bash
+npm install
+npm run local
+```
+
+La primera vez tarda unos minutos. Después OpenSlop se abre en tu navegador, con la sesión ya iniciada. Para pararlo, pulsa Ctrl+C en el terminal. Tus proyectos se guardan para la próxima vez.
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-terminal-light.svg#gh-light-mode-only" alt="En la carpeta Descargas se extrae el ZIP y se abre en el terminal; npm install y npm run local arrancan OpenSlop" width="100%">
+  <img src="../../assets/features/local-step-terminal-dark.svg#gh-dark-mode-only" alt="En la carpeta Descargas se extrae el ZIP y se abre en el terminal; npm install y npm run local arrancan OpenSlop" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 5. Añade tus claves de IA
+
+Haz clic en tu icono de perfil, luego en **Settings** > **Add providers**, y conecta un proveedor con tu clave. Las claves que necesitas dependen de lo que hagas:
+
+- **Todo:** los 7 tipos: Text, Speech, Images, Videos, Music, Sound y Captions.
+- **Vídeos con voz en off sin cara:** Text, Speech e Images.
+- **Vídeos cinematográficos:** Text y Videos.
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-keys-light.svg#gh-light-mode-only" alt="El menú de perfil abre Settings, Add providers muestra los proveedores y se pega y conecta una clave de Anthropic" width="100%">
+  <img src="../../assets/features/local-step-keys-dark.svg#gh-dark-mode-only" alt="El menú de perfil abre Settings, Add providers muestra los proveedores y se pega y conecta una clave de Anthropic" width="100%">
+</td>
+</tr>
+</table>
+
+<details>
+<summary>Qué se descarga</summary>
+
+- `npm install` descarga el código de la app.
+- El primer `npm run local` también descarga, una sola vez:
+  - **Supabase**: la base de datos y el almacenamiento de archivos, guardados en `~/.supabase/cache`. En Windows y en Mac con Intel, se guarda dentro de Docker Desktop.
+  - **Chrome Headless Shell**: convierte tu proyecto en un archivo de vídeo. Se guarda en `node_modules/.remotion`.
+
+</details>
+
+### Desarrollar con un proyecto de Supabase
+
+#### Requisitos
 
 - [Node.js](https://nodejs.org) 20.9+ (el mínimo de Next.js 16; la CI corre 22)
 - Un proyecto de [Supabase](https://supabase.com) (para autenticación y base de datos)
 
-### Instalación
+#### Instalación
 
 1. Clona el repo:
 
@@ -233,6 +359,7 @@ Mira [`ARCHITECTURE.md`](../../ARCHITECTURE.md) para ver cómo interactúan esta
 | Comando                   | Qué hace                          |
 | ------------------------- | --------------------------------- |
 | `npm run dev`             | Arranca el servidor de desarrollo |
+| `npm run local`           | Usa el modo local                 |
 | `npm run build`           | Build de producción               |
 | `npm run lint`            | ESLint                            |
 | `npm run format:check`    | Comprobación de Prettier          |

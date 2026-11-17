@@ -91,7 +91,7 @@ describe("partitionFiles", () => {
 
 		expect(partitionFiles([big, huge], ["video"])).toEqual({
 			accepted: [{ file: big, kind: "video" }],
-			rejected: [{ name: "huge.mp4", reason: "is over 50 MB" }],
+			rejected: [{ name: "huge.mp4", reason: "is over 500 MB" }],
 		});
 	});
 

@@ -24,9 +24,11 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
 
 vi.mock("@/lib/api/jobs", () => ({
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
-	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
 	getJob: (...args: unknown[]) => mockGetJob(...args),
+}));
+vi.mock("@/lib/api/job-queue", () => ({
+	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 }));
 
 const mockStreamAgentTurn = vi.fn();

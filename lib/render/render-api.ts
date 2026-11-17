@@ -19,16 +19,22 @@ export const RenderRequest = z.object({
 	resolution: z.enum(RESOLUTIONS),
 });
 
+export type RenderRequest = z.infer<typeof RenderRequest>;
+
+/** What a render on this machine names as its bucket. */
+export const LOCAL_RENDER_BUCKET = "local";
+
 // Both fields are forwarded to AWS as the bucket and key prefix the render is
 // read from, so they are parsed down to the shapes Remotion actually mints.
 export const RenderHandle = z.object({
 	renderId: z.string().regex(/^[A-Za-z0-9-]{1,64}$/, "Invalid renderId"),
-	bucketName: z
-		.string()
-		.regex(/^remotionlambda-[a-z0-9-]{1,48}$/, "Invalid bucketName"),
+	bucketName: z.union([
+		z.string().regex(/^remotionlambda-[a-z0-9-]{1,48}$/, "Invalid bucketName"),
+		z.literal(LOCAL_RENDER_BUCKET),
+	]),
 });
 
-/** Identifies an in-flight Lambda render: returned by `/api/render`, polled by progress. */
+/** Identifies an in-flight render: returned by `/api/render`, polled by progress. */
 export type RenderHandle = z.infer<typeof RenderHandle>;
 
 export const RenderProgress = z.discriminatedUnion("type", [
@@ -38,3 +44,9 @@ export const RenderProgress = z.discriminatedUnion("type", [
 ]);
 
 export type RenderProgress = z.infer<typeof RenderProgress>;
+
+/** Where a render runs: Lambda when hosted, this machine in local mode. */
+export type RenderBackend = {
+	start: (request: RenderRequest) => Promise<RenderHandle>;
+	progress: (handle: RenderHandle) => Promise<RenderProgress>;
+};
