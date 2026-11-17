@@ -37,8 +37,12 @@ export function useBalance(): number | null {
 				"postgres_changes",
 				{ event: "*", schema: "public", table: "funds" },
 				reread,
-			)
-			.subscribe();
+			);
+		// supabase-js can send the join before the session loads and never
+		// resend it, leaving the channel anonymous so RLS hides every row.
+		void supabase.realtime.setAuth().then(() => {
+			if (!cancelled) channel.subscribe();
+		});
 		return () => {
 			cancelled = true;
 			reread.cancel();
