@@ -1,7 +1,6 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
-import { buttonVariants } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -18,7 +17,6 @@ import {
 	SelectMenuTrigger,
 } from "@/components/ui/select-menu";
 import {
-	SimpleTooltip,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
@@ -29,6 +27,7 @@ import type { ConnectorType, ModelRef, Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/use-settings";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./model-chips";
+import { IconChip } from "./icon-chip";
 import { ProviderIcon } from "./provider-icon";
 import { useProviderKeyLookup } from "./use-provider-keys";
 
@@ -144,23 +143,14 @@ export function ConfigureModelsItem() {
 }
 
 /** Looks like the buttons it stands in for, without nesting one inside a menu row. */
-function ConnectHint({ provider }: { provider: Provider }) {
+export function ConnectHint({ provider }: { provider: Provider }) {
 	const { name } = PROVIDER_CATALOG[provider];
 	return (
-		<SimpleTooltip
+		<IconChip
+			icon={Link}
 			label={`Add your ${name} API key to generate with this model`}
-		>
-			<span
-				className={buttonVariants({
-					variant: "secondary",
-					size: "2xs",
-					className: "ml-auto",
-				})}
-			>
-				<Link className="size-2.5" />
-				Connect
-			</span>
-		</SimpleTooltip>
+			className="ml-auto"
+		/>
 	);
 }
 
