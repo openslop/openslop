@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { mountOnCanvas } from "../../../__tests__/_mount";
+import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { AudioResultPreview } from "../audio-result-preview";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -11,7 +11,7 @@ vi.mock("@/lib/components/use-peaks", () => ({
 	usePeaks: () => ({ status: "ready", peaks: [] }),
 }));
 let element: { layoutAttributes: { volume: string } };
-vi.mock("../../element-generation-context", () => ({
+vi.mock("@/app/components/canvas/elements/element-generation-context", () => ({
 	useElementGeneration: () => ({ element }),
 }));
 

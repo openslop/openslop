@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { resolveAttributeSchema } from "../../factory";
-import { listModels } from "../../models";
-import { CONNECTOR_TYPES } from "../../types";
+import { resolveAttributeSchema } from "@/lib/connectors/factory";
+import { listModels } from "@/lib/connectors/models";
+import { CONNECTOR_TYPES } from "@/lib/connectors/types";
 
 describe.each(CONNECTOR_TYPES)("the %s catalog", (type) => {
 	it("shares its base attributes across every model", () => {
