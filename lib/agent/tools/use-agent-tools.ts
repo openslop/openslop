@@ -46,7 +46,9 @@ import { executeToolCall } from "./registry";
 
 export function useAgentTools() {
 	const editor = useSlateStatic();
-	const lastRead = useRef<typeof editor.children>(undefined);
+	const lastRead = useRef<
+		{ children: typeof editor.children; signal?: AbortSignal } | undefined
+	>(undefined);
 	const store = useProjectStoreHandle();
 	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
@@ -69,7 +71,7 @@ export function useAgentTools() {
 				readScript: () => {
 					const script = serializeOSMLWithScenes(editor.children);
 					if (call.toolName === "read_script")
-						lastRead.current = editor.children;
+						lastRead.current = { children: editor.children, signal };
 					return script;
 				},
 				isScriptEmpty: () => isScriptEmpty(editor.children),
@@ -120,7 +122,9 @@ export function useAgentTools() {
 				editScript: (ops) => {
 					if (
 						call.toolName === "edit_script" &&
-						editor.children !== lastRead.current
+						(!lastRead.current ||
+							lastRead.current.signal !== signal ||
+							editor.children !== lastRead.current.children)
 					)
 						throw new Error(
 							"The canvas changed since you last read it, or has not been read yet. Call read_script before editing; the user or another tool may have changed it.",
@@ -129,7 +133,7 @@ export function useAgentTools() {
 					if (call.toolName === "edit_script")
 						lastRead.current = result.failures.length
 							? undefined
-							: editor.children;
+							: { children: editor.children, signal };
 					return result;
 				},
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
