@@ -19,8 +19,9 @@ import {
 	autoCaptionElements,
 	withoutCaptions,
 } from "@/lib/captions/auto-captions";
+import { getMediaCaptions } from "@/lib/captions/media-captions";
 import { resolveModel } from "@/lib/connectors/models";
-import { checkMediaKind } from "@/lib/project/media";
+import { checkMediaKind, requireMedia } from "@/lib/project/media";
 import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNode, buildNodes } from "@/lib/generation/generation-graph";
@@ -139,6 +140,28 @@ export function useAgentTools() {
 						projectId,
 					);
 				},
+				generateMediaCaptions: async (url) => {
+					const item = requireMedia(store.getState().media, url);
+					const connector = createConnector(
+						"stt",
+						resolveModel("stt", editor.defaultModels().stt),
+					);
+					const captions = await getMediaCaptions(item, async () => {
+						const { textTimestamps } = await connector.generate({
+							prompt: "",
+							mediaUrl: item.url,
+						});
+						return textTimestamps;
+					});
+					store.getState().saveMediaCaptions(url, captions);
+					const saved = store
+						.getState()
+						.media.find((candidate) => candidate.url === url);
+					return {
+						name: item.name,
+						wordCount: saved?.captions?.length ?? captions.length,
+					};
+				},
 				setElementResult: (id, url) => {
 					const [element] = requireElement(editor, id);
 					if (!isUploadable(element))
@@ -146,16 +169,19 @@ export function useAgentTools() {
 							`${id} is a ${element.type} element and can't take a file.`,
 						);
 					const kind = uploadKindOf(element);
-					checkMediaKind(store.getState().media, url, kind);
+					const media = store.getState().media;
+					checkMediaKind(media, url, kind);
+					const captions = media.find((item) => item.url === url)?.captions;
 					return commitUploaded(
 						queue,
 						buildNode(element, buildContext()),
 						kind,
 						url,
+						captions,
 					);
 				},
-				viewMedia: async ({ kind, url }) =>
-					resultView(await uploadedResult(kind, url)),
+				viewMedia: async ({ kind, url, captions }) =>
+					resultView(await uploadedResult(kind, url, captions)),
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);

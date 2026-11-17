@@ -54,8 +54,15 @@ const scenesWhere =
 const pinAsResult: MediaUse["apply"] = (
 	{ queue, buildContext },
 	element,
-	{ kind, url },
-) => commitUploaded(queue, buildNode(element, buildContext()), kind, url);
+	{ kind, url, captions },
+) =>
+	commitUploaded(
+		queue,
+		buildNode(element, buildContext()),
+		kind,
+		url,
+		captions,
+	);
 
 /** Where a piece of the project's media can go, by what it is. */
 const MEDIA_USES: readonly MediaUse[] = [

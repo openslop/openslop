@@ -6,6 +6,7 @@ import {
 	connectorModelsSchema,
 	type ConnectorModels,
 } from "@/lib/connectors/models";
+import type { Caption } from "@remotion/captions";
 import type { Upload } from "@/lib/upload/upload-files";
 import { MediaItemSchema, toMediaItems } from "./media";
 import {
@@ -37,6 +38,7 @@ export type ProjectContext = ProjectData & {
 	updateScriptSettings: (settings: Partial<ScriptSettings>) => void;
 	updateModels: (models: ConnectorModels) => void;
 	addMedia: (uploads: Upload[]) => void;
+	saveMediaCaptions: (url: string, captions: Caption[]) => void;
 	removeMedia: (name: string) => void;
 	reset: () => void;
 };
@@ -70,6 +72,13 @@ export function createProjectStore(
 			addMedia: (uploads) =>
 				set((state) => {
 					state.media.push(...toMediaItems(state.media, uploads));
+				}),
+			saveMediaCaptions: (url, captions) =>
+				set((state) => {
+					const items = state.media.filter((media) => media.url === url);
+					if (items.length === 0)
+						throw new Error(`${url} is no longer in the media library.`);
+					for (const item of items) item.captions ??= captions;
 				}),
 			removeMedia: (name) =>
 				set((state) => {

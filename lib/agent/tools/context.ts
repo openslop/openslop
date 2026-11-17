@@ -17,6 +17,8 @@ export const PROJECT_SETTERS = [
 	"updateModels",
 ] as const;
 
+export type MediaCaptionsReport = { name: string; wordCount: number };
+
 /** What a tool can do to the project, never the parts it is built from. */
 export type AgentToolContext = Pick<
 	ProjectContext,
@@ -43,6 +45,7 @@ export type AgentToolContext = Pick<
 	adaptScript: (script: string, notes?: string) => Promise<void>;
 	isConnected: (provider: Provider) => boolean;
 	generateCaptions: (ids?: string[]) => CaptionsReport;
+	generateMediaCaptions: (url: string) => Promise<MediaCaptionsReport>;
 	setElementResult: (id: string, url: string) => Promise<void>;
 	viewMedia: (item: MediaItem) => Promise<ResultView>;
 };

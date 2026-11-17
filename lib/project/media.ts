@@ -1,6 +1,7 @@
 import kebabCase from "lodash/kebabCase";
 import { matchSorter } from "match-sorter";
 import { z } from "zod";
+import { CaptionSchema } from "@/lib/connectors/types";
 import {
 	UPLOAD_KINDS,
 	UploadKindSchema,
@@ -14,6 +15,8 @@ export const MediaItemSchema = z.object({
 	url: z.string(),
 	/** Missing on media added before it was recorded. */
 	createdAt: z.string().optional(),
+	/** Word timings transcribed once for this file. */
+	captions: z.array(CaptionSchema).optional(),
 });
 
 export type MediaItem = z.infer<typeof MediaItemSchema>;
