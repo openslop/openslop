@@ -109,4 +109,21 @@ describe("layoutCaptions", () => {
 			spans(layoutOf([el("song", "music", heard), el("img", "image")])),
 		).toEqual([{ id: "song", start: 0, duration: 1 }]);
 	});
+
+	it("drops a track's words past where the next track cuts it", () => {
+		const song: ResolvedCaptions = {
+			trimIndexOffset: 0,
+			words: [toCaption("early", 0, 1), toCaption("late", 15, 16)],
+		};
+		expect(
+			spans(
+				layoutOf([
+					el("songA", "music", song, 30),
+					el("vid", "video"),
+					el("songB", "music", undefined, 30),
+					el("vid2", "video"),
+				]),
+			),
+		).toEqual([{ id: "songA", start: 0, duration: 1 }]);
+	});
 });

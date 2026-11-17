@@ -19,10 +19,11 @@ const isVideoInSpokenScene = (
 ) => element.type === "video" && spokenScenes.has(element.sceneId);
 
 function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
-	const { element, start } = sequence;
+	const { element, start, duration } = sequence;
 	if (!element.captions) return [];
 	const { trimIndexOffset, words } = element.captions;
-	return groupIntoLines(words, lineMs, trimIndexOffset).map((line) => ({
+	const played = words.filter(({ startMs }) => startMs < duration * 1000);
+	return groupIntoLines(played, lineMs, trimIndexOffset).map((line) => ({
 		element,
 		line,
 		start: start + line.startMs / 1000,
