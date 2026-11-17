@@ -7,8 +7,7 @@ import {
 	type ComponentProps,
 	type ReactNode,
 } from "react";
-import { RotateCcw, Timeline as TimelineIcon } from "@/components/ui/icon";
-import { TooltipIconButton } from "@/components/ui/icon-button";
+import { Timeline as TimelineIcon } from "@/components/ui/icon";
 import { renderPrompt } from "@/lib/connectors/character-refs";
 import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
@@ -17,7 +16,6 @@ import { usePlayerScrub } from "../use-player-scrub";
 import { useSelectScene } from "../use-select-scene";
 import { useLayout } from "../render-layout-context";
 import {
-	ClipAction,
 	ClipOutline,
 	TimelineCaptionClip,
 	TimelineClip,
@@ -91,7 +89,7 @@ function Clip({
 	selected,
 	onSelect,
 }: ClipProps<TimelineClipData> & { numbered: boolean; snap: TrimSnap }) {
-	const { trim, trimming, extensionSec, handleProps, reset } = useClipTrim(
+	const { trim, trimming, extensionSec, handleProps } = useClipTrim(
 		clip,
 		pxPerSec,
 		snap,
@@ -117,20 +115,6 @@ function Clip({
 						trim={trim}
 					/>
 				</SelectButton>
-				{reset ? (
-					<ClipAction>
-						<TooltipIconButton
-							label="Reset trim"
-							side="bottom"
-							variant="onMedia"
-							size="sm"
-							onClick={reset}
-							className="opacity-0 transition-opacity duration-200 group-hover/clip:opacity-100 focus-visible:opacity-100"
-						>
-							<RotateCcw />
-						</TooltipIconButton>
-					</ClipAction>
-				) : null}
 				<TimelineTrimHandles handleProps={handleProps} />
 			</ClipSlot>
 			{trimming ? (

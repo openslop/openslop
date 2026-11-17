@@ -155,18 +155,6 @@ export function ClipOutline({
 	);
 }
 
-/** A control drawn over a clip, at the right of its body below the header. */
-export function ClipAction({ children }: { children: ReactNode }) {
-	return (
-		<div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
-			<span className={cn("shrink-0", HEADER_HEIGHT)} />
-			<div className="flex flex-1 items-center justify-end px-2 *:pointer-events-auto">
-				{children}
-			</div>
-		</div>
-	);
-}
-
 export function TimelineClip({
 	clip,
 	width,

@@ -34,7 +34,7 @@ function TrimHandle({
 	);
 }
 
-/** Pointer only, and clipped to the clip's frame: keyboard users reset the trim from the clip's button. */
+/** Pointer only and clipped to the clip's frame; trim values can be reset in the canvas settings. */
 export function TimelineTrimHandles({
 	handleProps,
 }: {

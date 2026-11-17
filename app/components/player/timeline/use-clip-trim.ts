@@ -7,7 +7,6 @@ import { resetTrim, setTrimPoint } from "@/lib/canvas/editor-ops";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import {
 	isTrimmable,
-	isTrimmed,
 	playedTrim,
 	trimPointSec,
 	type TrimEdge,
@@ -88,6 +87,5 @@ export function useClipTrim(
 		trimming: preview !== null,
 		extensionSec: extensionDuration(clip, trim.trimDurationSec),
 		handleProps: isTrimmable(element) ? handles : null,
-		reset: isTrimmed(element) ? () => resetTrim(editor, element.id) : null,
 	};
 }
