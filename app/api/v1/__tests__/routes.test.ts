@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const mockLLMGenerate = vi.fn();
@@ -16,9 +16,13 @@ const mockCreateJob = vi.fn();
 const mockEnqueueJob = vi.fn();
 const mockUpdateJob = vi.fn();
 const mockGetJob = vi.fn();
-const mockSpentSince = vi.fn();
+const mockReadBalance = vi.fn();
+vi.mock("@/lib/user/balance", () => ({
+	readBalanceUsd: (...args: unknown[]) => mockReadBalance(...args),
+}));
+vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
+
 vi.mock("@/lib/api/jobs", () => ({
-	spentSince: (...args: unknown[]) => mockSpentSince(...args),
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
 	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
@@ -121,19 +125,12 @@ describe("API routes", () => {
 	beforeEach(() => {
 		mockGetUser.mockResolvedValue({
 			id: "user-1",
-			created_at: "2026-06-14T09:30:00Z",
 			app_metadata: { api_access: true },
 		});
-		vi.useFakeTimers({ toFake: ["Date"] });
-		vi.setSystemTime(new Date("2026-10-20T00:00:00Z"));
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
-		mockSpentSince.mockResolvedValue(0);
+		mockReadBalance.mockResolvedValue(5);
 		mockEnqueueJob.mockResolvedValue(undefined);
 		mockOwnsProject.mockResolvedValue(true);
-	});
-
-	afterEach(() => {
-		vi.useRealTimers();
 	});
 
 	describe("POST /api/v1/image", () => {
@@ -153,51 +150,27 @@ describe("API routes", () => {
 			expect(mockEnqueueJob).toHaveBeenCalledWith("job-abc");
 		});
 
-		it("reads the account's hosted spend since its period started", async () => {
-			const { POST } = await import("@/app/api/v1/image/route");
-			await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
+		it.each([0, -0.37])(
+			"returns 402 and queues nothing at a balance of %s",
+			async (balance) => {
+				mockReadBalance.mockResolvedValue(balance);
+				const { POST } = await import("@/app/api/v1/image/route");
+				const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
-			const [userId, provider, since] = mockSpentSince.mock.calls[0] ?? [];
-			expect([userId, provider]).toEqual(["user-1", "openslop"]);
-			expect(since).toEqual(new Date("2026-10-14T09:30:00Z"));
-		});
+				expect(res.status).toBe(402);
+				expect((await res.json()).error).toBe(
+					"You're out of balance. Questions? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
+				);
+				expect(mockCreateJob).not.toHaveBeenCalled();
+			},
+		);
 
-		it("returns 402 once the monthly budget is spent", async () => {
-			mockSpentSince.mockResolvedValue(100.02);
-			const { POST } = await import("@/app/api/v1/image/route");
-			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
-
-			expect(res.status).toBe(402);
-			expect((await res.json()).error).toMatch(
-				/^You've used your generation budget\. Your credits refresh on November 14\. Questions, or think this is a mistake\? Email hi@openslop\.ai or message us on Discord: https:\/\/discord\.gg\/zeP5482ced$/,
-			);
-			expect(mockCreateJob).not.toHaveBeenCalled();
-		});
-
-		it("admits a job on an account whose budget was raised", async () => {
-			mockSpentSince.mockResolvedValue(100.02);
-			mockGetUser.mockResolvedValue({
-				id: "user-1",
-				created_at: "2026-06-14T09:30:00Z",
-				app_metadata: { api_access: true, monthly_budget_usd: 500 },
-			});
+		it("admits a job on any balance left", async () => {
+			mockReadBalance.mockResolvedValue(0.01);
 			const { POST } = await import("@/app/api/v1/image/route");
 			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
 			expect(res.status).toBe(200);
-		});
-
-		it("returns 500 when the account's budget is malformed", async () => {
-			mockGetUser.mockResolvedValue({
-				id: "user-1",
-				created_at: "2026-06-14T09:30:00Z",
-				app_metadata: { api_access: true, monthly_budget_usd: "lots" },
-			});
-			const { POST } = await import("@/app/api/v1/image/route");
-			const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
-
-			expect(res.status).toBe(500);
-			expect(mockCreateJob).not.toHaveBeenCalled();
 		});
 
 		it("persists projectId and strips it from the provider request", async () => {
@@ -573,8 +546,8 @@ describe("API routes", () => {
 			expect(mockLLMGenerate).not.toHaveBeenCalled();
 		});
 
-		it("returns 402 without calling the model once the budget is spent", async () => {
-			mockSpentSince.mockResolvedValue(100);
+		it("returns 402 without calling the model once the balance is spent", async () => {
+			mockReadBalance.mockResolvedValue(0);
 			const { POST } = await import("@/app/api/v1/llm/route");
 			const res = await POST(makeRequest("/api/v1/llm", { prompt: "hi" }));
 
@@ -622,8 +595,8 @@ describe("API routes", () => {
 				),
 			);
 
-		it("returns 402 before the turn starts once the budget is spent", async () => {
-			mockSpentSince.mockResolvedValue(120);
+		it("returns 402 before the turn starts once the balance is spent", async () => {
+			mockReadBalance.mockResolvedValue(-0.5);
 
 			expect((await turn()).status).toBe(402);
 		});

@@ -31,6 +31,12 @@ export function forbidden() {
 	);
 }
 
-export function paymentRequired(message: string) {
-	return errorResponse({ error: message }, 402);
+export function outOfBalance() {
+	return errorResponse(
+		{
+			error:
+				"You're out of balance. Questions? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
+		},
+		402,
+	);
 }

@@ -19,6 +19,7 @@ import {
 } from "./canvas/hooks/use-generate-scope";
 import { useSloppy } from "./sloppy/sloppy-provider";
 import { ExportButton } from "./player/export-button";
+import { BalancePill } from "./balance-pill";
 import editorStyles from "./editor.module.css";
 
 function Breadcrumbs() {
@@ -93,6 +94,7 @@ function EditorToolbarComponent() {
 			<Breadcrumbs />
 			<div className="flex w-full items-center gap-3">
 				<div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+					<BalancePill />
 					{cancelActions.map(({ label, onClick }) => (
 						<TooltipIconButton
 							key={label}

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { notFound } from "./response";
 import {
 	withApiAccess,
-	withHostedBudget,
+	withHostedBalance,
 	withPublic,
 	withSession,
 } from "./with-auth";
@@ -50,7 +50,7 @@ function routeHandler(authTier: AuthTier, parse: ParseSource) {
 }
 
 export const createHostedRouteHandler = routeHandler(
-	withHostedBudget,
+	withHostedBalance,
 	parseBody,
 );
 export const createSessionRouteHandler = routeHandler(withSession, parseBody);

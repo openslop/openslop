@@ -78,20 +78,6 @@ export async function createJob(input: {
 	return { id: data.id };
 }
 
-export async function spentSince(
-	userId: string,
-	provider: string,
-	since: Date,
-): Promise<number> {
-	const { data, error } = await createServiceClient().rpc("spend_since", {
-		p_user_id: userId,
-		p_provider: provider,
-		p_since: since.toISOString(),
-	});
-	if (error) throw new Error(`Failed to read spend: ${error.message}`);
-	return z.coerce.number().parse(data);
-}
-
 export async function getJob(
 	jobId: string,
 	userId: string,

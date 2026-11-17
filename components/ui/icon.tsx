@@ -98,6 +98,7 @@ export const Contrast = icon("contrast");
 export const Coin1 = icon("coin-1");
 export const Coin2 = icon("coin-2");
 export const Coin3 = icon("coin-3");
+export const CreditCard = icon("credit-card");
 export const Copy = icon("copy");
 export const CornerDownLeft = icon("corner-down-left");
 export const CornerDownRight = icon("corner-down-right");

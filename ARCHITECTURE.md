@@ -108,6 +108,7 @@ Supabase Postgres with row-level security. Generated files live in Vercel Blob.
 | `projects`                     | The canvas (as OSML), project store and snapshots  |
 | `canvas_versions`              | Autosaved history of those columns                 |
 | `jobs`                         | Generation jobs, their status and what they cost   |
+| `funds`                        | Money added to a balance that hosted jobs spend    |
 | `provider_keys`                | One row per user and provider: vault id, last four |
 | `conversations` and `messages` | One Sloppy conversation per project, and its turns |
 
