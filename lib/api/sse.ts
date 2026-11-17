@@ -15,17 +15,22 @@ export function createSSEStreamResponse<T>(
 	label: string,
 ): Response {
 	const encoder = new TextEncoder();
+	let connected = true;
 	const stream = new ReadableStream({
 		async start(controller) {
 			try {
 				for await (const chunk of chunks) {
-					controller.enqueue(encoder.encode(formatSSE(chunk)));
+					if (connected) controller.enqueue(encoder.encode(formatSSE(chunk)));
 				}
-				controller.close();
+				if (connected) controller.close();
 			} catch (error) {
 				logger.error(error, `${label} stream error`);
 				controller.error(error);
 			}
+		},
+		// Drained anyway: a producer books its spend after its last chunk.
+		cancel() {
+			connected = false;
 		},
 	});
 	return new Response(stream, { headers: SSE_HEADERS });
