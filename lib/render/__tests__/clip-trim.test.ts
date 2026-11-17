@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
 	isTrimmable,
-	isTrimmed,
 	trimClip,
 	playedTrim,
 	trimEdge,
@@ -34,20 +33,6 @@ describe("isTrimmable", () => {
 	it("trims only what has a media length", () => {
 		expect(isTrimmable(el({ mediaDurationSec: 5 }))).toBe(true);
 		expect(isTrimmable(el({ mediaDurationSec: 0 }))).toBe(false);
-	});
-});
-
-describe("isTrimmed", () => {
-	it("is trimmed once it opens late or ends early", () => {
-		expect(isTrimmed(el({}))).toBe(false);
-		expect(isTrimmed(el({ trimStartSec: 1, trimDurationSec: 9 }))).toBe(true);
-		expect(isTrimmed(el({ trimDurationSec: 4 }))).toBe(true);
-	});
-
-	it("is never trimmed without media, like a still or the blank opener", () => {
-		expect(isTrimmed(el({ trimDurationSec: 4, mediaDurationSec: 0 }))).toBe(
-			false,
-		);
 	});
 });
 

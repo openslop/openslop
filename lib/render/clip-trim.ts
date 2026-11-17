@@ -16,10 +16,6 @@ export type TrimEdge = "start" | "end";
 export const isTrimmable = (element: ResolvedElement): boolean =>
 	element.mediaDurationSec > 0;
 
-export const isTrimmed = (
-	element: Pick<ResolvedElement, "trimDurationSec" | "mediaDurationSec">,
-): boolean => element.trimDurationSec < element.mediaDurationSec;
-
 /** The shortest a trim leaves a clip: the minimum, or the whole of media shorter than that. */
 const minTrimSec = (mediaDurationSec: number) =>
 	Math.min(MIN_DURATION_SEC, mediaDurationSec);
