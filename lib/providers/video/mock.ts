@@ -3,7 +3,7 @@ import { BaseVideoProvider } from "./base";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import type { ValidationResult } from "@/lib/connectors/provider-key";
 import { pickRandom } from "@/lib/utils";
-import { mockDelay } from "../mock-utils";
+import { MOCK_COST_USD, mockDelay } from "../mock-utils";
 
 const BLOB_BASE = `${BLOB_BASE_URL}/assets/video/mock`;
 
@@ -50,7 +50,7 @@ export class MockVideo extends BaseVideoProvider {
 		const variant = pickRandom(MOCK_VARIANTS);
 		return {
 			url: variant.url,
-			costUsd: 0,
+			costUsd: MOCK_COST_USD,
 			metadata: {
 				jobId,
 				status: "completed",

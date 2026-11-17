@@ -43,6 +43,7 @@
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
 		"@elevenlabs/elevenlabs-js": "^2.38.1",
+		"@number-flow/react": "^0.6.2",
 		"@pinecone-database/pinecone": "^7.2.0",
 		"@remotion/captions": "4.0.481",
 		"@remotion/cli": "4.0.481",

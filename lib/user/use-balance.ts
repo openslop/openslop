@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { readBalanceUsd } from "./balance";
 
-/** Null until the first read lands, $0 if it can't be read. */
-export function useBalance(): number | null {
-	const [usd, setUsd] = useState<number | null>(null);
+/** $0 until the first read lands, and if it can't be read. */
+export function useBalance(): number {
+	const [usd, setUsd] = useState(0);
 
 	useEffect(() => {
 		const supabase = createClient();
@@ -18,7 +18,7 @@ export function useBalance(): number | null {
 				.then((balance) => {
 					if (!cancelled) setUsd(balance);
 				});
-		const reread = debounce(read, 5000, { maxWait: 5000 });
+		const reread = debounce(read, 1000, { maxWait: 1000 });
 		read();
 		// Row-level security already limits these to the user's own rows.
 		const channel = supabase
@@ -37,8 +37,11 @@ export function useBalance(): number | null {
 				"postgres_changes",
 				{ event: "*", schema: "public", table: "funds" },
 				reread,
-			)
-			.subscribe();
+			);
+		// supabase-js can join before the session loads and never resend the token.
+		void supabase.realtime.setAuth().then(() => {
+			if (!cancelled) channel.subscribe();
+		});
 		return () => {
 			cancelled = true;
 			reread.cancel();

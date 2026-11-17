@@ -111,11 +111,12 @@ export default function Loading() {
 				<Skeleton className="size-8 rounded-full" />
 			</div>
 
-			{/* Refine bar + generate and export buttons */}
+			{/* Refine bar + balance, generate and export */}
 			<div className="z-40 flex w-full shrink-0 items-center gap-3 px-4 py-1.5">
 				<div className="hidden flex-1 sm:block" aria-hidden />
 				<Skeleton className="h-8 min-w-0 max-w-2xl flex-1 rounded-xl" />
 				<div className="flex flex-1 items-center justify-end gap-2">
+					<Skeleton className="h-8 w-20 rounded-lg" />
 					<Skeleton className="h-8 w-28 rounded-md" />
 					<Skeleton className="h-8 w-20 rounded-md" />
 				</div>
