@@ -12,10 +12,10 @@ const mockGetJob = vi.fn();
 const mockUpdateJob = vi.fn();
 vi.mock("../jobs", () => ({
 	createJob: vi.fn(),
-	enqueueJob: vi.fn(),
 	getJob: (...args: unknown[]) => mockGetJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
 }));
+vi.mock("../job-queue", () => ({ enqueueJob: vi.fn() }));
 
 vi.mock("@/lib/user/balance", () => ({ readBalanceUsd: async () => 5 }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));

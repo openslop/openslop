@@ -1,0 +1,7 @@
+# Supabase
+.branches
+.temp
+.supabase.lock.*.tmp
+.supabase.lock.lease
+.link.json
+..link.json.*.tmp

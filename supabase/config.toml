@@ -1,0 +1,24 @@
+# Local Supabase for `npm run local`. Every unset key keeps the CLI default.
+project_id = "openslop"
+
+[storage]
+file_size_limit = "1GiB"
+
+[storage.buckets.blob]
+public = true
+
+# Not used by OpenSlop, so never downloaded
+[studio]
+enabled = false
+
+[analytics]
+enabled = false
+
+[edge_runtime]
+enabled = false
+
+[local_smtp]
+enabled = false
+
+[experimental]
+stack = true

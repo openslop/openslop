@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Emits assets/features/<card>-{light,dark}.svg: one looping animated card per README feature.
+"""Emits assets/features/<card>-{light,dark}.svg: one looping animated card per README feature and local mode step.
 
 Every card is plain SVG plus CSS keyframes, so it plays on GitHub with no script and no GIF.
 Colors come from the tokens in app/globals.css, icons from components/ui/icons/*.css and
@@ -18,6 +18,7 @@ OUT = ROOT / "assets" / "features"
 W, H = 640, 360
 SANS = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
 SERIF = "'Instrument Serif', Georgia, 'Times New Roman', serif"
+MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace"
 
 # ---- app/globals.css, light then .dark -------------------------------------------------------
 THEMES = {
@@ -68,6 +69,20 @@ def icon_markup(name):
     return inner
 
 
+def thumbnail(data_uri, width):
+    """A data-URI image re-encoded as a JPEG `width` pixels wide."""
+    import base64
+    import io
+
+    from PIL import Image
+
+    img = Image.open(io.BytesIO(base64.b64decode(data_uri.split(",", 1)[1]))).convert("RGB")
+    img = img.resize((width, round(img.height * width / img.width)), Image.LANCZOS)
+    out = io.BytesIO()
+    img.save(out, "JPEG", quality=72, optimize=True)
+    return "data:image/jpeg;base64," + base64.b64encode(out.getvalue()).decode()
+
+
 def mix(hex_a, hex_b, t):
     a = [int(hex_a[i : i + 2], 16) for i in (1, 3, 5)]
     b = [int(hex_b[i : i + 2], 16) for i in (1, 3, 5)]
@@ -82,8 +97,10 @@ INTER = {
 }
 
 
-def tw(s, size, weight=400):
+def tw(s, size, weight=400, family=None):
     """Text width in Inter, measured from public/fonts/InterVariable.woff2."""
+    if family == MONO:
+        return len(s) * size * 0.62 / 1.06
     t = INTER[weight]
     return sum(t.get(ch, 0.6) for ch in s) * size * 1.06  # a little slack for wider system fonts
 
@@ -169,6 +186,26 @@ class Card:
         self.css.append(f".{c}{{animation:kf-{c} {period}s steps(1) infinite}}@keyframes kf-{c}{{0%{{opacity:1}}50%{{opacity:0}}}}")
         return c
 
+    def keys(self, frames, ease="cubic-bezier(.4,0,.2,1)", origin=None):
+        """A class stepping through (t, css) frames on the card's loop, held before the first and after the last."""
+        c = self.cls("k")
+        steps = "".join(f"{self.pct(at)}{{{css}}}" for at, css in frames)
+        box = f";transform-box:fill-box;transform-origin:{origin}" if origin else ""
+        self.css.append(
+            f".{c}{{animation:kf-{c} {self.loop}s {ease} infinite both{box}}}@keyframes kf-{c}{{0%{{{frames[0][1]}}}{steps}100%{{{frames[-1][1]}}}}}"
+        )
+        return c
+
+    def cursor(self, path):
+        """A mouse pointer gliding through (t, x, y) points. Draw it last so it sits on top."""
+        c = self.keys([(at, f"transform:translate({x}px,{y}px)") for at, x, y in path])
+        self.raw(f'<g class="{c}"><path d="M0 0V14.5L3.6 11.2L6.2 16.8L8.6 15.7L6 10.2H11Z" fill="#ffffff" stroke="#111111" stroke-width="1.1" stroke-linejoin="round"/></g>')
+
+    def click(self, at, x, y):
+        """The ripple a click leaves under the pointer."""
+        c = self.keys([(at - 0.01, "opacity:0;transform:scale(.2)"), (at, "opacity:.8;transform:scale(.2)"), (at + 0.45, "opacity:0;transform:scale(1)")], ease="ease-out", origin="center")
+        self.raw(f'<g class="{c}"><circle cx="{x}" cy="{y}" r="13" fill="{self.t["accent"]}" fill-opacity=".3" stroke="{self.t["accent"]}"/></g>')
+
     # ---- drawing helpers
     def raw(self, s):
         self.body.append(s)
@@ -203,13 +240,13 @@ class Card:
             )
         self.raw(self.wrap("".join(out), cls))
 
-    def typewriter(self, x, y, s, t0, t1, size=11, fill=None, cls="", weight=400, erase=None, caret=False, start=0):
+    def typewriter(self, x, y, s, t0, t1, size=11, fill=None, cls="", weight=400, erase=None, caret=False, start=0, family=None):
         """Types `s` between t0 and t1 with a stepped clip. `erase=(e0,e1)` wipes it again.
         `start` is how many leading characters are already there (an edit appended to a line)."""
         cid = self.cls("tw")
-        w = tw(s, size, weight) * 1.06 + 4 + (8 if caret else 0)
+        w = tw(s, size, weight, family) * 1.06 + 4 + (8 if caret else 0)
         n = max(1, len(s) - start)
-        f0 = f"{tw(s[:start], size, weight) / w:.4f}" if start else "0"
+        f0 = f"{tw(s[:start], size, weight, family) / w:.4f}" if start else "0"
         e = f"{self.pct(erase[0])}{{transform:scaleX(1);animation-timing-function:steps({n},end)}}{self.pct(erase[1])},100%{{transform:scaleX({f0})}}" if erase else "100%{transform:scaleX(1)}"
         self.css.append(
             f".{cid}{{animation:kf-{cid} {self.loop}s infinite both;transform-box:fill-box;transform-origin:left center}}@keyframes kf-{cid}{{0%,{self.pct(t0)}{{transform:scaleX({f0});animation-timing-function:steps({n},end)}}{self.pct(t1)}{{transform:scaleX(1)}}{e}}}"
@@ -218,8 +255,13 @@ class Card:
         fill = fill or self.t["fg"]
         tail = f'<tspan class="{self.blink(1.0)}" fill="{self.t["accent"]}">|</tspan>' if caret else ""
         self.body.append(
-            self.wrap(f'<text x="{x}" y="{y}" font-family="{SANS}" font-size="{size}" font-weight="{weight}" fill="{fill}" style="white-space:pre" clip-path="url(#{cid})">{html.escape(s)}{tail}</text>', cls)
+            self.wrap(f'<text x="{x}" y="{y}" font-family="{family or SANS}" font-size="{size}" font-weight="{weight}" fill="{fill}" style="white-space:pre" clip-path="url(#{cid})">{html.escape(s)}{tail}</text>', cls)
         )
+
+    @staticmethod
+    def pill_w(label, size=10, icon=None, chevron=False, pad=7, weight=500, icon_size=None):
+        isz = icon_size or size + 2
+        return pad * 2 + tw(label, size, weight) + (isz + 4 if icon else 0) + (10 if chevron else 0)
 
     def pill(self, x, y, label, size=10, fill=None, color=None, icon=None, icon_color=None, chevron=False, h=None, pad=7, cls="", weight=500, icon_size=None):
         t = self.t
@@ -227,7 +269,7 @@ class Card:
         color = color or t["fg"]
         h = h or size + 9
         isz = icon_size or size + 2
-        w = pad * 2 + tw(label, size, weight) + (isz + 4 if icon else 0) + (10 if chevron else 0)
+        w = self.pill_w(label, size, icon, chevron, pad, weight, icon_size)
         self.rect(x, y, w, h, fill, rx=h / 2 if not chevron else 5, cls=cls)
         cx = x + pad
         if icon:
@@ -237,6 +279,10 @@ class Card:
         if chevron:
             self.icon("chevron-down", x + w - pad - 8, y + (h - 8) / 2, 8, t["muted"], cls=cls)
         return w
+
+    @staticmethod
+    def button_w(label, icon=None, size=10, pad=10):
+        return pad * 2 + tw(label, size, 500) + (size + 3 + 5 if icon else 0)
 
     def button(self, x, y, label, icon=None, variant="generate", size=10, cls="", h=24, pad=10, icon_cls=""):
         t = self.t
@@ -250,7 +296,7 @@ class Card:
             "destructive": (t["destructive"], "#ffffff"),
         }[variant]
         isz = size + 3
-        w = pad * 2 + tw(label, size, 500) + (isz + 5 if icon else 0)
+        w = self.button_w(label, icon, size, pad)
         self.rect(x, y, w, h, fill, rx=6, cls=cls)
         cx = x + pad
         if icon:
@@ -407,13 +453,15 @@ class Card:
         self.raw("</g>")
         self.raw("</g>" * max(1, len(cls.split())))
 
-    def image(self, name, x, y, w, h, rx=6, cls="", stroke=True, opacity=1):
-        """One of the demo's generated renders, cropped like object-fit: cover."""
+    def image(self, name, x, y, w, h, rx=6, cls="", stroke=True, opacity=1, thumb=False):
+        """One of the demo's generated renders, cropped like object-fit: cover.
+        `thumb` re-encodes it at twice the drawn size, for small tiles."""
         t = self.t
         uid = f"im-{name}"
         if uid not in self._images:
             self._images.add(uid)
-            self.defs.append(f'<image id="{uid}" width="16" height="9" preserveAspectRatio="xMidYMid slice" href="{DEMO_IMAGES[name]}"/>')
+            href = thumbnail(DEMO_IMAGES[name], round(w * 2)) if thumb else DEMO_IMAGES[name]
+            self.defs.append(f'<image id="{uid}" width="16" height="9" preserveAspectRatio="xMidYMid slice" href="{href}"/>')
         cid = self.cls("ic")
         self.defs.append(f'<clipPath id="{cid}"><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}"/></clipPath>')
         aw, ah = (16, 9) if name not in ("takeshi", "ryu") else (16, 16)
@@ -484,10 +532,10 @@ class Card:
         )
         self.rect(0, 0, W, H, "url(#plus)")
 
-    def stage(self, x, y, w, h, rx=12):
+    def stage(self, x, y, w, h, rx=12, fill=None):
         t = self.t
         self.shadow(x, y, w, h, rx)
-        self.rect(x, y, w, h, t["elcard"], rx=rx, stroke=t["border"])
+        self.rect(x, y, w, h, fill or t["elcard"], rx=rx, stroke=t["border"])
         self.grain(x, y, w, h, rx)
 
     def write(self):
@@ -1122,9 +1170,611 @@ def card_providers(theme):
     c.write()
 
 
+def window(c, x, y, w, h, title, icon):
+    """A desktop window: a raised card with a title bar and traffic lights."""
+    t = c.t
+    c.stage(x, y, w, h, 10, fill=t["card"])
+    c.rect(x, y, w, 26, t["recessed"], rx=10)
+    c.rect(x, y + 16, w, 10, t["recessed"])
+    c.raw(f'<line x1="{x}" y1="{y + 26}" x2="{x + w}" y2="{y + 26}" stroke="{t["border"]}"/>')
+    for i in range(3):
+        c.raw(f'<circle cx="{x + 14 + i * 12}" cy="{y + 13}" r="3.5" fill="{t["border2"]}"/>')
+    tw_ = 15 + tw(title, 9, 500)
+    c.icon(icon, x + w / 2 - tw_ / 2, y + 7.5, 11, t["muted"])
+    c.text(x + w / 2 - tw_ / 2 + 15, y + 16.5, title, 9, t["muted"], weight=500)
+
+
+# =====================================================================================
+# 7. Run it on your computer — npm run local
+# =====================================================================================
+def card_local(theme):
+    c = Card("local", "Run it on your computer", "A terminal runs npm run local: Supabase, the migrations and the video renderer start on this machine, then OpenSlop opens at localhost:3000 with the user's projects, saved on their own computer.", 12, theme)
+    t = c.t
+    c.bg()
+
+    # ---- the terminal
+    TX, TY, TW, TH = 34, 34, 318, 172
+    window(c, TX, TY, TW, TH, "Terminal", "terminal")
+    LX, LY, LH, FS = TX + 14, TY + 50, 18, 9.5
+    prompt = "~/openslop $ "
+    c.text(LX, LY, prompt, FS, t["muted"], family=MONO)
+    col = lambda s: LX + tw(s, FS, family=MONO) * 1.06
+    c.typewriter(col(prompt), LY, "npm run local", 0.4, 1.4, FS, t["fg"], family=MONO)
+    steps = [
+        (2.0, "Supabase", "database, auth, storage"),
+        (2.8, "Migrations", "applied"),
+        (3.5, "Video renderer", "ready"),
+    ]
+    for i, (at, name, note) in enumerate(steps):
+        y = LY + (i + 1) * LH + 4
+        cl = c.appear(at, dy=3)
+        c.text(LX, y, "\u2713", FS, t["success"], family=MONO, weight=600, cls=cl)
+        c.text(col("\u2713 "), y, name, FS, t["fg"], family=MONO, cls=cl)
+        c.text(col(f"\u2713 {name} "), y, note, FS, t["muted"], family=MONO, cls=cl)
+    ry = LY + 4 * LH + 12
+    cl = c.appear(4.3, dy=3)
+    c.text(LX, ry, "Ready on", FS, t["fg"], family=MONO, cls=cl)
+    c.text(col("Ready on "), ry, "http://localhost:3000", FS, t["accent"], family=MONO, cls=cl, extra='text-decoration="underline"')
+    c.text(LX, ry + LH, "\u258f", FS, t["fg"], family=MONO, cls=f"{c.appear(4.4, dy=0)} {c.blink(1.0)}")
+
+    # ---- the browser, opened by the launcher and already signed in
+    BX, BY, BW, BH = 236, 112, 372, 212
+    win = c.appear(5.0, dy=14, fade=0.4)
+    c.raw(f'<g class="{win}">')
+    window(c, BX, BY, BW, BH, "OpenSlop", "monitor")
+    ax, ay, aw = BX + 70, BY + 34, BW - 140
+    c.rect(ax, ay, aw, 20, t["elinput"], rx=10)
+    c.icon("home", ax + 8, ay + 4.5, 11, t["muted"])
+    c.text(ax + 24, ay + 13.5, "localhost:3000", 9, t["fg"])
+    PX = BX + 18
+    hy = ay + 46
+    c.text(PX, hy, "My Slop", 15, t["fg"], weight=600)
+    c.text(PX, hy + 15, "3 projects", 9, t["muted"])
+    nb = c.button_w("New slop", icon="plus", size=9)
+    c.button(BX + BW - 18 - nb, hy - 14, "New slop", icon="plus", variant="primary", size=9, h=22)
+    c.raw(f'<circle cx="{BX + BW - 18}" cy="{BY + 44}" r="8" fill="{t["secondary"]}" stroke="{t["border"]}"/>')
+    c.icon("user", BX + BW - 23, BY + 39, 10, t["muted"])
+    gap = 12
+    gw = (BW - 36 - 2 * gap) / 3
+    gy = hy + 28
+    for i, (img, name) in enumerate((("tokyo0", "Neon Drift"), ("city1", "City of Smoke"), ("drift2", "Last Lap"))):
+        gx = PX + i * (gw + gap)
+        cl = c.appear(5.6 + i * 0.25, dy=6)
+        c.image(img, gx, gy, gw, gw * 9 / 16, rx=6, cls=cl, thumb=True)
+        c.text(gx, gy + gw * 9 / 16 + 14, name, 9, t["fg"], weight=500, cls=cl)
+    c.raw("</g>")
+
+    # ---- the point: it all lives here
+    msg = "Saved on this computer"
+    pw = c.pill_w(msg, 10, icon="hard-drive", pad=10)
+    px, py = BX + BW / 2 - pw / 2, BY + BH - 10
+    cl = c.appear(7.0, dy=6)
+    c.shadow(px, py, pw, 24, 12, 0.7, cls=cl)
+    c.pill(px, py, msg, 10, t["card"], t["fg"], icon="hard-drive", icon_color=t["success"], h=24, pad=10, cls=cl)
+    c.write()
+
+
+# =====================================================================================
+# Local mode, step by step: one card per README step, drawn from the real pages they visit
+# =====================================================================================
+# GitHub's Primer tokens, read off github.com in each mode
+GH = {
+    "light": dict(canvas="#ffffff", fg="#1f2328", muted="#59636e", border="#d1d9e0", btn="#f6f8fa", primary="#1f883d", pressed="#197935",
+                  overlay="#ffffff", seg="#e6eaef", segsel="#ffffff", underline="#fd8c73", hover="#818b981f"),
+    "dark": dict(canvas="#0d1117", fg="#f0f6fc", muted="#9198a1", border="#3d444d", btn="#212830", primary="#238636", pressed="#197935",
+                 overlay="#010409", seg="#010409", segsel="#212830", underline="#f78166", hover="#656c7633"),
+}
+GH_SANS = "'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"
+# nodejs.org/en/download in each mode
+NODE = {
+    "light": dict(page="#ffffff", fg="#2c3437", border="#d9e1e4", green="#417e38", pressed="#356a2e"),
+    "dark": dict(page="#0d121c", fg="#ffffff", border="#556066", green="#417e38", pressed="#356a2e"),
+}
+NODE_SANS = "'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+# docker.com has one theme; Docker Desktop follows the system
+DOCKER = dict(page="#f9fafb", fg="#17191e", blue="#2560ff", pressed="#1d4fd8", menu="#002978", hover="#ffffff1f", border="#d0d5dd")
+WINDOWS_MARK = "M0 1.4 6.5.5v6.2H0zM7.3.4 16-.8v7.5H7.3zM0 7.5h6.5v6.2L0 12.8zM7.3 7.5H16v7.7l-8.7-1.2z"
+# Octicons, copied from github.com's markup
+OCTICONS = {
+    "code": "m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z",
+    "triangle-down": "m4.427 7.427 3.396 3.396a.25.25 0 0 0 .354 0l3.396-3.396A.25.25 0 0 0 11.396 7H4.604a.25.25 0 0 0-.177.427Z",
+    "terminal": "M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM7.25 8a.749.749 0 0 1-.22.53l-2.25 2.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L5.44 8 3.72 6.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.25 2.25c.141.14.22.331.22.53Zm1.5 1.5h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5Z",
+    "question": "M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.92 6.085h.001a.749.749 0 1 1-1.342-.67c.169-.339.436-.701.849-.977C6.845 4.16 7.369 4 8 4a2.756 2.756 0 0 1 1.637.525c.503.377.863.965.863 1.725 0 .448-.115.83-.329 1.15-.205.307-.47.513-.692.662-.109.072-.22.138-.313.195l-.006.004a6.24 6.24 0 0 0-.26.16.952.952 0 0 0-.276.245.75.75 0 0 1-1.248-.832c.184-.264.42-.489.692-.661.103-.067.207-.132.313-.195l.007-.004c.1-.061.182-.11.258-.161a.969.969 0 0 0 .277-.245C8.96 6.514 9 6.427 9 6.25a.612.612 0 0 0-.262-.525A1.27 1.27 0 0 0 8 5.5c-.369 0-.595.09-.74.187a1.01 1.01 0 0 0-.34.398ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z",
+    "copy": "M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z",
+    "file-zip": "M3.5 1.75v11.5c0 .09.048.173.126.217a.75.75 0 0 1-.752 1.298A1.748 1.748 0 0 1 2 13.25V1.75C2 .784 2.784 0 3.75 0h5.586c.464 0 .909.185 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 12.25 15h-.5a.75.75 0 0 1 0-1.5h.5a.25.25 0 0 0 .25-.25V4.664a.25.25 0 0 0-.073-.177L9.513 1.573a.25.25 0 0 0-.177-.073H7.25a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5h-3a.25.25 0 0 0-.25.25Zm3.75 8.75h.5c.966 0 1.75.784 1.75 1.75v3a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1-.75-.75v-3c0-.966.784-1.75 1.75-1.75ZM6 5.25a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 6 5.25Zm.75 2.25h.5a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5ZM8 6.75A.75.75 0 0 1 8.75 6h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 8 6.75ZM8.75 3h.5a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5ZM8 9.75A.75.75 0 0 1 8.75 9h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 8 9.75Zm-1 2.5v2.25h1v-2.25a.25.25 0 0 0-.25-.25h-.5a.25.25 0 0 0-.25.25Z",
+    "mark-github": "M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z",
+}
+
+
+def octicon(c, name, x, y, size, color, cls=""):
+    c.raw(c.wrap(f'<path transform="translate({x},{y}) scale({size / 16:.4f})" d="{OCTICONS[name]}" fill="{color}"/>', cls))
+
+
+def browser(c, x, y, w, h, url, page):
+    """A browser window around `page`. Returns the page's top edge and a clip id for its contents."""
+    t = c.t
+    c.shadow(x, y, w, h, 10)
+    c.rect(x, y, w, h, page, rx=10, stroke=t["border"])
+    c.rect(x, y, w, 30, t["recessed"], rx=10)
+    c.rect(x, y + 20, w, 10, t["recessed"])
+    c.raw(f'<line x1="{x}" y1="{y + 30}" x2="{x + w}" y2="{y + 30}" stroke="{t["border"]}"/>')
+    for i in range(3):
+        c.raw(f'<circle cx="{x + 14 + i * 12}" cy="{y + 15}" r="3.5" fill="{t["border2"]}"/>')
+    c.rect(x + 60, y + 6, w - 120, 18, t["elinput"], rx=9)
+    uw = 14 + tw(url, 9)
+    c.icon("lock", x + w / 2 - uw / 2, y + 10, 10, t["muted"])
+    c.text(x + w / 2 - uw / 2 + 14, y + 18.5, url, 9, t["fg"])
+    c.icon("download", x + w - 28, y + 9, 12, t["muted"])
+    clip = c.cls("pg")
+    c.defs.append(f'<clipPath id="{clip}"><rect x="{x}" y="{y + 30}" width="{w}" height="{h - 30}" rx="10"/></clipPath>')
+    return y + 30, clip
+
+
+def download_bubble(c, right, top, name, t0, done):
+    """The browser's download panel: the file arrives, then reads Done."""
+    t = c.t
+    w, h = 214, 52
+    x = right - w
+    cl = c.appear(t0, dy=-4, fade=0.2)
+    c.shadow(x, top, w, h, 10, 0.9, cls=cl)
+    c.rect(x, top, w, h, t["card"], rx=10, stroke=t["border"], cls=cl)
+    c.rect(x + 10, top + 10, 32, 32, t["secondary"], rx=7, cls=cl)
+    c.icon("file", x + 18, top + 18, 16, t["fg"], cls=cl)
+    c.text(x + 52, top + 22, name, 9.5, t["fg"], weight=500, cls=cl)
+    c.rect(x + 52, top + 31, w - 66, 3, t["scrubtrack"], rx=1.5, cls=c.span(t0, done + 0.1))
+    c.rect(x + 52, top + 31, w - 66, 3, t["accent"], rx=1.5, cls=f"{c.span(t0, done + 0.1)} {c.grow(t0 + 0.2, done)}")
+    done_cls = c.appear(done + 0.15, dy=0)
+    c.icon("check-circle", x + 52, top + 33, 10, t["success"], cls=done_cls)
+    c.text(x + 66, top + 41.5, "Done", 8.5, t["muted"], cls=done_cls)
+    return x, w, h
+
+
+def os_menu(c, x, y, items, hover, cls):
+    """A right-click menu: (icon, label) rows, with `hover` = (row, t0, t1) highlighted."""
+    t = c.t
+    w, rh = 168, 24
+    h = rh * len(items) + 8
+    c.shadow(x, y, w, h, 8, 0.9, cls=cls)
+    c.rect(x, y, w, h, t["card"], rx=8, stroke=t["border"], cls=cls)
+    row, h0, h1 = hover
+    c.rect(x + 4, y + 4 + row * rh, w - 8, rh, t["hover"], rx=5, cls=f"{cls} {c.span(h0, h1, fade=0.08)}")
+    for i, (icon, label) in enumerate(items):
+        ry = y + 4 + i * rh
+        c.icon(icon, x + 12, ry + 6, 12, t["muted"], cls=cls)
+        c.text(x + 32, ry + 15.5, label, 9.5, t["fg"], cls=cls)
+    return [(x + 70, y + 4 + i * rh + rh / 2) for i in range(len(items))]
+
+
+def done_pill(c, cx, y, msg, at):
+    t = c.t
+    pw = c.pill_w(msg, 10, icon="check-circle", pad=10)
+    cl = c.appear(at, dy=6)
+    c.shadow(cx - pw / 2, y, pw, 24, 12, 0.7, cls=cl)
+    c.pill(cx - pw / 2, y, msg, 10, t["card"], t["fg"], icon="check-circle", icon_color=t["success"], h=24, pad=10, cls=cl)
+
+
+def card_step_node(theme):
+    c = Card("local-step-node", "Install Node.js", "On nodejs.org's download page, the Windows Installer button is clicked, the installer downloads and runs, and Node.js is installed.", 11, theme)
+    t, n = c.t, NODE[theme]
+    c.bg()
+    BX, BY, BW, BH = 24, 16, 592, 328
+    top, clip = browser(c, BX, BY, BW, BH, "nodejs.org/en/download", n["page"])
+    Z = 1.15
+    PX, PY = BX + 26, top + 20
+    c.raw(f'<g clip-path="url(#{clip})"><g transform="translate({PX},{PY}) scale({Z})">')
+    c.text(0, 30, "Download Node.js®", 30, n["fg"], weight=600, family=NODE_SANS, extra='letter-spacing="-0.4"')
+    ly = 66
+    c.text(0, ly + 24, "Or get a prebuilt Node.js® for", 16, n["fg"], family=NODE_SANS)
+    sx = tw("Or get a prebuilt Node.js® for", 16) + 10
+    c.rect(sx, ly, 140, 38, n["page"], rx=4, stroke=n["border"])
+    c.raw(f'<path transform="translate({sx + 14},{ly + 12}) scale(0.9)" d="{WINDOWS_MARK}" fill="#0078d4"/>')
+    c.text(sx + 36, ly + 24, "Windows", 14, n["fg"], weight=500, family=NODE_SANS)
+    c.icon("chevron-down", sx + 116, ly + 12, 14, n["fg"])
+    rx_ = sx + 150
+    c.text(rx_, ly + 24, "running a", 16, n["fg"], family=NODE_SANS)
+    ax = rx_ + tw("running a", 16) + 10
+    c.rect(ax, ly, 112, 38, n["page"], rx=4, stroke=n["border"])
+    c.text(ax + 14, ly + 24, "x64", 14, n["fg"], weight=500, family=NODE_SANS)
+    c.icon("chevron-down", ax + 88, ly + 12, 14, n["fg"])
+    c.text(ax + 124, ly + 24, "architecture.", 16, n["fg"], family=NODE_SANS)
+    by = ly + 62
+    label = "Windows Installer (.msi)"
+    bw = 16 + 18 + 10 + tw(label, 14, 600) + 16
+    c.rect(0, by, bw, 38, n["green"], rx=4)
+    c.rect(0, by, bw, 38, n["pressed"], rx=4, cls=c.span(1.35, 1.6, fade=0.08))
+    c.icon("cloud-download", 16, by + 10, 18, "#ffffff")
+    c.text(44, by + 24, label, 14, "#ffffff", weight=600, family=NODE_SANS)
+    c.raw("</g></g>")
+    btn = (PX + bw / 2 * Z, PY + (by + 19) * Z)
+
+    bx, bw_, bh = download_bubble(c, BX + BW - 12, BY + 34, "node-v26.13.1-x64.msi", 1.6, 2.9)
+    bub = (bx + bw_ / 2, BY + 34 + bh / 2)
+
+    # the installer, opened from the download
+    WX, WY, WW, WH = 150, 120, 340, 196
+    win = c.span(3.75, 8.6, fade=0.25)
+    c.raw(f'<g class="{win}">')
+    window(c, WX, WY, WW, WH, "Node.js Setup", "package")
+    IX = WX + 22
+    c.rect(WX + 1, WY + 27, 6, WH - 28, n["green"])
+    for (a, b), head, sub in (
+        ((3.75, 4.6), "Welcome to the Node.js Setup Wizard", "This installs Node.js on your computer."),
+        ((4.75, 6.9), "Installing Node.js", "Please wait while it is installed."),
+        ((7.0, 8.6), "Completed the Node.js Setup Wizard", "Click Finish to exit."),
+    ):
+        cl = c.span(a, b, fade=0.12)
+        c.text(IX, WY + 58, head, 12, t["fg"], weight=600, cls=cl)
+        c.text(IX, WY + 76, sub, 9.5, t["muted"], cls=cl)
+    prog = c.span(4.75, 6.9, fade=0.12)
+    c.rect(IX, WY + 100, WW - 44, 6, t["scrubtrack"], rx=3, cls=prog)
+    c.rect(IX, WY + 100, WW - 44, 6, n["green"], rx=3, cls=f"{prog} {c.grow(4.9, 6.8)}")
+    bxr = WX + WW - 16
+    nb = c.button_w("Next", size=9.5)
+    c.button(bxr - nb, WY + WH - 34, "Next", size=9.5, variant="primary", cls=c.span(3.75, 4.6, fade=0.12))
+    fb = c.button_w("Finish", size=9.5)
+    c.button(bxr - fb, WY + WH - 34, "Finish", size=9.5, variant="primary", cls=c.span(7.0, 8.6, fade=0.12))
+    c.raw("</g>")
+    nxt = (bxr - nb / 2, WY + WH - 22)
+    fin = (bxr - fb / 2, WY + WH - 22)
+    done_pill(c, W / 2, H - 52, "Node.js is installed", 8.8)
+
+    c.click(1.4, *btn)
+    c.click(3.55, *bub)
+    c.click(4.5, *nxt)
+    c.click(8.35, *fin)
+    c.cursor([(0, 560, 330), (0.3, 560, 330), (1.2, *btn), (1.5, *btn), (3.3, *bub), (3.7, *bub), (4.3, *nxt), (4.6, *nxt), (8.1, *fin), (8.5, *fin), (10.4, 560, 330)])
+    c.write()
+
+
+def card_step_docker(theme):
+    c = Card("local-step-docker", "Install Docker Desktop", "On docker.com, Download Docker Desktop opens a menu, the Windows download is picked, and Docker Desktop opens with its engine running.", 12, theme)
+    t, d = c.t, DOCKER
+    c.bg()
+    BX, BY, BW, BH = 24, 16, 592, 328
+    top, clip = browser(c, BX, BY, BW, BH, "docker.com/products/docker-desktop", d["page"])
+    Z = 0.95
+    PX, PY = BX + 30, top + 20
+    c.raw(f'<g clip-path="url(#{clip})"><g transform="translate({PX},{PY}) scale({Z})">')
+    c.text(0, 16, "Desktop", 14, d["blue"])
+    c.text(0, 52, "The #1 containerization software", 32, d["fg"], weight=600, extra='letter-spacing="-0.6"')
+    by = 72
+    label = "Download Docker Desktop"
+    bw = 32 + tw(label, 15, 500)
+    c.rect(0, by, bw, 42, d["blue"], rx=8)
+    c.rect(0, by, bw, 42, d["pressed"], rx=8, cls=c.span(1.35, 1.6, fade=0.08))
+    c.text(16, by + 26, label, 15, "#ffffff", weight=500)
+    cw = 32 + tw("Choose plan", 15, 500)
+    c.rect(bw + 10, by, cw, 42, "#ffffff", rx=8, stroke=d["border"])
+    c.text(bw + 26, by + 26, "Choose plan", 15, d["fg"], weight=500)
+    # the menu under the button
+    items = ["Download for Mac – Apple Silicon", "Download for Mac – Intel Chip", "Download for Windows – AMD64", "Download for Windows – ARM64", "Download for Linux"]
+    my, ih = by + 48, 30
+    mw = 24 + max(tw(s, 13, 500) for s in items)
+    menu = c.span(1.5, 4.0, fade=0.12)
+    c.rect(0, my, mw, ih * len(items) + 12, d["menu"], rx=6, cls=menu)
+    c.rect(4, my + 6 + 2 * ih, mw - 8, ih, d["hover"], rx=4, cls=f"{menu} {c.span(3.0, 4.0, fade=0.08)}")
+    for i, s in enumerate(items):
+        c.text(12, my + 6 + i * ih + 20, s, 13, "#ffffff", weight=500, cls=menu)
+    c.raw("</g></g>")
+    btn = (PX + bw / 2 * Z, PY + (by + 21) * Z)
+    pick = (PX + 90 * Z, PY + (my + 6 + 2.5 * ih) * Z)
+
+    bx, bw_, bh = download_bubble(c, BX + BW - 12, BY + 34, "Docker Desktop Installer.exe", 4.0, 5.2)
+    bub = (bx + bw_ / 2, BY + 34 + bh / 2)
+
+    # Docker Desktop, installed and running
+    AX, AY, AW, AH = 132, 110, 376, 186
+    app = c.appear(6.2, dy=12, fade=0.35)
+    c.raw(f'<g class="{app}">')
+    c.shadow(AX, AY, AW, AH, 8, 1.1)
+    c.rect(AX, AY, AW, AH, t["card"], rx=8, stroke=t["border"])
+    c.rect(AX, AY, AW, 28, "#1d63ed", rx=8)
+    c.rect(AX, AY + 20, AW, 8, "#1d63ed")
+    c.text(AX + 12, AY + 18.5, "docker", 11, "#ffffff", weight=700)
+    c.text(AX + 12 + tw("docker", 11, 700) + 2, AY + 18.5, "desktop", 11, "#ffffff", weight=400)
+    c.rect(AX + 1, AY + 28, 96, AH - 52, t["recessed"])
+    for i, (icon, label) in enumerate((("box", "Containers"), ("layers", "Images"), ("hard-drive", "Volumes"), ("tool", "Builds"))):
+        yy = AY + 38 + i * 24
+        if i == 0:
+            c.rect(AX + 6, yy - 2, 86, 20, t["secondary"], rx=4)
+        c.icon(icon, AX + 12, yy + 2, 11, t["accent"] if i == 0 else t["muted"])
+        c.text(AX + 28, yy + 11.5, label, 9, t["fg"] if i == 0 else t["muted"], weight=500 if i == 0 else 400)
+    c.text(AX + 112, AY + 50, "Containers", 13, t["fg"], weight=600)
+    c.text(AX + 112, AY + 66, "Your running containers show up here.", 9, t["muted"])
+    c.raw(f'<line x1="{AX}" y1="{AY + AH - 24}" x2="{AX + AW}" y2="{AY + AH - 24}" stroke="{t["border"]}"/>')
+    c.rect(AX + 1, AY + AH - 23.5, AW - 2, 22.5, t["recessed"], rx=7)
+    eng = c.appear(7.4, dy=0)
+    c.raw(f'<circle cx="{AX + 16}" cy="{AY + AH - 12}" r="3.5" fill="{t["caution"]}" class="{c.span(6.2, 7.4, fade=0.05)}"/>')
+    c.text(AX + 26, AY + AH - 8.5, "Engine starting", 9, t["muted"], cls=c.span(6.2, 7.4, fade=0.05))
+    c.raw(f'<circle cx="{AX + 16}" cy="{AY + AH - 12}" r="3.5" fill="{t["success"]}" class="{eng}"/>')
+    c.text(AX + 26, AY + AH - 8.5, "Engine running", 9, t["fg"], weight=500, cls=eng)
+    c.raw("</g>")
+    done_pill(c, W / 2, H - 50, "Leave Docker Desktop open", 8.0)
+
+    c.click(1.4, *btn)
+    c.click(3.75, *pick)
+    c.click(5.75, *bub)
+    c.cursor([(0, 560, 330), (0.3, 560, 330), (1.2, *btn), (1.6, *btn), (2.9, *pick), (3.9, *pick), (5.5, *bub), (5.9, *bub), (7.0, 560, 330)])
+    c.write()
+
+
+def card_step_download(theme):
+    c = Card("local-step-download", "Download OpenSlop", "On OpenSlop's GitHub page, the green Code button opens a menu, Download ZIP is clicked, and openslop-master.zip downloads.", 11.5, theme)
+    t, g = c.t, GH[theme]
+    c.bg()
+    BX, BY, BW, BH = 24, 16, 592, 328
+    top, clip = browser(c, BX, BY, BW, BH, "github.com/openslop/openslop", g["canvas"])
+    Z = 1.1
+    PX, PY = BX + (BW - 492 * Z) / 2, top + 18
+    PAN = -112
+    pan = c.keys([(2.2, "transform:translate(0,0)"), (2.8, f"transform:translate(0,{PAN}px)"), (9.8, f"transform:translate(0,{PAN}px)"), (10.4, "transform:translate(0,0)")])
+    c.raw(f'<g clip-path="url(#{clip})"><g class="{pan}"><g transform="translate({PX:.1f},{PY}) scale({Z})">')
+    # the row above the file list
+    c.rect(0, 0, 273, 32, g["canvas"], rx=6, stroke=g["border"])
+    c.icon("search", 10, 8, 16, g["muted"])
+    c.text(34, 21, "Go to file", 14, g["muted"], family=GH_SANS)
+    c.rect(247, 7, 18, 18, "none", rx=4, stroke=g["border"])
+    c.text(256, 20, "T", 11, g["muted"], anchor="middle", family=GH_SANS)
+    c.rect(282, 0, 94, 32, g["btn"], rx=6, stroke=g["border"])
+    c.text(294, 21, "Add file", 14, g["fg"], weight=500, family=GH_SANS)
+    octicon(c, "triangle-down", 352, 8, 16, g["muted"])
+    c.rect(385, 0, 107, 32, g["primary"], rx=6)
+    c.rect(385, 0, 107, 32, g["pressed"], rx=6, cls=c.span(1.35, 1.6, fade=0.08))
+    octicon(c, "code", 397, 8, 16, "#ffffff")
+    c.text(421, 21, "Code", 14, "#ffffff", weight=500, family=GH_SANS)
+    octicon(c, "triangle-down", 466, 8, 16, "#ffffff")
+    # the file list behind the menu
+    c.rect(0, 44, 492, 300, g["canvas"], rx=6, stroke=g["border"])
+    for i, name in enumerate(("app", "components", "lib", "public", "remotion", "scripts", "supabase/migrations")):
+        ry = 44 + i * 42
+        if i:
+            c.raw(f'<line x1="0" y1="{ry}" x2="492" y2="{ry}" stroke="{g["border"]}"/>')
+        c.icon("folder-s", 16, ry + 13, 16, g["muted"])
+        c.text(42, ry + 26, name, 14, g["fg"], family=GH_SANS)
+    # the Code menu
+    OX, OY = 92, 35
+    ov = c.span(1.55, 4.2, fade=0.12)
+    c.raw(f'<g class="{ov}">')
+    c.shadow(OX, OY, 400, 295, 12, 0.8)
+    c.rect(OX, OY, 400, 295, g["overlay"], rx=12, stroke=g["border"])
+    c.text(OX + 16, OY + 29, "Local", 14, g["fg"], weight=600, family=GH_SANS)
+    c.text(OX + 78, OY + 29, "Codespaces", 14, g["fg"], family=GH_SANS)
+    c.rect(OX + 8, OY + 46, 52, 2, g["underline"], rx=1)
+    c.raw(f'<line x1="{OX}" y1="{OY + 48}" x2="{OX + 400}" y2="{OY + 48}" stroke="{g["border"]}"/>')
+    octicon(c, "terminal", OX + 16, OY + 66, 16, g["fg"])
+    c.text(OX + 40, OY + 79, "Clone", 14, g["fg"], weight=600, family=GH_SANS)
+    octicon(c, "question", OX + 363, OY + 68, 16, g["muted"])
+    c.rect(OX + 16, OY + 97, 220, 32, g["seg"], rx=6, stroke=g["border"] if theme == "dark" else None)
+    c.rect(OX + 16, OY + 97, 68, 32, g["segsel"], rx=6, stroke=g["border"])
+    c.text(OX + 50, OY + 118, "HTTPS", 14, g["fg"], weight=600, anchor="middle", family=GH_SANS)
+    c.text(OX + 110, OY + 118, "SSH", 14, g["fg"], anchor="middle", family=GH_SANS)
+    c.raw(f'<line x1="{OX + 137}" y1="{OY + 105}" x2="{OX + 137}" y2="{OY + 121}" stroke="{g["border"]}"/>')
+    c.text(OX + 152, OY + 118, "GitHub CLI", 14, g["fg"], family=GH_SANS)
+    c.rect(OX + 16, OY + 138, 331, 32, g["canvas"], rx=6, stroke=g["border"])
+    c.text(OX + 28, OY + 158, "https://github.com/openslop/openslop.git", 12, g["fg"], family=MONO)
+    octicon(c, "copy", OX + 360, OY + 146, 16, g["muted"])
+    c.text(OX + 16, OY + 193, "Clone using the web URL.", 14, g["muted"], family=GH_SANS)
+    c.raw(f'<line x1="{OX}" y1="{OY + 215}" x2="{OX + 400}" y2="{OY + 215}" stroke="{g["border"]}"/>')
+    c.rect(OX + 16, OY + 229, 20, 20, g["btn"], rx=5, stroke=g["border"])
+    octicon(c, "mark-github", OX + 19, OY + 232, 14, g["fg"])
+    c.text(OX + 44, OY + 244, "Open in GitHub Copilot app", 14, g["fg"], family=GH_SANS)
+    c.rect(OX + 8, OY + 255, 384, 32, g["hover"], rx=6, cls=c.span(3.2, 4.2, fade=0.08))
+    octicon(c, "file-zip", OX + 18, OY + 263, 16, g["muted"])
+    c.text(OX + 44, OY + 276, "Download ZIP", 14, g["fg"], family=GH_SANS)
+    c.raw("</g></g></g></g>")
+    code = (PX + 438 * Z, PY + 16 * Z)
+    zipx, zipy = PX + (OX + 110) * Z, PY + (OY + 271) * Z + PAN
+
+    download_bubble(c, BX + BW - 12, BY + 34, "openslop-master.zip", 4.3, 5.8)
+    done_pill(c, W / 2, H - 52, "Saved to your Downloads folder", 6.3)
+
+    c.click(1.4, *code)
+    c.click(3.75, zipx, zipy)
+    c.cursor([(0, 560, 330), (0.3, 560, 330), (1.2, *code), (1.6, *code), (2.2, *code), (2.8, code[0], code[1] + PAN), (3.2, zipx, zipy), (3.9, zipx, zipy), (5.0, 560, 330)])
+    c.write()
+
+
+def card_step_terminal(theme):
+    c = Card("local-step-terminal", "Unzip it and run OpenSlop", "In the Downloads folder, the zip is extracted with Extract All, the new folder is opened in Terminal, and npm install then npm run local start OpenSlop at localhost:3000.", 13, theme)
+    t = c.t
+    c.bg()
+    # the Downloads folder
+    EX, EY, EW, EH = 24, 20, 400, 200
+    window(c, EX, EY, EW, EH, "Downloads", "folder")
+    hy = EY + 46
+    for x_, label in ((EX + 40, "Name"), (EX + 230, "Type")):
+        c.text(x_, hy, label, 8.5, t["muted"], weight=500)
+    c.raw(f'<line x1="{EX + 12}" y1="{hy + 7}" x2="{EX + EW - 12}" y2="{hy + 7}" stroke="{t["border"]}"/>')
+    r1, r2 = hy + 14, hy + 38
+
+    def row(y, icon, color, name, kind, sel, cls=""):
+        c.rect(EX + 10, y, EW - 20, 22, t["secondary"], rx=4, cls=f"{cls} {sel}".strip())
+        c.icon(icon, EX + 18, y + 5, 12, color, cls=cls)
+        c.text(EX + 40, y + 14.5, name, 9.5, t["fg"], cls=cls)
+        c.text(EX + 230, y + 14.5, kind, 9, t["muted"], cls=cls)
+
+    folder_in = c.appear(2.5, dy=0, fade=0.25)
+    zip_down = c.shift(2.5, dy=24, dur=0.25)
+    c.raw(f'<g class="{zip_down}">')
+    row(r1, "archive", t["muted"], "openslop-master.zip", "Compressed (zipped) Folder", c.span(0.6, 2.3, fade=0.1))
+    c.raw("</g>")
+    row(r1, "folder", t["caution"], "openslop-master", "File folder", c.span(2.9, 4.3, fade=0.1), cls=folder_in)
+
+    m1 = c.span(1.0, 2.1, fade=0.1)
+    zrow = os_menu(c, EX + 150, r1 + 14, [("folder-open", "Open"), ("archive", "Extract All…"), ("share", "Share"), ("copy", "Copy as path")], (1, 1.5, 2.1), m1)
+    m2 = c.span(3.1, 4.3, fade=0.1)
+    frow = os_menu(c, EX + 150, r1 + 14, [("folder-open", "Open"), ("terminal", "Open in Terminal"), ("share", "Share"), ("copy", "Copy as path")], (1, 3.6, 4.3), m2)
+
+    # the terminal, opened in that folder
+    TX, TY, TW, TH = 150, 116, 466, 228
+    term = c.appear(4.5, dy=12, fade=0.3)
+    c.raw(f'<g class="{term}">')
+    window(c, TX, TY, TW, TH, "Terminal", "terminal")
+    LX, LY, LH, FS = TX + 14, TY + 46, 17, 9
+    col = lambda s: LX + tw(s, FS, family=MONO) * 1.06
+    prompt = r"PS C:\Users\you\Downloads\openslop-master> "
+    c.text(LX, LY, prompt, FS, t["muted"], family=MONO)
+    c.typewriter(col(prompt), LY, "npm install", 5.0, 5.8, FS, t["fg"], family=MONO)
+    c.text(LX, LY + LH, "added 1415 packages in 2m", FS, t["fg"], family=MONO, cls=c.appear(6.6, dy=3))
+    p2 = c.appear(7.0, dy=0)
+    c.text(LX, LY + 2 * LH + 6, prompt, FS, t["muted"], family=MONO, cls=p2)
+    c.typewriter(col(prompt), LY + 2 * LH + 6, "npm run local", 7.3, 8.2, FS, t["fg"], family=MONO, cls=p2)
+    for i, (at, parts) in enumerate((
+        (9.0, (("▲ Next.js 16.4.6", t["fg"]),)),
+        (9.3, (("- Local:   ", t["muted"]), ("http://localhost:3000", t["accent"]))),
+        (9.7, (("✓", t["success"]), (" Ready", t["fg"]))),
+    )):
+        y = LY + (3 + i) * LH + 12
+        cl = c.appear(at, dy=3)
+        x_ = LX
+        for s, color in parts:
+            c.text(x_, y, s, FS, color, family=MONO, cls=cl)
+            x_ = col(s) - LX + x_
+    c.raw("</g>")
+    done_pill(c, TX + TW / 2, H - 40, "OpenSlop opens in your browser", 10.2)
+
+    zip_xy = (EX + 110, r1 + 11)
+    fold_xy = (EX + 110, r1 + 11)
+    c.click(1.0, *zip_xy)
+    c.click(2.15, *zrow[1])
+    c.click(3.1, *fold_xy)
+    c.click(4.3, *frow[1])
+    c.cursor([(0, 400, 300), (0.3, 400, 300), (0.9, *zip_xy), (1.1, *zip_xy), (1.9, *zrow[1]), (2.3, *zrow[1]), (2.9, *fold_xy), (3.2, *fold_xy), (4.0, *frow[1]), (4.5, *frow[1]), (5.0, 620, 350)])
+    c.write()
+
+
+def card_step_keys(theme):
+    c = Card("local-step-keys", "Add your AI keys", "The profile icon opens a menu, Settings opens on Models, Add providers lists the providers, and an Anthropic key is pasted and connected.", 12, theme)
+    t = c.t
+    c.bg()
+    # the account menu, top left like the app
+    AV = (34, 30)
+    c.raw(f'<circle cx="{AV[0]}" cy="{AV[1]}" r="12" fill="{t["secondary"]}" stroke="{t["border"]}"/>')
+    c.icon("user", AV[0] - 6, AV[1] - 6, 12, t["muted"])
+    c.text(56, 34, "My Slop", 12, t["fg"], weight=600)
+    menu = c.span(1.15, 2.0, fade=0.1)
+    MX, MY, MW = 22, 48, 176
+    rows = [("contrast", "Appearance"), ("settings", "Settings"), ("user", "Impersonate user"), ("log-out", "Log out")]
+    MH = 34 + 26 * len(rows)
+    c.shadow(MX, MY, MW, MH, 8, 0.9, cls=menu)
+    c.rect(MX, MY, MW, MH, t["card"], rx=8, stroke=t["border"], cls=menu)
+    c.text(MX + 10, MY + 19, "local", 9.5, t["fg"], weight=600, cls=menu)
+    c.raw(c.wrap(f'<line x1="{MX}" y1="{MY + 29}" x2="{MX + MW}" y2="{MY + 29}" stroke="{t["border"]}"/>', menu))
+    c.rect(MX + 4, MY + 32 + 26, MW - 8, 24, t["hover"], rx=5, cls=f"{menu} {c.span(1.6, 2.0, fade=0.08)}")
+    for i, (icon, label) in enumerate(rows):
+        ry = MY + 32 + i * 26
+        c.icon(icon, MX + 12, ry + 6, 12, t["fg"], cls=menu)
+        c.text(MX + 32, ry + 16, label, 9.5, t["fg"], cls=menu)
+    c.icon("chevron-right", MX + MW - 20, MY + 38, 10, t["muted"], cls=menu)
+    c.badge(MX + MW - 38, MY + 32 + 2 * 26 + 6, "Dev", "caution", size=8, cls=menu)
+    settings = (MX + 60, MY + 32 + 26 + 12)
+
+    # the Settings dialog
+    dlg = c.appear(2.2, dy=8, fade=0.3)
+    c.raw(f'<g class="{dlg}">')
+    c.rect(0, 0, W, H, "#000000", opacity=0.35)
+    P = 14
+    DX, DY, DW, DH = 70, 14, 500, 332
+    c.shadow(DX, DY, DW, DH, 8, 1.2)
+    c.rect(DX, DY, DW, DH, t["recessed"], rx=8, stroke=t["border"])
+    c.text(DX + P, DY + P + 8, "Settings", 11, t["fg"], weight=600)
+    c.icon("x", DX + DW - P - 12, DY + P, 12, t["muted"])
+    NX, NW = DX + P, 96
+    NY = DY + P + 24
+    c.text(NX + 8, NY + 11, "Account", 10, t["fg"], weight=600)
+    c.rect(NX, NY + 22, NW, 22, t["card"], rx=5)
+    c.icon("link", NX + 8, NY + 27.5, 11, t["fg"])
+    c.text(NX + 24, NY + 36.5, "Models", 10, t["fg"], weight=500)
+    RX, RY = NX + NW + 10, NY
+    RW, RH = DX + DW - P - RX, DY + DH - P - RY
+    c.rect(RX, RY, RW, RH, t["card"], rx=10)
+    IX, IW = RX + P, RW - 2 * P
+    TP = 12
+
+    # models pane, before
+    before = c.span(2.2, 3.35, fade=0.12)
+    c.text(IX, RY + P + 8, "Models", 11, t["fg"], weight=600, cls=before)
+    hy = RY + P + 26
+    c.text(IX, hy + 14, "Providers", 10, t["muted"], weight=600, cls=before)
+    abw = c.button_w("Add providers", icon="plus", size=9, pad=8)
+    c.button(IX + IW - abw, hy + 2, "Add providers", icon="plus", size=9, h=20, pad=8, cls=before)
+    add = (IX + IW - abw / 2, hy + 12)
+    c.rect(IX, hy + 34, IW, 54, "none", rx=10, stroke=t["border2"], cls=before, extra='stroke-dasharray="4 3"')
+    c.text(IX + IW / 2, hy + 65, "Add a provider to generate on your own key.", 9, t["muted"], anchor="middle", cls=before)
+
+    # Add providers
+    browse = c.span(3.45, 4.75, fade=0.12)
+    c.icon("arrow-left", IX, RY + P + 1, 12, t["fg"], cls=browse)
+    c.text(IX + 20, RY + P + 10, "Add providers", 11, t["fg"], weight=600, cls=browse)
+    sy = RY + P + 22
+    c.rect(IX, sy, IW, 22, t["elinput"], rx=6, cls=browse)
+    c.icon("search", IX + 8, sy + 5.5, 11, t["muted"], cls=browse)
+    c.text(IX + 24, sy + 14.5, "Search providers and models", 9, t["muted"], cls=browse)
+    gy = sy + 30
+    gx = IX
+    for i, g in enumerate(("All", "Images", "Videos", "Speech", "Captions", "Sound", "Music", "Text")):
+        gw = tw(g, 8.5, 500) + 12
+        c.rect(gx, gy, gw, 18, t["secondary"] if i == 0 else "none", rx=5, cls=browse)
+        c.text(gx + 6, gy + 12.3, g, 8.5, t["fg"] if i == 0 else t["muted"], weight=500, cls=browse)
+        gx += gw + 2
+    ty = gy + 28
+    tiles = (("anthropic", "Anthropic", "Claude models for scripting, editing and Sloppy's reasoning."), ("runware", "Runware", "Image and video generation across many open model families."), ("cartesia", "Cartesia", "Low-latency speech with a large searchable voice library."))
+    cw_ = c.button_w("Connect", icon="link", size=8.5, pad=7)
+    for i, (prov, name, desc) in enumerate(tiles):
+        yy = ty + i * 52
+        c.rect(IX, yy, IW, 46, t["elcard"], rx=8, stroke=t["border"], cls=browse)
+        c.provider_mark(prov, IX + TP, yy + 13, 20, cls=browse)
+        c.text(IX + TP + 30, yy + 19, name, 10, t["fg"], weight=500, cls=browse)
+        dc = c.cls("dc")
+        c.defs.append(f'<clipPath id="{dc}"><rect x="{IX + TP + 30}" y="{yy}" width="{IW - 2 * TP - 30 - cw_ - 8}" height="46"/></clipPath>')
+        c.text(IX + TP + 30, yy + 33, desc, 8, t["muted"], cls=browse, extra=f'clip-path="url(#{dc})"')
+        c.button(IX + IW - TP - cw_, yy + 13, "Connect", icon="link", size=8.5, h=20, pad=7, cls=browse)
+    connect = (IX + IW - TP - cw_ / 2, ty + 23)
+
+    # models pane, the key form, then connected
+    after = c.appear(4.85, dy=0, fade=0.12)
+    c.text(IX, RY + P + 8, "Models", 11, t["fg"], weight=600, cls=after)
+    c.text(IX, hy + 14, "Providers", 10, t["muted"], weight=600, cls=after)
+    c.button(IX + IW - abw, hy + 2, "Add providers", icon="plus", size=9, h=20, pad=8, cls=after)
+    fy = hy + 34
+    form = c.span(4.85, 8.3, fade=0.15)
+    FH = 100
+    c.rect(IX, fy, IW, FH, t["elcard"], rx=8, stroke=t["border"], cls=form)
+    c.provider_mark("anthropic", IX + TP, fy + 10, 16, cls=form)
+    c.text(IX + TP + 24, fy + 21.5, "Anthropic", 10, t["fg"], weight=500, cls=form)
+    c.text(IX + TP, fy + 44, "Anthropic API key", 9, t["fg"], cls=form)
+    c.rect(IX + TP, fy + 50, IW - 2 * TP, 22, t["elinput"], rx=5, stroke=t["border"], cls=form)
+    c.rect(IX + TP, fy + 50, IW - 2 * TP, 22, "none", rx=5, stroke=t["accent"], sw=1.5, cls=c.span(5.2, 7.2, fade=0.1))
+    c.text(IX + TP + 8, fy + 64.5, "Paste in your API key here", 9, t["muted"], cls=c.span(4.85, 5.8, fade=0.05))
+    c.typewriter(IX + TP + 8, fy + 64.5, "•" * 34, 5.8, 6.6, 9, t["fg"], cls=form)
+    sw_ = c.button_w("Save and validate", icon="key", size=8.5, pad=7)
+    c.button(IX + TP, fy + 78, "Save and validate", icon="key", variant="primary", size=8.5, h=18, pad=7, cls=form)
+    save = (IX + TP + sw_ / 2, fy + 87)
+    con = c.appear(8.4, dy=0)
+    CH = 66
+    c.rect(IX, fy, IW, CH, t["elcard"], rx=8, stroke=t["border"], cls=con)
+    c.provider_mark("anthropic", IX + TP, fy + 10, 16, cls=con)
+    c.text(IX + TP + 24, fy + 21.5, "Anthropic", 10, t["fg"], weight=500, cls=con)
+    c.badge(IX + TP + 24 + tw("Anthropic", 10, 500) + 8, fy + 10, "Connected", "default", icon="check-circle", cls=con)
+    c.text(IX + IW - TP, fy + 21.5, "••••k3Qp · added just now", 8.5, t["muted"], anchor="end", cls=con)
+    bx = IX + TP
+    bx += c.button(bx, fy + 40, "Test", icon="refresh-cw", size=8.5, h=18, pad=7, cls=con) + 6
+    c.button(bx, fy + 40, "Replace key", icon="pencil", size=8.5, h=18, pad=7, cls=con)
+    c.raw("</g>")
+    done_pill(c, W / 2, H - 50, "Repeat for each kind of model you need", 9.0)
+
+    c.click(1.0, *AV)
+    c.click(1.95, *settings)
+    c.click(3.25, *add)
+    c.click(4.6, *connect)
+    c.click(7.4, *save)
+    c.cursor([(0, 300, 300), (0.3, 300, 300), (0.9, *AV), (1.2, *AV), (1.7, *settings), (2.1, *settings), (3.0, *add), (3.4, *add), (4.3, *connect), (4.8, *connect), (5.3, IX + 120, fy + 61), (7.0, IX + 120, fy + 61), (7.3, *save), (7.6, *save), (8.6, 560, 320)])
+    c.write()
+
+
 def main():
     for theme in ("dark", "light"):
-        for fn in (card_describe, card_sloppy, card_canvas, card_generate, card_timeline, card_providers):
+        for fn in (card_describe, card_sloppy, card_canvas, card_generate, card_timeline, card_providers, card_local, card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys):
             fn(theme)
 
 
