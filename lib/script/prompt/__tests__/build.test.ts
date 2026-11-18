@@ -207,7 +207,7 @@ describe("buildScriptPrompt", () => {
 
 	it("gives an audiobook no visual elements", () => {
 		expect(VIDEO_FORMATS).toMatch(
-			/Audiobook:.*Only <narration>, <character>, <sound> and <music>, never <image> or <video>\./,
+			/Audiobook:.*Only <speech>, <sound> and <music>, never <image> or <video>\./,
 		);
 
 		const faceless =
