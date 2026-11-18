@@ -5,7 +5,7 @@ export const RESOLUTIONS = ["480p", "720p", "1080p", "1440p", "4K"] as const;
 export type Resolution = (typeof RESOLUTIONS)[number];
 
 const OUTPUT_WIDTHS: Record<Resolution, number> = {
-	"480p": 854,
+	"480p": 864,
 	"720p": 1280,
 	"1080p": 1920,
 	"1440p": 2560,
