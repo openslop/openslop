@@ -37,7 +37,7 @@ export function osmlSpec(language: string): string {
 		${languagePrompt(language)}
 
 		## Order
-		Write the story and nothing else, using only the elements your format allows. There must be a new visual (image or video) at least once before every sentence in a speech element.
+		Write the story and nothing else, using only the elements your format allows. Formats with visuals need a new visual (image or video) at least once before every sentence in a speech element.
 
 		## <speech>
 		- What one character says out loud. name is required and must be a character listed under Characters. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>

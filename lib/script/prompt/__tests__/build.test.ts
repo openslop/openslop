@@ -3,7 +3,7 @@ import { asset } from "@/lib/canvas/__tests__/_assets";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { ADAPT_SCRIPT_RULES } from "../adapt";
 import { buildScriptPrompt, scriptRules } from "../build";
-import { VIDEO_FORMAT_RULES } from "../formats";
+import { VIDEO_FORMATS, VIDEO_FORMAT_RULES } from "../formats";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
 import {
@@ -204,6 +204,28 @@ describe("buildScriptPrompt", () => {
 			expect(system).toContain(VIDEO_FORMAT_RULES);
 		},
 	);
+
+	it("gives an audiobook no visual elements", () => {
+		expect(VIDEO_FORMATS).toMatch(
+			/Audiobook:.*Only <narration>, <character>, <sound> and <music>, never <image> or <video>\./,
+		);
+
+		const faceless =
+			VIDEO_FORMATS.split("\n").find((line) => line.includes("Faceless:")) ??
+			"";
+		expect(faceless).not.toMatch(/audiobook|podcast/i);
+	});
+
+	it("scopes the visual cadence to formats with visuals", () => {
+		const { system } = buildScriptPrompt(
+			[],
+			settingsOf({ format: "audiobook" }),
+			{ kind: "brief", brief: "a brief" },
+		);
+
+		expect(system).toContain("Formats with visuals need a new visual");
+		expect(system).toContain("never <image> or <video>");
+	});
 
 	it("keeps the adaptation guidance independent of specific formats and speech elements", () => {
 		expect(ADAPT_SCRIPT_RULES).not.toMatch(

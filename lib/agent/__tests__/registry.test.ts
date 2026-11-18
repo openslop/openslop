@@ -352,6 +352,20 @@ describe("executeToolCall", () => {
 		);
 	});
 
+	it("lets Sloppy choose the audiobook format", async () => {
+		const settings: Partial<ScriptSettings>[] = [];
+		const outcome = await executeToolCall(
+			{
+				toolName: "update_script_settings",
+				input: { format: "audiobook" },
+			},
+			context(recordScriptSettings(settings)),
+		);
+
+		expect(settings).toStrictEqual([{ format: "audiobook" }]);
+		expect(outcome.ok).toBe(true);
+	});
+
 	it.each([
 		[
 			"the aspect ratio and transition it was given",

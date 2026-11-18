@@ -17,12 +17,14 @@ export const VIDEO_FORMAT = {
 	cinematic: VIDEO_FORMAT_SPECS.cinematic.label,
 	faceless: VIDEO_FORMAT_SPECS.faceless.label,
 	explainer: VIDEO_FORMAT_SPECS.explainer.label,
+	audiobook: VIDEO_FORMAT_SPECS.audiobook.label,
 } as const;
 
 export const VIDEO_FORMATS = dedent`
 	- ${VIDEO_FORMAT.cinematic}: characters speak on screen, inside the video prompts. Only <video> and <music>, with occasional <speech>.
 	- ${VIDEO_FORMAT.faceless}: voices tell the story over images and video. All elements.
 	- ${VIDEO_FORMAT.explainer}: a voice over video in which nobody speaks. All elements except <image>.
+	- ${VIDEO_FORMAT.audiobook}: a narrator and character voices with music and sound, and no visuals. Only <narration>, <character>, <sound> and <music>, never <image> or <video>.
 `;
 
 export const VIDEO_FORMAT_RULES = dedent`

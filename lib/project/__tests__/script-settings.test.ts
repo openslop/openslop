@@ -23,6 +23,11 @@ describe("ScriptSettingsSchema", () => {
 		["fills every setting left out", {}, DEFAULTS],
 		["keeps every setting held", STORED, STORED],
 		[
+			"keeps the audiobook format",
+			{ ...DEFAULTS, format: "audiobook" },
+			{ ...DEFAULTS, format: "audiobook" },
+		],
+		[
 			"falls back per setting on an unknown value",
 			{
 				language: "klingon",
