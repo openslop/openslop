@@ -12,6 +12,9 @@ import {
 
 export type TrimEdge = "start" | "end";
 
+export const mediaUrlAt = (url: string, sec: number): string =>
+	sec > 0 ? `${url}#t=${sec}` : url;
+
 /** A still has no media length to trim. */
 export const isTrimmable = (element: ResolvedElement): boolean =>
 	element.mediaDurationSec > 0;
