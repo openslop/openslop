@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -17,6 +18,7 @@ import {
 	SelectMenuTrigger,
 } from "@/components/ui/select-menu";
 import {
+	SimpleTooltip,
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
@@ -27,7 +29,6 @@ import type { ConnectorType, ModelRef, Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/use-settings";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./model-chips";
-import { IconChip } from "./icon-chip";
 import { ProviderIcon } from "./provider-icon";
 import { useProviderKeyLookup } from "./use-provider-keys";
 
@@ -142,15 +143,17 @@ export function ConfigureModelsItem() {
 	);
 }
 
-/** Looks like the buttons it stands in for, without nesting one inside a menu row. */
+/** A status, not a button, so it never nests one inside a menu row. */
 export function ConnectHint({ provider }: { provider: Provider }) {
-	const { name } = PROVIDER_CATALOG[provider];
+	const label = `Add your ${PROVIDER_CATALOG[provider].name} API key to generate with this model`;
 	return (
-		<IconChip
-			icon={Link}
-			label={`Add your ${name} API key to generate with this model`}
-			className="ml-auto"
-		/>
+		<SimpleTooltip label={label}>
+			<Badge variant="indicator" size="xs" className="ml-auto">
+				<Link />
+				<span aria-hidden="true">Connect</span>
+				<span className="sr-only">{label}</span>
+			</Badge>
+		</SimpleTooltip>
 	);
 }
 
