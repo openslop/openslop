@@ -21,9 +21,11 @@ const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 
 const FRAME =
-	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
+	"relative flex h-full w-full flex-col overflow-hidden rounded-md border transition-[border-color] duration-[var(--duration-faster)] ease-[var(--ease-productive)] motion-reduce:transition-none";
 const edge = (selected: boolean) =>
-	selected ? "border-current/60" : "border-border";
+	selected
+		? "border-current/60"
+		: "border-border group-hover/clip:border-current/40";
 
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
