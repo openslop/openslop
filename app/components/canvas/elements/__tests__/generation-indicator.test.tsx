@@ -32,12 +32,12 @@ describe("GenerationIndicator", () => {
 		expect(html).not.toContain("text-foreground");
 	});
 
-	it("shows a shimmering label on wide screens for the md indicator", () => {
+	it("shows a readable label on wide screens for the md indicator", () => {
 		const html = render(
 			<GenerationIndicator status="queued" startedAt={null} />,
 		);
 		expect(html).toContain("Queued");
-		expect(html).toContain("shimmer");
+		expect(html).not.toContain("shimmer");
 		expect(html).toContain("hidden");
 		expect(html).toContain("md:inline");
 	});
@@ -46,7 +46,7 @@ describe("GenerationIndicator", () => {
 		const html = render(
 			<GenerationIndicator status="queued" startedAt={null} size="sm" />,
 		);
-		expect(html).not.toContain("shimmer");
+		expect(html).not.toContain("md:inline");
 	});
 });
 

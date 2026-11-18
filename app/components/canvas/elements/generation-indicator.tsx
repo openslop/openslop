@@ -60,7 +60,7 @@ export function GenerationIndicator({
 			>
 				<Icon className={cn(sizes.icon, animation)} />
 				{size === "md" && (
-					<span className="shimmer hidden text-label-xs whitespace-nowrap md:inline">
+					<span className="hidden text-label-xs whitespace-nowrap md:inline">
 						{label}
 					</span>
 				)}
