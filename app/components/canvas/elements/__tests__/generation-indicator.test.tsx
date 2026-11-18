@@ -31,6 +31,23 @@ describe("GenerationIndicator", () => {
 		expect(html).toContain("text-on-media-foreground");
 		expect(html).not.toContain("text-foreground");
 	});
+
+	it("shows a shimmering label on wide screens for the md indicator", () => {
+		const html = render(
+			<GenerationIndicator status="queued" startedAt={null} />,
+		);
+		expect(html).toContain("Queued");
+		expect(html).toContain("shimmer");
+		expect(html).toContain("hidden");
+		expect(html).toContain("md:inline");
+	});
+
+	it("keeps the sm indicator icon-only", () => {
+		const html = render(
+			<GenerationIndicator status="queued" startedAt={null} size="sm" />,
+		);
+		expect(html).not.toContain("shimmer");
+	});
 });
 
 describe("GenerationIndicator clock", () => {

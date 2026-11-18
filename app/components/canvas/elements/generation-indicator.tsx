@@ -26,7 +26,7 @@ const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
 	sm: { wrapper: "h-4 w-4 bg-on-media/55", icon: "h-2.5 w-2.5" },
 	md: {
 		wrapper:
-			"h-7 w-7 bg-on-media/55 hover:bg-on-media/70 grain ring-1 ring-inset ring-border",
+			"h-7 w-7 bg-on-media/55 hover:bg-on-media/70 grain ring-1 ring-inset ring-border md:w-auto md:gap-1.5 md:px-2",
 		icon: "h-3 w-3",
 	},
 };
@@ -59,6 +59,11 @@ export function GenerationIndicator({
 				)}
 			>
 				<Icon className={cn(sizes.icon, animation)} />
+				{size === "md" && (
+					<span className="shimmer hidden text-label-xs whitespace-nowrap md:inline">
+						{label}
+					</span>
+				)}
 			</span>
 		</SimpleTooltip>
 	);
