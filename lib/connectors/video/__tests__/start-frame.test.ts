@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AttributeSchema } from "../../attributes/schema";
+import { AttributeSchema } from "@/lib/connectors/attributes/schema";
 import { frameSource, openingOn, startFrameDef } from "../start-frame";
 
 describe("frameSource", () => {

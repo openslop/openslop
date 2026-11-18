@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { z } from "zod";
-import { BLOB_BASE_URL } from "../../blob";
+import { BLOB_BASE_URL } from "@/lib/blob";
 import { AssetBundle, EmptyRemoteFileError } from "../asset-bundle";
 import type { BundleResponse } from "../asset-bundle";
 

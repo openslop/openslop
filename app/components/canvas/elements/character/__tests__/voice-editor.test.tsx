@@ -73,7 +73,7 @@ let queue: GenerationQueue;
 vi.mock("@/lib/generation/generation-queue-provider", () => ({
 	useGenerationQueue: () => queue,
 }));
-vi.mock("../../element-generation-context", () => ({
+vi.mock("@/app/components/canvas/elements/element-generation-context", () => ({
 	ElementGenerationProvider: ({ children }: { children: ReactNode }) =>
 		children,
 	useElementGeneration: () => {
