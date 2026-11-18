@@ -2,7 +2,13 @@ import { z } from "zod";
 import { Image } from "@/components/ui/icon";
 import { describe, expect, it } from "vitest";
 import { Play } from "@/components/ui/icon";
-import { toggleValue, trimStartDef } from "../common";
+import {
+	durationDef,
+	loopsDef,
+	toggleValue,
+	trimStartDef,
+	volumeDef,
+} from "../common";
 import { AttributeSchema } from "../schema";
 
 describe("AttributeSchema", () => {
@@ -125,5 +131,30 @@ describe("AttributeSchema", () => {
 		]);
 
 		expect(schema.baseDefs.map(({ key }) => key)).toEqual(["motion"]);
+	});
+
+	describe("range", () => {
+		it.each([
+			[volumeDef("5"), { min: 0, max: 10, step: 1 }],
+			[durationDef, { min: 4, max: 15, step: 1 }],
+			[loopsDef, { min: 1, max: 8, step: 1 }],
+		])("slides $key over its options", (def, bounds) => {
+			expect(def.edit).toMatchObject({ kind: "range", ...bounds });
+		});
+
+		it("keeps the stored values projects already hold", () => {
+			const schema = AttributeSchema.from([volumeDef("5"), durationDef]);
+			expect(schema.resolve({ volume: "7", duration: "12" })).toEqual({
+				volume: "7",
+				duration: "12",
+			});
+		});
+
+		it("refuses a value off the grid or out of bounds", () => {
+			const schema = AttributeSchema.from([volumeDef("5"), loopsDef]);
+			expect(schema.offers("volume", "11")).toBe(false);
+			expect(schema.offers("volume", "2.5")).toBe(false);
+			expect(schema.offers("loops", "0")).toBe(false);
+		});
 	});
 });

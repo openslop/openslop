@@ -4,7 +4,11 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
-import { trimEndDef } from "@/lib/connectors/attributes/common";
+import {
+	durationDef,
+	trimEndDef,
+	volumeDef,
+} from "@/lib/connectors/attributes/common";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import type { ContentElement } from "@/lib/canvas/types";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -85,6 +89,29 @@ describe("AttributeBadge", () => {
 		it("has nothing to reset while the field is on Auto", () => {
 			const html = render(elementWith({}), trimEndDef);
 			expect(reset(html)).toBeUndefined();
+		});
+	});
+
+	describe("range", () => {
+		const thumb = (html: string) =>
+			html.match(/<span[^>]*role="slider"[^>]*>/)?.[0] ?? "";
+
+		it("is a slider named for the attribute, not a menu", () => {
+			const html = render(elementWith({ volume: "7" }), volumeDef("5"));
+			expect(thumb(html)).toContain('aria-label="Volume"');
+			expect(html).not.toContain('aria-haspopup="menu"');
+		});
+
+		it("reads out the value with its unit", () => {
+			const html = render(elementWith({ duration: "12" }), durationDef);
+			expect(thumb(html)).toContain('aria-valuemax="15"');
+			expect(html).toMatch(/font-numeric[^>]*>12s</);
+		});
+
+		it("reads out nothing while the element has no value", () => {
+			expect(render(elementWith({}), volumeDef("5"))).toMatch(
+				/font-numeric[^>]*>—</,
+			);
 		});
 	});
 });
