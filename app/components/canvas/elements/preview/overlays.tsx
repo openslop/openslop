@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { X, AlertCircle, Check, Copy } from "@/components/ui/icon";
+import { X, AlertCircle } from "@/components/ui/icon";
+import { CopyButton } from "@/components/ui/copy-button";
 import { IconButton } from "@/components/ui/icon-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { isGenerationActive } from "@/lib/generation/snapshots";
-import { toastError } from "@/lib/toast-error";
 import { GenerationIndicator } from "../generation-indicator";
 import type {
 	GenerationState,
@@ -57,44 +56,19 @@ export function ResultOverlay({ status, startedAt }: GenerationState) {
 }
 
 export function ErrorMessage({ message }: { message: string }) {
-	const [copied, setCopied] = useState(false);
-	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	useEffect(
-		() => () => {
-			if (timerRef.current) clearTimeout(timerRef.current);
-		},
-		[],
-	);
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(message);
-		} catch (error) {
-			toastError(error, "Couldn't copy the error");
-			return;
-		}
-		setCopied(true);
-		if (timerRef.current) clearTimeout(timerRef.current);
-		timerRef.current = setTimeout(() => setCopied(false), 1500);
-	};
 	return (
 		<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-12 py-2">
-			<div className="pointer-events-auto flex max-h-full max-w-full items-start gap-1.5 overflow-auto rounded-lg bg-destructive px-3 py-1.5 shadow-elevation-1">
-				<AlertCircle className="mt-px h-3.5 w-3.5 text-destructive-foreground" />
-				<p className="min-w-0 whitespace-pre-wrap break-words text-label leading-snug text-destructive-foreground">
+			<div className="pointer-events-auto flex max-h-full max-w-full items-start gap-1.5 overflow-auto rounded-lg bg-destructive px-3 py-1.5 text-destructive-foreground shadow-elevation-1">
+				<AlertCircle className="mt-px h-3.5 w-3.5" />
+				<p className="min-w-0 whitespace-pre-wrap break-words text-label leading-snug">
 					{message}
 				</p>
-				<button
-					type="button"
-					onClick={handleCopy}
-					aria-label={copied ? "Copied" : "Copy error message"}
-					className="mt-px shrink-0 rounded text-destructive-foreground transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-border"
-				>
-					{copied ? (
-						<Check className="h-3.5 w-3.5" />
-					) : (
-						<Copy className="h-3.5 w-3.5" />
-					)}
-				</button>
+				<CopyButton
+					text={message}
+					label="Copy error message"
+					variant="inherit"
+					size="sm"
+				/>
 			</div>
 		</div>
 	);
