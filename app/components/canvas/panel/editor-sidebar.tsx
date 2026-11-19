@@ -244,7 +244,7 @@ function EditorSidebarComponent() {
 					</div>
 					<div
 						key={active}
-						className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 [scrollbar-gutter:stable]"
+						className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 scrollbar-gutter-stable"
 					>
 						<current.Panel />
 					</div>

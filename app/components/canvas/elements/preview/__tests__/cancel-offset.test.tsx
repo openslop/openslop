@@ -27,9 +27,7 @@ describe("cancel button offset", () => {
 		const html = withTooltip(
 			<MediaResult {...generating} url={undefined} outputKind="image" />,
 		);
-		expect(cancelButtonClass(html)).toContain(
-			"top-[var(--cancel-offset,0.5rem)]",
-		);
+		expect(cancelButtonClass(html)).toContain("top-(--cancel-offset,0.5rem)");
 	});
 
 	it("renders the media instead of the placeholder once a url arrives", () => {
