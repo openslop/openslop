@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
+import { NOTHING_TO_PLAY } from "@/lib/components/unavailable-reasons";
 import { cn } from "@/lib/utils";
 import { toFrames } from "@/lib/render/frames";
 import { findSegmentIndexAtFrame } from "@/lib/render/scene-segments";
@@ -61,14 +62,16 @@ function BottomTransportBarComponent() {
 				<div className="flex items-center gap-1">
 					<TooltipIconButton
 						label="Previous scene"
-						disabled={!canSeek}
+						reason={NOTHING_TO_PLAY}
+						unavailable={!canSeek}
 						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft />
 					</TooltipIconButton>
 					<TooltipIconButton
 						label={playing ? "Pause" : "Play"}
-						disabled={!canPlay}
+						reason={NOTHING_TO_PLAY}
+						unavailable={!canPlay}
 						onClick={() => {
 							showPlayer();
 							player?.toggle();
@@ -78,7 +81,8 @@ function BottomTransportBarComponent() {
 					</TooltipIconButton>
 					<TooltipIconButton
 						label="Next scene"
-						disabled={!canSeek}
+						reason={NOTHING_TO_PLAY}
+						unavailable={!canSeek}
 						onClick={() => seekToAdjacentScene(1)}
 					>
 						<ChevronsRight />

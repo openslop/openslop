@@ -5,6 +5,7 @@ import { AlertCircleFilled, Hourglass, Sparkles } from "@/components/ui/icon";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
+import { ADD_PROMPT } from "@/lib/components/unavailable-reasons";
 import {
 	isGenerationActive,
 	type GenerationStatus,
@@ -44,15 +45,17 @@ function generateLabel(status: GenerationStatus, hasResult: boolean) {
 export function GenerateButton({
 	status,
 	hasResult,
-	disabled,
+	unavailable,
 	onGenerate,
 	className,
+	tooltip,
 }: {
 	status: GenerationStatus;
 	hasResult: boolean;
-	disabled: boolean;
+	unavailable: boolean;
 	onGenerate: () => void;
 	className?: string;
+	tooltip?: string;
 }) {
 	const label = generateLabel(status, hasResult);
 	return (
@@ -61,10 +64,13 @@ export function GenerateButton({
 			label={label}
 			variant="generate"
 			className={className}
-			disabled={disabled}
+			unavailable={unavailable}
 			onClick={onGenerate}
 			aria-label={label}
-			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}
+			tooltip={
+				tooltip ??
+				(hasResult ? "Regenerate this element" : "Generate this element")
+			}
 		/>
 	);
 }
@@ -75,7 +81,8 @@ export function ElementGenerateButton() {
 		<GenerateButton
 			status={status}
 			hasResult={hasResult}
-			disabled={!hasPrompt || isGenerationActive(status)}
+			unavailable={!hasPrompt || isGenerationActive(status)}
+			tooltip={hasPrompt ? undefined : ADD_PROMPT}
 			onGenerate={generate}
 		/>
 	);

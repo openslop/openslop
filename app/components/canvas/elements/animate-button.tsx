@@ -5,6 +5,7 @@ import { MagicVideo } from "@/components/ui/icon";
 import { useSloppy } from "@/app/components/sloppy/sloppy-provider";
 import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
 import type { ContentElement } from "@/lib/canvas/types";
+import { animateUnavailableReason } from "@/lib/components/unavailable-reasons";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { animateImagePrompt } from "@/lib/script/refine/animate-prompt";
 import { useEditorPanel } from "../panel/editor-panel-context";
@@ -16,13 +17,20 @@ export function AnimateButton({ element }: { element: ContentElement }) {
 	const { result, status } = useElementGeneration();
 	const { send, loading } = useSloppy();
 	const { setActive } = useEditorPanel();
+	const unavailableReason = animateUnavailableReason({
+		sloppyBusy: loading,
+		generating: isGenerationActive(status),
+	});
 
 	return (
 		<ElementActionButton
 			icon={<MagicVideo />}
 			label="Animate"
-			tooltip={`Turn this into a video element${result?.imageUrl ? " that starts from this image" : ""}`}
-			disabled={loading || isGenerationActive(status)}
+			tooltip={
+				unavailableReason ??
+				`Turn this into a video element${result?.imageUrl ? " that starts from this image" : ""}`
+			}
+			unavailable={unavailableReason !== null}
 			onClick={() => {
 				const path = ReactEditor.findPath(editor, element);
 				setActive("sloppy");
