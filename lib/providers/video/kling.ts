@@ -12,6 +12,7 @@ type OmniLimits = {
 	maxVoiceSec: number;
 	maxDescription: number;
 	soundSetting: boolean;
+	resolutionWithFrame: boolean;
 };
 
 const omniElement = async (
@@ -48,6 +49,7 @@ export const klingOmni =
 		references,
 		continuityFrames,
 		size,
+		resolution,
 	}) => {
 		const budget = budgetOf(startFrame, limits);
 		const shown = pictured(characters);
@@ -58,7 +60,9 @@ export const klingOmni =
 		return {
 			positivePrompt: renderPrompt(prompt, seats(seated, elementRef)),
 			...inputsOf({
-				frameImages: compact([startFrame]),
+				frameImages: compact([
+					startFrame && { image: startFrame, frame: "first" },
+				]),
 				elements: await Promise.all(
 					seated.map((character) => omniElement(character, limits)),
 				),
@@ -71,6 +75,6 @@ export const klingOmni =
 			...(limits.soundSetting && {
 				providerSettings: { klingai: { sound: true } },
 			}),
-			...(startFrame ? {} : size),
+			...(startFrame ? limits.resolutionWithFrame && { resolution } : size),
 		};
 	};

@@ -43,7 +43,12 @@ const OMNI_LIMITS = {
 	maxDescription: 100,
 };
 
-const omni = klingOmni({ ...OMNI_LIMITS, soundSetting: true });
+// 3.0 rejects resolution without a video input.
+const omni = klingOmni({
+	...OMNI_LIMITS,
+	soundSetting: true,
+	resolutionWithFrame: false,
+});
 
 const CONDITIONERS: Record<ModelId, Conditioner> = {
 	// Runware allows 0.2 s over the 15 s, which covers a cut running a frame long.
@@ -67,6 +72,7 @@ const CONDITIONERS: Record<ModelId, Conditioner> = {
 	"klingai:kling-video@4.0": klingOmni({
 		...OMNI_LIMITS,
 		soundSetting: false,
+		resolutionWithFrame: true,
 	}),
 };
 
