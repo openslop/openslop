@@ -506,6 +506,34 @@ describe("RunwareVideo", () => {
 				expect(request).not.toHaveProperty("resolution");
 			});
 
+			it("casts Kling 4 Omni the same way, without the sound setting it rejects", async () => {
+				mockVideoInference.mockResolvedValue({
+					taskUUID: "job-k4",
+					status: "processing",
+				});
+
+				await new RunwareVideo("test-key").submit({
+					prompt: "{{Sol}} talks",
+					model: "klingai:kling-video@4.0",
+					characterAssets: [
+						{ name: "Sol", avatarUrl: avatar("Sol"), voice: SOL.voice },
+					],
+				});
+
+				const request = mockVideoInference.mock.calls[0]?.[0];
+				expect(request).toEqual(
+					expect.objectContaining({
+						positivePrompt: "<<<element_1>>> talks",
+						inputs: {
+							elements: [{ ...asElement("Sol"), voices: [SOL.voice.url] }],
+						},
+						width: 1280,
+						height: 720,
+					}),
+				);
+				expect(request).not.toHaveProperty("providerSettings");
+			});
+
 			it("drops a voice under 5 s and cuts one over 30 s", async () => {
 				const request = await omniRequest({
 					prompt: "they talk",

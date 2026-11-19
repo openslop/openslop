@@ -56,6 +56,7 @@ const OPENSLOP_PROVIDERS: {
 	},
 	video: {
 		"Kling 3 Omni": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
+		"Kling 4 Omni": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 		"Seedance 2 Fast": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 	},
 	sfx: {

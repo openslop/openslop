@@ -11,7 +11,7 @@ type OmniLimits = {
 	minVoiceSec: number;
 	maxVoiceSec: number;
 	maxDescription: number;
-	sound: boolean;
+	soundSetting: boolean;
 };
 
 const omniElement = async (
@@ -68,7 +68,9 @@ export const klingOmni =
 					...references,
 				].slice(0, budget.slots - seated.length),
 			}),
-			providerSettings: { klingai: { sound: limits.sound } },
+			...(limits.soundSetting && {
+				providerSettings: { klingai: { sound: true } },
+			}),
 			...(startFrame ? {} : size),
 		};
 	};
