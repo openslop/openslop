@@ -66,7 +66,6 @@ const CONDITIONERS: Record<ModelId, Conditioner> = {
 	// 4.0 always makes sound and rejects providerSettings.
 	"klingai:kling-video@4.0": klingOmni({
 		...OMNI_LIMITS,
-		maxElementsWithFrame: 6,
 		soundSetting: false,
 	}),
 };
