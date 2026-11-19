@@ -18,7 +18,10 @@ import type {
 } from "@/lib/connectors/types";
 import { useCreateConnector } from "@/lib/connectors/use-create-connector";
 import { useVoiceSearch } from "@/lib/connectors/tts/use-voice-search";
-import { startPlayback } from "@/lib/components/start-playback";
+import {
+	startPlayback,
+	stopFailedPlayback,
+} from "@/lib/components/start-playback";
 import { toastError } from "@/lib/toast-error";
 import { cn } from "@/lib/utils";
 import { FieldHeader, FieldLabel } from "./fields";
@@ -57,7 +60,7 @@ function PreviewPlayButton({ load }: { load: () => Promise<string> }) {
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}
 				onEnded={() => setPlaying(false)}
-				onError={() => setPlaying(false)}
+				onError={(event) => stopFailedPlayback(event.currentTarget)}
 			/>
 			<TooltipIconButton
 				label={playing ? "Pause" : "Play"}

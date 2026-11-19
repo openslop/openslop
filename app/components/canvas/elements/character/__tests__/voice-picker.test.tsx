@@ -131,7 +131,7 @@ describe("VoiceRow", () => {
 		expect(toastError).toHaveBeenCalledWith(refusal, "Could not play audio");
 	});
 
-	it("offers Play again when the preview fails mid-play", async () => {
+	it("stops and says so when the preview fails mid-play", async () => {
 		render(false);
 		await act(async () => previewButton().click());
 		expect(previewButton().getAttribute("aria-label")).toBe("Pause");
@@ -139,6 +139,11 @@ describe("VoiceRow", () => {
 		const audio = container.querySelector("audio");
 		act(() => audio?.dispatchEvent(new Event("error")));
 
+		expect(audio?.paused).toBe(true);
 		expect(previewButton().getAttribute("aria-label")).toBe("Play");
+		expect(toastError).toHaveBeenCalledWith(
+			"the file stopped loading",
+			"Could not play audio",
+		);
 	});
 });
