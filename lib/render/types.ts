@@ -34,7 +34,8 @@ export type ResolvedElement = Trim & {
 	loop: boolean;
 	volume: number;
 	motion: MotionEffect;
-	captions?: ResolvedCaptions;
+	/** Timed from the start of its media, before any trim. */
+	captions?: Caption[];
 };
 
 export type Sequence = {
