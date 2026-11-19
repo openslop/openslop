@@ -4,13 +4,6 @@ import type { CaptionStyle } from "../captions/caption-style";
 import type { MotionEffect } from "./motion-effect-names";
 import type { TransitionType } from "./transitions";
 
-/** The words an element shows, from its trim start. */
-export type ResolvedCaptions = {
-	/** Where `words` start in the element's own word list, past those the trim cut. */
-	trimIndexOffset: number;
-	words: Caption[];
-};
-
 /** Where a clip opens in its media, and how long it plays from there. */
 export type Trim = {
 	trimStartSec: number;
