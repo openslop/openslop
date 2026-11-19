@@ -1,6 +1,9 @@
 const ANIMATION =
 	"Best for animation and anything that isn't live action. Characters speak many languages.";
 
+const ANY_STYLE =
+	"Works for live action and animation. Characters speak many languages.";
+
 const LIVE_ACTION =
 	"Best for live action. Characters can only speak English, Chinese, Japanese, Korean or Spanish.";
 
@@ -32,5 +35,12 @@ export const RUNWARE_VIDEO_MODELS = {
 		speed: "low",
 		resolutions: ["1080p"],
 		description: LIVE_ACTION,
+	},
+	"Kling 4 Omni": {
+		id: "klingai:kling-video@4.0",
+		cost: "high",
+		speed: "low",
+		resolutions: ["720p", "1080p"],
+		description: ANY_STYLE,
 	},
 } as const;

@@ -421,7 +421,7 @@ describe("RunwareVideo", () => {
 			);
 		});
 
-		describe("Kling 3 Omni", () => {
+		describe("Kling Omni", () => {
 			const OMNI = "klingai:kling-video@o3-standard";
 			const ELEMENT_ID = expect.stringMatching(/^[\w-]{20}$/);
 
@@ -437,12 +437,13 @@ describe("RunwareVideo", () => {
 
 			const omniRequest = async (
 				params: Omit<Parameters<RunwareVideo["submit"]>[0], "model">,
+				model = OMNI,
 			) => {
 				mockVideoInference.mockResolvedValue({
 					taskUUID: "job-o",
 					status: "processing",
 				});
-				await new RunwareVideo("test-key").submit({ ...params, model: OMNI });
+				await new RunwareVideo("test-key").submit({ ...params, model });
 				return mockVideoInference.mock.calls[0]?.[0];
 			};
 
@@ -478,20 +479,15 @@ describe("RunwareVideo", () => {
 			});
 
 			it("casts Omni Pro the same way, sized at its own 1080p default", async () => {
-				mockVideoInference.mockResolvedValue({
-					taskUUID: "job-op",
-					status: "processing",
-				});
-
-				await new RunwareVideo("test-key").submit({
-					prompt: "{{Sol}} talks",
-					model: "klingai:kling-video@o3-pro",
-					characterAssets: [
-						{ name: "Sol", avatarUrl: avatar("Sol"), voice: SOL.voice },
-					],
-				});
-
-				const request = mockVideoInference.mock.calls[0]?.[0];
+				const request = await omniRequest(
+					{
+						prompt: "{{Sol}} talks",
+						characterAssets: [
+							{ name: "Sol", avatarUrl: avatar("Sol"), voice: SOL.voice },
+						],
+					},
+					"klingai:kling-video@o3-pro",
+				);
 				expect(request).toEqual(
 					expect.objectContaining({
 						positivePrompt: "<<<element_1>>> talks",
@@ -504,6 +500,29 @@ describe("RunwareVideo", () => {
 					}),
 				);
 				expect(request).not.toHaveProperty("resolution");
+			});
+
+			it("casts Kling 4 Omni the same way, without the sound setting it rejects", async () => {
+				const request = await omniRequest(
+					{
+						prompt: "{{Sol}} talks",
+						characterAssets: [
+							{ name: "Sol", avatarUrl: avatar("Sol"), voice: SOL.voice },
+						],
+					},
+					"klingai:kling-video@4.0",
+				);
+				expect(request).toEqual(
+					expect.objectContaining({
+						positivePrompt: "<<<element_1>>> talks",
+						inputs: {
+							elements: [{ ...asElement("Sol"), voices: [SOL.voice.url] }],
+						},
+						width: 1280,
+						height: 720,
+					}),
+				);
+				expect(request).not.toHaveProperty("providerSettings");
 			});
 
 			it("drops a voice under 5 s and cuts one over 30 s", async () => {

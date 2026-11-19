@@ -35,14 +35,15 @@ function toVideoJob(video: RunwareVideoTask): VideoJob {
 type ModelId =
 	(typeof RUNWARE_VIDEO_MODELS)[keyof typeof RUNWARE_VIDEO_MODELS]["id"];
 
-const omni = klingOmni({
+const OMNI_LIMITS = {
 	maxReferences: 7,
 	maxElementsWithFrame: 3,
 	minVoiceSec: 5,
 	maxVoiceSec: 30,
 	maxDescription: 100,
-	sound: true,
-});
+};
+
+const omni = klingOmni({ ...OMNI_LIMITS, soundSetting: true });
 
 const CONDITIONERS: Record<ModelId, Conditioner> = {
 	// Runware allows 0.2 s over the 15 s, which covers a cut running a frame long.
@@ -62,6 +63,11 @@ const CONDITIONERS: Record<ModelId, Conditioner> = {
 	}),
 	"klingai:kling-video@o3-standard": omni,
 	"klingai:kling-video@o3-pro": omni,
+	// 4.0 always makes sound and rejects providerSettings.
+	"klingai:kling-video@4.0": klingOmni({
+		...OMNI_LIMITS,
+		soundSetting: false,
+	}),
 };
 
 const runwareModel = (model: string) =>
