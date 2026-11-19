@@ -4,13 +4,19 @@ import type { Caption } from "@remotion/captions";
 import { clamp } from "@/lib/utils";
 import {
 	MIN_DURATION_SEC,
-	type ResolvedCaptions,
 	type ResolvedElement,
 	type Sequence,
 	type Trim,
 } from "./types";
 
 export type TrimEdge = "start" | "end";
+
+/** The words a clip shows, from its trim start. */
+type TrimmedCaptions = {
+	/** Where `words` start in the element's own word list, past those the trim cut. */
+	trimIndexOffset: number;
+	words: Caption[];
+};
 
 export const mediaUrlAt = (url: string, sec: number): string =>
 	sec > 0 ? `${url}#t=${sec}` : url;
@@ -55,7 +61,7 @@ export const playedTrim = ({ element, duration }: Sequence): Trim => ({
 export function trimCaptions(
 	captions: Caption[],
 	{ trimStartSec, trimDurationSec }: Trim,
-): ResolvedCaptions {
+): TrimmedCaptions {
 	const trimStartMs = trimStartSec * 1000;
 	const trimEndMs = trimStartMs + trimDurationSec * 1000;
 	const start = captions.filter(
