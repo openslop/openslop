@@ -101,9 +101,11 @@ describe("listModels", () => {
 			row({ provider: "openslop", model: "Muse Image" }),
 			row({ provider: "openslop", model: "Seedream 5 Lite" }),
 			row({ provider: "openslop", model: "Grok Imagine 2.0" }),
+			row({ provider: "openslop", model: "GPT Image 2.6 Sunburst" }),
 			row({ provider: "runware", model: "Muse Image" }),
 			row(SEEDREAM),
 			row({ provider: "runware", model: "Grok Imagine 2.0" }),
+			row({ provider: "runware", model: "GPT Image 2.6 Sunburst" }),
 		]);
 	});
 });
