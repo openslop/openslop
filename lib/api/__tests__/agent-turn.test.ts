@@ -123,6 +123,37 @@ beforeEach(() => {
 });
 
 describe("streamAgentTurn", () => {
+	it.each([
+		[{ elementId: "e12", sceneNumber: 3 }, "element e12 (scene 3)"],
+		[{ elementId: "style" }, "element style"],
+	] as const)(
+		"renders the user's focus as model context: %s",
+		async (data, selected) => {
+			const message = asked("make this funnier");
+			message.parts.push({ type: "data-focus", data });
+
+			await runTurn(TEXT_TURN, { message });
+
+			expect(calls[0].prompt[1]).toMatchObject({
+				role: "user",
+				content: [
+					{ type: "text", text: "make this funnier" },
+					{ type: "text", text: `The user has ${selected} selected.` },
+				],
+			});
+			expect(saved(0).parts).toEqual(message.parts);
+		},
+	);
+
+	it("adds no focus context when the message has none", async () => {
+		await runTurn(TEXT_TURN);
+
+		expect(calls[0].prompt[1]).toMatchObject({
+			role: "user",
+			content: [{ type: "text", text: "make it shorter" }],
+		});
+	});
+
 	it("records what came in before asking the model", async () => {
 		await runTurn(TEXT_TURN);
 
@@ -259,6 +290,27 @@ describe("streamAgentTurn", () => {
 				input: { ops: [{ op: "remove", id: "n1" }] },
 			}),
 		);
+	});
+
+	it("hands the editor several independent looks in one model step", async () => {
+		const chunks = await runTurn([
+			{ type: "stream-start", warnings: [] },
+			...Array.from(
+				{ length: 4 },
+				(_, index): LanguageModelV3StreamPart => ({
+					type: "tool-call",
+					toolCallId: `look-${index}`,
+					toolName: "view_result",
+					input: JSON.stringify({ id: `image-${index}` }),
+				}),
+			),
+			{ ...finish, finishReason: { unified: "tool-calls", raw: "tool_use" } },
+		]);
+
+		expect(calls).toHaveLength(1);
+		expect(
+			chunks.filter((chunk) => chunk.type === "tool-input-available"),
+		).toHaveLength(4);
 	});
 });
 

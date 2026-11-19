@@ -263,6 +263,33 @@ describe("pruneTranscript", () => {
 });
 
 describe("parseSloppyMessage", () => {
+	it("accepts focus context on incoming and stored messages", async () => {
+		const focused: SloppyMessage = {
+			...asked,
+			parts: [
+				...asked.parts,
+				{ type: "data-focus", data: { elementId: "e12", sceneNumber: 3 } },
+			],
+		};
+
+		await expect(parseSloppyMessage(focused)).resolves.toEqual(focused);
+		await expect(parseSloppyMessages([focused])).resolves.toEqual([focused]);
+	});
+
+	it.each([
+		{ elementId: "" },
+		{ elementId: 12 },
+		{ elementId: "e12", sceneNumber: 0 },
+		{ elementId: "e12", sceneNumber: "3" },
+	])("rejects malformed focus context: %s", async (data) => {
+		await expect(
+			parseSloppyMessage({
+				...asked,
+				parts: [...asked.parts, { type: "data-focus", data }],
+			}),
+		).resolves.toBeNull();
+	});
+
 	it("reads a message the editor sent", async () => {
 		const message = await parseSloppyMessage({
 			id: "m1",
