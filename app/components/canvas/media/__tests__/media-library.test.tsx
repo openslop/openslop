@@ -73,4 +73,23 @@ describe("MediaLibrary", () => {
 
 		expect(store.getState().media).toEqual([]);
 	});
+
+	it("deletes a picture once confirmed", async () => {
+		open();
+		await act(async () =>
+			store
+				.getState()
+				.addMedia([{ kind: "image", name: "pic.png", url: "https://i/p" }]),
+		);
+		await click('[role=radio][aria-label="Images"]');
+
+		await chooseTileMenuItem("pic", "Delete");
+		await act(async () =>
+			Array.from(document.querySelectorAll("[role=alertdialog] button"))
+				.find((button) => button.textContent === "Delete")
+				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+		);
+
+		expect(store.getState().media).toEqual([]);
+	});
 });

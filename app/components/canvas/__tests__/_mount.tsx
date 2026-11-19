@@ -44,6 +44,22 @@ export const click = (selector: string) =>
 		target.click();
 	});
 
+/** Opens the ⋮ menu of the tile named `tile` and lists the labels of its items. */
+export async function tileMenuItems(tile: string) {
+	await act(async () => {
+		const trigger = document.body.querySelector(
+			`button[aria-label="More actions for ${tile}"]`,
+		);
+		if (!trigger) throw new Error(`no menu for ${tile}`);
+		trigger.dispatchEvent(
+			new PointerEvent("pointerdown", { bubbles: true, button: 0 }),
+		);
+	});
+	return Array.from(
+		document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+	).map((element) => element.textContent);
+}
+
 /** Opens the ⋮ menu of the tile named `tile` and chooses the item reading `item`. */
 export async function chooseTileMenuItem(tile: string, item: string) {
 	await act(async () => {

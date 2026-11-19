@@ -78,32 +78,26 @@ type ReferenceTileProps = { url: string; index: number };
 
 const referenceName = (index: number) => `Reference ${index + 1}`;
 
-/** A reference image: its menu takes it off the references, or deletes its file from the project's media and the references both. */
+/** A reference image: its menu takes it off the references. */
 export function ReferenceTile({
 	url,
 	index,
 	primary,
 	onRemove,
 }: ReferenceTileProps & { primary?: TilePrimary; onRemove: () => void }) {
-	const item = useProject((state) => state.media.find((m) => m.url === url));
-	const remove = useDeleteMedia(item?.name ?? "", onRemove);
 	return (
-		<>
-			<AssetTile
-				name={referenceName(index)}
-				previewUrl={url}
-				context="Reference image"
-				Icon={Image}
-				primary={primary}
-				menu={
-					<TileMenuItem icon={X} onSelect={onRemove}>
-						Remove from references
-					</TileMenuItem>
-				}
-				onDelete={item && remove.request}
-			/>
-			{remove.dialog}
-		</>
+		<AssetTile
+			name={referenceName(index)}
+			previewUrl={url}
+			context="Reference image"
+			Icon={Image}
+			primary={primary}
+			menu={
+				<TileMenuItem icon={X} onSelect={onRemove}>
+					Remove from references
+				</TileMenuItem>
+			}
+		/>
 	);
 }
 
@@ -148,6 +142,8 @@ type MediaTileProps = TileProps & {
 	item: MediaItem;
 	/** Menu items before Delete. */
 	menu?: ReactNode;
+	/** Adds Delete to the menu; only the Media Library passes it. */
+	onDelete?: () => void;
 };
 
 /** A piece of the project's media as a small tile; the caller says what its face does, if anything. */
@@ -155,33 +151,35 @@ export function MediaAssetTile({
 	item: { name, kind, url, createdAt },
 	primary,
 	menu,
+	onDelete,
 	children,
 }: MediaTileProps & { primary: TilePrimary | undefined }) {
-	const remove = useDeleteMedia(name);
 	const previewKind = kind === "audio" ? undefined : kind;
 	return (
-		<>
-			<AssetTile
-				name={name}
-				previewUrl={previewKind && url}
-				previewKind={previewKind}
-				context="Media"
-				createdAt={createdAt}
-				Icon={MEDIA_KINDS[kind].Icon}
-				fallback="icon"
-				primary={primary}
-				menu={menu}
-				onDelete={remove.request}
-			>
-				{children}
-			</AssetTile>
-			{remove.dialog}
-		</>
+		<AssetTile
+			name={name}
+			previewUrl={previewKind && url}
+			previewKind={previewKind}
+			context="Media"
+			createdAt={createdAt}
+			Icon={MEDIA_KINDS[kind].Icon}
+			fallback="icon"
+			primary={primary}
+			menu={menu}
+			onDelete={onDelete}
+		>
+			{children}
+		</AssetTile>
 	);
 }
 
 /** Media as a library shows it: a video's face plays it, anything else's loads its request, which is otherwise in the menu. */
-export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
+export function LibraryMediaTile({
+	item,
+	menu,
+	onDelete,
+	children,
+}: MediaTileProps) {
 	const player = useTilePlayer(
 		item.kind === "video" ? item.url : undefined,
 		item.name,
@@ -191,6 +189,7 @@ export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
 		<MediaAssetTile
 			item={item}
 			primary={player.primary ?? request}
+			onDelete={onDelete}
 			menu={
 				<>
 					{player.primary && request && <LoadRequestItem {...request} />}
@@ -232,8 +231,21 @@ export function MediaLibraryItem({ item, menu, children }: MediaTileProps) {
 	return item.kind === "audio" ? (
 		<MediaAudioRow item={item} menu={menu} />
 	) : (
-		<LibraryMediaTile item={item} menu={menu}>
+		<DeletableLibraryTile item={item} menu={menu}>
 			{children}
-		</LibraryMediaTile>
+		</DeletableLibraryTile>
+	);
+}
+
+/** A library tile whose menu can delete the file from the project's media. */
+function DeletableLibraryTile({ item, menu, children }: MediaTileProps) {
+	const remove = useDeleteMedia(item.name);
+	return (
+		<>
+			<LibraryMediaTile item={item} menu={menu} onDelete={remove.request}>
+				{children}
+			</LibraryMediaTile>
+			{remove.dialog}
+		</>
 	);
 }
