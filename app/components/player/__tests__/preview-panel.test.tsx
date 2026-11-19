@@ -21,7 +21,9 @@ vi.mock("../project-preview", () => ({
 	ProjectPreview: () => <div data-testid="preview" />,
 }));
 vi.mock("../player-shimmer", () => ({
-	PlayerShimmer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+	PlayerShimmer: ({ children }: { children: React.ReactNode }) => (
+		<>{children}</>
+	),
 }));
 
 import { PreviewPanel } from "../preview-panel";
