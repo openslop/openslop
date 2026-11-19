@@ -26,7 +26,7 @@ import { toastError } from "@/lib/toast-error";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
 import { captionsActions, captionsPending } from "../elements/captions-menu";
-import { TileMenuItem } from "../elements/tile-actions";
+import { DeleteItem, TileMenuItem } from "../elements/tile-actions";
 import { usesFor, type MediaUse } from "./media-uses";
 
 /** Mounted as the menu opens, so the targets are read from the canvas as it is then. */
@@ -160,6 +160,25 @@ function CaptionsItem({
 	);
 }
 
+/** Asks before taking a piece of media out of the project. */
+function useDeleteMedia(name: string) {
+	const removeMedia = useProject((state) => state.removeMedia);
+	const [confirming, setConfirming] = useState(false);
+	return {
+		request: () => setConfirming(true),
+		dialog: (
+			<ConfirmDeleteDialog
+				target={confirming ? name : undefined}
+				onClose={() => setConfirming(false)}
+				title={(target) => `Delete ${target}?`}
+				description="This deletes it from the project's media. It can't be undone. Elements already using it keep it."
+				actionLabel="Delete"
+				onConfirm={removeMedia}
+			/>
+		),
+	};
+}
+
 /** A piece of the project's media, with what the Media panel can do with it. */
 export function LibraryTile({
 	item,
@@ -170,6 +189,7 @@ export function LibraryTile({
 	referencesOf?: string;
 }) {
 	const captions = useMediaCaptions(item);
+	const remove = useDeleteMedia(item.name);
 	return (
 		<>
 			<MediaLibraryItem
@@ -181,6 +201,7 @@ export function LibraryTile({
 						)}
 						{isKindCaptionable(item.kind) && <CaptionsItem {...captions} />}
 						<UseAsItem item={item} />
+						<DeleteItem onSelect={remove.request} />
 					</>
 				}
 			>
@@ -191,6 +212,7 @@ export function LibraryTile({
 				)}
 			</MediaLibraryItem>
 			{captions.dialog}
+			{remove.dialog}
 		</>
 	);
 }

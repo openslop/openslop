@@ -19,6 +19,7 @@ import {
 import {
 	chooseTileMenuItem,
 	click,
+	menuItems,
 	mountOnCanvas,
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
@@ -91,7 +92,7 @@ describe("AssetStrip", () => {
 		expect(openPanel()).toBe("assets");
 	});
 
-	it("shows the project's media and asks before removing an item", async () => {
+	it("shows the project's media without offering to delete it", async () => {
 		open(<AssetStripMedia />);
 		await act(async () =>
 			store
@@ -101,12 +102,9 @@ describe("AssetStrip", () => {
 
 		expect(document.body.textContent).toContain("intro");
 
-		await chooseTileMenuItem("intro", "Delete");
+		await chooseTileMenuItem("intro");
 
-		expect(store.getState().media).toHaveLength(1);
-		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(
-			"Delete intro?",
-		);
+		expect(menuItems()).not.toContain("Delete");
 	});
 
 	const openUploadedReference = async () => {
@@ -133,18 +131,12 @@ describe("AssetStrip", () => {
 		expect(store.getState().media).toHaveLength(1);
 	});
 
-	it("deletes a reference's file from the media and the references once confirmed", async () => {
+	it("does not offer to delete a reference's file", async () => {
 		await openUploadedReference();
 
-		await chooseTileMenuItem("Reference 1", "Delete");
-		await act(async () =>
-			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Delete")
-				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-		);
+		await chooseTileMenuItem("Reference 1");
 
-		expect(store.getState().media).toEqual([]);
-		expect(referenceUrls()).toEqual([]);
+		expect(menuItems()).not.toContain("Delete");
 	});
 
 	it("shows an uploaded reference once, as a reference", async () => {

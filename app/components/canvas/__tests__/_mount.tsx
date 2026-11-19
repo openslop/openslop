@@ -44,6 +44,9 @@ export const click = (selector: string) =>
 		target.click();
 	});
 
+const openMenuItems = () =>
+	Array.from(document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+
 /** Opens the ⋮ menu of the tile named `tile` and chooses the item reading `item`, through any submenus before it. */
 export async function chooseTileMenuItem(tile: string, ...path: string[]) {
 	await act(async () => {
@@ -57,13 +60,16 @@ export async function chooseTileMenuItem(tile: string, ...path: string[]) {
 	});
 	for (const item of path)
 		await act(async () => {
-			const found = Array.from(
-				document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
-			).find((element) => element.textContent === item);
+			const found = openMenuItems().find(
+				(element) => element.textContent === item,
+			);
 			if (!found) throw new Error(`no menu item reads ${item}`);
 			found.click();
 		});
 }
+
+/** The labels of the items in the open menu. */
+export const menuItems = () => openMenuItems().map((item) => item.textContent);
 
 /** Types into a controlled field the way a browser reports it to React. */
 export const type = (
