@@ -16,16 +16,16 @@ const where = ({ sceneNumber, type, id }: VisualSpan) =>
 	`${sceneLabel(sceneNumber)} ${type} ${id}`;
 
 const changeLine = ({ span, duration, needed }: DurationFit) =>
-	`${where(span)}: ${span.durationSec}s to ${duration}s, for about ${seconds(needed)} of estimated speech and leeway.`;
+	`${where(span)}: ${span.duration.sec}s to ${duration}s, for about ${seconds(needed)} of estimated speech and leeway.`;
 
 const shortLine = ({ span, needed }: DurationFit) =>
-	`${where(span)} needs about ${seconds(needed)} but ${span.maxDurationSec}s is the longest its model generates; split the speech after it across more visuals.`;
+	`${where(span)} needs about ${seconds(needed)} but ${span.duration.maxSec}s is the longest its model generates; split the speech after it across more visuals.`;
 
 const report = (...lines: (string | false)[]) =>
 	lines.filter(Boolean).join("\n");
 
 const isUnfitted = ({ span, duration }: DurationFit) =>
-	span.durationSec !== duration;
+	span.duration.sec !== duration;
 
 const toSetOp = ({ span, duration }: DurationFit) => ({
 	op: "set" as const,
