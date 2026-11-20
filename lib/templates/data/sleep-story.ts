@@ -29,7 +29,7 @@ export const sleepStory = {
 	},
 	systemPrompt: dedent`
 # Important
-Add motion to all images and videos. Every <speech> has speed="slow".
+Add motion to all images. Every <speech> has speed="slow".
 	`,
 	exampleText: dedent`
 #Music: Soft, slow, welcoming ambient pad with warm analog synth swells and distant felted piano notes, no percussion, like pulling a duvet up to your chin

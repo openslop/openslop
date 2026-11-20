@@ -9,7 +9,7 @@ export type RenderUpdate =
 	| { status: "done"; url: string; size: number };
 
 /**
- * Starts a Lambda render and yields progress until the output is ready.
+ * Starts a render and yields progress until the output is ready.
  * A render that fails upstream throws, so callers handle one error path.
  */
 export async function* runRender(

@@ -1,7 +1,6 @@
 import { isToggleOn } from "@/lib/canvas/types";
 import type { VendorParams } from "@/lib/connectors/models";
 import type { MusicGenerateParams } from "@/lib/connectors/types";
-import { audioPromptCache } from "../cache";
 import {
 	BaseElevenLabsAudio,
 	ELEVENLABS_AUDIO_FORMAT,
@@ -14,11 +13,6 @@ type MusicRequest = VendorParams<MusicGenerateParams>;
 /** The Scale plan is $299 for 1,993 minutes of music. */
 const USD_PER_SECOND = 0.15 / 60;
 
-const cache = audioPromptCache(
-	process.env.PINECONE_MUSIC_INDEX || "music",
-	"music",
-);
-
 export class ElevenLabsMusic
 	extends BaseElevenLabsAudio<MusicRequest>
 	implements MusicProvider
@@ -28,12 +22,6 @@ export class ElevenLabsMusic
 
 	protected costUsd(durationSec: number) {
 		return durationSec * USD_PER_SECOND;
-	}
-
-	override generate(params: MusicRequest) {
-		// The cache matches on prompt similarity alone, so it can't tell a sung track from an instrumental.
-		if (isToggleOn(params.lyrics)) return super.generate(params);
-		return cache.readThrough(params, () => super.generate(params));
 	}
 
 	protected requestStream(params: MusicRequest) {

@@ -136,14 +136,14 @@ describe("AttributeSchema", () => {
 	describe("range", () => {
 		it.each([
 			[volumeDef("5"), { min: 0, max: 10, step: 1 }],
-			[durationDef, { min: 4, max: 15, step: 1 }],
+			[durationDef(15), { min: 4, max: 15, step: 1 }],
 			[loopsDef, { min: 1, max: 8, step: 1 }],
 		])("slides $key over its options", (def, bounds) => {
 			expect(def.edit).toMatchObject({ kind: "range", ...bounds });
 		});
 
 		it("keeps the stored values projects already hold", () => {
-			const schema = AttributeSchema.from([volumeDef("5"), durationDef]);
+			const schema = AttributeSchema.from([volumeDef("5"), durationDef(15)]);
 			expect(schema.resolve({ volume: "7", duration: "12" })).toEqual({
 				volume: "7",
 				duration: "12",

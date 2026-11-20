@@ -73,38 +73,6 @@ describe("applyRefineOp — insert", () => {
 		expect(getContentTexts(editor)).toEqual(["hello", "rain"]);
 	});
 
-	it("inserts after an anchored element", () => {
-		const editor = makeEditor([
-			scene([
-				content("speech", "n1", "first"),
-				content("speech", "n2", "second"),
-			]),
-		]);
-
-		applyRefineOp(editor, {
-			op: "insert",
-			anchor_id: "n1",
-			elements: [{ type: "sound", text: "rain" }],
-		});
-
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["first", "rain", "second"]);
-	});
-
-	it("inserts before an anchored element", () => {
-		const editor = makeEditor([scene([content("speech", "n1", "first")])]);
-
-		applyRefineOp(editor, {
-			op: "insert",
-			anchor_id: "n1",
-			position: "before",
-			elements: [{ type: "sound", text: "rain" }],
-		});
-
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["rain", "first"]);
-	});
-
 	it.each([
 		["after", ["first", "A", "B", "C", "last"]],
 		["before", ["A", "B", "C", "first", "last"]],

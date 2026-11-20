@@ -54,7 +54,7 @@ const press = (key: string) =>
 
 describe("RangeAttributeField", () => {
 	it("sits at the element's value", () => {
-		mount(durationDef, { duration: "12" });
+		mount(durationDef(15), { duration: "12" });
 		expect(thumb().getAttribute("aria-valuenow")).toBe("12");
 		expect(thumb().getAttribute("aria-label")).toBe("Duration");
 		expect(readout()).toBe("12s");
@@ -74,7 +74,7 @@ describe("RangeAttributeField", () => {
 	});
 
 	it("stops at the ends of its range", async () => {
-		mount(durationDef, { duration: "15" });
+		mount(durationDef(15), { duration: "15" });
 		await press("ArrowRight");
 		expect(stored("duration")).toBe("15");
 	});

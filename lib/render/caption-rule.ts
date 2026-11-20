@@ -2,6 +2,7 @@ import {
 	groupIntoLines,
 	type CaptionLine,
 } from "@/lib/captions/caption-layout";
+import { playedTrim, trimCaptions } from "./clip-trim";
 import { allSequences } from "./sequences";
 import type { RenderLayout, Sequence } from "./types";
 
@@ -21,7 +22,10 @@ const isVideoInSpokenScene = (
 function captionLines(sequence: Sequence, lineMs: number): CaptionSequence[] {
 	const { element, start } = sequence;
 	if (!element.captions) return [];
-	const { trimIndexOffset, words } = element.captions;
+	const { trimIndexOffset, words } = trimCaptions(
+		element.captions,
+		playedTrim(sequence),
+	);
 	return groupIntoLines(words, lineMs, trimIndexOffset).map((line) => ({
 		element,
 		line,

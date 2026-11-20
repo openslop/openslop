@@ -103,7 +103,7 @@ describe("AttributeBadge", () => {
 		});
 
 		it("reads out the value with its unit", () => {
-			const html = render(elementWith({ duration: "12" }), durationDef);
+			const html = render(elementWith({ duration: "12" }), durationDef(15));
 			expect(thumb(html)).toContain('aria-valuemax="15"');
 			expect(html).toMatch(/font-numeric[^>]*>12s</);
 		});

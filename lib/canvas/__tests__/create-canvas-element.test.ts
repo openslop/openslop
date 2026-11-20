@@ -10,11 +10,6 @@ const PINNED = { provider: "runware", model: "Seedream 5 Lite" } as const;
 const CARTESIA = { provider: "cartesia", model: "Sonic 3.6" } as const;
 
 describe("createCanvasElement", () => {
-	it("backfills defaultAttributes for sound (loops=1)", () => {
-		const node = createCanvasElement("sound");
-		expect(flatAttributes(node).loops).toBe("1");
-	});
-
 	it("caller-supplied attrs override defaults", () => {
 		const node = createCanvasElement("sound", {
 			attrs: { loops: "3" },

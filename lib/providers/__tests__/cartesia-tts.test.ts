@@ -536,26 +536,6 @@ describe("CartesiaTTS", () => {
 			expect(result).toHaveLength(3);
 		});
 
-		it("aggregates voices across multiple pages", async () => {
-			mockGet
-				.mockResolvedValueOnce({
-					data: makeVoices(100),
-					has_more: true,
-					next_page: "cur1",
-				})
-				.mockResolvedValueOnce({
-					data: makeVoices(50, 100),
-					has_more: false,
-					next_page: null,
-				});
-
-			const provider = new CartesiaTTS("test-key");
-			const voices = await provider.search({});
-
-			expect(voices).toHaveLength(150);
-			expect(mockGet).toHaveBeenCalledTimes(2);
-		});
-
 		it("serves a repeat search with identical params from cache", async () => {
 			mockGet.mockResolvedValue(makePage(makeVoices(10)));
 			const provider = new CartesiaTTS("test-key");

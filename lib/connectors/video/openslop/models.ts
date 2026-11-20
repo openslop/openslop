@@ -3,5 +3,6 @@ import { RUNWARE_VIDEO_MODELS } from "../runware/models";
 
 export const OPENSLOP_VIDEO_MODELS = pick(RUNWARE_VIDEO_MODELS, [
 	"Kling 3 Omni",
+	"Kling 4 Omni",
 	"Seedance 2 Fast",
 ]);

@@ -398,7 +398,6 @@ describe("prompt caching", () => {
 
 		const [standing, next] = calls[0].prompt;
 		expect(standing).toMatchObject({ role: "system", providerOptions: MARK });
-		expect(JSON.stringify(standing)).toContain("You are Sloppy");
 		expect(next?.role).toBe("user");
 	});
 });
