@@ -9,6 +9,10 @@ import {
 	ModelSelectTrigger,
 } from "@/app/components/models/model-select";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
+import {
+	TYPE_MESSAGE,
+	WAIT_FOR_SLOPPY,
+} from "@/lib/components/unavailable-reasons";
 import { useProject } from "@/lib/project/use-project";
 import { pickOther } from "@/lib/utils";
 import { PanelCard } from "../canvas/panel/panel-card";
@@ -33,17 +37,20 @@ function ModelPicker() {
 
 function SuggestionButton({
 	onPick,
-	disabled,
+	unavailable,
+	reason,
 }: {
 	onPick: () => void;
-	disabled: boolean;
+	unavailable: boolean;
+	reason?: string;
 }) {
 	return (
 		<TooltipIconButton
 			label="Suggest a prompt"
+			reason={reason}
 			variant="quiet"
 			size="sm"
-			disabled={disabled}
+			unavailable={unavailable}
 			onMouseDown={keepFocus}
 			onClick={onPick}
 		>
@@ -93,7 +100,8 @@ export function SloppyComposer() {
 					<ModelPicker />
 					<SuggestionButton
 						onPick={suggest}
-						disabled={loading || (hasText && !showsSuggestion)}
+						unavailable={loading || (hasText && !showsSuggestion)}
+						reason={loading ? WAIT_FOR_SLOPPY : undefined}
 					/>
 				</div>
 				{loading ? (
@@ -103,8 +111,9 @@ export function SloppyComposer() {
 				) : (
 					<TooltipIconButton
 						label="Send to Sloppy"
+						reason={TYPE_MESSAGE}
 						onClick={submit}
-						disabled={!hasText}
+						unavailable={!hasText}
 					>
 						<CornerDownLeft />
 					</TooltipIconButton>

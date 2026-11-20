@@ -11,6 +11,7 @@ import {
 	type AssetElement,
 	type MediaContentType,
 } from "@/lib/canvas/types";
+import { ADD_PROMPT } from "@/lib/components/unavailable-reasons";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { ModelAttribute } from "../elements/attributes/model-attribute";
@@ -53,7 +54,8 @@ function DraftGenerateButton() {
 		<GenerateButton
 			status={status}
 			hasResult={false}
-			disabled={!hasPrompt || isGenerationActive(status)}
+			unavailable={!hasPrompt || isGenerationActive(status)}
+			tooltip={hasPrompt ? undefined : ADD_PROMPT}
 			onGenerate={generate}
 			className="w-full"
 		/>
