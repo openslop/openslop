@@ -490,6 +490,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						speechIds: ["nar1"],
 						durationSec: 10,
+						maxDurationSec: 15,
 					},
 					{
 						id: "img1",
@@ -528,6 +529,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						speechIds: [],
 						durationSec: 10,
+						maxDurationSec: 15,
 					},
 					{
 						id: "vid1",
@@ -536,6 +538,7 @@ describe("executeToolCall", () => {
 						words: 180,
 						speechIds: ["nar2"],
 						durationSec: 15,
+						maxDurationSec: 15,
 					},
 				],
 			}),
@@ -559,6 +562,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						speechIds: ["nar1"],
 						durationSec: 5,
+						maxDurationSec: 15,
 					},
 				],
 				editScript: () => {
@@ -582,6 +586,7 @@ describe("executeToolCall", () => {
 						words: 12,
 						speechIds: ["nar1"],
 						durationSec: 5,
+						maxDurationSec: 15,
 					},
 				],
 			}),
