@@ -13,6 +13,14 @@ type AttributeEdit =
 			value: z.ZodEnum<Record<string, string>>;
 			icon: IconComponent;
 	  }
+	/** A number on a `step` grid from `min` to `max`, dragged along a slider. `value` holds that grid's values. */
+	| {
+			kind: "range";
+			value: z.ZodEnum<Record<string, string>>;
+			min: number;
+			max: number;
+			step: number;
+	  }
 	/** A boolean stored as "true" or "false", switched between two iconed faces. */
 	| {
 			kind: "toggle";
@@ -43,9 +51,11 @@ export interface AttributeDef {
 	perModel?: boolean;
 }
 
-/** The values a menu or toggle offers; none for a free-form attribute. */
+/** The values a menu, slider or toggle offers; none for a free-form attribute. */
 export const optionsOf = ({ edit }: AttributeDef): readonly string[] =>
-	edit?.kind === "enum" || edit?.kind === "toggle" ? edit.value.options : [];
+	edit?.kind === "enum" || edit?.kind === "range" || edit?.kind === "toggle"
+		? edit.value.options
+		: [];
 
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {

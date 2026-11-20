@@ -1,13 +1,5 @@
 import { z } from "zod";
-import {
-	Freeze,
-	Image,
-	Monitor,
-	Motion,
-	Repeat,
-	Timer,
-	Volume2,
-} from "@/components/ui/icon";
+import { Freeze, Image, Monitor, Motion, Repeat } from "@/components/ui/icon";
 import { parseNumber } from "@/lib/canvas/element-attributes";
 import {
 	DEFAULT_DURATION,
@@ -26,7 +18,19 @@ import {
 } from "@/lib/render/motion-effect-names";
 import type { AttributeDef } from "./schema";
 
-const volumeValue = z.enum(VOLUME_OPTIONS);
+/** A slider over evenly spaced numeric options, which stay the only values it accepts. */
+const rangeEdit = (options: readonly string[]) => {
+	const values = options.map(Number);
+	return {
+		kind: "range" as const,
+		value: z.enum(options),
+		min: Math.min(...values),
+		max: Math.max(...values),
+		step: values[1] - values[0],
+	};
+};
+
+const volumeRange = rangeEdit(VOLUME_OPTIONS);
 
 export const toggleValue = z.enum([TOGGLE_OFF, TOGGLE_ON]);
 
@@ -49,7 +53,7 @@ export const OWN_MODEL_DEFS: readonly AttributeDef[] = [
 export const volumeDef = (defaultValue: string): AttributeDef => ({
 	key: "volume",
 	label: "Volume",
-	edit: { kind: "enum", value: volumeValue, icon: Volume2 },
+	edit: volumeRange,
 	default: defaultValue,
 });
 
@@ -64,7 +68,7 @@ export const durationDef = (maxSec: number): AttributeDef => ({
 	key: "duration",
 	label: "Duration",
 	unit: "s",
-	edit: { kind: "enum", value: z.enum(durationOptions(maxSec)), icon: Timer },
+	edit: rangeEdit(durationOptions(maxSec)),
 	default: DEFAULT_DURATION,
 	perModel: true,
 });
@@ -72,7 +76,7 @@ export const durationDef = (maxSec: number): AttributeDef => ({
 export const loopsDef: AttributeDef = {
 	key: "loops",
 	label: "Loops",
-	edit: { kind: "enum", value: z.enum(LOOPS_OPTIONS), icon: Repeat },
+	edit: rangeEdit(LOOPS_OPTIONS),
 	default: DEFAULT_LOOPS,
 };
 

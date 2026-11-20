@@ -15,6 +15,7 @@ import { ReferenceImagesPopover } from "./attributes/reference-images-popover";
 import { StartFramePicker } from "./attributes/start-frame-picker";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
 import { InputAttributeField } from "./attributes/input-attribute-field";
+import { RangeAttributeField } from "./attributes/range-attribute-field";
 import { clampedNumber, flatAttributes } from "@/lib/canvas/element-attributes";
 
 const UNSET = "—";
@@ -86,6 +87,22 @@ export function AttributeBadge({
 				placeholder="Auto"
 				aria-label={`${label} in seconds`}
 				className={SECONDS_FIELD}
+			/>
+		);
+	}
+
+	if (edit.kind === "range") {
+		return (
+			<RangeAttributeField
+				element={element}
+				attrKey={attrKey}
+				value={value}
+				label={label}
+				format={(next) => formatValue(next, unit)}
+				min={edit.min}
+				max={edit.max}
+				step={edit.step}
+				fallback={def.default}
 			/>
 		);
 	}
