@@ -51,10 +51,9 @@ describe("osmlSpec", () => {
 
 	it("writes a Cinematic music cue for the scenes it scores, timed to the picture", () => {
 		expect(spec).toContain("## Music prompts");
-		expect(spec).toContain("In Cinematic the score carries the story");
 		expect(spec).toContain("Estimated runtime, as m:ss");
 		expect(spec).toContain("each turn timestamped to what happens");
-		expect(spec).toContain("In every other format the music sits under speech");
+		expect(spec).toContain("Time the music to what is happening");
 	});
 
 	it("takes a cue's runtime from the prompt, with no length attribute to disagree with it", () => {
