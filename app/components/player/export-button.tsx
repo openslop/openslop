@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { formatBytes } from "@/lib/format";
+import { exportBlocker } from "@/lib/render/export-blocker";
 import { RESOLUTIONS, type Resolution } from "@/lib/render/resolutions";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import { useSloppy } from "../sloppy/sloppy-provider";
@@ -33,7 +34,11 @@ export function ExportButton() {
 	const { state, exportVideo, reset, open, setOpen } = useExport();
 	const [resolution, setResolution] = useState<Resolution>("1080p");
 
-	const disabled = loading || !layout.series.length || generating;
+	const blocker = exportBlocker({
+		sloppyBusy: loading,
+		hasContent: layout.series.length > 0,
+		generating,
+	});
 	const isRendering = state.status === "rendering";
 
 	return (
@@ -45,7 +50,8 @@ export function ExportButton() {
 					size="sm"
 					className="shrink-0"
 					aria-label="Export"
-					disabled={disabled}
+					unavailable={blocker !== null}
+					tooltip={blocker ?? "Export this video"}
 				>
 					<Download />
 					<span className="hidden sm:inline">Export</span>
@@ -127,7 +133,7 @@ export function ExportButton() {
 							variant="generate"
 							size="sm"
 							onClick={() => exportVideo(layout, resolution)}
-							disabled={disabled}
+							disabled={blocker !== null}
 							className="w-full"
 						>
 							<Download />
