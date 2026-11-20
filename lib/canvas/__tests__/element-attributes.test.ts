@@ -97,6 +97,12 @@ describe("getDuration", () => {
 		expect(getDuration(el({ duration: "99" }))).toBe(15);
 	});
 
+	it("clamps to the longest its own model generates", () => {
+		const seedance = { provider: "runware", model: "Seedance 2.5" };
+		expect(getDuration(el({ ...seedance, duration: "30" }))).toBe(30);
+		expect(getDuration(el({ ...seedance, duration: "99" }))).toBe(30);
+	});
+
 	it("passes through offered values", () => {
 		expect(getDuration(el({ duration: "7" }))).toBe(7);
 	});

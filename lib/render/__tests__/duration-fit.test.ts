@@ -15,6 +15,7 @@ const span = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	words: 30,
 	speechIds: ["n1"],
 	durationSec: 10,
+	maxDurationSec: 15,
 	...over,
 });
 
@@ -40,6 +41,13 @@ describe("durationFits", () => {
 
 		expect(fit.duration).toBe(15);
 		expect(fallsShort(fit)).toBe(true);
+	});
+
+	it("reaches as far as a longer model goes", () => {
+		const [fit] = durationFits([span({ words: 60, maxDurationSec: 30 })]);
+
+		expect(fit.duration).toBe(21);
+		expect(fallsShort(fit)).toBe(false);
 	});
 
 	it("leaves stills out, since they carry no duration and already stretch", () => {
@@ -87,5 +95,28 @@ describe("durationFits over an estimated canvas", () => {
 
 		expect(fit.span.id).toBe("video1");
 		expect(fit.duration).toBe(11);
+	});
+
+	it("caps a video at the longest its own model generates", () => {
+		const script = [
+			{
+				id: "s1",
+				type: "scene",
+				children: [
+					node("video1", "video", "A pan.", {
+						provider: "runware",
+						model: "Seedance 2.5",
+					}),
+					node("n1", "speech", words(120)),
+				],
+			},
+		] as unknown as Descendant[];
+
+		const [fit] = durationFits(
+			estimateVisualSpans(script, () => EMPTY_SNAPSHOT),
+		);
+
+		expect(fit.duration).toBe(30);
+		expect(fallsShort(fit)).toBe(true);
 	});
 });
