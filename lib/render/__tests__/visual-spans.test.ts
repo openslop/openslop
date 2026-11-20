@@ -49,8 +49,8 @@ describe("estimateVisualSpans", () => {
 			),
 		]);
 
-		expect(video.durationSec).toBe(8);
-		expect(still.durationSec).toBeUndefined();
+		expect(video.duration?.sec).toBe(8);
+		expect(still.duration).toBeUndefined();
 	});
 
 	it("carries no duration for an uploaded video, which keeps its own length", () => {
@@ -64,7 +64,7 @@ describe("estimateVisualSpans", () => {
 			},
 		});
 
-		expect(span.durationSec).toBeUndefined();
+		expect(span.duration).toBeUndefined();
 	});
 
 	it("ignores silent elements and speech before the first visual", () => {

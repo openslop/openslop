@@ -14,8 +14,7 @@ const span = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	sceneNumber: 1,
 	words: 30,
 	speechIds: ["n1"],
-	durationSec: 10,
-	maxDurationSec: 15,
+	duration: { sec: 10, maxSec: 15 },
 	...over,
 });
 
@@ -44,7 +43,9 @@ describe("durationFits", () => {
 	});
 
 	it("reaches as far as a longer model goes", () => {
-		const [fit] = durationFits([span({ words: 60, maxDurationSec: 30 })]);
+		const [fit] = durationFits([
+			span({ words: 60, duration: { sec: 10, maxSec: 30 } }),
+		]);
 
 		expect(fit.duration).toBe(21);
 		expect(fallsShort(fit)).toBe(false);
@@ -52,7 +53,7 @@ describe("durationFits", () => {
 
 	it("leaves stills out, since they carry no duration and already stretch", () => {
 		expect(
-			durationFits([span({ type: "image", durationSec: undefined })]),
+			durationFits([span({ type: "image", duration: undefined })]),
 		).toEqual([]);
 	});
 });
