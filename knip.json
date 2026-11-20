@@ -15,5 +15,6 @@
 	"ignoreDependencies": ["turbo"],
 	"rules": {
 		"types": "warn"
-	}
+	},
+	"ignoreBinaries": ["claude"]
 }
