@@ -78,10 +78,11 @@ export function MediaLibrary({ type }: { type: MediaContentType }) {
 	const [query, setQuery] = useState("");
 	const media = useProject((state) => state.media);
 	const items = findMedia(media, kind, query);
-	const { openPicker, uploadingCount, inputElement } = useMediaUpload({
+	const { openPicker, uploadingKinds, inputElement } = useMediaUpload({
 		kinds: UploadKindSchema.options,
 		multiple: true,
 	});
+	const uploadingCount = uploadingKinds.filter((k) => k === kind).length;
 	const referencesOf = useSlateSelector((editor) => {
 		const draft = requireAsset(editor.children, mediaDraftTypeOf(type));
 		return elementOffers(draft, REFERENCE_IMAGES_ATTR) ? draft.id : undefined;
