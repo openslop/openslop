@@ -64,7 +64,9 @@ describe("osmlSpec", () => {
 	});
 
 	it("starts a cue with the scene it scores and changes cues at the story's turns", () => {
-		expect(spec).toContain("Place it where its first scene starts");
+		expect(spec).toContain(
+			"Place it right before the first element it plays under",
+		);
 		expect(spec).toContain("Change cues where the story turns");
 	});
 

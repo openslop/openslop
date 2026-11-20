@@ -73,7 +73,7 @@ export function osmlSpec(language: string): string {
 
 		## <music>
 		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the Music prompts section says.
-		- Place it where its first scene starts.
+		- Place it right before the first element it plays under.
 		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. A cue written to its runtime plays once; use more only for a short bed that should repeat.
 		- ${lyricsDef.key}: "${TOGGLE_ON}" makes the cue a song, sung over the scenes (default "${lyricsDef.default}", instrumental). Set it only when the story calls for a song, like a music video, a theme song or a character singing, and never under speech, where the singing would fight the voice.
 
