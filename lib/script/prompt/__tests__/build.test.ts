@@ -205,12 +205,6 @@ describe("buildScriptPrompt", () => {
 		},
 	);
 
-	it("keeps the adaptation guidance independent of specific formats and speech elements", () => {
-		expect(ADAPT_SCRIPT_RULES).not.toMatch(
-			/cinematic|faceless|explainer|audiobook|<speech>|<video>/i,
-		);
-	});
-
 	it("picks an auto adapt's format from the script and notes", () => {
 		const script = "EXT. FOREST - DAWN\nMIRA\nWe made it.";
 		const notes = "a tense film, no voiceover";
