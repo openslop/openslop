@@ -103,20 +103,6 @@ describe("BaseAssetConnector", () => {
 			const result = await connector.resolveBundle(bundle);
 			expect(result.durationSec).toBe(0);
 		});
-
-		it("defaults duration to 0 when durationSec is missing from metadata", async () => {
-			const connector = new TestAssetConnector(config);
-			const bundle = new AssetBundle(
-				"https://blob.example.com/assets/image/mock/xyz",
-				{
-					result: { image: "output.jpg" },
-					metadata: { otherField: "value" },
-				},
-			);
-
-			const result = await connector.resolveBundle(bundle);
-			expect(result.durationSec).toBe(0);
-		});
 	});
 
 	describe("_generate (via generate)", () => {

@@ -7,16 +7,6 @@ import type { ConnectorType } from "../types";
 const stubConfig = {};
 
 describe("createConnector", () => {
-	it("creates a valid LLM connector", () => {
-		const connector = createConnector(
-			"llm",
-			DEFAULT_MODELS.llm,
-			"project-1",
-			stubConfig,
-		);
-		expect(connector.type).toBe("llm");
-	});
-
 	it("creates all connector types, each reporting the type it was registered under", () => {
 		const types: ConnectorType[] = [
 			"llm",

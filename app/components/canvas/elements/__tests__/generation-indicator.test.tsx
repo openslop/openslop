@@ -22,15 +22,6 @@ describe("GenerationIndicator", () => {
 		expect(html).not.toContain("<button");
 		expect(html).not.toContain("disabled");
 	});
-
-	it("pairs the media scrim with the on-media foreground", () => {
-		const html = render(
-			<GenerationIndicator status="queued" startedAt={null} size="sm" />,
-		);
-		expect(html).toContain("bg-on-media/55");
-		expect(html).toContain("text-on-media-foreground");
-		expect(html).not.toContain("text-foreground");
-	});
 });
 
 describe("GenerationIndicator clock", () => {

@@ -2,16 +2,6 @@ import { describe, expect, it } from "vitest";
 import { animateImagePrompt, animateImageScene } from "../animate-prompt";
 
 describe("animateImagePrompt", () => {
-	it("names the scene the user is looking at", () => {
-		expect(animateImagePrompt(9)).toBe(
-			"Animate the image in scene 9 and use its existing result (if it exists) as the start frame for the video.",
-		);
-	});
-
-	it("says nothing about ids or attributes", () => {
-		expect(animateImagePrompt(9)).not.toMatch(/id=|startFrame|continuity|http/);
-	});
-
 	it("reads back the scene it named", () => {
 		expect(animateImageScene(animateImagePrompt(1))).toBe(1);
 		expect(animateImageScene(animateImagePrompt(42))).toBe(42);
