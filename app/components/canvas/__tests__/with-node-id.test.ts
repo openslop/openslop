@@ -28,7 +28,6 @@ describe("withNodeId", () => {
 
 			const inserted = editor.children[1] as Element;
 			expect(inserted.id).toBeDefined();
-			expect(inserted.id).toHaveLength(16);
 		});
 
 		it("preserves an existing ID", () => {

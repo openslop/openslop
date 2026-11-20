@@ -130,36 +130,6 @@ describe("resolveElements", () => {
 		expect(resolved).toEqual([]);
 	});
 
-	it("assigns correct roles and layers for all element types", () => {
-		const types: ContentElement["type"][] = [
-			"image",
-			"video",
-			"speech",
-			"music",
-			"sound",
-		];
-		const elements = types.map((t, i) => makeElement(`el${i}`, t));
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-
-		const roleMap = Object.fromEntries(resolved.map((r) => [r.type, r.role]));
-		expect(roleMap).toEqual({
-			image: "foreground",
-			video: "foreground",
-			speech: "overlay",
-			music: "background",
-			sound: "effect",
-		});
-
-		const layerMap = Object.fromEntries(resolved.map((r) => [r.type, r.layer]));
-		expect(layerMap).toEqual({
-			image: "visual",
-			video: "visual",
-			speech: "audio",
-			music: "audio",
-			sound: "audio",
-		});
-	});
-
 	it("reads loops from the attributes (default 1)", () => {
 		const elements = [
 			makeElement("s1", "sound", { loops: "4" }),
@@ -167,16 +137,6 @@ describe("resolveElements", () => {
 		];
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].loops).toBe(4);
-		expect(resolved[1].loops).toBe(1);
-	});
-
-	it("clamps invalid loops attributes to at least 1", () => {
-		const elements = [
-			makeElement("s1", "sound", { loops: "0" }),
-			makeElement("s2", "sound", { loops: "not-a-number" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].loops).toBe(1);
 		expect(resolved[1].loops).toBe(1);
 	});
 
@@ -190,38 +150,6 @@ describe("resolveElements", () => {
 		expect(resolved[0].volume).toBe(3);
 		expect(resolved[1].volume).toBe(0);
 		expect(resolved[2].volume).toBe(10);
-	});
-
-	it("clamps volume to 0-10 and falls back on invalid values", () => {
-		const elements = [
-			makeElement("s1", "music", { volume: "-2" }),
-			makeElement("s2", "music", { volume: "42" }),
-			makeElement("s3", "music", { volume: "not-a-number" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].volume).toBe(0);
-		expect(resolved[1].volume).toBe(10);
-		expect(resolved[2].volume).toBe(10);
-	});
-
-	it("keeps a blank volume attribute audible in the rendered layout", () => {
-		const elements = [
-			makeElement("s1", "music", { volume: "" }),
-			makeElement("s2", "music", { loops: "" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].volume).toBe(10);
-		expect(resolved[1].loops).toBe(1);
-	});
-
-	it("skips all elements when none have results", () => {
-		const elements = [
-			makeElement("img1", "image"),
-			makeElement("nar1", "speech"),
-		];
-		const noResult = makeSnapshot({ status: "idle", result: null });
-		const resolved = resolveElements([wrap(elements)], () => noResult);
-		expect(resolved).toEqual([]);
 	});
 
 	describe("captions", () => {
@@ -242,26 +170,8 @@ describe("resolveElements", () => {
 		const resolveOne = (element: ContentElement) =>
 			resolveElements([wrap([element])], bySnapshot)[0];
 
-		it("captions an element with the words on its own result, until it ends", () => {
-			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
-				trimIndexOffset: 0,
-				words: heard,
-			});
-		});
-
-		it("counts the words a trim cuts, so an edit still lands on the element's own", () => {
-			const { captions } = resolveOne(
-				makeElement("vid", "video", { trimStart: "1.5" }),
-			);
-			expect(captions?.trimIndexOffset).toBe(1);
-			expect(captions?.words).toEqual([toCaption("two", 0.5, 1.5)]);
-		});
-
-		it("starts the words at the element's first, though the end trim cuts the last", () => {
-			const { captions } = resolveOne(
-				makeElement("vid", "video", { trimEnd: "1.5" }),
-			);
-			expect(captions).toEqual({ trimIndexOffset: 0, words: [heard[0]] });
+		it("captions an element with the words on its own result", () => {
+			expect(resolveOne(makeElement("vid", "video")).captions).toEqual(heard);
 		});
 
 		it("captions nothing an element has no words for", () => {

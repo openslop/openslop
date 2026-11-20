@@ -3,13 +3,9 @@ import { asset } from "@/lib/canvas/__tests__/_assets";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { ADAPT_SCRIPT_RULES } from "../adapt";
 import { buildScriptPrompt, scriptRules } from "../build";
-import { VIDEO_FORMATS, VIDEO_FORMAT_RULES } from "../formats";
+import { VIDEO_FORMAT_RULES } from "../formats";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
-import {
-	VIDEO_FORMAT_SPECS,
-	VIDEO_FORMAT_TARGETS,
-} from "@/lib/project/video-format";
 import { VIDEO_LENGTH_SPECS } from "@/lib/project/video-length";
 
 const settingsOf = (settings: Partial<ScriptSettings> = {}) =>
@@ -187,50 +183,18 @@ describe("buildScriptPrompt", () => {
 		expect(scriptRules([], settingsOf())).not.toContain("raw XML");
 	});
 
-	it.each(VIDEO_FORMAT_TARGETS)(
-		"adapts in the project's %s format",
-		(format) => {
-			const script = "INT. CAFE - NIGHT\nMIRA\nWait! Don't leave me here.";
-			const { system, prompt } = buildScriptPrompt([], settingsOf({ format }), {
-				kind: "adapt",
-				script,
-			});
-
-			expect(prompt).toBe(script);
-			expect(system).toContain(
-				`The format is ${VIDEO_FORMAT_SPECS[format].label}. Write in it.`,
-			);
-			expect(system).toContain(ADAPT_SCRIPT_RULES);
-			expect(system).toContain(VIDEO_FORMAT_RULES);
-		},
-	);
-
-	it("gives an audiobook no visual elements", () => {
-		expect(VIDEO_FORMATS).toMatch(
-			/Audiobook:.*Only <speech>, <sound> and <music>, never <image> or <video>\./,
-		);
-
-		const faceless =
-			VIDEO_FORMATS.split("\n").find((line) => line.includes("Faceless:")) ??
-			"";
-		expect(faceless).not.toMatch(/audiobook|podcast/i);
-	});
-
-	it("scopes the visual cadence to formats with visuals", () => {
-		const { system } = buildScriptPrompt(
+	it("adapts in the project's format", () => {
+		const script = "INT. CAFE - NIGHT\nMIRA\nWait! Don't leave me here.";
+		const { system, prompt } = buildScriptPrompt(
 			[],
-			settingsOf({ format: "audiobook" }),
-			{ kind: "brief", brief: "a brief" },
+			settingsOf({ format: "cinematic" }),
+			{ kind: "adapt", script },
 		);
 
-		expect(system).toContain("Formats with visuals need a new visual");
-		expect(system).toContain("never <image> or <video>");
-	});
-
-	it("keeps the adaptation guidance independent of specific formats and speech elements", () => {
-		expect(ADAPT_SCRIPT_RULES).not.toMatch(
-			/cinematic|faceless|explainer|<speech>|<speech>|<video>/i,
-		);
+		expect(prompt).toBe(script);
+		expect(system).toContain("The format is Cinematic. Write in it.");
+		expect(system).toContain(ADAPT_SCRIPT_RULES);
+		expect(system).toContain(VIDEO_FORMAT_RULES);
 	});
 
 	it("picks an auto adapt's format from the script and notes", () => {
@@ -243,7 +207,6 @@ describe("buildScriptPrompt", () => {
 		);
 
 		expect(prompt).toBe(script);
-		expect(system).toContain("If no format is set, pick the closest one");
 		expect(system).toContain(notes);
 		expect(system).not.toContain("The format is");
 	});

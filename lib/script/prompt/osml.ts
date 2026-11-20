@@ -37,10 +37,10 @@ export function osmlSpec(language: string): string {
 		${languagePrompt(language)}
 
 		## Order
-		Write the story and nothing else, using only the elements your format allows. Formats with visuals need a new visual (image or video) at least once before every sentence in a speech element.
+		Write the story and nothing else, using only the elements your format allows.
 
 		## <speech>
-		- What one character says out loud. name is required and must be a character listed under Characters. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
+		- What one character says out loud. name is required: the character who says it. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
 		- emotion: ${TTS_EMOTIONS.join(", ")}. speed: ${TTS_SPEEDS.join(", ")}.
 		- Never write words in ALL CAPS, because the voice engine mispronounces them. Acronyms like USA stay capitalized.
 		- The only nonverbal cue is [laughter]. Use ... for a pause and ! for strong feeling. Example: <speech name="Mia" emotion="happy">[laughter] That's the way I want it!</speech>
@@ -73,7 +73,7 @@ export function osmlSpec(language: string): string {
 
 		## <music>
 		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the Music prompts section says.
-		- Place it ahead of the first visual it plays under, so it starts with that scene.
+		- Place it right before the first element it plays under.
 		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. A cue written to its runtime plays once; use more only for a short bed that should repeat.
 		- ${lyricsDef.key}: "${TOGGLE_ON}" makes the cue a song, sung over the scenes (default "${lyricsDef.default}", instrumental). Set it only when the story calls for a song, like a music video, a theme song or a character singing, and never under speech, where the singing would fight the voice.
 

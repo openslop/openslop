@@ -176,11 +176,10 @@ describe("pruneTranscript", () => {
 			await convertToModelMessages(messages, { tools: SLOPPY_TOOLS }),
 		);
 
-	const stale = {
+	const stale = (toolName: string) => ({
 		type: "text",
-		value:
-			"Taken in an earlier turn and not kept. The canvas may have changed since.",
-	};
+		value: `Cleared from history on purpose. Call ${toolName} again for the current result.`,
+	});
 
 	const finished = turnWith(
 		"m2",
@@ -211,7 +210,11 @@ describe("pruneTranscript", () => {
 		expect(result).toMatchObject({
 			role: "tool",
 			content: [
-				{ type: "tool-result", toolName: "read_script", output: stale },
+				{
+					type: "tool-result",
+					toolName: "read_script",
+					output: stale("read_script"),
+				},
 			],
 		});
 	});
@@ -230,7 +233,11 @@ describe("pruneTranscript", () => {
 		expect(result).toMatchObject({
 			role: "tool",
 			content: [
-				{ type: "tool-result", toolName: "view_result", output: stale },
+				{
+					type: "tool-result",
+					toolName: "view_result",
+					output: stale("view_result"),
+				},
 			],
 		});
 	});

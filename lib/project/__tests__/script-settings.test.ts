@@ -24,7 +24,7 @@ describe("ScriptSettingsSchema", () => {
 		["keeps every setting held", STORED, STORED],
 		[
 			"keeps the audiobook format",
-			{ ...DEFAULTS, format: "audiobook" },
+			{ format: "audiobook" },
 			{ ...DEFAULTS, format: "audiobook" },
 		],
 		[

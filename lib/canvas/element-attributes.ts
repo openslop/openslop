@@ -3,7 +3,6 @@ import pick from "lodash/pick";
 import {
 	DEFAULT_DURATION_SEC,
 	DEFAULT_LOOPS,
-	DURATION_MAX,
 	DURATION_MIN,
 	LOOPS_OPTIONS,
 	VOLUME_OPTIONS,
@@ -12,6 +11,7 @@ import {
 	type SplitAttributes,
 } from "./types";
 import { clamp } from "@/lib/utils";
+import { modelEntry, resolveModel } from "@/lib/connectors/models";
 import {
 	DEFAULT_MOTION,
 	isMotionEffect,
@@ -51,7 +51,6 @@ const boundsOf = (options: readonly string[]) => {
 
 const VOLUME = boundsOf(VOLUME_OPTIONS);
 const LOOPS = boundsOf(LOOPS_OPTIONS);
-const DURATION = { min: DURATION_MIN, max: DURATION_MAX };
 
 const DEFAULT_VOLUME = VOLUME.max;
 
@@ -85,10 +84,17 @@ export function getVolumeGain(element: SplitAttributes): number {
 	return volumeToGain(getVolume(element));
 }
 
+/** The longest `duration` the element's video model generates. */
+export const getMaxDuration = (element: ContentElement): number =>
+	modelEntry("video", resolveModel("video", element.generationAttributes))
+		.maxDurationSec;
+
 export function getDuration(element: ContentElement): number {
 	return (
-		clampedNumber(element.generationAttributes?.duration, DURATION) ??
-		DEFAULT_DURATION_SEC
+		clampedNumber(element.generationAttributes?.duration, {
+			min: DURATION_MIN,
+			max: getMaxDuration(element),
+		}) ?? DEFAULT_DURATION_SEC
 	);
 }
 

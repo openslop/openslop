@@ -20,6 +20,7 @@ import { ICON_SIZES } from "@/components/ui/icon-button";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { Toolbar, ToolbarButton } from "@/components/ui/toolbar";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { toastError } from "@/lib/toast-error";
 import { cn } from "@/lib/utils";
 import { MediaViewerDialog, type Viewed } from "./media-viewer";
 
@@ -166,7 +167,13 @@ export function useTilePlayer(src: string | undefined, name: string) {
 				src={src}
 				autoPlay
 				onEnded={stop}
-				onError={stop}
+				onError={(event) => {
+					stop();
+					toastError(
+						event.currentTarget.error?.message || "the file could not load",
+						"Could not play video",
+					);
+				}}
 				className="pointer-events-none absolute inset-0 size-full object-cover"
 			/>
 		),

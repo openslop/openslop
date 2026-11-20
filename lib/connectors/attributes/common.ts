@@ -12,7 +12,7 @@ import { parseNumber } from "@/lib/canvas/element-attributes";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
-	DURATION_OPTIONS,
+	durationOptions,
 	LOOPS_OPTIONS,
 	TOGGLE_OFF,
 	TOGGLE_ON,
@@ -60,13 +60,14 @@ export const motionDef: AttributeDef = {
 	default: DEFAULT_MOTION,
 };
 
-export const durationDef: AttributeDef = {
+export const durationDef = (maxSec: number): AttributeDef => ({
 	key: "duration",
 	label: "Duration",
 	unit: "s",
-	edit: { kind: "enum", value: z.enum(DURATION_OPTIONS), icon: Timer },
+	edit: { kind: "enum", value: z.enum(durationOptions(maxSec)), icon: Timer },
 	default: DEFAULT_DURATION,
-};
+	perModel: true,
+});
 
 export const loopsDef: AttributeDef = {
 	key: "loops",

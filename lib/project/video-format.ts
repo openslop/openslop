@@ -28,7 +28,7 @@ export const VIDEO_FORMAT_SPECS = {
 	faceless: {
 		label: "Faceless",
 		summary:
-			"Voices tell the story over pictures and video. For stories read aloud and newscasts.",
+			"Voices tell the story over pictures and video. For narrated story videos and newscasts.",
 	},
 	explainer: {
 		label: "Explainer",

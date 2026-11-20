@@ -15,7 +15,7 @@ export function reviewPrompt(
 
 		Judge only the scenes of the script below. The asset elements ahead of the first scene are the project's assets, and outside the scope of this review.
 
-		Read it as if you're watching a video generated from these prompts, then check it against those rules:
+		Read it as if you're the audience for what these prompts generate, then check it against those rules:
 		- Format: only the elements that format allows, and the startFrame, continuity
 		  and loop rules stated with it.
 		- Each tag element, attribute and value as outlined by their rules.
@@ -23,11 +23,11 @@ export function reviewPrompt(
 		- Language: each part of the script in the language that section assigns it.
 
 		Then judge what those rules cannot state, reading the script whole:
-		- Continuity: characters, place, light and props hold from one visual to the next, and
+		- Continuity: characters, place, light and props hold from one scene to the next, and
 		  each video's startFrame and continuity match what its pictures actually do.
 		- Dialogue: everyday words, idiomatic to the format, true to who says it and to what just
 		  happened. It should be appropriate, simple, and make perfect sense in its context.
-		- Pacing and beats: the video progresses at a natural speed, with no sudden awkward cuts or overly dragged out scenes.
+		- Pacing and beats: the story progresses at a natural speed, with no sudden awkward cuts or overly dragged out scenes.
 		- Prompts: all prompts are clear, specific, and give the model enough information to generate the intended visuals and audio.
 
 		Attributes the rules never mention, like provider, model, volume and trimStart, are app settings and outside the scope of this review.

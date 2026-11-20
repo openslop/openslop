@@ -56,14 +56,14 @@ The canvas is the project. Each term means one thing everywhere in the code:
 
 ## Project
 
-| Term                | Where                  | Means                                                                                                                                                                          |
-| ------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Project store**   | `lib/project/store.ts` | A Zustand store for what is not on the canvas: title, settings, pinned models, media. It owns saving and version history.                                                      |
-| **Script settings** | `ScriptSettings`       | Language, length and format, read by the script writer.                                                                                                                        |
-| **Format**          | `video-format.ts`      | Who speaks: cinematic (characters on screen), faceless (voices over pictures), explainer (a voice, nobody on screen) or audiobook (narrator and character voices, no visuals). |
-| **Video settings**  | `VideoSettings`        | Aspect ratio, captions, caption style, transition. Layout only.                                                                                                                |
-| **Template**        | `lib/templates/`       | A starting brief with its characters, art style, references and length. Applied before a project has a script.                                                                 |
-| **Media**           | `lib/project/media.ts` | The project's own files. Uploads land there through `useMediaUpload`; Media panel takes land via `useAddDraftTakesToMedia`. Removing one never touches the elements using it.  |
+| Term                | Where                  | Means                                                                                                                                                                         |
+| ------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Project store**   | `lib/project/store.ts` | A Zustand store for what is not on the canvas: title, settings, pinned models, media. It owns saving and version history.                                                     |
+| **Script settings** | `ScriptSettings`       | Language, length and format, read by the script writer.                                                                                                                       |
+| **Format**          | `video-format.ts`      | Who speaks: cinematic (characters on screen), faceless (voices over pictures), explainer (a voice, nobody on screen) or audiobook (voices, sound and music, no visuals).      |
+| **Video settings**  | `VideoSettings`        | Aspect ratio, captions, caption style, transition. Layout only.                                                                                                               |
+| **Template**        | `lib/templates/`       | A starting brief with its characters, art style, references and length. Applied before a project has a script.                                                                |
+| **Media**           | `lib/project/media.ts` | The project's own files. Uploads land there through `useMediaUpload`; Media panel takes land via `useAddDraftTakesToMedia`. Removing one never touches the elements using it. |
 
 ## Sloppy
 
