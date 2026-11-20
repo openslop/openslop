@@ -24,7 +24,7 @@ export const VIDEO_FORMATS = dedent`
 	- ${VIDEO_FORMAT.cinematic}: characters speak on screen, inside the video prompts. Only <video> and <music>, with occasional <speech>.
 	- ${VIDEO_FORMAT.faceless}: voices tell the story over images and video. All elements.
 	- ${VIDEO_FORMAT.explainer}: a voice over video in which nobody speaks. All elements except <image>.
-	- ${VIDEO_FORMAT.audiobook}: voices tell the story over sound and music, with nothing on screen. Only <speech>, <sound> and <music>, never <image> or <video>.
+	- ${VIDEO_FORMAT.audiobook}: voices with sound and music, nothing on screen. Only <speech>, <sound> and <music>.
 `;
 
 export const VIDEO_FORMAT_RULES = dedent`

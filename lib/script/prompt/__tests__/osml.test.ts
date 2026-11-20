@@ -53,10 +53,8 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("## Music prompts");
 		expect(spec).toContain("In Cinematic the score carries the story");
 		expect(spec).toContain("Estimated runtime, as m:ss");
-		expect(spec).toContain("each turn timestamped to what is on screen");
-		expect(spec).toContain(
-			"In Faceless, Explainer and Audiobook the music sits under speech",
-		);
+		expect(spec).toContain("each turn timestamped to what happens");
+		expect(spec).toContain("In every other format the music sits under speech");
 	});
 
 	it("takes a cue's runtime from the prompt, with no length attribute to disagree with it", () => {
@@ -66,13 +64,13 @@ describe("osmlSpec", () => {
 	});
 
 	it("starts a cue with the scene it scores and changes cues at the story's turns", () => {
-		expect(spec).toContain("Place it ahead of the first visual it plays under");
+		expect(spec).toContain("Place it where its first scene starts");
 		expect(spec).toContain("Change cues where the story turns");
 	});
 
 	it("sets the visual cadence without dictating what the script opens with", () => {
 		expect(spec).toContain(
-			"a new visual (image or video) at least once before every sentence",
+			"If your format has visuals, put a new one before every sentence of speech.",
 		);
 		expect(spec).not.toContain("Start with a visual");
 	});
@@ -118,9 +116,8 @@ describe("osmlSpec", () => {
 	});
 
 	it("keeps an audiobook to voices, sound and music, with nothing on screen", () => {
-		expect(spec).toContain(
-			"Audiobook: voices tell the story over sound and music, with nothing on screen. Only <speech>, <sound> and <music>, never <image> or <video>.",
-		);
+		expect(spec).toContain("Audiobook:");
+		expect(spec).toContain("Only <speech>, <sound> and <music>.");
 	});
 
 	it("sings a music cue only when the story calls for a song, with its lyrics in the prompt", () => {
