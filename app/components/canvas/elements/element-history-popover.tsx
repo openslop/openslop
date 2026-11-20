@@ -10,7 +10,7 @@ import {
 	CloudUploadFilled,
 	History,
 	Maximize2,
-	RotateCcw,
+	Check,
 } from "@/components/ui/icon";
 import {
 	Popover,
@@ -124,11 +124,11 @@ function ElementVersionRow({
 				</div>
 				{!active && (
 					<TooltipIconButton
-						label="Restore"
+						label="Use this version"
 						className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
 						onClick={onRestore}
 					>
-						<RotateCcw />
+						<Check />
 					</TooltipIconButton>
 				)}
 			</div>
