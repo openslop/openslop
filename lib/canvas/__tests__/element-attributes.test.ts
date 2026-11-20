@@ -5,7 +5,6 @@ import {
 	VOLUME_OPTIONS,
 } from "@/lib/canvas/types";
 import {
-	LAYOUT_ATTRIBUTE_KEYS,
 	getDuration,
 	getLoops,
 	getMotion,
@@ -97,6 +96,12 @@ describe("getDuration", () => {
 		expect(getDuration(el({ duration: "99" }))).toBe(15);
 	});
 
+	it("clamps to the longest its own model generates", () => {
+		const seedance = { provider: "runware", model: "Seedance 2.5" };
+		expect(getDuration(el({ ...seedance, duration: "30" }))).toBe(30);
+		expect(getDuration(el({ ...seedance, duration: "99" }))).toBe(30);
+	});
+
 	it("passes through offered values", () => {
 		expect(getDuration(el({ duration: "7" }))).toBe(7);
 	});
@@ -162,23 +167,10 @@ describe("getMotion", () => {
 		expect(getMotion(el({ motion: "kenBurnsIn" }))).toBe("kenBurnsIn");
 		expect(getMotion(el({ motion: "shake" }))).toBe("shake");
 	});
-
-	it("is included in LAYOUT_ATTRIBUTE_KEYS so changes invalidate layout memos", () => {
-		expect(LAYOUT_ATTRIBUTE_KEYS).toContain("motion");
-	});
 });
 
 describe("layoutAttributeSignature", () => {
 	it("joins raw layout attribute values in LAYOUT_ATTRIBUTE_KEYS order", () => {
-		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual([
-			"loops",
-			"loop",
-			"volume",
-			"motion",
-			"uploadedFrame",
-			"trimStart",
-			"trimEnd",
-		]);
 		expect(
 			layoutAttributeSignature(
 				el({

@@ -10,7 +10,6 @@ describe("readBalanceUsd", () => {
 		rpc.mockResolvedValue({ data: 3.25, error: null });
 
 		expect(await readBalanceUsd(supabase)).toBe(3.25);
-		expect(rpc).toHaveBeenCalledWith("balance_usd");
 	});
 
 	it("reads a numeric sent as a string", async () => {

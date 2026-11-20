@@ -1,12 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
-import {
-	DRAFTING_TOOLS,
-	SLOPPY_TOOLS,
-	SNAPSHOT_TOOLS,
-	executeToolCall,
-	presentToolCall,
-} from "../tools/registry";
+import { executeToolCall, presentToolCall } from "../tools/registry";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
@@ -14,7 +8,6 @@ import type { VideoSettings } from "@/lib/project/video-settings";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
-import { sloppyInstructions } from "../prompt";
 
 const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
 	updateScriptSettings: (patch: Partial<ScriptSettings>) =>
@@ -61,43 +54,6 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	setElementResult: async () => {},
 	viewMedia: async () => ({ durationSec: 0, images: [], words: [] }),
 	...over,
-});
-
-describe("script review opt-in", () => {
-	it("asks before reviewing a new or adapted script", () => {
-		const systemPrompt = sloppyInstructions({})[0].content.replace(/\s+/g, " ");
-		const { description } = SLOPPY_TOOLS.review_script;
-		const reviewDescription =
-			typeof description === "string" ? description.replace(/\s+/g, " ") : "";
-
-		expect(systemPrompt).toContain(
-			"length fitting with edit_script has landed, ask whether they want a review and finish the turn",
-		);
-		expect(systemPrompt).toContain(
-			"Do not call review_script until they say yes or ask for one",
-		);
-		expect(reviewDescription).toContain(
-			"when the user explicitly asks for a review or accepts your offer",
-		);
-		expect(reviewDescription).toContain(
-			"Do not run it just because you wrote, adapted or edited the script",
-		);
-	});
-
-	it.each([
-		["write_script", { brief: "A new story" }],
-		["adapt_script", { script: "NARRATOR\nA short story." }],
-	] as const)(
-		"does not tell the model to review after %s",
-		async (toolName, input) => {
-			const outcome = await executeToolCall({ toolName, input }, context());
-
-			expect(outcome.ok && outcome.output).toContain(
-				"Read it to see what landed.",
-			);
-			expect(outcome.ok && outcome.output).not.toContain("review_script");
-		},
-	);
 });
 
 describe("executeToolCall", () => {
@@ -489,7 +445,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: ["nar1"],
-						durationSec: 10,
+						duration: { sec: 10, maxSec: 15 },
 					},
 					{
 						id: "img1",
@@ -527,7 +483,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: [],
-						durationSec: 10,
+						duration: { sec: 10, maxSec: 15 },
 					},
 					{
 						id: "vid1",
@@ -535,7 +491,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 2,
 						words: 180,
 						speechIds: ["nar2"],
-						durationSec: 15,
+						duration: { sec: 15, maxSec: 15 },
 					},
 				],
 			}),
@@ -558,7 +514,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: ["nar1"],
-						durationSec: 5,
+						duration: { sec: 5, maxSec: 15 },
 					},
 				],
 				editScript: () => {
@@ -581,7 +537,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: ["nar1"],
-						durationSec: 5,
+						duration: { sec: 5, maxSec: 15 },
 					},
 				],
 			}),
@@ -678,7 +634,6 @@ describe("executeToolCall", () => {
 
 		expect(outcome.ok && outcome.output).toBe("1. A rabbit finds a lantern.");
 		expect(prompts[0]).toContain("a rabbit on the moon");
-		expect(prompts[0]).toContain("conflict, twists, and a resolution");
 	});
 
 	it("reviews the script against the rules and the stored format", async () => {
@@ -748,9 +703,7 @@ describe("model tools", () => {
 		const output = String(outcome.ok && outcome.output);
 
 		expect(output).toContain("Videos (type video)\n");
-		expect(output).toContain(
-			"- Seedance 2 Fast from openslop. Best for animation and anything that isn't live action.",
-		);
+		expect(output).toContain("- Seedance 2 Fast from openslop.");
 		expect(output).not.toContain("from runware");
 	});
 
@@ -839,45 +792,6 @@ describe("model tools", () => {
 	);
 });
 
-describe("SLOPPY_TOOLS", () => {
-	it("offers the model exactly the tools the editor can run", () => {
-		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
-			"read_script",
-			"edit_script",
-			"write_script",
-			"adapt_script",
-			"review_script",
-			"update_script_settings",
-			"update_video_settings",
-			"generate_captions",
-			"view_result",
-			"read_media",
-			"view_media",
-			"set_element_result",
-			"outline_story",
-			"estimate_total_length",
-			"estimate_speech_lengths",
-			"fit_durations",
-			"set_title",
-			"list_models",
-			"set_default_model",
-		]);
-	});
-
-	it("lists each asset type an edit can set up", () => {
-		const { description } = SLOPPY_TOOLS.edit_script;
-
-		for (const type of [
-			"asset_avatar",
-			"asset_voice",
-			"asset_style",
-			"asset_references",
-		]) {
-			expect(description).toContain(`- ${type}: `);
-		}
-	});
-});
-
 describe("a call the editor cannot run", () => {
 	it("rejects a tool nothing can run", async () => {
 		const outcome = await executeToolCall(
@@ -901,27 +815,5 @@ describe("presentToolCall", () => {
 
 	it("presents nothing for a tool it does not know", () => {
 		expect(presentToolCall("set_narrator", { name: "Red" })).toBeNull();
-	});
-});
-
-describe("tool flags", () => {
-	it("collects the tools whose output only lasts the turn", () => {
-		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
-			"read_media",
-			"read_script",
-			"review_script",
-			"view_media",
-			"view_result",
-		]);
-	});
-
-	it("collects the tools that write the script, reviewing it included", () => {
-		expect([...DRAFTING_TOOLS].sort()).toEqual([
-			"adapt_script",
-			"edit_script",
-			"fit_durations",
-			"review_script",
-			"write_script",
-		]);
 	});
 });

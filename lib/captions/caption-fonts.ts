@@ -1,7 +1,7 @@
 import { keysOf } from "@/lib/utils";
 
 /**
- * The caption faces, self-hosted so the editor preview and the Lambda render
+ * The caption faces, self-hosted so the editor preview and the exported render
  * draw with the same glyphs. Each entry names a real font family, so one
  * `font-family` value works in both once the files are loaded — the editor
  * registers them in `app/components/canvas/caption-fonts.tsx`, the renderer in

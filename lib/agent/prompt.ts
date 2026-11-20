@@ -12,7 +12,8 @@ const ROLE = dedent`
 
   - Make changes with a tool call.
   - Read the canvas before your first change and again whenever a tool reports it changed.
-    It is not given to you any other way.
+    It is not given to you any other way. Results from earlier turns are cleared on purpose, so
+    read again.
   - The user can change the canvas between your turns. If something looks different from what
     you wrote, they changed it on purpose. Leave it as they left it unless they ask you to change it.
   - Before outline_story, write_script or adapt_script, settle the format and target length with

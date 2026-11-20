@@ -53,9 +53,15 @@ const OPENSLOP_PROVIDERS: {
 		"Muse Image": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 		"Seedream 5 Lite": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
 		"Grok Imagine 2.0": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
+		"GPT Image 2.6 Sunburst": hosted(
+			"RUNWARE_API_KEY",
+			RunwareImage,
+			MockImage,
+		),
 	},
 	video: {
 		"Kling 3 Omni": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
+		"Kling 4 Omni": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 		"Seedance 2 Fast": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 	},
 	sfx: {
