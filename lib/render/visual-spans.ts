@@ -7,7 +7,7 @@ import {
 	holdsPinnedResult,
 	type ElementSnapshot,
 } from "@/lib/generation/snapshots";
-import { getDuration } from "../canvas/element-attributes";
+import { getDuration, getMaxDuration } from "../canvas/element-attributes";
 
 /** One visual and the speech after it, up to the next visual. */
 export type VisualSpan = {
@@ -18,6 +18,8 @@ export type VisualSpan = {
 	speechIds: string[];
 	/** Its `duration` attribute, where generating it sets its length. */
 	durationSec?: number;
+	/** The longest `duration` its model generates, alongside `durationSec`. */
+	maxDurationSec?: number;
 };
 
 /** Speech before the first visual belongs to no visual. */
@@ -40,6 +42,7 @@ export const estimateVisualSpans = (
 					...(outputKind === "video" &&
 						!holdsPinnedResult(getSnapshot(element.id)) && {
 							durationSec: getDuration(element),
+							maxDurationSec: getMaxDuration(element),
 						}),
 				});
 				continue;

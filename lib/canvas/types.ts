@@ -1,10 +1,11 @@
 import type { BaseEditor } from "slate";
 import type { HistoryEditor } from "slate-history";
 import type { ReactEditor } from "slate-react";
+import range from "lodash/range";
 import { z } from "zod";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { AssetConnectorType } from "@/lib/connectors/types";
-import { keysOf } from "@/lib/utils";
+import { clamp, keysOf } from "@/lib/utils";
 
 export type ResultKind = "image" | "video" | "audio";
 
@@ -67,23 +68,23 @@ export const isCaptionable = (type: ContentType): boolean => {
 
 export const ContentTypeSchema = z.enum(keysOf(CONTENT_TYPES));
 
-export const DURATION_OPTIONS = Array.from({ length: 12 }, (_, i) =>
-	String(i + 4),
-);
+export const DURATION_MIN = 4;
+
+/** Every whole second from DURATION_MIN up to the longest a model generates. */
+export const durationOptions = (maxSec: number): string[] =>
+	range(DURATION_MIN, maxSec + 1).map(String);
+
+/** The longest most video models generate in one go. */
+export const STANDARD_MAX_DURATION_SEC = 15;
+
+export const DURATION_OPTIONS = durationOptions(STANDARD_MAX_DURATION_SEC);
 
 export const DEFAULT_DURATION = "10";
 export const DEFAULT_DURATION_SEC = Number(DEFAULT_DURATION);
 
-const DURATIONS = DURATION_OPTIONS.map(Number);
-
-export const DURATION_MIN = Math.min(...DURATIONS);
-
-/** The longest a video can be generated at, so the ceiling on what one visual covers. */
-export const DURATION_MAX = Math.max(...DURATIONS);
-
-/** The shortest option that still covers `seconds`, or the longest there is. */
-export const snapDurationUp = (seconds: number): number =>
-	DURATIONS.find((option) => option >= seconds) ?? DURATION_MAX;
+/** The shortest option that still covers `seconds`, or the longest the model has. */
+export const snapDurationUp = (seconds: number, maxSec: number): number =>
+	clamp(Math.ceil(seconds), DURATION_MIN, maxSec);
 
 export const VOLUME_OPTIONS = [
 	"0",

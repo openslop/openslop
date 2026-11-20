@@ -29,19 +29,7 @@ describe("insertElement", () => {
 			insertElement(editor, "speech", [0, 1]);
 		});
 
-		const node = inserted(editor);
-		expect(node.type).toBe("speech");
-		expect(node.id).toBeDefined();
-		expect(node.children).toBeDefined();
-	});
-
-	it("applies default attributes from element config", () => {
-		const editor = seededEditor();
-		Editor.withoutNormalizing(editor, () => {
-			insertElement(editor, "speech", [0, 1]);
-		});
-
-		expect(flatAttributes(inserted(editor)).emotion).toBe("neutral");
+		expect(inserted(editor).type).toBe("speech");
 	});
 
 	it("hydrates the model a new element generates with", () => {

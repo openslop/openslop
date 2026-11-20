@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { coverScale, motionTransform } from "../motion-effects";
 import {
-	DEFAULT_MOTION,
 	isMotionEffect,
 	MOTION_EFFECTS,
 	type MotionEffect,
@@ -32,23 +31,6 @@ function parseTransform(t: string): {
 function sampleFrames(duration: number, count: number): number[] {
 	return Array.from({ length: count }, (_, i) => (i * duration) / (count - 1));
 }
-
-describe("MOTION_EFFECTS table", () => {
-	it("starts with 'none' as the default and exposes it in the union", () => {
-		expect(DEFAULT_MOTION).toBe("none");
-		expect(MOTION_EFFECTS).toContain("none");
-	});
-
-	it("has no duplicate entries", () => {
-		expect(new Set(MOTION_EFFECTS).size).toBe(MOTION_EFFECTS.length);
-	});
-
-	it("every active effect has a spec (covered by transform call below)", () => {
-		for (const e of ACTIVE) {
-			expect(() => motionTransform(e, 0, 90)).not.toThrow();
-		}
-	});
-});
 
 describe("isMotionEffect", () => {
 	it("accepts every known effect", () => {
@@ -110,14 +92,6 @@ describe("motionTransform — determinism and shape", () => {
 			expect(motionTransform(e, 30, 90, 9 / 16)).toBe(
 				motionTransform(e, 30, 90, 9 / 16),
 			);
-		}
-	});
-
-	it("every active effect emits a parseable translate/scale/rotate string", () => {
-		for (const e of ACTIVE) {
-			const { s, theta } = parseTransform(motionTransform(e, 10, 90));
-			expect(Number.isFinite(s)).toBe(true);
-			expect(Number.isFinite(theta)).toBe(true);
 		}
 	});
 

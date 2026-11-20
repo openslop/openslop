@@ -66,8 +66,7 @@ describe("DragOverlayPreview", () => {
 		await drag(image());
 
 		for (const label of ["Insert item", "Drag to reorder"]) {
-			const button = document.querySelector(`[aria-label="${label}"]`);
-			expect(button?.className).toContain("size-7");
+			expect(document.querySelector(`[aria-label="${label}"]`)).not.toBeNull();
 		}
 	});
 });

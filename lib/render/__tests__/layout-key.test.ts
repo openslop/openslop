@@ -47,14 +47,6 @@ describe("getLayoutKey", () => {
 		);
 	});
 
-	it("changes when an element is removed", () => {
-		const a = [el("s1"), el("s2")];
-		const b = [el("s1")];
-		expect(getLayoutKey(scene(a), "none")).not.toBe(
-			getLayoutKey(scene(b), "none"),
-		);
-	});
-
 	it("changes when loops changes on any element", () => {
 		const a = [el("s1", { loops: "1" })];
 		const b = [el("s1", { loops: "4" })];

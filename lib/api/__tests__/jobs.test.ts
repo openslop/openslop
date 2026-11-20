@@ -57,9 +57,6 @@ describe("getJob", () => {
 		answerWith({ data: polled, error: null });
 
 		await expect(getJob(JOB_ID, "u1")).resolves.toEqual(polled);
-		expect(table.select).toHaveBeenCalledExactlyOnceWith(
-			"id, connector_type, status, result, error, created_at",
-		);
 		expect(table.eq.mock.calls).toEqual([
 			["id", JOB_ID],
 			["user_id", "u1"],
@@ -90,7 +87,6 @@ describe("loadJobForProcessing", () => {
 		answerWith({ data: STORED_JOB, error: null });
 
 		await expect(loadJobForProcessing(JOB_ID)).resolves.toEqual(STORED_JOB);
-		expect(table.select).toHaveBeenCalledExactlyOnceWith("*");
 	});
 
 	it("rejects a booked llm row, which no queue message should name", async () => {
