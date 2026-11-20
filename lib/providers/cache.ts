@@ -66,13 +66,13 @@ export const fromAudioRow = (
 		url: metadata.url ?? metadata.audioUrl,
 	});
 	if (!row.success) return undefined;
-	const { url, duration, description } = row.data;
+	const { url, duration } = row.data;
 	return {
 		id: url,
 		type,
 		provider: "pinecone-cache",
 		result: { audio: url },
-		metadata: { durationSec: duration, cached: true, description },
+		metadata: { durationSec: duration, cached: true },
 	};
 };
 

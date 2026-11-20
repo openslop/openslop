@@ -67,7 +67,7 @@ describe("audioPromptCache", () => {
 		expect(mockIndex).toHaveBeenCalledWith({ name: "sfx-eu" });
 	});
 
-	it("serves a similar-enough row without producing", async () => {
+	it("serves a similar-enough row without producing or its writer's prompt", async () => {
 		const { audioPromptCache } = await loadCache();
 		mockQuery.mockResolvedValue({
 			matches: [row("https://blob/cached.mp3", 5)],
@@ -85,7 +85,7 @@ describe("audioPromptCache", () => {
 			type: "music",
 			provider: "pinecone-cache",
 			result: { audio: "https://blob/cached.mp3" },
-			metadata: { durationSec: 5, cached: true, description: "d" },
+			metadata: { durationSec: 5, cached: true },
 		});
 		expect(produce).not.toHaveBeenCalled();
 		expect(mockUpsert).not.toHaveBeenCalled();
@@ -274,11 +274,7 @@ describe("audio rows", () => {
 		expect(restored?.result.audio).toBe("https://blob/audio.mp3");
 		expect(restored?.type).toBe("music");
 		expect(restored?.provider).toBe("pinecone-cache");
-		expect(restored?.metadata).toMatchObject({
-			durationSec: 12.5,
-			cached: true,
-			description: "happy piano",
-		});
+		expect(restored?.metadata).toEqual({ durationSec: 12.5, cached: true });
 	});
 
 	it("resolves a relative filename to an absolute URL under the bundle's path", async () => {
