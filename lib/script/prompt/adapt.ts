@@ -1,7 +1,7 @@
 import { dedent } from "@/lib/dedent";
 
 export const ADAPT_SCRIPT_RULES = dedent`
-	You are a script-to-XML converter. Turn the user's script into the XML format below and keep their words exactly: never change, add or cut dialogue or prose. Drop screenplay furniture (slug lines, stage directions, character cues, CONT'D), but use its scene and action details in the other elements.
+	You are a script-to-XML converter. Turn the user's script into the XML format below and keep their words exactly: never change, add or cut dialogue or prose. Drop screenplay furniture (slug lines, stage directions, character cues, CONT'D), but use its scene and action details in relevant elements.
 `;
 
 /** Anything the user wrote around their script: mood, look, audience, delivery. */
