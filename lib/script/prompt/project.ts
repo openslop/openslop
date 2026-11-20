@@ -1,10 +1,5 @@
 import { dedent } from "@/lib/dedent";
-import {
-	assetText,
-	characterNames,
-	findAsset,
-	voiceOf,
-} from "@/lib/canvas/assets";
+import { assetText, characterNames, voiceOf } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -20,28 +15,15 @@ function renderVoice(voice: Voice): string {
 		.join("\n");
 }
 
-/** Which assets a character has; CHARACTER_REFS_RULE and the <speech> rule say what follows from them. */
-function renderAssetFacts(assets: AssetElement[], name: string): string {
-	const voice = findAsset(assets, "asset_voice", name)
-		? "Has a voice."
-		: "No voice.";
-	const avatar = findAsset(assets, "asset_avatar", name)
-		? "Has an avatar."
-		: "No avatar.";
-	return `${voice} ${avatar}`;
-}
-
 function renderCharacter(assets: AssetElement[], name: string): string {
 	const appearance = assetText(assets, "asset_avatar", name);
-	const traits = [
+	const body = [
 		renderVoice(voiceOf(assets, name)),
 		appearance && `- appearance: ${appearance}`,
 	]
 		.filter(Boolean)
 		.join("\n");
-	return [`## ${name}`, renderAssetFacts(assets, name), traits]
-		.filter(Boolean)
-		.join("\n\n");
+	return `## ${name}\n\n${body}`;
 }
 
 export function projectPreamble(assets: AssetElement[]): string {

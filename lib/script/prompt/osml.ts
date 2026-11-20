@@ -40,7 +40,7 @@ export function osmlSpec(language: string): string {
 		Write the story and nothing else, using only the elements your format allows. There must be a new visual (image or video) at least once before every sentence in a speech element.
 
 		## <speech>
-		- What one character says out loud. name is required and must be a character listed under Characters who has a voice. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
+		- What one character says out loud. name is required: the character who says it. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
 		- emotion: ${TTS_EMOTIONS.join(", ")}. speed: ${TTS_SPEEDS.join(", ")}.
 		- Never write words in ALL CAPS, because the voice engine mispronounces them. Acronyms like USA stay capitalized.
 		- The only nonverbal cue is [laughter]. Use ... for a pause and ! for strong feeling. Example: <speech name="Mia" emotion="happy">[laughter] That's the way I want it!</speech>

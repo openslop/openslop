@@ -1,6 +1,5 @@
 import { Editor, Path, Transforms } from "slate";
 import { setAsset } from "@/lib/canvas/asset-ops";
-import { findAsset } from "@/lib/canvas/assets";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
@@ -87,25 +86,10 @@ function resolveInsertPath(
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
 }
 
-/** A speech line speaks in its speaker's asset_voice, so one without that voice fails at generation. */
-function unvoicedSpeaker(
-	editor: Editor,
-	name: string | null | undefined,
-): string | undefined {
-	if (!name) return "speech needs a name: the asset_voice that speaks it";
-	return findAsset(editor.children, "asset_voice", name)
-		? undefined
-		: `${name} has no asset_voice to speak in; add one with an asset op first`;
-}
-
-function elementProblems(
-	editor: Editor,
-	{ type, attrs, text }: NewElement,
-): string[] {
+function elementProblems({ type, attrs, text }: NewElement): string[] {
 	return [
 		unofferedAttributes(type, attrs ?? {}),
 		text?.trim() ? undefined : `${type} needs text`,
-		type === "speech" ? unvoicedSpeaker(editor, attrs?.name) : undefined,
 	].filter((problem) => problem !== undefined);
 }
 
@@ -113,9 +97,7 @@ function applyInsert(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
 ): RefineOpResult {
-	const problems = op.elements.flatMap((element) =>
-		elementProblems(editor, element),
-	);
+	const problems = op.elements.flatMap(elementProblems);
 	if (problems.length > 0)
 		return { ok: false, reason: `insert: ${problems.join("; ")}` };
 
@@ -204,14 +186,6 @@ function applySet(
 			ok: false,
 			reason: `set: an asset's name never changes; remove "${op.id}" and create it again with an asset op`,
 		};
-
-	const speaker =
-		found.type === "speech" &&
-		op.attrs?.name !== undefined &&
-		op.attrs.name !== current.name
-			? unvoicedSpeaker(editor, op.attrs.name)
-			: undefined;
-	if (speaker) return { ok: false, reason: `set: ${speaker}` };
 
 	const unoffered = unofferedAttributes(
 		found.type,

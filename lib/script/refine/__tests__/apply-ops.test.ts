@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type Descendant, Editor, Element } from "slate";
+import { Editor, Element } from "slate";
 import type {
 	AssetElement,
 	CanvasElement,
@@ -130,17 +130,14 @@ describe("applyRefineOp — insert", () => {
 	);
 
 	it("inserts none of the elements when one is invalid", () => {
-		const editor = makeEditor([
-			asset("asset_voice", { name: "Mia" }),
-			scene([content("speech", "n1", "hello")]),
-		]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOp(editor, {
 			op: "insert",
 			anchor_id: "n1",
 			elements: [
 				{ type: "sound", text: "rain" },
-				{ type: "speech", attrs: { name: "Mia" }, text: " " },
+				{ type: "speech", text: " " },
 			],
 		});
 
@@ -169,10 +166,7 @@ describe("applyRefineOp — insert", () => {
 	});
 
 	it("reports every problem across an insert's elements at once", () => {
-		const editor = makeEditor([
-			asset("asset_voice", { name: "Mia" }),
-			scene([content("speech", "n1", "hello")]),
-		]);
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOp(editor, {
 			op: "insert",
@@ -182,11 +176,7 @@ describe("applyRefineOp — insert", () => {
 					text: "rain",
 					attrs: { loops: "unoffered", trimStart: "unoffered" },
 				},
-				{
-					type: "speech",
-					text: "",
-					attrs: { name: "Mia", emotion: "unoffered" },
-				},
+				{ type: "speech", text: "", attrs: { emotion: "unoffered" } },
 			],
 		});
 
@@ -217,15 +207,12 @@ describe("applyRefineOp — insert", () => {
 	it.each([undefined, "", "   "])(
 		"refuses a script element with no text: %j",
 		(text) => {
-			const editor = makeEditor([
-				asset("asset_voice", { name: "Mia" }),
-				scene([content("speech", "n1", "hello")]),
-			]);
+			const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 			const result = applyRefineOp(editor, {
 				op: "insert",
 				anchor_id: "n1",
-				elements: [{ type: "speech", attrs: { name: "Mia" }, text }],
+				elements: [{ type: "speech", text }],
 			});
 
 			expect(result).toEqual({
@@ -429,7 +416,6 @@ describe("applyRefineOp — set", () => {
 
 	it("applies attrs and text together", () => {
 		const editor = makeEditor([
-			asset("asset_voice", { name: "Alice" }),
 			scene([content("speech", "n1", "old", { name: "Lyra" })]),
 		]);
 
@@ -899,134 +885,5 @@ describe("applyRefineOps", () => {
 		expect(result.applied).toBe(1);
 		expect(result.failures).toEqual(['set: no element "gone"']);
 		expect(getContentTexts(editor)).toEqual(["hello", "rain"]);
-	});
-});
-
-describe("applyRefineOp — speech lines speak in a voice", () => {
-	const voiced = (...children: Descendant[]) =>
-		makeEditor([
-			asset("asset_voice", { name: "Mia" }),
-			asset("asset_avatar", { name: "Kai", text: "a boy" }),
-			...children,
-		]);
-
-	it("inserts a line for a character with a voice", () => {
-		const editor = voiced(
-			scene([content("speech", "n1", "hello", { name: "Mia" })]),
-		);
-
-		const result = applyRefineOp(editor, {
-			op: "insert",
-			anchor_id: "n1",
-			elements: [{ type: "speech", attrs: { name: "Mia" }, text: "Hi!" }],
-		});
-
-		expect(result).toEqual({ ok: true });
-		expect(getContentTexts(editor)).toEqual(["hello", "Hi!"]);
-	});
-
-	it.each([
-		[
-			"a character with only an avatar",
-			{ name: "Kai" },
-			"insert: Kai has no asset_voice to speak in; add one with an asset op first",
-		],
-		[
-			"a name no asset carries",
-			{ name: "Ghost" },
-			"insert: Ghost has no asset_voice to speak in; add one with an asset op first",
-		],
-		[
-			"no name",
-			{},
-			"insert: speech needs a name: the asset_voice that speaks it",
-		],
-	])(
-		"refuses a whole insert whose line names %s, inserting nothing",
-		(_, attrs, reason) => {
-			const editor = voiced(
-				scene([content("speech", "n1", "hello", { name: "Mia" })]),
-			);
-
-			const result = applyRefineOps(editor, [
-				{
-					op: "insert",
-					anchor_id: "n1",
-					elements: [
-						{ type: "sound", text: "rain" },
-						{ type: "speech", attrs, text: "Hi!" },
-					],
-				},
-			]);
-
-			expect(result).toEqual({ applied: 0, failures: [reason] });
-			expect(getContentTexts(editor)).toEqual(["hello"]);
-		},
-	);
-
-	it("speaks a line whose voice an earlier op in the same call adds", () => {
-		const editor = voiced(
-			scene([content("speech", "n1", "hello", { name: "Mia" })]),
-		);
-
-		const result = applyRefineOps(editor, [
-			{ op: "asset", type: "asset_voice", attrs: { name: "Kai" } },
-			{
-				op: "insert",
-				anchor_id: "n1",
-				elements: [{ type: "speech", attrs: { name: "Kai" }, text: "Yo" }],
-			},
-		]);
-
-		expect(result).toEqual({ applied: 2, failures: [] });
-		expect(getContentTexts(editor)).toEqual(["hello", "Yo"]);
-	});
-
-	it("refuses handing a line to a speaker with no voice, changing nothing", () => {
-		const editor = voiced(
-			scene([content("speech", "c1", "Hi!", { name: "Mia" })]),
-		);
-
-		const result = applyRefineOp(editor, {
-			op: "set",
-			id: "c1",
-			attrs: { name: "Kai", emotion: "happy" },
-		});
-
-		expect(result).toEqual({
-			ok: false,
-			reason:
-				"set: Kai has no asset_voice to speak in; add one with an asset op first",
-		});
-		expect(flatAttributes(getNode(editor, "c1"))).toEqual({ name: "Mia" });
-	});
-
-	it("refuses dropping a line's speaker", () => {
-		const editor = voiced(
-			scene([content("speech", "c1", "Hi!", { name: "Mia" })]),
-		);
-
-		expect(
-			applyRefineOp(editor, { op: "set", id: "c1", attrs: { name: null } }),
-		).toEqual({
-			ok: false,
-			reason: "set: speech needs a name: the asset_voice that speaks it",
-		});
-	});
-
-	it("still edits a line whose speaker has lost their voice, as long as the name stays", () => {
-		const editor = voiced(
-			scene([content("speech", "c1", "Hi!", { name: "Kai" })]),
-		);
-
-		const result = applyRefineOp(editor, {
-			op: "set",
-			id: "c1",
-			attrs: { emotion: "happy" },
-			text: "Hello!",
-		});
-
-		expect(result).toEqual({ ok: true });
-		expect(getContentTexts(editor)).toEqual(["Hello!"]);
 	});
 });
