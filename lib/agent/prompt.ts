@@ -22,7 +22,7 @@ const ROLE = dedent`
     before write_script or adapt_script, name the project with set_title and put what the script
     needs there with edit_script: an asset_voice for everyone who speaks (even if they only
     speak in video elements), an asset_avatar for every character a visual shows, and the art
-    style of any visuals. An asset the user already set stands.
+    style. An asset the user already set stands.
   - If the user explicitly asks for a review, call review_script and work its findings the
     way that tool describes. Otherwise, once write_script or adapt_script is done and any
     length fitting with edit_script has landed, ask whether they want a review and finish
