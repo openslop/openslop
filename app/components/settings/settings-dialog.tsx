@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import {
+	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogTitle,
 	MountedDialog,
 } from "@/components/ui/dialog";
+import { CloseButton } from "@/components/ui/close-button";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
@@ -37,9 +39,17 @@ export function SettingsDialog() {
 		>
 			<DialogContent
 				glow={false}
+				showCloseButton={false}
 				className="h-[min(46rem,calc(100dvh-2rem))] max-w-4xl gap-3 bg-surface-recessed p-4"
 			>
-				<DialogTitle className="text-label font-semibold">Settings</DialogTitle>
+				<div className="flex items-center justify-between gap-3">
+					<DialogTitle className="text-label font-semibold">
+						Settings
+					</DialogTitle>
+					<DialogClose asChild>
+						<CloseButton />
+					</DialogClose>
+				</div>
 				<DialogDescription className="sr-only">
 					Choose the models your work runs on and the keys behind them.
 				</DialogDescription>

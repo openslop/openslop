@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { Editable, type RenderElementProps } from "slate-react";
 import type { ContentElement } from "@/lib/canvas/types";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { content } from "../../__tests__/fixtures";
-import { click, mountOnCanvas } from "../../__tests__/_mount";
+import { content } from "@/app/components/canvas/__tests__/fixtures";
+import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import type { AssetResult } from "@/lib/connectors/types";
 import { ElementPrompt } from "../element-input";
 

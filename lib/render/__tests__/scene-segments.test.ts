@@ -165,6 +165,18 @@ describe("buildSceneSegments", () => {
 		]);
 	});
 
+	it("shows a trimmed video from its trim start", () => {
+		const clip = {
+			...resolved("long.mp4"),
+			type: "video" as const,
+			mediaDurationSec: 120,
+			trimStartSec: 30,
+			trimDurationSec: 15,
+		};
+		const [segment] = segmentsOf([sequence(0, 15, clip)]);
+		expect(segment.thumbnail).toEqual({ url: "long.mp4#t=30", kind: "video" });
+	});
+
 	it("trims the previous segment by the transition overlap", () => {
 		const segments = segmentsOf(
 			[

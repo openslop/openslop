@@ -6,7 +6,7 @@ import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const avatar = vi.hoisted(() => ({ url: "" }));
-vi.mock("../../hooks/use-character-avatar", () => ({
+vi.mock("@/app/components/canvas/hooks/use-character-avatar", () => ({
 	useCharacterAvatar: () => avatar,
 }));
 

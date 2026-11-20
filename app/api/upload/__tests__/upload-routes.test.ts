@@ -101,14 +101,14 @@ describe("POST /api/upload/:kind", () => {
 		});
 	});
 
-	it("limits a video token to videos up to 50 MB", async () => {
+	it("limits a video token to videos up to 500 MB", async () => {
 		await POST_VIDEO(
 			makeRequest(tokenRequest("assets/upload/user/a1/clip.mp4"), "video"),
 		);
 
 		expect(await tokenOptions()).toEqual({
 			allowedContentTypes: ["video/*"],
-			maximumSizeInBytes: 50 * 1024 * 1024,
+			maximumSizeInBytes: 500 * 1024 * 1024,
 			addRandomSuffix: false,
 		});
 	});

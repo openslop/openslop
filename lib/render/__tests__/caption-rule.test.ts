@@ -2,14 +2,15 @@ import { describe, expect, it } from "vitest";
 import { CONTENT_TYPES, type ContentType } from "@/lib/canvas/types";
 import { toCaption } from "@/lib/captions/word-captions";
 import { layoutCaptions } from "../caption-rule";
-import type { RenderLayout, ResolvedCaptions, ResolvedElement } from "../types";
+import type { Caption } from "@remotion/captions";
+import type { RenderLayout, ResolvedElement } from "../types";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
 import { layoutOf } from "./_layout";
 
 function el(
 	id: string,
 	type: ContentType,
-	captions?: ResolvedCaptions,
+	captions?: Caption[],
 	durationSec = 10,
 ): ResolvedElement {
 	const { role, layer } = CONTENT_TYPES[type];
@@ -33,10 +34,7 @@ function el(
 	};
 }
 
-const heard: ResolvedCaptions = {
-	trimIndexOffset: 0,
-	words: [toCaption("hi", 0, 1)],
-};
+const heard: Caption[] = [toCaption("hi", 0, 1)];
 
 describe("layoutCaptions", () => {
 	const spans = (layout: RenderLayout) =>
@@ -61,10 +59,7 @@ describe("layoutCaptions", () => {
 	});
 
 	describe("with a word a line", () => {
-		const paused: ResolvedCaptions = {
-			trimIndexOffset: 0,
-			words: [toCaption("one", 0, 1), toCaption("two", 3, 4)],
-		};
+		const paused: Caption[] = [toCaption("one", 0, 1), toCaption("two", 3, 4)];
 		const wordPerLine = (element: ResolvedElement) =>
 			layoutOf([element], {
 				captionStyle: {
@@ -108,5 +103,35 @@ describe("layoutCaptions", () => {
 		expect(
 			spans(layoutOf([el("song", "music", heard), el("img", "image")])),
 		).toEqual([{ id: "song", start: 0, duration: 1 }]);
+	});
+
+	it("shows only the words inside the trim, timed from its start", () => {
+		const words = [toCaption("one", 0, 1), toCaption("two", 2, 3)];
+		const trimmed = {
+			...el("vid", "video", words, 3),
+			trimStartSec: 1.5,
+			trimDurationSec: 1.5,
+		};
+		expect(spans(layoutOf([trimmed]))).toEqual([
+			{ id: "vid", start: 0.5, duration: 1 },
+		]);
+	});
+
+	it("drops a track's words past where the next track cuts it", () => {
+		const song: Caption[] = [
+			toCaption("early", 0, 1),
+			toCaption("straddles", 9.5, 10.5),
+			toCaption("late", 15, 16),
+		];
+		expect(
+			spans(
+				layoutOf([
+					el("songA", "music", song, 30),
+					el("vid", "video"),
+					el("songB", "music", undefined, 30),
+					el("vid2", "video"),
+				]),
+			),
+		).toEqual([{ id: "songA", start: 0, duration: 1 }]);
 	});
 });

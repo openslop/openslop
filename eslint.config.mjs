@@ -14,8 +14,13 @@ const MEDIA_UPLOAD = {
 	message: "User uploads land in the project's media: use useMediaUpload.",
 };
 
+const CLIMB = {
+	group: ["../../*"],
+	message: "Use the @/ alias for paths that climb two or more folders.",
+};
+
 const restrictImports = (...patterns) => ({
-	"no-restricted-imports": ["error", { patterns }],
+	"no-restricted-imports": ["error", { patterns: [CLIMB, ...patterns] }],
 });
 
 const eslintConfig = defineConfig([
@@ -31,6 +36,7 @@ const eslintConfig = defineConfig([
 		// Remotion bundle output
 		".remotion/**",
 	]),
+	{ rules: restrictImports() },
 	{
 		// lib/ is the domain layer: it must never import from app/ (the UI layer)
 		files: ["lib/**/*.{ts,tsx}"],

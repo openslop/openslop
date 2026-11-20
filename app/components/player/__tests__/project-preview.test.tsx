@@ -9,7 +9,7 @@ import { ProjectPreview } from "../project-preview";
 vi.mock("next/dynamic", () => ({
 	default: () => () => null,
 }));
-vi.mock("../../toast-error-boundary", () => ({
+vi.mock("@/app/components/toast-error-boundary", () => ({
 	ToastErrorBoundary: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock("../active-scene-sync", () => ({ ActiveSceneSync: () => null }));

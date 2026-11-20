@@ -7,6 +7,7 @@
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="ステータス: プライベートベータ"></a>
+  <a href="#local-mode"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="macOS、Windows、Linux で動作"></a>
   <a href="https://github.com/openslop/openslop/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/openslop/openslop/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="ライセンス: Apache-2.0"></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16"></a>
@@ -35,7 +36,7 @@
 ---
 
 > **プライベートベータ。** 今は招待制です。
-> [openslop.ai でウェイトリストに登録](https://openslop.ai)して、参加してください。
+> [openslop.ai でウェイトリストに登録](https://openslop.ai)するか、[ローカルモード](#local-mode)で今日から自分のパソコンで使えます。
 
 ## 概要
 
@@ -136,6 +137,21 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
   <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
 </td>
 </tr>
+<tr>
+<td width="50%" valign="middle">
+
+### 自分のパソコンで動かす
+
+自分の Mac、Windows、Linux のパソコンで OpenSlop を動かせます。プロジェクトと動画は手元に残ります。
+
+[ローカルモード →](#local-mode)
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
+  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
+</td>
+</tr>
 </table>
 
 **ほかにも入っています:**
@@ -149,12 +165,122 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 ## はじめ方
 
-### 前提条件
+OpenSlop の使い方は 2 つあります。
+
+- **オンライン**：[app.openslop.ai](https://app.openslop.ai) で使えます。インストールは不要です。今は招待制なので、[ウェイトリストに登録](https://openslop.ai)してください。
+- **ローカルモード**：自分のパソコンで動かします。下の手順に沿って進めてください。
+
+<a name="local-mode"></a>
+
+### ローカルモード
+
+<p>
+  <img src="https://img.shields.io/badge/macOS-Apple%20silicon%20%7C%20Intel-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: Apple silicon, Intel">
+  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMy40IDkuOCAydjkuNkgwek0xMSAxLjkgMjQgMHYxMS42SDExek0wIDEyLjRoOS44VjIyTDAgMjAuNnpNMTEgMTIuNGgxM1YyNGwtMTMtMS45eiIvPjwvc3ZnPg==" alt="Windows 10, 11">
+  <img src="https://img.shields.io/badge/Linux-x64%20%7C%20arm64-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: x64, arm64">
+</p>
+
+プロジェクトと動画はパソコンの中に残ります。インターネットに出るのは、AI サービスへのリクエストだけです。
+
+<table>
+<tr>
+<td width="50%" valign="middle">
+
+#### 1. Node.js をインストール
+
+[Node.js のダウンロードページ](https://nodejs.org/en/download)を開きます。緑のインストーラーボタン（**Windows Installer** か **macOS Installer**）をクリックし、ダウンロードしたファイルを開いて進めます。バージョンは 22 以上なら大丈夫です。
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-node-light.svg#gh-light-mode-only" alt="nodejs.org で Windows Installer をクリックし、インストーラーを進めて Node.js をインストールする" width="100%">
+  <img src="../../assets/features/local-step-node-dark.svg#gh-dark-mode-only" alt="nodejs.org で Windows Installer をクリックし、インストーラーを進めて Node.js をインストールする" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 2. Docker Desktop をインストール（Windows と Intel の Mac のみ）
+
+_Linux や、M1 以降のチップ（M2、M3 など）の Mac では飛ばしてください。Mac のチップは、Apple メニュー > **この Mac について** の **チップ** で確認できます。_
+
+[docker.com](https://www.docker.com/products/docker-desktop/) で **Download Docker Desktop** をクリックし、自分のパソコンを選んでインストールします。起動したら、OpenSlop を使っている間は開いたままにしておきます。
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-docker-light.svg#gh-light-mode-only" alt="docker.com で Windows 用のダウンロードを選び、Docker Desktop がエンジン起動済みで開く" width="100%">
+  <img src="../../assets/features/local-step-docker-dark.svg#gh-dark-mode-only" alt="docker.com で Windows 用のダウンロードを選び、Docker Desktop がエンジン起動済みで開く" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 3. OpenSlop をダウンロード
+
+[OpenSlop の GitHub ページ](https://github.com/openslop/openslop)で緑の **Code** ボタンをクリックし、**Download ZIP** を選びます。[ZIP を直接ダウンロード](https://github.com/openslop/openslop/archive/refs/heads/master.zip)することもできます。
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-download-light.svg#gh-light-mode-only" alt="GitHub で緑の Code ボタンがメニューを開き、Download ZIP をクリックする" width="100%">
+  <img src="../../assets/features/local-step-download-dark.svg#gh-dark-mode-only" alt="GitHub で緑の Code ボタンがメニューを開き、Download ZIP をクリックする" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 4. 展開して OpenSlop を起動
+
+Windows では ZIP を右クリック > **Extract All**、次に新しいフォルダを右クリック > **Open in Terminal** を選びます。Mac では ZIP をダブルクリックし、新しいフォルダを右クリック > **New Terminal at Folder** を選びます。ターミナルで次を実行します。
+
+```bash
+npm install
+npm run local
+```
+
+初回は数分かかります。そのあと OpenSlop がブラウザで開き、すでにサインインした状態になります。止めるときはターミナルで Ctrl+C を押します。プロジェクトは次回のために保存されます。
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-terminal-light.svg#gh-light-mode-only" alt="ダウンロードフォルダで ZIP を展開してターミナルで開き、npm install と npm run local で OpenSlop を起動する" width="100%">
+  <img src="../../assets/features/local-step-terminal-dark.svg#gh-dark-mode-only" alt="ダウンロードフォルダで ZIP を展開してターミナルで開き、npm install と npm run local で OpenSlop を起動する" width="100%">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="middle">
+
+#### 5. AI のキーを追加
+
+プロフィールアイコンをクリックし、**Settings** > **Add providers** を開いて、自分のキーでプロバイダーを接続します。必要なキーは作るものによって変わります。
+
+- **すべて使う**：7 種類すべて（Text、Speech、Images、Videos、Music、Sound、Captions）
+- **顔出しなしのナレーション動画**：Text、Speech、Images
+- **シネマティックな動画**：Text、Videos
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-keys-light.svg#gh-light-mode-only" alt="プロフィールメニューから Settings を開き、Add providers でプロバイダーを選んで Anthropic のキーを貼り付けて接続する" width="100%">
+  <img src="../../assets/features/local-step-keys-dark.svg#gh-dark-mode-only" alt="プロフィールメニューから Settings を開き、Add providers でプロバイダーを選んで Anthropic のキーを貼り付けて接続する" width="100%">
+</td>
+</tr>
+</table>
+
+<details>
+<summary>ダウンロードされるもの</summary>
+
+- `npm install` でアプリのコードを取得します。
+- 最初の `npm run local` では、次のものも一度だけダウンロードします。
+  - **Supabase**：データベースとファイルの保存先です。`~/.supabase/cache` に置かれます。Windows と Intel の Mac では、代わりに Docker Desktop の中に保存されます。
+  - **Chrome Headless Shell**：プロジェクトを動画ファイルにします。`node_modules/.remotion` に置かれます。
+
+</details>
+
+### Supabase プロジェクトで開発する
+
+#### 前提条件
 
 - [Node.js](https://nodejs.org) 20.9 以上（Next.js 16 の最低要件。CI は 22 で動いています）
 - [Supabase](https://supabase.com) のプロジェクト（認証とデータベース用）
 
-### セットアップ
+#### セットアップ
 
 1. リポジトリをクローンします:
 
@@ -233,6 +359,7 @@ supabase/        データベースのマイグレーション
 | コマンド                  | すること                            |
 | ------------------------- | ----------------------------------- |
 | `npm run dev`             | 開発サーバーを起動                  |
+| `npm run local`           | ローカルモードで起動                |
 | `npm run build`           | 本番ビルド                          |
 | `npm run lint`            | ESLint                              |
 | `npm run format:check`    | Prettier のチェック                 |

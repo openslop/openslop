@@ -1,5 +1,6 @@
 import { sceneLabel } from "@/lib/canvas/constants";
 import { CONTENT_TYPES } from "@/lib/canvas/types";
+import { mediaUrlAt } from "./clip-trim";
 import { toFrames } from "./frames";
 import { totalDuration } from "./sequences";
 import type { ResolvedElement, RenderLayout } from "./types";
@@ -37,7 +38,10 @@ export function findSegmentIndexAtFrame(
 function toThumbnail(element: ResolvedElement): SeekThumbnail | null {
 	const { outputKind } = CONTENT_TYPES[element.type];
 	if (outputKind === "audio") return null;
-	return { url: element.url, kind: outputKind };
+	return {
+		url: mediaUrlAt(element.url, element.trimStartSec),
+		kind: outputKind,
+	};
 }
 
 /**

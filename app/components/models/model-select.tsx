@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentProps, ReactNode } from "react";
-import { buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -143,23 +143,16 @@ export function ConfigureModelsItem() {
 	);
 }
 
-/** Looks like the buttons it stands in for, without nesting one inside a menu row. */
-function ConnectHint({ provider }: { provider: Provider }) {
-	const { name } = PROVIDER_CATALOG[provider];
+/** A status, not a button, so it never nests one inside a menu row. */
+export function ConnectHint({ provider }: { provider: Provider }) {
+	const label = `Add your ${PROVIDER_CATALOG[provider].name} API key to generate with this model`;
 	return (
-		<SimpleTooltip
-			label={`Add your ${name} API key to generate with this model`}
-		>
-			<span
-				className={buttonVariants({
-					variant: "secondary",
-					size: "2xs",
-					className: "ml-auto",
-				})}
-			>
-				<Link className="size-2.5" />
-				Connect
-			</span>
+		<SimpleTooltip label={label}>
+			<Badge variant="indicator" size="xs" className="ml-auto">
+				<Link />
+				<span aria-hidden="true">Connect</span>
+				<span className="sr-only">{label}</span>
+			</Badge>
 		</SimpleTooltip>
 	);
 }

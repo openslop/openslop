@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 640 360" width="640" height="360" role="img" aria-label="Install Node.js">
+<title>Install Node.js</title>
+<desc>On nodejs.org&#x27;s download page, the Windows Installer button is clicked, the installer downloads and runs, and Node.js is installed.</desc>
+<style>
+.s2{animation:kf-s2 11s infinite both}@keyframes kf-s2{0%,12.18%{opacity:0}13.00%,14.55%{opacity:1}15.27%,100%{opacity:0}}
+.a3{animation:kf-a3 11s infinite both}@keyframes kf-a3{0%,14.45%{opacity:0;transform:translate(0,-4px)}16.36%,100%{opacity:1;transform:translate(0,0)}}
+.s4{animation:kf-s4 11s infinite both}@keyframes kf-s4{0%,14.45%{opacity:0}15.91%,27.27%{opacity:1}28.64%,100%{opacity:0}}
+.s5{animation:kf-s5 11s infinite both}@keyframes kf-s5{0%,14.45%{opacity:0}15.91%,27.27%{opacity:1}28.64%,100%{opacity:0}}
+.g6{animation:kf-g6 11s linear infinite both;transform-box:fill-box;transform-origin:left center}@keyframes kf-g6{0%,16.27%{transform:scaleX(0)}26.36%,100%{transform:scaleX(1)}}
+.a7{animation:kf-a7 11s infinite both}@keyframes kf-a7{0%,27.64%{opacity:0;transform:translate(0,0px)}30.45%,100%{opacity:1;transform:translate(0,0)}}
+.s8{animation:kf-s8 11s infinite both}@keyframes kf-s8{0%,34.00%{opacity:0}36.36%,78.18%{opacity:1}80.45%,100%{opacity:0}}
+.s9{animation:kf-s9 11s infinite both}@keyframes kf-s9{0%,34.00%{opacity:0}35.18%,41.82%{opacity:1}42.91%,100%{opacity:0}}
+.s10{animation:kf-s10 11s infinite both}@keyframes kf-s10{0%,43.09%{opacity:0}44.27%,62.73%{opacity:1}63.82%,100%{opacity:0}}
+.s11{animation:kf-s11 11s infinite both}@keyframes kf-s11{0%,63.55%{opacity:0}64.73%,78.18%{opacity:1}79.27%,100%{opacity:0}}
+.s12{animation:kf-s12 11s infinite both}@keyframes kf-s12{0%,43.09%{opacity:0}44.27%,62.73%{opacity:1}63.82%,100%{opacity:0}}
+.g13{animation:kf-g13 11s linear infinite both;transform-box:fill-box;transform-origin:left center}@keyframes kf-g13{0%,44.45%{transform:scaleX(0)}61.82%,100%{transform:scaleX(1)}}
+.s14{animation:kf-s14 11s infinite both}@keyframes kf-s14{0%,34.00%{opacity:0}35.18%,41.82%{opacity:1}42.91%,100%{opacity:0}}
+.s15{animation:kf-s15 11s infinite both}@keyframes kf-s15{0%,63.55%{opacity:0}64.73%,78.18%{opacity:1}79.27%,100%{opacity:0}}
+.a16{animation:kf-a16 11s infinite both}@keyframes kf-a16{0%,79.91%{opacity:0;transform:translate(0,6px)}82.73%,100%{opacity:1;transform:translate(0,0)}}
+.k17{animation:kf-k17 11s ease-out infinite both;transform-box:fill-box;transform-origin:center}@keyframes kf-k17{0%{opacity:0;transform:scale(.2)}12.64%{opacity:0;transform:scale(.2)}12.73%{opacity:.8;transform:scale(.2)}16.82%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.k18{animation:kf-k18 11s ease-out infinite both;transform-box:fill-box;transform-origin:center}@keyframes kf-k18{0%{opacity:0;transform:scale(.2)}32.18%{opacity:0;transform:scale(.2)}32.27%{opacity:.8;transform:scale(.2)}36.36%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.k19{animation:kf-k19 11s ease-out infinite both;transform-box:fill-box;transform-origin:center}@keyframes kf-k19{0%{opacity:0;transform:scale(.2)}40.82%{opacity:0;transform:scale(.2)}40.91%{opacity:.8;transform:scale(.2)}45.00%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.k20{animation:kf-k20 11s ease-out infinite both;transform-box:fill-box;transform-origin:center}@keyframes kf-k20{0%{opacity:0;transform:scale(.2)}75.82%{opacity:0;transform:scale(.2)}75.91%{opacity:.8;transform:scale(.2)}80.00%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.k21{animation:kf-k21 11s cubic-bezier(.4,0,.2,1) infinite both}@keyframes kf-k21{0%{transform:translate(560px,330px)}0.00%{transform:translate(560px,330px)}2.73%{transform:translate(560px,330px)}10.91%{transform:translate(176.05909px,235.04999999999998px)}13.64%{transform:translate(176.05909px,235.04999999999998px)}30.00%{transform:translate(497.0px,76.0px)}33.64%{transform:translate(497.0px,76.0px)}39.09%{transform:translate(453.4265px,294px)}41.82%{transform:translate(453.4265px,294px)}73.64%{transform:translate(450.909px,294px)}77.27%{transform:translate(450.909px,294px)}94.55%{transform:translate(560px,330px)}100%{transform:translate(560px,330px)}}
+</style>
+<defs>
+<pattern id="plus" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M12 9v6M9 12h6" stroke="#26171d" stroke-opacity="0.10" stroke-width="1"/></pattern>
+<clipPath id="pg1"><rect x="24" y="46" width="592" height="298" rx="10"/></clipPath>
+<filter id="grainf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0.4 0.4 0.4 0 -0.25"/></filter><pattern id="grainp" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" filter="url(#grainf)"/></pattern>
+</defs>
+<rect x="0" y="0" width="640" height="360" rx="0" fill="#f3f1f0" opacity="1" />
+<rect x="0" y="0" width="640" height="360" rx="0" fill="url(#plus)" opacity="1" />
+<rect x="23.0" y="16.0" width="594" height="330" rx="11.0" fill="#26171d" opacity="0.050"/><rect x="21.0" y="17.0" width="598" height="334" rx="13.0" fill="#26171d" opacity="0.035"/><rect x="17.0" y="19.0" width="606" height="342" rx="17.0" fill="#26171d" opacity="0.025"/>
+<rect x="24" y="16" width="592" height="328" rx="10" fill="#ffffff" stroke="#e6dfe2" stroke-width="1" opacity="1" />
+<rect x="24" y="16" width="592" height="30" rx="10" fill="#f3f1f0" opacity="1" />
+<rect x="24" y="36" width="592" height="10" rx="0" fill="#f3f1f0" opacity="1" />
+<line x1="24" y1="46" x2="616" y2="46" stroke="#e6dfe2"/>
+<circle cx="38" cy="31" r="3.5" fill="#d9d1d5"/>
+<circle cx="50" cy="31" r="3.5" fill="#d9d1d5"/>
+<circle cx="62" cy="31" r="3.5" fill="#d9d1d5"/>
+<rect x="84" y="22" width="472" height="18" rx="9" fill="#f3f1f1" opacity="1" />
+<g color="#6a595f" opacity="1" transform="translate(262.3426,26) scale(0.6250)"><path fill='currentColor' d='M8 .5C8.946.5 9.842.918 10.493 1.642 11.143 2.363 11.5 3.332 11.5 4.333V6.5H11.889C12.384 6.5 12.799 6.764 13.072 7.122 13.346 7.48 13.5 7.952 13.5 8.454V13.546C13.5 14.047 13.346 14.52 13.072 14.878 12.799 15.236 12.384 15.5 11.889 15.5H4.11C3.615 15.5 3.2 15.236 2.927 14.878A2.2 2.2 0 0 1 2.499 13.546V8.454C2.499 7.953 2.653 7.48 2.927 7.122 3.2 6.764 3.615 6.5 4.11 6.5H4.5V4.333C4.5 3.333 4.857 2.363 5.507 1.642 6.158.918 7.054.5 8 .5M4.111 7.5C3.993 7.5 3.851 7.561 3.723 7.73A1.2 1.2 0 0 0 3.5 8.454V13.546C3.5 13.848 3.594 14.102 3.723 14.271 3.851 14.439 3.993 14.5 4.111 14.5H11.889C12.007 14.5 12.149 14.439 12.277 14.27 12.406 14.102 12.5 13.848 12.5 13.546V8.454C12.5 8.153 12.406 7.898 12.277 7.729 12.149 7.561 12.007 7.5 11.889 7.5ZM8 1.5C7.355 1.5 6.724 1.784 6.25 2.31A3.04 3.04 0 0 0 5.5 4.333V6.5H10.5V4.333C10.5 3.566 10.225 2.839 9.75 2.311 9.276 1.784 8.645 1.5 8 1.5'/></g>
+<text x="276.3426" y="34.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#26171d" text-anchor="start" style="white-space:pre" >nodejs.org/en/download</text>
+<g color="#6a595f" opacity="1" transform="translate(588,25) scale(0.7500)"><path fill='currentColor' d='M2 13.167C2 13.374 2.09 13.582 2.263 13.742 2.437 13.903 2.682 14 2.944 14H13.056C13.318 14 13.563 13.903 13.737 13.742A.8.8 0 0 0 14 13.167V10.5H15V13.167C15 13.667 14.784 14.137 14.416 14.477A2 2 0 0 1 13.056 15H2.944C2.441 15 1.951 14.816 1.584 14.477A1.78 1.78 0 0 1 1 13.167V10.5H2ZM8.5 7.793L11.646 4.646 12.353 5.354 8 9.707 3.646 5.354 4.354 4.646 7.5 7.793V1H8.5Z'/></g>
+<g clip-path="url(#pg1)"><g transform="translate(50,66) scale(1.15)">
+<text x="0" y="30" font-family="'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="30" font-weight="600" fill="#2c3437" text-anchor="start" style="white-space:pre" letter-spacing="-0.4">Download Node.js®</text>
+<text x="0" y="90" font-family="'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#2c3437" text-anchor="start" style="white-space:pre" >Or get a prebuilt Node.js® for</text>
+<rect x="223.8656" y="66" width="140" height="38" rx="4" fill="#ffffff" stroke="#d9e1e4" stroke-width="1" opacity="1" />
+<path transform="translate(237.8656,78) scale(0.9)" d="M0 1.4 6.5.5v6.2H0zM7.3.4 16-.8v7.5H7.3zM0 7.5h6.5v6.2L0 12.8zM7.3 7.5H16v7.7l-8.7-1.2z" fill="#0078d4"/>
+<text x="259.8656" y="90" font-family="'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#2c3437" text-anchor="start" style="white-space:pre" >Windows</text>
+<g color="#2c3437" opacity="1" transform="translate(339.8656,78) scale(0.8750)"><path fill='currentColor' d='M12.354 6.354L8 10.707 3.646 6.354 4.354 5.646 8 9.293 11.646 5.646Z'/></g>
+<text x="373.8656" y="90" font-family="'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#2c3437" text-anchor="start" style="white-space:pre" >running a</text>
+<rect x="452.89279999999997" y="66" width="112" height="38" rx="4" fill="#ffffff" stroke="#d9e1e4" stroke-width="1" opacity="1" />
+<text x="466.89279999999997" y="90" font-family="'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#2c3437" text-anchor="start" style="white-space:pre" >x64</text>
+<g color="#2c3437" opacity="1" transform="translate(540.8928,78) scale(0.8750)"><path fill='currentColor' d='M12.354 6.354L8 10.707 3.646 6.354 4.354 5.646 8 9.293 11.646 5.646Z'/></g>
+<text x="576.8928" y="90" font-family="'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#2c3437" text-anchor="start" style="white-space:pre" >architecture.</text>
+<rect x="0" y="128" width="219.2332" height="38" rx="4" fill="#417e38" opacity="1" />
+<g class="s2"><rect x="0" y="128" width="219.2332" height="38" rx="4" fill="#356a2e" opacity="1" /></g>
+<g color="#ffffff" opacity="1" transform="translate(16,138) scale(1.1250)"><g><path fill='currentColor' d='M7.5 13.793l-2.146-2.146-.707.707L8 15.707l3.354-3.354-.708-.707L8.5 13.794V9h-1zM12.112.367A6 6 0 0 0 8.848.121a5.97 5.97 0 0 0-2.904 1.506 5.9 5.9 0 0 0-1.55 2.43h-.486c-1.035 0-2.028.407-2.762 1.134A3.87 3.87 0 0 0 0 7.937a3.87 3.87 0 0 0 1.146 2.745l.352-.355.353-.355c-.545-.54-.851-1.273-.851-2.035s.306-1.495.85-2.036a2.92 2.92 0 0 1 2.058-.844h1.245l.098-.374a4.9 4.9 0 0 1 1.38-2.33 4.97 4.97 0 0 1 2.417-1.252 5 5 0 0 1 2.72.205 4.95 4.95 0 0 1 2.197 1.6 4.87 4.87 0 0 1 .53 5.165 4.93 4.93 0 0 1-1.829 2.003l.525.852A5.93 5.93 0 0 0 15.39 8.514a5.87 5.87 0 0 0-.637-6.224A5.95 5.95 0 0 0 12.113.367'/></g></g>
+<text x="44" y="152" font-family="'Open Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#ffffff" text-anchor="start" style="white-space:pre" >Windows Installer (.msi)</text>
+</g></g>
+<g class="a3"><rect x="389.0" y="50.0" width="216" height="54" rx="11.0" fill="#26171d" opacity="0.045"/><rect x="387.0" y="51.0" width="220" height="58" rx="13.0" fill="#26171d" opacity="0.032"/><rect x="383.0" y="53.0" width="228" height="66" rx="17.0" fill="#26171d" opacity="0.023"/></g>
+<g class="a3"><rect x="390" y="50" width="214" height="52" rx="10" fill="#ffffff" stroke="#e6dfe2" stroke-width="1" opacity="1" /></g>
+<g class="a3"><rect x="400" y="60" width="32" height="32" rx="7" fill="#f1eaed" opacity="1" /></g>
+<g class="a3"><g color="#26171d" opacity="1" transform="translate(408,68) scale(1.0000)"><path fill='currentColor' d='M8.685.005A1 1 0 0 1 9.293.293L13.707 4.707A1 1 0 0 1 14 5.414V15A1 1 0 0 1 13.102 15.995L13 16H3L2.897 15.995A1 1 0 0 1 2 15V1A1 1 0 0 1 3 0H8.586ZM3 15H13V6H8.5A.5.5 0 0 1 8 5.5V1H3ZM9 5H12.586L9 1.414Z'/></g></g>
+<g class="a3"><text x="442" y="72" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="500" fill="#26171d" text-anchor="start" style="white-space:pre" >node-v26.13.1-x64.msi</text></g>
+<g class="s4"><rect x="442" y="81" width="148" height="3" rx="1.5" fill="#e2dde0" opacity="1" /></g>
+<g class="g6"><g class="s5"><rect x="442" y="81" width="148" height="3" rx="1.5" fill="#6b6bcf" opacity="1" /></g></g>
+<g class="a7"><g color="#3e8b6a" opacity="1" transform="translate(442,83) scale(0.6250)"><g><path fill='currentColor' d='M8 .5A7.5 7.5 0 1 1 8 15.5 7.5 7.5 0 0 1 8 .5M8 1.5A6.5 6.5 0 1 0 8 14.5 6.5 6.5 0 0 0 8 1.5M12.315 6.389L7.373 10.389 7.059 10.644 6.744 10.389 4.686 8.722 5.314 7.944 7.06 9.356 11.686 5.611Z'/></g></g></g>
+<g class="a7"><text x="456" y="91.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#6a595f" text-anchor="start" style="white-space:pre" >Done</text></g>
+<g class="s8">
+<rect x="149.0" y="120.0" width="342" height="198" rx="11.0" fill="#26171d" opacity="0.050"/><rect x="147.0" y="121.0" width="346" height="202" rx="13.0" fill="#26171d" opacity="0.035"/><rect x="143.0" y="123.0" width="354" height="210" rx="17.0" fill="#26171d" opacity="0.025"/>
+<rect x="150" y="120" width="340" height="196" rx="10" fill="#ffffff" stroke="#e6dfe2" stroke-width="1" opacity="1" />
+<rect x="150" y="120" width="340" height="196" rx="10" fill="url(#grainp)" opacity="0.2"/>
+<rect x="150" y="120" width="340" height="26" rx="10" fill="#f3f1f0" opacity="1" />
+<rect x="150" y="136" width="340" height="10" rx="0" fill="#f3f1f0" opacity="1" />
+<line x1="150" y1="146" x2="490" y2="146" stroke="#e6dfe2"/>
+<circle cx="164" cy="133" r="3.5" fill="#d9d1d5"/>
+<circle cx="176" cy="133" r="3.5" fill="#d9d1d5"/>
+<circle cx="188" cy="133" r="3.5" fill="#d9d1d5"/>
+<g color="#6a595f" opacity="1" transform="translate(282.8306,127.5) scale(0.6875)"><path fill='currentColor' d='M8 0c-.273 0-.54.074-.777.215l-5.446 3.2c-.236.14-.432.342-.568.585s-.209.52-.209.8v6.4c0 .28.072 .557.209 .8l.113.174a1.6 1.6 0 0 0 .455.411l5.446 3.2c.236.14 .504.215 .777.215l.203-.014a1.5 1.5 0 0 0 .574-.2l5.446-3.201a1.6 1.6 0 0 0 .455-.411L14.79 12a1.64 1.64 0 0 0 .21-.8V4.8c0-.21-.04-.418-.118-.612L14.79 4c-.136-.243-.332-.445-.568-.585l-5.446-3.2C8.541.075 8.273 0 8 0M14 11.2l-.005.082q-.016.122-.076.228a.6.6 0 0 1-.203.213l-5.445 3.2-.003.003q-.128.075-.268.074V8.568l.237-.128L14 5.337z m-7-3.17v6.464l-4.716-2.771a.6.6 0 0 1-.203-.213c-.052-.093-.08-.2-.081-.31V5.337zM13.716 4.276l.061.043L8 7.432l-2.83-1.525 5.74-3.28zM8 1a.5.5 0 0 1 .268.074l.003.002 1.645.967-5.784 3.305-1.908-1.028.06-.043 5.445-3.2.003-.003A.5.5 0 0 1 8 1'/></g>
+<text x="297.8306" y="136.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="500" fill="#6a595f" text-anchor="start" style="white-space:pre" >Node.js Setup</text>
+<rect x="151" y="147" width="6" height="168" rx="0" fill="#417e38" opacity="1" />
+<g class="s9"><text x="172" y="178" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#26171d" text-anchor="start" style="white-space:pre" >Welcome to the Node.js Setup Wizard</text></g>
+<g class="s9"><text x="172" y="196" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#6a595f" text-anchor="start" style="white-space:pre" >This installs Node.js on your computer.</text></g>
+<g class="s10"><text x="172" y="178" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#26171d" text-anchor="start" style="white-space:pre" >Installing Node.js</text></g>
+<g class="s10"><text x="172" y="196" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#6a595f" text-anchor="start" style="white-space:pre" >Please wait while it is installed.</text></g>
+<g class="s11"><text x="172" y="178" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#26171d" text-anchor="start" style="white-space:pre" >Completed the Node.js Setup Wizard</text></g>
+<g class="s11"><text x="172" y="196" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="400" fill="#6a595f" text-anchor="start" style="white-space:pre" >Click Finish to exit.</text></g>
+<g class="s12"><rect x="172" y="220" width="296" height="6" rx="3" fill="#e2dde0" opacity="1" /></g>
+<g class="g13"><g class="s12"><rect x="172" y="220" width="296" height="6" rx="3" fill="#417e38" opacity="1" /></g></g>
+<g class="s14"><rect x="432.853" y="282" width="41.147000000000006" height="24" rx="6" fill="#26171d" opacity="1" /></g>
+<g class="s14"><text x="442.853" y="297.42" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Next</text></g>
+<g class="s15"><rect x="427.818" y="282" width="46.182" height="24" rx="6" fill="#26171d" opacity="1" /></g>
+<g class="s15"><text x="437.818" y="297.42" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Finish</text></g>
+</g>
+<g class="a16"><rect x="257.593" y="308.0" width="124.814" height="26" rx="13.0" fill="#26171d" opacity="0.035"/><rect x="255.59300000000002" y="309.0" width="128.814" height="30" rx="15.0" fill="#26171d" opacity="0.024"/><rect x="251.59300000000002" y="311.0" width="136.814" height="38" rx="19.0" fill="#26171d" opacity="0.017"/></g>
+<g class="a16"><rect x="258.593" y="308" width="122.814" height="24" rx="12.0" fill="#ffffff" opacity="1" /></g>
+<g class="a16"><g color="#3e8b6a" opacity="1" transform="translate(268.593,314.0) scale(0.7500)"><g><path fill='currentColor' d='M8 .5A7.5 7.5 0 1 1 8 15.5 7.5 7.5 0 0 1 8 .5M8 1.5A6.5 6.5 0 1 0 8 14.5 6.5 6.5 0 0 0 8 1.5M12.315 6.389L7.373 10.389 7.059 10.644 6.744 10.389 4.686 8.722 5.314 7.944 7.06 9.356 11.686 5.611Z'/></g></g></g>
+<g class="a16"><text x="284.593" y="323.6" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" fill="#26171d" text-anchor="start" style="white-space:pre" >Node.js is installed</text></g>
+<g class="k17"><circle cx="176.05909" cy="235.04999999999998" r="13" fill="#6b6bcf" fill-opacity=".3" stroke="#6b6bcf"/></g>
+<g class="k18"><circle cx="497.0" cy="76.0" r="13" fill="#6b6bcf" fill-opacity=".3" stroke="#6b6bcf"/></g>
+<g class="k19"><circle cx="453.4265" cy="294" r="13" fill="#6b6bcf" fill-opacity=".3" stroke="#6b6bcf"/></g>
+<g class="k20"><circle cx="450.909" cy="294" r="13" fill="#6b6bcf" fill-opacity=".3" stroke="#6b6bcf"/></g>
+<g class="k21"><path d="M0 0V14.5L3.6 11.2L6.2 16.8L8.6 15.7L6 10.2H11Z" fill="#ffffff" stroke="#111111" stroke-width="1.1" stroke-linejoin="round"/></g>
+</svg>

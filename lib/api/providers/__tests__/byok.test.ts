@@ -8,11 +8,11 @@ import {
 	MissingProviderKeyError,
 	readProviderKey,
 	setKeyStatus,
-} from "../../provider-keys";
+} from "@/lib/api/provider-keys";
 import { byokProviderFor, validateKey, verifyProviderKey } from "../byok";
 
-vi.mock("../../provider-keys", async (importOriginal) => ({
-	...(await importOriginal<typeof import("../../provider-keys")>()),
+vi.mock("@/lib/api/provider-keys", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/api/provider-keys")>()),
 	readProviderKey: vi.fn(),
 	setKeyStatus: vi.fn(),
 }));

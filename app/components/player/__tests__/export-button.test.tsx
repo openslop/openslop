@@ -12,7 +12,7 @@ vi.mock("@/lib/generation/generation-queue-provider", () => ({
 	useQueueSelector: (select: (q: { isBusy: () => boolean }) => unknown) =>
 		select({ isBusy: () => generating }),
 }));
-vi.mock("../../sloppy/sloppy-provider", () => ({
+vi.mock("@/app/components/sloppy/sloppy-provider", () => ({
 	useSloppy: () => ({ loading: false }),
 }));
 vi.mock("../use-export", () => ({

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isLocalMode } from "@/lib/local-mode";
 import {
+	LocalUploadGrant,
+	LocalUploadRequest,
 	UPLOAD_KINDS,
 	UPLOAD_PATHNAME,
 	type UploadKind,
 } from "@/lib/upload/upload-files";
+import { createLocalUploadToken } from "./local-storage";
 import { createSessionRouteHandler } from "./route-handler";
 
 const ClientTokenRequestSchema = z.object({
@@ -18,6 +22,19 @@ const ClientTokenRequestSchema = z.object({
 
 /** Lets the browser upload a file of `kind` straight to the blob store, past the function body limit. */
 export const createUploadRoute = (kind: UploadKind) =>
+	isLocalMode() ? createLocalUploadRoute(kind) : createBlobUploadRoute(kind);
+
+const createLocalUploadRoute = (kind: UploadKind) =>
+	createSessionRouteHandler({
+		schema: LocalUploadRequest,
+		label: `upload/${kind}`,
+		handle: async ({ input }) =>
+			NextResponse.json<LocalUploadGrant>({
+				token: await createLocalUploadToken(input.pathname),
+			}),
+	});
+
+const createBlobUploadRoute = (kind: UploadKind) =>
 	createSessionRouteHandler({
 		schema: ClientTokenRequestSchema,
 		label: `upload/${kind}`,

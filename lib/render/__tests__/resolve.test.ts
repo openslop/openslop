@@ -242,26 +242,8 @@ describe("resolveElements", () => {
 		const resolveOne = (element: ContentElement) =>
 			resolveElements([wrap([element])], bySnapshot)[0];
 
-		it("captions an element with the words on its own result, until it ends", () => {
-			expect(resolveOne(makeElement("vid", "video")).captions).toEqual({
-				trimIndexOffset: 0,
-				words: heard,
-			});
-		});
-
-		it("counts the words a trim cuts, so an edit still lands on the element's own", () => {
-			const { captions } = resolveOne(
-				makeElement("vid", "video", { trimStart: "1.5" }),
-			);
-			expect(captions?.trimIndexOffset).toBe(1);
-			expect(captions?.words).toEqual([toCaption("two", 0.5, 1.5)]);
-		});
-
-		it("starts the words at the element's first, though the end trim cuts the last", () => {
-			const { captions } = resolveOne(
-				makeElement("vid", "video", { trimEnd: "1.5" }),
-			);
-			expect(captions).toEqual({ trimIndexOffset: 0, words: [heard[0]] });
+		it("captions an element with the words on its own result", () => {
+			expect(resolveOne(makeElement("vid", "video")).captions).toEqual(heard);
 		});
 
 		it("captions nothing an element has no words for", () => {

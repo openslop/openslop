@@ -18,26 +18,30 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 const Nothing = () => null;
 const toast = Object.assign(vi.fn(), { dismiss: vi.fn() });
 vi.mock("sonner", () => ({ toast }));
-vi.mock("../../element-generation-context", () => ({
+vi.mock("@/app/components/canvas/elements/element-generation-context", () => ({
 	ElementGenerationProvider: ({ children }: { children: ReactNode }) =>
 		children,
 }));
-vi.mock("../../generate-button", () => ({
+vi.mock("@/app/components/canvas/elements/generate-button", () => ({
 	ElementGenerateButton: Nothing,
 	ElementStaleIndicator: Nothing,
 }));
-vi.mock("../../element-history-popover", () => ({
+vi.mock("@/app/components/canvas/elements/element-history-popover", () => ({
 	ElementHistoryPopover: Nothing,
 }));
-vi.mock("../../reset-edits-button", () => ({
+vi.mock("@/app/components/canvas/elements/reset-edits-button", () => ({
 	ResetEditsButton: Nothing,
 }));
-vi.mock("../../element-media-picker", () => ({
+vi.mock("@/app/components/canvas/elements/element-media-picker", () => ({
 	AddMediaButton: Nothing,
 }));
-vi.mock("../../output-preview", () => ({ OutputPreview: Nothing }));
-vi.mock("../../element-settings", () => ({ ElementSettings: Nothing }));
-vi.mock("../../attributes/model-attribute", () => ({
+vi.mock("@/app/components/canvas/elements/output-preview", () => ({
+	OutputPreview: Nothing,
+}));
+vi.mock("@/app/components/canvas/elements/element-settings", () => ({
+	ElementSettings: Nothing,
+}));
+vi.mock("@/app/components/canvas/elements/attributes/model-attribute", () => ({
 	ModelAttribute: () => <button type="button">Avatar model</button>,
 }));
 vi.mock("../voice-editor", () => ({
