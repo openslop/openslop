@@ -7,6 +7,7 @@ import type { ResultKind } from "@/lib/canvas/types";
 import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
+import { mediaUrlAt } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import type { ResolvedElement, Trim } from "@/lib/render/types";
 import { cn } from "@/lib/utils";
@@ -17,19 +18,18 @@ import type {
 } from "./timeline-rows";
 
 const HEADER_ICON_SIZE = 9;
-const HEADER_HEIGHT = "h-3.5";
 const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 
 const FRAME =
-	"relative flex h-full w-full flex-col overflow-hidden rounded-md border";
+	"relative flex h-full w-full flex-col overflow-hidden rounded-md border transition-[border-color] duration-[var(--duration-faster)] ease-[var(--ease-productive)] motion-reduce:transition-none";
 const edge = (selected: boolean) =>
-	selected ? "border-current/60" : "border-border";
+	selected
+		? "border-current/60"
+		: "border-border group-hover/clip:border-current/40";
 
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
-
-const urlAt = (url: string, sec: number) => (sec > 0 ? `${url}#t=${sec}` : url);
 
 function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
 	return (
@@ -39,13 +39,7 @@ function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
 	);
 }
 
-function Preview({
-	width,
-	children,
-}: {
-	width?: number;
-	children: React.ReactNode;
-}) {
+function Preview({ width, children }: { width?: number; children: ReactNode }) {
 	return (
 		<div
 			className={cn(
@@ -97,12 +91,7 @@ function ClipHeader({
 	width: number;
 }) {
 	return (
-		<span
-			className={cn(
-				"relative z-10 flex shrink-0 items-center gap-1 px-1",
-				HEADER_HEIGHT,
-			)}
-		>
+		<span className="relative z-10 flex h-3.5 shrink-0 items-center gap-1 px-1">
 			<Icon size={HEADER_ICON_SIZE} />
 			<span dir="auto" className="truncate text-badge-xs text-foreground">
 				{fit(label, width)}
@@ -211,7 +200,7 @@ export function TimelineClip({
 					<Preview>
 						<Footage
 							outputKind={config.outputKind}
-							src={urlAt(element.url, element.trimStartSec)}
+							src={mediaUrlAt(element.url, element.trimStartSec)}
 						/>
 					</Preview>
 				)}
@@ -261,7 +250,7 @@ export function TimelineExtension({
 						<Preview key={i} width={clipWidth}>
 							<Footage
 								outputKind={config.outputKind}
-								src={urlAt(url, trimStartSec)}
+								src={mediaUrlAt(url, trimStartSec)}
 							/>
 						</Preview>
 					))
@@ -269,7 +258,7 @@ export function TimelineExtension({
 					<Preview>
 						<Footage
 							outputKind={config.outputKind}
-							src={urlAt(url, trimStartSec + trimDurationSec)}
+							src={mediaUrlAt(url, trimStartSec + trimDurationSec)}
 						/>
 					</Preview>
 				)}

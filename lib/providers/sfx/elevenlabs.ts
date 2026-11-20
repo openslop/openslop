@@ -1,6 +1,5 @@
 import type { VendorParams } from "@/lib/connectors/models";
 import type { SFXGenerateParams } from "@/lib/connectors/types";
-import { audioPromptCache } from "../cache";
 import {
 	BaseElevenLabsAudio,
 	ELEVENLABS_AUDIO_FORMAT,
@@ -13,8 +12,6 @@ type SFXRequest = VendorParams<SFXGenerateParams>;
 /** The Scale plan is $299 for 9,000 generations. */
 const USD_PER_GENERATION = 299 / 9000;
 
-const cache = audioPromptCache(process.env.PINECONE_SFX_INDEX || "sfx", "sfx");
-
 export class ElevenLabsSFX
 	extends BaseElevenLabsAudio<SFXRequest>
 	implements SFXProvider
@@ -24,10 +21,6 @@ export class ElevenLabsSFX
 
 	protected costUsd() {
 		return USD_PER_GENERATION;
-	}
-
-	override generate(params: SFXRequest) {
-		return cache.readThrough(params, () => super.generate(params));
 	}
 
 	protected requestStream(params: SFXRequest) {

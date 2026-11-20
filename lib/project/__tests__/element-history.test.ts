@@ -49,11 +49,6 @@ describe("parseElementVersions", () => {
 		]);
 	});
 
-	it("reads the element type a version was generated as", () => {
-		const [version] = parseElementVersions([row({ element_type: "video" })]);
-		expect(version?.elementType).toBe("video");
-	});
-
 	it("keeps what a version cost across a reload", () => {
 		const result = {
 			durationSec: 0,

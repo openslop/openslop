@@ -3,13 +3,8 @@ import { z } from "zod";
 import type { JobPoll, JobSubmission } from "@/lib/gateway/base";
 import type { ModelRef } from "@/lib/connectors/types";
 import { errorMessage } from "@/lib/errors";
-import {
-	createJob,
-	enqueueJob,
-	getJob,
-	updateJob,
-	type JobConnectorType,
-} from "./jobs";
+import { createJob, getJob, updateJob, type JobConnectorType } from "./jobs";
+import { enqueueJob } from "./job-queue";
 import { failIfExpired } from "./job-deadline";
 import {
 	AUDIO_FIELDS,

@@ -23,4 +23,12 @@ export const RUNWARE_IMAGE_MODELS = {
 		description:
 			"xAI's image model, strong at prompt-faithful scenes and edits from a reference image.",
 	},
+	"GPT Image 2.6 Sunburst": {
+		id: "openai:gpt-image@2.6-sunburst",
+		cost: "medium",
+		speed: "low",
+		resolutions: ["1152p", "1440p"],
+		description:
+			"OpenAI's image model, best for detailed compositions and precise edits from reference images.",
+	},
 } as const;

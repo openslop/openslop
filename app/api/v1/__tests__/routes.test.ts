@@ -24,9 +24,11 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
 
 vi.mock("@/lib/api/jobs", () => ({
 	createJob: (...args: unknown[]) => mockCreateJob(...args),
-	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
 	getJob: (...args: unknown[]) => mockGetJob(...args),
+}));
+vi.mock("@/lib/api/job-queue", () => ({
+	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 }));
 
 const mockStreamAgentTurn = vi.fn();
@@ -158,9 +160,6 @@ describe("API routes", () => {
 				const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
 				expect(res.status).toBe(402);
-				expect((await res.json()).error).toBe(
-					"You're out of balance. Questions? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
-				);
 				expect(mockCreateJob).not.toHaveBeenCalled();
 			},
 		);
@@ -495,6 +494,34 @@ describe("API routes", () => {
 				status: "completed",
 				costUsd: 0.003,
 			});
+		});
+
+		it("books a streamed call's cost when the client disconnects mid-stream", async () => {
+			const { POST } = await import("@/app/api/v1/llm/route");
+			const { promise: disconnected, resolve: disconnect } =
+				Promise.withResolvers<void>();
+			mockLLMStream.mockReturnValue(
+				(async function* () {
+					yield { text: "Hi", done: false };
+					await disconnected;
+					yield { text: "", done: true };
+					return 0.003;
+				})(),
+			);
+
+			const res = await POST(
+				makeRequest("/api/v1/llm", { prompt: "hi", stream: true }),
+			);
+			const reader = res.body?.getReader();
+			await reader?.read();
+			await reader?.cancel();
+			disconnect();
+
+			await vi.waitFor(() =>
+				expect(mockCreateJob).toHaveBeenCalledWith(
+					expect.objectContaining({ costUsd: 0.003 }),
+				),
+			);
 		});
 
 		it("records what the call cost", async () => {

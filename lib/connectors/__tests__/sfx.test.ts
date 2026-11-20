@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { HttpSFXConnector } from "../sfx/connector";
-import type { ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
@@ -28,30 +27,6 @@ describe("BaseSFXConnector", () => {
 			prompt: "explosion",
 		});
 		expect(result.audioUrl).toBe(AUDIO_URL);
-	});
-
-	it("runs plugins in order", async () => {
-		mockSuccess();
-		const order: string[] = [];
-		const plugin: ConnectorPlugin = {
-			name: "tracker",
-			transformPrompt: (p) => {
-				order.push("transform");
-				return p;
-			},
-			beforeGenerate: (p) => {
-				order.push("before");
-				return p;
-			},
-			afterGenerate: (r) => {
-				order.push("after");
-				return r;
-			},
-		};
-		await new HttpSFXConnector({ ...config, plugins: [plugin] }).generate({
-			prompt: "test",
-		});
-		expect(order).toEqual(["transform", "before", "after"]);
 	});
 
 	it("returns the native asset durationSec from metadata (looping is a layout concern)", async () => {

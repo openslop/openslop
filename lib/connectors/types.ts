@@ -63,13 +63,18 @@ export type VisualModelEntry = ModelEntry & {
 	resolutions: readonly [MediaResolution, ...MediaResolution[]];
 };
 
+/** A video model also says the longest clip it generates in one go. */
+export type VideoModelEntry = VisualModelEntry & {
+	maxDurationSec: number;
+};
+
 /** What each connector type's catalog entries carry. */
 export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
 	voice: ModelEntry;
 	image: VisualModelEntry;
-	video: VisualModelEntry;
+	video: VideoModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
 	stt: ModelEntry;

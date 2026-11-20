@@ -1,10 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { BaseConnector } from "../base";
-import type {
-	ConnectorPlugin,
-	ConnectorType,
-	ResolvedConnectorConfig,
-} from "../types";
+import type { ConnectorPlugin, ConnectorType } from "../types";
 
 class TestConnector extends BaseConnector {
 	readonly type: ConnectorType = "llm";
@@ -15,16 +11,6 @@ class TestConnector extends BaseConnector {
 
 describe("BaseConnector", () => {
 	const model = { provider: "openslop", model: "Claude Opus 5" } as const;
-	const config: ResolvedConnectorConfig = {
-		projectId: "project-1",
-		model,
-		plugins: [{ name: "p1" }],
-	};
-
-	it("extracts plugins from config", () => {
-		const c = new TestConnector(config);
-		expect((c as unknown as { plugins: unknown[] }).plugins).toHaveLength(1);
-	});
 
 	it("stamps its own model onto every generation", async () => {
 		const seen: unknown[] = [];
@@ -35,11 +21,6 @@ describe("BaseConnector", () => {
 		});
 		await c.generate({ prompt: "hi" });
 		expect(seen[0]).toEqual({ prompt: "hi", ...model });
-	});
-
-	it("defaults plugins to empty array", () => {
-		const c = new TestConnector({ projectId: "project-1", model });
-		expect((c as unknown as { plugins: unknown[] }).plugins).toEqual([]);
 	});
 
 	it("runs onError when transformPrompt throws", async () => {

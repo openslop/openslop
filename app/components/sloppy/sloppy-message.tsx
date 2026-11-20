@@ -1,6 +1,7 @@
 "use client";
 
 import { isStaticToolUIPart, isTextUIPart } from "ai";
+import { CopyButton } from "@/components/ui/copy-button";
 import type { SloppyMessage } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/panel-card";
 import { Reasoning } from "./reasoning";
@@ -18,11 +19,19 @@ export function UserMessage({ message }: { message: SloppyMessage }) {
 
 function ReplyText({ text }: { text: string }) {
 	return (
-		<PanelCard>
-			<p className="whitespace-pre-wrap break-words text-label text-foreground">
-				{text}
-			</p>
-		</PanelCard>
+		<div className="group/reply">
+			<PanelCard>
+				<p className="whitespace-pre-wrap break-words pr-6 text-label text-foreground">
+					{text}
+				</p>
+				<CopyButton
+					text={text}
+					label="Copy reply"
+					size="sm"
+					className="absolute top-2 right-2 opacity-0 group-hover/reply:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+				/>
+			</PanelCard>
+		</div>
 	);
 }
 

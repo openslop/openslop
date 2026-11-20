@@ -25,7 +25,7 @@ vi.mock("@/app/components/canvas/workspace-context", () => ({
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-vi.mock("../../elements/style/art-style-modal", () => ({
+vi.mock("@/app/components/canvas/elements/style/art-style-modal", () => ({
 	ArtStyleModal: () => <span data-dialog="asset_style" />,
 }));
 

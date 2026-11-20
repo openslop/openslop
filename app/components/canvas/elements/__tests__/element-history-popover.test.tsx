@@ -7,16 +7,16 @@ import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { inputsFor } from "@/lib/generation/__tests__/_graph";
 import type { ElementVersion } from "@/lib/generation/versions";
-import type { ElementVersionHistory } from "../../hooks/use-element-history";
-import { content, scene } from "../../__tests__/fixtures";
-import { click, mountOnCanvas } from "../../__tests__/_mount";
+import type { ElementVersionHistory } from "@/app/components/canvas/hooks/use-element-history";
+import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
+import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { ElementHistoryPopover } from "../element-history-popover";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const loadHistory = vi.fn();
 let history: ElementVersionHistory;
-vi.mock("../../hooks/use-element-history", () => ({
+vi.mock("@/app/components/canvas/hooks/use-element-history", () => ({
 	useElementHistory: () => history,
 	useLoadElementHistory: () => loadHistory,
 }));

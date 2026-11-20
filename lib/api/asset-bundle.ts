@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { BLOB_BASE_URL } from "../blob";
+import { isLocalMode } from "../local-mode";
+import { putLocalObject, type ObjectBody } from "./local-storage";
 
 const httpError = (response: Response, label: string) =>
 	new Error(`${label} (${response.status} ${response.statusText})`);
@@ -42,7 +44,30 @@ export type BundleFileRemote = BundleFileBase & {
 
 export type BundleFile = BundleFileData | BundleFileRemote;
 
-type PutBody = Parameters<typeof import("@vercel/blob").put>[1];
+type PutOptions = {
+	contentType: string;
+	overwrite: boolean;
+	multipart?: boolean;
+};
+
+async function putObject(
+	pathname: string,
+	body: ObjectBody,
+	{ contentType, overwrite, multipart }: PutOptions,
+): Promise<void> {
+	if (isLocalMode()) {
+		await putLocalObject(pathname, body, { contentType, overwrite });
+		return;
+	}
+	const { put } = await import("@vercel/blob");
+	await put(pathname, body, {
+		access: "public",
+		contentType,
+		addRandomSuffix: false,
+		allowOverwrite: overwrite,
+		multipart,
+	});
+}
 
 /** A remote file served with no bytes yet, as a host may briefly do right after it reports the file done. */
 export class EmptyRemoteFileError extends Error {
@@ -69,7 +94,7 @@ async function withBytes(
 async function sourceOf(
 	file: BundleFile,
 	provider: string,
-): Promise<{ body: PutBody; multipart: boolean }> {
+): Promise<{ body: ObjectBody; multipart: boolean }> {
 	if ("data" in file) return { body: file.data, multipart: false };
 	const response = await fetchOk(file.url, file.key);
 	// Vercel rejects empty uploads as "Invalid body"
@@ -152,7 +177,6 @@ export class AssetBundle {
 		metadata?: Record<string, unknown>,
 		{ id }: UploadOptions = {},
 	): Promise<BundleResponse> {
-		const { put } = await import("@vercel/blob");
 		// Two callers naming the same bundle write the same bytes, so the second may overwrite.
 		const named = id !== undefined;
 		const bundleId = id ?? nanoid();
@@ -161,11 +185,9 @@ export class AssetBundle {
 		await Promise.all(
 			files.map(async (file) => {
 				const { body, multipart } = await sourceOf(file, provider);
-				return put(`${basePath}/${file.filename}`, body, {
-					access: "public",
+				return putObject(`${basePath}/${file.filename}`, body, {
 					contentType: file.contentType,
-					addRandomSuffix: false,
-					allowOverwrite: named,
+					overwrite: named,
 					multipart,
 				});
 			}),
@@ -183,11 +205,9 @@ export class AssetBundle {
 			metadata,
 		};
 
-		await put(`${basePath}/manifest.json`, JSON.stringify(manifest), {
-			access: "public",
+		await putObject(`${basePath}/manifest.json`, JSON.stringify(manifest), {
 			contentType: "application/json",
-			addRandomSuffix: false,
-			allowOverwrite: named,
+			overwrite: named,
 		});
 
 		return { id: bundleId, type, provider, result, metadata };

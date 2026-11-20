@@ -42,7 +42,6 @@ export function CharacterSwitcher({ element }: { element: ContentElement }) {
 			options={names.map((name) => ({ value: name, label: name }))}
 			tooltip={tooltip}
 			contentClassName="max-h-64"
-			itemClassName="text-muted-foreground"
 			footer={
 				<>
 					{names.length > 0 && <DropdownMenuSeparator />}

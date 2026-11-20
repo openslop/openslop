@@ -6,7 +6,7 @@ import { Slate, withReact } from "slate-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { asset, element } from "@/lib/canvas/__tests__/_assets";
 
-vi.mock("../../hooks/use-character-avatar", () => ({
+vi.mock("@/app/components/canvas/hooks/use-character-avatar", () => ({
 	useCharacterAvatar: () => ({ url: "" }),
 }));
 
