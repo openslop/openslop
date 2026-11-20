@@ -37,7 +37,7 @@ export function osmlSpec(language: string): string {
 		${languagePrompt(language)}
 
 		## Order
-		Write the story and nothing else.
+		Write the story and nothing else, using only the elements your format allows.
 
 		## <speech>
 		- What one character says out loud. name is required: the character who says it. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
