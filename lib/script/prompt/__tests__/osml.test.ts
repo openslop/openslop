@@ -16,15 +16,6 @@ describe("osmlSpec", () => {
 		);
 	});
 
-	it("leaves where a line goes to the format, whatever its language", () => {
-		const spanish = osmlSpec("es (ISO 639-1)");
-		expect(spanish).toContain(
-			"The language never decides which element a line goes in; the format does.",
-		);
-		expect(spanish).not.toMatch(/Write all <speech> in the script language/);
-		expect(spanish).not.toMatch(/Only speech quoted inside a <video> prompt/);
-	});
-
 	it("names English as the fallback rather than ruling any language out", () => {
 		expect(spec).toContain("or English when that is unclear");
 		expect(spec).not.toMatch(/ignoring the language of|not the language of/);
