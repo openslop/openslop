@@ -69,13 +69,6 @@ describe("osmlSpec", () => {
 		expect(spec).toContain("Change cues where the story turns");
 	});
 
-	it("sets the visual cadence without dictating what the script opens with", () => {
-		expect(spec).toContain(
-			"If your format has visuals, put a new one before every sentence of speech.",
-		);
-		expect(spec).not.toContain("Start with a visual");
-	});
-
 	it("describes every video prompt in detail, standing alone", () => {
 		expect(spec).toContain("Each prompt is standalone");
 	});
