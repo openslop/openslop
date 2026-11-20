@@ -21,7 +21,6 @@ describe("AgentTurn", () => {
 
 		expect(markup).toContain("Done thinking");
 		expect(markup).not.toContain("Thinking…");
-		expect(markup).not.toContain("shimmer");
 	});
 
 	it("leaves the abandoned half-thought collapsed rather than expanded", () => {

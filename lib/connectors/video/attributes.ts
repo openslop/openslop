@@ -14,8 +14,9 @@ import { modelEntry } from "../models";
 import type { ModelRef } from "../types";
 import { continuityDef, startFrameDef, uploadedFrameDef } from "./start-frame";
 
-export const videoAttributesFor = (model: ModelRef) =>
-	AttributeSchema.from([
+export const videoAttributesFor = (model: ModelRef) => {
+	const { resolutions, maxDurationSec } = modelEntry("video", model);
+	return AttributeSchema.from([
 		...OWN_MODEL_DEFS,
 		startFrameDef,
 		continuityDef,
@@ -24,11 +25,12 @@ export const videoAttributesFor = (model: ModelRef) =>
 			...referenceImagesDef,
 			edit: { ...imagesEdit, continuity: true },
 		},
-		resolutionDef(modelEntry("video", model).resolutions),
-		durationDef,
+		resolutionDef(resolutions),
+		durationDef(maxDurationSec),
 		loopDef,
 		volumeDef("5"),
 		motionDef,
 		trimStartDef,
 		trimEndDef,
 	]);
+};

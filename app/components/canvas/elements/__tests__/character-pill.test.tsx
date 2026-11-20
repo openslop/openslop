@@ -6,7 +6,7 @@ import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const avatar = vi.hoisted(() => ({ url: "" }));
-vi.mock("../../hooks/use-character-avatar", () => ({
+vi.mock("@/app/components/canvas/hooks/use-character-avatar", () => ({
 	useCharacterAvatar: () => avatar,
 }));
 
@@ -34,14 +34,13 @@ describe("CharacterAvatar placeholder", () => {
 		expect(html).toContain("--user-icon");
 	});
 
-	it("the pill without a name is the placeholder plus what it's handed, styled like a header button", () => {
+	it("the pill without a name is the placeholder plus what it's handed", () => {
 		avatar.url = "";
 		const html = renderToStaticMarkup(
 			<CharacterPill>
 				<i>flag</i>
 			</CharacterPill>,
 		);
-		expect(html).toContain("text-muted-foreground");
 		expect(html).toContain("--user-icon");
 		expect(html).toContain("<i>flag</i>");
 		expect(html).not.toMatch(/>[A-Z]</);

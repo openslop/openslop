@@ -3,6 +3,8 @@ import { useGenerate } from "../hooks/use-generate";
 import { PlaceholderBallsLoader } from "./preview/placeholder-balls";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
+import { getTrimStart } from "@/lib/canvas/element-attributes";
+import { mediaUrlAt } from "@/lib/render/clip-trim";
 
 export function ForegroundPreview({ element }: { element: ContentElement }) {
 	const { result, status } = useGenerate(element);
@@ -21,7 +23,7 @@ export function ForegroundPreview({ element }: { element: ContentElement }) {
 		<div className="relative w-full h-full rounded-lg overflow-hidden border">
 			<MediaWithSkeleton
 				outputKind={outputKind}
-				src={url}
+				src={mediaUrlAt(url, getTrimStart(element))}
 				alt="Scene preview"
 			/>
 		</div>

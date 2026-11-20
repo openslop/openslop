@@ -1,4 +1,3 @@
-import { send } from "@vercel/queue";
 import isUndefined from "lodash/isUndefined";
 import omitBy from "lodash/omitBy";
 import { z } from "zod";
@@ -8,8 +7,6 @@ import { JOB_STATUSES, type JobStatus } from "@/lib/gateway/base";
 import { selectColumns } from "@/lib/supabase/select-columns";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-
-const ASSET_QUEUE_TOPIC = "asset-generate";
 
 /** What an asset route queues. */
 export const JOB_CONNECTOR_TYPES = [
@@ -134,11 +131,4 @@ export async function updateJob(
 	const supabase = createServiceClient();
 	const { error } = await supabase.from("jobs").update(update).eq("id", jobId);
 	if (error) throw new Error(`Failed to update job: ${error.message}`);
-}
-
-export async function enqueueJob(
-	jobId: string,
-	options?: { delaySeconds: number },
-): Promise<void> {
-	await send(ASSET_QUEUE_TOPIC, { jobId }, options);
 }

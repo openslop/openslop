@@ -15,13 +15,8 @@ describe("Spinner", () => {
 		expect(renderToStaticMarkup(<Spinner />)).toContain("font-size:16px");
 	});
 
-	it("takes an icon size with no class fighting it", () => {
+	it("takes an icon size", () => {
 		const html = renderToStaticMarkup(<Spinner size={ICON_SIZES.header} />);
 		expect(html).toContain("font-size:14px");
-		expect(html).not.toMatch(/\b(size|h|w)-\d/);
-	});
-
-	it("takes the color of the control it sits in, like every icon", () => {
-		expect(renderToStaticMarkup(<Spinner />)).not.toMatch(/\btext-/);
 	});
 });

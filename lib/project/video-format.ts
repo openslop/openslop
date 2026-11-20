@@ -2,6 +2,7 @@ export const VIDEO_FORMAT_TARGETS = [
 	"cinematic",
 	"faceless",
 	"explainer",
+	"audiobook",
 ] as const;
 
 /** `auto` is not classified yet; the writer falls back to the format closest to the brief. */
@@ -27,12 +28,17 @@ export const VIDEO_FORMAT_SPECS = {
 	faceless: {
 		label: "Faceless",
 		summary:
-			"Voices tell the story over pictures and video. For stories read aloud, newscasts and podcasts.",
+			"Voices tell the story over pictures and video. For narrated story videos and newscasts.",
 	},
 	explainer: {
 		label: "Explainer",
 		summary:
 			"A voice over video in which nobody speaks. For explainers, essays, lessons, documentaries and product tours.",
+	},
+	audiobook: {
+		label: "Audiobook",
+		summary:
+			"A narrator and character voices with music and sound, and no visuals. For audiobooks, audio dramas and podcasts.",
 	},
 } as const satisfies Record<VideoFormatTarget, VideoFormatSpec>;
 

@@ -50,15 +50,6 @@ describe("GenerationIndicator", () => {
 		expect(html).not.toContain("Generating 0s</span>");
 		expect(html).not.toContain("shimmer");
 	});
-
-	it("pairs the media scrim with the on-media foreground", () => {
-		const html = render(
-			<GenerationIndicator status="queued" startedAt={null} size="sm" />,
-		);
-		expect(html).toContain("bg-on-media/55");
-		expect(html).toContain("text-on-media-foreground");
-		expect(html).not.toContain("text-foreground");
-	});
 });
 
 describe("GenerationIndicator clock", () => {

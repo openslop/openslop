@@ -3,11 +3,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { Waveform } from "../waveform";
+import { Waveform, type WaveformProps } from "../waveform";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 // happy-dom leaves out the standard readyState constants.
 Object.assign(HTMLMediaElement, { HAVE_NOTHING: 0, HAVE_METADATA: 1 });
+
+const toastError = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/toast-error", () => ({ toastError }));
 
 vi.mock("../use-peaks", () => ({
 	usePeaks: () => ({ status: "ready", peaks: [] }),
@@ -24,10 +27,8 @@ afterEach(() => {
 	act(() => root.unmount());
 });
 
-function render(volume?: number) {
-	act(() =>
-		root.render(<Waveform src="https://audio/a.mp3" volume={volume} />),
-	);
+function render(props: Omit<WaveformProps, "src"> = {}) {
+	act(() => root.render(<Waveform src="https://audio/a.mp3" {...props} />));
 	const slider = container.querySelector<HTMLElement>('[role="slider"]');
 	const audio = container.querySelector("audio");
 	if (!slider || !audio) throw new Error("no waveform rendered");
@@ -108,19 +109,43 @@ describe("Waveform", () => {
 	});
 
 	it("plays at the gain it is given", () => {
-		const { audio } = render(0.3);
+		const { audio } = render({ volume: 0.3 });
 
 		expect(audio.volume).toBe(0.3);
 	});
 
 	it("follows a gain change while it plays", () => {
-		const { audio } = render(0.3);
+		const { audio } = render({ volume: 0.3 });
 		const playing = audio;
 
-		render(0.7);
+		render({ volume: 0.7 });
 
 		expect(container.querySelector("audio")).toBe(playing);
 		expect(playing.volume).toBe(0.7);
+	});
+
+	it("stops and says so when its audio fails mid-play", async () => {
+		const onPause = vi.fn();
+		const { audio } = render({ onPause });
+		load(audio, 20);
+		await act(() => audio.play());
+
+		act(() => audio.dispatchEvent(new Event("error")));
+
+		expect(audio.paused).toBe(true);
+		expect(onPause).toHaveBeenCalledOnce();
+		expect(toastError).toHaveBeenCalledWith(
+			"the file stopped loading",
+			"Could not play audio",
+		);
+	});
+
+	it("stays quiet when its audio fails before anyone plays it", () => {
+		const { audio } = render();
+
+		act(() => audio.dispatchEvent(new Event("error")));
+
+		expect(toastError).not.toHaveBeenCalled();
 	});
 
 	it("plays at full gain when given none", () => {

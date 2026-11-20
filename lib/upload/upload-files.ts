@@ -27,7 +27,7 @@ export const UPLOAD_KINDS = {
 	},
 	video: {
 		noun: "a video",
-		maxBytes: 50 * 1024 * 1024,
+		maxBytes: 500 * 1024 * 1024,
 		contentTypes: ["video/*"],
 	},
 	audio: {
@@ -61,6 +61,15 @@ function sanitizeFilename(name: string): string {
 
 export const uploadPathname = (filename: string) =>
 	`${UPLOAD_DIR}/${nanoid()}/${sanitizeFilename(filename)}`;
+
+/** In local mode the browser asks for an upload token for one path, then uploads to local Supabase Storage. */
+export const LocalUploadRequest = z.object({
+	pathname: z.string().regex(UPLOAD_PATHNAME, "Invalid upload path"),
+});
+
+export const LocalUploadGrant = z.object({ token: z.string() });
+
+export type LocalUploadGrant = z.infer<typeof LocalUploadGrant>;
 
 const matchesContentType = (type: string, pattern: string) =>
 	pattern.endsWith("/*")

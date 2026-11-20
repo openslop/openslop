@@ -4,13 +4,11 @@ import { ChargedError } from "@/lib/providers/base";
 const mockLoadJobForProcessing = vi.fn();
 const mockClaimJob = vi.fn();
 const mockUpdateJob = vi.fn();
-const mockEnqueueJob = vi.fn();
 vi.mock("@/lib/api/jobs", () => ({
 	loadJobForProcessing: (...args: unknown[]) =>
 		mockLoadJobForProcessing(...args),
 	claimJob: (...args: unknown[]) => mockClaimJob(...args),
 	updateJob: (...args: unknown[]) => mockUpdateJob(...args),
-	enqueueJob: (...args: unknown[]) => mockEnqueueJob(...args),
 }));
 
 const mockGetJobHandler = vi.fn();
@@ -55,7 +53,6 @@ describe("processQueuedJob", () => {
 	beforeEach(() => {
 		mockClaimJob.mockResolvedValue(true);
 		mockUpdateJob.mockResolvedValue(undefined);
-		mockEnqueueJob.mockResolvedValue(undefined);
 	});
 
 	it.each(["completed", "failed"])(
@@ -74,11 +71,10 @@ describe("processQueuedJob", () => {
 	it("acknowledges a message whose job does not exist", async () => {
 		mockLoadJobForProcessing.mockResolvedValue(null);
 
-		await expect(processQueuedJob(JOB_ID)).resolves.toBeUndefined();
+		await expect(processQueuedJob(JOB_ID)).resolves.toBeNull();
 
 		expect(mockClaimJob).not.toHaveBeenCalled();
 		expect(mockGetJobHandler).not.toHaveBeenCalled();
-		expect(mockEnqueueJob).not.toHaveBeenCalled();
 	});
 
 	it.each(["pending", "processing"])(
@@ -91,10 +87,9 @@ describe("processQueuedJob", () => {
 			const handler = { process: vi.fn() };
 			mockGetJobHandler.mockReturnValue(handler);
 
-			await processQueuedJob(JOB_ID);
+			await expect(processQueuedJob(JOB_ID)).resolves.toBeNull();
 
 			expect(handler.process).not.toHaveBeenCalled();
-			expect(mockEnqueueJob).not.toHaveBeenCalled();
 			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
 				status: "failed",
 				error: expect.stringContaining("timed out"),
@@ -115,7 +110,7 @@ describe("processQueuedJob", () => {
 			};
 			mockGetJobHandler.mockReturnValue(handler);
 
-			await processQueuedJob(JOB_ID);
+			await expect(processQueuedJob(JOB_ID)).resolves.toBeNull();
 
 			expect(mockClaimJob).toHaveBeenCalledExactlyOnceWith(JOB_ID);
 			expect(handler.process).toHaveBeenCalledWith(job);
@@ -124,7 +119,6 @@ describe("processQueuedJob", () => {
 				result: { url: "u" },
 				cost_usd: 0.18,
 			});
-			expect(mockEnqueueJob).not.toHaveBeenCalled();
 		});
 
 		it("runs the handler once when two deliveries of one job race", async () => {
@@ -174,37 +168,17 @@ describe("processQueuedJob", () => {
 		});
 	});
 
-	describe("pending outcomes", () => {
-		it("checkpoints the metadata, releases the job and redelivers it after a delay", async () => {
-			mockLoadJobForProcessing.mockResolvedValue(pendingJob());
-			stubPendingHandler({ providerJobId: "upstream-1" });
+	it("checkpoints the metadata, releases the job and asks for a delayed redelivery", async () => {
+		mockLoadJobForProcessing.mockResolvedValue(pendingJob());
+		stubPendingHandler({ providerJobId: "upstream-1" });
 
-			await processQueuedJob(JOB_ID);
-
-			expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
-				status: "pending",
-				metadata: { providerJobId: "upstream-1" },
-			});
-			expect(mockEnqueueJob).toHaveBeenCalledWith(JOB_ID, {
-				delaySeconds: expect.any(Number),
-			});
-			expect(mockUpdateJob.mock.invocationCallOrder[0]).toBeLessThan(
-				mockEnqueueJob.mock.invocationCallOrder[0],
-			);
+		await expect(processQueuedJob(JOB_ID)).resolves.toEqual({
+			delaySeconds: expect.any(Number),
 		});
 
-		it("propagates a redelivery failure so the queue retries instead of failing the job", async () => {
-			mockLoadJobForProcessing.mockResolvedValue(pendingJob());
-			stubPendingHandler();
-			mockEnqueueJob.mockRejectedValue(new Error("queue unavailable"));
-
-			await expect(processQueuedJob(JOB_ID)).rejects.toThrow(
-				"queue unavailable",
-			);
-			expect(mockUpdateJob).not.toHaveBeenCalledWith(
-				JOB_ID,
-				expect.objectContaining({ status: "failed" }),
-			);
+		expect(mockUpdateJob).toHaveBeenCalledExactlyOnceWith(JOB_ID, {
+			status: "pending",
+			metadata: { providerJobId: "upstream-1" },
 		});
 	});
 
@@ -222,7 +196,6 @@ describe("processQueuedJob", () => {
 			status: "failed",
 			error: "provider down",
 		});
-		expect(mockEnqueueJob).not.toHaveBeenCalled();
 	});
 
 	it("books the vendor's charge on a job that failed after the vendor was paid", async () => {

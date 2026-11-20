@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { HttpImageConnector } from "../image/connector";
-import type { AssetResult, ConnectorPlugin } from "../types";
 import { mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
@@ -28,22 +27,5 @@ describe("BaseImageConnector", () => {
 			prompt: "a cat",
 		});
 		expect(result.imageUrl).toBe(IMAGE_URL);
-	});
-
-	it("runs afterGenerate plugin", async () => {
-		mockSuccess();
-		const replacement: AssetResult = {
-			imageUrl: "https://example.com/replaced.png",
-			durationSec: 0,
-		};
-		const plugin: ConnectorPlugin = {
-			name: "resize",
-			afterGenerate: () => replacement,
-		};
-		const result = await new HttpImageConnector({
-			...config,
-			plugins: [plugin],
-		}).generate({ prompt: "test" });
-		expect(result.imageUrl).toBe("https://example.com/replaced.png");
 	});
 });

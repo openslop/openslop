@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 640 360" width="640" height="360" role="img" aria-label="Install Docker Desktop">
+<title>Install Docker Desktop</title>
+<desc>On docker.com, Download Docker Desktop opens a menu, the Windows download is picked, and Docker Desktop opens with its engine running.</desc>
+<style>
+.s2{animation:kf-s2 12s infinite both}@keyframes kf-s2{0%,11.17%{opacity:0}11.92%,13.33%{opacity:1}14.00%,100%{opacity:0}}
+.s3{animation:kf-s3 12s infinite both}@keyframes kf-s3{0%,12.42%{opacity:0}13.50%,33.33%{opacity:1}34.33%,100%{opacity:0}}
+.s4{animation:kf-s4 12s infinite both}@keyframes kf-s4{0%,24.92%{opacity:0}25.67%,33.33%{opacity:1}34.00%,100%{opacity:0}}
+.a5{animation:kf-a5 12s infinite both}@keyframes kf-a5{0%,33.25%{opacity:0;transform:translate(0,-4px)}35.00%,100%{opacity:1;transform:translate(0,0)}}
+.s6{animation:kf-s6 12s infinite both}@keyframes kf-s6{0%,33.25%{opacity:0}34.58%,44.17%{opacity:1}45.42%,100%{opacity:0}}
+.s7{animation:kf-s7 12s infinite both}@keyframes kf-s7{0%,33.25%{opacity:0}34.58%,44.17%{opacity:1}45.42%,100%{opacity:0}}
+.g8{animation:kf-g8 12s linear infinite both;transform-box:fill-box;transform-origin:left center}@keyframes kf-g8{0%,34.92%{transform:scaleX(0)}43.33%,100%{transform:scaleX(1)}}
+.a9{animation:kf-a9 12s infinite both}@keyframes kf-a9{0%,44.50%{opacity:0;transform:translate(0,0px)}47.08%,100%{opacity:1;transform:translate(0,0)}}
+.a10{animation:kf-a10 12s infinite both}@keyframes kf-a10{0%,51.58%{opacity:0;transform:translate(0,12px)}54.58%,100%{opacity:1;transform:translate(0,0)}}
+.a11{animation:kf-a11 12s infinite both}@keyframes kf-a11{0%,61.58%{opacity:0;transform:translate(0,0px)}64.17%,100%{opacity:1;transform:translate(0,0)}}
+.s12{animation:kf-s12 12s infinite both}@keyframes kf-s12{0%,51.58%{opacity:0}52.08%,61.67%{opacity:1}62.08%,100%{opacity:0}}
+.s13{animation:kf-s13 12s infinite both}@keyframes kf-s13{0%,51.58%{opacity:0}52.08%,61.67%{opacity:1}62.08%,100%{opacity:0}}
+.a14{animation:kf-a14 12s infinite both}@keyframes kf-a14{0%,66.58%{opacity:0;transform:translate(0,6px)}69.17%,100%{opacity:1;transform:translate(0,0)}}
+.k15{animation:kf-k15 12s ease-out infinite both;transform-box:fill-box;transform-origin:center}@keyframes kf-k15{0%{opacity:0;transform:scale(.2)}11.58%{opacity:0;transform:scale(.2)}11.67%{opacity:.8;transform:scale(.2)}15.42%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.k16{animation:kf-k16 12s ease-out infinite both;transform-box:fill-box;transform-origin:center}@keyframes kf-k16{0%{opacity:0;transform:scale(.2)}31.17%{opacity:0;transform:scale(.2)}31.25%{opacity:.8;transform:scale(.2)}35.00%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.k17{animation:kf-k17 12s ease-out infinite both;transform-box:fill-box;transform-origin:center}@keyframes kf-k17{0%{opacity:0;transform:scale(.2)}47.83%{opacity:0;transform:scale(.2)}47.92%{opacity:.8;transform:scale(.2)}51.67%{opacity:0;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.k18{animation:kf-k18 12s cubic-bezier(.4,0,.2,1) infinite both}@keyframes kf-k18{0%{transform:translate(560px,330px)}0.00%{transform:translate(560px,330px)}2.50%{transform:translate(560px,330px)}10.00%{transform:translate(158.546075px,154.35px)}13.33%{transform:translate(158.546075px,154.35px)}24.17%{transform:translate(139.5px,256.95px)}32.50%{transform:translate(139.5px,256.95px)}45.83%{transform:translate(497.0px,76.0px)}49.17%{transform:translate(497.0px,76.0px)}58.33%{transform:translate(560px,330px)}100%{transform:translate(560px,330px)}}
+</style>
+<defs>
+<pattern id="plus" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M12 9v6M9 12h6" stroke="#f1eaed" stroke-opacity="0.08" stroke-width="1"/></pattern>
+<clipPath id="pg1"><rect x="24" y="46" width="592" height="298" rx="10"/></clipPath>
+</defs>
+<rect x="0" y="0" width="640" height="360" rx="0" fill="#140e11" opacity="1" />
+<rect x="0" y="0" width="640" height="360" rx="0" fill="url(#plus)" opacity="1" />
+<rect x="23.0" y="16.0" width="594" height="330" rx="11.0" fill="#000000" opacity="0.175"/><rect x="21.0" y="17.0" width="598" height="334" rx="13.0" fill="#000000" opacity="0.122"/><rect x="17.0" y="19.0" width="606" height="342" rx="17.0" fill="#000000" opacity="0.087"/>
+<rect x="24" y="16" width="592" height="328" rx="10" fill="#f9fafb" stroke="#332a2e" stroke-width="1" opacity="1" />
+<rect x="24" y="16" width="592" height="30" rx="10" fill="#140e11" opacity="1" />
+<rect x="24" y="36" width="592" height="10" rx="0" fill="#140e11" opacity="1" />
+<line x1="24" y1="46" x2="616" y2="46" stroke="#332a2e"/>
+<circle cx="38" cy="31" r="3.5" fill="#453a3f"/>
+<circle cx="50" cy="31" r="3.5" fill="#453a3f"/>
+<circle cx="62" cy="31" r="3.5" fill="#453a3f"/>
+<rect x="84" y="22" width="472" height="18" rx="9" fill="#2e282b" opacity="1" />
+<g color="#9d8b93" opacity="1" transform="translate(233.15019999999998,26) scale(0.6250)"><path fill='currentColor' d='M8 .5C8.946.5 9.842.918 10.493 1.642 11.143 2.363 11.5 3.332 11.5 4.333V6.5H11.889C12.384 6.5 12.799 6.764 13.072 7.122 13.346 7.48 13.5 7.952 13.5 8.454V13.546C13.5 14.047 13.346 14.52 13.072 14.878 12.799 15.236 12.384 15.5 11.889 15.5H4.11C3.615 15.5 3.2 15.236 2.927 14.878A2.2 2.2 0 0 1 2.499 13.546V8.454C2.499 7.953 2.653 7.48 2.927 7.122 3.2 6.764 3.615 6.5 4.11 6.5H4.5V4.333C4.5 3.333 4.857 2.363 5.507 1.642 6.158.918 7.054.5 8 .5M4.111 7.5C3.993 7.5 3.851 7.561 3.723 7.73A1.2 1.2 0 0 0 3.5 8.454V13.546C3.5 13.848 3.594 14.102 3.723 14.271 3.851 14.439 3.993 14.5 4.111 14.5H11.889C12.007 14.5 12.149 14.439 12.277 14.27 12.406 14.102 12.5 13.848 12.5 13.546V8.454C12.5 8.153 12.406 7.898 12.277 7.729 12.149 7.561 12.007 7.5 11.889 7.5ZM8 1.5C7.355 1.5 6.724 1.784 6.25 2.31A3.04 3.04 0 0 0 5.5 4.333V6.5H10.5V4.333C10.5 3.566 10.225 2.839 9.75 2.311 9.276 1.784 8.645 1.5 8 1.5'/></g>
+<text x="247.15019999999998" y="34.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#f1eaed" text-anchor="start" style="white-space:pre" >docker.com/products/docker-desktop</text>
+<g color="#9d8b93" opacity="1" transform="translate(588,25) scale(0.7500)"><path fill='currentColor' d='M2 13.167C2 13.374 2.09 13.582 2.263 13.742 2.437 13.903 2.682 14 2.944 14H13.056C13.318 14 13.563 13.903 13.737 13.742A.8.8 0 0 0 14 13.167V10.5H15V13.167C15 13.667 14.784 14.137 14.416 14.477A2 2 0 0 1 13.056 15H2.944C2.441 15 1.951 14.816 1.584 14.477A1.78 1.78 0 0 1 1 13.167V10.5H2ZM8.5 7.793L11.646 4.646 12.353 5.354 8 9.707 3.646 5.354 4.354 4.646 7.5 7.793V1H8.5Z'/></g>
+<g clip-path="url(#pg1)"><g transform="translate(54,66) scale(0.95)">
+<text x="0" y="16" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#2560ff" text-anchor="start" style="white-space:pre" >Desktop</text>
+<text x="0" y="52" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="32" font-weight="600" fill="#17191e" text-anchor="start" style="white-space:pre" letter-spacing="-0.6">The #1 containerization software</text>
+<rect x="0" y="72" width="220.097" height="42" rx="8" fill="#2560ff" opacity="1" />
+<g class="s2"><rect x="0" y="72" width="220.097" height="42" rx="8" fill="#1d4fd8" opacity="1" /></g>
+<text x="16" y="98" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Download Docker Desktop</text>
+<rect x="230.097" y="72" width="120.40400000000001" height="42" rx="8" fill="#ffffff" stroke="#d0d5dd" stroke-width="1" opacity="1" />
+<text x="246.097" y="98" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="500" fill="#17191e" text-anchor="start" style="white-space:pre" >Choose plan</text>
+<g class="s3"><rect x="0" y="120" width="228.2196" height="162" rx="6" fill="#002978" opacity="1" /></g>
+<g class="s4"><g class="s3"><rect x="4" y="186" width="220.2196" height="30" rx="4" fill="#ffffff1f" opacity="1" /></g></g>
+<g class="s3"><text x="12" y="146" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Download for Mac – Apple Silicon</text></g>
+<g class="s3"><text x="12" y="176" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Download for Mac – Intel Chip</text></g>
+<g class="s3"><text x="12" y="206" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Download for Windows – AMD64</text></g>
+<g class="s3"><text x="12" y="236" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Download for Windows – ARM64</text></g>
+<g class="s3"><text x="12" y="266" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Download for Linux</text></g>
+</g></g>
+<g class="a5"><rect x="389.0" y="50.0" width="216" height="54" rx="11.0" fill="#000000" opacity="0.158"/><rect x="387.0" y="51.0" width="220" height="58" rx="13.0" fill="#000000" opacity="0.110"/><rect x="383.0" y="53.0" width="228" height="66" rx="17.0" fill="#000000" opacity="0.079"/></g>
+<g class="a5"><rect x="390" y="50" width="214" height="52" rx="10" fill="#251e21" stroke="#332a2e" stroke-width="1" opacity="1" /></g>
+<g class="a5"><rect x="400" y="60" width="32" height="32" rx="7" fill="#261c1f" opacity="1" /></g>
+<g class="a5"><g color="#f1eaed" opacity="1" transform="translate(408,68) scale(1.0000)"><path fill='currentColor' d='M8.685.005A1 1 0 0 1 9.293.293L13.707 4.707A1 1 0 0 1 14 5.414V15A1 1 0 0 1 13.102 15.995L13 16H3L2.897 15.995A1 1 0 0 1 2 15V1A1 1 0 0 1 3 0H8.586ZM3 15H13V6H8.5A.5.5 0 0 1 8 5.5V1H3ZM9 5H12.586L9 1.414Z'/></g></g>
+<g class="a5"><text x="442" y="72" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9.5" font-weight="500" fill="#f1eaed" text-anchor="start" style="white-space:pre" >Docker Desktop Installer.exe</text></g>
+<g class="s6"><rect x="442" y="81" width="148" height="3" rx="1.5" fill="#656264" opacity="1" /></g>
+<g class="g8"><g class="s7"><rect x="442" y="81" width="148" height="3" rx="1.5" fill="#7a79d6" opacity="1" /></g></g>
+<g class="a9"><g color="#489872" opacity="1" transform="translate(442,83) scale(0.6250)"><g><path fill='currentColor' d='M8 .5A7.5 7.5 0 1 1 8 15.5 7.5 7.5 0 0 1 8 .5M8 1.5A6.5 6.5 0 1 0 8 14.5 6.5 6.5 0 0 0 8 1.5M12.315 6.389L7.373 10.389 7.059 10.644 6.744 10.389 4.686 8.722 5.314 7.944 7.06 9.356 11.686 5.611Z'/></g></g></g>
+<g class="a9"><text x="456" y="91.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Done</text></g>
+<g class="a10">
+<rect x="131.0" y="110.0" width="378" height="188" rx="9.0" fill="#000000" opacity="0.193"/><rect x="129.0" y="111.0" width="382" height="192" rx="11.0" fill="#000000" opacity="0.135"/><rect x="125.0" y="113.0" width="390" height="200" rx="15.0" fill="#000000" opacity="0.096"/>
+<rect x="132" y="110" width="376" height="186" rx="8" fill="#251e21" stroke="#332a2e" stroke-width="1" opacity="1" />
+<rect x="132" y="110" width="376" height="28" rx="8" fill="#1d63ed" opacity="1" />
+<rect x="132" y="130" width="376" height="8" rx="0" fill="#1d63ed" opacity="1" />
+<text x="144" y="128.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="start" style="white-space:pre" >docker</text>
+<text x="183.5452" y="128.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#ffffff" text-anchor="start" style="white-space:pre" >desktop</text>
+<rect x="133" y="138" width="96" height="134" rx="0" fill="#140e11" opacity="1" />
+<rect x="138" y="146" width="86" height="20" rx="4" fill="#261c1f" opacity="1" />
+<g color="#7a79d6" opacity="1" transform="translate(144,150) scale(0.6875)"><path fill='currentColor' d='M8 1c-.308 0-.608.086-.871.247l-4.277 2.6-.002.002c-.263.16-.478.39-.625.663-.148.271-.225.578-.225.887v5.202l.015.231c.028.23 .099.453 .21.656a1.77 1.77 0 0 0 .625.663l.002.001 4.276 2.599A1.67 1.67 0 0 0 8 15c.309 0 .61-.086.873-.248v-.001l4.275-2.599H13.15a1.77 1.77 0 0 0 .625-.664A1.9 1.9 0 0 0 14 10.601V5.399l-.015-.231c-.028-.23-.099-.453-.21-.656-.147-.272-.362-.502-.625-.663l-.002-.001-4.277-2.6C8.608 1.085 8.308 1 8 1m5 9.6l-.007.109q-.02.162-.097.302c-.066.123-.16.221-.269.288L8.5 13.808V8.274L13 5.41z m-5.5-2.307v5.515l-4.127-2.51a.8.8 0 0 1-.27-.287.86 .86 0 0 1-.103-.41V5.787zM8 2a.67.67 0 0 1 .35.1l.002.002 4.085 2.482-4.454 2.834-4.723-2.63a1 1 0 0 1 .113-.087L7.648 2.1H7.65A.67.67 0 0 1 8 2'/></g>
+<text x="160" y="159.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="500" fill="#f1eaed" text-anchor="start" style="white-space:pre" >Containers</text>
+<g color="#9d8b93" opacity="1" transform="translate(144,174) scale(0.6875)"><g><path fill='currentColor' d='M15.248 11.435L8.248 15.435 8 15.576 7.752 15.435.752 11.435 1.248 10.565 8 14.423 14.752 10.565ZM15.248 8.435L8.248 12.435 8 12.576 7.752 12.435.752 8.435 1.248 7.565 8 11.423 14.752 7.565ZM8.248.565L15.248 4.565 16.008 5 15.248 5.435 8.248 9.435 8 9.576 7.752 9.435.752 5.435-.008 5 .752 4.565 7.752.565 8 .424ZM2.008 5L8 8.423 13.991 5 8 1.576Z'/></g></g>
+<text x="160" y="183.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Images</text>
+<g color="#9d8b93" opacity="1" transform="translate(144,198) scale(0.6875)"><path fill='currentColor' d='M4.192 2c-.297 0-.59.079-.842.226-.253.147-.458.356-.59.606L0 8v4.5c0 .398.169 .78.469 1.06.3 .282.706 .44 1.13.44H14.4c.372 0 .73-.121 1.014-.34l.117-.1A1.45 1.45 0 0 0 16 12.5V8l-2.76-5.168c-.1-.187-.239-.352-.409-.485l-.18-.121c-.19-.11-.402-.182-.622-.211L11.808 2zM15 12.5c0 .111-.046.232-.152.331A.66.66 0 0 1 14.4 13h-12.8a.66.66 0 0 1-.448-.169c-.106-.1-.152-.22-.152-.331V9H15z m-2.01-2.25a.75.75 0 0 0 0 1.5H13a.75.75 0 0 0 0-1.5z m-4 0a.75.75 0 0 0 0 1.5H9a.75.75 0 0 0 0-1.5zM12.358 3.304L14.868 8h-13.735l2.509-4.696.002-.003a.54.54 0 0 1 .208-.211.7 .7 0 0 1 .249-.084L4.192 3H11.808a.7.7 0 0 1 .34.09 .54.54 0 0 1 .208.21l.884-.468z'/></g>
+<text x="160" y="207.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Volumes</text>
+<g color="#9d8b93" opacity="1" transform="translate(144,222) scale(0.6875)"><g><path fill='currentColor' d='M6.308.58c-.984-.18-2-.055-2.912.357l-.658.298 .511.512 2.77 2.77.004 .003.029 .035a.24.24 0 0 1-.026.292l-1.178 1.179a.237.237 0 0 1-.328-.003l-2.773-2.774-.512-.511-.297.658a4.923 4.923 0 0 0 3.6 6.87 4.9 4.9 0 0 0 2.586-.226l4.855 4.855A2.064 2.064 0 0 0 15.5 13.437c0-.547-.218-1.072-.604-1.459L10.04 7.123A4.922 4.922 0 0 0 6.308.58m-1.783 1.027a3.9 3.9 0 0 1 1.603-.044 3.922 3.922 0 0 1 2.868 5.473l-.142.315 .245.244 5.09 5.09a1.065 1.065 0 0 1 0 1.503 1.06 1.06 0 0 1-1.503 0l-5.09-5.09-.244-.245-.316.143a3.922 3.922 0 0 1-5.473-2.869 3.9 3.9 0 0 1 .045-1.603l2.208 2.209.004 .004a1.237 1.237 0 0 0 1.732 0l.003-.004 1.178-1.179.004-.003a1.24 1.24 0 0 0 0-1.731l-.01-.01z'/></g></g>
+<text x="160" y="231.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Builds</text>
+<text x="244" y="160" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#f1eaed" text-anchor="start" style="white-space:pre" >Containers</text>
+<text x="244" y="176" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Your running containers show up here.</text>
+<line x1="132" y1="272" x2="508" y2="272" stroke="#332a2e"/>
+<rect x="133" y="272.5" width="374" height="22.5" rx="7" fill="#140e11" opacity="1" />
+<circle cx="148" cy="284" r="3.5" fill="#b57e38" class="s12"/>
+<g class="s13"><text x="158" y="287.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Engine starting</text></g>
+<circle cx="148" cy="284" r="3.5" fill="#489872" class="a11"/>
+<g class="a11"><text x="158" y="287.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="9" font-weight="500" fill="#f1eaed" text-anchor="start" style="white-space:pre" >Engine running</text></g>
+</g>
+<g class="a14"><rect x="234.538" y="310.0" width="170.924" height="26" rx="13.0" fill="#000000" opacity="0.122"/><rect x="232.538" y="311.0" width="174.924" height="30" rx="15.0" fill="#000000" opacity="0.086"/><rect x="228.538" y="313.0" width="182.924" height="38" rx="19.0" fill="#000000" opacity="0.061"/></g>
+<g class="a14"><rect x="235.538" y="310" width="168.924" height="24" rx="12.0" fill="#251e21" opacity="1" /></g>
+<g class="a14"><g color="#489872" opacity="1" transform="translate(245.538,316.0) scale(0.7500)"><g><path fill='currentColor' d='M8 .5A7.5 7.5 0 1 1 8 15.5 7.5 7.5 0 0 1 8 .5M8 1.5A6.5 6.5 0 1 0 8 14.5 6.5 6.5 0 0 0 8 1.5M12.315 6.389L7.373 10.389 7.059 10.644 6.744 10.389 4.686 8.722 5.314 7.944 7.06 9.356 11.686 5.611Z'/></g></g></g>
+<g class="a14"><text x="261.538" y="325.6" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" fill="#f1eaed" text-anchor="start" style="white-space:pre" >Leave Docker Desktop open</text></g>
+<g class="k15"><circle cx="158.546075" cy="154.35" r="13" fill="#7a79d6" fill-opacity=".3" stroke="#7a79d6"/></g>
+<g class="k16"><circle cx="139.5" cy="256.95" r="13" fill="#7a79d6" fill-opacity=".3" stroke="#7a79d6"/></g>
+<g class="k17"><circle cx="497.0" cy="76.0" r="13" fill="#7a79d6" fill-opacity=".3" stroke="#7a79d6"/></g>
+<g class="k18"><path d="M0 0V14.5L3.6 11.2L6.2 16.8L8.6 15.7L6 10.2H11Z" fill="#ffffff" stroke="#111111" stroke-width="1.1" stroke-linejoin="round"/></g>
+</svg>
