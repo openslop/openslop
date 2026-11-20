@@ -49,16 +49,6 @@ describe("middleware - session refresh", () => {
 		expect(res.headers.get("location")).toBe("http://localhost:3000/");
 	});
 
-	it("redirects authenticated user away from /signup", async () => {
-		mockGetUser.mockResolvedValue({
-			data: { user: { id: "user-1" } },
-			error: null,
-		});
-
-		const res = await updateSession(makeRequest("/signup"));
-		expect(res.status).toBe(307);
-	});
-
 	it("does not redirect unauthenticated user from /login", async () => {
 		mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
 

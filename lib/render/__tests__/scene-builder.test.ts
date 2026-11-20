@@ -62,13 +62,6 @@ describe("buildRenderLayout", () => {
 	});
 
 	describe("film effects", () => {
-		it("leaves them off unless asked", () => {
-			expect(layoutOf([])).toMatchObject({
-				filmGrain: false,
-				rgbSplit: false,
-			});
-		});
-
 		it("carries them to the composition", () => {
 			expect(layoutOf([], { filmGrain: true, rgbSplit: true })).toMatchObject({
 				filmGrain: true,

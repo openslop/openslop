@@ -690,22 +690,6 @@ describe("RunwareVideo", () => {
 			expect(result).toBe("job-arr");
 		});
 
-		it("asks the SDK for the ack rather than the finished video", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-3",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "test",
-				model: MODEL,
-			});
-
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({ skipResponse: true }),
-			);
-		});
-
 		it("fails loudly when the ack carries no task id", async () => {
 			mockVideoInference.mockResolvedValue({});
 

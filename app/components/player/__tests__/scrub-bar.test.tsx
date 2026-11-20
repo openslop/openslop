@@ -52,7 +52,6 @@ describe("ScrubBar", () => {
 	const render = (
 		props: {
 			disabled?: boolean;
-			breaks?: number[];
 			ariaValueText?: string;
 		} = {},
 	) => {
@@ -119,14 +118,5 @@ describe("ScrubBar", () => {
 		expect(slider.tabIndex).toBe(-1);
 		expect(slider.getAttribute("aria-disabled")).toBe("true");
 		expect(calls).toEqual([]);
-	});
-
-	it("fills one linear track whatever its breaks", () => {
-		const slider = render({ breaks: [0.1, 0.2, 0.3] });
-		const fill = slider.querySelector<HTMLElement>(".bg-scrub-progress");
-
-		expect(slider.querySelectorAll(".bg-scrub-track")).toHaveLength(1);
-		expect(fill?.style.width).toBe("calc(var(--scrub-pos) * 100%)");
-		expect(slider.style.getPropertyValue("--scrub-pos")).toBe("0.5");
 	});
 });

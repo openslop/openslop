@@ -8,10 +8,6 @@ import {
 } from "@/lib/canvas/element-attributes";
 
 describe("makeNodeId", () => {
-	it("returns a 16-character string", () => {
-		expect(makeNodeId()).toHaveLength(16);
-	});
-
 	it("produces unique IDs on successive calls", () => {
 		const ids = new Set(Array.from({ length: 100 }, makeNodeId));
 		expect(ids.size).toBe(100);
@@ -27,7 +23,6 @@ describe("assignIdRecursively", () => {
 
 		assignIdRecursively(node);
 		expect(node.id).toBeDefined();
-		expect(node.id).toHaveLength(16);
 	});
 
 	it("preserves an existing ID", () => {

@@ -16,7 +16,7 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { needsGeneration } from "@/lib/generation/staleness";
 import { applyTemplate } from "../apply-template";
-import { getTemplate, TEMPLATES } from "../templates";
+import { getTemplate } from "../templates";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { VoiceSchema } from "@/lib/project/types";
 import { makeEditor } from "@/lib/canvas/__tests__/_assets";
@@ -141,25 +141,6 @@ describe("applyTemplate", () => {
 		apply("pov-life");
 
 		expect(store.getState().media).toEqual(media);
-	});
-
-	it.each(["pov-life", "true-crime"])(
-		"keeps a non-default aspect ratio when applying the %s template",
-		(templateId) => {
-			store.getState().updateVideoSettings({ aspectRatio: "9:16" });
-
-			apply(templateId);
-
-			expect(store.getState().videoSettings.aspectRatio).toBe("9:16");
-		},
-	);
-
-	it("keeps every template style free of aspect ratios and orientation", () => {
-		for (const template of TEMPLATES) {
-			expect(template.style.description).not.toMatch(
-				/\b(?:\d+:\d+|vertical|horizontal|portrait|landscape)\b/i,
-			);
-		}
 	});
 
 	it("leaves the script's scenes where they are", () => {

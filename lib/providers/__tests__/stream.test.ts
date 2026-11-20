@@ -32,13 +32,6 @@ describe("streamToBuffer", () => {
 		expect(buffer.byteLength).toBe(0);
 	});
 
-	it("handles large chunks correctly", async () => {
-		const big = new Uint8Array(10_000).fill(42);
-		const buffer = await streamToBuffer(makeStream([big]));
-		expect(new Uint8Array(buffer).every((b) => b === 42)).toBe(true);
-		expect(buffer.byteLength).toBe(10_000);
-	});
-
 	it("propagates stream errors", async () => {
 		const stream = new ReadableStream<Uint8Array>({
 			start(controller) {

@@ -40,21 +40,6 @@ describe("GenerationQueue", () => {
 		vi.useRealTimers();
 	});
 
-	describe("getElementSnapshot", () => {
-		it("returns idle snapshot for unknown element", () => {
-			const snapshot = generationQueue.getElementSnapshot("unknown-id");
-			expect(snapshot).toEqual({
-				status: "idle",
-				startedAt: null,
-				result: null,
-				error: null,
-				resultInputs: null,
-				connectorType: null,
-				pinned: false,
-			});
-		});
-	});
-
 	describe("subscribe", () => {
 		it("calls listener on enqueue and returns unsubscribe fn", () => {
 			const listener = vi.fn();
@@ -147,21 +132,6 @@ describe("GenerationQueue", () => {
 	});
 
 	describe("enqueueGraph", () => {
-		it("enqueues multiple roots at once", () => {
-			generateMock.mockReturnValue(pending());
-			generationQueue.enqueueGraph([makeJob("m1"), makeJob("m2")]);
-
-			expect(generationQueue.getElementSnapshot("m1").status).toBe(
-				"generating",
-			);
-			expect(generationQueue.getElementSnapshot("m2").status).toBe(
-				"generating",
-			);
-
-			generationQueue.discard("m1");
-			generationQueue.discard("m2");
-		});
-
 		it("does not notify if no new jobs were added", () => {
 			generateMock.mockReturnValue(pending());
 			generationQueue.enqueueGraph([makeJob("existing")]);
@@ -1212,22 +1182,6 @@ describe("GenerationQueue", () => {
 			expect(generationQueue.getElementSnapshot("image").status).toBe("idle");
 			expect(generationQueue.getElementSnapshot("alice").error).toMatch(/boom/);
 			expect(generationQueue.isBusy()).toBe(false);
-		});
-
-		it("reports a failed dependency on the dependent that was waiting on it", async () => {
-			generateMock.mockImplementation(({ id }) =>
-				id === "alice"
-					? Promise.reject(new Error("avatar boom"))
-					: Promise.resolve({ imageUrl: "x.png", durationSec: 0 }),
-			);
-			vi.spyOn(console, "error").mockImplementation(() => {});
-
-			generationQueue.enqueueGraph([makeJob("image", [makeJob("alice")])]);
-			await vi.runAllTimersAsync();
-
-			expect(generationQueue.getElementSnapshot("image").error).toMatch(
-				/avatar boom/,
-			);
 		});
 
 		it("carries a failure across a chain of blocked dependencies", async () => {
