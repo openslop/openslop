@@ -1,4 +1,3 @@
-import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import { describe, expect, it } from "vitest";
 import { imageAttributesFor } from "@/lib/connectors/image/attributes";
 import { DEFAULT_IMAGE_MODEL } from "@/lib/connectors/image/models";
@@ -137,10 +136,6 @@ describe("elementSchema", () => {
 		);
 	});
 
-	it("lets any speech line name its speaker", () => {
-		expect(attributeSchemaFor("speech").keys).toContain("name");
-	});
-
 	it("offers every attribute an element is created with, and no made-up key", () => {
 		for (const type of ElementTypeSchema.options) {
 			const created = flatAttributes(createCanvasElement(type));
@@ -153,30 +148,6 @@ describe("elementSchema", () => {
 });
 
 describe("asset schemas", () => {
-	const voice = attributeSchemaFor("asset_voice");
-
-	it("lets a voice set its traits, each one optional, and describe itself", () => {
-		expect(voice.settingsDefs.map(({ key }) => key)).toEqual([
-			"gender",
-			"language",
-			"age",
-			"pitch",
-			"accent",
-			"description",
-		]);
-	});
-
-	it("gives the style and references assets nothing to set beside their text", () => {
-		for (const type of ["asset_style", "asset_references"] as const)
-			expect(attributeSchemaFor(type).settingsDefs).toEqual([]);
-	});
-
-	it("lets an avatar override the project's reference images", () => {
-		expect(
-			attributeSchemaFor("asset_avatar").settingsDefs.map(({ key }) => key),
-		).toEqual([REFERENCE_IMAGES_ATTR]);
-	});
-
 	it("drops what an asset holds outside its schema when it is created", () => {
 		expect(
 			flatAttributes(

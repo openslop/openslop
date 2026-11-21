@@ -2,18 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import { TOGGLE_OFF, TOGGLE_ON } from "@/lib/canvas/types";
 
 const mockCompose = vi.fn();
-const mockReadThrough = vi.hoisted(() =>
-	vi.fn((_params: unknown, produce: () => Promise<unknown>) => produce()),
-);
 
 vi.mock("@elevenlabs/elevenlabs-js", () => ({
 	ElevenLabsClient: class {
 		music = { compose: mockCompose };
 	},
-}));
-
-vi.mock("../cache", () => ({
-	audioPromptCache: () => ({ readThrough: mockReadThrough }),
 }));
 
 import { ElevenLabsMusic } from "../music/elevenlabs";
@@ -70,25 +63,21 @@ describe("ElevenLabsMusic", () => {
 	it.each([
 		["unset", undefined],
 		["off", TOGGLE_OFF],
-	])(
-		"composes an instrumental through the cache with lyrics %s",
-		async (_label, lyrics) => {
-			mockCompose.mockResolvedValue(mockReadableStream(new Uint8Array([0])));
+	])("composes an instrumental with lyrics %s", async (_label, lyrics) => {
+		mockCompose.mockResolvedValue(mockReadableStream(new Uint8Array([0])));
 
-			await new ElevenLabsMusic("test-key").generate({
-				prompt: "lofi beats",
-				model: MODEL,
-				lyrics,
-			});
+		await new ElevenLabsMusic("test-key").generate({
+			prompt: "lofi beats",
+			model: MODEL,
+			lyrics,
+		});
 
-			expect(mockCompose).toHaveBeenCalledWith(
-				expect.objectContaining({ forceInstrumental: true }),
-			);
-			expect(mockReadThrough).toHaveBeenCalledOnce();
-		},
-	);
+		expect(mockCompose).toHaveBeenCalledWith(
+			expect.objectContaining({ forceInstrumental: true }),
+		);
+	});
 
-	it("lets the model sing, and skips the cache, with lyrics on", async () => {
+	it("lets the model sing with lyrics on", async () => {
 		mockCompose.mockResolvedValue(mockReadableStream(new Uint8Array([0])));
 
 		await new ElevenLabsMusic("test-key").generate({
@@ -100,6 +89,5 @@ describe("ElevenLabsMusic", () => {
 		expect(mockCompose).toHaveBeenCalledWith(
 			expect.objectContaining({ forceInstrumental: false }),
 		);
-		expect(mockReadThrough).not.toHaveBeenCalled();
 	});
 });

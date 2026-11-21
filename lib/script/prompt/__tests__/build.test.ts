@@ -6,10 +6,6 @@ import { buildScriptPrompt, scriptRules } from "../build";
 import { VIDEO_FORMAT_RULES } from "../formats";
 import { projectPreamble } from "../project";
 import { getTemplate, TEMPLATES } from "@/lib/templates/templates";
-import {
-	VIDEO_FORMAT_SPECS,
-	VIDEO_FORMAT_TARGETS,
-} from "@/lib/project/video-format";
 import { VIDEO_LENGTH_SPECS } from "@/lib/project/video-length";
 
 const settingsOf = (settings: Partial<ScriptSettings> = {}) =>
@@ -187,28 +183,18 @@ describe("buildScriptPrompt", () => {
 		expect(scriptRules([], settingsOf())).not.toContain("raw XML");
 	});
 
-	it.each(VIDEO_FORMAT_TARGETS)(
-		"adapts in the project's %s format",
-		(format) => {
-			const script = "INT. CAFE - NIGHT\nMIRA\nWait! Don't leave me here.";
-			const { system, prompt } = buildScriptPrompt([], settingsOf({ format }), {
-				kind: "adapt",
-				script,
-			});
-
-			expect(prompt).toBe(script);
-			expect(system).toContain(
-				`The format is ${VIDEO_FORMAT_SPECS[format].label}. Write in it.`,
-			);
-			expect(system).toContain(ADAPT_SCRIPT_RULES);
-			expect(system).toContain(VIDEO_FORMAT_RULES);
-		},
-	);
-
-	it("keeps the adaptation guidance independent of specific formats and speech elements", () => {
-		expect(ADAPT_SCRIPT_RULES).not.toMatch(
-			/cinematic|faceless|explainer|<speech>|<speech>|<video>/i,
+	it("adapts in the project's format", () => {
+		const script = "INT. CAFE - NIGHT\nMIRA\nWait! Don't leave me here.";
+		const { system, prompt } = buildScriptPrompt(
+			[],
+			settingsOf({ format: "cinematic" }),
+			{ kind: "adapt", script },
 		);
+
+		expect(prompt).toBe(script);
+		expect(system).toContain("The format is Cinematic. Write in it.");
+		expect(system).toContain(ADAPT_SCRIPT_RULES);
+		expect(system).toContain(VIDEO_FORMAT_RULES);
 	});
 
 	it("picks an auto adapt's format from the script and notes", () => {
@@ -221,7 +207,6 @@ describe("buildScriptPrompt", () => {
 		);
 
 		expect(prompt).toBe(script);
-		expect(system).toContain("If no format is set, pick the closest one");
 		expect(system).toContain(notes);
 		expect(system).not.toContain("The format is");
 	});

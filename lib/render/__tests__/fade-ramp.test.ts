@@ -47,15 +47,8 @@ describe("fadeRamp", () => {
 		expect(fadeRamp(100, -5)).toBeNull();
 	});
 
-	it("produces strictly increasing input for short even durations", () => {
-		for (let d = 2; d <= 20; d++) {
-			const r = fadeRamp(d, 100);
-			if (r) expect(isStrictlyIncreasing(r.input)).toBe(true);
-		}
-	});
-
-	it("produces strictly increasing input for short odd durations", () => {
-		for (let d = 3; d <= 21; d += 2) {
+	it("produces strictly increasing input for short durations", () => {
+		for (let d = 2; d <= 21; d++) {
 			const r = fadeRamp(d, 100);
 			if (r) expect(isStrictlyIncreasing(r.input)).toBe(true);
 		}

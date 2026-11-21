@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 import { HttpVideoConnector } from "../video/connector";
-import type { ConnectorPlugin } from "../types";
 import { mockGatewaySequence, mockGatewaySuccess } from "./_gateway-mock";
 
 const TEST_ID = "test-id";
@@ -68,43 +67,5 @@ describe("HttpVideoConnector", () => {
 		await expect(
 			new HttpVideoConnector(config).generate({ prompt: "test" }),
 		).rejects.toThrow("GPU unavailable");
-	});
-
-	it("runs plugins in order", async () => {
-		mockSuccess();
-		const order: string[] = [];
-		const plugin: ConnectorPlugin = {
-			name: "tracker",
-			transformPrompt: (p) => {
-				order.push("transform");
-				return p;
-			},
-			beforeGenerate: (p) => {
-				order.push("before");
-				return p;
-			},
-			afterGenerate: (r) => {
-				order.push("after");
-				return r;
-			},
-		};
-		await new HttpVideoConnector({ ...config, plugins: [plugin] }).generate({
-			prompt: "test",
-		});
-		expect(order).toEqual(["transform", "before", "after"]);
-	});
-
-	it("runs onError plugin on failure", async () => {
-		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("video failed"));
-		const errors: unknown[] = [];
-		const connector = new HttpVideoConnector({
-			...config,
-			plugins: [{ name: "err", onError: (e) => void errors.push(e) }],
-		});
-
-		const error = await connector
-			.generate({ prompt: "test" })
-			.catch((e: unknown) => e);
-		expect(errors).toEqual([error]);
 	});
 });

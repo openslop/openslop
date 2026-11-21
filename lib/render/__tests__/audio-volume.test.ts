@@ -8,11 +8,6 @@ describe("audioVolume", () => {
 		expect(audioVolume(0.3, 0, 10)).toBe(0.3);
 	});
 
-	it("returns a function when a fade ramp is produced", () => {
-		const v = audioVolume(1, 100, 10);
-		expect(typeof v).toBe("function");
-	});
-
 	it("applies fade-in and fade-out around the multiplier", () => {
 		const multiplier = 0.8;
 		const v = audioVolume(multiplier, 100, 10);

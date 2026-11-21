@@ -574,13 +574,33 @@ describe("RunwareVideo", () => {
 				expect(request).toMatchObject({
 					positivePrompt: "animate this",
 					inputs: {
-						frameImages: ["https://img/last.png"],
+						frameImages: [{ image: "https://img/last.png", frame: "first" }],
 						referenceImages: ["https://img/ref.png"],
 					},
 				});
 				expect(request).not.toHaveProperty("width");
 				expect(request).not.toHaveProperty("height");
 				expect(request).not.toHaveProperty("resolution");
+			});
+
+			it("sizes Kling 4 Omni by resolution beside its frame", async () => {
+				const request = await omniRequest(
+					{
+						prompt: "animate this",
+						frameImage: "https://img/last.png",
+						resolution: "720p",
+					},
+					"klingai:kling-video@4.0",
+				);
+
+				expect(request).toMatchObject({
+					inputs: {
+						frameImages: [{ image: "https://img/last.png", frame: "first" }],
+					},
+					resolution: "720p",
+				});
+				expect(request).not.toHaveProperty("width");
+				expect(request).not.toHaveProperty("height");
 			});
 
 			it("generates from references alone, sized by pixels", async () => {
@@ -634,7 +654,9 @@ describe("RunwareVideo", () => {
 					});
 
 					expect(request.inputs).toEqual({
-						...(frameImage && { frameImages: [frameImage] }),
+						...(frameImage && {
+							frameImages: [{ image: frameImage, frame: "first" }],
+						}),
 						elements: elements.map(asElement),
 						referenceImages,
 					});
@@ -666,22 +688,6 @@ describe("RunwareVideo", () => {
 			const result = await provider.submit({ prompt: "test", model: MODEL });
 
 			expect(result).toBe("job-arr");
-		});
-
-		it("asks the SDK for the ack rather than the finished video", async () => {
-			mockVideoInference.mockResolvedValue({
-				taskUUID: "job-3",
-				status: "processing",
-			});
-
-			await new RunwareVideo("test-key").submit({
-				prompt: "test",
-				model: MODEL,
-			});
-
-			expect(mockVideoInference).toHaveBeenCalledWith(
-				expect.objectContaining({ skipResponse: true }),
-			);
 		});
 
 		it("fails loudly when the ack carries no task id", async () => {

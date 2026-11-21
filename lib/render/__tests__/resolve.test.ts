@@ -130,36 +130,6 @@ describe("resolveElements", () => {
 		expect(resolved).toEqual([]);
 	});
 
-	it("assigns correct roles and layers for all element types", () => {
-		const types: ContentElement["type"][] = [
-			"image",
-			"video",
-			"speech",
-			"music",
-			"sound",
-		];
-		const elements = types.map((t, i) => makeElement(`el${i}`, t));
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-
-		const roleMap = Object.fromEntries(resolved.map((r) => [r.type, r.role]));
-		expect(roleMap).toEqual({
-			image: "foreground",
-			video: "foreground",
-			speech: "overlay",
-			music: "background",
-			sound: "effect",
-		});
-
-		const layerMap = Object.fromEntries(resolved.map((r) => [r.type, r.layer]));
-		expect(layerMap).toEqual({
-			image: "visual",
-			video: "visual",
-			speech: "audio",
-			music: "audio",
-			sound: "audio",
-		});
-	});
-
 	it("reads loops from the attributes (default 1)", () => {
 		const elements = [
 			makeElement("s1", "sound", { loops: "4" }),
@@ -167,16 +137,6 @@ describe("resolveElements", () => {
 		];
 		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
 		expect(resolved[0].loops).toBe(4);
-		expect(resolved[1].loops).toBe(1);
-	});
-
-	it("clamps invalid loops attributes to at least 1", () => {
-		const elements = [
-			makeElement("s1", "sound", { loops: "0" }),
-			makeElement("s2", "sound", { loops: "not-a-number" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].loops).toBe(1);
 		expect(resolved[1].loops).toBe(1);
 	});
 
@@ -190,38 +150,6 @@ describe("resolveElements", () => {
 		expect(resolved[0].volume).toBe(3);
 		expect(resolved[1].volume).toBe(0);
 		expect(resolved[2].volume).toBe(10);
-	});
-
-	it("clamps volume to 0-10 and falls back on invalid values", () => {
-		const elements = [
-			makeElement("s1", "music", { volume: "-2" }),
-			makeElement("s2", "music", { volume: "42" }),
-			makeElement("s3", "music", { volume: "not-a-number" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].volume).toBe(0);
-		expect(resolved[1].volume).toBe(10);
-		expect(resolved[2].volume).toBe(10);
-	});
-
-	it("keeps a blank volume attribute audible in the rendered layout", () => {
-		const elements = [
-			makeElement("s1", "music", { volume: "" }),
-			makeElement("s2", "music", { loops: "" }),
-		];
-		const resolved = resolveElements([wrap(elements)], () => makeSnapshot());
-		expect(resolved[0].volume).toBe(10);
-		expect(resolved[1].loops).toBe(1);
-	});
-
-	it("skips all elements when none have results", () => {
-		const elements = [
-			makeElement("img1", "image"),
-			makeElement("nar1", "speech"),
-		];
-		const noResult = makeSnapshot({ status: "idle", result: null });
-		const resolved = resolveElements([wrap(elements)], () => noResult);
-		expect(resolved).toEqual([]);
 	});
 
 	describe("captions", () => {

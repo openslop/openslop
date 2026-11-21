@@ -56,12 +56,15 @@ export function settleUnansweredCalls(
 	}));
 }
 
-const STALE_SNAPSHOT =
-	"Taken in an earlier turn and not kept. The canvas may have changed since.";
+const staleSnapshot = (toolName: string) =>
+	`Cleared from history on purpose. Call ${toolName} again for the current result.`;
 
 const withStaleSnapshot = (part: ToolContent[number]) =>
 	part.type === "tool-result" && SNAPSHOT_TOOLS.has(part.toolName)
-		? { ...part, output: { type: "text" as const, value: STALE_SNAPSHOT } }
+		? {
+				...part,
+				output: { type: "text" as const, value: staleSnapshot(part.toolName) },
+			}
 		: part;
 
 const pruneFinished = (message: ModelMessage): ModelMessage => {
