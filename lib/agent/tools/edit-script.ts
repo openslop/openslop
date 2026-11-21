@@ -83,6 +83,10 @@ export const editScript = defineTool({
 		return `Editing the script (${count} ${plural(count, "change")})`;
 	},
 	execute: async ({ ops }, ctx) => {
+		if (!ctx.isScriptReadCurrent())
+			throw new Error(
+				"The canvas changed since you last read it, or you have not read it this turn. Call read_script before editing.",
+			);
 		const { applied, failures } = ctx.editScript(ops);
 		if (failures.length === 0) {
 			return `Applied ${applied} ${plural(applied, "operation")}. The script has changed; read it again before editing further.`;

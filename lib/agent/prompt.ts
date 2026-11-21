@@ -39,6 +39,8 @@ const ROLE = dedent`
     frames, or the words a voice line says and when.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it.
+  - Make independent look-ups in one step, like view_result on several elements. Run
+    write_script, adapt_script and edit_script on their own.
   - One short sentence before a tool call, saying what you are about to change. Lead with the outcome.
   - Finish by replying to the user. Keep replies brief.
   - Ask only when the answer would change the work. Otherwise decide and say what you chose.

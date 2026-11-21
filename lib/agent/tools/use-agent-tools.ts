@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useSlateStatic } from "slate-react";
 import pick from "lodash/pick";
 import { getAssets } from "@/lib/canvas/assets";
@@ -46,6 +46,11 @@ import { executeToolCall } from "./registry";
 
 export function useAgentTools() {
 	const editor = useSlateStatic();
+	// Earlier turns' reads are pruned from the transcript, so a read only counts within its turn.
+	const lastRead = useRef<{
+		turn?: AbortSignal;
+		canvas?: typeof editor.children;
+	}>({});
 	const store = useProjectStoreHandle();
 	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
@@ -66,6 +71,12 @@ export function useAgentTools() {
 				);
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
+				markScriptRead: () => {
+					lastRead.current = { turn: signal, canvas: editor.children };
+				},
+				isScriptReadCurrent: () =>
+					lastRead.current.turn === signal &&
+					lastRead.current.canvas === editor.children,
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				estimateSpeechLengths: () => estimateSpeechLengths(editor.children),

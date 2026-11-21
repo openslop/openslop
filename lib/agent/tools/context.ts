@@ -23,6 +23,8 @@ export type AgentToolContext = Pick<
 	(typeof PROJECT_SETTERS)[number]
 > & {
 	readScript: () => string;
+	markScriptRead: () => void;
+	isScriptReadCurrent: () => boolean;
 	isScriptEmpty: () => boolean;
 	countSpokenWords: () => number;
 	estimateSpeechLengths: () => SpeechEstimate[];

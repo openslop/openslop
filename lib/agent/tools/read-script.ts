@@ -33,6 +33,7 @@ export const readScript = defineTool({
 	icon: Eye,
 	label: "Reading the script",
 	execute: async (_input, ctx) => {
+		ctx.markScriptRead();
 		const script = ctx.readScript().trim();
 		const { title, scriptSettings, videoSettings } = ctx.readProject();
 		return [

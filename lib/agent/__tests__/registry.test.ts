@@ -32,6 +32,8 @@ const project = (
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<speech>hi</speech>",
+	markScriptRead: () => {},
+	isScriptReadCurrent: () => true,
 	countSpokenWords: () => 1,
 	estimateSpeechLengths: () => [],
 	estimateVisualSpans: () => [],
