@@ -1,5 +1,6 @@
 import keyBy from "lodash/keyBy";
 import sortBy from "lodash/sortBy";
+import sum from "lodash/sum";
 import type { ElementType } from "@/lib/canvas/types";
 import { resultIdentity } from "../connectors/asset-url";
 import type { AssetConnectorType, AssetResult } from "../connectors/types";
@@ -35,6 +36,13 @@ export const activeVersionIndex = (
 	if (!result || !resultInputs) return -1;
 	const key = versionKey({ inputs: resultInputs, result });
 	return versions.findIndex((version) => versionKey(version) === key);
+};
+
+export const totalCostUsd = (
+	versions: readonly ElementVersion[],
+): number | undefined => {
+	const costs = versions.flatMap(({ result }) => result.costUsd ?? []);
+	return costs.length > 0 ? sum(costs) : undefined;
 };
 
 export class VersionLog {

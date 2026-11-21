@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import {
-	FolderOpen,
-	PanelLeft,
-	PlusCircle,
-	Upload,
-} from "@/components/ui/icon";
+import { StockAlt, PanelLeft, PlusCircle, Upload } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import {
 	Popover,
@@ -141,7 +136,7 @@ export function MediaPicker({
 			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>
 				<PopoverHeader
 					title="Media"
-					icon={FolderOpen}
+					icon={StockAlt}
 					action={
 						<TooltipIconButton
 							label="Open Media"

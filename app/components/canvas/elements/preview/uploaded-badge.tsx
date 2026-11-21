@@ -9,7 +9,7 @@ import { useElementGeneration } from "../element-generation-context";
 export function UploadedLabel({ tooltip }: { tooltip: string }) {
 	return (
 		<SimpleTooltip label={tooltip}>
-			<Badge variant="indicator" size="xs">
+			<Badge variant="muted" size="xs">
 				<CloudUploadFilled />
 				<span aria-hidden="true">Uploaded</span>
 				<span className="sr-only">{tooltip}</span>

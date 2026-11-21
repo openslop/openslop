@@ -17,6 +17,7 @@ export type GatewayStep = {
 	pollStatus?: JobStatus;
 	result?: BundleResponse;
 	error?: string;
+	costUsd?: number;
 	payload?: unknown;
 };
 
@@ -30,6 +31,7 @@ function stepToResponse(step: GatewayStep, jobId: string): Response {
 			status: step.pollStatus,
 			result: step.result ?? null,
 			error: step.error ?? null,
+			costUsd: step.costUsd ?? null,
 		} satisfies JobPoll);
 	}
 	return jsonResponse(step.payload);

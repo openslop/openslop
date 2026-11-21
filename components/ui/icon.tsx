@@ -179,6 +179,7 @@ export const TextSize = icon("text-size");
 export const Timeline = icon("timeline");
 export const TextBox = icon("text-box");
 export const Timer = icon("timer");
+export const Tag = icon("tag");
 export const Template = icon("template");
 export const TextBoxFill = icon("text-box-fill");
 export const Transition = icon("transition");

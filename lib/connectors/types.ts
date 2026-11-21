@@ -177,6 +177,7 @@ export const AssetResultSchema = z.object({
 	voiceId: z.string().optional(),
 	/** The user supplied it rather than generating it. */
 	uploaded: z.boolean().optional(),
+	costUsd: z.number().optional(),
 });
 
 export type AssetResult = z.infer<typeof AssetResultSchema>;
