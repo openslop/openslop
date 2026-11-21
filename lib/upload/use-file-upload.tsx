@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { toastError } from "@/lib/toast-error";
 import { uploadFile } from "./upload-file";
 import {
+	type AcceptedFile,
 	acceptedTypes,
 	partitionFiles,
 	type Upload,
@@ -41,7 +42,7 @@ export function useFileUpload({
 	multiple?: boolean;
 }) {
 	const inputRef = useRef<HTMLInputElement>(null);
-	const [uploadingCount, setUploadingCount] = useState(0);
+	const [uploading, setUploading] = useState<AcceptedFile[]>([]);
 	const [isDraggingOver, setIsDraggingOver] = useState(false);
 
 	useBlockStrayFileDrops();
@@ -54,7 +55,7 @@ export function useFileUpload({
 		const files = multiple ? accepted : accepted.slice(0, 1);
 		if (files.length === 0) return;
 
-		setUploadingCount((count) => count + files.length);
+		setUploading((current) => [...current, ...files]);
 		try {
 			const results = await Promise.allSettled(
 				files.map(async ({ file, kind }) => ({
@@ -70,7 +71,7 @@ export function useFileUpload({
 			}
 			// Store and state updates render in separate passes; one commit keeps placeholders from showing beside what replaced them.
 			await flushSync(() => {
-				setUploadingCount((count) => count - files.length);
+				setUploading((current) => current.filter((f) => !files.includes(f)));
 				return uploads.length > 0 ? onUpload(uploads) : undefined;
 			});
 		} catch (error) {
@@ -129,8 +130,7 @@ export function useFileUpload({
 
 	return {
 		openPicker: () => inputRef.current?.click(),
-		uploading: uploadingCount > 0,
-		uploadingCount,
+		uploading,
 		inputElement,
 		dropZoneProps,
 		isDraggingOver,

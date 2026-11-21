@@ -15,7 +15,7 @@ function Thumbnail({
 		<Comp
 			data-slot="thumbnail"
 			className={cn(
-				"flex w-[var(--thumbnail-width,8rem)] flex-col gap-1",
+				"flex w-(--thumbnail-width,8rem) flex-col gap-1",
 				className,
 			)}
 			{...props}

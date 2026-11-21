@@ -191,6 +191,7 @@ export default function ComposerCopilot({
 		kinds: UploadKindSchema.options,
 		multiple: true,
 	});
+	const uploadingCount = references.uploading.length + media.uploading.length;
 	const hasText = value.trim().length > 0;
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -214,9 +215,7 @@ export default function ComposerCopilot({
 					<AssetStripCharacters />
 					<AssetStripReferences />
 					<AssetStripMedia />
-					<AssetStripUploading
-						count={references.uploadingCount + media.uploadingCount}
-					/>
+					<AssetStripUploading count={uploadingCount} />
 				</AssetStrip>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">
 					{template && (
@@ -241,7 +240,7 @@ export default function ComposerCopilot({
 						<AttachMenu
 							uploadReferences={references.openPicker}
 							uploadMedia={media.openPicker}
-							uploading={references.uploading || media.uploading}
+							uploading={uploadingCount > 0}
 						/>
 						<SettingPill
 							name="Aspect ratio"

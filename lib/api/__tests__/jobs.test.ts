@@ -40,6 +40,7 @@ const STORED_JOB = {
 	result: null,
 	metadata: {},
 	error: null,
+	cost_usd: 0.04,
 	created_at: "2026-10-01T00:00:00.000Z",
 	updated_at: "2026-10-01T00:00:01.000Z",
 };
@@ -52,6 +53,7 @@ describe("getJob", () => {
 			"status",
 			"result",
 			"error",
+			"cost_usd",
 			"created_at",
 		]);
 		answerWith({ data: polled, error: null });

@@ -4,6 +4,12 @@ import type { ReactNode } from "react";
 import type { Editor } from "slate";
 import { useSlateSelector, useSlateStatic } from "slate-react";
 import { shallow } from "zustand/shallow";
+import { Plus } from "@/components/ui/icon";
+import {
+	Thumbnail,
+	ThumbnailCaption,
+	ThumbnailFace,
+} from "@/components/ui/thumbnail";
 import { getAssets } from "@/lib/canvas/assets";
 import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
@@ -11,6 +17,7 @@ import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useReferenceImages } from "../hooks/use-reference-images";
+import { useEditorPanel } from "../panel/editor-panel-context";
 import { deleteCharacter } from "./delete-asset";
 import { UploadingTile } from "./uploading-tile";
 import {
@@ -25,6 +32,27 @@ export function AssetStrip({ children }: { children: ReactNode }) {
 		<ul aria-label="Assets" className="flex flex-wrap gap-2 pb-1 empty:hidden">
 			{children}
 		</ul>
+	);
+}
+
+/** Opens the Assets panel, which adds every kind of asset; so the strip shows even before there are any. */
+export function AssetStripAdd() {
+	const { setActive } = useEditorPanel();
+	return (
+		<li>
+			<Thumbnail asChild>
+				<button
+					type="button"
+					onClick={() => setActive("assets")}
+					className="focus-ring rounded-md"
+				>
+					<ThumbnailFace look="dashed">
+						<Plus className="size-5" />
+					</ThumbnailFace>
+					<ThumbnailCaption>Add asset</ThumbnailCaption>
+				</button>
+			</Thumbnail>
+		</li>
 	);
 }
 

@@ -6,7 +6,7 @@ import { Editor } from "slate";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { inputsFor } from "@/lib/generation/__tests__/_graph";
-import type { ElementVersion } from "@/lib/generation/versions";
+import { totalCostUsd, type ElementVersion } from "@/lib/generation/versions";
 import type { ElementVersionHistory } from "@/app/components/canvas/hooks/use-element-history";
 import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
 import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
@@ -18,6 +18,7 @@ const loadHistory = vi.fn();
 let history: ElementVersionHistory;
 vi.mock("@/app/components/canvas/hooks/use-element-history", () => ({
 	useElementHistory: () => history,
+	useElementHistoryCostUsd: () => totalCostUsd(history.versions),
 	useLoadElementHistory: () => loadHistory,
 }));
 vi.mock("@/lib/components/use-peaks", () => ({
@@ -69,6 +70,26 @@ const videoTake = (prompt: string): ElementVersion => ({
 afterEach(() => canvas.unmount());
 
 describe("ElementHistoryPopover", () => {
+	it("shows each take's cost and the total in the header", async () => {
+		const costing = (prompt: string, costUsd?: number): ElementVersion => {
+			const take = videoTake(prompt);
+			return { ...take, result: { ...take.result, costUsd } };
+		};
+		history = {
+			versions: [costing("a", 0.25), costing("b"), costing("c", 0.12)],
+			status: "ready",
+			activeIndex: 2,
+		};
+		renderPopover();
+		await click('button[aria-label="Generation history"]');
+
+		const badges = Array.from(
+			document.body.querySelectorAll('[data-slot="badge"]'),
+			(badge) => badge.textContent,
+		);
+		expect(badges).toEqual(["Total$0.37", "Cost$0.12", "Cost$0.25"]);
+	});
+
 	it("announces a failed read and offers to try again without closing", async () => {
 		await click('button[aria-label="Generation history"]');
 		expect(loadHistory).toHaveBeenCalledWith("el-1");

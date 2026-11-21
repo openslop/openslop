@@ -51,7 +51,7 @@ function CharacterActionButton({
 				e.stopPropagation();
 				onClick();
 			}}
-			className="focus-ring absolute inset-y-0 start-0 flex aspect-square cursor-pointer items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/chip:opacity-100 hover:bg-background/90 focus-visible:opacity-100 focus-visible:ring-inset"
+			className="focus-ring absolute inset-y-0 inset-s-0 flex aspect-square cursor-pointer items-center justify-center bg-background/70 text-foreground opacity-0 transition-opacity group-hover/chip:opacity-100 hover:bg-background/90 focus-visible:opacity-100 focus-visible:ring-inset"
 		>
 			<Icon size={10} />
 		</button>

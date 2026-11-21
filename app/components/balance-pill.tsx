@@ -13,7 +13,7 @@ export function BalancePill() {
 
 	return (
 		<SimpleTooltip label="Your balance for OpenSlop's models" side="bottom">
-			<Badge variant="indicatorOutline" size="lg">
+			<Badge variant="mutedOutline" size="lg">
 				<CreditCard />
 				<span className="sr-only">Balance</span>
 				<NumberFlow value={usd} locales="en-US" format={USD} />

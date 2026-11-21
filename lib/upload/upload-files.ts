@@ -86,7 +86,7 @@ const kindOf = (file: File, kinds: readonly UploadKind[]) =>
 export const acceptedTypes = (kinds: readonly UploadKind[]) =>
 	kinds.flatMap((kind) => UPLOAD_KINDS[kind].contentTypes).join(",");
 
-interface AcceptedFile {
+export interface AcceptedFile {
 	file: File;
 	kind: UploadKind;
 }

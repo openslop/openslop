@@ -52,7 +52,7 @@ export function CaptionFontField({
 			</SimpleTooltip>
 			<PopoverContent
 				align="start"
-				className="w-[var(--radix-popover-trigger-width)] min-w-0 p-1"
+				className="w-(--radix-popover-trigger-width) min-w-0 p-1"
 			>
 				<SearchField
 					autoFocus

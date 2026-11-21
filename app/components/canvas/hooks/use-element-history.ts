@@ -8,6 +8,7 @@ import {
 import type { ElementHistoryStatus } from "@/lib/generation/history";
 import {
 	activeVersionIndex,
+	totalCostUsd,
 	type ElementVersion,
 } from "@/lib/generation/versions";
 
@@ -26,6 +27,14 @@ export function useElementHistory(elementId: string): ElementVersionHistory {
 		status,
 		activeIndex: activeVersionIndex(versions, snapshot),
 	};
+}
+
+export function useElementHistoryCostUsd(
+	elementId: string,
+): number | undefined {
+	return useElementHistorySelector((history) =>
+		totalCostUsd(history.get(elementId)),
+	);
 }
 
 export function useLoadElementHistory(): (elementId: string) => void {

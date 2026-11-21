@@ -49,6 +49,16 @@ describe("parseElementVersions", () => {
 		]);
 	});
 
+	it("keeps what a version cost across a reload", () => {
+		const result = {
+			durationSec: 0,
+			imageUrl: "https://cdn/a.png",
+			costUsd: 0.04,
+		};
+		const [version] = parseElementVersions([row({ result })]);
+		expect(version?.result).toEqual(result);
+	});
+
 	it("treats a project with no history as empty", () => {
 		expect(parseElementVersions(null)).toEqual([]);
 	});

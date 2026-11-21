@@ -22,12 +22,20 @@ const STATUS: Record<
 	},
 };
 
-const SIZE_CLASSES: Record<Size, { wrapper: string; icon: string }> = {
-	sm: { wrapper: "h-4 w-4 bg-on-media/55", icon: "h-2.5 w-2.5" },
+const SIZE_CLASSES: Record<
+	Size,
+	{ wrapper: string; icon: string; label: string }
+> = {
+	sm: {
+		wrapper: "h-4 w-4 bg-on-media/55",
+		icon: "h-2.5 w-2.5",
+		label: "hidden",
+	},
 	md: {
 		wrapper:
-			"h-7 w-7 bg-on-media/55 hover:bg-on-media/70 grain ring-1 ring-inset ring-border md:w-auto md:gap-1.5 md:px-2",
+			"h-7 w-7 bg-on-media/70 hover:bg-on-media/80 grain ring-1 ring-inset ring-border md:w-auto md:gap-1.5 md:px-2.5",
 		icon: "h-3 w-3",
+		label: "hidden md:inline",
 	},
 };
 
@@ -58,12 +66,13 @@ export function GenerationIndicator({
 					className,
 				)}
 			>
-				<Icon className={cn(sizes.icon, animation)} />
-				{size === "md" && (
-					<span className="hidden text-label-xs whitespace-nowrap md:inline">
-						{label}
-					</span>
-				)}
+				<Icon className={cn("shrink-0", sizes.icon, animation)} />
+				<span
+					aria-hidden
+					className={cn("shimmer text-label-xs whitespace-nowrap", sizes.label)}
+				>
+					{label}
+				</span>
 			</span>
 		</SimpleTooltip>
 	);
