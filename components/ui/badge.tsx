@@ -22,9 +22,8 @@ const badgeVariants = cva(
 				muted: "border-transparent bg-muted text-muted-foreground",
 				indicator:
 					"rounded border-transparent bg-indicator text-indicator-foreground",
-				/** `indicator` with a hairline, for a pill that stands alone in chrome. */
-				indicatorOutline:
-					"rounded border-indicator-foreground/20 bg-indicator text-indicator-foreground",
+				/** `muted` with a hairline, for a pill that stands alone in chrome. */
+				mutedOutline: "rounded border-border bg-muted text-foreground",
 				onMedia:
 					"border-transparent bg-on-media/70 text-on-media-foreground shadow-elevation-1",
 			},
