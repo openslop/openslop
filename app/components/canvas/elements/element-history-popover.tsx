@@ -135,7 +135,7 @@ function ElementVersionRow({
 						</span>
 						<Dot />
 						{version.result.uploaded && (
-							<Badge variant="indicator" size="sm">
+							<Badge variant="muted" size="inlineXs">
 								<CloudUploadFilled />
 								Uploaded
 							</Badge>
