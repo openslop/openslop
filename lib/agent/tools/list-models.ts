@@ -18,8 +18,6 @@ import type {
 import type { AgentToolContext } from "./context";
 import { defineTool } from "./define-tool";
 
-const MODELS_PER_TYPE = 5;
-
 const SET_BY: Record<DefaultSource, string> = {
 	project: "set on this project",
 	account: "set on the user's account",
@@ -45,7 +43,6 @@ const groupSection = (
 		defaultLine(type, defaults),
 		...catalogModels(type)
 			.filter(({ provider }) => isConnected(provider))
-			.slice(0, MODELS_PER_TYPE)
 			.map(modelLine),
 	].join("\n");
 

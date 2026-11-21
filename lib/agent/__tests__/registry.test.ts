@@ -6,6 +6,7 @@ import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
+import { listModels as catalogModels } from "@/lib/connectors/models";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
 
@@ -721,13 +722,12 @@ describe("model tools", () => {
 		expect(output).not.toContain("from runware");
 	});
 
-	it("lists at most five models a type", async () => {
+	it("lists every connected model of a type", async () => {
 		const outcome = await run("list_models", {});
 		const output = String(outcome.ok && outcome.output);
 
-		for (const section of output.split("\n\n"))
-			expect(section.split("\n- ").length - 1).toBeLessThanOrEqual(5);
-		expect(output).toMatch(/(\n- .*){5}/);
+		for (const { provider, model } of catalogModels("video"))
+			expect(output).toContain(`- ${model} from ${provider}`);
 	});
 
 	it("sets the default for every type the model's group covers, as the models panel does", async () => {
