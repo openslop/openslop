@@ -10,6 +10,7 @@ import Canvas from "./canvas/canvas";
 import { CanvasVersionBanner } from "./canvas/canvas-version-banner";
 import {
 	AssetStrip,
+	AssetStripAdd,
 	AssetStripArtStyle,
 	AssetStripCharacters,
 	AssetStripReferences,
@@ -62,6 +63,7 @@ export default function PostPromptView() {
 										<AssetStripArtStyle />
 										<AssetStripCharacters />
 										<AssetStripReferences />
+										<AssetStripAdd />
 									</AssetStrip>
 									<Canvas />
 								</div>
