@@ -33,7 +33,7 @@ const SIZE_CLASSES: Record<
 	},
 	md: {
 		wrapper:
-			"h-7 w-7 bg-on-media/55 hover:bg-on-media/70 grain ring-1 ring-inset ring-border md:w-auto md:gap-1.5 md:px-2.5",
+			"h-7 w-7 bg-on-media/70 hover:bg-on-media/80 grain ring-1 ring-inset ring-border md:w-auto md:gap-1.5 md:px-2.5",
 		icon: "h-3 w-3",
 		label: "hidden md:inline",
 	},
