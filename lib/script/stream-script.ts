@@ -17,6 +17,7 @@ export async function streamScript(
 	const { system, prompt } = buildScriptPrompt(
 		getAssets(editor.children),
 		settings,
+		editor.defaultModels(),
 		source,
 	);
 
