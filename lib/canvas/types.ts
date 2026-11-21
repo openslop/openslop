@@ -77,8 +77,6 @@ export const durationOptions = (maxSec: number): string[] =>
 /** The longest most video models generate in one go. */
 export const STANDARD_MAX_DURATION_SEC = 15;
 
-export const DURATION_OPTIONS = durationOptions(STANDARD_MAX_DURATION_SEC);
-
 export const DEFAULT_DURATION = "10";
 export const DEFAULT_DURATION_SEC = Number(DEFAULT_DURATION);
 

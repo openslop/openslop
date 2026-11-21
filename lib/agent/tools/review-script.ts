@@ -1,5 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
+import { resolveDefaultModels } from "@/lib/connectors/models";
 import { scriptRules } from "@/lib/script/prompt/build";
 import { NO_FINDINGS, reviewPrompt } from "@/lib/script/prompt/review";
 import { Search } from "@/components/ui/icon";
@@ -30,7 +31,11 @@ export const reviewScript = defineTool({
 			return "The script is empty, so there is nothing to review.";
 		const settings = ctx.readProject().scriptSettings;
 		return ctx.generateText(reviewPrompt(ctx.readScript(), settings.format), {
-			systemPrompt: scriptRules(ctx.readAssets(), settings),
+			systemPrompt: scriptRules(
+				ctx.readAssets(),
+				settings,
+				resolveDefaultModels(ctx.modelDefaults()),
+			),
 		});
 	},
 	snapshot: true,

@@ -2,7 +2,7 @@ import { dedent } from "@/lib/dedent";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
-	DURATION_OPTIONS,
+	durationOptions,
 	LOOPS_OPTIONS,
 	TOGGLE_ON,
 } from "@/lib/canvas/types";
@@ -27,7 +27,10 @@ import { MUSIC_PROMPT_FORMAT } from "./music-prompt";
 export const OSML_REPLY_FORMAT =
 	"Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >.";
 
-export function osmlSpec(language: string): string {
+export function osmlSpec(
+	language: string,
+	maxVideoDurationSec: number,
+): string {
 	return dedent`
 		The story script must be written in the XML format below. Never nest tags.
 
@@ -56,7 +59,7 @@ export function osmlSpec(language: string): string {
 
 		## <video>
 		- A short generated video whose sound is written into its shots. The body is a video prompt, written as the Video prompts section says.
-		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
+		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: ${durationOptions(maxVideoDurationSec).join(", ")}.
 		- ${START_FRAME_ATTR}, ${CONTINUITY_ATTR} and ${loopDef.key}: see Format.
 		- motion: normally set to "${DEFAULT_MOTION}". Only set one when the shots have no camera move of their own.
 		- Example: <video startFrame="none">Shot 1: Wide shot of a moonlit forest clearing as {{Red}} and {{Wolf}} walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby.</video>
