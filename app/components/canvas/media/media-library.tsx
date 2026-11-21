@@ -78,11 +78,11 @@ export function MediaLibrary({ type }: { type: MediaContentType }) {
 	const [query, setQuery] = useState("");
 	const media = useProject((state) => state.media);
 	const items = findMedia(media, kind, query);
-	const { openPicker, uploadingKinds, inputElement } = useMediaUpload({
+	const { openPicker, uploading, inputElement } = useMediaUpload({
 		kinds: UploadKindSchema.options,
 		multiple: true,
 	});
-	const uploadingCount = uploadingKinds.filter((k) => k === kind).length;
+	const uploadingHere = uploading.filter((file) => file.kind === kind);
 	const referencesOf = useSlateSelector((editor) => {
 		const draft = requireAsset(editor.children, mediaDraftTypeOf(type));
 		return elementOffers(draft, REFERENCE_IMAGES_ATTR) ? draft.id : undefined;
@@ -108,11 +108,11 @@ export function MediaLibrary({ type }: { type: MediaContentType }) {
 					query={query}
 					onQueryChange={setQuery}
 				/>
-				{items.length === 0 && !pending && uploadingCount === 0 ? (
+				{items.length === 0 && !pending && uploadingHere.length === 0 ? (
 					<EmptyLibrary kind={kind} query={query} />
 				) : (
 					<ThumbnailGrid columns={MEDIA_KINDS[kind].columns}>
-						{uploadingTiles(uploadingCount, kind)}
+						{uploadingTiles(uploadingHere)}
 						{draftIds.map((id) => (
 							<PendingTile key={id} id={id} kind={kind} />
 						))}

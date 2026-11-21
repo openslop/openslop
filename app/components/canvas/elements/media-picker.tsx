@@ -71,7 +71,7 @@ function MediaChoices({
 				<TooltipIconButton
 					label={`Upload ${kind}`}
 					variant="inherit"
-					disabled={upload.uploading}
+					disabled={upload.uploading.length > 0}
 					onClick={upload.openPicker}
 				>
 					<Upload />
@@ -81,11 +81,11 @@ function MediaChoices({
 				className="-mx-1 mt-2 max-h-80 overflow-y-auto overscroll-contain px-1"
 				{...upload.dropZoneProps}
 			>
-				{items.length === 0 && !upload.uploading ? (
+				{items.length === 0 && upload.uploading.length === 0 ? (
 					<EmptyLibrary kind={kind} query={query} />
 				) : (
 					<ThumbnailGrid columns={2}>
-						{uploadingTiles(upload.uploadingKinds.length, kind)}
+						{uploadingTiles(upload.uploading)}
 						{items.map((item) => (
 							<MediaChoice
 								key={item.name}
@@ -135,7 +135,7 @@ export function MediaPicker({
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			{upload.inputElement}
-			<UploadingContext value={upload.uploading}>
+			<UploadingContext value={upload.uploading.length > 0}>
 				<PopoverTrigger asChild>{children}</PopoverTrigger>
 			</UploadingContext>
 			<PopoverContent align="end" className={THUMBNAIL_POPOVER_WIDTH}>

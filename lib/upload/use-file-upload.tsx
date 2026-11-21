@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { toastError } from "@/lib/toast-error";
 import { uploadFile } from "./upload-file";
 import {
+	type AcceptedFile,
 	acceptedTypes,
 	partitionFiles,
 	type Upload,
@@ -41,8 +42,7 @@ export function useFileUpload({
 	multiple?: boolean;
 }) {
 	const inputRef = useRef<HTMLInputElement>(null);
-	const [batches, setBatches] = useState<UploadKind[][]>([]);
-	const uploadingKinds = batches.flat();
+	const [uploading, setUploading] = useState<AcceptedFile[]>([]);
 	const [isDraggingOver, setIsDraggingOver] = useState(false);
 
 	useBlockStrayFileDrops();
@@ -55,8 +55,7 @@ export function useFileUpload({
 		const files = multiple ? accepted : accepted.slice(0, 1);
 		if (files.length === 0) return;
 
-		const batch = files.map(({ kind }) => kind);
-		setBatches((current) => [...current, batch]);
+		setUploading((current) => [...current, ...files]);
 		try {
 			const results = await Promise.allSettled(
 				files.map(async ({ file, kind }) => ({
@@ -72,7 +71,7 @@ export function useFileUpload({
 			}
 			// Store and state updates render in separate passes; one commit keeps placeholders from showing beside what replaced them.
 			await flushSync(() => {
-				setBatches((current) => current.filter((b) => b !== batch));
+				setUploading((current) => current.filter((f) => !files.includes(f)));
 				return uploads.length > 0 ? onUpload(uploads) : undefined;
 			});
 		} catch (error) {
@@ -131,8 +130,7 @@ export function useFileUpload({
 
 	return {
 		openPicker: () => inputRef.current?.click(),
-		uploading: uploadingKinds.length > 0,
-		uploadingKinds,
+		uploading,
 		inputElement,
 		dropZoneProps,
 		isDraggingOver,

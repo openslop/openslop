@@ -24,7 +24,7 @@ const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 
 function Probe() {
-	const { inputElement, uploadingKinds } = useFileUpload({
+	const { inputElement, uploading } = useFileUpload({
 		kinds: ["image", "video", "audio"],
 		multiple: true,
 		onUpload,
@@ -32,7 +32,7 @@ function Probe() {
 	return (
 		<>
 			{inputElement}
-			<output>{uploadingKinds.join(",")}</output>
+			<output>{uploading.map((file) => file.kind).join(",")}</output>
 		</>
 	);
 }
