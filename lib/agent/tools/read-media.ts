@@ -4,23 +4,16 @@ import { FolderOpen } from "@/components/ui/icon";
 import { MediaItemSchema } from "@/lib/project/media";
 import { defineTool } from "./define-tool";
 
-const MediaSummarySchema = MediaItemSchema.omit({ captions: true }).extend({
-	hasCaptions: z.boolean(),
-});
-
 export const readMedia = defineTool({
 	description: dedent`
 	  List every image, video and audio file in the project's media library, with its name,
-	  kind, URL and whether it has timed captions.
+	  kind and URL.
 	`,
 	input: z.object({}),
-	output: z.array(MediaSummarySchema),
+	output: z.array(MediaItemSchema.omit({ captions: true })),
 	icon: FolderOpen,
 	label: "Reading the media library",
 	execute: async (_input, ctx) =>
-		ctx.readProject().media.map(({ captions, ...item }) => ({
-			...item,
-			hasCaptions: captions !== undefined,
-		})),
+		ctx.readProject().media.map(({ captions: _, ...item }) => item),
 	snapshot: true,
 });

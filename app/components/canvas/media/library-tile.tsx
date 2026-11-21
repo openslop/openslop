@@ -14,24 +14,14 @@ import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-ima
 import type { GeneratedElement } from "@/lib/canvas/types";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useBuildContext } from "@/lib/generation/use-build-context";
-import { getMediaCaptions } from "@/lib/captions/media-captions";
-import { resolveModel } from "@/lib/connectors/models";
-import { useCreateConnector } from "@/lib/connectors/use-create-connector";
+import { useCaptionMedia } from "@/lib/captions/use-caption-media";
 import type { MediaItem } from "@/lib/project/media";
-import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { toastError } from "@/lib/toast-error";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
-import { GenerationIndicator } from "../elements/generation-indicator";
 import { TileMenuItem } from "../elements/tile-actions";
 import { useTake } from "./use-take";
 import { usesFor, type MediaUse } from "./media-uses";
-
-function captionActionLabel(item: MediaItem, captioning: boolean) {
-	if (captioning) return "Generating captions…";
-	if (item.captions !== undefined) return "Captions ready";
-	return "Generate captions";
-}
 
 /** Mounted as the menu opens, so the targets are read from the canvas as it is then. */
 function UseAsItems({ item, uses }: { item: MediaItem; uses: MediaUse[] }) {
@@ -119,69 +109,45 @@ export function LibraryTile({
 	/** The element the tile adds itself to the references of, when it takes any. */
 	referencesOf?: string;
 }) {
-	const editor = useSlateStatic();
-	const createConnector = useCreateConnector();
-	const store = useProjectStoreHandle();
-	const [captioningStartedAt, setCaptioningStartedAt] = useState<number | null>(
-		null,
-	);
+	const captionMedia = useCaptionMedia();
+	const [captioningSince, setCaptioningSince] = useState<number>();
 	const { take, traced } = useTake(item);
-	const captioning = captioningStartedAt !== null;
 	const generateCaptions = async () => {
-		setCaptioningStartedAt(Date.now());
+		setCaptioningSince(Date.now());
 		try {
-			const connector = createConnector(
-				"stt",
-				resolveModel("stt", editor.defaultModels().stt),
-			);
-			const captions = await getMediaCaptions(item, async () => {
-				const { textTimestamps } = await connector.generate({
-					prompt: "",
-					mediaUrl: item.url,
-				});
-				return textTimestamps;
-			});
-			store.getState().saveMediaCaptions(item.url, captions);
+			await captionMedia(item);
 		} catch (error) {
 			toastError(error, `Couldn't generate captions for ${item.name}`);
 		} finally {
-			setCaptioningStartedAt(null);
+			setCaptioningSince(undefined);
 		}
 	};
 	return (
 		<MediaLibraryItem
 			item={item}
+			generatingSince={captioningSince}
 			menu={
 				<>
 					{referencesOf && (
 						<AddReferenceItem item={item} elementId={referencesOf} />
 					)}
-					{item.kind !== "image" && (
+					{item.kind !== "image" && !item.captions && (
 						<TileMenuItem
 							icon={MagicCaptions}
-							disabled={captioning || item.captions !== undefined}
 							onSelect={() => void generateCaptions()}
 						>
-							{captionActionLabel(item, captioning)}
+							Generate captions
 						</TileMenuItem>
 					)}
 					<UseAsItem item={item} />
 				</>
 			}
 		>
-			{captioning ? (
-				<div className="absolute right-1 bottom-1">
-					<GenerationIndicator
-						status="generating"
-						startedAt={captioningStartedAt}
-						size="sm"
-					/>
-				</div>
-			) : traced && !take ? (
+			{traced && !take && (
 				<div className="absolute right-1 bottom-1">
 					<UploadedLabel tooltip="Uploaded, not generated" />
 				</div>
-			) : null}
+			)}
 		</MediaLibraryItem>
 	);
 }

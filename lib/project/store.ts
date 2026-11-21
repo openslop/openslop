@@ -7,8 +7,12 @@ import {
 	type ConnectorModels,
 } from "@/lib/connectors/models";
 import type { Caption } from "@remotion/captions";
-import type { Upload } from "@/lib/upload/upload-files";
-import { MediaItemSchema, toMediaItems } from "./media";
+import {
+	MediaItemSchema,
+	requireMedia,
+	toMediaItems,
+	type NewMedia,
+} from "./media";
 import {
 	ScriptSettingsSchema,
 	type DeepPartial,
@@ -37,7 +41,7 @@ export type ProjectContext = ProjectData & {
 	updateVideoSettings: (partial: DeepPartial<VideoSettings>) => void;
 	updateScriptSettings: (settings: Partial<ScriptSettings>) => void;
 	updateModels: (models: ConnectorModels) => void;
-	addMedia: (uploads: Upload[]) => void;
+	addMedia: (uploads: NewMedia[]) => void;
 	saveMediaCaptions: (url: string, captions: Caption[]) => void;
 	removeMedia: (name: string) => void;
 	reset: () => void;
@@ -75,10 +79,7 @@ export function createProjectStore(
 				}),
 			saveMediaCaptions: (url, captions) =>
 				set((state) => {
-					const items = state.media.filter((media) => media.url === url);
-					if (items.length === 0)
-						throw new Error(`${url} is no longer in the media library.`);
-					for (const item of items) item.captions ??= captions;
+					requireMedia(state.media, url).captions = captions;
 				}),
 			removeMedia: (name) =>
 				set((state) => {

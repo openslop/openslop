@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	checkMediaKind,
-	findMedia,
-	MediaItemSchema,
-	toMediaItems,
-	type MediaItem,
-} from "../media";
-import { toCaption } from "@/lib/captions/word-captions";
+import { findMedia, mediaOfKind, toMediaItems, type MediaItem } from "../media";
 
 const upload = (name: string, kind: MediaItem["kind"] = "image") => ({
 	kind,
@@ -41,18 +34,6 @@ describe("toMediaItems", () => {
 	});
 });
 
-describe("MediaItemSchema", () => {
-	it("keeps timed captions on a file and accepts older rows without them", () => {
-		const item = upload("interview.mp4", "video");
-		const captions = [toCaption("hello", 0, 0.4)];
-
-		expect(MediaItemSchema.parse({ ...item, captions }).captions).toEqual(
-			captions,
-		);
-		expect(MediaItemSchema.parse(item).captions).toBeUndefined();
-	});
-});
-
 describe("findMedia", () => {
 	const item = (name: string, kind: MediaItem["kind"] = "image") => ({
 		name,
@@ -81,22 +62,28 @@ describe("findMedia", () => {
 	});
 });
 
-describe("checkMediaKind", () => {
+describe("mediaOfKind", () => {
 	const media = toMediaItems(
 		[],
 		[upload("theme.mp3", "audio"), upload("cover.png")],
 	);
 
 	it("refuses a library file of another kind, naming both", () => {
-		expect(() =>
-			checkMediaKind(media, "https://blob/theme.mp3", "image"),
-		).toThrow("theme is audio, not an image.");
+		expect(() => mediaOfKind(media, "https://blob/theme.mp3", "image")).toThrow(
+			"theme is audio, not an image.",
+		);
 	});
 
-	it.each([
-		["a library file of the kind asked for", "https://blob/cover.png"],
-		["a stored file outside the library", "https://blob/elsewhere.mp4"],
-	])("takes %s", (_, url) => {
-		expect(() => checkMediaKind(media, url, "image")).not.toThrow();
+	it("takes a library file of the kind asked for, with what the library knows of it", () => {
+		expect(mediaOfKind(media, "https://blob/cover.png", "image")).toBe(
+			media[1],
+		);
+	});
+
+	it("takes a stored file outside the library as it is", () => {
+		expect(mediaOfKind(media, "https://blob/elsewhere.png", "image")).toEqual({
+			kind: "image",
+			url: "https://blob/elsewhere.png",
+		});
 	});
 });

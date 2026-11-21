@@ -15,11 +15,14 @@ export const MediaItemSchema = z.object({
 	url: z.string(),
 	/** Missing on media added before it was recorded. */
 	createdAt: z.string().optional(),
-	/** Word timings transcribed once for this file. */
 	captions: z.array(CaptionSchema).optional(),
 });
 
 export type MediaItem = z.infer<typeof MediaItemSchema>;
+
+export type UploadedMedia = Pick<MediaItem, "kind" | "url" | "captions">;
+
+export type NewMedia = Upload & Pick<MediaItem, "captions">;
 
 const stem = (fileName: string) => fileName.replace(/\.[^.]*$/, "");
 
@@ -32,14 +35,13 @@ function uniqueName(base: string, taken: Set<string>): string {
 
 export function toMediaItems(
 	media: MediaItem[],
-	uploads: Upload[],
+	uploads: NewMedia[],
 ): MediaItem[] {
 	const taken = new Set(media.map((item) => item.name));
 	const createdAt = new Date().toISOString();
-	return uploads.map(({ kind, name, url }) => ({
-		name: uniqueName(kebabCase(stem(name)) || kind, taken),
-		kind,
-		url,
+	return uploads.map(({ name, ...upload }) => ({
+		...upload,
+		name: uniqueName(kebabCase(stem(name)) || upload.kind, taken),
 		createdAt,
 	}));
 }
@@ -50,16 +52,18 @@ export function requireMedia(media: MediaItem[], url: string): MediaItem {
 	return item;
 }
 
-export function checkMediaKind(
+export function mediaOfKind(
 	media: MediaItem[],
 	url: string,
 	kind: UploadKind,
-): void {
+): UploadedMedia {
 	const item = media.find((candidate) => candidate.url === url);
-	if (item && item.kind !== kind)
+	if (!item) return { kind, url };
+	if (item.kind !== kind)
 		throw new Error(
 			`${item.name} is ${UPLOAD_KINDS[item.kind].noun}, not ${UPLOAD_KINDS[kind].noun}.`,
 		);
+	return item;
 }
 
 /** The media of one kind whose name matches the query, best match first; ties newest first. */
