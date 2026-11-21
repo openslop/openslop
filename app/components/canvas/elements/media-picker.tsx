@@ -85,7 +85,7 @@ function MediaChoices({
 					<EmptyLibrary kind={kind} query={query} />
 				) : (
 					<ThumbnailGrid columns={2}>
-						{uploadingTiles(upload.uploadingCount, kind)}
+						{uploadingTiles(upload.uploadingKinds.length, kind)}
 						{items.map((item) => (
 							<MediaChoice
 								key={item.name}

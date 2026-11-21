@@ -24,7 +24,7 @@ vi.mock("@/lib/project/use-media-upload", () => ({
 	useMediaUpload: () => ({
 		openPicker: vi.fn(),
 		uploading: false,
-		uploadingCount: 0,
+		uploadingKinds: [],
 		inputElement: null,
 	}),
 }));

@@ -215,7 +215,9 @@ export default function ComposerCopilot({
 					<AssetStripReferences />
 					<AssetStripMedia />
 					<AssetStripUploading
-						count={references.uploadingCount + media.uploadingCount}
+						count={
+							references.uploadingKinds.length + media.uploadingKinds.length
+						}
 					/>
 				</AssetStrip>
 				<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline">

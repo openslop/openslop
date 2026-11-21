@@ -70,7 +70,7 @@ function CharactersCard() {
 
 function ReferencesCard() {
 	const { urls, add, remove } = useReferenceImages();
-	const { openPicker, uploadingCount, inputElement } = useMediaUpload({
+	const { openPicker, uploadingKinds, inputElement } = useMediaUpload({
 		kinds: ["image"],
 		multiple: true,
 		onUpload: add,
@@ -94,7 +94,7 @@ function ReferencesCard() {
 							onRemove={() => remove(index)}
 						/>
 					)),
-					...uploadingTiles(uploadingCount),
+					...uploadingTiles(uploadingKinds.length),
 				]}
 			</AssetCard>
 		</>

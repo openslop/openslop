@@ -132,7 +132,6 @@ export function useFileUpload({
 	return {
 		openPicker: () => inputRef.current?.click(),
 		uploading: uploadingKinds.length > 0,
-		uploadingCount: uploadingKinds.length,
 		uploadingKinds,
 		inputElement,
 		dropZoneProps,
