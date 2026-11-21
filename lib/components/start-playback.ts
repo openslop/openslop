@@ -7,3 +7,13 @@ export function startPlayback(audio: HTMLAudioElement): void {
 		toastError(error, "Could not play audio");
 	});
 }
+
+/** A source that fails mid-play leaves the element unpaused. */
+export function stopFailedPlayback(audio: HTMLAudioElement): void {
+	if (audio.paused) return;
+	audio.pause();
+	toastError(
+		audio.error?.message || "the file stopped loading",
+		"Could not play audio",
+	);
+}
