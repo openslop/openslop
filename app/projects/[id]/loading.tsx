@@ -107,7 +107,7 @@ export default function Loading() {
 			<DotGrid />
 
 			{/* Profile avatar */}
-			<div className="fixed top-4 left-5 z-100">
+			<div className="fixed top-4 left-5 z-50">
 				<Skeleton className="size-8 rounded-full" />
 			</div>
 
