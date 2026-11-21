@@ -2,7 +2,6 @@ import { memo } from "react";
 import type { ResultKind } from "@/lib/canvas/types";
 import { PREVIEWS_BY_KIND } from "./preview/registry";
 import { UploadedBadge } from "./preview/uploaded-badge";
-import { GenerationCost } from "./generation-cost";
 import { useElementGeneration } from "./element-generation-context";
 
 function OutputPreviewComponent({ outputKind }: { outputKind: ResultKind }) {
@@ -16,12 +15,7 @@ function OutputPreviewComponent({ outputKind }: { outputKind: ResultKind }) {
 			result={result}
 			error={error}
 			onDiscard={discard}
-			topRight={
-				<>
-					<UploadedBadge />
-					<GenerationCost costUsd={result?.costUsd} size="xs" />
-				</>
-			}
+			topRight={<UploadedBadge />}
 		/>
 	);
 }
