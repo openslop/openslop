@@ -67,7 +67,10 @@ export function GenerationIndicator({
 				)}
 			>
 				<Icon className={cn("shrink-0", sizes.icon, animation)} />
-				<span aria-hidden className={cn("shimmer text-label-xs", sizes.label)}>
+				<span
+					aria-hidden
+					className={cn("shimmer text-label-xs whitespace-nowrap", sizes.label)}
+				>
 					{label}
 				</span>
 			</span>
