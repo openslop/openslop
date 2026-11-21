@@ -162,7 +162,7 @@ function EnumField({
 				</DropdownMenuTrigger>
 				<DropdownMenuContent
 					align="start"
-					className="max-h-64 min-w-[var(--radix-dropdown-menu-trigger-width)]"
+					className="max-h-64 min-w-(--radix-dropdown-menu-trigger-width)"
 				>
 					{[undefined, ...options].map((option) => (
 						<SelectMenuItem

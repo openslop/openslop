@@ -102,7 +102,7 @@ function CollapsedScene({
 			className={`group/collapsible relative h-32 ${SCENE_FRAME_CLASS}`}
 			style={dropPadding}
 		>
-			<div className="relative z-[1] flex flex-col h-full">
+			<div className="relative z-1 flex flex-col h-full">
 				{/* Pull the header back over the drag-handle gutter so it lines up
 				    with the expanded header instead of shifting right. */}
 				<div className="-ml-[34px]">
@@ -162,7 +162,7 @@ function ExpandedScene({
 			className={`group/collapsible ${SCENE_FRAME_CLASS}`}
 			style={dropPadding}
 		>
-			<div className="relative z-[1]">
+			<div className="relative z-1">
 				<SceneHeader
 					sceneIndex={sceneIndex}
 					collapsed={false}

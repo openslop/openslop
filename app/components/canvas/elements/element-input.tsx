@@ -44,7 +44,7 @@ export function ElementInput({
 			)}
 		>
 			{getElementText(element) === ZERO_WIDTH_SPACE && (
-				<div className="pointer-events-none absolute top-2.5 start-3 text-start text-label text-muted-foreground select-none">
+				<div className="pointer-events-none absolute top-2.5 inset-s-3 text-start text-label text-muted-foreground select-none">
 					{ELEMENT_CONFIGS[element.type].placeholder}
 				</div>
 			)}

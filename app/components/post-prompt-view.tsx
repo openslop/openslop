@@ -55,7 +55,7 @@ export default function PostPromptView() {
 						{placement === "top" && <TopPlayerPanel />}
 
 						<div className="flex min-h-0 flex-1 overflow-hidden">
-							<div className="flex-1 overflow-y-auto [scrollbar-gutter:stable]">
+							<div className="flex-1 overflow-y-auto scrollbar-gutter-stable">
 								<div className="mx-auto max-w-6xl px-4 py-4">
 									<ProjectTitle />
 									<AssetStrip>

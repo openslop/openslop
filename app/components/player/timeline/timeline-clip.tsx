@@ -22,7 +22,7 @@ const PX_PER_CHAR = 6;
 const MIN_CHARS = 4;
 
 const FRAME =
-	"relative flex h-full w-full flex-col overflow-hidden rounded-md border transition-[border-color] duration-[var(--duration-faster)] ease-[var(--ease-productive)] motion-reduce:transition-none";
+	"relative flex h-full w-full flex-col overflow-hidden rounded-md border transition-[border-color] duration-(--duration-faster) ease-productive motion-reduce:transition-none";
 const edge = (selected: boolean) =>
 	selected
 		? "border-current/60"
