@@ -23,8 +23,7 @@ vi.mock("../use-previous-pictures", () => ({
 vi.mock("@/lib/project/use-media-upload", () => ({
 	useMediaUpload: () => ({
 		openPicker: vi.fn(),
-		uploading: false,
-		uploadingCount: 0,
+		uploading: [],
 		inputElement: null,
 	}),
 }));
