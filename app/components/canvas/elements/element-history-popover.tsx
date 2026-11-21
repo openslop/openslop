@@ -61,7 +61,7 @@ function CostBadge({
 }) {
 	if (costUsd === undefined) return null;
 	return (
-		<Badge variant="muted" size={size}>
+		<Badge variant="subtle" size={size}>
 			<Tag />
 			{children}
 			<span>{formatCost(costUsd)}</span>
@@ -130,12 +130,10 @@ function ElementVersionRow({
 				<ElementVersionThumbnail version={version} name={`version ${label}`} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
-						<span className={cn("font-numeric", active && "text-accent")}>
-							v{label}
-						</span>
+						<span className="font-numeric">v{label}</span>
 						<Dot />
 						{version.result.uploaded && (
-							<Badge variant="muted" size="inlineXs">
+							<Badge variant="subtle" size="inlineXs">
 								<CloudUploadFilled />
 								Uploaded
 							</Badge>
