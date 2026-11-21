@@ -47,8 +47,9 @@ describe("GenerationIndicator", () => {
 		const html = render(
 			<GenerationIndicator status="generating" startedAt={null} size="sm" />,
 		);
-		expect(html).not.toContain("Generating 0s</span>");
-		expect(html).not.toContain("shimmer");
+		const shown = html.match(/<span aria-hidden="true" class="([^"]*)">/);
+		expect(shown?.[1]).toMatch(/(^| )hidden( |$)/);
+		expect(shown?.[1]).not.toContain("md:inline");
 	});
 });
 

@@ -811,9 +811,9 @@
 .shimmer {
 	background: linear-gradient(
 		90deg,
-		color-mix(in srgb, var(--muted-foreground) 30%, transparent) 0%,
-		color-mix(in srgb, var(--muted-foreground) 60%, transparent) 50%,
-		color-mix(in srgb, var(--muted-foreground) 30%, transparent) 100%
+		color-mix(in srgb, currentColor 30%, transparent) 0%,
+		color-mix(in srgb, currentColor 60%, transparent) 50%,
+		color-mix(in srgb, currentColor 30%, transparent) 100%
 	);
 	background-size: 200% auto;
 	background-clip: text;
