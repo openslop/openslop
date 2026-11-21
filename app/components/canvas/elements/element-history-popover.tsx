@@ -116,7 +116,7 @@ function ElementVersionRow({
 	active: boolean;
 	onRestore: () => void;
 }) {
-	const { audioUrl } = version.result;
+	const { audioUrl, uploaded, costUsd } = version.result;
 	const volume = getVolumeGain(useElementGeneration().element);
 	return (
 		<li
@@ -132,13 +132,13 @@ function ElementVersionRow({
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
 						<span className="font-numeric">v{label}</span>
 						<Dot />
-						{version.result.uploaded && (
+						{uploaded && (
 							<Badge variant="subtle" size="inlineXs">
 								<CloudUploadFilled />
 								Uploaded
 							</Badge>
 						)}
-						<CostBadge costUsd={version.result.costUsd} size="inlineXs">
+						<CostBadge costUsd={costUsd} size="inlineXs">
 							<span className="sr-only">Cost</span>
 						</CostBadge>
 						{relativeTime(version.createdAt)}
