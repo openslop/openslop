@@ -63,11 +63,14 @@ const clearedOutput = (toolName: string) =>
 type LatestByTool = ReadonlyMap<string, ToolResultPart>;
 
 const isStale = (part: ToolResultPart, latest: LatestByTool) => {
-	const retention = retentionOf(part.toolName);
-	return (
-		retention === "turn" ||
-		(retention === "latest" && part !== latest.get(part.toolName))
-	);
+	switch (retentionOf(part.toolName)) {
+		case "always":
+			return false;
+		case "turn":
+			return true;
+		case "latest":
+			return part !== latest.get(part.toolName);
+	}
 };
 
 const clearIfStale =
