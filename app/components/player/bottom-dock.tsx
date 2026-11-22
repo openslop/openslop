@@ -21,7 +21,7 @@ function ResizableDock() {
 	const { view } = useBottomView();
 	const { size, handleProps, resizing } = useResize({
 		axis: "vertical",
-		invert: true,
+		handleEdge: "start",
 		defaultSize: DOCK_DEFAULT_HEIGHT,
 		minSize: 160,
 		maxViewportFraction: 0.75,

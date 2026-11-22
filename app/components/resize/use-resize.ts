@@ -11,23 +11,19 @@ import { clamp } from "@/lib/utils";
 
 export type ResizeAxis = "vertical" | "horizontal";
 
+/** The panel edge its handle sits on; top and left are the start. */
+type HandleEdge = "start" | "end";
+
 const KEY_STEP = 16;
 
-/**
- * `invert` is for a handle on the panel's leading edge — a bottom dock grabbed
- * from its top grows as the pointer moves up, the opposite of a top panel
- * grabbed from its bottom.
- */
 export function clampResize(
-	axis: ResizeAxis,
+	handleEdge: HandleEdge,
 	pointerDelta: number,
 	startSize: number,
 	minSize: number,
 	maxSize: number,
-	invert = false,
 ): number {
-	const towardsPointer = axis === "vertical" ? pointerDelta : -pointerDelta;
-	const delta = invert ? -towardsPointer : towardsPointer;
+	const delta = handleEdge === "end" ? pointerDelta : -pointerDelta;
 	return clamp(startSize + delta, minSize, maxSize);
 }
 
@@ -65,14 +61,14 @@ export function useResize({
 	minSize,
 	maxSize: maxLength = Infinity,
 	maxViewportFraction = 1,
-	invert,
+	handleEdge,
 }: {
 	axis: ResizeAxis;
 	defaultSize: number;
 	minSize: number;
 	maxSize?: number;
 	maxViewportFraction?: number;
-	invert?: boolean;
+	handleEdge: HandleEdge;
 }) {
 	const [requested, setRequested] = useState(defaultSize);
 	const [resizing, setResizing] = useState(false);
@@ -89,7 +85,7 @@ export function useResize({
 
 	const resizeBy = (startSize: number, pointerDelta: number) =>
 		setRequested(
-			clampResize(axis, pointerDelta, startSize, minSize, maxSize, invert),
+			clampResize(handleEdge, pointerDelta, startSize, minSize, maxSize),
 		);
 
 	const drag = usePointerDrag({

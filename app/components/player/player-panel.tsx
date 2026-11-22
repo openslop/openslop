@@ -29,6 +29,7 @@ function FitToAspectRatio({ children }: { children: ReactNode }) {
 function TopPlayerPanelComponent() {
 	const { size, handleProps, resizing } = useResize({
 		axis: "vertical",
+		handleEdge: "end",
 		defaultSize: TOP_DEFAULT,
 		minSize: 150,
 		maxViewportFraction: 0.6,
@@ -54,6 +55,7 @@ function TopPlayerPanelComponent() {
 function SidePlayerPanelComponent() {
 	const { size, handleProps, resizing } = useResize({
 		axis: "horizontal",
+		handleEdge: "start",
 		defaultSize: SIDE_PLAYER_DEFAULT_WIDTH,
 		minSize: 250,
 		maxViewportFraction: 0.5,

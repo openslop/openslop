@@ -194,7 +194,7 @@ function ResizablePanel({ children }: { children: ReactNode }) {
 		defaultSize: PANEL_WIDTH.default,
 		minSize: PANEL_WIDTH.min,
 		maxSize: PANEL_WIDTH.max,
-		invert: true,
+		handleEdge: "end",
 	});
 	return (
 		<>
