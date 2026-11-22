@@ -301,7 +301,7 @@ describe("applyRefineOp — move", () => {
 
 		const result = applyRefineOp(editor, { op: "move", ...move });
 
-		expect(result).toEqual({ ok: true });
+		expect(result).toEqual({ ok: true, inserted: [] });
 		expect(layout(editor)).toEqual(expected);
 	});
 

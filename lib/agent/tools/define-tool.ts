@@ -3,14 +3,14 @@ import type { z } from "zod";
 import type { IconComponent } from "@/components/ui/icon";
 import type { AgentToolContext } from "./context";
 
+export type Retention = "always" | "turn" | "latest";
+
 /**
  * One tool, whole: the spec the model is offered and the executor the editor
  * runs. Specs declare no execute of their own because every tool runs against
  * the Slate canvas in the browser: the SDK surfaces the call, the editor
  * answers it, and the result comes back as the next request.
  */
-export type Retention = "always" | "turn" | "latest";
-
 export function defineTool<Input, Output>(def: {
 	description: string;
 	input: z.ZodType<Input>;

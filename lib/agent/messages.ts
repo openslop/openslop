@@ -4,7 +4,6 @@ import {
 	safeValidateUIMessages,
 	validateUIMessages,
 	type ModelMessage,
-	type ToolContent,
 	type ToolResultPart,
 } from "ai";
 import { retentionOf, SLOPPY_TOOLS } from "./tools/registry";
@@ -57,8 +56,13 @@ export function settleUnansweredCalls(
 	}));
 }
 
-const clearedOutput = (toolName: string) =>
-	`Cleared from history on purpose. Call ${toolName} again for the current result.`;
+const cleared = (part: ToolResultPart): ToolResultPart => ({
+	...part,
+	output: {
+		type: "text",
+		value: `Cleared from history on purpose. Call ${part.toolName} again for the current result.`,
+	},
+});
 
 type LatestByTool = ReadonlyMap<string, ToolResultPart>;
 
@@ -73,16 +77,6 @@ const isStale = (part: ToolResultPart, latest: LatestByTool) => {
 	}
 };
 
-const clearIfStale =
-	(latest: LatestByTool) =>
-	(part: ToolContent[number]): ToolContent[number] =>
-		part.type === "tool-result" && isStale(part, latest)
-			? {
-					...part,
-					output: { type: "text", value: clearedOutput(part.toolName) },
-				}
-			: part;
-
 const pruneFinished = (
 	message: ModelMessage,
 	latest: LatestByTool,
@@ -93,14 +87,18 @@ const pruneFinished = (
 			content: message.content.filter((part) => part.type !== "reasoning"),
 		};
 	if (message.role === "tool")
-		return { ...message, content: message.content.map(clearIfStale(latest)) };
+		return {
+			...message,
+			content: message.content.map((part) =>
+				part.type === "tool-result" && isStale(part, latest)
+					? cleared(part)
+					: part,
+			),
+		};
 	return message;
 };
 
-/**
- * Before the last user message is history, which drops reasoning and stale tool output:
- * "turn" output always, "latest" output unless it is the newest of its tool.
- */
+/** Before the last user message is history: drop its reasoning and stale tool output. */
 export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
 	const currentTurnStart = messages.findLastIndex(
 		(message) => message.role === "user",
@@ -109,11 +107,7 @@ export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
 		messages
 			.slice(0, currentTurnStart)
 			.flatMap((message) => (message.role === "tool" ? message.content : []))
-			.filter(
-				(part): part is ToolResultPart =>
-					part.type === "tool-result" &&
-					retentionOf(part.toolName) === "latest",
-			)
+			.filter((part) => part.type === "tool-result")
 			.map((part) => [part.toolName, part]),
 	);
 	return messages.map((message, index) =>

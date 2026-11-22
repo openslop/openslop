@@ -15,7 +15,7 @@ import type { AssetType, ElementType } from "@/lib/canvas/types";
 import type { NewElement, RefineOp } from "./types";
 
 export type RefineOpResult =
-	| { ok: true; inserted?: string[] }
+	| { ok: true; inserted: string[] }
 	| { ok: false; reason: string };
 
 export type RefineReport = {
@@ -24,7 +24,7 @@ export type RefineReport = {
 	inserted: string[];
 };
 
-const OK: RefineOpResult = { ok: true };
+const OK: RefineOpResult = { ok: true, inserted: [] };
 
 const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
 
@@ -73,9 +73,7 @@ export function applyRefineOps(editor: Editor, ops: RefineOp[]): RefineReport {
 	return {
 		applied: results.filter((result) => result.ok).length,
 		failures: results.flatMap((result) => (result.ok ? [] : [result.reason])),
-		inserted: results.flatMap((result) =>
-			result.ok ? (result.inserted ?? []) : [],
-		),
+		inserted: results.flatMap((result) => (result.ok ? result.inserted : [])),
 	};
 }
 

@@ -80,12 +80,12 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			// Not awaited: the SDK awaits each call in turn, so this runs a step's calls together.
 			onToolCall: ({ toolCall }) => {
 				const signal = turn.current?.signal;
+				const call = {
+					tool: toolCall.toolName as AgentToolName,
+					toolCallId: toolCall.toolCallId,
+				};
 				void runTool(toolCall, signal).then((outcome) => {
 					if (signal?.aborted) return;
-					const call = {
-						tool: toolCall.toolName as AgentToolName,
-						toolCallId: toolCall.toolCallId,
-					};
 					addToolOutput(
 						outcome.ok
 							? { ...call, output: outcome.output }
