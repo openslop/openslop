@@ -86,7 +86,7 @@ export const editScript = defineTool({
 	execute: async ({ ops }, ctx) => {
 		if (!ctx.isScriptReadCurrent())
 			throw new Error(
-				"The canvas changed since you last read it, or you have not read it. Call read_script before editing.",
+				"The script has been modified since read, either by the user or by a tool. Read it again before attempting to edit it.",
 			);
 		const { applied, failures, inserted } = ctx.editScript(ops);
 		return compact([

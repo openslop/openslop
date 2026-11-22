@@ -131,7 +131,7 @@ describe("edit_script read guard", () => {
 	it("refuses an edit before any read", async () => {
 		expect(await edit("Unseen")).toMatchObject({
 			ok: false,
-			errorText: expect.stringContaining("Call read_script before editing"),
+			errorText: expect.stringContaining("modified since read"),
 		});
 		expect(text()).toBe("The cat is on the mat.");
 	});

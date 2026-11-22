@@ -172,10 +172,10 @@ describe("pruneTranscript", () => {
 			await convertToModelMessages(messages, { tools: SLOPPY_TOOLS }),
 		);
 
-	const stale = (toolName: string) => ({
+	const cleared = {
 		type: "text",
-		value: `Cleared from history on purpose. Call ${toolName} again for the current result.`,
-	});
+		value: "[Old tool result content cleared]",
+	};
 
 	const finished = turnWith(
 		"m2",
@@ -242,7 +242,7 @@ describe("pruneTranscript", () => {
 				{
 					type: "tool-result",
 					toolName: "view_result",
-					output: stale("view_result"),
+					output: cleared,
 				},
 			],
 		});

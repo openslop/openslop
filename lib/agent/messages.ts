@@ -58,10 +58,7 @@ export function settleUnansweredCalls(
 
 const cleared = (part: ToolResultPart): ToolResultPart => ({
 	...part,
-	output: {
-		type: "text",
-		value: `Cleared from history on purpose. Call ${part.toolName} again for the current result.`,
-	},
+	output: { type: "text", value: "[Old tool result content cleared]" },
 });
 
 type LatestByTool = ReadonlyMap<string, ToolResultPart>;
