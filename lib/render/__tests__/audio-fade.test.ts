@@ -89,8 +89,8 @@ describe("a looping effect's copies", () => {
 		const volume = audioVolume(1, window, toFrames(audioFadeSec(element), fps));
 		if (typeof volume !== "function") throw new Error("Expected function");
 		const stride = toFrames(loopStrideSec(element), fps);
-		for (let f = stride; f < window; f++) {
-			expect(volume(f) + volume(f - stride)).toBeCloseTo(1, 5);
+		for (let frame = stride; frame < window; frame++) {
+			expect(volume(frame) + volume(frame - stride)).toBeCloseTo(1, 5);
 		}
 	});
 });
