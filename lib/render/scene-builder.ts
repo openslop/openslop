@@ -9,7 +9,7 @@ import {
 } from "./types";
 import { ASPECT_RATIO_DIMENSIONS } from "../project/aspect-ratio";
 import type { VideoSettings } from "../project/video-settings";
-import { blankScene } from "./blank-scene";
+import { blankScene, isBlankScene } from "./blank-scene";
 import { totalDuration } from "./sequences";
 import { loopStrideSec } from "./audio-fade";
 import { toFrames, toSeconds } from "./frames";
@@ -77,6 +77,15 @@ function getForegroundCursor(current: Sequence | undefined, cursor: number) {
 		: cursor;
 }
 
+/** A visual holds the speech after it; a blank scene holds only its own scene's. */
+const holdsOverlay = (
+	current: Sequence | undefined,
+	element: ResolvedElement,
+): current is Sequence =>
+	current !== undefined &&
+	(!isBlankScene(current.element) ||
+		current.element.sceneId === element.sceneId);
+
 const isStill = ({ element }: Sequence) =>
 	CONTENT_TYPES[element.type].outputKind === "image";
 
@@ -84,7 +93,7 @@ const isStill = ({ element }: Sequence) =>
  * Walks the element list and assembles scenes with these rules:
  *
  *  1. Foreground → starts a new scene.
- *  2. Overlay    → extends the current scene's duration; opens a blank scene if none exists.
+ *  2. Overlay    → extends the current scene's duration; opens a blank scene if none holds it.
  *  3. Background → updates the active background layer for that element type. Exclusive (one at a time per type).
  *  4. Effect     → starts with its visual, or where the speech before it ends; overlaps freely.
  *
@@ -113,6 +122,18 @@ export function buildRenderLayout(
 	let cursor = 0;
 	let overlaySec = 0;
 
+	const openScene = (opener: ResolvedElement) => {
+		cursor = getForegroundCursor(series.at(-1), cursor);
+		if (series.length > 0) {
+			// TransitionSeries overlaps each sequence with the one before it by the transition.
+			cursor -= transitionDurationSec;
+		}
+		const scene = sequenceAt(opener, cursor, MIN_DURATION_SEC);
+		series.push(scene);
+		overlaySec = 0;
+		return scene;
+	};
+
 	for (const raw of elements) {
 		const element = {
 			...raw,
@@ -134,19 +155,12 @@ export function buildRenderLayout(
 				break;
 			}
 			case "foreground": {
-				cursor = foregroundCursor;
-				if (series.length > 0) {
-					// TransitionSeries overlaps each sequence with the one before it by the transition.
-					cursor -= transitionDurationSec;
-				}
-				series.push(sequenceAt(element, cursor, MIN_DURATION_SEC));
-				overlaySec = 0;
+				openScene(element);
 				break;
 			}
 			case "overlay": {
-				if (!current) {
-					current = sequenceAt(blankScene(element), cursor, MIN_DURATION_SEC);
-					series.push(current);
+				if (!holdsOverlay(current, element)) {
+					current = openScene(blankScene(element));
 				}
 				overlaySec += element.trimDurationSec;
 				current.minDuration = Math.max(current.minDuration, overlaySec);

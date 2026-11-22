@@ -8,6 +8,7 @@ import {
 	type SceneSegment,
 } from "../scene-segments";
 import { blankScene } from "../blank-scene";
+import { layoutOf } from "./_layout";
 
 const seg = (
 	sceneId: string,
@@ -214,5 +215,30 @@ describe("buildSceneSegments", () => {
 			start: 0,
 			duration: 2,
 		});
+	});
+
+	const speechIn = (scene: number, trimDurationSec: number) => ({
+		...resolved(`n${scene}.mp3`, { id: `s${scene}`, number: scene }),
+		type: "speech" as const,
+		role: "overlay" as const,
+		layer: "audio" as const,
+		trimDurationSec,
+	});
+	const spansOf = (elements: ResolvedElement[]) =>
+		buildSceneSegments(layoutOf(elements, { transitionType: "none" })).map(
+			(s) => [s.label, s.start, s.duration],
+		);
+
+	it("gives each scene with no visual its own span", () => {
+		expect(spansOf([speechIn(1, 5), speechIn(2, 4), speechIn(3, 6)])).toEqual([
+			["Scene 1", 0, 5],
+			["Scene 2", 5, 4],
+			["Scene 3", 9, 6],
+		]);
+	});
+
+	it("holds the previous visual over a later scene's speech", () => {
+		const image = resolved("a.png");
+		expect(spansOf([image, speechIn(2, 4)])).toEqual([["Scene 1", 0, 4]]);
 	});
 });

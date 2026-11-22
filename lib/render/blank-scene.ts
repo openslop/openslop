@@ -1,13 +1,11 @@
 import type { ResolvedElement } from "./types";
 
-export const BLANK_SCENE_ID = "blank";
-
 const BLACK_PIXEL =
 	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mNgYGAAAAAEAAHI6uv5AAAAAElFTkSuQmCC";
 
 export function blankScene(opener: ResolvedElement): ResolvedElement {
 	return {
-		id: BLANK_SCENE_ID,
+		id: `blank-${opener.sceneId}`,
 		type: "image",
 		role: "foreground",
 		layer: "visual",
@@ -26,4 +24,4 @@ export function blankScene(opener: ResolvedElement): ResolvedElement {
 }
 
 export const isBlankScene = (element: ResolvedElement) =>
-	element.id === BLANK_SCENE_ID;
+	element.url === BLACK_PIXEL;
