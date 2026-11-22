@@ -1,30 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { coverScale, motionTransform } from "../motion-effects";
-import {
-	isMotionEffect,
-	MOTION_EFFECTS,
-	type MotionEffect,
-} from "../motion-effect-names";
+import { isMotionEffect, MOTION_EFFECTS } from "../motion-effect-names";
 
-const ACTIVE: ReadonlyArray<Exclude<MotionEffect, "none">> =
-	MOTION_EFFECTS.filter((e) => e !== "none") as Exclude<MotionEffect, "none">[];
+const ACTIVE = MOTION_EFFECTS.filter((effect) => effect !== "none");
 
-function parseTransform(t: string): {
-	tx: number;
-	ty: number;
-	s: number;
-	theta: number;
-} {
-	const m =
+function parseTransform(transform: string) {
+	const match =
 		/^translate\(([-\d.]+)%,\s*([-\d.]+)%\)\s+scale\(([-\d.]+)\)\s+rotate\(([-\d.]+)deg\)$/.exec(
-			t,
+			transform,
 		);
-	if (!m) throw new Error(`unparseable transform: ${t}`);
+	if (!match) throw new Error(`unparseable transform: ${transform}`);
 	return {
-		tx: parseFloat(m[1]),
-		ty: parseFloat(m[2]),
-		s: parseFloat(m[3]),
-		theta: parseFloat(m[4]),
+		tx: parseFloat(match[1]),
+		ty: parseFloat(match[2]),
+		scale: parseFloat(match[3]),
+		rotation: parseFloat(match[4]),
 	};
 }
 
@@ -34,7 +24,8 @@ function sampleFrames(duration: number, count: number): number[] {
 
 describe("isMotionEffect", () => {
 	it("accepts every known effect", () => {
-		for (const e of MOTION_EFFECTS) expect(isMotionEffect(e)).toBe(true);
+		for (const effect of MOTION_EFFECTS)
+			expect(isMotionEffect(effect)).toBe(true);
 	});
 
 	it("rejects unknown strings and non-strings", () => {
@@ -87,17 +78,19 @@ describe("motionTransform — 'none'", () => {
 
 describe("motionTransform — determinism and shape", () => {
 	it("is pure: same inputs always produce the same output", () => {
-		for (const e of MOTION_EFFECTS) {
-			expect(motionTransform(e, 30, 90)).toBe(motionTransform(e, 30, 90));
-			expect(motionTransform(e, 30, 90, 9 / 16)).toBe(
-				motionTransform(e, 30, 90, 9 / 16),
+		for (const effect of MOTION_EFFECTS) {
+			expect(motionTransform(effect, 30, 90)).toBe(
+				motionTransform(effect, 30, 90),
+			);
+			expect(motionTransform(effect, 30, 90, 9 / 16)).toBe(
+				motionTransform(effect, 30, 90, 9 / 16),
 			);
 		}
 	});
 
 	it("active effects produce visible motion mid-duration (not identity)", () => {
-		for (const e of ACTIVE) {
-			expect(motionTransform(e, 45, 90)).not.toBe("none");
+		for (const effect of ACTIVE) {
+			expect(motionTransform(effect, 45, 90)).not.toBe("none");
 		}
 	});
 });
@@ -106,13 +99,13 @@ describe("motionTransform — ramped effects move from start to end", () => {
 	it("pushIn zoom grows across the duration", () => {
 		const start = parseTransform(motionTransform("pushIn", 0, 90));
 		const end = parseTransform(motionTransform("pushIn", 90, 90));
-		expect(end.s).toBeGreaterThan(start.s);
+		expect(end.scale).toBeGreaterThan(start.scale);
 	});
 
 	it("pullOut zoom shrinks across the duration", () => {
 		const start = parseTransform(motionTransform("pullOut", 0, 90));
 		const end = parseTransform(motionTransform("pullOut", 90, 90));
-		expect(end.s).toBeLessThan(start.s);
+		expect(end.scale).toBeLessThan(start.scale);
 	});
 
 	it("panRight tx ramps from negative to positive", () => {
@@ -125,8 +118,8 @@ describe("motionTransform — ramped effects move from start to end", () => {
 	it("rotateSlow rotation ramps from 0 to its peak", () => {
 		const start = parseTransform(motionTransform("rotateSlow", 0, 90));
 		const end = parseTransform(motionTransform("rotateSlow", 90, 90));
-		expect(Math.abs(start.theta)).toBeLessThan(0.01);
-		expect(end.theta).toBeGreaterThan(start.theta);
+		expect(Math.abs(start.rotation)).toBeLessThan(0.01);
+		expect(end.rotation).toBeGreaterThan(start.rotation);
 	});
 });
 
@@ -144,16 +137,18 @@ describe("motionTransform — frame boundary handling", () => {
 	});
 
 	it("tolerates zero/negative duration without throwing", () => {
-		for (const e of MOTION_EFFECTS) {
-			expect(() => motionTransform(e, 0, 0)).not.toThrow();
-			expect(() => motionTransform(e, 5, -10)).not.toThrow();
+		for (const effect of MOTION_EFFECTS) {
+			expect(() => motionTransform(effect, 0, 0)).not.toThrow();
+			expect(() => motionTransform(effect, 5, -10)).not.toThrow();
 		}
 	});
 
 	it("clamps aspect ratio below 1 (caller mistake) to 1, so output stays finite", () => {
-		const { s } = parseTransform(motionTransform("rotateSlow", 90, 90, 0.5));
-		expect(Number.isFinite(s)).toBe(true);
-		expect(s).toBeGreaterThan(0);
+		const { scale } = parseTransform(
+			motionTransform("rotateSlow", 90, 90, 0.5),
+		);
+		expect(Number.isFinite(scale)).toBe(true);
+		expect(scale).toBeGreaterThan(0);
 	});
 });
 
@@ -177,13 +172,13 @@ describe("cover invariant — the geometric guarantee", () => {
 		for (const effect of ACTIVE) {
 			it(`'${effect}' covers frame at AR ${label}`, () => {
 				for (const frame of FRAMES) {
-					const { tx, ty, s, theta } = parseTransform(
+					const { tx, ty, scale, rotation } = parseTransform(
 						motionTransform(effect, frame, DURATION, ar),
 					);
-					const min = coverScale(tx, ty, theta, ar);
+					const min = coverScale(tx, ty, rotation, ar);
 					expect(
-						s,
-						`effect=${effect} ar=${ar} frame=${frame} tx=${tx} ty=${ty} θ=${theta} needs s≥${min.toFixed(4)} got s=${s}`,
+						scale,
+						`effect=${effect} ar=${ar} frame=${frame} tx=${tx} ty=${ty} rotation=${rotation} needs scale≥${min.toFixed(4)} got scale=${scale}`,
 					).toBeGreaterThanOrEqual(min);
 				}
 			});
@@ -193,12 +188,12 @@ describe("cover invariant — the geometric guarantee", () => {
 	it("scale grows with aspect ratio for rotation-heavy effects", () => {
 		const square = parseTransform(motionTransform("rotateSlow", 90, 90, 1));
 		const ultra = parseTransform(motionTransform("rotateSlow", 90, 90, 32 / 9));
-		expect(ultra.s).toBeGreaterThan(square.s);
+		expect(ultra.scale).toBeGreaterThan(square.scale);
 	});
 
 	it("scale is independent of aspect ratio for pure-translate effects", () => {
-		const a = parseTransform(motionTransform("panLeft", 30, 90, 1));
-		const b = parseTransform(motionTransform("panLeft", 30, 90, 16 / 9));
-		expect(a.s).toBeCloseTo(b.s, 10);
+		const square = parseTransform(motionTransform("panLeft", 30, 90, 1));
+		const wide = parseTransform(motionTransform("panLeft", 30, 90, 16 / 9));
+		expect(square.scale).toBeCloseTo(wide.scale, 10);
 	});
 });
