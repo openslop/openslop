@@ -11,7 +11,11 @@ import { generateCaptions } from "./generate-captions";
 import { listModels } from "./list-models";
 import { outlineStory } from "./outline-story";
 import { readMedia } from "./read-media";
+import { readGeneration } from "./read-generation";
 import { readScript } from "./read-script";
+import { readScriptSettings } from "./read-script-settings";
+import { readTitle } from "./read-title";
+import { readVideoSettings } from "./read-video-settings";
 import { viewMedia } from "./view-media";
 import { reviewScript } from "./review-script";
 import { setDefaultModel } from "./set-default-model";
@@ -25,6 +29,10 @@ import { writeScript } from "./write-script";
 /** Registration is the contract: one entry is a tool's whole definition. */
 const TOOLS = {
 	read_script: readScript,
+	read_generation: readGeneration,
+	read_title: readTitle,
+	read_script_settings: readScriptSettings,
+	read_video_settings: readVideoSettings,
 	edit_script: editScript,
 	write_script: writeScript,
 	adapt_script: adaptScript,
@@ -95,20 +103,15 @@ export function presentToolCall(
 	return { icon, label: label(input ?? {}) };
 }
 
-type ToolFlag = "snapshot" | "draftsScript";
-
-const namesFlagged = (flag: ToolFlag): ReadonlySet<string> =>
-	new Set(
-		Object.entries(TOOLS)
-			.filter(([, def]) => def[flag])
-			.map(([name]) => name),
-	);
-
-/** Output that is only true until the next edit, so only its own turn keeps it. */
-export const SNAPSHOT_TOOLS = namesFlagged("snapshot");
+export const retentionOf = (toolName: string) =>
+	isToolName(toolName) ? TOOLS[toolName].retention : undefined;
 
 /** Calls that are part of writing the script, so what is rendered from the canvas is mid-change. */
-export const DRAFTING_TOOLS = namesFlagged("draftsScript");
+export const DRAFTING_TOOLS: ReadonlySet<string> = new Set(
+	Object.entries(TOOLS)
+		.filter(([, def]) => def.draftsScript)
+		.map(([name]) => name),
+);
 
 /** A failure is reported, not thrown: the model reads it as the next observation. */
 export type ToolOutcome =

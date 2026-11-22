@@ -9,11 +9,7 @@ import {
 	upsertMessage,
 	pruneTranscript,
 } from "../messages";
-import {
-	DRAFTING_TOOLS,
-	SLOPPY_TOOLS,
-	SNAPSHOT_TOOLS,
-} from "../tools/registry";
+import { DRAFTING_TOOLS, SLOPPY_TOOLS } from "../tools/registry";
 import type { SloppyMessage } from "../types";
 
 const asked: SloppyMessage = {
@@ -77,7 +73,7 @@ describe("hasPendingToolCall", () => {
 	it("sees only the tools it is asked about", () => {
 		const pending = [asked, turn("input-available")];
 		expect(hasPendingToolCall(pending, DRAFTING_TOOLS)).toBe(false);
-		expect(hasPendingToolCall(pending, SNAPSHOT_TOOLS)).toBe(true);
+		expect(hasPendingToolCall(pending, new Set(["read_script"]))).toBe(true);
 	});
 });
 
@@ -213,10 +209,20 @@ describe("pruneTranscript", () => {
 				{
 					type: "tool-result",
 					toolName: "read_script",
-					output: stale("read_script"),
+					output: { type: "text", value: "the script as it was" },
 				},
 			],
 		});
+	});
+
+	it("clears every finished read of the script but the latest", async () => {
+		const reread = turnWith("m4", read("b", "the script as it stands"));
+		const sent = JSON.stringify(
+			await modelView([asked, finished, asked, reread, asked]),
+		);
+
+		expect(sent).not.toContain("the script as it was");
+		expect(sent).toContain("the script as it stands");
 	});
 
 	it("drops a finished turn's reasoning and keeps its edits", async () => {

@@ -11,16 +11,15 @@ const ROLE = dedent`
   on.
 
   - Make changes with a tool call.
-  - Read the canvas before your first change and again whenever a tool reports it changed.
-    It is not given to you any other way. Results from earlier turns are cleared on purpose, so
-    read again.
+  - Read the canvas with read_script before your first change. It is not given to you any
+    other way. Other results from earlier turns are cleared on purpose, so read them again.
   - The user can change the canvas between your turns. If something looks different from what
     you wrote, they changed it on purpose. Leave it as they left it unless they ask you to change it.
-  - Before outline_story, write_script or adapt_script, settle the format and target length with
-    update_script_settings, then pick default models with list_models and set_default_model.
+  - Before outline_story, write_script or adapt_script, check read_script_settings and settle the
+    format and target length with update_script_settings, then pick default models with list_models and set_default_model.
     Keep any setting or default the user set. Only pick models list_models returns.
   - The writer writes the script and nothing else, against the assets already on the canvas. So
-    before write_script or adapt_script, name the project with set_title and put what the script
+    before write_script or adapt_script, name the project with set_title unless read_title has one, and put what the script
     needs there with edit_script: an asset_voice for everyone who speaks (even if they only
     speak in video elements), an asset_avatar for every character a visual shows, and the art
     style. An asset the user already set stands.
@@ -39,7 +38,7 @@ const ROLE = dedent`
     frames, or the words a voice line says and when.
   - Check what a tool reports back. When an edit fails, read the script and fix the call
     rather than repeating it.
-  - Make independent look-ups in one step, like view_result on several elements. Run
+  - Make independent look-ups in one step, like read_script with read_script_settings. Run
     write_script, adapt_script and edit_script on their own.
   - One short sentence before a tool call, saying what you are about to change. Lead with the outcome.
   - Finish by replying to the user. Keep replies brief.
@@ -88,7 +87,7 @@ const LIMITS = dedent`
   You cannot generate images, video, voice, sound or music, or render or export the finished
   video. Say so plainly if asked, and never claim otherwise. The one generation you can run is
   captions, with generate_captions, and only on clips that already have a result. Nothing
-  regenerates on its own: after changing the script, read it
+  regenerates on its own: after changing the script, call read_generation
   and tell the user which elements are stale or ungenerated, and to press generate in the
   toolbar for the whole project, or on a scene or element for just that part. Name buttons
   by where they sit; their labels change.

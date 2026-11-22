@@ -46,11 +46,8 @@ import { executeToolCall } from "./registry";
 
 export function useAgentTools() {
 	const editor = useSlateStatic();
-	// Earlier turns' reads are pruned from the transcript, so a read only counts within its turn.
-	const lastRead = useRef<{
-		turn?: AbortSignal;
-		canvas?: typeof editor.children;
-	}>({});
+	// Slate replaces the children on every change, so a reference check spots any edit.
+	const lastRead = useRef<typeof editor.children>(undefined);
 	const store = useProjectStoreHandle();
 	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
@@ -60,6 +57,10 @@ export function useAgentTools() {
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
+			const markScriptRead = () => {
+				lastRead.current = editor.children;
+			};
+			const isScriptReadCurrent = () => lastRead.current === editor.children;
 			const llm = () => createConnector("llm", editor.defaultModels().llm);
 			const draftScript = (source: ScriptSource) =>
 				streamScript(
@@ -71,12 +72,8 @@ export function useAgentTools() {
 				);
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
-				markScriptRead: () => {
-					lastRead.current = { turn: signal, canvas: editor.children };
-				},
-				isScriptReadCurrent: () =>
-					lastRead.current.turn === signal &&
-					lastRead.current.canvas === editor.children,
+				markScriptRead,
+				isScriptReadCurrent,
 				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				estimateSpeechLengths: () => estimateSpeechLengths(editor.children),
@@ -122,7 +119,12 @@ export function useAgentTools() {
 					project: store.getState().models,
 					account: account.getState().models,
 				}),
-				editScript: (ops) => applyRefineOps(editor, ops),
+				editScript: (ops) => {
+					const current = isScriptReadCurrent();
+					const report = applyRefineOps(editor, ops);
+					if (current) markScriptRead();
+					return report;
+				},
 				writeScript: (brief) => draftScript({ kind: "brief", brief }),
 				adaptScript: (script, notes) =>
 					draftScript({ kind: "adapt", script, notes }),

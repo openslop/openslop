@@ -4,9 +4,9 @@ import {
 	safeValidateUIMessages,
 	validateUIMessages,
 	type ModelMessage,
-	type ToolContent,
+	type ToolResultPart,
 } from "ai";
-import { SLOPPY_TOOLS, SNAPSHOT_TOOLS } from "./tools/registry";
+import { retentionOf, SLOPPY_TOOLS } from "./tools/registry";
 import { sloppyMetadataSchema, type SloppyMessage } from "./types";
 
 export function upsertMessage(
@@ -56,38 +56,55 @@ export function settleUnansweredCalls(
 	}));
 }
 
-const staleSnapshot = (toolName: string) =>
+const clearedOutput = (toolName: string) =>
 	`Cleared from history on purpose. Call ${toolName} again for the current result.`;
 
-const withStaleSnapshot = (part: ToolContent[number]) =>
-	part.type === "tool-result" && SNAPSHOT_TOOLS.has(part.toolName)
-		? {
-				...part,
-				output: { type: "text" as const, value: staleSnapshot(part.toolName) },
-			}
-		: part;
+const isStale = (part: ToolResultPart, latest: ToolResultPart | undefined) => {
+	const retention = retentionOf(part.toolName);
+	return retention === "turn" || (retention === "latest" && part !== latest);
+};
 
-const pruneFinished = (message: ModelMessage): ModelMessage => {
+const pruneFinished = (
+	message: ModelMessage,
+	latest: ToolResultPart | undefined,
+): ModelMessage => {
 	if (message.role === "assistant" && typeof message.content !== "string")
 		return {
 			...message,
 			content: message.content.filter((part) => part.type !== "reasoning"),
 		};
 	if (message.role === "tool")
-		return { ...message, content: message.content.map(withStaleSnapshot) };
+		return {
+			...message,
+			content: message.content.map((part) =>
+				part.type === "tool-result" && isStale(part, latest)
+					? {
+							...part,
+							output: { type: "text", value: clearedOutput(part.toolName) },
+						}
+					: part,
+			),
+		};
 	return message;
 };
 
 /**
- * Before the last user message is history: snapshot calls stay but their output
- * goes, and so does reasoning, the bulk of a finished turn the next one doesn't need.
+ * Before the last user message is history, which drops reasoning and stale tool output:
+ * "turn" output always, "latest" output unless it is the newest of its tool.
  */
 export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
 	const currentTurnStart = messages.findLastIndex(
 		(message) => message.role === "user",
 	);
+	const latest = messages
+		.slice(0, currentTurnStart)
+		.flatMap((message) => (message.role === "tool" ? message.content : []))
+		.findLast(
+			(part): part is ToolResultPart =>
+				part.type === "tool-result" && retentionOf(part.toolName) === "latest",
+		);
 	return messages.map((message, index) =>
-		index < currentTurnStart ? pruneFinished(message) : message,
+		index < currentTurnStart ? pruneFinished(message, latest) : message,
 	);
 }
 

@@ -85,16 +85,16 @@ export const editScript = defineTool({
 	execute: async ({ ops }, ctx) => {
 		if (!ctx.isScriptReadCurrent())
 			throw new Error(
-				"The canvas changed since you last read it, or you have not read it this turn. Call read_script before editing.",
+				"The canvas changed since you last read it, or you have not read it. Call read_script before editing.",
 			);
 		const { applied, failures } = ctx.editScript(ops);
 		if (failures.length === 0) {
-			return `Applied ${applied} ${plural(applied, "operation")}. The script has changed; read it again before editing further.`;
+			return `Applied ${applied} ${plural(applied, "operation")}.`;
 		}
 		return [
 			`Applied ${applied} of ${ops.length} operations.`,
 			`Failed: ${failures.join("; ")}.`,
-			"Read the script again before retrying; the ids you used may be stale.",
+			"Read the script before retrying.",
 		].join(" ");
 	},
 	draftsScript: true,

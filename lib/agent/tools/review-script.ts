@@ -12,8 +12,7 @@ export const reviewScript = defineTool({
 	  pacing and style.
 
 	  Findings come back one bullet each, naming the element's id, the rule it breaks and the
-	  smallest change that fixes it. Fix them with edit_script, read the script, then review
-	  again. Stop when it replies ${NO_FINDINGS}, or when three reviews have run.
+	  smallest change that fixes it. Fix them with edit_script, then review again. Stop when it replies ${NO_FINDINGS}, or when three reviews have run.
 
 	  Skip a finding if fixing it would undo something the user asked for or changed themselves,
 	  and tell them which one you skipped and why.
@@ -33,6 +32,6 @@ export const reviewScript = defineTool({
 			systemPrompt: scriptRules(ctx.readAssets(), settings),
 		});
 	},
-	snapshot: true,
+	retention: "turn",
 	draftsScript: true,
 });

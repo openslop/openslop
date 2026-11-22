@@ -51,8 +51,7 @@ function Probe() {
 }
 
 const turn = new AbortController().signal;
-const read = (signal = turn) =>
-	runTool({ toolName: "read_script", input: {} }, signal);
+const read = () => runTool({ toolName: "read_script", input: {} }, turn);
 const edit = (text: string) =>
 	runTool(
 		{
@@ -84,7 +83,7 @@ afterEach(() => {
 });
 
 describe("edit_script read guard", () => {
-	it("edits the canvas as last read this turn", async () => {
+	it("edits the canvas as last read", async () => {
 		await read();
 
 		expect((await edit("Revised")).ok).toBe(true);
@@ -109,19 +108,22 @@ describe("edit_script read guard", () => {
 		expect(text()).toBe("Hand edited. The cat is on the mat.");
 	});
 
-	it("needs a read after each of its own edits", async () => {
+	it("keeps its read current through its own edits", async () => {
 		await read();
 		await edit("First");
 
-		expect((await edit("Second")).ok).toBe(false);
-		await read();
 		expect((await edit("Second")).ok).toBe(true);
+		expect(text()).toBe("Second");
 	});
 
-	it("does not count a read from an earlier turn", async () => {
-		await read(new AbortController().signal);
+	it("refuses an edit after the user changes what it edited", async () => {
+		await read();
+		await edit("First");
+		Transforms.insertText(editor, "Hand edited. ", {
+			at: { path: [0, 1, 0], offset: 0 },
+		});
 
-		expect((await edit("Stale")).ok).toBe(false);
+		expect((await edit("Overwritten")).ok).toBe(false);
 	});
 
 	it("does not count review_script reading the script for itself", async () => {

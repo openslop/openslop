@@ -18,8 +18,8 @@ export function defineTool<Input, Output>(def: {
 	label: string | ((input: Partial<Input>) => string);
 	toModelOutput?: Tool<Input, Output>["toModelOutput"];
 	execute: (input: Input, ctx: AgentToolContext) => Promise<Output>;
-	/** Output that is only true until the next edit, so only its own turn keeps it. */
-	snapshot?: true;
+	/** Output that goes stale: kept for its own turn, or only while it is the latest call of its tool. */
+	retention?: "turn" | "latest";
 	/** The call is part of writing the script, so what is rendered from the canvas is mid-change. */
 	draftsScript?: true;
 }) {
@@ -27,7 +27,7 @@ export function defineTool<Input, Output>(def: {
 		input,
 		output,
 		execute,
-		snapshot,
+		retention,
 		draftsScript,
 		icon,
 		label,
@@ -44,7 +44,7 @@ export function defineTool<Input, Output>(def: {
 		icon,
 		label: typeof label === "function" ? label : () => label,
 	};
-	return { input, execute, spec, snapshot, draftsScript, present };
+	return { input, execute, spec, retention, draftsScript, present };
 }
 
 /** A tool-result image, handed to the model by URL for the provider to fetch. */
