@@ -11,6 +11,7 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 function Harness() {
 	const { handleProps, resizing } = useResize({
 		axis: "vertical",
+		handleEdge: "end",
 		defaultSize: 200,
 		minSize: 100,
 		maxViewportFraction: 0.5,
