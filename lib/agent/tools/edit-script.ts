@@ -10,6 +10,7 @@ import { MUSIC_PROMPT_FORMAT } from "@/lib/script/prompt/music-prompt";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
+import compact from "lodash/compact";
 import { plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
@@ -87,15 +88,15 @@ export const editScript = defineTool({
 			throw new Error(
 				"The canvas changed since you last read it, or you have not read it. Call read_script before editing.",
 			);
-		const { applied, failures } = ctx.editScript(ops);
-		if (failures.length === 0) {
-			return `Applied ${applied} ${plural(applied, "operation")}.`;
-		}
-		return [
-			`Applied ${applied} of ${ops.length} operations.`,
-			`Failed: ${failures.join("; ")}.`,
-			"Read the script before retrying.",
-		].join(" ");
+		const { applied, failures, inserted } = ctx.editScript(ops);
+		return compact([
+			failures.length === 0
+				? `Applied ${applied} ${plural(applied, "operation")}.`
+				: `Applied ${applied} of ${ops.length} operations.`,
+			inserted.length > 0 && `Inserted ${inserted.join(", ")}, in order.`,
+			failures.length > 0 &&
+				`Failed: ${failures.join("; ")}. Read the script before retrying.`,
+		]).join(" ");
 	},
 	draftsScript: true,
 });

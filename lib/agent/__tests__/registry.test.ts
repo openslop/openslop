@@ -45,7 +45,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readAssets: () => [],
 	readProject: () => project(),
 	modelDefaults: () => ({}),
-	editScript: () => ({ applied: 0, failures: [] }),
+	editScript: () => ({ applied: 0, failures: [], inserted: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
 	setTitle: () => {},
@@ -139,7 +139,11 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "edit_script", input: { ops: [{ op: "remove", id: "n1" }] } },
 			context({
-				editScript: () => ({ applied: 0, failures: ["no element n1"] }),
+				editScript: () => ({
+					applied: 0,
+					failures: ["no element n1"],
+					inserted: [],
+				}),
 			}),
 		);
 
@@ -474,7 +478,7 @@ describe("executeToolCall", () => {
 				],
 				editScript: (applied) => {
 					ops.push(applied);
-					return { applied: applied.length, failures: [] };
+					return { applied: applied.length, failures: [], inserted: [] };
 				},
 			}),
 		);

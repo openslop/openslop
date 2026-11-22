@@ -3,6 +3,7 @@ import type { ElementResult, ResultView } from "../element-result";
 import type { ElementState } from "../element-state";
 import type { SpeechEstimate } from "@/lib/canvas/spoken-words";
 import type { VisualSpan } from "@/lib/render/visual-spans";
+import type { RefineReport } from "@/lib/script/refine/apply-ops";
 import type { RefineOp } from "@/lib/script/refine/types";
 import type { ProjectContext, ProjectData } from "@/lib/project/store";
 import type { MediaItem } from "@/lib/project/media";
@@ -40,7 +41,7 @@ export type AgentToolContext = Pick<
 	readAssets: () => AssetElement[];
 	readProject: () => ProjectData;
 	modelDefaults: () => ModelDefaults;
-	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
+	editScript: (ops: RefineOp[]) => RefineReport;
 	writeScript: (brief: string) => Promise<void>;
 	adaptScript: (script: string, notes?: string) => Promise<void>;
 	isConnected: (provider: Provider) => boolean;

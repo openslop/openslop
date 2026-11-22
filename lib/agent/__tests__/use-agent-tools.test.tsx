@@ -90,6 +90,44 @@ describe("edit_script read guard", () => {
 		expect(text()).toBe("Revised");
 	});
 
+	it("names what it inserts, so it can edit that next without reading", async () => {
+		await read();
+		const inserted = await runTool(
+			{
+				toolName: "edit_script",
+				input: {
+					ops: [
+						{
+							op: "insert",
+							anchor_id: "line",
+							elements: [{ type: "speech", text: "A dog barks." }],
+						},
+					],
+				},
+			},
+			turn,
+		);
+		const id = String(inserted.ok && inserted.output).match(
+			/Inserted (\S+?),/,
+		)?.[1];
+
+		expect(id).toBeDefined();
+		expect(
+			(
+				await runTool(
+					{
+						toolName: "edit_script",
+						input: { ops: [{ op: "set", id, text: "A dog howls." }] },
+					},
+					turn,
+				)
+			).ok,
+		).toBe(true);
+		expect(getElementBodyText(requireElement(editor, String(id))[0])).toBe(
+			"A dog howls.",
+		);
+	});
+
 	it("refuses an edit before any read", async () => {
 		expect(await edit("Unseen")).toMatchObject({
 			ok: false,
