@@ -1,3 +1,4 @@
+import uniqWith from "lodash/uniqWith";
 import { nameDef, OWN_MODEL_DEFS } from "@/lib/connectors/attributes/common";
 import { referenceImagesDef } from "@/lib/connectors/attributes/reference-images";
 import {
@@ -5,7 +6,7 @@ import {
 	type AttributeDef,
 } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
-import { listModels, resolveModel } from "@/lib/connectors/models";
+import { listModels, resolveModel, sameModel } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { VOICE_ATTRIBUTES } from "@/lib/connectors/voice/attributes";
 import type {
@@ -22,6 +23,7 @@ import {
 	type ProjectAssetType,
 	type GeneratedElement,
 	type CanvasElement,
+	type GeneratedType,
 } from "./types";
 
 type ElementConnector = {
@@ -100,3 +102,21 @@ export const elementSchema = (element: CanvasElement): AttributeSchema =>
 
 export const elementOffers = (element: CanvasElement, key: string): boolean =>
 	elementSchema(element).keys.includes(key);
+
+export type ElementModel = { type: GeneratedType; model: ModelRef };
+
+export type ModelAttributes = ElementModel & { defs: AttributeDef[] };
+
+export const elementModel = (element: GeneratedElement): ElementModel => ({
+	type: element.type,
+	model: resolveModel(connectorOf(element.type), flatAttributes(element)),
+});
+
+export const modelAttributes = (models: ElementModel[]): ModelAttributes[] =>
+	uniqWith(
+		models,
+		(a, b) => a.type === b.type && sameModel(a.model, b.model),
+	).flatMap(({ type, model }) => {
+		const defs = resolveAttributeSchema(connectorOf(type), model).modelDefs;
+		return defs.length > 0 ? [{ type, model, defs }] : [];
+	});

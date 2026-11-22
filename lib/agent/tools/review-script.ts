@@ -1,6 +1,5 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
-import { resolveDefaultModels } from "@/lib/connectors/models";
 import { scriptRules } from "@/lib/script/prompt/build";
 import { NO_FINDINGS, reviewPrompt } from "@/lib/script/prompt/review";
 import { Search } from "@/components/ui/icon";
@@ -34,7 +33,7 @@ export const reviewScript = defineTool({
 			systemPrompt: scriptRules(
 				ctx.readAssets(),
 				settings,
-				resolveDefaultModels(ctx.modelDefaults()),
+				ctx.readModelAttributes(),
 			),
 		});
 	},

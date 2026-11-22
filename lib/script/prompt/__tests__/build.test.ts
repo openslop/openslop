@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { durationOptions } from "@/lib/canvas/types";
+import { modelAttributes } from "@/lib/canvas/element-connector";
 import type { ModelRef } from "@/lib/connectors/types";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { ADAPT_SCRIPT_RULES } from "../adapt";
@@ -18,17 +19,15 @@ const lengthOf = (length: "1-3m" | "auto") => settingsOf({ length });
 const template = TEMPLATES[0];
 if (!template) throw new Error("expected a template fixture");
 
+const SEEDANCE: ModelRef = { provider: "runware", model: "Seedance 2.5" };
+const KLING: ModelRef = { provider: "runware", model: "Kling 3 Omni" };
+
 describe("buildScriptPrompt", () => {
 	it("gives a brief the length budget and the format spec, and passes it through", () => {
-		const { system, prompt } = buildScriptPrompt(
-			[],
-			lengthOf("1-3m"),
-			{},
-			{
-				kind: "brief",
-				brief: "a rabbit finds a lantern",
-			},
-		);
+		const { system, prompt } = buildScriptPrompt([], lengthOf("1-3m"), [], {
+			kind: "brief",
+			brief: "a rabbit finds a lantern",
+		});
 
 		const { minWords } = VIDEO_LENGTH_SPECS["1-3m"];
 		expect(system).toContain(`Write ${minWords} to`);
@@ -37,15 +36,10 @@ describe("buildScriptPrompt", () => {
 	});
 
 	it("orders the length budget ahead of the format spec", () => {
-		const { system } = buildScriptPrompt(
-			[],
-			lengthOf("1-3m"),
-			{},
-			{
-				kind: "brief",
-				brief: "a brief",
-			},
-		);
+		const { system } = buildScriptPrompt([], lengthOf("1-3m"), [], {
+			kind: "brief",
+			brief: "a brief",
+		});
 
 		expect(system.indexOf("# Length")).toBeLessThan(
 			system.indexOf("The story script must be written"),
@@ -57,23 +51,18 @@ describe("buildScriptPrompt", () => {
 		const brief = { kind: "brief", brief: "a brief" } as const;
 
 		expect(
-			buildScriptPrompt([], formatOf("faceless"), {}, brief).system,
+			buildScriptPrompt([], formatOf("faceless"), [], brief).system,
 		).toContain("The format is Faceless");
 		expect(
-			buildScriptPrompt([], formatOf("auto"), {}, brief).system,
+			buildScriptPrompt([], formatOf("auto"), [], brief).system,
 		).not.toContain("The format is");
 	});
 
 	it("leaves a brief on auto with no budget to write to", () => {
-		const { system } = buildScriptPrompt(
-			[],
-			lengthOf("auto"),
-			{},
-			{
-				kind: "brief",
-				brief: "a brief",
-			},
-		);
+		const { system } = buildScriptPrompt([], lengthOf("auto"), [], {
+			kind: "brief",
+			brief: "a brief",
+		});
 
 		expect(system).not.toContain("# Length");
 	});
@@ -83,7 +72,7 @@ describe("buildScriptPrompt", () => {
 		const { system, prompt } = buildScriptPrompt(
 			[],
 			settingsOf({ template: template.id, length: "1-3m" }),
-			{},
+			[],
 			{ kind: "adapt", script, notes: "warm and slow, lots of wide shots" },
 		);
 
@@ -99,7 +88,7 @@ describe("buildScriptPrompt", () => {
 		const { system, prompt } = buildScriptPrompt(
 			[],
 			settingsOf({ template: template.id }),
-			{},
+			[],
 			{ kind: "brief", brief: "a barista" },
 		);
 
@@ -115,10 +104,10 @@ describe("buildScriptPrompt", () => {
 			buildScriptPrompt(
 				[],
 				settingsOf({ template: "left-the-catalog" }),
-				{},
+				[],
 				source,
 			),
-		).toEqual(buildScriptPrompt([], settingsOf(), {}, source));
+		).toEqual(buildScriptPrompt([], settingsOf(), [], source));
 	});
 
 	it("carries the art style and every character on the canvas, voiced or drawn", () => {
@@ -132,7 +121,7 @@ describe("buildScriptPrompt", () => {
 				asset("asset_avatar", { name: "Lumi", text: "a small grey rabbit" }),
 			],
 			settingsOf(),
-			{},
+			[],
 			{ kind: "brief", brief: "a brief" },
 		);
 
@@ -178,18 +167,13 @@ describe("buildScriptPrompt", () => {
 
 	it("hands a review the same rules the writer was given, minus the budget it cannot judge", () => {
 		const styled = [asset("asset_style", { text: "muted watercolor" })];
-		const rules = scriptRules(styled, settingsOf(), {});
+		const rules = scriptRules(styled, settingsOf(), []);
 
 		expect(
-			buildScriptPrompt(
-				styled,
-				settingsOf(),
-				{},
-				{
-					kind: "brief",
-					brief: "a brief",
-				},
-			).system,
+			buildScriptPrompt(styled, settingsOf(), [], {
+				kind: "brief",
+				brief: "a brief",
+			}).system,
 		).toContain(rules);
 		expect(rules).toContain("The story script must be written");
 		expect(rules).toContain("muted watercolor");
@@ -200,24 +184,38 @@ describe("buildScriptPrompt", () => {
 		const brief = { kind: "brief", brief: "a brief" } as const;
 		const adapt = { kind: "adapt", script: "Once upon a time." } as const;
 
-		expect(buildScriptPrompt([], settingsOf(), {}, brief).system).toContain(
+		expect(buildScriptPrompt([], settingsOf(), [], brief).system).toContain(
 			"Reply with the raw XML only",
 		);
-		expect(buildScriptPrompt([], settingsOf(), {}, adapt).system).toContain(
+		expect(buildScriptPrompt([], settingsOf(), [], adapt).system).toContain(
 			"Reply with the raw XML only",
 		);
-		expect(scriptRules([], settingsOf(), {})).not.toContain("raw XML");
+		expect(scriptRules([], settingsOf(), [])).not.toContain("raw XML");
 	});
 
-	it("allows video durations up to the project's video model's longest", () => {
-		const rulesFor = (video: ModelRef) =>
-			scriptRules([], settingsOf(), { video });
-
-		expect(rulesFor({ provider: "runware", model: "Seedance 2.5" })).toContain(
-			`Allowed values: ${durationOptions(30).join(", ")}.`,
+	it("lists each given model's own attribute values", () => {
+		const rules = scriptRules(
+			[],
+			settingsOf(),
+			modelAttributes([
+				{ type: "video", model: SEEDANCE },
+				{ type: "video", model: KLING },
+			]),
 		);
-		expect(rulesFor({ provider: "runware", model: "Kling 3 Omni" })).toContain(
-			`Allowed values: ${durationOptions(15).join(", ")}.`,
+
+		const lineOf = (model: string) =>
+			rules.split("\n").find((line) => line.includes(`model="${model}"`));
+		expect(lineOf("Seedance 2.5")).toContain(
+			`duration: ${durationOptions(30).join(", ")}.`,
+		);
+		expect(lineOf("Kling 3 Omni")).toContain(
+			`duration: ${durationOptions(15).join(", ")}.`,
+		);
+	});
+
+	it("leaves the model attributes out when no model has its own", () => {
+		expect(scriptRules([], settingsOf(), [])).not.toContain(
+			"## Model attributes",
 		);
 	});
 
@@ -226,7 +224,7 @@ describe("buildScriptPrompt", () => {
 		const { system, prompt } = buildScriptPrompt(
 			[],
 			settingsOf({ format: "cinematic" }),
-			{},
+			[],
 			{ kind: "adapt", script },
 		);
 
@@ -242,7 +240,7 @@ describe("buildScriptPrompt", () => {
 		const { system, prompt } = buildScriptPrompt(
 			[],
 			settingsOf({ format: "auto" }),
-			{},
+			[],
 			{ kind: "adapt", script, notes },
 		);
 

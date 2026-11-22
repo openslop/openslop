@@ -41,6 +41,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	elementStates: () => [],
 	isScriptEmpty: () => false,
 	readAssets: () => [],
+	readModelAttributes: () => [],
 	readProject: () => project(),
 	modelDefaults: () => ({}),
 	editScript: () => ({ applied: 0, failures: [] }),

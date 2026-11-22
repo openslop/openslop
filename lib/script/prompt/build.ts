@@ -1,15 +1,12 @@
 import compact from "lodash/compact";
 import type { AssetElement } from "@/lib/canvas/types";
-import {
-	modelEntry,
-	resolveModel,
-	type ConnectorModels,
-} from "@/lib/connectors/models";
+import type { ModelAttributes } from "@/lib/canvas/element-connector";
 import type { ScriptSettings } from "@/lib/project/types";
 import { getTemplateById } from "@/lib/templates/templates";
 import { ADAPT_SCRIPT_RULES, notesSection } from "./adapt";
 import { INPUT_LANGUAGE, spokenLanguage } from "./language";
 import { OSML_REPLY_FORMAT, osmlSpec } from "./osml";
+import { modelAttributesSection } from "./model-attributes";
 import { formatSection, lengthSection, projectPreamble } from "./project";
 import { templatePrompt } from "./template";
 
@@ -66,19 +63,19 @@ function promptParts(
 export function scriptRules(
 	assets: AssetElement[],
 	settings: ScriptSettings,
-	models: ConnectorModels,
+	models: ModelAttributes[],
 ): string {
-	const video = modelEntry("video", resolveModel("video", models.video));
 	return compact([
 		projectPreamble(assets),
-		osmlSpec(spokenLanguage(settings, INPUT_LANGUAGE), video.maxDurationSec),
+		osmlSpec(spokenLanguage(settings, INPUT_LANGUAGE)),
+		modelAttributesSection(models),
 	]).join("\n\n");
 }
 
 export function buildScriptPrompt(
 	assets: AssetElement[],
 	settings: ScriptSettings,
-	models: ConnectorModels,
+	models: ModelAttributes[],
 	source: ScriptSource,
 ): ScriptPrompt {
 	const { guidance, instruction } = promptParts(source, settings);

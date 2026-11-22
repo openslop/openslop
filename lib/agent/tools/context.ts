@@ -1,4 +1,5 @@
 import type { AssetElement } from "@/lib/canvas/types";
+import type { ModelAttributes } from "@/lib/canvas/element-connector";
 import type { ElementResult, ResultView } from "../element-result";
 import type { ElementState } from "../element-state";
 import type { SpeechEstimate } from "@/lib/canvas/spoken-words";
@@ -36,6 +37,7 @@ export type AgentToolContext = Pick<
 		options?: { maxTokens?: number; systemPrompt?: string },
 	) => Promise<string>;
 	readAssets: () => AssetElement[];
+	readModelAttributes: () => ModelAttributes[];
 	readProject: () => ProjectData;
 	modelDefaults: () => ModelDefaults;
 	editScript: (ops: RefineOp[]) => { applied: number; failures: string[] };
