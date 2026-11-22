@@ -56,6 +56,25 @@ describe("useAddDraftTakesToMedia", () => {
 		]);
 	});
 
+	it("records costUsd on the media item when the take cost money", () => {
+		const draft = asset("asset_media_image", { text: "A wizard" });
+
+		queue.commitResult(buildNode(draft, buildCtx([draft])), {
+			imageUrl: "https://blob/wizard.png",
+			durationSec: 0,
+			costUsd: 0.05,
+		});
+
+		expect(added).toEqual([
+			{
+				kind: "image",
+				name: "image",
+				url: "https://blob/wizard.png",
+				costUsd: 0.05,
+			},
+		]);
+	});
+
 	it("leaves results of anything but a draft out of the media", () => {
 		const avatar = asset("asset_avatar", { name: "Mia", text: "A girl" });
 

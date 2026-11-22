@@ -19,7 +19,15 @@ export function useAddDraftTakesToMedia(): void {
 				const kind = CONTENT_TYPES[name].outputKind;
 				const url = getPrimaryUrl(result, kind);
 				if (!url) throw new Error(`The ${name} came back without its ${kind}`);
-				addMedia([{ kind, name, url, captions: result.textTimestamps }]);
+				addMedia([
+					{
+						kind,
+						name,
+						url,
+						captions: result.textTimestamps,
+						costUsd: result.costUsd,
+					},
+				]);
 			}),
 		[queue, addMedia],
 	);

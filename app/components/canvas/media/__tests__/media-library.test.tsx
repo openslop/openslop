@@ -119,4 +119,36 @@ describe("MediaLibrary", () => {
 
 		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});
+
+	it("shows the cost chip on a generated take and no cost chip on uploaded media", async () => {
+		open();
+		await act(async () =>
+			store.getState().addMedia([
+				{
+					kind: "image",
+					name: "generated.png",
+					url: "https://a/gen",
+					costUsd: 0.12,
+				},
+				{
+					kind: "image",
+					name: "uploaded.png",
+					url: "https://a/up",
+				},
+			]),
+		);
+
+		expect(document.body.textContent).toContain("$0.12");
+
+		const badges = Array.from(
+			document.body.querySelectorAll('[data-slot="badge"]'),
+		);
+		const costBadge = badges.find((b) => b.textContent?.includes("$0.12"));
+		expect(costBadge).toBeDefined();
+
+		const uploadedTile = Array.from(
+			document.body.querySelectorAll('[data-slot="thumbnail"]'),
+		).find((tile) => tile.textContent?.includes("uploaded"));
+		expect(uploadedTile?.textContent).not.toContain("$");
+	});
 });
