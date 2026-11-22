@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { IconComponent } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
+import type { Retention } from "./define-tool";
 import { adaptScript } from "./adapt-script";
 import { estimateSpeechLengths } from "./estimate-speech-lengths";
 import { estimateTotalLength } from "./estimate-total-length";
@@ -103,8 +104,8 @@ export function presentToolCall(
 	return { icon, label: label(input ?? {}) };
 }
 
-export const retentionOf = (toolName: string) =>
-	isToolName(toolName) ? TOOLS[toolName].retention : undefined;
+export const retentionOf = (toolName: string): Retention =>
+	isToolName(toolName) ? TOOLS[toolName].retention : "always";
 
 /** Calls that are part of writing the script, so what is rendered from the canvas is mid-change. */
 export const DRAFTING_TOOLS: ReadonlySet<string> = new Set(

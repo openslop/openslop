@@ -9,6 +9,8 @@ import type { AgentToolContext } from "./context";
  * the Slate canvas in the browser: the SDK surfaces the call, the editor
  * answers it, and the result comes back as the next request.
  */
+export type Retention = "always" | "turn" | "latest";
+
 export function defineTool<Input, Output>(def: {
 	description: string;
 	input: z.ZodType<Input>;
@@ -18,8 +20,8 @@ export function defineTool<Input, Output>(def: {
 	label: string | ((input: Partial<Input>) => string);
 	toModelOutput?: Tool<Input, Output>["toModelOutput"];
 	execute: (input: Input, ctx: AgentToolContext) => Promise<Output>;
-	/** Output that goes stale: kept for its own turn, or only while it is the latest call of its tool. */
-	retention?: "turn" | "latest";
+	/** How long history keeps the output: always, its own turn, or while it is the latest call of its tool. */
+	retention?: Retention;
 	/** The call is part of writing the script, so what is rendered from the canvas is mid-change. */
 	draftsScript?: true;
 }) {
@@ -27,7 +29,7 @@ export function defineTool<Input, Output>(def: {
 		input,
 		output,
 		execute,
-		retention,
+		retention = "always",
 		draftsScript,
 		icon,
 		label,
