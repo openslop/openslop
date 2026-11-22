@@ -4,6 +4,7 @@ import {
 	safeValidateUIMessages,
 	validateUIMessages,
 	type ModelMessage,
+	type ToolContent,
 	type ToolResultPart,
 } from "ai";
 import { retentionOf, SLOPPY_TOOLS } from "./tools/registry";
@@ -59,14 +60,29 @@ export function settleUnansweredCalls(
 const clearedOutput = (toolName: string) =>
 	`Cleared from history on purpose. Call ${toolName} again for the current result.`;
 
-const isStale = (part: ToolResultPart, latest: ToolResultPart | undefined) => {
+type LatestByTool = ReadonlyMap<string, ToolResultPart>;
+
+const isStale = (part: ToolResultPart, latest: LatestByTool) => {
 	const retention = retentionOf(part.toolName);
-	return retention === "turn" || (retention === "latest" && part !== latest);
+	return (
+		retention === "turn" ||
+		(retention === "latest" && part !== latest.get(part.toolName))
+	);
 };
+
+const clearIfStale =
+	(latest: LatestByTool) =>
+	(part: ToolContent[number]): ToolContent[number] =>
+		part.type === "tool-result" && isStale(part, latest)
+			? {
+					...part,
+					output: { type: "text", value: clearedOutput(part.toolName) },
+				}
+			: part;
 
 const pruneFinished = (
 	message: ModelMessage,
-	latest: ToolResultPart | undefined,
+	latest: LatestByTool,
 ): ModelMessage => {
 	if (message.role === "assistant" && typeof message.content !== "string")
 		return {
@@ -74,17 +90,7 @@ const pruneFinished = (
 			content: message.content.filter((part) => part.type !== "reasoning"),
 		};
 	if (message.role === "tool")
-		return {
-			...message,
-			content: message.content.map((part) =>
-				part.type === "tool-result" && isStale(part, latest)
-					? {
-							...part,
-							output: { type: "text", value: clearedOutput(part.toolName) },
-						}
-					: part,
-			),
-		};
+		return { ...message, content: message.content.map(clearIfStale(latest)) };
 	return message;
 };
 
@@ -96,13 +102,17 @@ export function pruneTranscript(messages: ModelMessage[]): ModelMessage[] {
 	const currentTurnStart = messages.findLastIndex(
 		(message) => message.role === "user",
 	);
-	const latest = messages
-		.slice(0, currentTurnStart)
-		.flatMap((message) => (message.role === "tool" ? message.content : []))
-		.findLast(
-			(part): part is ToolResultPart =>
-				part.type === "tool-result" && retentionOf(part.toolName) === "latest",
-		);
+	const latest: LatestByTool = new Map(
+		messages
+			.slice(0, currentTurnStart)
+			.flatMap((message) => (message.role === "tool" ? message.content : []))
+			.filter(
+				(part): part is ToolResultPart =>
+					part.type === "tool-result" &&
+					retentionOf(part.toolName) === "latest",
+			)
+			.map((part) => [part.toolName, part]),
+	);
 	return messages.map((message, index) =>
 		index < currentTurnStart ? pruneFinished(message, latest) : message,
 	);
