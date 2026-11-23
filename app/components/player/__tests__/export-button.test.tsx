@@ -63,9 +63,9 @@ describe("exportBlocker", () => {
 		).toBe("Wait for Sloppy to finish");
 	});
 
-	it("asks for an element when there is nothing to render", () => {
+	it("asks for a visual or voice element when there is nothing to render", () => {
 		expect(exportBlocker({ ...ready, hasContent: false })).toBe(
-			"Generate at least one element first",
+			"Generate at least one visual or voice element first",
 		);
 	});
 

@@ -36,7 +36,7 @@ export function exportBlocker({
 	generating: boolean;
 }): string | null {
 	if (sloppyBusy) return "Wait for Sloppy to finish";
-	if (!hasContent) return "Generate at least one element first";
+	if (!hasContent) return "Generate at least one visual or voice element first";
 	if (generating) return "Wait for generation to finish";
 	return null;
 }
