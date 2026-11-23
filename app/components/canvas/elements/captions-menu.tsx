@@ -16,7 +16,8 @@ export interface CaptionsControl {
 	captioned: boolean;
 	error?: string | null;
 	generate: () => void;
-	resetEdits?: () => void;
+	edited?: boolean;
+	reset?: () => void;
 }
 
 interface CaptionsFace {
@@ -66,12 +67,13 @@ export function captionsActions(
 			icon: <MagicCaptions />,
 			onSelect: captions.generate,
 		},
-		captions.resetEdits && {
-			key: "reset",
-			label: "Reset edits",
-			icon: <RotateCcw />,
-			onSelect: captions.resetEdits,
-		},
+		captions.edited &&
+			captions.reset && {
+				key: "reset",
+				label: "Reset edits",
+				icon: <RotateCcw />,
+				onSelect: captions.reset,
+			},
 		{
 			key: "remove",
 			label: "Remove captions",

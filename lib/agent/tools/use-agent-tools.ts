@@ -21,7 +21,7 @@ import {
 } from "@/lib/captions/auto-captions";
 import { useCaptionMedia } from "@/lib/captions/use-caption-media";
 import { resolveModel } from "@/lib/connectors/models";
-import { mediaOfKind } from "@/lib/project/media";
+import { UPLOAD_KINDS } from "@/lib/upload/upload-files";
 import { useProjectId } from "@/lib/project/project-provider";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNode, buildNodes } from "@/lib/generation/generation-graph";
@@ -148,10 +148,16 @@ export function useAgentTools() {
 						throw new Error(
 							`${id} is a ${element.type} element and can't take a file.`,
 						);
+					const kind = uploadKindOf(element);
+					const item = store.getState().media.find((m) => m.url === url);
+					if (item && item.kind !== kind)
+						throw new Error(
+							`${item.name} is ${UPLOAD_KINDS[item.kind].noun}, not ${UPLOAD_KINDS[kind].noun}.`,
+						);
 					return commitUploaded(
 						queue,
 						buildNode(element, buildContext()),
-						mediaOfKind(store.getState().media, url, uploadKindOf(element)),
+						item ?? { kind, url },
 					);
 				},
 				viewMedia: async (item) => resultView(await uploadedResult(item)),

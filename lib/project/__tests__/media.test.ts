@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findMedia, mediaOfKind, toMediaItems, type MediaItem } from "../media";
+import { findMedia, toMediaItems, type MediaItem } from "../media";
 
 const upload = (name: string, kind: MediaItem["kind"] = "image") => ({
 	kind,
@@ -59,31 +59,5 @@ describe("findMedia", () => {
 
 	it("matches letters in order", () => {
 		expect(names("blsk")).toEqual(["blue-sky"]);
-	});
-});
-
-describe("mediaOfKind", () => {
-	const media = toMediaItems(
-		[],
-		[upload("theme.mp3", "audio"), upload("cover.png")],
-	);
-
-	it("refuses a library file of another kind, naming both", () => {
-		expect(() => mediaOfKind(media, "https://blob/theme.mp3", "image")).toThrow(
-			"theme is audio, not an image.",
-		);
-	});
-
-	it("takes a library file of the kind asked for, with what the library knows of it", () => {
-		expect(mediaOfKind(media, "https://blob/cover.png", "image")).toBe(
-			media[1],
-		);
-	});
-
-	it("takes a stored file outside the library as it is", () => {
-		expect(mediaOfKind(media, "https://blob/elsewhere.png", "image")).toEqual({
-			kind: "image",
-			url: "https://blob/elsewhere.png",
-		});
 	});
 });

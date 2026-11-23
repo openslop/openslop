@@ -77,7 +77,7 @@ function FaceButton({ face }: { face: Face }) {
 function readyLabel(captions: Captions) {
 	if (captions.error)
 		return `Regenerating captions failed: ${captions.error}. The last captions still show`;
-	return captions.resetEdits
+	return captions.edited
 		? "Captions ready, edited in the player"
 		: "Captions ready";
 }
