@@ -119,6 +119,13 @@ describe("modalitiesFor", () => {
 });
 
 describe("defaultModelFor", () => {
+	it("defaults new projects to Claude Opus 5.5 on OpenSlop for text", () => {
+		expect(defaultModelFor("llm")).toEqual({
+			provider: "openslop",
+			model: "Claude Opus 5.5",
+		});
+	});
+
 	it("takes the recommendation when no scope pins anything", () => {
 		expect(defaultModelFor("image")).toEqual(SLOP_IMAGE);
 	});

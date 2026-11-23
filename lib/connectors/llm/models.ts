@@ -9,5 +9,5 @@ export const LLM_MODELS = {
 
 export const DEFAULT_LLM_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Claude Opus 5",
+	model: "Claude Opus 5.5",
 };
