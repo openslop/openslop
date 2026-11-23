@@ -31,7 +31,7 @@ function PreviewPanelBody() {
 export function PreviewPanel() {
 	return (
 		<div className="relative h-full w-full overflow-hidden rounded-lg border border-border bg-card">
-			<div className="relative z-[2] h-full w-full">
+			<div className="relative z-2 h-full w-full">
 				<PreviewPanelBody />
 			</div>
 		</div>

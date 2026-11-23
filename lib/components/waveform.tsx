@@ -13,7 +13,6 @@ import {
 	useState,
 } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toastError } from "@/lib/toast-error";
 import { clamp, cn } from "@/lib/utils";
 import { seekKeyStep, sliderKeyTarget } from "./slider-keys";
 import {
@@ -21,7 +20,7 @@ import {
 	soundwaveMaskStyle,
 	toBarHeights,
 } from "./soundwave";
-import { startPlayback } from "./start-playback";
+import { startPlayback, stopFailedPlayback } from "./start-playback";
 import { useMediaSettled } from "./use-media-settled";
 import { usePeaks } from "./use-peaks";
 
@@ -174,16 +173,7 @@ export function Waveform({
 				onPlay={onPlay}
 				onPause={onPause}
 				onEnded={onFinish}
-				onError={(event) => {
-					// A source that fails mid-play leaves the element unpaused.
-					const audio = event.currentTarget;
-					if (audio.paused) return;
-					audio.pause();
-					toastError(
-						audio.error?.message || "the file stopped loading",
-						"Could not play audio",
-					);
-				}}
+				onError={(event) => stopFailedPlayback(event.currentTarget)}
 			/>
 		</>
 	);

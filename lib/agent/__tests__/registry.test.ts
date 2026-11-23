@@ -6,8 +6,10 @@ import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
+import { listModels as catalogModels } from "@/lib/connectors/models";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
+import { toCaption } from "@/lib/captions/word-captions";
 
 const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
 	updateScriptSettings: (patch: Partial<ScriptSettings>) =>
@@ -31,6 +33,8 @@ const project = (
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<speech>hi</speech>",
+	markScriptRead: () => {},
+	isScriptReadCurrent: () => true,
 	countSpokenWords: () => 1,
 	estimateSpeechLengths: () => [],
 	estimateVisualSpans: () => [],
@@ -42,7 +46,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readAssets: () => [],
 	readProject: () => project(),
 	modelDefaults: () => ({}),
-	editScript: () => ({ applied: 0, failures: [] }),
+	editScript: () => ({ applied: 0, failures: [], inserted: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
 	setTitle: () => {},
@@ -51,6 +55,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
+	captionMedia: async () => {},
 	setElementResult: async () => {},
 	viewMedia: async () => ({ durationSec: 0, images: [], words: [] }),
 	...over,
@@ -75,38 +80,82 @@ describe("executeToolCall", () => {
 		});
 	});
 
-	it("hands back the script and the settings it renders with", async () => {
+	it("captions library files that have no captions yet", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const song = { name: "song", kind: "audio" as const, url };
+		const done = {
+			name: "done",
+			kind: "audio" as const,
+			url: `${BLOB_BASE_URL}/assets/upload/user/done.mp3`,
+			captions: [toCaption("hi", 0, 1)],
+		};
+		const captionMedia = vi.fn(async () => {});
+
+		const outcome = await executeToolCall(
+			{ toolName: "caption_media", input: { urls: [url, done.url] } },
+			context({
+				readProject: () => ProjectDataSchema.parse({ media: [song, done] }),
+				captionMedia,
+			}),
+		);
+
+		expect(captionMedia).toHaveBeenCalledOnce();
+		expect(captionMedia).toHaveBeenCalledWith(song);
+		expect(outcome.ok).toBe(true);
+	});
+
+	it("lists media files without their timed words", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const media = ProjectDataSchema.parse({
+			media: [
+				{ name: "song", kind: "audio", url, captions: [toCaption("hi", 0, 1)] },
+			],
+		});
+
+		const outcome = await executeToolCall(
+			{ toolName: "read_media", input: {} },
+			context({ readProject: () => media }),
+		);
+
+		expect(outcome).toEqual({
+			ok: true,
+			output: [{ name: "song", kind: "audio", url }],
+		});
+	});
+
+	it("hands back the script", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
 			context(),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("- title: Moon Cat");
 		expect(outcome.ok && outcome.output).toContain("<speech>hi</speech>");
-		expect(outcome.ok && outcome.output).toContain("- length: 3-5m");
-		expect(outcome.ok && outcome.output).toContain("- template: none");
-		expect(outcome.ok && outcome.output).toContain("- aspect ratio: 9:16");
 	});
 
-	it("says the canvas is empty and the project untitled rather than handing back nothing", async () => {
+	it("says the canvas is empty rather than handing back nothing", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
-			context({
-				readScript: () => "  ",
-				readProject: () => project({ title: "" }),
-			}),
+			context({ readScript: () => "  " }),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("- title: not set");
-		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
-		expect(outcome.ok && outcome.output).toContain(
-			"## Generation state\nNone yet.",
-		);
+		expect(outcome).toEqual({ ok: true, output: "The canvas is empty." });
 	});
 
-	it("reports where each element's generation stands under the script", async () => {
+	it("says no element generates media rather than handing back nothing", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "read_script", input: {} },
+			{ toolName: "read_generation", input: {} },
+			context(),
+		);
+
+		expect(outcome).toEqual({
+			ok: true,
+			output: "No element on the canvas generates media.",
+		});
+	});
+
+	it("reports where each element's generation stands", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_generation", input: {} },
 			context({
 				elementStates: () => [
 					{ id: "n1", state: "generated" },
@@ -121,9 +170,8 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain(
+		expect(outcome.ok && outcome.output).toBe(
 			[
-				"## Generation state",
 				"- n1: generated",
 				"- img1: stale (The prompt changed — regenerate to update)",
 				"- ai1: failed (Provider returned 503)",
@@ -136,7 +184,11 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "edit_script", input: { ops: [{ op: "remove", id: "n1" }] } },
 			context({
-				editScript: () => ({ applied: 0, failures: ["no element n1"] }),
+				editScript: () => ({
+					applied: 0,
+					failures: ["no element n1"],
+					inserted: [],
+				}),
 			}),
 		);
 
@@ -308,6 +360,20 @@ describe("executeToolCall", () => {
 		);
 	});
 
+	it("lets Sloppy choose the audiobook format", async () => {
+		const settings: Partial<ScriptSettings>[] = [];
+		const outcome = await executeToolCall(
+			{
+				toolName: "update_script_settings",
+				input: { format: "audiobook" },
+			},
+			context(recordScriptSettings(settings)),
+		);
+
+		expect(settings).toStrictEqual([{ format: "audiobook" }]);
+		expect(outcome.ok).toBe(true);
+	});
+
 	it.each([
 		[
 			"the aspect ratio and transition it was given",
@@ -457,7 +523,7 @@ describe("executeToolCall", () => {
 				],
 				editScript: (applied) => {
 					ops.push(applied);
-					return { applied: applied.length, failures: [] };
+					return { applied: applied.length, failures: [], inserted: [] };
 				},
 			}),
 		);
@@ -707,13 +773,12 @@ describe("model tools", () => {
 		expect(output).not.toContain("from runware");
 	});
 
-	it("lists at most five models a type", async () => {
+	it("lists every connected model of a type", async () => {
 		const outcome = await run("list_models", {});
 		const output = String(outcome.ok && outcome.output);
 
-		for (const section of output.split("\n\n"))
-			expect(section.split("\n- ").length - 1).toBeLessThanOrEqual(5);
-		expect(output).toMatch(/(\n- .*){5}/);
+		for (const { provider, model } of catalogModels("video"))
+			expect(output).toContain(`- ${model} from ${provider}`);
 	});
 
 	it("sets the default for every type the model's group covers, as the models panel does", async () => {

@@ -36,7 +36,10 @@ export abstract class BaseJobConnector<
 		if (!completed.result) {
 			throw new Error("Generation completed without a result");
 		}
-		return this.resolveBundle(AssetBundle.fromResponse(completed.result));
+		return {
+			...(await this.resolveBundle(AssetBundle.fromResponse(completed.result))),
+			costUsd: completed.costUsd ?? undefined,
+		};
 	}
 }
 

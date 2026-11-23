@@ -39,6 +39,7 @@ function job(overrides: Partial<VideoJobRow> = {}): VideoJobRow {
 		result: null,
 		metadata: { providerJobId: "upstream-1" },
 		error: null,
+		cost_usd: null,
 		created_at: "2026-01-01T00:00:00Z",
 		updated_at: "2026-01-01T00:00:00Z",
 		...overrides,

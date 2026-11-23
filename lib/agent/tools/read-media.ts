@@ -10,9 +10,10 @@ export const readMedia = defineTool({
 	  kind and URL.
 	`,
 	input: z.object({}),
-	output: z.array(MediaItemSchema),
+	output: z.array(MediaItemSchema.omit({ captions: true })),
 	icon: FolderOpen,
 	label: "Reading the media library",
-	execute: async (_input, ctx) => ctx.readProject().media,
-	snapshot: true,
+	execute: async (_input, ctx) =>
+		ctx.readProject().media.map(({ captions: _, ...item }) => item),
+	retention: "turn",
 });

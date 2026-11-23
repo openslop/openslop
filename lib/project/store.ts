@@ -6,8 +6,13 @@ import {
 	connectorModelsSchema,
 	type ConnectorModels,
 } from "@/lib/connectors/models";
-import type { Upload } from "@/lib/upload/upload-files";
-import { MediaItemSchema, toMediaItems } from "./media";
+import type { Caption } from "@remotion/captions";
+import {
+	MediaItemSchema,
+	requireMedia,
+	toMediaItems,
+	type NewMedia,
+} from "./media";
 import {
 	ScriptSettingsSchema,
 	type DeepPartial,
@@ -36,7 +41,8 @@ export type ProjectContext = ProjectData & {
 	updateVideoSettings: (partial: DeepPartial<VideoSettings>) => void;
 	updateScriptSettings: (settings: Partial<ScriptSettings>) => void;
 	updateModels: (models: ConnectorModels) => void;
-	addMedia: (uploads: Upload[]) => void;
+	addMedia: (uploads: NewMedia[]) => void;
+	setMediaCaptions: (url: string, captions: Caption[] | undefined) => void;
 	removeMedia: (name: string) => void;
 	reset: () => void;
 };
@@ -70,6 +76,10 @@ export function createProjectStore(
 			addMedia: (uploads) =>
 				set((state) => {
 					state.media.push(...toMediaItems(state.media, uploads));
+				}),
+			setMediaCaptions: (url, captions) =>
+				set((state) => {
+					requireMedia(state.media, url).captions = captions;
 				}),
 			removeMedia: (name) =>
 				set((state) => {

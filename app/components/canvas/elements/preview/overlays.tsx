@@ -23,7 +23,7 @@ function CancelButton({ onClick }: { onClick: () => void }) {
 				shape="round"
 				size="sm"
 				chip
-				className="absolute right-2 top-[var(--cancel-offset,0.5rem)] z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+				className="absolute right-2 top-(--cancel-offset,0.5rem) z-10 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
 				onClick={onClick}
 			>
 				<X />
@@ -60,7 +60,7 @@ export function ErrorMessage({ message }: { message: string }) {
 		<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-12 py-2">
 			<div className="pointer-events-auto flex max-h-full max-w-full items-start gap-1.5 overflow-auto rounded-lg bg-destructive px-3 py-1.5 text-destructive-foreground shadow-elevation-1">
 				<AlertCircle className="mt-px h-3.5 w-3.5" />
-				<p className="min-w-0 whitespace-pre-wrap break-words text-label leading-snug">
+				<p className="min-w-0 whitespace-pre-wrap wrap-break-word text-label leading-snug">
 					{message}
 				</p>
 				<CopyButton

@@ -239,6 +239,7 @@ describe("createJobPollHandler", () => {
 			status: "pending",
 			result: null,
 			error: null,
+			cost_usd: null,
 			created_at: new Date(Date.now() - ageMs).toISOString(),
 		};
 	}
@@ -252,7 +253,18 @@ describe("createJobPollHandler", () => {
 			status: "pending",
 			result: null,
 			error: null,
+			costUsd: null,
 		});
+	});
+
+	it("reports what a finished job cost", async () => {
+		mockGetJob.mockResolvedValue({
+			...storedJob(0),
+			status: "completed",
+			cost_usd: 0.04,
+		});
+		const res = await poll("00000000-0000-0000-0000-000000000000");
+		expect(await res.json()).toMatchObject({ costUsd: 0.04 });
 	});
 
 	it("fails a job past its deadline before reporting it", async () => {

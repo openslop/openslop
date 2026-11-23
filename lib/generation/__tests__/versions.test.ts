@@ -3,6 +3,7 @@ import type { AssetResult } from "@/lib/connectors/types";
 import { inputsFor } from "./_graph";
 import {
 	activeVersionIndex,
+	totalCostUsd,
 	VersionLog,
 	type ElementVersion,
 } from "../versions";
@@ -123,5 +124,22 @@ describe("activeVersionIndex", () => {
 			pinned: false,
 		};
 		expect(activeVersionIndex(versions, snapshot)).toBe(-1);
+	});
+});
+
+describe("totalCostUsd", () => {
+	const costing = (prompt: string, costUsd?: number): ElementVersion => {
+		const base = version(prompt);
+		return { ...base, result: { ...base.result, costUsd } };
+	};
+
+	it("sums the versions that have a cost", () => {
+		expect(
+			totalCostUsd([costing("a", 0.25), costing("b"), costing("c", 0.5)]),
+		).toBe(0.75);
+	});
+
+	it("has no total when no version has a cost", () => {
+		expect(totalCostUsd([costing("a")])).toBeUndefined();
 	});
 });

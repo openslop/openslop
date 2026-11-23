@@ -194,7 +194,7 @@ function ResizablePanel({ children }: { children: ReactNode }) {
 		defaultSize: PANEL_WIDTH.default,
 		minSize: PANEL_WIDTH.min,
 		maxSize: PANEL_WIDTH.max,
-		invert: true,
+		handleEdge: "end",
 	});
 	return (
 		<>
@@ -244,7 +244,7 @@ function EditorSidebarComponent() {
 					</div>
 					<div
 						key={active}
-						className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 [scrollbar-gutter:stable]"
+						className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-1 scrollbar-gutter-stable"
 					>
 						<current.Panel />
 					</div>

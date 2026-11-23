@@ -26,6 +26,21 @@ const RESOLUTION_OPTIONS = RESOLUTIONS.map((resolution) => ({
 	label: resolution,
 }));
 
+export function exportBlocker({
+	sloppyBusy,
+	hasContent,
+	generating,
+}: {
+	sloppyBusy: boolean;
+	hasContent: boolean;
+	generating: boolean;
+}): string | null {
+	if (sloppyBusy) return "Wait for Sloppy to finish";
+	if (!hasContent) return "Generate at least one visual or voice element first";
+	if (generating) return "Wait for generation to finish";
+	return null;
+}
+
 export function ExportButton() {
 	const { layout } = useLayout();
 	const generating = useQueueSelector((q) => q.isBusy());
@@ -33,7 +48,11 @@ export function ExportButton() {
 	const { state, exportVideo, reset, open, setOpen } = useExport();
 	const [resolution, setResolution] = useState<Resolution>("1080p");
 
-	const disabled = loading || !layout.series.length || generating;
+	const blocker = exportBlocker({
+		sloppyBusy: loading,
+		hasContent: layout.series.length > 0,
+		generating,
+	});
 	const isRendering = state.status === "rendering";
 
 	return (
@@ -45,7 +64,8 @@ export function ExportButton() {
 					size="sm"
 					className="shrink-0"
 					aria-label="Export"
-					disabled={disabled}
+					unavailable={blocker !== null}
+					tooltip={blocker ?? "Export this video"}
 				>
 					<Download />
 					<span className="hidden sm:inline">Export</span>
@@ -127,7 +147,7 @@ export function ExportButton() {
 							variant="generate"
 							size="sm"
 							onClick={() => exportVideo(layout, resolution)}
-							disabled={disabled}
+							disabled={blocker !== null}
 							className="w-full"
 						>
 							<Download />

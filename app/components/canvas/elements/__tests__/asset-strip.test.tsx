@@ -12,14 +12,19 @@ import { createProjectStore, type ProjectStore } from "@/lib/project/store";
 import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
 import { MediaPanelProvider } from "@/app/components/canvas/media/media-panel-context";
-import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
+import {
+	EditorPanelProvider,
+	useEditorPanel,
+} from "@/app/components/canvas/panel/editor-panel-context";
 import {
 	chooseTileMenuItem,
+	click,
 	mountOnCanvas,
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
 import {
 	AssetStrip,
+	AssetStripAdd,
 	AssetStripMedia,
 	AssetStripReferences,
 } from "../asset-strip";
@@ -54,7 +59,38 @@ const open = (tiles: ReactNode, children: Descendant[] = []) => {
 	);
 };
 
+function OpenPanel() {
+	const { active } = useEditorPanel();
+	return <li data-open-panel={active ?? "none"} />;
+}
+
+const openPanel = () =>
+	document.querySelector("[data-open-panel]")?.getAttribute("data-open-panel");
+
 describe("AssetStrip", () => {
+	it("offers to add an asset when the project has none yet", () => {
+		open(<AssetStripAdd />);
+		const add = document.querySelector<HTMLButtonElement>(
+			'ul[aria-label="Assets"] > li > button',
+		);
+		expect(add?.textContent).toBe("Add asset");
+		expect(add?.type).toBe("button");
+	});
+
+	it("opens the Assets panel from the add tile, and keeps it open", async () => {
+		open(
+			<>
+				<AssetStripAdd />
+				<OpenPanel />
+			</>,
+		);
+		expect(openPanel()).toBe("none");
+		await click('ul[aria-label="Assets"] button');
+		expect(openPanel()).toBe("assets");
+		await click('ul[aria-label="Assets"] button');
+		expect(openPanel()).toBe("assets");
+	});
+
 	it("shows the project's media and asks before removing an item", async () => {
 		open(<AssetStripMedia />);
 		await act(async () =>

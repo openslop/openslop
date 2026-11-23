@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { truncateMiddle } from "../format";
+import { formatCost, truncateMiddle } from "../format";
 
 describe("truncateMiddle", () => {
 	it("leaves text that already fits", () => {
@@ -34,5 +34,18 @@ describe("truncateMiddle", () => {
 		expect(truncateMiddle("a".repeat(40), 11)).toBe(
 			`${"a".repeat(5)}…${"a".repeat(5)}`,
 		);
+	});
+});
+
+describe("formatCost", () => {
+	it.each([
+		[0.04, "$0.04"],
+		[1.2, "$1.20"],
+		[1.2345, "$1.23"],
+		[0.0035, "$0.0035"],
+		[0.000123, "$0.00012"],
+		[0, "Free"],
+	])("formats %s as %s", (usd, text) => {
+		expect(formatCost(usd)).toBe(text);
 	});
 });
