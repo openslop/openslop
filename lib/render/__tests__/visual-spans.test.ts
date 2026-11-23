@@ -25,7 +25,6 @@ describe("estimateVisualSpans", () => {
 		expect(first).toMatchObject({
 			id: image.id,
 			words: 90,
-			speechIds: [speech.id],
 		});
 		expect(second.words).toBe(180);
 	});
@@ -85,7 +84,6 @@ describe("estimateVisualSpans", () => {
 				type: "image",
 				sceneNumber: 1,
 				words: 0,
-				speechIds: [],
 			},
 		]);
 	});
