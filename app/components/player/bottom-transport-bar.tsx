@@ -48,11 +48,11 @@ function BottomTransportBarComponent() {
 			<div className={cn("flex w-full items-center", SCRUB_BAR_HEIGHT)}>
 				<SegmentedSeekBar />
 			</div>
-			<div className="scrollbar-overlay flex min-w-0 items-center gap-2 overflow-x-auto @max-transport-mask:mask-r-from-85%">
+			<div className="scrollbar-overlay flex min-w-0 items-center gap-2 overflow-x-auto @max-xl:mask-r-from-85%">
 				<div className="flex flex-1 items-center gap-2">
 					{canSeek && <TimeDisplay />}
 					{canSeek && (
-						<div className="hidden @scene-pill:contents">
+						<div className="hidden @lg:contents">
 							<ScenePill />
 						</div>
 					)}

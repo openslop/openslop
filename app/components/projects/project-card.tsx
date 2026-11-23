@@ -76,7 +76,7 @@ function ProjectThumbnail({ url, name }: { url: string | null; name: string }) {
 			src={url}
 			alt={name}
 			fill
-			sizes="(min-width: 1280px) 200px, (min-width: 768px) 25vw, 50vw"
+			sizes="(min-width: 80rem) 200px, (min-width: 48rem) 25vw, 50vw"
 			className={className}
 		/>
 	);

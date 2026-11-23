@@ -34,7 +34,6 @@
 
 .actions {
 	flex: none;
-	display: flex;
 	align-items: center;
 	user-select: none;
 	margin-inline: 4px;

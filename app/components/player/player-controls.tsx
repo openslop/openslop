@@ -78,7 +78,7 @@ export function VolumeControl() {
 			>
 				{muted || volume === 0 ? <VolumeX /> : <Volume2 />}
 			</IconButton>
-			<div className="hidden @volume:block">
+			<div className="hidden @md:block">
 				<ScrubBar
 					className="w-18"
 					ariaLabel="Volume"
