@@ -10,6 +10,7 @@ import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-
 import {
 	chooseTileMenuItem,
 	click,
+	menuItems,
 	mountOnCanvas,
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
@@ -83,6 +84,19 @@ describe("MediaLibrary", () => {
 		);
 
 		expect(store.getState().media).toEqual([]);
+	});
+
+	it("offers to delete a picture", async () => {
+		open();
+		await act(async () =>
+			store
+				.getState()
+				.addMedia([{ kind: "image", name: "pic.png", url: "https://i/p" }]),
+		);
+
+		await chooseTileMenuItem("pic");
+
+		expect(menuItems()).toContain("Delete");
 	});
 
 	it("generates, regenerates and removes a file's captions from its Captions submenu", async () => {
