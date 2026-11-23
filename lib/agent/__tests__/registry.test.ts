@@ -32,6 +32,8 @@ const project = (
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<speech>hi</speech>",
+	markScriptRead: () => {},
+	isScriptReadCurrent: () => true,
 	countSpokenWords: () => 1,
 	estimateSpeechLengths: () => [],
 	estimateVisualSpans: () => [],
@@ -43,7 +45,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readAssets: () => [],
 	readProject: () => project(),
 	modelDefaults: () => ({}),
-	editScript: () => ({ applied: 0, failures: [] }),
+	editScript: () => ({ applied: 0, failures: [], inserted: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
 	setTitle: () => {},
@@ -76,38 +78,39 @@ describe("executeToolCall", () => {
 		});
 	});
 
-	it("hands back the script and the settings it renders with", async () => {
+	it("hands back the script", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
 			context(),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("- title: Moon Cat");
 		expect(outcome.ok && outcome.output).toContain("<speech>hi</speech>");
-		expect(outcome.ok && outcome.output).toContain("- length: 3-5m");
-		expect(outcome.ok && outcome.output).toContain("- template: none");
-		expect(outcome.ok && outcome.output).toContain("- aspect ratio: 9:16");
 	});
 
-	it("says the canvas is empty and the project untitled rather than handing back nothing", async () => {
+	it("says the canvas is empty rather than handing back nothing", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
-			context({
-				readScript: () => "  ",
-				readProject: () => project({ title: "" }),
-			}),
+			context({ readScript: () => "  " }),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("- title: not set");
-		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
-		expect(outcome.ok && outcome.output).toContain(
-			"## Generation state\nNone yet.",
-		);
+		expect(outcome).toEqual({ ok: true, output: "The canvas is empty." });
 	});
 
-	it("reports where each element's generation stands under the script", async () => {
+	it("says no element generates media rather than handing back nothing", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "read_script", input: {} },
+			{ toolName: "read_generation", input: {} },
+			context(),
+		);
+
+		expect(outcome).toEqual({
+			ok: true,
+			output: "No element on the canvas generates media.",
+		});
+	});
+
+	it("reports where each element's generation stands", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_generation", input: {} },
 			context({
 				elementStates: () => [
 					{ id: "n1", state: "generated" },
@@ -122,9 +125,8 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain(
+		expect(outcome.ok && outcome.output).toBe(
 			[
-				"## Generation state",
 				"- n1: generated",
 				"- img1: stale (The prompt changed — regenerate to update)",
 				"- ai1: failed (Provider returned 503)",
@@ -137,7 +139,11 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "edit_script", input: { ops: [{ op: "remove", id: "n1" }] } },
 			context({
-				editScript: () => ({ applied: 0, failures: ["no element n1"] }),
+				editScript: () => ({
+					applied: 0,
+					failures: ["no element n1"],
+					inserted: [],
+				}),
 			}),
 		);
 
@@ -472,7 +478,7 @@ describe("executeToolCall", () => {
 				],
 				editScript: (applied) => {
 					ops.push(applied);
-					return { applied: applied.length, failures: [] };
+					return { applied: applied.length, failures: [], inserted: [] };
 				},
 			}),
 		);

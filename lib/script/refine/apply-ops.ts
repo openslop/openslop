@@ -14,9 +14,17 @@ import { isScene } from "@/lib/canvas/scenes";
 import type { AssetType, ElementType } from "@/lib/canvas/types";
 import type { NewElement, RefineOp } from "./types";
 
-export type RefineOpResult = { ok: true } | { ok: false; reason: string };
+export type RefineOpResult =
+	| { ok: true; inserted: string[] }
+	| { ok: false; reason: string };
 
-const OK: RefineOpResult = { ok: true };
+export type RefineReport = {
+	applied: number;
+	failures: string[];
+	inserted: string[];
+};
+
+const OK: RefineOpResult = { ok: true, inserted: [] };
 
 const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
 
@@ -60,14 +68,12 @@ export function applyRefineOp(editor: Editor, op: RefineOp): RefineOpResult {
 }
 
 /** Applies a turn's ops in order; a failed op is reported, never rolled back. */
-export function applyRefineOps(
-	editor: Editor,
-	ops: RefineOp[],
-): { applied: number; failures: string[] } {
+export function applyRefineOps(editor: Editor, ops: RefineOp[]): RefineReport {
 	const results = ops.map((op) => applyRefineOp(editor, op));
 	return {
 		applied: results.filter((result) => result.ok).length,
 		failures: results.flatMap((result) => (result.ok ? [] : [result.reason])),
+		inserted: results.flatMap((result) => (result.ok ? result.inserted : [])),
 	};
 }
 
@@ -110,11 +116,12 @@ function applyInsert(
 	}
 
 	let path = at;
+	const inserted: string[] = [];
 	for (const { type, attrs, text } of op.elements) {
-		insertElement(editor, type, path, { attrs, text });
+		inserted.push(insertElement(editor, type, path, { attrs, text }));
 		path = Path.next(path);
 	}
-	return OK;
+	return { ok: true, inserted };
 }
 
 function applyAsset(
