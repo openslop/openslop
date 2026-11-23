@@ -11,7 +11,7 @@ function CardImage({ src, alt }: { src: string; alt: string }) {
 				src={src}
 				alt={alt}
 				fill
-				sizes="(min-width: 640px) 96px, 80px"
+				sizes="(min-width: 40rem) 96px, 80px"
 				className="object-cover"
 			/>
 		</div>

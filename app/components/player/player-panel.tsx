@@ -36,7 +36,7 @@ function TopPlayerPanelComponent() {
 	});
 
 	return (
-		<div className="shrink-0" style={{ height: size }}>
+		<div className="shrink-0 max-sm:max-h-1/4" style={{ height: size }}>
 			<div className="relative mx-auto h-[calc(100%-0.5rem)] max-w-6xl p-2">
 				<FitToAspectRatio>
 					<PreviewPanel />

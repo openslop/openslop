@@ -26,16 +26,13 @@ function Breadcrumbs() {
 	const title = useProject((state) => state.title);
 
 	return (
-		<nav
-			aria-label="Breadcrumb"
-			className="absolute inset-y-0 left-1/2 flex max-w-[40vw] -translate-x-1/2 items-center"
-		>
+		<nav aria-label="Breadcrumb" className="col-start-2 overflow-hidden">
 			<ol className="flex min-w-0 items-center gap-1.5 text-label font-book text-foreground">
 				<li className="shrink-0">
 					<Button variant="ghost" size="xs" asChild className="font-book">
 						<Link href="/">
 							<Lock />
-							Personal
+							<span className="max-sm:sr-only">Personal</span>
 						</Link>
 					</Button>
 				</li>
@@ -88,42 +85,41 @@ function EditorToolbarComponent() {
 	];
 
 	return (
+		// The first column clears the fixed account avatar.
 		<div
-			className={`relative z-40 flex w-full shrink-0 flex-col items-center gap-3 px-4 py-1.5 ${editorStyles.copilotEnter}`}
+			className={`relative z-40 grid w-full shrink-0 grid-cols-[minmax(--spacing(10),1fr)_minmax(0,auto)_1fr] items-center gap-3 px-4 py-1.5 ${editorStyles.copilotEnter}`}
 		>
 			<Breadcrumbs />
-			<div className="flex w-full items-center gap-3">
-				<div className="ml-auto flex shrink-0 items-center justify-end gap-2">
-					<BalancePill />
-					{cancelActions.map(({ label, onClick }) => (
-						<TooltipIconButton
-							key={label}
-							label={label}
-							variant="quiet"
-							size="sm"
-							chip
-							className="self-center"
-							onClick={onClick}
-						>
-							<X />
-						</TooltipIconButton>
-					))}
-					<Button
-						type="button"
-						variant="generate"
+			<div className="flex items-center justify-end gap-2">
+				<BalancePill />
+				{cancelActions.map(({ label, onClick }) => (
+					<TooltipIconButton
+						key={label}
+						label={label}
+						variant="quiet"
 						size="sm"
-						className="shrink-0"
-						aria-label={generateLabel}
-						tooltip={loading ? NOTHING_TO_GENERATE : scope.description}
-						tooltipSide="bottom"
-						unavailable={unavailable}
-						onClick={scope.run}
+						chip
+						className="self-center"
+						onClick={onClick}
 					>
-						{busy ? <Spinner /> : allGenerated ? <Check /> : <Sparkles />}
-						<span className="hidden sm:inline">{generateLabel}</span>
-					</Button>
-					<ExportButton />
-				</div>
+						<X />
+					</TooltipIconButton>
+				))}
+				<Button
+					type="button"
+					variant="generate"
+					size="sm"
+					className="shrink-0"
+					aria-label={generateLabel}
+					tooltip={loading ? NOTHING_TO_GENERATE : scope.description}
+					tooltipSide="bottom"
+					unavailable={unavailable}
+					onClick={scope.run}
+				>
+					{busy ? <Spinner /> : allGenerated ? <Check /> : <Sparkles />}
+					<span className="hidden sm:inline">{generateLabel}</span>
+				</Button>
+				<ExportButton />
 			</div>
 		</div>
 	);

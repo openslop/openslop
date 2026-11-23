@@ -44,7 +44,7 @@ function PresetTile({
 							src={thumbnail}
 							alt=""
 							fill
-							sizes="(min-width: 640px) 220px, 50vw"
+							sizes="(min-width: 40rem) 220px, 50vw"
 							className="object-cover"
 							onError={() => setBroken(true)}
 						/>

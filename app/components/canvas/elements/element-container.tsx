@@ -34,7 +34,7 @@ export function ElementContainer({
 	return (
 		<ElementGenerationProvider element={element}>
 			<div
-				className="flex items-stretch mb-1.5 animate-fadeInUp"
+				className="flex items-stretch mb-1.5 animate-fadeInUp @max-lg/canvas:flex-col @max-lg/canvas:gap-3"
 				data-element-id={element.id}
 				{...nodeAttributes}
 			>
@@ -91,7 +91,7 @@ export function ElementContainer({
 				</div>
 
 				<div
-					className="flex shrink-0 items-stretch px-3 select-none sm:px-4"
+					className="flex shrink-0 items-stretch px-4 select-none @max-lg/canvas:hidden"
 					contentEditable={false}
 					aria-hidden="true"
 				>

@@ -51,13 +51,13 @@ export default function PostPromptView() {
 			<CanvasVersionBanner />
 			<div className="flex min-h-0 flex-1 overflow-hidden">
 				<EditorSidebar />
-				<div className="grain relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5">
+				<div className="grain relative mr-2 mb-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-element-card shadow-elevation-5 max-sm:peer-data-panel-open:hidden">
 					<div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
 						{placement === "top" && <TopPlayerPanel />}
 
 						<div className="flex min-h-0 flex-1 overflow-hidden">
 							<div className="flex-1 overflow-y-auto scrollbar-gutter-stable">
-								<div className="mx-auto max-w-6xl px-4 py-4">
+								<div className="@container/canvas mx-auto max-w-6xl px-4 py-4">
 									<ProjectTitle />
 									<AssetStrip>
 										<AssetStripArtStyle />

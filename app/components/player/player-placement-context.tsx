@@ -2,9 +2,9 @@
 
 import {
 	useCallback,
-	useEffect,
 	useMemo,
 	useState,
+	useSyncExternalStore,
 	type ReactNode,
 } from "react";
 import { createRequiredContext } from "@/lib/components/create-required-context";
@@ -12,8 +12,16 @@ import { createRequiredContext } from "@/lib/components/create-required-context"
 /** Where the player sits, or that it sits nowhere. */
 export type PlayerPlacement = "top" | "right" | "hidden";
 
-const NARROW_BREAKPOINT = 1066;
-const NARROW_QUERY = `(max-width: ${NARROW_BREAKPOINT}px)`;
+// Tailwind's max-lg; JS can't read the theme's breakpoints.
+const NARROW_QUERY = "(width < 64rem)";
+
+function subscribeNarrow(onChange: () => void) {
+	const mediaQuery = window.matchMedia(NARROW_QUERY);
+	mediaQuery.addEventListener("change", onChange);
+	return () => mediaQuery.removeEventListener("change", onChange);
+}
+
+const isNarrow = () => window.matchMedia(NARROW_QUERY).matches;
 
 const [PlayerPlacementContext, usePlayerPlacement] = createRequiredContext<{
 	placement: PlayerPlacement;
@@ -26,16 +34,11 @@ export { usePlayerPlacement };
 export function PlayerPlacementProvider({ children }: { children: ReactNode }) {
 	const [preferred, setPreferred] = useState<"top" | "right">("right");
 	const [hidden, setHidden] = useState(false);
-	const [narrowViewport, setNarrowViewport] = useState(false);
-
-	useEffect(() => {
-		const mediaQuery = window.matchMedia(NARROW_QUERY);
-		const onChange = ({ matches }: MediaQueryListEvent | MediaQueryList) =>
-			setNarrowViewport(matches);
-		onChange(mediaQuery);
-		mediaQuery.addEventListener("change", onChange);
-		return () => mediaQuery.removeEventListener("change", onChange);
-	}, []);
+	const narrowViewport = useSyncExternalStore(
+		subscribeNarrow,
+		isNarrow,
+		() => false,
+	);
 
 	/** Hiding keeps the preferred side, so showing the player again restores it. */
 	const setPlacement = useCallback((next: PlayerPlacement) => {

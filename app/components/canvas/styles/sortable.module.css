@@ -34,19 +34,12 @@
 
 .actions {
 	flex: none;
-	display: flex;
 	align-items: center;
 	user-select: none;
 	margin-inline: 4px;
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity var(--duration-faster) var(--ease-casual);
-}
-
-@media (max-width: 639px) {
-	.actions {
-		display: none;
-	}
 }
 
 .hoverTarget {

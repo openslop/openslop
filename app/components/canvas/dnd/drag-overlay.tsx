@@ -48,7 +48,7 @@ export function DragOverlayPreview({ block }: { block: CanvasBlock }) {
 	return (
 		<div className={styles.dragOverlay}>
 			<Slate editor={editor} initialValue={value}>
-				<div className={styles.actions} aria-hidden>
+				<div className={`flex max-sm:hidden ${styles.actions}`} aria-hidden>
 					<InsertButton />
 					<DragHandle />
 				</div>
