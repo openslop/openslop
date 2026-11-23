@@ -47,7 +47,7 @@ export function DraftPictures({ element }: { element: GeneratedElement }) {
 
 const isSlider = (def: AttributeDef) => def.edit?.kind === "range";
 
-/** Every other setting: menu buttons in a row, then each slider under its label, since it has no icon to name it; layout belongs to a scene. */
+/** Every other setting; layout belongs to a scene. */
 export function DraftSettings({ element }: { element: GeneratedElement }) {
 	const [sliders, chips] = partition(
 		generationDefs(element).filter((def) => !laidFlat(def)),
