@@ -16,6 +16,7 @@ export const MediaItemSchema = z.object({
 	createdAt: z.string().optional(),
 	captions: z.array(CaptionSchema).optional(),
 	uploaded: z.boolean().optional(),
+	costUsd: z.number().optional(),
 });
 
 export type MediaItem = z.infer<typeof MediaItemSchema>;

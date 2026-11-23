@@ -152,7 +152,7 @@ type MediaTileProps = TileProps & {
 
 /** A piece of the project's media as a small tile; the caller says what its face does, if anything. */
 export function MediaAssetTile({
-	item: { name, kind, url, createdAt },
+	item: { name, kind, url, createdAt, costUsd },
 	primary,
 	menu,
 	children,
@@ -167,6 +167,7 @@ export function MediaAssetTile({
 				previewKind={previewKind}
 				context="Media"
 				createdAt={createdAt}
+				costUsd={costUsd}
 				Icon={MEDIA_KINDS[kind].Icon}
 				fallback="icon"
 				primary={primary}

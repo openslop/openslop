@@ -119,4 +119,49 @@ describe("MediaLibrary", () => {
 
 		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});
+
+	it("shows what a generated take cost in its larger view, not on the tile", async () => {
+		open();
+		await act(async () =>
+			store.getState().addMedia([
+				{
+					kind: "image",
+					name: "generated.png",
+					url: "https://a/gen",
+					costUsd: 0.12,
+				},
+				{
+					kind: "image",
+					name: "uploaded.png",
+					url: "https://a/up",
+					uploaded: true,
+				},
+			]),
+		);
+		expect(document.body.textContent).not.toContain("$");
+
+		await chooseTileMenuItem("generated", "View larger");
+		expect(
+			document.querySelector('[role=dialog] [data-slot="badge"]')?.textContent,
+		).toBe("$0.12");
+	});
+
+	it("leaves the cost out of the larger view of uploaded media", async () => {
+		open();
+		await act(async () =>
+			store.getState().addMedia([
+				{
+					kind: "image",
+					name: "uploaded.png",
+					url: "https://a/up",
+					uploaded: true,
+				},
+			]),
+		);
+
+		await chooseTileMenuItem("uploaded", "View larger");
+		expect(document.querySelector("[role=dialog]")?.textContent).not.toContain(
+			"$",
+		);
+	});
 });
