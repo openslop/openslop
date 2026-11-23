@@ -9,15 +9,9 @@ import { keysOf } from "@/lib/utils";
 
 export type TimelineClip = Sequence & { key: string };
 
-export type PlaceholderKind = {
-	role: ElementRole;
-	type: ContentType;
-	label: string;
-};
-
-export const PLACEHOLDER_KINDS: PlaceholderKind[] = [
+const PLACEHOLDER_KINDS = [
 	{ role: "background", type: "music", label: "Add music" },
-];
+] as const;
 
 export type PlaceholderClip = {
 	key: string;
@@ -77,26 +71,27 @@ export function computePlaceholderClips(
 	const placeholders: PlaceholderClip[] = [];
 
 	// Music placeholder
+	const musicConfig = PLACEHOLDER_KINDS.find((k) => k.type === "music");
 	const musicSequences = sequencesForRole(layout, "background");
 	const firstMusic = musicSequences[0];
 	const firstSceneId = layout.series[0]?.element.sceneId;
 
-	if (!firstMusic) {
+	if (musicConfig && !firstMusic) {
 		placeholders.push({
 			key: "placeholder-music-0",
-			role: "background",
-			type: "music",
-			label: "Add music",
+			role: musicConfig.role,
+			type: musicConfig.type,
+			label: musicConfig.label,
 			start: 0,
 			duration: layout.totalDurationSec,
 			sceneId: firstSceneId,
 		});
-	} else if (firstMusic.start > TOUCH_EPSILON) {
+	} else if (musicConfig && firstMusic.start > TOUCH_EPSILON) {
 		placeholders.push({
 			key: "placeholder-music-0",
-			role: "background",
-			type: "music",
-			label: "Add music",
+			role: musicConfig.role,
+			type: musicConfig.type,
+			label: musicConfig.label,
 			start: 0,
 			duration: firstMusic.start,
 			sceneId: firstSceneId,
