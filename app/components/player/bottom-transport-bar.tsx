@@ -5,7 +5,10 @@ import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { toFrames } from "@/lib/render/frames";
-import { findSegmentIndexAtFrame } from "@/lib/render/scene-segments";
+import {
+	findSegmentIndexAtFrame,
+	previousSceneStart,
+} from "@/lib/render/scene-segments";
 import { BottomViewToggle } from "./bottom-view-toggle";
 import { usePlayerControl } from "./player-control-context";
 import { usePlayerPlacement } from "./player-placement-context";
@@ -35,14 +38,21 @@ function BottomTransportBarComponent() {
 	const canSeek = canPlay && player !== null;
 	const playLabel = playing ? "Pause" : "Play";
 
-	const seekToAdjacentScene = (direction: -1 | 1) => {
+	const seekToPreviousScene = () => {
+		if (!player || segments.length === 0) return;
+		player.seekTo(
+			previousSceneStart(segments, player.getCurrentFrame(), layout.fps),
+		);
+	};
+
+	const seekToNextScene = () => {
 		if (!player || segments.length === 0) return;
 		const current = findSegmentIndexAtFrame(
 			segments,
 			player.getCurrentFrame(),
 			layout.fps,
 		);
-		const target = segments[current + direction];
+		const target = segments[current + 1];
 		if (target) player.seekTo(toFrames(target.start, layout.fps));
 	};
 
@@ -66,7 +76,7 @@ function BottomTransportBarComponent() {
 						label={canSeek ? "Previous scene" : NOTHING_TO_PLAY}
 						ariaLabel="Previous scene"
 						unavailable={!canSeek}
-						onClick={() => seekToAdjacentScene(-1)}
+						onClick={seekToPreviousScene}
 					>
 						<ChevronsLeft />
 					</TooltipIconButton>
@@ -85,7 +95,7 @@ function BottomTransportBarComponent() {
 						label={canSeek ? "Next scene" : NOTHING_TO_PLAY}
 						ariaLabel="Next scene"
 						unavailable={!canSeek}
-						onClick={() => seekToAdjacentScene(1)}
+						onClick={seekToNextScene}
 					>
 						<ChevronsRight />
 					</TooltipIconButton>
