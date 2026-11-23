@@ -15,5 +15,5 @@ export const readMedia = defineTool({
 	label: "Reading the media library",
 	execute: async (_input, ctx) =>
 		ctx.readProject().media.map(({ captions: _, ...item }) => item),
-	snapshot: true,
+	retention: "turn",
 });

@@ -6,6 +6,7 @@ import {
 	type ComponentProps,
 	type KeyboardEvent,
 } from "react";
+import { flushSync } from "react-dom";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import { clamp } from "@/lib/utils";
 
@@ -40,11 +41,16 @@ export function useNumberScrub({
 	const drag = useRef<{ x: number; y: number; from: number; moved: boolean }>(
 		null,
 	);
+	const scrub = useRef<HTMLDivElement>(null);
 
 	const commit = (next: string) => {
 		const parsed = Number.parseFloat(next);
 		if (!Number.isNaN(parsed)) onChange(quantize(parsed, min, max, step));
 		setDraft(null);
+	};
+	const closeToValue = () => {
+		flushSync(() => setDraft(null));
+		scrub.current?.focus();
 	};
 	const nudge = (steps: number) =>
 		onChange(quantize(value + steps * step, min, max, step));
@@ -59,16 +65,17 @@ export function useNumberScrub({
 		onBlur: (event) => commit(event.target.value),
 		onKeyDown: (event) => {
 			if (event.key === "Enter") commit(event.currentTarget.value);
-			if (event.key === "Escape") setDraft(null);
+			if (event.key === "Enter" || event.key === "Escape") closeToValue();
 		},
 		onDoubleClick: () => {
 			if (resetValue === undefined) return;
-			setDraft(null);
 			onChange(resetValue);
+			closeToValue();
 		},
 	} satisfies ComponentProps<"input">;
 
 	const scrubProps = {
+		ref: scrub,
 		role: "spinbutton" as const,
 		"aria-valuenow": value,
 		"aria-valuemin": min,

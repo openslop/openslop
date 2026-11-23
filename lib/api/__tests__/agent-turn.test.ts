@@ -367,15 +367,19 @@ describe("a turn that takes more than one step", () => {
 		expect(sent).toContain("the script as it stands");
 	});
 
-	it("drops the readings of turns that have already finished", async () => {
+	it("keeps only the latest reading of turns that have already finished", async () => {
 		await runTurn(TEXT_TURN, {
 			message: asked("now make it longer"),
-			history: recorded(spent, reading("call-1", "a script from last turn")),
+			history: recorded(
+				spent,
+				reading("call-1", "an older script"),
+				reading("call-2", "a script from last turn"),
+			),
 		});
 
-		expect(JSON.stringify(calls[0].prompt)).not.toContain(
-			"a script from last turn",
-		);
+		const sent = JSON.stringify(calls[0].prompt);
+		expect(sent).not.toContain("an older script");
+		expect(sent).toContain("a script from last turn");
 	});
 });
 

@@ -32,7 +32,7 @@ export const viewMedia = defineTool({
 			output.map(describeMedia).join("\n\n"),
 			...output.flatMap(({ images }) => images.map(({ url }) => url)),
 		),
-	snapshot: true,
+	retention: "turn",
 	label: "Looking at the media library",
 	execute: async ({ urls }, ctx) => {
 		const media = ctx.readProject().media;
