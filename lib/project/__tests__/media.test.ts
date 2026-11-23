@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-	checkMediaKind,
 	findMedia,
 	toMediaItems,
+	uploadedMedia,
 	type MediaItem,
 } from "../media";
 
@@ -82,7 +82,7 @@ describe("findMedia", () => {
 	});
 });
 
-describe("checkMediaKind", () => {
+describe("uploadedMedia", () => {
 	const media = toMediaItems(
 		[],
 		[upload("theme.mp3", "audio"), upload("cover.png")],
@@ -90,14 +90,18 @@ describe("checkMediaKind", () => {
 
 	it("refuses a library file of another kind, naming both", () => {
 		expect(() =>
-			checkMediaKind(media, "https://blob/theme.mp3", "image"),
+			uploadedMedia(media, "https://blob/theme.mp3", "image"),
 		).toThrow("theme is audio, not an image.");
 	});
 
-	it.each([
-		["a library file of the kind asked for", "https://blob/cover.png"],
-		["a stored file outside the library", "https://blob/elsewhere.mp4"],
-	])("takes %s", (_, url) => {
-		expect(() => checkMediaKind(media, url, "image")).not.toThrow();
+	it("takes a library file of the kind asked for as its record", () => {
+		expect(uploadedMedia(media, "https://blob/cover.png", "image")).toBe(
+			media[1],
+		);
+	});
+
+	it("takes a stored file outside the library as itself", () => {
+		const url = "https://blob/elsewhere.mp4";
+		expect(uploadedMedia(media, url, "image")).toEqual({ kind: "image", url });
 	});
 });
