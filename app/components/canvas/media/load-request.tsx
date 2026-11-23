@@ -8,7 +8,7 @@ import { useTake } from "./use-take";
 
 /** Loads the request that made `item` back into its draft, when a draft made it. */
 export function useLoadRequest(item: MediaItem): TilePrimary | undefined {
-	const { take } = useTake(item);
+	const take = useTake(item);
 	const { reuse } = useMediaPanel();
 	return (
 		take && {

@@ -15,13 +15,14 @@ export const MediaItemSchema = z.object({
 	/** Missing on media added before it was recorded. */
 	createdAt: z.string().optional(),
 	captions: z.array(CaptionSchema).optional(),
+	uploaded: z.boolean().optional(),
 });
 
 export type MediaItem = z.infer<typeof MediaItemSchema>;
 
 export type UploadedMedia = Pick<MediaItem, "kind" | "url" | "captions">;
 
-export type NewMedia = Upload & Pick<MediaItem, "captions">;
+export type NewMedia = Upload & Pick<MediaItem, "captions" | "uploaded">;
 
 const stem = (fileName: string) => fileName.replace(/\.[^.]*$/, "");
 

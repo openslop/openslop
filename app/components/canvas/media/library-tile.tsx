@@ -27,7 +27,6 @@ import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
 import { captionsActions, captionsPending } from "../elements/captions-menu";
 import { TileMenuItem } from "../elements/tile-actions";
-import { useTake } from "./use-take";
 import { usesFor, type MediaUse } from "./media-uses";
 
 /** Mounted as the menu opens, so the targets are read from the canvas as it is then. */
@@ -171,7 +170,6 @@ export function LibraryTile({
 	referencesOf?: string;
 }) {
 	const captions = useMediaCaptions(item);
-	const { uploaded } = useTake(item);
 	return (
 		<>
 			<MediaLibraryItem
@@ -186,7 +184,7 @@ export function LibraryTile({
 					</>
 				}
 			>
-				{uploaded && (
+				{item.uploaded && (
 					<div className="absolute right-1 bottom-1">
 						<UploadedLabel tooltip="Uploaded, not generated" />
 					</div>
