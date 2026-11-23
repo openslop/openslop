@@ -37,6 +37,21 @@ describe("toMediaItems", () => {
 	it("falls back to the kind when the file name has no words", () => {
 		expect(toMediaItems([], [upload(".mp3", "audio")])[0]?.name).toBe("audio");
 	});
+
+	it("preserves costUsd when provided and leaves it unset for uploads", () => {
+		expect(toMediaItems([], [{ ...upload("gen.png"), costUsd: 0.05 }])).toEqual(
+			[
+				{
+					name: "gen",
+					kind: "image",
+					url: "https://blob/gen.png",
+					createdAt: expect.any(String),
+					costUsd: 0.05,
+				},
+			],
+		);
+		expect(toMediaItems([], [upload("upload.png")])[0].costUsd).toBeUndefined();
+	});
 });
 
 describe("findMedia", () => {

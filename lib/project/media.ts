@@ -1,10 +1,10 @@
 import kebabCase from "lodash/kebabCase";
 import { matchSorter } from "match-sorter";
 import { z } from "zod";
+import { CaptionSchema } from "@/lib/connectors/types";
 import {
 	UPLOAD_KINDS,
 	UploadKindSchema,
-	type Upload,
 	type UploadKind,
 } from "@/lib/upload/upload-files";
 
@@ -14,9 +14,16 @@ export const MediaItemSchema = z.object({
 	url: z.string(),
 	/** Missing on media added before it was recorded. */
 	createdAt: z.string().optional(),
+	captions: z.array(CaptionSchema).optional(),
+	uploaded: z.boolean().optional(),
+	costUsd: z.number().optional(),
 });
 
 export type MediaItem = z.infer<typeof MediaItemSchema>;
+
+export type UploadedMedia = Pick<MediaItem, "kind" | "url" | "captions">;
+
+export type NewMedia = Omit<MediaItem, "createdAt">;
 
 const stem = (fileName: string) => fileName.replace(/\.[^.]*$/, "");
 
@@ -29,14 +36,13 @@ function uniqueName(base: string, taken: Set<string>): string {
 
 export function toMediaItems(
 	media: MediaItem[],
-	uploads: Upload[],
+	uploads: NewMedia[],
 ): MediaItem[] {
 	const taken = new Set(media.map((item) => item.name));
 	const createdAt = new Date().toISOString();
-	return uploads.map(({ kind, name, url }) => ({
-		name: uniqueName(kebabCase(stem(name)) || kind, taken),
-		kind,
-		url,
+	return uploads.map(({ name, ...upload }) => ({
+		...upload,
+		name: uniqueName(kebabCase(stem(name)) || upload.kind, taken),
 		createdAt,
 	}));
 }

@@ -77,19 +77,25 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			sendAutomaticallyWhen: (options) =>
 				!turn.current?.signal.aborted &&
 				lastAssistantMessageIsCompleteWithToolCalls(options),
-			onToolCall: async ({ toolCall }) => {
+			// Not awaited: the SDK awaits each call in turn, so this runs a step's calls together.
+			onToolCall: ({ toolCall }) => {
 				const signal = turn.current?.signal;
-				const outcome = await runTool(toolCall, signal);
-				if (signal?.aborted) return;
 				const call = {
 					tool: toolCall.toolName as AgentToolName,
 					toolCallId: toolCall.toolCallId,
 				};
-				addToolOutput(
-					outcome.ok
-						? { ...call, output: outcome.output }
-						: { ...call, state: "output-error", errorText: outcome.errorText },
-				);
+				void runTool(toolCall, signal).then((outcome) => {
+					if (signal?.aborted) return;
+					addToolOutput(
+						outcome.ok
+							? { ...call, output: outcome.output }
+							: {
+									...call,
+									state: "output-error",
+									errorText: outcome.errorText,
+								},
+					);
+				});
 			},
 			onError: (error) => toastError(error, "Sloppy could not finish that"),
 			throttle: 50,

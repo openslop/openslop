@@ -21,6 +21,8 @@ import {
 	VolumeControl,
 } from "./player-controls";
 
+const NOTHING_TO_PLAY = "Nothing to play yet";
+
 function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
 	const { showPlayer } = usePlayerPlacement();
@@ -31,6 +33,7 @@ function BottomTransportBarComponent() {
 	// panel that mounts one.
 	const canPlay = ready && segments.length > 0;
 	const canSeek = canPlay && player !== null;
+	const playLabel = playing ? "Pause" : "Play";
 
 	const seekToAdjacentScene = (direction: -1 | 1) => {
 		if (!player || segments.length === 0) return;
@@ -60,15 +63,17 @@ function BottomTransportBarComponent() {
 
 				<div className="flex items-center gap-1">
 					<TooltipIconButton
-						label="Previous scene"
-						disabled={!canSeek}
+						label={canSeek ? "Previous scene" : NOTHING_TO_PLAY}
+						ariaLabel="Previous scene"
+						unavailable={!canSeek}
 						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft />
 					</TooltipIconButton>
 					<TooltipIconButton
-						label={playing ? "Pause" : "Play"}
-						disabled={!canPlay}
+						label={canPlay ? playLabel : NOTHING_TO_PLAY}
+						ariaLabel={playLabel}
+						unavailable={!canPlay}
 						onClick={() => {
 							showPlayer();
 							player?.toggle();
@@ -77,8 +82,9 @@ function BottomTransportBarComponent() {
 						{playing ? <Pause /> : <Play />}
 					</TooltipIconButton>
 					<TooltipIconButton
-						label="Next scene"
-						disabled={!canSeek}
+						label={canSeek ? "Next scene" : NOTHING_TO_PLAY}
+						ariaLabel="Next scene"
+						unavailable={!canSeek}
 						onClick={() => seekToAdjacentScene(1)}
 					>
 						<ChevronsRight />

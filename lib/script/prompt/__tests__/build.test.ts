@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { durationOptions } from "@/lib/canvas/types";
-import { modelAttributes } from "@/lib/canvas/element-connector";
 import type { ModelRef } from "@/lib/connectors/types";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { ADAPT_SCRIPT_RULES } from "../adapt";
@@ -193,24 +192,21 @@ describe("buildScriptPrompt", () => {
 		expect(scriptRules([], settingsOf(), [])).not.toContain("raw XML");
 	});
 
-	it("lists each given model's own attribute values", () => {
-		const rules = scriptRules(
-			[],
-			settingsOf(),
-			modelAttributes([
-				{ type: "video", model: SEEDANCE },
-				{ type: "video", model: KLING },
-			]),
-		);
+	it("lists each model in play once, with only its own attribute values", () => {
+		const rules = scriptRules([], settingsOf(), [
+			{ type: "video", model: SEEDANCE },
+			{ type: "video", model: KLING },
+			{ type: "video", model: SEEDANCE },
+		]);
 
-		const lineOf = (model: string) =>
-			rules.split("\n").find((line) => line.includes(`model="${model}"`));
-		expect(lineOf("Seedance 2.5")).toContain(
-			`duration: ${durationOptions(30).join(", ")}.`,
-		);
-		expect(lineOf("Kling 3 Omni")).toContain(
-			`duration: ${durationOptions(15).join(", ")}.`,
-		);
+		const linesOf = (model: string) =>
+			rules.split("\n").filter((line) => line.includes(`model="${model}"`));
+		expect(linesOf("Seedance 2.5")).toEqual([
+			expect.stringContaining(`duration: ${durationOptions(30).join(", ")}.`),
+		]);
+		expect(linesOf("Kling 3 Omni")).toEqual([
+			expect.stringContaining(`duration: ${durationOptions(15).join(", ")}.`),
+		]);
 	});
 
 	it("leaves the model attributes out when no model has its own", () => {

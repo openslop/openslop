@@ -6,6 +6,7 @@ import {
 	type ComponentProps,
 	type KeyboardEvent,
 } from "react";
+import { flushSync } from "react-dom";
 import { usePointerDrag } from "@/lib/components/use-pointer-drag";
 import { clamp } from "@/lib/utils";
 
@@ -13,16 +14,22 @@ import { clamp } from "@/lib/utils";
 const PX_PER_STEP = 3;
 const DRAG_THRESHOLD_PX = 3;
 
-function quantize(value: number, min: number, max: number, step: number) {
+function quantize(
+	value: number,
+	min: number,
+	max: number | undefined,
+	step: number,
+) {
 	const decimals = (String(step).split(".")[1] ?? "").length;
 	const snapped = Number((Math.round(value / step) * step).toFixed(decimals));
-	return clamp(snapped, min, max);
+	return clamp(snapped, min, max ?? Infinity);
 }
 
 export type NumberScrubOptions = {
 	value: number;
 	min: number;
-	max: number;
+	/** Left out, the value has no ceiling. */
+	max?: number;
 	step: number;
 	onChange: (value: number) => void;
 	resetValue?: number;
@@ -40,11 +47,16 @@ export function useNumberScrub({
 	const drag = useRef<{ x: number; y: number; from: number; moved: boolean }>(
 		null,
 	);
+	const scrub = useRef<HTMLDivElement>(null);
 
 	const commit = (next: string) => {
 		const parsed = Number.parseFloat(next);
 		if (!Number.isNaN(parsed)) onChange(quantize(parsed, min, max, step));
 		setDraft(null);
+	};
+	const closeToValue = () => {
+		flushSync(() => setDraft(null));
+		scrub.current?.focus();
 	};
 	const nudge = (steps: number) =>
 		onChange(quantize(value + steps * step, min, max, step));
@@ -59,16 +71,17 @@ export function useNumberScrub({
 		onBlur: (event) => commit(event.target.value),
 		onKeyDown: (event) => {
 			if (event.key === "Enter") commit(event.currentTarget.value);
-			if (event.key === "Escape") setDraft(null);
+			if (event.key === "Enter" || event.key === "Escape") closeToValue();
 		},
 		onDoubleClick: () => {
 			if (resetValue === undefined) return;
-			setDraft(null);
 			onChange(resetValue);
+			closeToValue();
 		},
 	} satisfies ComponentProps<"input">;
 
 	const scrubProps = {
+		ref: scrub,
 		role: "spinbutton" as const,
 		"aria-valuenow": value,
 		"aria-valuemin": min,

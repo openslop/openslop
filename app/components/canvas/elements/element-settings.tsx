@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import type { GeneratedElement } from "@/lib/canvas/types";
 import { elementSchema } from "@/lib/canvas/element-connector";
 import {
@@ -27,15 +28,14 @@ export function ElementSettings({ element }: { element: GeneratedElement }) {
 			</SimpleTooltip>
 			<PopoverContent align="start" className="w-64">
 				<SectionTitle className="mb-2">Settings</SectionTitle>
-				<div className="flex flex-col gap-2">
+				<div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
 					{defs.map((def) => (
-						<div
-							key={def.key}
-							className="flex items-center justify-between gap-3"
-						>
-							<span className="shrink-0 text-label">{def.label}</span>
-							<AttributeBadge element={element} def={def} />
-						</div>
+						<Fragment key={def.key}>
+							<span className="text-label">{def.label}</span>
+							<div className="flex justify-end">
+								<AttributeBadge element={element} def={def} />
+							</div>
+						</Fragment>
 					))}
 				</div>
 			</PopoverContent>

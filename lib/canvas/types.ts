@@ -66,6 +66,12 @@ export const isCaptionable = (type: ContentType): boolean => {
 	return spec.captionable === true;
 };
 
+/** A file of this kind can be captioned when some element that makes that kind is. */
+export const isKindCaptionable = (kind: ResultKind): boolean =>
+	keysOf(CONTENT_TYPES).some(
+		(type) => CONTENT_TYPES[type].outputKind === kind && isCaptionable(type),
+	);
+
 export const ContentTypeSchema = z.enum(keysOf(CONTENT_TYPES));
 
 export const DURATION_MIN = 4;
@@ -98,7 +104,8 @@ export const VOLUME_OPTIONS = [
 	"10",
 ] as const;
 
-export const LOOPS_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8"] as const;
+export const LOOPS_MIN = 1;
+export const LOOPS_RULE = `A whole number, ${LOOPS_MIN} or more.`;
 
 export const DEFAULT_LOOPS = "1";
 

@@ -1,18 +1,14 @@
 "use client";
 
-import compact from "lodash/compact";
 import { useState, type ReactNode } from "react";
-import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import {
 	CaptionsReady,
 	CaptionsAlert,
 	Hourglass,
 	MagicCaptions,
-	RotateCcw,
-	Trash2,
 } from "@/components/ui/icon";
-import { Spinner } from "@/components/ui/spinner";
 import {
 	SimpleTooltip,
 	Tooltip,
@@ -22,6 +18,11 @@ import {
 import type { ContentElement } from "@/lib/canvas/types";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { useElementCaptions } from "../hooks/use-element-captions";
+import {
+	captionsActions,
+	captionsPending,
+	generateCaptionsItem,
+} from "./captions-menu";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
 
@@ -32,7 +33,7 @@ interface Face {
 	label: string;
 	icon: ReactNode;
 	variant?: "destructive";
-	onClick?: () => void;
+	onSelect?: () => void;
 }
 
 const NOT_GENERATED: Face = {
@@ -52,26 +53,10 @@ function faceOf(
 ): Face | null {
 	if (!result) return NOT_GENERATED;
 	if (isGenerationActive(status)) return GENERATING;
-	if (captions.status === "queued")
-		return { label: "Captions queued", icon: <Hourglass /> };
-	if (captions.status !== "idle")
-		return {
-			label: "Generating captions…",
-			icon: <Spinner />,
-		};
+	const pending = captionsPending(captions.status);
+	if (pending) return pending;
 	if (captions.captioned) return null;
-	if (captions.error)
-		return {
-			label: `Captions failed: ${captions.error}. Try again`,
-			icon: <CaptionsAlert />,
-			variant: "destructive",
-			onClick: captions.generate,
-		};
-	return {
-		label: "Generate captions",
-		icon: <MagicCaptions />,
-		onClick: captions.generate,
-	};
+	return generateCaptionsItem(captions);
 }
 
 function FaceButton({ face }: { face: Face }) {
@@ -80,8 +65,8 @@ function FaceButton({ face }: { face: Face }) {
 			<HeaderIconButton
 				ariaLabel={face.label}
 				variant={face.variant ?? "quiet"}
-				unavailable={!face.onClick}
-				onClick={face.onClick}
+				unavailable={!face.onSelect}
+				onClick={face.onSelect}
 			>
 				{face.icon}
 			</HeaderIconButton>
@@ -95,30 +80,6 @@ function readyLabel(captions: Captions) {
 	return captions.edited
 		? "Captions ready, edited in the player"
 		: "Captions ready";
-}
-
-function menuOf(captions: Captions, onRemove: () => void): ActionMenuItem[] {
-	return compact([
-		{
-			key: "regenerate",
-			label: "Regenerate captions",
-			icon: <MagicCaptions />,
-			onSelect: captions.generate,
-		},
-		captions.edited && {
-			key: "reset",
-			label: "Reset edits",
-			icon: <RotateCcw />,
-			onSelect: captions.reset,
-		},
-		{
-			key: "remove",
-			label: "Remove captions",
-			icon: <Trash2 />,
-			variant: "destructive",
-			onSelect: onRemove,
-		},
-	]);
 }
 
 export function ElementCaptionsButton({
@@ -138,7 +99,7 @@ export function ElementCaptionsButton({
 		<>
 			<Tooltip>
 				<ActionMenu
-					items={menuOf(captions, () => setRemoving(true))}
+					items={captionsActions(captions, () => setRemoving(true))}
 					align="end"
 				>
 					<TooltipTrigger asChild>

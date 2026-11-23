@@ -1,8 +1,6 @@
 import type { Editor } from "slate";
 import { getAssets } from "@/lib/canvas/assets";
-import { modelAttributes } from "@/lib/canvas/element-connector";
-import { connectorOf, ContentTypeSchema } from "@/lib/canvas/types";
-import { resolveModel } from "@/lib/connectors/models";
+import { defaultElementModels } from "@/lib/canvas/element-connector";
 import type { LLMConnector } from "@/lib/connectors/types";
 import type { ScriptSettings } from "@/lib/project/types";
 import { buildScriptPrompt, type ScriptSource } from "./prompt/build";
@@ -20,15 +18,7 @@ export async function streamScript(
 	const { system, prompt } = buildScriptPrompt(
 		getAssets(editor.children),
 		settings,
-		modelAttributes(
-			ContentTypeSchema.options.map((type) => ({
-				type,
-				model: resolveModel(
-					connectorOf(type),
-					editor.defaultModels()[connectorOf(type)],
-				),
-			})),
-		),
+		defaultElementModels(editor.defaultModels()),
 		source,
 	);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { CloseButton } from "@/components/ui/close-button";
 import {
 	Dialog,
@@ -9,11 +10,11 @@ import {
 	DialogDescription,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Link } from "@/components/ui/icon";
+import { Link, Tag } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Separator } from "@/components/ui/separator";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
-import { formatDateTime } from "@/lib/format";
+import { formatCost, formatDateTime } from "@/lib/format";
 import { toastError } from "@/lib/toast-error";
 
 export type Viewed = {
@@ -24,6 +25,8 @@ export type Viewed = {
 	context?: string;
 	/** When the media was made, for media that records it. */
 	createdAt?: string;
+	/** What generating it cost, for media that records it. */
+	costUsd?: number;
 };
 
 function ViewerActions({ src }: Pick<Viewed, "src">) {
@@ -51,6 +54,7 @@ export function MediaViewerDialog({
 	name,
 	context,
 	createdAt,
+	costUsd,
 	open,
 	onOpenChange,
 }: Viewed & { open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -70,10 +74,18 @@ export function MediaViewerDialog({
 				<div className="flex items-center justify-between gap-3">
 					<div className="flex min-w-0 flex-col">
 						<DialogTitle className="truncate text-label">{name}</DialogTitle>
-						<DialogDescription className="text-label-xs">
-							{[context, createdAt && `Created ${formatDateTime(createdAt)}`]
-								.filter(Boolean)
-								.join(" · ")}
+						<DialogDescription className="flex items-center gap-1.5 text-label-xs">
+							<span className="truncate">
+								{[context, createdAt && `Created ${formatDateTime(createdAt)}`]
+									.filter(Boolean)
+									.join(" · ")}
+							</span>
+							{costUsd !== undefined && (
+								<Badge variant="muted" size="inlineXs">
+									<Tag />
+									<span>{formatCost(costUsd)}</span>
+								</Badge>
+							)}
 						</DialogDescription>
 					</div>
 					<ViewerActions src={src} />

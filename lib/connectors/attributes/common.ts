@@ -1,19 +1,12 @@
 import { z } from "zod";
-import {
-	Freeze,
-	Image,
-	Monitor,
-	Motion,
-	Repeat,
-	Timer,
-	Volume2,
-} from "@/components/ui/icon";
-import { parseNumber } from "@/lib/canvas/element-attributes";
+import { Freeze, Image, Monitor, Motion, Repeat } from "@/components/ui/icon";
+import { boundsOf, parseNumber } from "@/lib/canvas/element-attributes";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
 	durationOptions,
-	LOOPS_OPTIONS,
+	LOOPS_MIN,
+	LOOPS_RULE,
 	TOGGLE_OFF,
 	TOGGLE_ON,
 	VOLUME_OPTIONS,
@@ -26,13 +19,31 @@ import {
 } from "@/lib/render/motion-effect-names";
 import type { AttributeDef } from "./schema";
 
-const volumeValue = z.enum(VOLUME_OPTIONS);
+/** A slider over consecutive whole-number options, which stay the only values it accepts. */
+const rangeEdit = (options: readonly string[]) => ({
+	kind: "range" as const,
+	value: z.enum(options),
+	...boundsOf(options),
+});
+
+const volumeRange = rangeEdit(VOLUME_OPTIONS);
 
 export const toggleValue = z.enum([TOGGLE_OFF, TOGGLE_ON]);
 
 const secondsValue = z
 	.string()
 	.refine((value) => parseNumber(value) !== undefined);
+
+const loopsValue = z
+	.string()
+	.refine(
+		(value) => {
+			const count = parseNumber(value) ?? 0;
+			return Number.isInteger(count) && count >= LOOPS_MIN;
+		},
+		{ message: LOOPS_RULE },
+	)
+	.describe(LOOPS_RULE);
 
 export const nameDef: AttributeDef = {
 	key: "name",
@@ -49,7 +60,7 @@ export const OWN_MODEL_DEFS: readonly AttributeDef[] = [
 export const volumeDef = (defaultValue: string): AttributeDef => ({
 	key: "volume",
 	label: "Volume",
-	edit: { kind: "enum", value: volumeValue, icon: Volume2 },
+	edit: volumeRange,
 	default: defaultValue,
 });
 
@@ -64,7 +75,7 @@ export const durationDef = (maxSec: number): AttributeDef => ({
 	key: "duration",
 	label: "Duration",
 	unit: "s",
-	edit: { kind: "enum", value: z.enum(durationOptions(maxSec)), icon: Timer },
+	edit: rangeEdit(durationOptions(maxSec)),
 	default: DEFAULT_DURATION,
 	perModel: true,
 });
@@ -72,7 +83,7 @@ export const durationDef = (maxSec: number): AttributeDef => ({
 export const loopsDef: AttributeDef = {
 	key: "loops",
 	label: "Loops",
-	edit: { kind: "enum", value: z.enum(LOOPS_OPTIONS), icon: Repeat },
+	edit: { kind: "count", value: loopsValue, min: LOOPS_MIN },
 	default: DEFAULT_LOOPS,
 };
 

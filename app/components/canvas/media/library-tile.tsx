@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { useSlateStatic } from "slate-react";
 import {
 	DropdownMenuItem,
@@ -7,18 +8,25 @@ import {
 	DropdownMenuSubContent,
 	DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Alternative, LayersPlus } from "@/components/ui/icon";
+import {
+	ActionMenuItems,
+	type ActionMenuItem,
+} from "@/components/ui/action-menu";
+import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
+import { Alternative, LayersPlus, MagicCaptions } from "@/components/ui/icon";
 import { addElementReferences } from "@/lib/canvas/asset-ops";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
-import type { GeneratedElement } from "@/lib/canvas/types";
+import { isKindCaptionable, type GeneratedElement } from "@/lib/canvas/types";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useBuildContext } from "@/lib/generation/use-build-context";
+import { useCaptionMedia } from "@/lib/captions/use-caption-media";
 import type { MediaItem } from "@/lib/project/media";
+import { useProject } from "@/lib/project/use-project";
 import { toastError } from "@/lib/toast-error";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
-import { TileMenuItem } from "../elements/tile-actions";
-import { useTake } from "./use-take";
+import { captionsActions, captionsPending } from "../elements/captions-menu";
+import { DeleteItem, TileMenuItem } from "../elements/tile-actions";
 import { usesFor, type MediaUse } from "./media-uses";
 
 /** Mounted as the menu opens, so the targets are read from the canvas as it is then. */
@@ -98,6 +106,79 @@ function AddReferenceItem({
 	);
 }
 
+/** A library file's captions: generated from its menu, kept on the file. */
+function useMediaCaptions(item: MediaItem) {
+	const captionMedia = useCaptionMedia();
+	const setMediaCaptions = useProject((state) => state.setMediaCaptions);
+	const [generating, startGenerating] = useTransition();
+	const [removing, setRemoving] = useState(false);
+	const captions = {
+		captioned: item.captions !== undefined,
+		generate: () =>
+			startGenerating(async () => {
+				try {
+					await captionMedia(item);
+				} catch (error) {
+					toastError(error, `Couldn't generate captions for ${item.name}`);
+				}
+			}),
+	};
+	return {
+		items: captionsActions(captions, () => setRemoving(true)),
+		pending: captionsPending(generating ? "generating" : "idle"),
+		dialog: (
+			<ConfirmDeleteDialog
+				target={removing ? item.name : undefined}
+				onClose={() => setRemoving(false)}
+				title={(name) => `Remove ${name}'s captions?`}
+				description="Elements already using this file keep their captions. Getting them back means generating them again."
+				actionLabel="Remove captions"
+				onConfirm={() => setMediaCaptions(item.url, undefined)}
+			/>
+		),
+	};
+}
+
+/** Captions as a submenu of their actions; while they generate, the spinner in their place. */
+function CaptionsItem({
+	items,
+	pending,
+}: {
+	items: ActionMenuItem[];
+	pending: ReturnType<typeof captionsPending>;
+}) {
+	return (
+		<DropdownMenuSub>
+			<DropdownMenuSubTrigger disabled={pending !== null}>
+				{pending?.icon ?? <MagicCaptions />}
+				{pending?.label ?? "Captions"}
+			</DropdownMenuSubTrigger>
+			<DropdownMenuSubContent>
+				<ActionMenuItems items={items} />
+			</DropdownMenuSubContent>
+		</DropdownMenuSub>
+	);
+}
+
+/** Asks before taking a piece of media out of the project. */
+function useDeleteMedia(name: string) {
+	const removeMedia = useProject((state) => state.removeMedia);
+	const [confirming, setConfirming] = useState(false);
+	return {
+		request: () => setConfirming(true),
+		dialog: (
+			<ConfirmDeleteDialog
+				target={confirming ? name : undefined}
+				onClose={() => setConfirming(false)}
+				title={(target) => `Delete ${target}?`}
+				description="This deletes it from the project's media. It can't be undone. Elements already using it keep it."
+				actionLabel="Delete"
+				onConfirm={removeMedia}
+			/>
+		),
+	};
+}
+
 /** A piece of the project's media, with what the Media panel can do with it. */
 export function LibraryTile({
 	item,
@@ -107,24 +188,31 @@ export function LibraryTile({
 	/** The element the tile adds itself to the references of, when it takes any. */
 	referencesOf?: string;
 }) {
-	const { take, traced } = useTake(item);
+	const captions = useMediaCaptions(item);
+	const remove = useDeleteMedia(item.name);
 	return (
-		<MediaLibraryItem
-			item={item}
-			menu={
-				<>
-					{referencesOf && (
-						<AddReferenceItem item={item} elementId={referencesOf} />
-					)}
-					<UseAsItem item={item} />
-				</>
-			}
-		>
-			{traced && !take && (
-				<div className="absolute right-1 bottom-1">
-					<UploadedLabel tooltip="Uploaded, not generated" />
-				</div>
-			)}
-		</MediaLibraryItem>
+		<>
+			<MediaLibraryItem
+				item={item}
+				menu={
+					<>
+						{referencesOf && (
+							<AddReferenceItem item={item} elementId={referencesOf} />
+						)}
+						{isKindCaptionable(item.kind) && <CaptionsItem {...captions} />}
+						<UseAsItem item={item} />
+						<DeleteItem onSelect={remove.request} />
+					</>
+				}
+			>
+				{item.uploaded && (
+					<div className="absolute right-1 bottom-1">
+						<UploadedLabel tooltip="Uploaded, not generated" />
+					</div>
+				)}
+			</MediaLibraryItem>
+			{captions.dialog}
+			{remove.dialog}
+		</>
 	);
 }

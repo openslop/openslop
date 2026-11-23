@@ -5,13 +5,10 @@ import { DEFAULT_MODELS } from "@/lib/connectors/models";
 import { TTS_ATTRIBUTES } from "@/lib/connectors/tts/attributes";
 import { DEFAULT_CONNECTOR_REGISTRY } from "@/lib/connectors/registry";
 import { videoAttributesFor } from "@/lib/connectors/video/attributes";
-import type { ModelRef } from "@/lib/connectors/types";
 import { createCanvasElement } from "../create-canvas-element";
 import {
 	attributeSchemaFor,
-	elementModel,
 	elementSchema,
-	modelAttributes,
 	resolveElementConnector,
 } from "../element-connector";
 import { ElementTypeSchema, type ContentElement } from "../types";
@@ -183,27 +180,5 @@ describe("media drafts", () => {
 		const connector = resolveElementConnector(draft, registry, [draft]);
 		expect(connector.type).toBe("image");
 		expect(connector.config).toBe(registry.image);
-	});
-});
-
-describe("modelAttributes", () => {
-	const SEEDANCE: ModelRef = { provider: "runware", model: "Seedance 2.5" };
-	const KLING: ModelRef = { provider: "runware", model: "Kling 3 Omni" };
-
-	it("gives each model on the canvas once, with only its own attributes", () => {
-		const found = modelAttributes(
-			[
-				el("video", SEEDANCE),
-				el("video", KLING),
-				el("video", SEEDANCE),
-				el("speech"),
-			].map(elementModel),
-		);
-
-		expect(found.map(({ model }) => model)).toEqual([SEEDANCE, KLING]);
-		expect(found[0]?.defs.map(({ key }) => key)).toEqual([
-			"resolution",
-			"duration",
-		]);
 	});
 });

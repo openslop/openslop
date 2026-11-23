@@ -10,6 +10,7 @@ import { MUSIC_PROMPT_FORMAT } from "@/lib/script/prompt/music-prompt";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
+import compact from "lodash/compact";
 import { plural } from "@/lib/format";
 import { defineTool } from "./define-tool";
 
@@ -83,15 +84,19 @@ export const editScript = defineTool({
 		return `Editing the script (${count} ${plural(count, "change")})`;
 	},
 	execute: async ({ ops }, ctx) => {
-		const { applied, failures } = ctx.editScript(ops);
-		if (failures.length === 0) {
-			return `Applied ${applied} ${plural(applied, "operation")}. The script has changed; read it again before editing further.`;
-		}
-		return [
-			`Applied ${applied} of ${ops.length} operations.`,
-			`Failed: ${failures.join("; ")}.`,
-			"Read the script again before retrying; the ids you used may be stale.",
-		].join(" ");
+		if (!ctx.isScriptReadCurrent())
+			throw new Error(
+				"The script has been modified since read, either by the user or by a tool. Read it again before attempting to edit it.",
+			);
+		const { applied, failures, inserted } = ctx.editScript(ops);
+		return compact([
+			failures.length === 0
+				? `Applied ${applied} ${plural(applied, "operation")}.`
+				: `Applied ${applied} of ${ops.length} operations.`,
+			inserted.length > 0 && `Inserted ${inserted.join(", ")}, in order.`,
+			failures.length > 0 &&
+				`Failed: ${failures.join("; ")}. Read the script before retrying.`,
+		]).join(" ");
 	},
 	draftsScript: true,
 });

@@ -31,19 +31,26 @@ function ModelPicker() {
 	);
 }
 
+function suggestionBlocker(sloppyBusy: boolean, hasOwnText: boolean) {
+	if (sloppyBusy) return "Wait for Sloppy to finish";
+	if (hasOwnText) return "Clear your message to get a suggestion";
+	return null;
+}
+
 function SuggestionButton({
 	onPick,
-	disabled,
+	blocker,
 }: {
 	onPick: () => void;
-	disabled: boolean;
+	blocker: string | null;
 }) {
 	return (
 		<TooltipIconButton
-			label="Suggest a prompt"
+			label={blocker ?? "Suggest a prompt"}
+			ariaLabel="Suggest a prompt"
 			variant="quiet"
 			size="sm"
-			disabled={disabled}
+			unavailable={blocker !== null}
 			onMouseDown={keepFocus}
 			onClick={onPick}
 		>
@@ -93,7 +100,7 @@ export function SloppyComposer() {
 					<ModelPicker />
 					<SuggestionButton
 						onPick={suggest}
-						disabled={loading || (hasText && !showsSuggestion)}
+						blocker={suggestionBlocker(loading, hasText && !showsSuggestion)}
 					/>
 				</div>
 				{loading ? (
@@ -102,9 +109,10 @@ export function SloppyComposer() {
 					</TooltipIconButton>
 				) : (
 					<TooltipIconButton
-						label="Send to Sloppy"
+						label={hasText ? "Send to Sloppy" : "Type a message first"}
+						ariaLabel="Send to Sloppy"
 						onClick={submit}
-						disabled={!hasText}
+						unavailable={!hasText}
 					>
 						<CornerDownLeft />
 					</TooltipIconButton>

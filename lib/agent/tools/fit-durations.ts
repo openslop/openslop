@@ -100,7 +100,7 @@ export const fitDurations = defineTool({
 			unknown.length > 0 &&
 				`Not a visual on the canvas: ${unknown.join(", ")}. Read the script again.`,
 			failures.length > 0 &&
-				`Failed: ${failures.join("; ")}. Read the script again; the ids may be stale.`,
+				`Failed: ${failures.join("; ")}. Read the script before retrying.`,
 		);
 	},
 	draftsScript: true,

@@ -119,7 +119,7 @@ describe("ElementHistoryPopover", () => {
 		renderPopover();
 		await click('button[aria-label="Generation history"]');
 
-		await click('button[aria-label="Restore"]');
+		await click('button[aria-label="Use this version"]');
 
 		const [take] = history.versions;
 		expect(restoreResult).toHaveBeenCalledWith(take);

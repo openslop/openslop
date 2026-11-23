@@ -3,6 +3,8 @@ import type { z } from "zod";
 import type { IconComponent } from "@/components/ui/icon";
 import type { AgentToolContext } from "./context";
 
+export type Retention = "always" | "turn" | "latest";
+
 /**
  * One tool, whole: the spec the model is offered and the executor the editor
  * runs. Specs declare no execute of their own because every tool runs against
@@ -18,8 +20,8 @@ export function defineTool<Input, Output>(def: {
 	label: string | ((input: Partial<Input>) => string);
 	toModelOutput?: Tool<Input, Output>["toModelOutput"];
 	execute: (input: Input, ctx: AgentToolContext) => Promise<Output>;
-	/** Output that is only true until the next edit, so only its own turn keeps it. */
-	snapshot?: true;
+	/** How long history keeps the output: always, its own turn, or while it is the latest call of its tool. */
+	retention?: Retention;
 	/** The call is part of writing the script, so what is rendered from the canvas is mid-change. */
 	draftsScript?: true;
 }) {
@@ -27,7 +29,7 @@ export function defineTool<Input, Output>(def: {
 		input,
 		output,
 		execute,
-		snapshot,
+		retention = "always",
 		draftsScript,
 		icon,
 		label,
@@ -44,7 +46,7 @@ export function defineTool<Input, Output>(def: {
 		icon,
 		label: typeof label === "function" ? label : () => label,
 	};
-	return { input, execute, spec, snapshot, draftsScript, present };
+	return { input, execute, spec, retention, draftsScript, present };
 }
 
 /** A tool-result image, handed to the model by URL for the provider to fetch. */

@@ -13,6 +13,13 @@ type AttributeEdit =
 			value: z.ZodEnum<Record<string, string>>;
 			icon: IconComponent;
 	  }
+	/** A whole number from `min` to `max`, dragged along a slider. `value` holds every one of them. */
+	| {
+			kind: "range";
+			value: z.ZodEnum<Record<string, string>>;
+			min: number;
+			max: number;
+	  }
 	/** A boolean stored as "true" or "false", switched between two iconed faces. */
 	| {
 			kind: "toggle";
@@ -23,6 +30,8 @@ type AttributeEdit =
 	| { kind: "text"; value?: undefined; placeholder?: string; rows?: number }
 	/** A count of seconds typed in, at least `min`. Empty leaves it unset. */
 	| { kind: "seconds"; value: z.ZodType<string>; min: number }
+	/** A whole number, at least `min` and with no ceiling, typed in or scrubbed. */
+	| { kind: "count"; value: z.ZodType<string>; min: number }
 	/** Image URLs as tiles; `continuity` adds the previous visual's pictures and their link toggle. */
 	| { kind: "images"; value: z.ZodType<string>; continuity?: true }
 	/** One picture to open on: the visual before, or an image URL. */
@@ -43,9 +52,11 @@ export interface AttributeDef {
 	perModel?: boolean;
 }
 
-/** The values a menu or toggle offers; none for a free-form attribute. */
+/** The values a menu, slider or toggle offers; none for a free-form attribute. */
 export const optionsOf = ({ edit }: AttributeDef): readonly string[] =>
-	edit?.kind === "enum" || edit?.kind === "toggle" ? edit.value.options : [];
+	edit?.kind === "enum" || edit?.kind === "range" || edit?.kind === "toggle"
+		? edit.value.options
+		: [];
 
 /** An ordered, immutable set of attribute definitions for a connector type/model. */
 export class AttributeSchema {

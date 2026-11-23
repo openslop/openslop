@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { snapDurationUp } from "../types";
+import { isKindCaptionable, snapDurationUp } from "../types";
 
 describe("snapDurationUp", () => {
 	it("takes the shortest option that still covers the seconds asked for", () => {
@@ -14,5 +14,13 @@ describe("snapDurationUp", () => {
 
 	it("holds the shortest option for anything under it", () => {
 		expect(snapDurationUp(0, 15)).toBe(4);
+	});
+});
+
+describe("isKindCaptionable", () => {
+	it("captions video and audio files, never images", () => {
+		expect(isKindCaptionable("video")).toBe(true);
+		expect(isKindCaptionable("audio")).toBe(true);
+		expect(isKindCaptionable("image")).toBe(false);
 	});
 });

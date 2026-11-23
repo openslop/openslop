@@ -29,6 +29,7 @@ export function AssetTile({
 	previewKind = "image",
 	context,
 	createdAt,
+	costUsd,
 	Icon,
 	status = "idle",
 	startedAt = null,
@@ -45,6 +46,7 @@ export function AssetTile({
 	/** What the picture is, as its larger view says. */
 	context?: string;
 	createdAt?: string;
+	costUsd?: number;
 	Icon: IconComponent;
 	status?: GenerationStatus;
 	startedAt?: number | null;
@@ -59,7 +61,14 @@ export function AssetTile({
 }) {
 	const viewer = useViewLarger(
 		previewUrl
-			? { src: previewUrl, kind: previewKind, name, context, createdAt }
+			? {
+					src: previewUrl,
+					kind: previewKind,
+					name,
+					context,
+					createdAt,
+					costUsd,
+				}
 			: undefined,
 	);
 	const fallbackContent =

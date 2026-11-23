@@ -22,12 +22,12 @@ export async function* runRender(
 	});
 	yield { status: "rendering", progress: 0 };
 
-	const progress = () =>
+	const fetchProgress = () =>
 		apiJson("/api/render/progress", RenderProgress, {
 			method: "POST",
 			body: handle,
 		});
-	for await (const result of pollUpdates(progress)) {
+	for await (const result of pollUpdates(fetchProgress)) {
 		if (result.type === "error") throw new Error(result.message);
 		if (result.type === "done") {
 			yield { status: "done", url: result.url, size: result.size };
