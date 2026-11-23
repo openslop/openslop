@@ -1,11 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+// @vitest-environment happy-dom
+
+import { act, createElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { buildNode } from "@/lib/generation/generation-graph";
 import { GenerationQueue } from "@/lib/generation/queue";
 import { buildCtx } from "@/lib/generation/__tests__/_context";
 import type { Upload } from "@/lib/upload/upload-files";
+import { useAddDraftTakesToMedia } from "../use-add-draft-takes-to-media";
 
-vi.mock("react", () => ({ useEffect: (effect: () => void) => effect() }));
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 const queue = new GenerationQueue();
 vi.mock("@/lib/generation/generation-queue-provider", () => ({
@@ -13,20 +18,31 @@ vi.mock("@/lib/generation/generation-queue-provider", () => ({
 }));
 
 const added: Upload[] = [];
+const addMedia = (media: Upload[]) => added.push(...media);
 vi.mock("@/lib/project/use-project", () => ({
-	useProject: () => (media: Upload[]) => added.push(...media),
+	useProject: () => addMedia,
 }));
 
-const { useAddDraftTakesToMedia } =
-	await import("../use-add-draft-takes-to-media");
+function Probe() {
+	useAddDraftTakesToMedia();
+	return null;
+}
+
+let root: Root;
+
+beforeEach(() => {
+	added.length = 0;
+	root = createRoot(document.createElement("div"));
+	act(() => root.render(createElement(Probe)));
+});
+
+afterEach(() => act(() => root.unmount()));
 
 describe("useAddDraftTakesToMedia", () => {
 	it("adds a media draft take to the media", () => {
-		useAddDraftTakesToMedia();
 		const draft = asset("asset_media_image", { text: "A wizard" });
-		const node = buildNode(draft, buildCtx([draft]));
 
-		queue.commitResult(node, {
+		queue.commitResult(buildNode(draft, buildCtx([draft])), {
 			imageUrl: "https://blob/wizard.png",
 			durationSec: 0,
 		});
@@ -41,10 +57,22 @@ describe("useAddDraftTakesToMedia", () => {
 	});
 
 	it("leaves results of anything but a draft out of the media", () => {
-		added.length = 0;
 		const avatar = asset("asset_avatar", { name: "Mia", text: "A girl" });
+
 		queue.commitResult(buildNode(avatar, buildCtx([avatar])), {
 			imageUrl: "https://blob/mia.png",
+			durationSec: 0,
+		});
+
+		expect(added).toEqual([]);
+	});
+
+	it("stops adding takes once unmounted", () => {
+		act(() => root.unmount());
+		const draft = asset("asset_media_image", { text: "A wizard" });
+
+		queue.commitResult(buildNode(draft, buildCtx([draft])), {
+			imageUrl: "https://blob/wizard.png",
 			durationSec: 0,
 		});
 

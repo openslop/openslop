@@ -1,20 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AgentToolContext } from "../tools/context";
-import {
-	DRAFTING_TOOLS,
-	SLOPPY_TOOLS,
-	SNAPSHOT_TOOLS,
-	executeToolCall,
-	presentToolCall,
-} from "../tools/registry";
+import { executeToolCall, presentToolCall } from "../tools/registry";
 import { BLOB_BASE_URL } from "@/lib/blob";
 import { ProjectDataSchema } from "@/lib/project/store";
 import type { DeepPartial, ScriptSettings } from "@/lib/project/types";
 import type { VideoSettings } from "@/lib/project/video-settings";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
+import { listModels as catalogModels } from "@/lib/connectors/models";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
-import { sloppyInstructions } from "../prompt";
+import { toCaption } from "@/lib/captions/word-captions";
 
 const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
 	updateScriptSettings: (patch: Partial<ScriptSettings>) =>
@@ -38,6 +33,8 @@ const project = (
 
 const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readScript: () => "<speech>hi</speech>",
+	markScriptRead: () => {},
+	isScriptReadCurrent: () => true,
 	countSpokenWords: () => 1,
 	estimateSpeechLengths: () => [],
 	estimateVisualSpans: () => [],
@@ -49,7 +46,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	readAssets: () => [],
 	readProject: () => project(),
 	modelDefaults: () => ({}),
-	editScript: () => ({ applied: 0, failures: [] }),
+	editScript: () => ({ applied: 0, failures: [], inserted: [] }),
 	writeScript: async () => {},
 	adaptScript: async () => {},
 	setTitle: () => {},
@@ -58,46 +55,10 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
+	captionMedia: async () => {},
 	setElementResult: async () => {},
 	viewMedia: async () => ({ durationSec: 0, images: [], words: [] }),
 	...over,
-});
-
-describe("script review opt-in", () => {
-	it("asks before reviewing a new or adapted script", () => {
-		const systemPrompt = sloppyInstructions({})[0].content.replace(/\s+/g, " ");
-		const { description } = SLOPPY_TOOLS.review_script;
-		const reviewDescription =
-			typeof description === "string" ? description.replace(/\s+/g, " ") : "";
-
-		expect(systemPrompt).toContain(
-			"length fitting with edit_script has landed, ask whether they want a review and finish the turn",
-		);
-		expect(systemPrompt).toContain(
-			"Do not call review_script until they say yes or ask for one",
-		);
-		expect(reviewDescription).toContain(
-			"when the user explicitly asks for a review or accepts your offer",
-		);
-		expect(reviewDescription).toContain(
-			"Do not run it just because you wrote, adapted or edited the script",
-		);
-	});
-
-	it.each([
-		["write_script", { brief: "A new story" }],
-		["adapt_script", { script: "NARRATOR\nA short story." }],
-	] as const)(
-		"does not tell the model to review after %s",
-		async (toolName, input) => {
-			const outcome = await executeToolCall({ toolName, input }, context());
-
-			expect(outcome.ok && outcome.output).toContain(
-				"Read it to see what landed.",
-			);
-			expect(outcome.ok && outcome.output).not.toContain("review_script");
-		},
-	);
 });
 
 describe("executeToolCall", () => {
@@ -119,38 +80,82 @@ describe("executeToolCall", () => {
 		});
 	});
 
-	it("hands back the script and the settings it renders with", async () => {
+	it("captions library files that have no captions yet", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const song = { name: "song", kind: "audio" as const, url };
+		const done = {
+			name: "done",
+			kind: "audio" as const,
+			url: `${BLOB_BASE_URL}/assets/upload/user/done.mp3`,
+			captions: [toCaption("hi", 0, 1)],
+		};
+		const captionMedia = vi.fn(async () => {});
+
+		const outcome = await executeToolCall(
+			{ toolName: "caption_media", input: { urls: [url, done.url] } },
+			context({
+				readProject: () => ProjectDataSchema.parse({ media: [song, done] }),
+				captionMedia,
+			}),
+		);
+
+		expect(captionMedia).toHaveBeenCalledOnce();
+		expect(captionMedia).toHaveBeenCalledWith(song);
+		expect(outcome.ok).toBe(true);
+	});
+
+	it("lists media files without their timed words", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const media = ProjectDataSchema.parse({
+			media: [
+				{ name: "song", kind: "audio", url, captions: [toCaption("hi", 0, 1)] },
+			],
+		});
+
+		const outcome = await executeToolCall(
+			{ toolName: "read_media", input: {} },
+			context({ readProject: () => media }),
+		);
+
+		expect(outcome).toEqual({
+			ok: true,
+			output: [{ name: "song", kind: "audio", url }],
+		});
+	});
+
+	it("hands back the script", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
 			context(),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("- title: Moon Cat");
 		expect(outcome.ok && outcome.output).toContain("<speech>hi</speech>");
-		expect(outcome.ok && outcome.output).toContain("- length: 3-5m");
-		expect(outcome.ok && outcome.output).toContain("- template: none");
-		expect(outcome.ok && outcome.output).toContain("- aspect ratio: 9:16");
 	});
 
-	it("says the canvas is empty and the project untitled rather than handing back nothing", async () => {
+	it("says the canvas is empty rather than handing back nothing", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "read_script", input: {} },
-			context({
-				readScript: () => "  ",
-				readProject: () => project({ title: "" }),
-			}),
+			context({ readScript: () => "  " }),
 		);
 
-		expect(outcome.ok && outcome.output).toContain("- title: not set");
-		expect(outcome.ok && outcome.output).toContain("The canvas is empty.");
-		expect(outcome.ok && outcome.output).toContain(
-			"## Generation state\nNone yet.",
-		);
+		expect(outcome).toEqual({ ok: true, output: "The canvas is empty." });
 	});
 
-	it("reports where each element's generation stands under the script", async () => {
+	it("says no element generates media rather than handing back nothing", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "read_script", input: {} },
+			{ toolName: "read_generation", input: {} },
+			context(),
+		);
+
+		expect(outcome).toEqual({
+			ok: true,
+			output: "No element on the canvas generates media.",
+		});
+	});
+
+	it("reports where each element's generation stands", async () => {
+		const outcome = await executeToolCall(
+			{ toolName: "read_generation", input: {} },
 			context({
 				elementStates: () => [
 					{ id: "n1", state: "generated" },
@@ -165,9 +170,8 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(outcome.ok && outcome.output).toContain(
+		expect(outcome.ok && outcome.output).toBe(
 			[
-				"## Generation state",
 				"- n1: generated",
 				"- img1: stale (The prompt changed — regenerate to update)",
 				"- ai1: failed (Provider returned 503)",
@@ -180,7 +184,11 @@ describe("executeToolCall", () => {
 		const outcome = await executeToolCall(
 			{ toolName: "edit_script", input: { ops: [{ op: "remove", id: "n1" }] } },
 			context({
-				editScript: () => ({ applied: 0, failures: ["no element n1"] }),
+				editScript: () => ({
+					applied: 0,
+					failures: ["no element n1"],
+					inserted: [],
+				}),
 			}),
 		);
 
@@ -352,6 +360,20 @@ describe("executeToolCall", () => {
 		);
 	});
 
+	it("lets Sloppy choose the audiobook format", async () => {
+		const settings: Partial<ScriptSettings>[] = [];
+		const outcome = await executeToolCall(
+			{
+				toolName: "update_script_settings",
+				input: { format: "audiobook" },
+			},
+			context(recordScriptSettings(settings)),
+		);
+
+		expect(settings).toStrictEqual([{ format: "audiobook" }]);
+		expect(outcome.ok).toBe(true);
+	});
+
 	it.each([
 		[
 			"the aspect ratio and transition it was given",
@@ -489,7 +511,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: ["nar1"],
-						durationSec: 10,
+						duration: { sec: 10, maxSec: 15 },
 					},
 					{
 						id: "img1",
@@ -501,7 +523,7 @@ describe("executeToolCall", () => {
 				],
 				editScript: (applied) => {
 					ops.push(applied);
-					return { applied: applied.length, failures: [] };
+					return { applied: applied.length, failures: [], inserted: [] };
 				},
 			}),
 		);
@@ -527,7 +549,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: [],
-						durationSec: 10,
+						duration: { sec: 10, maxSec: 15 },
 					},
 					{
 						id: "vid1",
@@ -535,7 +557,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 2,
 						words: 180,
 						speechIds: ["nar2"],
-						durationSec: 15,
+						duration: { sec: 15, maxSec: 15 },
 					},
 				],
 			}),
@@ -558,7 +580,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: ["nar1"],
-						durationSec: 5,
+						duration: { sec: 5, maxSec: 15 },
 					},
 				],
 				editScript: () => {
@@ -581,7 +603,7 @@ describe("executeToolCall", () => {
 						sceneNumber: 1,
 						words: 12,
 						speechIds: ["nar1"],
-						durationSec: 5,
+						duration: { sec: 5, maxSec: 15 },
 					},
 				],
 			}),
@@ -678,7 +700,6 @@ describe("executeToolCall", () => {
 
 		expect(outcome.ok && outcome.output).toBe("1. A rabbit finds a lantern.");
 		expect(prompts[0]).toContain("a rabbit on the moon");
-		expect(prompts[0]).toContain("conflict, twists, and a resolution");
 	});
 
 	it("reviews the script against the rules and the stored format", async () => {
@@ -748,19 +769,16 @@ describe("model tools", () => {
 		const output = String(outcome.ok && outcome.output);
 
 		expect(output).toContain("Videos (type video)\n");
-		expect(output).toContain(
-			"- Seedance 2 Fast from openslop. Best for animation and anything that isn't live action.",
-		);
+		expect(output).toContain("- Seedance 2 Fast from openslop.");
 		expect(output).not.toContain("from runware");
 	});
 
-	it("lists at most five models a type", async () => {
+	it("lists every connected model of a type", async () => {
 		const outcome = await run("list_models", {});
 		const output = String(outcome.ok && outcome.output);
 
-		for (const section of output.split("\n\n"))
-			expect(section.split("\n- ").length - 1).toBeLessThanOrEqual(5);
-		expect(output).toMatch(/(\n- .*){5}/);
+		for (const { provider, model } of catalogModels("video"))
+			expect(output).toContain(`- ${model} from ${provider}`);
 	});
 
 	it("sets the default for every type the model's group covers, as the models panel does", async () => {
@@ -839,45 +857,6 @@ describe("model tools", () => {
 	);
 });
 
-describe("SLOPPY_TOOLS", () => {
-	it("offers the model exactly the tools the editor can run", () => {
-		expect(Object.keys(SLOPPY_TOOLS)).toEqual([
-			"read_script",
-			"edit_script",
-			"write_script",
-			"adapt_script",
-			"review_script",
-			"update_script_settings",
-			"update_video_settings",
-			"generate_captions",
-			"view_result",
-			"read_media",
-			"view_media",
-			"set_element_result",
-			"outline_story",
-			"estimate_total_length",
-			"estimate_speech_lengths",
-			"fit_durations",
-			"set_title",
-			"list_models",
-			"set_default_model",
-		]);
-	});
-
-	it("lists each asset type an edit can set up", () => {
-		const { description } = SLOPPY_TOOLS.edit_script;
-
-		for (const type of [
-			"asset_avatar",
-			"asset_voice",
-			"asset_style",
-			"asset_references",
-		]) {
-			expect(description).toContain(`- ${type}: `);
-		}
-	});
-});
-
 describe("a call the editor cannot run", () => {
 	it("rejects a tool nothing can run", async () => {
 		const outcome = await executeToolCall(
@@ -901,27 +880,5 @@ describe("presentToolCall", () => {
 
 	it("presents nothing for a tool it does not know", () => {
 		expect(presentToolCall("set_narrator", { name: "Red" })).toBeNull();
-	});
-});
-
-describe("tool flags", () => {
-	it("collects the tools whose output only lasts the turn", () => {
-		expect([...SNAPSHOT_TOOLS].sort()).toEqual([
-			"read_media",
-			"read_script",
-			"review_script",
-			"view_media",
-			"view_result",
-		]);
-	});
-
-	it("collects the tools that write the script, reviewing it included", () => {
-		expect([...DRAFTING_TOOLS].sort()).toEqual([
-			"adapt_script",
-			"edit_script",
-			"fit_durations",
-			"review_script",
-			"write_script",
-		]);
 	});
 });

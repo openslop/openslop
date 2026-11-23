@@ -75,6 +75,7 @@ export const createJobPollHandler = (
 				status: job.status,
 				result: job.result,
 				error: job.error,
+				costUsd: job.cost_usd,
 			});
 		},
 	});

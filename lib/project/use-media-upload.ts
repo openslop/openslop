@@ -18,7 +18,7 @@ export function useMediaUpload({
 		kinds,
 		multiple,
 		onUpload: async (uploads) => {
-			addMedia(uploads);
+			addMedia(uploads.map((upload) => ({ ...upload, uploaded: true })));
 			await onUpload?.(uploads.map((upload) => upload.url));
 		},
 	});

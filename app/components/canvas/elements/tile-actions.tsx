@@ -26,7 +26,7 @@ import { MediaViewerDialog, type Viewed } from "./media-viewer";
 
 // Touch has no hover, so there the controls always show.
 const REVEAL_ON_HOVER =
-	"opacity-0 group-hover/tile:opacity-100 focus-within:opacity-100 has-[[aria-expanded=true]]:opacity-100 pointer-coarse:opacity-100";
+	"opacity-0 group-hover/tile:opacity-100 focus-within:opacity-100 has-aria-expanded:opacity-100 pointer-coarse:opacity-100";
 
 /** What choosing a tile's face (`group/tile`) does. */
 export type TilePrimary = {

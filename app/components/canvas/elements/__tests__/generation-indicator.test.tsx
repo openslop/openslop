@@ -23,13 +23,33 @@ describe("GenerationIndicator", () => {
 		expect(html).not.toContain("disabled");
 	});
 
-	it("pairs the media scrim with the on-media foreground", () => {
+	it.each([
+		["queued", "Queued…"],
+		["generating", "Generating 0s"],
+	] as const)(
+		"shows the %s label beside the icon on wide screens, hidden from screen readers",
+		(status, label) => {
+			const html = render(
+				<GenerationIndicator status={status} startedAt={null} />,
+			);
+			const shown = html.match(
+				/<span aria-hidden="true" class="([^"]*)">([^<]*)<\/span>/,
+			);
+			expect(shown?.[2]).toBe(label);
+			expect(shown?.[1]).toContain("shimmer");
+			expect(shown?.[1]).toMatch(/(^| )hidden( |$)/);
+			expect(shown?.[1]).toContain("md:inline");
+			expect(html).toContain(`aria-label="${label}"`);
+		},
+	);
+
+	it("keeps the small indicator to its icon", () => {
 		const html = render(
-			<GenerationIndicator status="queued" startedAt={null} size="sm" />,
+			<GenerationIndicator status="generating" startedAt={null} size="sm" />,
 		);
-		expect(html).toContain("bg-on-media/55");
-		expect(html).toContain("text-on-media-foreground");
-		expect(html).not.toContain("text-foreground");
+		const shown = html.match(/<span aria-hidden="true" class="([^"]*)">/);
+		expect(shown?.[1]).toMatch(/(^| )hidden( |$)/);
+		expect(shown?.[1]).not.toContain("md:inline");
 	});
 });
 
@@ -49,6 +69,9 @@ describe("GenerationIndicator clock", () => {
 
 	const label = () =>
 		container.querySelector('[role="status"]')?.getAttribute("aria-label");
+	const shown = () =>
+		container.querySelector('[role="status"] [aria-hidden="true"].shimmer')
+			?.textContent;
 
 	it("counts whole seconds from when the job started, on its own", async () => {
 		vi.setSystemTime(10_000);
@@ -60,8 +83,10 @@ describe("GenerationIndicator clock", () => {
 			),
 		);
 		expect(label()).toBe("Generating 3s");
+		expect(shown()).toBe("Generating 3s");
 
 		await act(() => vi.advanceTimersByTimeAsync(1_000));
 		expect(label()).toBe("Generating 4s");
+		expect(shown()).toBe("Generating 4s");
 	});
 });

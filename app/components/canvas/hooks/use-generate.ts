@@ -37,7 +37,6 @@ export function useGenerate(element: GeneratedElement) {
 		startedAt: snapshot.startedAt,
 		result: snapshot.result,
 		error: snapshot.error,
-		uploaded: Boolean(snapshot.result?.uploaded),
 		staleReason: reason,
 		hasPrompt: hasPrompt(node),
 		hasResult: Boolean(snapshot.result),

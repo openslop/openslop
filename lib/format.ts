@@ -34,6 +34,16 @@ export function plural(count: number, noun: string): string {
 	return count === 1 ? noun : `${noun}s`;
 }
 
+const USD = new Intl.NumberFormat("en-US", {
+	style: "currency",
+	currency: "USD",
+	maximumSignificantDigits: 2,
+	roundingPriority: "morePrecision",
+});
+
+export const formatCost = (usd: number): string =>
+	usd === 0 ? "Free" : USD.format(usd);
+
 export function formatBytes(bytes: number): string {
 	if (bytes < 1024) return `${bytes} B`;
 	const kb = bytes / 1024;

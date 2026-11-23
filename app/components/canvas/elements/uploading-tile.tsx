@@ -18,7 +18,7 @@ export function UploadingTile({ kind = "image" }: { kind?: UploadKind }) {
 	);
 }
 
-export const uploadingTiles = (count: number, kind?: UploadKind) =>
-	Array.from({ length: count }, (_, i) => (
+export const uploadingTiles = (files: readonly { kind: UploadKind }[]) =>
+	files.map(({ kind }, i) => (
 		<UploadingTile key={`uploading:${i}`} kind={kind} />
 	));

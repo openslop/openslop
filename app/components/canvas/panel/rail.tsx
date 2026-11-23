@@ -21,7 +21,7 @@ export function Rail({
 			{home}
 			<div
 				data-slot="rail-body"
-				className="-mx-1.5 flex min-h-0 flex-1 flex-col items-center gap-1 self-stretch overflow-y-auto [scrollbar-gutter:stable_both-edges]"
+				className="-mx-1.5 flex min-h-0 flex-1 flex-col items-center gap-1 self-stretch overflow-y-auto scrollbar-gutter-both"
 			>
 				{RAIL_PANEL_GROUPS.map((group) => (
 					<Fragment key={group.join()}>

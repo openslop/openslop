@@ -82,6 +82,7 @@ describe("HTTP gateways", () => {
 				status: "completed",
 				result: null,
 				error: null,
+				costUsd: 0.04,
 			};
 			fetchMock.mockResolvedValue(jsonResponse(poll));
 
@@ -109,6 +110,7 @@ describe("HTTP gateways", () => {
 					status: "processing",
 					result: null,
 					error: null,
+					costUsd: null,
 				}),
 			);
 			const { signal } = new AbortController();

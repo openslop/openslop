@@ -146,11 +146,13 @@ describe("SloppyProvider tool calls", () => {
 
 		await runToolCall();
 
-		expect(state.addToolOutput).toHaveBeenCalledWith({
-			tool: "review_script",
-			toolCallId: "call-0",
-			output: "Tighten act two",
-		});
+		await vi.waitFor(() =>
+			expect(state.addToolOutput).toHaveBeenCalledWith({
+				tool: "review_script",
+				toolCallId: "call-0",
+				output: "Tighten act two",
+			}),
+		);
 	});
 
 	it("aborts the running tool and drops its output when the user stops", async () => {
@@ -158,10 +160,10 @@ describe("SloppyProvider tool calls", () => {
 		state.runTool.mockReturnValueOnce(tool.promise);
 		act(() => current().send("review it"));
 
-		const running = runToolCall();
+		await runToolCall();
 		act(() => current().stop());
 		tool.resolve({ ok: true, output: "Tighten act two" });
-		await running;
+		await tool.promise;
 
 		const signal: AbortSignal = state.runTool.mock.calls[0]?.[1];
 		expect(signal.aborted).toBe(true);

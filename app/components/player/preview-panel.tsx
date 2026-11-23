@@ -17,6 +17,7 @@ function PreviewPanelBody() {
 			</PlayerShimmer>
 		);
 	}
+	if (!ready) return <QueueProgressBar />;
 	if (!layout.series.length) {
 		return (
 			<div className="flex h-full w-full items-center justify-center px-4 text-center text-body text-muted-foreground">
@@ -24,14 +25,13 @@ function PreviewPanelBody() {
 			</div>
 		);
 	}
-	if (!ready) return <QueueProgressBar />;
 	return <ProjectPreview layout={layout} />;
 }
 
 export function PreviewPanel() {
 	return (
 		<div className="relative h-full w-full overflow-hidden rounded-lg border border-border bg-card">
-			<div className="relative z-[2] h-full w-full">
+			<div className="relative z-2 h-full w-full">
 				<PreviewPanelBody />
 			</div>
 		</div>

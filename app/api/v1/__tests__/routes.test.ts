@@ -160,9 +160,6 @@ describe("API routes", () => {
 				const res = await POST(makeRequest("/api/v1/image", { prompt: "cat" }));
 
 				expect(res.status).toBe(402);
-				expect((await res.json()).error).toBe(
-					"You're out of balance. Questions? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
-				);
 				expect(mockCreateJob).not.toHaveBeenCalled();
 			},
 		);

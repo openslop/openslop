@@ -148,7 +148,7 @@ export function ConnectHint({ provider }: { provider: Provider }) {
 	const label = `Add your ${PROVIDER_CATALOG[provider].name} API key to generate with this model`;
 	return (
 		<SimpleTooltip label={label}>
-			<Badge variant="indicator" size="xs" className="ml-auto">
+			<Badge variant="muted" size="xs" className="ml-auto">
 				<Link />
 				<span aria-hidden="true">Connect</span>
 				<span className="sr-only">{label}</span>

@@ -63,13 +63,18 @@ export type VisualModelEntry = ModelEntry & {
 	resolutions: readonly [MediaResolution, ...MediaResolution[]];
 };
 
+/** A video model also says the longest clip it generates in one go. */
+export type VideoModelEntry = VisualModelEntry & {
+	maxDurationSec: number;
+};
+
 /** What each connector type's catalog entries carry. */
 export type ModelEntries = {
 	llm: ModelEntry;
 	tts: ModelEntry;
 	voice: ModelEntry;
 	image: VisualModelEntry;
-	video: VisualModelEntry;
+	video: VideoModelEntry;
 	sfx: ModelEntry;
 	music: ModelEntry;
 	stt: ModelEntry;
@@ -172,6 +177,7 @@ export const AssetResultSchema = z.object({
 	voiceId: z.string().optional(),
 	/** The user supplied it rather than generating it. */
 	uploaded: z.boolean().optional(),
+	costUsd: z.number().optional(),
 });
 
 export type AssetResult = z.infer<typeof AssetResultSchema>;

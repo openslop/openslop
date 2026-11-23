@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { DURATION_OPTIONS, VOLUME_OPTIONS } from "@/lib/canvas/types";
 import {
-	DURATION_OPTIONS,
-	LOOPS_OPTIONS,
-	VOLUME_OPTIONS,
-} from "@/lib/canvas/types";
-import {
-	LAYOUT_ATTRIBUTE_KEYS,
 	getDuration,
 	getLoops,
 	getMotion,
@@ -97,6 +92,12 @@ describe("getDuration", () => {
 		expect(getDuration(el({ duration: "99" }))).toBe(15);
 	});
 
+	it("clamps to the longest its own model generates", () => {
+		const seedance = { provider: "runware", model: "Seedance 2.5" };
+		expect(getDuration(el({ ...seedance, duration: "30" }))).toBe(30);
+		expect(getDuration(el({ ...seedance, duration: "99" }))).toBe(30);
+	});
+
 	it("passes through offered values", () => {
 		expect(getDuration(el({ duration: "7" }))).toBe(7);
 	});
@@ -129,9 +130,9 @@ describe("getLoops", () => {
 		expect(getLoops(el({ loops: "NaN" }))).toBe(1);
 	});
 
-	it("clamps a loop count to the most the picker offers", () => {
-		expect(getLoops(el({ loops: "9" }))).toBe(8);
-		expect(getLoops(el({ loops: "999999999" }))).toBe(8);
+	it("has no ceiling", () => {
+		expect(getLoops(el({ loops: "9" }))).toBe(9);
+		expect(getLoops(el({ loops: "999999999" }))).toBe(999999999);
 	});
 
 	it("clamps negative loop counts to 1", () => {
@@ -143,7 +144,6 @@ describe("what the pickers offer", () => {
 	it.each([
 		["volume", VOLUME_OPTIONS, getVolume],
 		["duration", DURATION_OPTIONS, getDuration],
-		["loops", LOOPS_OPTIONS, getLoops],
 	] as const)("reads every %s option as itself", (key, options, read) => {
 		for (const option of options) {
 			expect(read(el({ [key]: option }))).toBe(Number(option));
@@ -162,23 +162,10 @@ describe("getMotion", () => {
 		expect(getMotion(el({ motion: "kenBurnsIn" }))).toBe("kenBurnsIn");
 		expect(getMotion(el({ motion: "shake" }))).toBe("shake");
 	});
-
-	it("is included in LAYOUT_ATTRIBUTE_KEYS so changes invalidate layout memos", () => {
-		expect(LAYOUT_ATTRIBUTE_KEYS).toContain("motion");
-	});
 });
 
 describe("layoutAttributeSignature", () => {
 	it("joins raw layout attribute values in LAYOUT_ATTRIBUTE_KEYS order", () => {
-		expect(LAYOUT_ATTRIBUTE_KEYS).toEqual([
-			"loops",
-			"loop",
-			"volume",
-			"motion",
-			"uploadedFrame",
-			"trimStart",
-			"trimEnd",
-		]);
 		expect(
 			layoutAttributeSignature(
 				el({

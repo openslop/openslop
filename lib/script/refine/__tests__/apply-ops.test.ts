@@ -73,38 +73,6 @@ describe("applyRefineOp — insert", () => {
 		expect(getContentTexts(editor)).toEqual(["hello", "rain"]);
 	});
 
-	it("inserts after an anchored element", () => {
-		const editor = makeEditor([
-			scene([
-				content("speech", "n1", "first"),
-				content("speech", "n2", "second"),
-			]),
-		]);
-
-		applyRefineOp(editor, {
-			op: "insert",
-			anchor_id: "n1",
-			elements: [{ type: "sound", text: "rain" }],
-		});
-
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["first", "rain", "second"]);
-	});
-
-	it("inserts before an anchored element", () => {
-		const editor = makeEditor([scene([content("speech", "n1", "first")])]);
-
-		applyRefineOp(editor, {
-			op: "insert",
-			anchor_id: "n1",
-			position: "before",
-			elements: [{ type: "sound", text: "rain" }],
-		});
-
-		const texts = getContentTexts(editor);
-		expect(texts).toEqual(["rain", "first"]);
-	});
-
 	it.each([
 		["after", ["first", "A", "B", "C", "last"]],
 		["before", ["A", "B", "C", "first", "last"]],
@@ -333,7 +301,7 @@ describe("applyRefineOp — move", () => {
 
 		const result = applyRefineOp(editor, { op: "move", ...move });
 
-		expect(result).toEqual({ ok: true });
+		expect(result).toEqual({ ok: true, inserted: [] });
 		expect(layout(editor)).toEqual(expected);
 	});
 
@@ -581,6 +549,7 @@ describe("applyRefineOp — assets", () => {
 		expect(result).toEqual({
 			applied: 0,
 			failures: ["asset: asset_avatar needs a name"],
+			inserted: [],
 		});
 		expect(topLevelTypes(editor)).toEqual(["scene"]);
 	});
@@ -595,7 +564,7 @@ describe("applyRefineOp — assets", () => {
 			text: "a girl in a yellow cardigan",
 		});
 
-		expect(result).toEqual({ applied: 1, failures: [] });
+		expect(result).toEqual({ applied: 1, failures: [], inserted: [] });
 		expect(topLevelTypes(editor)).toEqual([
 			"asset_avatar",
 			"asset_style",
@@ -692,7 +661,7 @@ describe("applyRefineOp — assets", () => {
 			},
 		);
 
-		expect(result).toEqual({ applied: 2, failures: [] });
+		expect(result).toEqual({ applied: 2, failures: [], inserted: [] });
 		expect(describeAssets(editor)).toEqual([
 			["asset_avatar:Mia", { ...LOOK, name: "Mia" }, "a girl with a red scarf"],
 			["asset_voice:Mia", { ...VOICE, name: "Mia", age: "adult" }, ""],
@@ -708,7 +677,7 @@ describe("applyRefineOp — assets", () => {
 			attrs: { name: "Mia", age: "child" },
 		});
 
-		expect(result).toEqual({ applied: 1, failures: [] });
+		expect(result).toEqual({ applied: 1, failures: [], inserted: [] });
 		expect(describeAssets(editor)).toEqual([
 			["asset_voice:Mia", { name: "Mia", age: "child", ...VOICE }, ""],
 		]);
@@ -726,6 +695,7 @@ describe("applyRefineOp — assets", () => {
 		expect(result).toEqual({
 			applied: 0,
 			failures: ['asset: asset_voice offers no age "ageless"'],
+			inserted: [],
 		});
 		expect(describeAssets(editor)).toEqual([]);
 	});
@@ -782,7 +752,7 @@ describe("applyRefineOp — assets", () => {
 			attrs: { name: "Mia", age: "adult" },
 		});
 
-		expect(result).toEqual({ applied: 1, failures: [] });
+		expect(result).toEqual({ applied: 1, failures: [], inserted: [] });
 		expect(describeAssets(editor)[0]?.[1]).toMatchObject({
 			name: "Mia",
 			age: "adult",
@@ -820,6 +790,7 @@ describe("applyRefineOp — assets", () => {
 		expect(apply(editor, { op: "remove", id: mia.id })).toEqual({
 			applied: 1,
 			failures: [],
+			inserted: [],
 		});
 		expect(describeAssets(editor).map(([id]) => id)).toEqual([
 			"asset_voice:Mia",
@@ -866,7 +837,11 @@ describe("applyRefineOps", () => {
 			},
 		]);
 
-		expect(result).toEqual({ applied: 2, failures: [] });
+		expect(result).toEqual({
+			applied: 2,
+			failures: [],
+			inserted: [contentElements(editor)[1]?.id],
+		});
 		expect(getContentTexts(editor)).toEqual(["goodbye", "rain"]);
 	});
 

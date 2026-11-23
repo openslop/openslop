@@ -1,7 +1,7 @@
 "use client";
 
 import { renderPrompt } from "@/lib/connectors/character-refs";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TooltipIconButton } from "@/components/ui/icon-button";
@@ -10,7 +10,8 @@ import {
 	CloudUploadFilled,
 	History,
 	Maximize2,
-	RotateCcw,
+	Tag,
+	CornerDownLeft,
 } from "@/components/ui/icon";
 import {
 	Popover,
@@ -23,13 +24,14 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useSlateStatic } from "slate-react";
 import { applyElementVersion } from "@/lib/canvas/editor-ops";
 import { getVolumeGain } from "@/lib/canvas/element-attributes";
-import { truncateMiddle } from "@/lib/format";
+import { formatCost, truncateMiddle } from "@/lib/format";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { relativeTime } from "@/lib/project/relative-time";
 import { cn } from "@/lib/utils";
 import {
 	useElementHistory,
+	useElementHistoryCostUsd,
 	useLoadElementHistory,
 } from "../hooks/use-element-history";
 import { AudioPlayer } from "./audio-player";
@@ -47,6 +49,33 @@ const Dot = () => (
 		·
 	</span>
 );
+
+function CostBadge({
+	costUsd,
+	size,
+	children,
+}: {
+	costUsd: number | undefined;
+	size: "xsLabel" | "inlineXs";
+	children: ReactNode;
+}) {
+	if (costUsd === undefined) return null;
+	return (
+		<Badge variant="subtle" size={size}>
+			<Tag />
+			{children}
+			<span>{formatCost(costUsd)}</span>
+		</Badge>
+	);
+}
+
+function HistoryTotal({ elementId }: { elementId: string }) {
+	return (
+		<CostBadge costUsd={useElementHistoryCostUsd(elementId)} size="xsLabel">
+			Total
+		</CostBadge>
+	);
+}
 
 function ElementVersionThumbnail({
 	version: { result, createdAt },
@@ -87,7 +116,7 @@ function ElementVersionRow({
 	active: boolean;
 	onRestore: () => void;
 }) {
-	const { audioUrl } = version.result;
+	const { audioUrl, uploaded, costUsd } = version.result;
 	const volume = getVolumeGain(useElementGeneration().element);
 	return (
 		<li
@@ -101,16 +130,17 @@ function ElementVersionRow({
 				<ElementVersionThumbnail version={version} name={`version ${label}`} />
 				<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 					<span className="flex items-center gap-1.5 text-label-xs text-foreground">
-						<span className={cn("font-numeric", active && "text-accent")}>
-							v{label}
-						</span>
+						<span className="font-numeric">v{label}</span>
 						<Dot />
-						{version.result.uploaded && (
-							<Badge variant="indicator" size="sm">
+						{uploaded && (
+							<Badge variant="subtle" size="inlineXs">
 								<CloudUploadFilled />
 								Uploaded
 							</Badge>
 						)}
+						<CostBadge costUsd={costUsd} size="inlineXs">
+							<span className="sr-only">Cost</span>
+						</CostBadge>
 						{relativeTime(version.createdAt)}
 					</span>
 					<span className="w-full truncate text-label-xs text-muted-foreground">
@@ -124,11 +154,11 @@ function ElementVersionRow({
 				</div>
 				{!active && (
 					<TooltipIconButton
-						label="Restore"
+						label="Use this version"
 						className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
 						onClick={onRestore}
 					>
-						<RotateCcw />
+						<CornerDownLeft />
 					</TooltipIconButton>
 				)}
 			</div>
@@ -183,7 +213,10 @@ export function ElementHistoryPopover({ elementId }: { elementId: string }) {
 				aria-label="Generation history"
 				className="w-80 font-medium"
 			>
-				<PopoverHeader title="Generation history" />
+				<PopoverHeader
+					title="Generation history"
+					action={<HistoryTotal elementId={elementId} />}
+				/>
 				<div
 					aria-live="polite"
 					className="-mx-1 flex max-h-80 flex-col overflow-y-auto overscroll-contain"

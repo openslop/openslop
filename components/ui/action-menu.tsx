@@ -42,19 +42,30 @@ export function ActionMenu({
 				align={align}
 				className={contentClassName}
 			>
-				{items.map((item) => (
-					<DropdownMenuItem
-						key={item.key}
-						onSelect={item.onSelect}
-						disabled={item.disabled}
-						variant={item.variant}
-						className={itemClassName}
-					>
-						{item.icon}
-						{item.label}
-					</DropdownMenuItem>
-				))}
+				<ActionMenuItems items={items} itemClassName={itemClassName} />
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
+}
+
+/** The items alone, for a menu that already exists, such as a submenu. */
+export function ActionMenuItems({
+	items,
+	itemClassName,
+}: {
+	items: ActionMenuItem[];
+	itemClassName?: string;
+}) {
+	return items.map((item) => (
+		<DropdownMenuItem
+			key={item.key}
+			onSelect={item.onSelect}
+			disabled={item.disabled}
+			variant={item.variant}
+			className={itemClassName}
+		>
+			{item.icon}
+			{item.label}
+		</DropdownMenuItem>
+	));
 }

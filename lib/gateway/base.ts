@@ -29,6 +29,7 @@ export type JobSubmission = z.infer<typeof JobSubmissionSchema>;
 export const JobPollSchema = JobSubmissionSchema.extend({
 	result: BundleResponseSchema.nullable(),
 	error: z.string().nullable(),
+	costUsd: z.number().nullable(),
 });
 
 export type JobPoll = z.infer<typeof JobPollSchema>;
