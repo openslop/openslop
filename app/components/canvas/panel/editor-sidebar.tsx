@@ -199,7 +199,7 @@ function ResizablePanel({ children }: { children: ReactNode }) {
 	return (
 		<>
 			<div
-				className="flex shrink-0 flex-col gap-3 pr-1 pb-3 text-panel-fg"
+				className="flex shrink-0 flex-col gap-3 pr-1 pb-3 text-panel-fg max-sm:flex-1"
 				style={{ width: size }}
 			>
 				{children}
@@ -220,7 +220,10 @@ function EditorSidebarComponent() {
 	const current = active ? PANELS[active] : null;
 
 	return (
-		<div className="flex shrink-0">
+		<div
+			data-panel-open={current ? "" : undefined}
+			className="peer flex shrink-0 max-sm:data-panel-open:flex-1"
+		>
 			<Rail
 				home={<RailItem icon={Home} label="Home" href="/" />}
 				Item={PanelRailItem}

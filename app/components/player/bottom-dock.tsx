@@ -31,7 +31,7 @@ function ResizableDock() {
 
 	return (
 		<div
-			className="flex shrink-0 flex-col"
+			className="flex shrink-0 flex-col max-sm:max-h-1/4"
 			style={fillsDock ? { height: size } : undefined}
 		>
 			{fillsDock ? (
