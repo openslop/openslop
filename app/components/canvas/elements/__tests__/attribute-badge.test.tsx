@@ -6,6 +6,7 @@ import { createEditor } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import {
 	durationDef,
+	loopsDef,
 	trimEndDef,
 	volumeDef,
 } from "@/lib/connectors/attributes/common";
@@ -112,6 +113,24 @@ describe("AttributeBadge", () => {
 			expect(render(elementWith({}), volumeDef("5"))).toMatch(
 				/font-numeric[^>]*>—</,
 			);
+		});
+	});
+
+	describe("count", () => {
+		const spinbutton = (html: string) =>
+			html.match(/<div[^>]*role="spinbutton"[^>]*>/)?.[0] ?? "";
+
+		it("is a number field with a floor and no ceiling", () => {
+			const html = spinbutton(render(elementWith({ loops: "12" }), loopsDef));
+			expect(html).toContain('aria-label="Loops"');
+			expect(html).toContain('aria-valuenow="12"');
+			expect(html).toContain('aria-valuemin="1"');
+			expect(html).not.toContain("aria-valuemax");
+		});
+
+		it("shows the default while the element has no value", () => {
+			const html = spinbutton(render(elementWith({}), loopsDef));
+			expect(html).toContain('aria-valuenow="1"');
 		});
 	});
 });

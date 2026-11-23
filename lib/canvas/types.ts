@@ -106,7 +106,8 @@ export const VOLUME_OPTIONS = [
 	"10",
 ] as const;
 
-export const LOOPS_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8"] as const;
+export const LOOPS_MIN = 1;
+export const LOOPS_RULE = `A whole number, ${LOOPS_MIN} or more.`;
 
 export const DEFAULT_LOOPS = "1";
 

@@ -14,16 +14,22 @@ import { clamp } from "@/lib/utils";
 const PX_PER_STEP = 3;
 const DRAG_THRESHOLD_PX = 3;
 
-function quantize(value: number, min: number, max: number, step: number) {
+function quantize(
+	value: number,
+	min: number,
+	max: number | undefined,
+	step: number,
+) {
 	const decimals = (String(step).split(".")[1] ?? "").length;
 	const snapped = Number((Math.round(value / step) * step).toFixed(decimals));
-	return clamp(snapped, min, max);
+	return clamp(snapped, min, max ?? Infinity);
 }
 
 export type NumberScrubOptions = {
 	value: number;
 	min: number;
-	max: number;
+	/** Left out, the value has no ceiling. */
+	max?: number;
 	step: number;
 	onChange: (value: number) => void;
 	resetValue?: number;

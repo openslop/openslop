@@ -27,11 +27,11 @@ export function NumberScrubber({
 	className?: string;
 }) {
 	const { editing, inputProps, scrubProps } = useNumberScrub(scrub);
-	const { value, max } = scrub;
+	const { value, max = value } = scrub;
 
 	const shell = cn(chipControlClassName, className);
-	// Reserving the widest value keeps the box one size, whether it is showing
-	// three digits, one, or an input.
+	// Reserving the widest value keeps a bounded box one size, whether it is
+	// showing three digits, one, or an input.
 	const valueWidth = `${String(max).length + suffix.length}ch`;
 	const valueText = "text-right font-numeric text-label-xs";
 

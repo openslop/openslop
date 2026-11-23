@@ -1,5 +1,6 @@
 import { useSlateStatic } from "slate-react";
 import { MediaToggle } from "@/components/ui/media-toggle";
+import { NumberScrubber } from "@/components/ui/number-scrubber";
 import { ButtonMenuTrigger, SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
@@ -16,7 +17,11 @@ import { StartFramePicker } from "./attributes/start-frame-picker";
 import { TextAttributePopover } from "./attributes/text-attribute-popover";
 import { InputAttributeField } from "./attributes/input-attribute-field";
 import { RangeAttributeField } from "./attributes/range-attribute-field";
-import { clampedNumber, flatAttributes } from "@/lib/canvas/element-attributes";
+import {
+	clampedNumber,
+	flatAttributes,
+	parseNumber,
+} from "@/lib/canvas/element-attributes";
 
 const UNSET = "—";
 
@@ -101,8 +106,22 @@ export function AttributeBadge({
 				format={(next) => formatValue(next, unit)}
 				min={edit.min}
 				max={edit.max}
-				step={edit.step}
 				fallback={def.default}
+			/>
+		);
+	}
+
+	if (edit.kind === "count") {
+		return (
+			<NumberScrubber
+				label={label}
+				value={parseNumber(value) ?? parseNumber(def.default) ?? edit.min}
+				min={edit.min}
+				step={1}
+				suffix={unit}
+				onChange={(next) =>
+					mergeAttrs(editor, element.id, { [attrKey]: String(next) })
+				}
 			/>
 		);
 	}

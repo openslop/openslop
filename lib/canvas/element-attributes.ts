@@ -4,7 +4,7 @@ import {
 	DEFAULT_DURATION_SEC,
 	DEFAULT_LOOPS,
 	DURATION_MIN,
-	LOOPS_OPTIONS,
+	LOOPS_MIN,
 	VOLUME_OPTIONS,
 	isToggleOn,
 	type ContentElement,
@@ -44,13 +44,12 @@ export const flatAttributes = (element: SplitAttributes) => ({
 	...element.layoutAttributes,
 });
 
-const boundsOf = (options: readonly string[]) => {
+export const boundsOf = (options: readonly string[]) => {
 	const values = options.map(Number);
 	return { min: Math.min(...values), max: Math.max(...values) };
 };
 
 const VOLUME = boundsOf(VOLUME_OPTIONS);
-const LOOPS = boundsOf(LOOPS_OPTIONS);
 
 const DEFAULT_VOLUME = VOLUME.max;
 
@@ -100,7 +99,7 @@ export function getDuration(element: ContentElement): number {
 
 export function getLoops(element: ContentElement): number {
 	return (
-		clampedNumber(element.layoutAttributes?.loops, LOOPS) ??
+		clampedNumber(element.layoutAttributes?.loops, { min: LOOPS_MIN }) ??
 		Number(DEFAULT_LOOPS)
 	);
 }

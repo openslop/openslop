@@ -135,9 +135,8 @@ describe("AttributeSchema", () => {
 
 	describe("range", () => {
 		it.each([
-			[volumeDef("5"), { min: 0, max: 10, step: 1 }],
-			[durationDef(15), { min: 4, max: 15, step: 1 }],
-			[loopsDef, { min: 1, max: 8, step: 1 }],
+			[volumeDef("5"), { min: 0, max: 10 }],
+			[durationDef(15), { min: 4, max: 15 }],
 		])("slides $key over its options", (def, bounds) => {
 			expect(def.edit).toMatchObject({ kind: "range", ...bounds });
 		});
@@ -155,6 +154,17 @@ describe("AttributeSchema", () => {
 			expect(schema.offers("volume", "11")).toBe(false);
 			expect(schema.offers("volume", "2.5")).toBe(false);
 			expect(schema.offers("loops", "0")).toBe(false);
+		});
+	});
+
+	describe("count", () => {
+		it("takes any whole number of loops from 1 up", () => {
+			const schema = AttributeSchema.from([loopsDef]);
+			expect(schema.offers("loops", "1")).toBe(true);
+			expect(schema.offers("loops", "250")).toBe(true);
+			expect(schema.offers("loops", "0")).toBe(false);
+			expect(schema.offers("loops", "2.5")).toBe(false);
+			expect(schema.offers("loops", "many")).toBe(false);
 		});
 	});
 });

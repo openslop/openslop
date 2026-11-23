@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { Freeze, Image, Monitor, Motion, Repeat } from "@/components/ui/icon";
-import { parseNumber } from "@/lib/canvas/element-attributes";
+import { boundsOf, parseNumber } from "@/lib/canvas/element-attributes";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
 	durationOptions,
-	LOOPS_OPTIONS,
+	LOOPS_MIN,
+	LOOPS_RULE,
 	TOGGLE_OFF,
 	TOGGLE_ON,
 	VOLUME_OPTIONS,
@@ -18,17 +19,12 @@ import {
 } from "@/lib/render/motion-effect-names";
 import type { AttributeDef } from "./schema";
 
-/** A slider over evenly spaced numeric options, which stay the only values it accepts. */
-const rangeEdit = (options: readonly string[]) => {
-	const values = options.map(Number);
-	return {
-		kind: "range" as const,
-		value: z.enum(options),
-		min: Math.min(...values),
-		max: Math.max(...values),
-		step: values[1] - values[0],
-	};
-};
+/** A slider over consecutive whole-number options, which stay the only values it accepts. */
+const rangeEdit = (options: readonly string[]) => ({
+	kind: "range" as const,
+	value: z.enum(options),
+	...boundsOf(options),
+});
 
 const volumeRange = rangeEdit(VOLUME_OPTIONS);
 
@@ -37,6 +33,17 @@ export const toggleValue = z.enum([TOGGLE_OFF, TOGGLE_ON]);
 const secondsValue = z
 	.string()
 	.refine((value) => parseNumber(value) !== undefined);
+
+const loopsValue = z
+	.string()
+	.refine(
+		(value) => {
+			const count = parseNumber(value) ?? 0;
+			return Number.isInteger(count) && count >= LOOPS_MIN;
+		},
+		{ message: LOOPS_RULE },
+	)
+	.describe(LOOPS_RULE);
 
 export const nameDef: AttributeDef = {
 	key: "name",
@@ -76,7 +83,7 @@ export const durationDef = (maxSec: number): AttributeDef => ({
 export const loopsDef: AttributeDef = {
 	key: "loops",
 	label: "Loops",
-	edit: rangeEdit(LOOPS_OPTIONS),
+	edit: { kind: "count", value: loopsValue, min: LOOPS_MIN },
 	default: DEFAULT_LOOPS,
 };
 

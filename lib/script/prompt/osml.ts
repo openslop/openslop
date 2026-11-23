@@ -2,8 +2,8 @@ import { dedent } from "@/lib/dedent";
 import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
+	LOOPS_RULE,
 	DURATION_OPTIONS,
-	LOOPS_OPTIONS,
 	TOGGLE_ON,
 } from "@/lib/canvas/types";
 import {
@@ -66,7 +66,7 @@ export function osmlSpec(language: string): string {
 		## <sound>
 		- A sound effect that no <video> already makes. The body is a short, plain sound prompt, like rain, wind, a fire crackling or footsteps.
 		- Place it right before the line it belongs to.
-		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. Use more for a sound that fills a scene, like rain or wind, and 1 for a single moment, like a door. Example:
+		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). ${LOOPS_RULE} Use more for a sound that fills a scene, like rain or wind, and 1 for a single moment, like a door. Example:
 		  <sound loops="4">Wind</sound>
 		  <speech name="Narrator" emotion="peaceful">They walked through the windy forest.</speech>
 		- Never a voice: no sighs, gasps, laughter or crying.
@@ -74,7 +74,7 @@ export function osmlSpec(language: string): string {
 		## <music>
 		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the Music prompts section says.
 		- Place it right before the first element it plays under.
-		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). Allowed values: ${LOOPS_OPTIONS.join(", ")}. A cue written to its runtime plays once; use more only for a short bed that should repeat.
+		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). ${LOOPS_RULE} A cue written to its runtime plays once; use more only for a short bed that should repeat.
 		- ${lyricsDef.key}: "${TOGGLE_ON}" makes the cue a song, sung over the scenes (default "${lyricsDef.default}", instrumental). Set it only when the story calls for a song, like a music video, a theme song or a character singing, and never under speech, where the singing would fight the voice.
 
 		${MUSIC_PROMPT_FORMAT}

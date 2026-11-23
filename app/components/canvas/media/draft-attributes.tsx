@@ -1,5 +1,6 @@
 "use client";
 
+import partition from "lodash/partition";
 import type { ComponentType } from "react";
 import { isLayoutAttribute } from "@/lib/canvas/element-attributes";
 import { elementSchema } from "@/lib/canvas/element-connector";
@@ -9,7 +10,7 @@ import { AttributeBadge } from "../elements/attribute-badge";
 import type { LaidOutTarget } from "../elements/attributes/attribute-target";
 import { ReferenceImagesEditor } from "../elements/attributes/reference-images-popover";
 import { DraftStartFrame } from "../elements/attributes/start-frame-picker";
-import { PanelSection } from "../panel/panel-card";
+import { PanelField, PanelSection } from "../panel/panel-card";
 
 type Edit = NonNullable<AttributeDef["edit"]>["kind"];
 
@@ -44,15 +45,28 @@ export function DraftPictures({ element }: { element: GeneratedElement }) {
 	});
 }
 
-/** Every other setting, as a row of menu buttons; layout belongs to a scene. */
+const isSlider = (def: AttributeDef) => def.edit?.kind === "range";
+
+/** Every other setting: menu buttons in a row, then each slider under its label, since it has no icon to name it; layout belongs to a scene. */
 export function DraftSettings({ element }: { element: GeneratedElement }) {
-	const chips = generationDefs(element).filter((def) => !laidFlat(def));
-	if (chips.length === 0) return null;
+	const [sliders, chips] = partition(
+		generationDefs(element).filter((def) => !laidFlat(def)),
+		isSlider,
+	);
 	return (
-		<div className="flex flex-wrap gap-2">
-			{chips.map((def) => (
-				<AttributeBadge key={def.key} element={element} def={def} />
+		<>
+			{chips.length > 0 && (
+				<div className="flex flex-wrap gap-2">
+					{chips.map((def) => (
+						<AttributeBadge key={def.key} element={element} def={def} />
+					))}
+				</div>
+			)}
+			{sliders.map((def) => (
+				<PanelField key={def.key} label={def.label}>
+					<AttributeBadge element={element} def={def} />
+				</PanelField>
 			))}
-		</div>
+		</>
 	);
 }

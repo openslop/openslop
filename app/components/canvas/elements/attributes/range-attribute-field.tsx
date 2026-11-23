@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSlateStatic } from "slate-react";
-import { Slider } from "@/components/ui/slider";
+import { SliderField } from "@/components/ui/slider";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import { parseNumber } from "@/lib/canvas/element-attributes";
 import type { GeneratedElement } from "@/lib/canvas/types";
@@ -16,7 +16,6 @@ export function RangeAttributeField({
 	format,
 	min,
 	max,
-	step,
 	fallback,
 }: {
 	element: GeneratedElement;
@@ -26,7 +25,6 @@ export function RangeAttributeField({
 	format: (value: string) => string;
 	min: number;
 	max: number;
-	step: number;
 	/** Where the thumb rests while the element has no value. */
 	fallback?: string;
 }) {
@@ -47,19 +45,15 @@ export function RangeAttributeField({
 	};
 
 	return (
-		<div className="flex w-full items-center gap-3">
-			<Slider
-				min={min}
-				max={max}
-				step={step}
-				value={[position]}
-				onValueChange={([next]) => setDragged(next)}
-				onValueCommit={commit}
-				aria-label={label}
-			/>
-			<span className="shrink-0 text-right font-numeric text-label">
-				{format(dragged === undefined ? value : String(dragged))}
-			</span>
-		</div>
+		<SliderField
+			min={min}
+			max={max}
+			value={[position]}
+			onValueChange={([next]) => setDragged(next)}
+			onValueCommit={commit}
+			aria-label={label}
+			readout={format(dragged === undefined ? value : String(dragged))}
+			widest={format(String(max))}
+		/>
 	);
 }
