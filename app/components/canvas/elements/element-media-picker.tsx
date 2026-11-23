@@ -44,20 +44,12 @@ export function AddMediaButton() {
 	const { element, node, status } = useElementGeneration();
 	if (!isUploadable(element)) return null;
 	const kind = uploadKindOf(element);
+	const pick = (url: string) => {
+		const media = store.getState().media.find((item) => item.url === url);
+		return commitUploaded(queue, node, media ?? { kind, url });
+	};
 	return (
-		<MediaPicker
-			kind={kind}
-			onPick={(url) =>
-				commitUploaded(
-					queue,
-					node,
-					store.getState().media.find((item) => item.url === url) ?? {
-						kind,
-						url,
-					},
-				)
-			}
-		>
+		<MediaPicker kind={kind} onPick={pick}>
 			<AddMediaPickerButton kind={kind} disabled={isGenerationActive(status)} />
 		</MediaPicker>
 	);
