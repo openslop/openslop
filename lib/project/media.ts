@@ -5,7 +5,6 @@ import { CaptionSchema } from "@/lib/connectors/types";
 import {
 	UPLOAD_KINDS,
 	UploadKindSchema,
-	type Upload,
 	type UploadKind,
 } from "@/lib/upload/upload-files";
 
@@ -23,7 +22,7 @@ export type MediaItem = z.infer<typeof MediaItemSchema>;
 
 export type UploadedMedia = Pick<MediaItem, "kind" | "url" | "captions">;
 
-export type NewMedia = Upload & Pick<MediaItem, "captions" | "uploaded">;
+export type NewMedia = Omit<MediaItem, "createdAt">;
 
 const stem = (fileName: string) => fileName.replace(/\.[^.]*$/, "");
 
