@@ -3,7 +3,6 @@
 import { memo } from "react";
 import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
-import { NOTHING_TO_PLAY } from "@/lib/components/unavailable-reasons";
 import { cn } from "@/lib/utils";
 import { toFrames } from "@/lib/render/frames";
 import { findSegmentIndexAtFrame } from "@/lib/render/scene-segments";
@@ -22,6 +21,8 @@ import {
 	VolumeControl,
 } from "./player-controls";
 
+const NOTHING_TO_PLAY = "Nothing to play yet";
+
 function BottomTransportBarComponent() {
 	const { player } = usePlayerControl();
 	const { showPlayer } = usePlayerPlacement();
@@ -32,6 +33,7 @@ function BottomTransportBarComponent() {
 	// panel that mounts one.
 	const canPlay = ready && segments.length > 0;
 	const canSeek = canPlay && player !== null;
+	const playLabel = playing ? "Pause" : "Play";
 
 	const seekToAdjacentScene = (direction: -1 | 1) => {
 		if (!player || segments.length === 0) return;
@@ -61,16 +63,16 @@ function BottomTransportBarComponent() {
 
 				<div className="flex items-center gap-1">
 					<TooltipIconButton
-						label="Previous scene"
-						reason={NOTHING_TO_PLAY}
+						label={canSeek ? "Previous scene" : NOTHING_TO_PLAY}
+						ariaLabel="Previous scene"
 						unavailable={!canSeek}
 						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft />
 					</TooltipIconButton>
 					<TooltipIconButton
-						label={playing ? "Pause" : "Play"}
-						reason={NOTHING_TO_PLAY}
+						label={canPlay ? playLabel : NOTHING_TO_PLAY}
+						ariaLabel={playLabel}
 						unavailable={!canPlay}
 						onClick={() => {
 							showPlayer();
@@ -80,8 +82,8 @@ function BottomTransportBarComponent() {
 						{playing ? <Pause /> : <Play />}
 					</TooltipIconButton>
 					<TooltipIconButton
-						label="Next scene"
-						reason={NOTHING_TO_PLAY}
+						label={canSeek ? "Next scene" : NOTHING_TO_PLAY}
+						ariaLabel="Next scene"
 						unavailable={!canSeek}
 						onClick={() => seekToAdjacentScene(1)}
 					>

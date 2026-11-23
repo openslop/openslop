@@ -73,25 +73,17 @@ export function IconButton({
 /** An {@link IconButton} wrapped in a tooltip. `ariaLabel` defaults to `label`. */
 export function TooltipIconButton({
 	label,
-	reason,
 	ariaLabel,
 	side,
-	unavailable,
 	...props
 }: Omit<React.ComponentProps<typeof IconButton>, "ariaLabel"> & {
 	label: string;
 	ariaLabel?: string;
-	/** Shown instead of `label` while the button is unavailable. */
-	reason?: string;
 	side?: React.ComponentProps<typeof SimpleTooltip>["side"];
 }) {
 	return (
-		<SimpleTooltip label={unavailable && reason ? reason : label} side={side}>
-			<IconButton
-				ariaLabel={ariaLabel ?? label}
-				unavailable={unavailable}
-				{...props}
-			/>
+		<SimpleTooltip label={label} side={side}>
+			<IconButton ariaLabel={ariaLabel ?? label} {...props} />
 		</SimpleTooltip>
 	);
 }

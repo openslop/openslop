@@ -9,10 +9,6 @@ import {
 	ModelSelectTrigger,
 } from "@/app/components/models/model-select";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
-import {
-	TYPE_MESSAGE,
-	WAIT_FOR_SLOPPY,
-} from "@/lib/components/unavailable-reasons";
 import { useProject } from "@/lib/project/use-project";
 import { pickOther } from "@/lib/utils";
 import { PanelCard } from "../canvas/panel/panel-card";
@@ -35,22 +31,26 @@ function ModelPicker() {
 	);
 }
 
+function suggestionBlocker(sloppyBusy: boolean, hasOwnText: boolean) {
+	if (sloppyBusy) return "Wait for Sloppy to finish";
+	if (hasOwnText) return "Clear your message to get a suggestion";
+	return null;
+}
+
 function SuggestionButton({
 	onPick,
-	unavailable,
-	reason,
+	blocker,
 }: {
 	onPick: () => void;
-	unavailable: boolean;
-	reason?: string;
+	blocker: string | null;
 }) {
 	return (
 		<TooltipIconButton
-			label="Suggest a prompt"
-			reason={reason}
+			label={blocker ?? "Suggest a prompt"}
+			ariaLabel="Suggest a prompt"
 			variant="quiet"
 			size="sm"
-			unavailable={unavailable}
+			unavailable={blocker !== null}
 			onMouseDown={keepFocus}
 			onClick={onPick}
 		>
@@ -100,8 +100,7 @@ export function SloppyComposer() {
 					<ModelPicker />
 					<SuggestionButton
 						onPick={suggest}
-						unavailable={loading || (hasText && !showsSuggestion)}
-						reason={loading ? WAIT_FOR_SLOPPY : undefined}
+						blocker={suggestionBlocker(loading, hasText && !showsSuggestion)}
 					/>
 				</div>
 				{loading ? (
@@ -110,8 +109,8 @@ export function SloppyComposer() {
 					</TooltipIconButton>
 				) : (
 					<TooltipIconButton
-						label="Send to Sloppy"
-						reason={TYPE_MESSAGE}
+						label={hasText ? "Send to Sloppy" : "Type a message first"}
+						ariaLabel="Send to Sloppy"
 						onClick={submit}
 						unavailable={!hasText}
 					>
