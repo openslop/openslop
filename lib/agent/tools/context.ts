@@ -46,6 +46,7 @@ export type AgentToolContext = Pick<
 	adaptScript: (script: string, notes?: string) => Promise<void>;
 	isConnected: (provider: Provider) => boolean;
 	generateCaptions: (ids?: string[]) => CaptionsReport;
+	captionMedia: (item: MediaItem) => Promise<void>;
 	setElementResult: (id: string, url: string) => Promise<void>;
 	viewMedia: (item: MediaItem) => Promise<ResultView>;
 };

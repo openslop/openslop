@@ -19,6 +19,7 @@ import {
 	autoCaptionElements,
 	withoutCaptions,
 } from "@/lib/captions/auto-captions";
+import { useCaptionMedia } from "@/lib/captions/use-caption-media";
 import { resolveModel } from "@/lib/connectors/models";
 import { checkMediaKind } from "@/lib/project/media";
 import { useProjectId } from "@/lib/project/project-provider";
@@ -54,6 +55,7 @@ export function useAgentTools() {
 	const buildContext = useBuildContext();
 	const createConnector = useCreateConnector();
 	const projectId = useProjectId();
+	const captionMedia = useCaptionMedia();
 
 	return useCallback(
 		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
@@ -152,6 +154,7 @@ export function useAgentTools() {
 						projectId,
 					);
 				},
+				captionMedia,
 				setElementResult: (id, url) => {
 					const [element] = requireElement(editor, id);
 					if (!isUploadable(element))
@@ -159,20 +162,29 @@ export function useAgentTools() {
 							`${id} is a ${element.type} element and can't take a file.`,
 						);
 					const kind = uploadKindOf(element);
-					checkMediaKind(store.getState().media, url, kind);
+					const { media } = store.getState();
+					checkMediaKind(media, url, kind);
+					const item = media.find((m) => m.url === url);
 					return commitUploaded(
 						queue,
 						buildNode(element, buildContext()),
-						kind,
-						url,
+						item ?? { kind, url },
 					);
 				},
-				viewMedia: async ({ kind, url }) =>
-					resultView(await uploadedResult(kind, url)),
+				viewMedia: async (item) => resultView(await uploadedResult(item)),
 				...pick(store.getState(), PROJECT_SETTERS),
 			};
 			return executeToolCall(call, ctx);
 		},
-		[editor, store, account, queue, buildContext, createConnector, projectId],
+		[
+			editor,
+			store,
+			account,
+			queue,
+			buildContext,
+			createConnector,
+			projectId,
+			captionMedia,
+		],
 	);
 }

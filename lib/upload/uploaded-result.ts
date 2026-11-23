@@ -4,10 +4,12 @@ import {
 	type OutputType,
 	outputKindOf,
 } from "@/lib/canvas/types";
+import { replaceCaptions } from "@/lib/captions/caption-edits";
 import { assetUrlField } from "@/lib/connectors/asset-url";
 import type { AssetResult } from "@/lib/connectors/types";
 import type { GenerationNode } from "@/lib/generation/graph";
 import type { GenerationQueue } from "@/lib/generation/queue";
+import type { UploadedMedia } from "@/lib/project/media";
 import type { UploadKind } from "./upload-files";
 
 async function mediaDurationSec(url: string): Promise<number> {
@@ -32,15 +34,19 @@ const READ_DURATION: Record<UploadKind, (url: string) => Promise<number>> = {
 };
 
 /** Browser only. The result an element shows for media the user supplied. */
-export async function uploadedResult(
-	kind: UploadKind,
-	url: string,
-): Promise<AssetResult> {
-	return {
-		[assetUrlField(kind)]: url,
-		durationSec: await READ_DURATION[kind](url),
-		uploaded: true,
-	};
+export async function uploadedResult({
+	kind,
+	url,
+	captions,
+}: UploadedMedia): Promise<AssetResult> {
+	return replaceCaptions(
+		{
+			[assetUrlField(kind)]: url,
+			durationSec: await READ_DURATION[kind](url),
+			uploaded: true,
+		},
+		captions,
+	);
 }
 
 /** The elements that take supplied media, each of the kind it would generate. */
@@ -65,8 +71,7 @@ export const uploadKindOf = (element: UploadableElement): UploadKind =>
 export async function commitUploaded(
 	queue: GenerationQueue,
 	node: GenerationNode,
-	kind: UploadKind,
-	url: string,
+	media: UploadedMedia,
 ): Promise<void> {
-	queue.commitResult(node, await uploadedResult(kind, url), { pinned: true });
+	queue.commitResult(node, await uploadedResult(media), { pinned: true });
 }

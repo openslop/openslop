@@ -4,6 +4,7 @@ import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import type { Retention } from "./define-tool";
 import { adaptScript } from "./adapt-script";
+import { captionMedia } from "./caption-media";
 import { estimateSpeechLengths } from "./estimate-speech-lengths";
 import { estimateTotalLength } from "./estimate-total-length";
 import { editScript } from "./edit-script";
@@ -41,6 +42,7 @@ const TOOLS = {
 	update_script_settings: updateScriptSettings,
 	update_video_settings: updateVideoSettings,
 	generate_captions: generateCaptions,
+	caption_media: captionMedia,
 	view_result: viewResult,
 	read_media: readMedia,
 	view_media: viewMedia,

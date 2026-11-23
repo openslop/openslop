@@ -66,6 +66,12 @@ export const isCaptionable = (type: ContentType): boolean => {
 	return spec.captionable === true;
 };
 
+/** A file of this kind can be captioned when some element that makes that kind is. */
+export const isKindCaptionable = (kind: ResultKind): boolean =>
+	keysOf(CONTENT_TYPES).some(
+		(type) => CONTENT_TYPES[type].outputKind === kind && isCaptionable(type),
+	);
+
 export const ContentTypeSchema = z.enum(keysOf(CONTENT_TYPES));
 
 export const DURATION_MIN = 4;

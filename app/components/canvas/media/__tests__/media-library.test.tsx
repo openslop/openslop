@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { act } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
@@ -14,18 +14,26 @@ import {
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
 import { asset } from "@/lib/canvas/__tests__/_assets";
+import { toCaption } from "@/lib/captions/word-captions";
 import { MediaPanelProvider } from "../media-panel-context";
 import { MediaLibrary } from "../media-library";
+
+const { transcribe } = vi.hoisted(() => ({ transcribe: vi.fn() }));
+vi.mock("@/lib/connectors/use-create-connector", () => ({
+	useCreateConnector: () => () => ({ generate: transcribe }),
+}));
 
 vi.mock("@/app/components/canvas/workspace-context", () => ({
 	useShowWorkspace: () => true,
 }));
+vi.mock("../../elements/audio-player", () => ({ AudioPlayer: () => null }));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 let store: ProjectStore;
 afterEach(() => canvas.unmount());
+beforeEach(() => transcribe.mockReset());
 
 const open = () => {
 	canvas = mountOnCanvas([asset("asset_media_image")]);
@@ -44,6 +52,9 @@ const open = () => {
 		</ProjectStoreProvider>,
 	);
 };
+
+const chooseCaptions = (action: string) =>
+	chooseTileMenuItem("song", "Captions", action);
 
 describe("MediaLibrary", () => {
 	it("lists the media of the kind shown and deletes an item once confirmed", async () => {
@@ -72,5 +83,40 @@ describe("MediaLibrary", () => {
 		);
 
 		expect(store.getState().media).toEqual([]);
+	});
+
+	it("generates, regenerates and removes a file's captions from its Captions submenu", async () => {
+		const words = [toCaption("hello", 0, 0.4)];
+		transcribe.mockResolvedValue({ durationSec: 2, textTimestamps: words });
+		open();
+		await click('[role=radio][aria-label="Audio"]');
+		await act(async () =>
+			store
+				.getState()
+				.addMedia([
+					{ kind: "audio", name: "song.mp3", url: "https://blob/song.mp3" },
+				]),
+		);
+
+		await chooseCaptions("Generate captions");
+
+		expect(transcribe).toHaveBeenCalledWith({
+			prompt: "",
+			mediaUrl: "https://blob/song.mp3",
+		});
+		expect(store.getState().media[0]?.captions).toEqual(words);
+
+		await chooseCaptions("Regenerate captions");
+
+		expect(transcribe).toHaveBeenCalledTimes(2);
+
+		await chooseCaptions("Remove captions");
+		await act(async () =>
+			Array.from(document.querySelectorAll("[role=alertdialog] button"))
+				.find((button) => button.textContent === "Remove captions")
+				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+		);
+
+		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});
 });

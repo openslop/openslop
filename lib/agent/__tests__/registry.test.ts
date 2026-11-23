@@ -9,6 +9,7 @@ import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import { listModels as catalogModels } from "@/lib/connectors/models";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { NO_FINDINGS } from "@/lib/script/prompt/review";
+import { toCaption } from "@/lib/captions/word-captions";
 
 const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
 	updateScriptSettings: (patch: Partial<ScriptSettings>) =>
@@ -54,6 +55,7 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	updateModels: () => {},
 	isConnected: () => true,
 	generateCaptions: () => ({ queued: [], skipped: [] }),
+	captionMedia: async () => {},
 	setElementResult: async () => {},
 	viewMedia: async () => ({ durationSec: 0, images: [], words: [] }),
 	...over,
@@ -75,6 +77,49 @@ describe("executeToolCall", () => {
 		expect(outcome).toEqual({
 			ok: true,
 			output: "Captioning n1, v2.\nSkipped n3: it isn't generated yet.",
+		});
+	});
+
+	it("captions library files that have no captions yet", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const song = { name: "song", kind: "audio" as const, url };
+		const done = {
+			name: "done",
+			kind: "audio" as const,
+			url: `${BLOB_BASE_URL}/assets/upload/user/done.mp3`,
+			captions: [toCaption("hi", 0, 1)],
+		};
+		const captionMedia = vi.fn(async () => {});
+
+		const outcome = await executeToolCall(
+			{ toolName: "caption_media", input: { urls: [url, done.url] } },
+			context({
+				readProject: () => ProjectDataSchema.parse({ media: [song, done] }),
+				captionMedia,
+			}),
+		);
+
+		expect(captionMedia).toHaveBeenCalledOnce();
+		expect(captionMedia).toHaveBeenCalledWith(song);
+		expect(outcome.ok).toBe(true);
+	});
+
+	it("lists media files without their timed words", async () => {
+		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
+		const media = ProjectDataSchema.parse({
+			media: [
+				{ name: "song", kind: "audio", url, captions: [toCaption("hi", 0, 1)] },
+			],
+		});
+
+		const outcome = await executeToolCall(
+			{ toolName: "read_media", input: {} },
+			context({ readProject: () => media }),
+		);
+
+		expect(outcome).toEqual({
+			ok: true,
+			output: [{ name: "song", kind: "audio", url }],
 		});
 	});
 
