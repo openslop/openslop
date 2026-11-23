@@ -171,7 +171,7 @@ export function LibraryTile({
 	referencesOf?: string;
 }) {
 	const captions = useMediaCaptions(item);
-	const { take, traced } = useTake(item);
+	const { uploaded } = useTake(item);
 	return (
 		<>
 			<MediaLibraryItem
@@ -186,7 +186,7 @@ export function LibraryTile({
 					</>
 				}
 			>
-				{traced && !take && (
+				{uploaded && (
 					<div className="absolute right-1 bottom-1">
 						<UploadedLabel tooltip="Uploaded, not generated" />
 					</div>
