@@ -11,18 +11,28 @@ import { useEditorPanel } from "../panel/editor-panel-context";
 import { ElementActionButton } from "./element-action-button";
 import { useElementGeneration } from "./element-generation-context";
 
+function animateBlocker(sloppyBusy: boolean, generating: boolean) {
+	if (sloppyBusy) return "Wait for Sloppy to finish";
+	if (generating) return "Wait for this element to finish generating";
+	return null;
+}
+
 export function AnimateButton({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
 	const { result, status } = useElementGeneration();
 	const { send, loading } = useSloppy();
 	const { setActive } = useEditorPanel();
+	const blocker = animateBlocker(loading, isGenerationActive(status));
 
 	return (
 		<ElementActionButton
 			icon={<MagicVideo />}
 			label="Animate"
-			tooltip={`Turn this into a video element${result?.imageUrl ? " that starts from this image" : ""}`}
-			disabled={loading || isGenerationActive(status)}
+			tooltip={
+				blocker ??
+				`Turn this into a video element${result?.imageUrl ? " that starts from this image" : ""}`
+			}
+			unavailable={blocker !== null}
 			onClick={() => {
 				const path = ReactEditor.findPath(editor, element);
 				setActive("sloppy");

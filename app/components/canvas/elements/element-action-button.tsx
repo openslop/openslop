@@ -22,6 +22,7 @@ export function ElementActionButton({
 			variant={variant}
 			size="sm"
 			className={cn("shrink-0", className)}
+			aria-label={label}
 			onMouseDown={keepFocus}
 			{...props}
 		>

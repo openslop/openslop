@@ -41,16 +41,21 @@ function generateLabel(status: GenerationStatus, hasResult: boolean) {
 	return hasResult ? "Regenerate" : "Generate";
 }
 
+function generateTooltip(hasPrompt: boolean, hasResult: boolean) {
+	if (!hasPrompt) return "Add a prompt first";
+	return hasResult ? "Regenerate this element" : "Generate this element";
+}
+
 export function GenerateButton({
 	status,
+	hasPrompt,
 	hasResult,
-	disabled,
 	onGenerate,
 	className,
 }: {
 	status: GenerationStatus;
+	hasPrompt: boolean;
 	hasResult: boolean;
-	disabled: boolean;
 	onGenerate: () => void;
 	className?: string;
 }) {
@@ -61,10 +66,9 @@ export function GenerateButton({
 			label={label}
 			variant="generate"
 			className={className}
-			disabled={disabled}
+			unavailable={!hasPrompt || isGenerationActive(status)}
 			onClick={onGenerate}
-			aria-label={label}
-			tooltip={hasResult ? "Regenerate this element" : "Generate this element"}
+			tooltip={generateTooltip(hasPrompt, hasResult)}
 		/>
 	);
 }
@@ -74,8 +78,8 @@ export function ElementGenerateButton() {
 	return (
 		<GenerateButton
 			status={status}
+			hasPrompt={hasPrompt}
 			hasResult={hasResult}
-			disabled={!hasPrompt || isGenerationActive(status)}
 			onGenerate={generate}
 		/>
 	);

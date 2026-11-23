@@ -11,7 +11,6 @@ import {
 	type AssetElement,
 	type MediaContentType,
 } from "@/lib/canvas/types";
-import { isGenerationActive } from "@/lib/generation/snapshots";
 import { MediaToggle } from "@/components/ui/media-toggle";
 import { ModelAttribute } from "../elements/attributes/model-attribute";
 import { ELEMENT_CONFIGS } from "../elements/element-configs";
@@ -52,8 +51,8 @@ function DraftGenerateButton() {
 	return (
 		<GenerateButton
 			status={status}
+			hasPrompt={hasPrompt}
 			hasResult={false}
-			disabled={!hasPrompt || isGenerationActive(status)}
 			onGenerate={generate}
 			className="w-full"
 		/>
