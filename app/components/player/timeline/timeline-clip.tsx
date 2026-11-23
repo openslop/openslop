@@ -7,6 +7,9 @@ import type { ResultKind } from "@/lib/canvas/types";
 import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
+import { isGenerationActive } from "@/lib/generation/snapshots";
+import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
+import { GenerationIndicator } from "@/app/components/canvas/elements/generation-indicator";
 import { mediaUrlAt } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import type { ResolvedElement, Trim } from "@/lib/render/types";
@@ -166,10 +169,14 @@ export function TimelineClip({
 	const { element } = clip;
 	const config = ELEMENT_CONFIGS[element.type];
 	const range = formatTimeRange(clip.start, clip.duration);
+	const { status, startedAt } = useQueueSelector((q) =>
+		q.getElementSnapshot(element.id),
+	);
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
 		element.captions && "captioned",
+		isGenerationActive(status) && "regenerating",
 		range,
 	]
 		.filter(Boolean)
@@ -205,6 +212,14 @@ export function TimelineClip({
 					</Preview>
 				)}
 			</div>
+			{isGenerationActive(status) ? (
+				<GenerationIndicator
+					status={status}
+					startedAt={startedAt}
+					size="sm"
+					className="absolute top-0.5 right-0.5 z-10"
+				/>
+			) : null}
 			{sceneNumber ? (
 				<CornerChip className="font-numeric">
 					<span className="truncate">

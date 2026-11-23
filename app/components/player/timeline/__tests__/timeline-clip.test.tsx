@@ -1,5 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { noHistory } from "@/app/components/canvas/__tests__/_mount";
+import {
+	GenerationQueueProvider,
+	useGenerationQueue,
+} from "@/lib/generation/generation-queue-provider";
+import {
+	EMPTY_SNAPSHOT,
+	type GenerationStatus,
+} from "@/lib/generation/snapshots";
 import type { ResolvedElement, Trim } from "@/lib/render/types";
 import { TimelineClip, TimelineExtension } from "../timeline-clip";
 
@@ -24,16 +34,43 @@ const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
 	...over,
 });
 
-const markup = (el: ResolvedElement, duration: number, trim: Trim = el) =>
+/** Reports the status the queue holds for every element, as a regeneration under way would. */
+function HoldStatus({ status }: { status: GenerationStatus }) {
+	const queue = useGenerationQueue();
+	vi.spyOn(queue, "getElementSnapshot").mockReturnValue({
+		...EMPTY_SNAPSHOT,
+		status,
+		startedAt: status === "generating" ? 0 : null,
+	});
+	return null;
+}
+
+const markup = (
+	el: ResolvedElement,
+	duration: number,
+	trim: Trim = el,
+	status: GenerationStatus = "idle",
+) =>
 	renderToStaticMarkup(
-		<TimelineClip
-			clip={{ key: "clip", element: el, start: 0, duration, minDuration: 0 }}
-			width={duration * PX_PER_SEC}
-			label="slow pan"
-			selected={false}
-			pxPerSec={PX_PER_SEC}
-			trim={trim}
-		/>,
+		<TooltipProvider>
+			<GenerationQueueProvider initialState={{}} storage={noHistory}>
+				<HoldStatus status={status} />
+				<TimelineClip
+					clip={{
+						key: "clip",
+						element: el,
+						start: 0,
+						duration,
+						minDuration: 0,
+					}}
+					width={duration * PX_PER_SEC}
+					label="slow pan"
+					selected={false}
+					pxPerSec={PX_PER_SEC}
+					trim={trim}
+				/>
+			</GenerationQueueProvider>
+		</TooltipProvider>,
 	);
 
 const sources = (markup: string) =>
@@ -65,6 +102,23 @@ describe("TimelineClip footage", () => {
 			trimDurationSec: 0,
 		});
 		expect(markup(still, 8).match(/<img /g)).toHaveLength(1);
+	});
+});
+
+describe("TimelineClip regeneration", () => {
+	it("shows no indicator while the element is idle", () => {
+		const html = markup(element(), 5);
+		expect(html).not.toContain('role="status"');
+		expect(html).not.toContain("regenerating");
+	});
+
+	it.each([
+		["queued", "Queued…"],
+		["generating", "Generating 0s"],
+	] as const)("marks a clip whose element is %s", (status, label) => {
+		const html = markup(element(), 5, element(), status);
+		expect(html).toContain(`role="status" aria-label="${label}"`);
+		expect(html).toContain('aria-label="Video, regenerating, 0:00–0:05"');
 	});
 });
 
