@@ -5,6 +5,7 @@ import { useSlateStatic } from "slate-react";
 import pick from "lodash/pick";
 import { getAssets } from "@/lib/canvas/assets";
 import { findElementById, requireElement } from "@/lib/canvas/editor-ops";
+import { elementModel } from "@/lib/canvas/element-connector";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
 import { getContentElements, isScriptEmpty } from "@/lib/canvas/scenes";
 import {
@@ -116,6 +117,7 @@ export function useAgentTools() {
 					return text;
 				},
 				readAssets: () => getAssets(editor.children),
+				readModels: () => getContentElements(editor.children).map(elementModel),
 				readProject: () => store.getState(),
 				modelDefaults: () => ({
 					project: store.getState().models,

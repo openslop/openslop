@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { DURATION_OPTIONS, VOLUME_OPTIONS } from "@/lib/canvas/types";
+import {
+	durationOptions,
+	STANDARD_MAX_DURATION_SEC,
+	VOLUME_OPTIONS,
+} from "@/lib/canvas/types";
 import {
 	getDuration,
 	getLoops,
@@ -143,7 +147,7 @@ describe("getLoops", () => {
 describe("what the pickers offer", () => {
 	it.each([
 		["volume", VOLUME_OPTIONS, getVolume],
-		["duration", DURATION_OPTIONS, getDuration],
+		["duration", durationOptions(STANDARD_MAX_DURATION_SEC), getDuration],
 	] as const)("reads every %s option as itself", (key, options, read) => {
 		for (const option of options) {
 			expect(read(el({ [key]: option }))).toBe(Number(option));

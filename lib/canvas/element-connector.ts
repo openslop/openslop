@@ -5,7 +5,11 @@ import {
 	type AttributeDef,
 } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
-import { listModels, resolveModel } from "@/lib/connectors/models";
+import {
+	listModels,
+	resolveModel,
+	type ConnectorModels,
+} from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { VOICE_ATTRIBUTES } from "@/lib/connectors/voice/attributes";
 import type {
@@ -17,11 +21,13 @@ import { REFERENCE_URLS_ATTR } from "./assets";
 import { flatAttributes } from "./element-attributes";
 import {
 	connectorOf,
+	ContentTypeSchema,
 	ElementTypeSchema,
 	type ElementType,
 	type ProjectAssetType,
 	type GeneratedElement,
 	type CanvasElement,
+	type GeneratedType,
 } from "./types";
 
 type ElementConnector = {
@@ -100,3 +106,19 @@ export const elementSchema = (element: CanvasElement): AttributeSchema =>
 
 export const elementOffers = (element: CanvasElement, key: string): boolean =>
 	elementSchema(element).keys.includes(key);
+
+export type ElementModel = { type: GeneratedType; model: ModelRef };
+
+export const elementModel = (element: GeneratedElement): ElementModel => ({
+	type: element.type,
+	model: resolveModel(connectorOf(element.type), flatAttributes(element)),
+});
+
+/** The model each content type's new elements get. */
+export const defaultElementModels = (
+	defaults: ConnectorModels,
+): ElementModel[] =>
+	ContentTypeSchema.options.map((type) => {
+		const connector = connectorOf(type);
+		return { type, model: resolveModel(connector, defaults[connector]) };
+	});

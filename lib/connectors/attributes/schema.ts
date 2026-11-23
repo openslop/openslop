@@ -78,6 +78,10 @@ export class AttributeSchema {
 		return this.defs.filter((def) => !def.perModel);
 	}
 
+	get modelDefs(): AttributeDef[] {
+		return this.defs.filter((def) => def.perModel);
+	}
+
 	/** Whether the element can carry this value: a key outside the schema never can. */
 	offers(key: string, value: string): boolean {
 		const def = this.defs.find((candidate) => candidate.key === key);

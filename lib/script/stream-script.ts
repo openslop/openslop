@@ -1,5 +1,6 @@
 import type { Editor } from "slate";
 import { getAssets } from "@/lib/canvas/assets";
+import { defaultElementModels } from "@/lib/canvas/element-connector";
 import type { LLMConnector } from "@/lib/connectors/types";
 import type { ScriptSettings } from "@/lib/project/types";
 import { buildScriptPrompt, type ScriptSource } from "./prompt/build";
@@ -17,6 +18,7 @@ export async function streamScript(
 	const { system, prompt } = buildScriptPrompt(
 		getAssets(editor.children),
 		settings,
+		defaultElementModels(editor.defaultModels()),
 		source,
 	);
 

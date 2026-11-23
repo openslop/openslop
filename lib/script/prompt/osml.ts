@@ -3,7 +3,6 @@ import {
 	DEFAULT_DURATION,
 	DEFAULT_LOOPS,
 	LOOPS_RULE,
-	DURATION_OPTIONS,
 	TOGGLE_ON,
 } from "@/lib/canvas/types";
 import {
@@ -56,7 +55,7 @@ export function osmlSpec(language: string): string {
 
 		## <video>
 		- A short generated video whose sound is written into its shots. The body is a video prompt, written as the Video prompts section says.
-		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: ${DURATION_OPTIONS.join(", ")}.
+		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: see Model attributes.
 		- ${START_FRAME_ATTR}, ${CONTINUITY_ATTR} and ${loopDef.key}: see Format.
 		- motion: normally set to "${DEFAULT_MOTION}". Only set one when the shots have no camera move of their own.
 		- Example: <video startFrame="none">Shot 1: Wide shot of a moonlit forest clearing as {{Red}} and {{Wolf}} walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby.</video>

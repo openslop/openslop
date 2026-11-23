@@ -30,7 +30,7 @@ export const reviewScript = defineTool({
 			return "The script is empty, so there is nothing to review.";
 		const settings = ctx.readProject().scriptSettings;
 		return ctx.generateText(reviewPrompt(ctx.readScript(), settings.format), {
-			systemPrompt: scriptRules(ctx.readAssets(), settings),
+			systemPrompt: scriptRules(ctx.readAssets(), settings, ctx.readModels()),
 		});
 	},
 	retention: "turn",
