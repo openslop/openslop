@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	DURATION_OPTIONS,
-	LOOPS_OPTIONS,
-	VOLUME_OPTIONS,
-} from "@/lib/canvas/types";
+import { DURATION_OPTIONS, VOLUME_OPTIONS } from "@/lib/canvas/types";
 import {
 	getDuration,
 	getLoops,
@@ -134,9 +130,9 @@ describe("getLoops", () => {
 		expect(getLoops(el({ loops: "NaN" }))).toBe(1);
 	});
 
-	it("clamps a loop count to the most the picker offers", () => {
-		expect(getLoops(el({ loops: "9" }))).toBe(8);
-		expect(getLoops(el({ loops: "999999999" }))).toBe(8);
+	it("has no ceiling", () => {
+		expect(getLoops(el({ loops: "9" }))).toBe(9);
+		expect(getLoops(el({ loops: "999999999" }))).toBe(999999999);
 	});
 
 	it("clamps negative loop counts to 1", () => {
@@ -148,7 +144,6 @@ describe("what the pickers offer", () => {
 	it.each([
 		["volume", VOLUME_OPTIONS, getVolume],
 		["duration", DURATION_OPTIONS, getDuration],
-		["loops", LOOPS_OPTIONS, getLoops],
 	] as const)("reads every %s option as itself", (key, options, read) => {
 		for (const option of options) {
 			expect(read(el({ [key]: option }))).toBe(Number(option));

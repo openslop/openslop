@@ -32,7 +32,7 @@ function Slider({
 			min={min}
 			max={max}
 			className={cn(
-				"group relative flex w-full cursor-pointer touch-none items-center select-none data-[disabled]:cursor-default data-[disabled]:opacity-50",
+				"group relative flex h-6 w-full cursor-pointer touch-none items-center select-none data-[disabled]:cursor-default data-[disabled]:opacity-50",
 				className,
 			)}
 			{...props}
@@ -58,4 +58,23 @@ function Slider({
 	);
 }
 
-export { Slider };
+/** A slider with its value read out beside it, in room kept for `widest` so the track never shifts. */
+function SliderField({
+	readout,
+	widest,
+	...props
+}: React.ComponentProps<typeof Slider> & { readout: string; widest: string }) {
+	return (
+		<div className="flex h-8 w-full items-center gap-3">
+			<Slider {...props} />
+			<span
+				className="shrink-0 text-right font-numeric text-label"
+				style={{ width: `${widest.length}ch` }}
+			>
+				{readout}
+			</span>
+		</div>
+	);
+}
+
+export { Slider, SliderField };

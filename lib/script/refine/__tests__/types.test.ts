@@ -26,8 +26,15 @@ describe("refine op attributes", () => {
 		const parsed = insertMusic({ loops: 1, volume: 10 });
 
 		expect(parsed.success).toBe(false);
-		expect(problems(parsed)).toContain('expected one of "1"|"2"');
+		expect(problems(parsed)).toContain("expected string, received number");
 		expect(problems(parsed)).toContain('expected one of "0"|"1"');
+	});
+
+	it("rejects a loop count that is not a whole number from 1, saying so", () => {
+		const parsed = setAttrs({ loops: "0" });
+
+		expect(parsed.success).toBe(false);
+		expect(problems(parsed)).toContain("A whole number, 1 or more.");
 	});
 
 	it("rejects a value outside an attribute's options, naming the values allowed", () => {
