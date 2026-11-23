@@ -37,13 +37,13 @@ const badgeVariants = cva(
 				sm: "gap-1 px-1.5 py-0 text-badge-xs [&_.icon]:size-2.5 [&_svg:not([class*='size-'])]:size-2.5",
 				icon: "size-6 rounded-md p-0 [&_svg:not([class*='size-'])]:size-4",
 				inline:
-					"h-4.5 max-w-48 rounded border-0 px-1 text-label leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3",
+					"h-4.5 max-w-48 rounded border-0 px-1 text-label leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3 [&>.icon]:size-3",
 				/** `inline` at 11px, for chips set inside 11px rows. */
 				inlineXs:
-					"h-4.5 max-w-48 rounded border-0 px-1 text-label-xs leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3",
+					"h-4.5 max-w-48 rounded border-0 px-1 text-label-xs leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3 [&>.icon]:size-3",
 				// `inline` at the 10px badge size, for chips set inside 10px text
 				inlineSm:
-					"h-4.5 max-w-48 rounded border-0 px-1 text-badge leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3",
+					"h-4.5 max-w-48 rounded border-0 px-1 text-badge leading-4.5 font-normal has-data-[slot=avatar]:pl-0 [&_svg:not([class*='size-'])]:size-3 [&>.icon]:size-3",
 			},
 		},
 		defaultVariants: {
