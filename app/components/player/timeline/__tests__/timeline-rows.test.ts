@@ -6,6 +6,7 @@ import { layoutOf } from "@/lib/render/__tests__/_layout";
 import {
 	buildCaptionRows,
 	buildTimelineRows,
+	computePlaceholderClips,
 	packLanes,
 } from "../timeline-rows";
 import { toCaption } from "@/lib/captions/word-captions";
@@ -74,9 +75,14 @@ describe("buildTimelineRows", () => {
 		expect(buildTimelineRows(layoutOf([]))).toEqual([]);
 	});
 
-	it("drops lanes that hold nothing", () => {
+	it("drops lanes that hold nothing and have no placeholders", () => {
 		const rows = buildTimelineRows(layoutOf([el("a", "image")]));
-		expect(rows.map((row) => row.id)).toEqual(["foreground"]);
+		expect(rows.map((row) => row.id)).toEqual(["foreground", "background"]);
+		expect(rows.find((r) => r.id === "overlay")).toBeUndefined();
+		expect(rows.find((r) => r.id === "effect")).toBeUndefined();
+		expect(rows.find((r) => r.id === "background")?.placeholders).toHaveLength(
+			1,
+		);
 	});
 
 	it("puts each role in its own lane, in stacking order", () => {
@@ -212,6 +218,59 @@ describe("buildTimelineRows", () => {
 		expect(isBlankScene(visual?.clips[0].element as ResolvedElement)).toBe(
 			true,
 		);
+	});
+});
+
+describe("computePlaceholderClips", () => {
+	it("returns empty list for an empty layout", () => {
+		expect(computePlaceholderClips(layoutOf([]))).toEqual([]);
+	});
+
+	it("shows an 'Add music' placeholder spanning all scenes when there is no music", () => {
+		const layout = layoutOf([
+			el("a", "image", { sceneId: "s1", trimDurationSec: 5 }),
+			el("b", "image", { sceneId: "s2", trimDurationSec: 7 }),
+		]);
+		const placeholders = computePlaceholderClips(layout);
+		expect(placeholders).toHaveLength(1);
+		expect(placeholders[0]).toMatchObject({
+			role: "background",
+			type: "music",
+			label: "Add music",
+			start: 0,
+			duration: layout.totalDurationSec,
+			sceneId: "s1",
+		});
+	});
+
+	it("shows placeholder only over earlier scenes when music starts at a later scene", () => {
+		const layout = layoutOf([
+			el("a", "image", { sceneId: "s1", trimDurationSec: 5 }),
+			el("bgm", "music", { sceneId: "s2", trimDurationSec: 5 }),
+			el("b", "image", { sceneId: "s2", trimDurationSec: 5 }),
+		]);
+		const placeholders = computePlaceholderClips(layout);
+		expect(placeholders).toHaveLength(1);
+		expect(placeholders[0]).toMatchObject({
+			role: "background",
+			type: "music",
+			label: "Add music",
+			start: 0,
+			sceneId: "s1",
+		});
+		const music = layout.sequences.music?.[0];
+		expect(music).toBeDefined();
+		if (music) {
+			expect(placeholders[0].duration).toBeCloseTo(music.start);
+		}
+	});
+
+	it("produces no placeholder when music covers the whole timeline from start", () => {
+		const layout = layoutOf([
+			el("bgm", "music", { sceneId: "s1", trimDurationSec: 10 }),
+			el("a", "image", { sceneId: "s1", trimDurationSec: 10 }),
+		]);
+		expect(computePlaceholderClips(layout)).toEqual([]);
 	});
 });
 

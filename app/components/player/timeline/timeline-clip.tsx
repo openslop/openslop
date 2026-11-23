@@ -3,7 +3,7 @@ import { Captions, type IconComponent } from "@/components/ui/icon";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
-import type { ResultKind } from "@/lib/canvas/types";
+import type { ContentType, ResultKind } from "@/lib/canvas/types";
 import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
@@ -286,5 +286,38 @@ export function TimelineCaptionClip({
 		>
 			<ClipHeader icon={Captions} label={text} width={width} />
 		</ClipFrame>
+	);
+}
+
+export function TimelinePlaceholderClip({
+	placeholder,
+	width,
+	onClick,
+}: {
+	placeholder: {
+		label: string;
+		type: ContentType;
+		start: number;
+		duration: number;
+	};
+	width: number;
+	onClick: () => void;
+}) {
+	const config = ELEMENT_CONFIGS[placeholder.type];
+	const Icon = config.Icon;
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			aria-label={`${placeholder.label}, ${formatTimeRange(placeholder.start, placeholder.duration)}`}
+			className={cn(
+				"relative flex h-full w-full items-center justify-center gap-1.5 overflow-hidden rounded-md border-2 border-dashed px-2 text-label-xs font-medium transition-colors",
+				"border-border/70 hover:border-current hover:bg-current/5",
+				config.colorClass,
+			)}
+		>
+			<Icon size={12} className="shrink-0" />
+			<span className="truncate">{fit(placeholder.label, width)}</span>
+		</button>
 	);
 }

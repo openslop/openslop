@@ -1,4 +1,4 @@
-import type { ElementRole, LayerType } from "@/lib/canvas/types";
+import type { ContentType, ElementRole, LayerType } from "@/lib/canvas/types";
 import {
 	layoutCaptions,
 	type CaptionSequence,
@@ -9,6 +9,26 @@ import { keysOf } from "@/lib/utils";
 
 export type TimelineClip = Sequence & { key: string };
 
+export type PlaceholderKind = {
+	role: ElementRole;
+	type: ContentType;
+	label: string;
+};
+
+export const PLACEHOLDER_KINDS: PlaceholderKind[] = [
+	{ role: "background", type: "music", label: "Add music" },
+];
+
+export type PlaceholderClip = {
+	key: string;
+	role: ElementRole;
+	type: ContentType;
+	label: string;
+	start: number;
+	duration: number;
+	sceneId: string;
+};
+
 export type TimelineRow = {
 	key: string;
 	id: ElementRole;
@@ -17,6 +37,7 @@ export type TimelineRow = {
 	/** Only the scene lane carries scene numbers; the rest sit under it unlabelled. */
 	numbered: boolean;
 	clips: TimelineClip[];
+	placeholders?: PlaceholderClip[];
 };
 
 /** One lane per role, in stacking order, mirroring `buildRenderLayout`'s cases. */
@@ -45,6 +66,46 @@ function sequencesForRole(layout: RenderLayout, role: ElementRole): Sequence[] {
 		.sort((a, b) => a.start - b.start);
 }
 
+/** Computes UI-only placeholder clips for uncovered tracks (e.g. initial music gap). */
+export function computePlaceholderClips(
+	layout: RenderLayout,
+): PlaceholderClip[] {
+	if (layout.totalDurationSec <= 0 || layout.series.length === 0) {
+		return [];
+	}
+
+	const placeholders: PlaceholderClip[] = [];
+
+	// Music placeholder
+	const musicSequences = sequencesForRole(layout, "background");
+	const firstMusic = musicSequences[0];
+	const firstSceneId = layout.series[0]?.element.sceneId;
+
+	if (!firstMusic) {
+		placeholders.push({
+			key: "placeholder-music-0",
+			role: "background",
+			type: "music",
+			label: "Add music",
+			start: 0,
+			duration: layout.totalDurationSec,
+			sceneId: firstSceneId,
+		});
+	} else if (firstMusic.start > TOUCH_EPSILON) {
+		placeholders.push({
+			key: "placeholder-music-0",
+			role: "background",
+			type: "music",
+			label: "Add music",
+			start: 0,
+			duration: firstMusic.start,
+			sceneId: firstSceneId,
+		});
+	}
+
+	return placeholders;
+}
+
 /**
  * Splits clips into as few lanes as they can occupy without overlapping, the
  * way a linear editor stacks simultaneous sounds. Expects clips in start order.
@@ -71,13 +132,32 @@ export function packLanes<
 	return lanes;
 }
 
-/** Roles with nothing to show are dropped. */
+/** Roles with nothing to show and no placeholders are dropped. */
 export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
+	const placeholders = computePlaceholderClips(layout);
+
 	return keysOf(ROWS).flatMap((role) => {
-		const lanes = packLanes(
-			sequencesForRole(layout, role),
-			layout.transitionDurationSec,
-		);
+		const sequences = sequencesForRole(layout, role);
+		const rolePlaceholders = placeholders.filter((p) => p.role === role);
+
+		if (sequences.length === 0 && rolePlaceholders.length === 0) {
+			return [];
+		}
+
+		const lanes = packLanes(sequences, layout.transitionDurationSec);
+
+		if (lanes.length === 0 && rolePlaceholders.length > 0) {
+			return [
+				{
+					key: `${role}-0`,
+					id: role,
+					...ROWS[role],
+					clips: [],
+					placeholders: rolePlaceholders,
+				},
+			];
+		}
+
 		return lanes.map((lane, index) => ({
 			key: `${role}-${index}`,
 			id: role,
@@ -86,6 +166,9 @@ export function buildTimelineRows(layout: RenderLayout): TimelineRow[] {
 				...sequence,
 				key: `${sequence.element.id}-${sequence.start}`,
 			})),
+			...(index === 0 && rolePlaceholders.length > 0
+				? { placeholders: rolePlaceholders }
+				: {}),
 		}));
 	});
 }

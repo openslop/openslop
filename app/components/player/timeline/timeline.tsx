@@ -20,6 +20,7 @@ import {
 	TimelineCaptionClip,
 	TimelineClip,
 	TimelineExtension,
+	TimelinePlaceholderClip,
 } from "./timeline-clip";
 import { TimelineHoverHead, type HoverHeadHandle } from "./timeline-hover-head";
 import { TimelinePlayhead } from "./timeline-playhead";
@@ -30,12 +31,18 @@ import {
 	buildCaptionRows,
 	buildTimelineRows,
 	type CaptionClip as CaptionClipData,
+	type PlaceholderClip as PlaceholderClipData,
 	type TimelineClip as TimelineClipData,
 } from "./timeline-rows";
 import { RULER_TAIL_PX, useTimelineZoomContext } from "./timeline-zoom-context";
 import { TimelineTrimHandles } from "./timeline-trim-handle";
 import { useClipTrim } from "./use-clip-trim";
 import { useTrimSnap, type TrimSnap } from "./use-trim-snap";
+import { Transforms } from "slate";
+import { useSlateStatic } from "slate-react";
+import { insertElement } from "@/lib/canvas/insert-element";
+import { findElementById } from "@/lib/canvas/editor-ops";
+import { isScene } from "@/lib/canvas/scenes";
 
 const MIN_CLIP_WIDTH_PX = 2;
 
@@ -166,6 +173,29 @@ function CaptionClip({
 	);
 }
 
+function PlaceholderClip({
+	placeholder,
+	pxPerSec,
+	onInsert,
+}: {
+	placeholder: PlaceholderClipData;
+	pxPerSec: number;
+	onInsert: (placeholder: PlaceholderClipData) => void;
+}) {
+	const startPx = placeholder.start * pxPerSec;
+	const widthPx = Math.max(MIN_CLIP_WIDTH_PX, placeholder.duration * pxPerSec);
+
+	return (
+		<ClipSlot start={startPx} width={widthPx}>
+			<TimelinePlaceholderClip
+				placeholder={placeholder}
+				width={widthPx}
+				onClick={() => onInsert(placeholder)}
+			/>
+		</ClipSlot>
+	);
+}
+
 function Track({
 	row,
 	children,
@@ -199,6 +229,7 @@ function TimelineEmpty() {
 }
 
 export function Timeline() {
+	const editor = useSlateStatic();
 	const { layout } = useLayout();
 	const { player } = usePlayerControl();
 	const selectScene = useSelectScene();
@@ -218,6 +249,25 @@ export function Timeline() {
 	const select = (clip: TimelineClipData) => {
 		setSelectedKey(clip.key);
 		selectScene(clip.element.sceneId, clip.start);
+	};
+
+	const handleInsertPlaceholder = (placeholder: PlaceholderClipData) => {
+		const sceneIndex = editor.children.findIndex(
+			(node) => isScene(node) && node.id === placeholder.sceneId,
+		);
+		const targetIndex = sceneIndex >= 0 ? sceneIndex : 0;
+		const scene = editor.children[targetIndex];
+		const childCount = isScene(scene) ? scene.children.length : 0;
+		const insertPath = [targetIndex, childCount];
+
+		const newId = insertElement(editor, placeholder.type, insertPath);
+
+		const found = findElementById(editor, newId);
+		if (found) {
+			Transforms.select(editor, found[1]);
+		}
+
+		selectScene(placeholder.sceneId, placeholder.start);
 	};
 
 	return (
@@ -285,6 +335,14 @@ export function Timeline() {
 						))}
 						{rows.map((row) => (
 							<Track key={row.key} row={row}>
+								{row.placeholders?.map((placeholder) => (
+									<PlaceholderClip
+										key={placeholder.key}
+										placeholder={placeholder}
+										pxPerSec={pxPerSec}
+										onInsert={handleInsertPlaceholder}
+									/>
+								))}
 								{row.clips.map((clip) => (
 									<Clip
 										key={clip.key}
