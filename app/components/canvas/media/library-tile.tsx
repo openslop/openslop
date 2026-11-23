@@ -16,13 +16,12 @@ import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import { Alternative, LayersPlus, MagicCaptions } from "@/components/ui/icon";
 import { addElementReferences } from "@/lib/canvas/asset-ops";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
-import type { GeneratedElement } from "@/lib/canvas/types";
+import { isKindCaptionable, type GeneratedElement } from "@/lib/canvas/types";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { useCaptionMedia } from "@/lib/captions/use-caption-media";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
-import { UPLOAD_KINDS } from "@/lib/upload/upload-files";
 import { toastError } from "@/lib/toast-error";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
@@ -182,7 +181,7 @@ export function LibraryTile({
 						{referencesOf && (
 							<AddReferenceItem item={item} elementId={referencesOf} />
 						)}
-						{UPLOAD_KINDS[item.kind].hasSound && <CaptionsItem {...captions} />}
+						{isKindCaptionable(item.kind) && <CaptionsItem {...captions} />}
 						<UseAsItem item={item} />
 					</>
 				}

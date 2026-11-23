@@ -16,7 +16,6 @@ export type UploadKind = z.infer<typeof UploadKindSchema>;
 export const UPLOAD_KINDS = {
 	image: {
 		noun: "an image",
-		hasSound: false,
 		maxBytes: 10 * 1024 * 1024,
 		contentTypes: [
 			"image/jpeg",
@@ -28,24 +27,17 @@ export const UPLOAD_KINDS = {
 	},
 	video: {
 		noun: "a video",
-		hasSound: true,
 		maxBytes: 500 * 1024 * 1024,
 		contentTypes: ["video/*"],
 	},
 	audio: {
 		noun: "audio",
-		hasSound: true,
 		maxBytes: 20 * 1024 * 1024,
 		contentTypes: ["audio/*"],
 	},
 } as const satisfies Record<
 	UploadKind,
-	{
-		noun: string;
-		hasSound: boolean;
-		maxBytes: number;
-		contentTypes: readonly string[];
-	}
+	{ noun: string; maxBytes: number; contentTypes: readonly string[] }
 >;
 
 export interface Upload {
