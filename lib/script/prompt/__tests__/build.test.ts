@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { asset } from "@/lib/canvas/__tests__/_assets";
-import { durationOptions } from "@/lib/canvas/types";
 import type { ModelRef } from "@/lib/connectors/types";
 import { ScriptSettingsSchema, type ScriptSettings } from "@/lib/project/types";
 import { ADAPT_SCRIPT_RULES } from "../adapt";
@@ -202,10 +201,10 @@ describe("buildScriptPrompt", () => {
 		const linesOf = (model: string) =>
 			rules.split("\n").filter((line) => line.includes(`model="${model}"`));
 		expect(linesOf("Seedance 2.5")).toEqual([
-			expect.stringContaining(`duration: ${durationOptions(30).join(", ")}.`),
+			expect.stringContaining("duration 4 to 30"),
 		]);
 		expect(linesOf("Kling 3 Omni")).toEqual([
-			expect.stringContaining(`duration: ${durationOptions(15).join(", ")}.`),
+			expect.stringContaining("duration 4 to 15"),
 		]);
 	});
 

@@ -30,7 +30,7 @@ export function reviewPrompt(
 		- Pacing and beats: the story progresses at a natural speed, with no sudden awkward cuts or overly dragged out scenes.
 		- Prompts: all prompts are clear, specific, and give the model enough information to generate the intended visuals and audio.
 
-		Attributes the rules never mention, like volume and trimStart, are app settings and outside the scope of this review. So are provider and model, but they decide which Model attributes values the element allows.
+		Attributes the rules never mention, like volume and trimStart, are app settings and outside the scope of this review. So are provider and model, though model decides which Model attributes values the element allows.
 
 		Work through every scene and give each element at most one finding.
 
