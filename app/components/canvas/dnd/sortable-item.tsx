@@ -73,7 +73,7 @@ export function SortableItem({
 				>
 					{!disabled && (
 						<div
-							className={`self-center ${styles.actions}`}
+							className={`self-center max-sm:hidden ${styles.actions}`}
 							contentEditable={false}
 						>
 							{insertMenu}

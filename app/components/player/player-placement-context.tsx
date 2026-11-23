@@ -12,8 +12,13 @@ import { createRequiredContext } from "@/lib/components/create-required-context"
 /** Where the player sits, or that it sits nowhere. */
 export type PlayerPlacement = "top" | "right" | "hidden";
 
-const NARROW_BREAKPOINT = 1066;
-const NARROW_QUERY = `(max-width: ${NARROW_BREAKPOINT}px)`;
+function getNarrowQuery(): string {
+	if (typeof window === "undefined") return "";
+	const token = getComputedStyle(document.documentElement)
+		.getPropertyValue("--breakpoint-narrow")
+		.trim();
+	return token ? `(max-width: ${token})` : "";
+}
 
 const [PlayerPlacementContext, usePlayerPlacement] = createRequiredContext<{
 	placement: PlayerPlacement;
@@ -29,7 +34,9 @@ export function PlayerPlacementProvider({ children }: { children: ReactNode }) {
 	const [narrowViewport, setNarrowViewport] = useState(false);
 
 	useEffect(() => {
-		const mediaQuery = window.matchMedia(NARROW_QUERY);
+		const query = getNarrowQuery();
+		if (!query) return;
+		const mediaQuery = window.matchMedia(query);
 		const onChange = ({ matches }: MediaQueryListEvent | MediaQueryList) =>
 			setNarrowViewport(matches);
 		onChange(mediaQuery);

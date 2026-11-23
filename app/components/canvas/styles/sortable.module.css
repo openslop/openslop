@@ -43,12 +43,6 @@
 	transition: opacity var(--duration-faster) var(--ease-casual);
 }
 
-@media (max-width: 639px) {
-	.actions {
-		display: none;
-	}
-}
-
 .hoverTarget {
 	display: flex;
 }
