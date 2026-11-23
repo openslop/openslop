@@ -15,6 +15,9 @@ import { languageLabel } from "@/lib/project/language";
 import { videoFormatLabel } from "@/lib/project/video-format";
 import { videoLengthLabel } from "@/lib/project/video-length";
 import { getTemplateById } from "@/lib/templates/templates";
+import { useMaybeProjectId } from "@/lib/project/project-provider";
+import { useProjectTotalCost } from "@/lib/project/project-cost";
+import { CostBadge } from "../cost-badge";
 import { PanelCard, PanelField } from "./panel-card";
 
 /** A setting the project was created with, shown as the dropdown it was picked from. */
@@ -40,12 +43,21 @@ function FixedSetting({
 }
 
 export function ProjectPanel() {
+	const projectId = useMaybeProjectId();
+	const totalCost = useProjectTotalCost(projectId);
 	const { language, length, format, template } = useProject(
 		(state) => state.scriptSettings,
 	);
 
 	return (
-		<PanelCard title="Project">
+		<PanelCard
+			title="Project"
+			action={
+				<CostBadge costUsd={totalCost} size="xsLabel">
+					Total
+				</CostBadge>
+			}
+		>
 			<FixedSetting
 				label="Language"
 				Icon={Translate}

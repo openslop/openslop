@@ -1,6 +1,15 @@
 // @vitest-environment happy-dom
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const { mockTotalCost } = vi.hoisted(() => ({
+	mockTotalCost: { current: undefined as number | undefined },
+}));
+
+vi.mock("@/lib/project/project-cost", () => ({
+	useProjectTotalCost: () => mockTotalCost.current,
+}));
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { languageLabel } from "@/lib/project/language";
@@ -12,6 +21,9 @@ import { ProjectPanel } from "../project-panel";
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 let canvas: ReturnType<typeof mountOnCanvas> | undefined;
+beforeEach(() => {
+	mockTotalCost.current = undefined;
+});
 afterEach(() => canvas?.unmount());
 
 const renderPanel = (store = createProjectStore()) => {
@@ -53,5 +65,22 @@ describe("ProjectPanel", () => {
 		await renderPanel();
 
 		expect(document.body.textContent).toContain("None");
+	});
+
+	it("hides the total cost badge when there are no costed jobs", async () => {
+		mockTotalCost.current = undefined;
+		await renderPanel();
+
+		const badge = document.body.querySelector('[data-slot="badge"]');
+		expect(badge).toBeNull();
+	});
+
+	it("shows the total cost badge in the header when the project has costed jobs", async () => {
+		mockTotalCost.current = 0.42;
+		await renderPanel();
+
+		const badge = document.body.querySelector('[data-slot="badge"]');
+		expect(badge).not.toBeNull();
+		expect(badge?.textContent).toBe("Total$0.42");
 	});
 });
