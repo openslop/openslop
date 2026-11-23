@@ -20,9 +20,10 @@ export const captionMedia = defineTool({
 	label: "Captioning media",
 	execute: async ({ urls }, ctx) => {
 		const media = ctx.readProject().media;
-		await Promise.all(
-			urls.map((url) => ctx.captionMedia(requireMedia(media, url))),
-		);
+		const uncaptioned = urls
+			.map((url) => requireMedia(media, url))
+			.filter((item) => !item.captions);
+		await Promise.all(uncaptioned.map((item) => ctx.captionMedia(item)));
 		return "Captioned. Read the words with view_media.";
 	},
 });

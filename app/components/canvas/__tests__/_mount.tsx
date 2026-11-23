@@ -44,8 +44,8 @@ export const click = (selector: string) =>
 		target.click();
 	});
 
-/** Opens the ⋮ menu of the tile named `tile` and chooses the item reading `item`. */
-export async function chooseTileMenuItem(tile: string, item: string) {
+/** Opens the ⋮ menu of the tile named `tile` and chooses the item reading `item`, through any submenus before it. */
+export async function chooseTileMenuItem(tile: string, ...path: string[]) {
 	await act(async () => {
 		const trigger = document.body.querySelector(
 			`button[aria-label="More actions for ${tile}"]`,
@@ -55,13 +55,14 @@ export async function chooseTileMenuItem(tile: string, item: string) {
 			new PointerEvent("pointerdown", { bubbles: true, button: 0 }),
 		);
 	});
-	await act(async () => {
-		const found = Array.from(
-			document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
-		).find((element) => element.textContent === item);
-		if (!found) throw new Error(`no menu item reads ${item}`);
-		found.click();
-	});
+	for (const item of path)
+		await act(async () => {
+			const found = Array.from(
+				document.body.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+			).find((element) => element.textContent === item);
+			if (!found) throw new Error(`no menu item reads ${item}`);
+			found.click();
+		});
 }
 
 /** Types into a controlled field the way a browser reports it to React. */

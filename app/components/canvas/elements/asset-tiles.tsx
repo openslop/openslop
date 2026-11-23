@@ -11,7 +11,6 @@ import { useCharacterAvatar } from "../hooks/use-character-avatar";
 import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
 import { AudioPlayer } from "./audio-player";
-import { GenerationIndicator } from "./generation-indicator";
 import { MEDIA_KINDS } from "./media-kinds";
 import {
 	DeleteItem,
@@ -149,7 +148,6 @@ type MediaTileProps = TileProps & {
 	item: MediaItem;
 	/** Menu items before Delete. */
 	menu?: ReactNode;
-	generatingSince?: number;
 };
 
 /** A piece of the project's media as a small tile; the caller says what its face does, if anything. */
@@ -157,7 +155,6 @@ export function MediaAssetTile({
 	item: { name, kind, url, createdAt },
 	primary,
 	menu,
-	generatingSince,
 	children,
 }: MediaTileProps & { primary: TilePrimary | undefined }) {
 	const remove = useDeleteMedia(name);
@@ -175,8 +172,6 @@ export function MediaAssetTile({
 				primary={primary}
 				menu={menu}
 				onDelete={remove.request}
-				status={generatingSince === undefined ? "idle" : "generating"}
-				startedAt={generatingSince}
 			>
 				{children}
 			</AssetTile>
@@ -186,12 +181,7 @@ export function MediaAssetTile({
 }
 
 /** Media as a library shows it: a video's face plays it, anything else's loads its request, which is otherwise in the menu. */
-export function LibraryMediaTile({
-	item,
-	menu,
-	generatingSince,
-	children,
-}: MediaTileProps) {
+export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
 	const player = useTilePlayer(
 		item.kind === "video" ? item.url : undefined,
 		item.name,
@@ -200,7 +190,6 @@ export function LibraryMediaTile({
 	return (
 		<MediaAssetTile
 			item={item}
-			generatingSince={generatingSince}
 			primary={player.primary ?? request}
 			menu={
 				<>
@@ -216,7 +205,7 @@ export function LibraryMediaTile({
 }
 
 /** Audio has no face to choose, so its request is always in the menu. */
-function MediaAudioRow({ item, menu, generatingSince }: MediaTileProps) {
+function MediaAudioRow({ item, menu }: MediaTileProps) {
 	const remove = useDeleteMedia(item.name);
 	const request = useLoadRequest(item);
 	return (
@@ -224,21 +213,13 @@ function MediaAudioRow({ item, menu, generatingSince }: MediaTileProps) {
 			<AudioCard
 				name={item.name}
 				menu={
-					generatingSince === undefined && (
-						<>
-							{request && <LoadRequestItem {...request} />}
-							{menu}
-							<DeleteItem onSelect={remove.request} />
-						</>
-					)
+					<>
+						{request && <LoadRequestItem {...request} />}
+						{menu}
+						<DeleteItem onSelect={remove.request} />
+					</>
 				}
 			>
-				{generatingSince !== undefined && (
-					<GenerationIndicator
-						status="generating"
-						startedAt={generatingSince}
-					/>
-				)}
 				<AudioPlayer src={item.url} tone="panel" />
 			</AudioCard>
 			{remove.dialog}
@@ -247,7 +228,12 @@ function MediaAudioRow({ item, menu, generatingSince }: MediaTileProps) {
 }
 
 /** A piece of media as a library lists it: pictures and video as tiles, audio a row wide. */
-export function MediaLibraryItem(props: MediaTileProps) {
-	const Item = props.item.kind === "audio" ? MediaAudioRow : LibraryMediaTile;
-	return <Item {...props} />;
+export function MediaLibraryItem({ item, menu, children }: MediaTileProps) {
+	return item.kind === "audio" ? (
+		<MediaAudioRow item={item} menu={menu} />
+	) : (
+		<LibraryMediaTile item={item} menu={menu}>
+			{children}
+		</LibraryMediaTile>
+	);
 }

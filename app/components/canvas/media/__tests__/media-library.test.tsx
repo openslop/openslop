@@ -53,6 +53,9 @@ const open = () => {
 	);
 };
 
+const chooseCaptions = (action: string) =>
+	chooseTileMenuItem("song", "Captions", action);
+
 describe("MediaLibrary", () => {
 	it("lists the media of the kind shown and deletes an item once confirmed", async () => {
 		open();
@@ -82,7 +85,7 @@ describe("MediaLibrary", () => {
 		expect(store.getState().media).toEqual([]);
 	});
 
-	it("generates captions from the library tile and saves the timed words", async () => {
+	it("generates, regenerates and removes a file's captions from its Captions submenu", async () => {
 		const words = [toCaption("hello", 0, 0.4)];
 		transcribe.mockResolvedValue({ durationSec: 2, textTimestamps: words });
 		open();
@@ -95,12 +98,25 @@ describe("MediaLibrary", () => {
 				]),
 		);
 
-		await chooseTileMenuItem("song", "Generate captions");
+		await chooseCaptions("Generate captions");
 
 		expect(transcribe).toHaveBeenCalledWith({
 			prompt: "",
 			mediaUrl: "https://blob/song.mp3",
 		});
 		expect(store.getState().media[0]?.captions).toEqual(words);
+
+		await chooseCaptions("Regenerate captions");
+
+		expect(transcribe).toHaveBeenCalledTimes(2);
+
+		await chooseCaptions("Remove captions");
+		await act(async () =>
+			Array.from(document.querySelectorAll("[role=alertdialog] button"))
+				.find((button) => button.textContent === "Remove captions")
+				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+		);
+
+		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});
 });

@@ -42,7 +42,7 @@ export type ProjectContext = ProjectData & {
 	updateScriptSettings: (settings: Partial<ScriptSettings>) => void;
 	updateModels: (models: ConnectorModels) => void;
 	addMedia: (uploads: NewMedia[]) => void;
-	saveMediaCaptions: (url: string, captions: Caption[]) => void;
+	setMediaCaptions: (url: string, captions: Caption[] | undefined) => void;
 	removeMedia: (name: string) => void;
 	reset: () => void;
 };
@@ -77,7 +77,7 @@ export function createProjectStore(
 				set((state) => {
 					state.media.push(...toMediaItems(state.media, uploads));
 				}),
-			saveMediaCaptions: (url, captions) =>
+			setMediaCaptions: (url, captions) =>
 				set((state) => {
 					requireMedia(state.media, url).captions = captions;
 				}),

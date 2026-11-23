@@ -78,19 +78,26 @@ describe("executeToolCall", () => {
 		});
 	});
 
-	it("captions library files", async () => {
+	it("captions library files that have no captions yet", async () => {
 		const url = `${BLOB_BASE_URL}/assets/upload/user/song.mp3`;
 		const song = { name: "song", kind: "audio" as const, url };
+		const done = {
+			name: "done",
+			kind: "audio" as const,
+			url: `${BLOB_BASE_URL}/assets/upload/user/done.mp3`,
+			captions: [toCaption("hi", 0, 1)],
+		};
 		const captionMedia = vi.fn(async () => {});
 
 		const outcome = await executeToolCall(
-			{ toolName: "caption_media", input: { urls: [url] } },
+			{ toolName: "caption_media", input: { urls: [url, done.url] } },
 			context({
-				readProject: () => ProjectDataSchema.parse({ media: [song] }),
+				readProject: () => ProjectDataSchema.parse({ media: [song, done] }),
 				captionMedia,
 			}),
 		);
 
+		expect(captionMedia).toHaveBeenCalledOnce();
 		expect(captionMedia).toHaveBeenCalledWith(song);
 		expect(outcome.ok).toBe(true);
 	});

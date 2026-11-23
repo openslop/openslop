@@ -42,14 +42,16 @@ export function useElementCaptions(
 	const { status, error } = useQueueSelector((q) =>
 		q.getElementSnapshot(captionsNodeId(element.id)),
 	);
+	const edited = result ? captionsEdited(result) : false;
 	return {
 		captioned: result?.textTimestamps !== undefined,
-		edited: result ? captionsEdited(result) : false,
 		status,
 		error,
 		generate: () => generateSTT([element]),
 		remove: () =>
 			queue.reviseResult(element, (current) => replaceCaptions(current)),
-		reset: () => queue.reviseResult(element, resetCaptions),
+		resetEdits: edited
+			? () => queue.reviseResult(element, resetCaptions)
+			: undefined,
 	};
 }

@@ -109,15 +109,19 @@ describe("store snapshot", () => {
 		expect(store.getState().media).toEqual([]);
 	});
 
-	it("stores captions on a media file", () => {
+	it("stores and removes captions on a media file", () => {
 		const store = createProjectStore();
 		const url = "https://blob/interview.mp4";
 		const captions = [toCaption("hello", 0, 0.4)];
 		store.getState().addMedia([{ kind: "video", name: "interview.mp4", url }]);
 
-		store.getState().saveMediaCaptions(url, captions);
+		store.getState().setMediaCaptions(url, captions);
 
 		expect(store.getState().media[0]?.captions).toEqual(captions);
+
+		store.getState().setMediaCaptions(url, undefined);
+
+		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});
 
 	it("round-trips through createProjectStore", () => {
