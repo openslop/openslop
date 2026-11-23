@@ -120,7 +120,7 @@ describe("MediaLibrary", () => {
 		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});
 
-	it("shows the cost chip on a generated take and no cost chip on uploaded media", async () => {
+	it("shows what a generated take cost in its larger view, not on the tile", async () => {
 		open();
 		await act(async () =>
 			store.getState().addMedia([
@@ -134,21 +134,34 @@ describe("MediaLibrary", () => {
 					kind: "image",
 					name: "uploaded.png",
 					url: "https://a/up",
+					uploaded: true,
+				},
+			]),
+		);
+		expect(document.body.textContent).not.toContain("$");
+
+		await chooseTileMenuItem("generated", "View larger");
+		expect(
+			document.querySelector('[role=dialog] [data-slot="badge"]')?.textContent,
+		).toBe("$0.12");
+	});
+
+	it("leaves the cost out of the larger view of uploaded media", async () => {
+		open();
+		await act(async () =>
+			store.getState().addMedia([
+				{
+					kind: "image",
+					name: "uploaded.png",
+					url: "https://a/up",
+					uploaded: true,
 				},
 			]),
 		);
 
-		expect(document.body.textContent).toContain("$0.12");
-
-		const badges = Array.from(
-			document.body.querySelectorAll('[data-slot="badge"]'),
+		await chooseTileMenuItem("uploaded", "View larger");
+		expect(document.querySelector("[role=dialog]")?.textContent).not.toContain(
+			"$",
 		);
-		const costBadge = badges.find((b) => b.textContent?.includes("$0.12"));
-		expect(costBadge).toBeDefined();
-
-		const uploadedTile = Array.from(
-			document.body.querySelectorAll('[data-slot="thumbnail"]'),
-		).find((tile) => tile.textContent?.includes("uploaded"));
-		expect(uploadedTile?.textContent).not.toContain("$");
 	});
 });

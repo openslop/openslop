@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useSlateStatic } from "slate-react";
-import { Badge } from "@/components/ui/badge";
 import {
 	DropdownMenuItem,
 	DropdownMenuSub,
@@ -14,16 +13,10 @@ import {
 	type ActionMenuItem,
 } from "@/components/ui/action-menu";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
-import {
-	Alternative,
-	LayersPlus,
-	MagicCaptions,
-	Tag,
-} from "@/components/ui/icon";
+import { Alternative, LayersPlus, MagicCaptions } from "@/components/ui/icon";
 import { addElementReferences } from "@/lib/canvas/asset-ops";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import { isKindCaptionable, type GeneratedElement } from "@/lib/canvas/types";
-import { formatCost } from "@/lib/format";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { useCaptionMedia } from "@/lib/captions/use-caption-media";
@@ -194,14 +187,6 @@ export function LibraryTile({
 				{item.uploaded && (
 					<div className="absolute right-1 bottom-1">
 						<UploadedLabel tooltip="Uploaded, not generated" />
-					</div>
-				)}
-				{item.costUsd !== undefined && (
-					<div className="absolute right-1 bottom-1">
-						<Badge variant="muted" size="xs">
-							<Tag />
-							<span>{formatCost(item.costUsd)}</span>
-						</Badge>
 					</div>
 				)}
 			</MediaLibraryItem>
