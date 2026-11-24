@@ -51,7 +51,8 @@ const markup = (
 	{
 		trim = el,
 		status = "idle",
-	}: { trim?: Trim; status?: GenerationStatus } = {},
+		sceneNumber,
+	}: { trim?: Trim; status?: GenerationStatus; sceneNumber?: number } = {},
 ) =>
 	renderToStaticMarkup(
 		<TooltipProvider>
@@ -68,6 +69,7 @@ const markup = (
 					width={duration * PX_PER_SEC}
 					label="slow pan"
 					selected={false}
+					sceneNumber={sceneNumber}
 					pxPerSec={PX_PER_SEC}
 					trim={trim}
 				/>
@@ -124,6 +126,13 @@ describe("TimelineClip regeneration", () => {
 		expect(html).toContain(`role="status" aria-label="${label}"`);
 		expect(html).toContain('aria-label="Video, regenerating, 0:00–0:05"');
 		expect(SHIMMER.test(html)).toBe(shimmers);
+	});
+
+	it("names the scene before the regenerating clip", () => {
+		const html = markup(element(), 5, { status: "generating", sceneNumber: 1 });
+		expect(html).toContain(
+			'aria-label="Scene 1, Video, regenerating, 0:00–0:05"',
+		);
 	});
 });
 
