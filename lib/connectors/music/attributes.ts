@@ -26,7 +26,7 @@ export const MUSIC_ATTRIBUTES = AttributeSchema.from([
 	...OWN_MODEL_DEFS,
 	lyricsDef,
 	loopsDef,
-	volumeDef("2"),
+	volumeDef("10"),
 	trimStartDef,
 	trimEndDef,
 ]);
