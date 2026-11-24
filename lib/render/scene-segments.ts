@@ -35,22 +35,6 @@ export function findSegmentIndexAtFrame(
 	return index === -1 ? segments.length - 1 : index;
 }
 
-const RESTART_GRACE_SEC = 1;
-
-export function previousSceneStart(
-	segments: SceneSegment[],
-	frame: number,
-	fps: number,
-): number {
-	const current = findSegmentIndexAtFrame(segments, frame, fps);
-	if (current === -1) return 0;
-	const currentStart = toFrames(segments[current].start, fps);
-	if (frame > currentStart + toFrames(RESTART_GRACE_SEC, fps)) {
-		return currentStart;
-	}
-	return toFrames(segments[Math.max(0, current - 1)].start, fps);
-}
-
 function toThumbnail(element: ResolvedElement): SeekThumbnail | null {
 	const { outputKind } = CONTENT_TYPES[element.type];
 	if (outputKind === "audio") return null;

@@ -5,10 +5,6 @@ import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { toFrames } from "@/lib/render/frames";
-import {
-	findSegmentIndexAtFrame,
-	previousSceneStart,
-} from "@/lib/render/scene-segments";
 import { BottomViewToggle } from "./bottom-view-toggle";
 import { usePlayerControl } from "./player-control-context";
 import { usePlayerPlacement } from "./player-placement-context";
@@ -38,22 +34,15 @@ function BottomTransportBarComponent() {
 	const canSeek = canPlay && player !== null;
 	const playLabel = playing ? "Pause" : "Play";
 
-	const seekToPreviousScene = () => {
+	const seekToAdjacentScene = (direction: -1 | 1) => {
 		if (!player) return;
-		player.seekTo(
-			previousSceneStart(segments, player.getCurrentFrame(), layout.fps),
-		);
-	};
-
-	const seekToNextScene = () => {
-		if (!player || segments.length === 0) return;
-		const current = findSegmentIndexAtFrame(
-			segments,
-			player.getCurrentFrame(),
-			layout.fps,
-		);
-		const target = segments[current + 1];
-		if (target) player.seekTo(toFrames(target.start, layout.fps));
+		const frame = player.getCurrentFrame();
+		const starts = segments.map(({ start }) => toFrames(start, layout.fps));
+		const target =
+			direction === 1
+				? starts.find((start) => start > frame)
+				: starts.findLast((start) => start < frame);
+		if (target !== undefined) player.seekTo(target);
 	};
 
 	return (
@@ -76,7 +65,7 @@ function BottomTransportBarComponent() {
 						label={canSeek ? "Previous scene" : NOTHING_TO_PLAY}
 						ariaLabel="Previous scene"
 						unavailable={!canSeek}
-						onClick={seekToPreviousScene}
+						onClick={() => seekToAdjacentScene(-1)}
 					>
 						<ChevronsLeft />
 					</TooltipIconButton>
@@ -95,7 +84,7 @@ function BottomTransportBarComponent() {
 						label={canSeek ? "Next scene" : NOTHING_TO_PLAY}
 						ariaLabel="Next scene"
 						unavailable={!canSeek}
-						onClick={seekToNextScene}
+						onClick={() => seekToAdjacentScene(1)}
 					>
 						<ChevronsRight />
 					</TooltipIconButton>

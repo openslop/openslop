@@ -5,7 +5,6 @@ import { DEFAULT_CAPTION_STYLE } from "@/lib/captions/caption-style";
 import {
 	buildSceneSegments,
 	findSegmentIndexAtFrame,
-	previousSceneStart,
 	type SceneSegment,
 } from "../scene-segments";
 import { blankScene } from "../blank-scene";
@@ -33,40 +32,6 @@ const FPS = 24;
 
 /** Starts on `frame` but a hair after it, so `toFrames` rounds back down. */
 const unalignedStart = (frame: number, fps: number) => (frame + 0.2) / fps;
-
-describe("previousSceneStart", () => {
-	it("goes to the start of the current scene once past its first second", () => {
-		expect(previousSceneStart(segments, 30, FPS)).toBe(0);
-		expect(previousSceneStart(segments, 80, FPS)).toBe(48);
-	});
-
-	it("goes to the scene before within a scene's first second", () => {
-		expect(previousSceneStart(segments, 48, FPS)).toBe(0);
-		expect(previousSceneStart(segments, 72, FPS)).toBe(0);
-		expect(previousSceneStart(segments, 120, FPS)).toBe(48);
-		expect(previousSceneStart(segments, 143, FPS)).toBe(48);
-	});
-
-	it("stays at 0 within the first scene's first second", () => {
-		expect(previousSceneStart(segments, 0, FPS)).toBe(0);
-		expect(previousSceneStart(segments, 20, FPS)).toBe(0);
-	});
-
-	it("returns 0 when there are no segments", () => {
-		expect(previousSceneStart([], 30, FPS)).toBe(0);
-	});
-
-	it("goes to the last scene's start from past the end", () => {
-		expect(previousSceneStart(segments, 9999, FPS)).toBe(120);
-	});
-
-	it("handles a start that rounds down to a frame", () => {
-		const start = unalignedStart(151, FPS);
-		const unaligned = [seg("a", 0, start), seg("b", start, 3)];
-		expect(previousSceneStart(unaligned, 175, FPS)).toBe(0);
-		expect(previousSceneStart(unaligned, 176, FPS)).toBe(151);
-	});
-});
 
 describe("findSegmentIndexAtFrame", () => {
 	it("returns -1 when there are no segments", () => {
