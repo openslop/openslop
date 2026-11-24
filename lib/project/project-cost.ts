@@ -1,20 +1,19 @@
 "use client";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import sum from "lodash/sum";
+import { z } from "zod";
 import { useLiveRead } from "@/lib/supabase/use-live-read";
 
 export async function readProjectCostUsd(
 	supabase: SupabaseClient,
 	projectId: string,
 ): Promise<number> {
-	const { data, error } = await supabase
-		.from("jobs")
-		.select("cost_usd")
-		.eq("project_id", projectId)
-		.not("cost_usd", "is", null);
-	if (error) throw error;
-	return sum(data.map((row) => Number(row.cost_usd)));
+	const { data, error } = await supabase.rpc("project_cost_usd", {
+		project_id: projectId,
+	});
+	if (error) throw new Error(`Failed to read project cost: ${error.message}`);
+	// PostgREST can send a numeric as a string to keep its precision.
+	return z.coerce.number().parse(data);
 }
 
 /** Undefined until the first read lands. */
