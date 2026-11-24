@@ -47,8 +47,7 @@ type Counts = Record<"fits" | "changes" | "short" | "applied", number>;
 const headline = ({ fits, changes, short, applied }: Counts) => {
 	if (fits === 0)
 		return "No video element to generate has speech under it in scope. Images stretch to the speech under them; uploaded videos keep their own length.";
-	if (changes > 0)
-		return `Fitted ${applied} of ${changes}. Those elements are stale now and need regenerating.`;
+	if (changes > 0) return `Fitted ${applied} of ${changes}.`;
 	if (short > 0)
 		return "Nothing to change: the ones that fall short are already at the longest option.";
 	return `All ${fits} already cover their speech; nothing to change.`;
@@ -66,8 +65,7 @@ export const fitDurations = defineTool({
 	  Send \`element_ids\` to fit only those, or nothing for the whole canvas.
 
 	  Images already stretch, uploaded videos keep their own length, and videos with no
-	  speech under them have nothing to fit, so all three are left alone. Changing a
-	  duration stales the element: tell the user to regenerate it afterwards.
+	  speech under them have nothing to fit, so all three are left alone.
 	`,
 	input: z.object({
 		element_ids: z.array(z.string()).min(1).optional(),

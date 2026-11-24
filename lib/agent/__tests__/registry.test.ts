@@ -500,7 +500,7 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("fits each video element to the speech under it and says it went stale", async () => {
+	it("fits each video element to the speech under it", async () => {
 		const ops: RefineOp[][] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
@@ -531,7 +531,7 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain(
 			"Scene 1 video ai1: 10s to 5s, for about 5.0s of estimated speech and leeway.",
 		);
-		expect(outcome.ok && outcome.output).toContain("need regenerating");
+		expect(outcome.ok && outcome.output).toContain("Fitted 1 of 1.");
 		expect(outcome.ok && outcome.output).toContain(
 			"1 image or video left alone.",
 		);
