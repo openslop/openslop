@@ -1,7 +1,7 @@
 import type { IRequestVideo } from "@runware/sdk-js";
 import pickBy from "lodash/pickBy";
 import type { Character } from "@/lib/connectors/types";
-import type { MediaResolution } from "@/lib/project/aspect-ratio";
+import type { Dimensions, MediaResolution } from "@/lib/project/aspect-ratio";
 
 export type Sources = {
 	prompt: string;
@@ -9,7 +9,7 @@ export type Sources = {
 	characters: Character[];
 	references: string[];
 	continuityFrames: string[];
-	size: { width: number; height: number };
+	size: Dimensions;
 	resolution?: MediaResolution;
 };
 

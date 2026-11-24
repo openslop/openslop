@@ -9,7 +9,7 @@ import { ToastErrorBoundary } from "../toast-error-boundary";
 import { ActiveSceneSync } from "./active-scene-sync";
 import { EditableCaptionLine } from "./editable-caption-line";
 import { usePlayerControl } from "./player-control-context";
-import { PlayPauseFlash } from "./play-pause-flash";
+import { PlayPauseFlash, type Flash } from "./play-pause-flash";
 import styles from "./project-preview.module.css";
 
 const fullSizeStyle = { width: "100%", height: "100%" };
@@ -61,9 +61,7 @@ const RemotionPlayer = dynamic(
 export function ProjectPreview({ layout }: { layout: RenderLayout }) {
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const { player, registerPlayer } = usePlayerControl();
-	const [flash, setFlash] = useState<{ key: number; playing: boolean } | null>(
-		null,
-	);
+	const [flash, setFlash] = useState<Flash | null>(null);
 	useEffect(() => {
 		if (!player) return;
 		const handler: CallbackListener<"fullscreenchange"> = ({ detail }) =>
