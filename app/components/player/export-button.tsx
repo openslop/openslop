@@ -18,6 +18,7 @@ import { formatBytes } from "@/lib/format";
 import { RESOLUTIONS, type Resolution } from "@/lib/render/resolutions";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import { useSloppy } from "../sloppy/sloppy-provider";
+import { WAIT_FOR_SLOPPY } from "../sloppy/turn-display";
 import { useLayout } from "./render-layout-context";
 import { useExport } from "./use-export";
 
@@ -35,7 +36,7 @@ export function exportBlocker({
 	hasContent: boolean;
 	generating: boolean;
 }): string | null {
-	if (sloppyBusy) return "Wait for Sloppy to finish";
+	if (sloppyBusy) return WAIT_FOR_SLOPPY;
 	if (!hasContent) return "Generate at least one visual or voice element first";
 	if (generating) return "Wait for generation to finish";
 	return null;
