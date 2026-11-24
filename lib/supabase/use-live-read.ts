@@ -14,7 +14,6 @@ export function useLiveRead<T>(
 ): T | undefined {
 	const [value, setValue] = useState<T>();
 	const readLatest = useEffectEvent(read);
-	const watchLatest = useEffectEvent(() => watches);
 	const watchKey = JSON.stringify(watches);
 
 	useEffect(() => {
@@ -29,7 +28,8 @@ export function useLiveRead<T>(
 		const reloadSoon = debounce(reload, 1000, { maxWait: 1000 });
 		void reload();
 		// Row-level security already limits these to the user's own rows.
-		const channel = watchLatest().reduce(
+		const watched: Watch[] = JSON.parse(watchKey);
+		const channel = watched.reduce(
 			(subscribed, watch) =>
 				subscribed.on(
 					"postgres_changes",
