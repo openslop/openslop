@@ -15,6 +15,7 @@ import {
 	upsertMessage,
 	pruneTranscript,
 } from "@/lib/agent/messages";
+import { repairToolCall } from "@/lib/agent/repair-tool-call";
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
 import type { ModelRef } from "@/lib/connectors/types";
@@ -91,6 +92,7 @@ export async function streamAgentTurn(
 		instructions: sloppyInstructions(cachedPrefix),
 		messages: modelMessages,
 		tools: SLOPPY_TOOLS,
+		repairToolCall,
 		// Withdrawing the tools is what ends a runaway turn: the model has nothing
 		// left to call, so it answers the user instead of looping again.
 		toolChoice: toolCallsMade(messages) >= MAX_TOOL_CALLS ? "none" : "auto",
