@@ -49,7 +49,10 @@ const ATTRIBUTES = mapValues(
 const ATTRIBUTES_BY_TYPE = mapValues(
 	groupBy(TYPED_ATTRIBUTES, ({ type }) => type),
 	(typed) =>
-		mapValues(groupBy(typed, ({ def }) => def.key), attributeValue),
+		mapValues(
+			groupBy(typed, ({ def }) => def.key),
+			attributeValue,
+		),
 );
 
 const attrsFor = (type: ElementType) =>
