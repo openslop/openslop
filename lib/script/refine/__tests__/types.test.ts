@@ -48,6 +48,25 @@ describe("refine op attributes", () => {
 		expect(setAttrs({ tempo: "fast" }).success).toBe(false);
 	});
 
+	it("rejects attributes that belong to another content type on insert", () => {
+		const parsed = refineOpSchema.safeParse({
+			op: "insert",
+			elements: [{ type: "video", text: "A shot", attrs: { name: "x" } }],
+		});
+
+		expect(parsed.success).toBe(false);
+	});
+
+	it("rejects attributes that belong to another asset type", () => {
+		const parsed = refineOpSchema.safeParse({
+			op: "asset",
+			type: "asset_style",
+			attrs: { name: "x" },
+		});
+
+		expect(parsed.success).toBe(false);
+	});
+
 	it("takes what each type offers, in seconds, frames and a model's own options", () => {
 		expect(
 			insertMusic({ loops: "2", volume: "4", lyrics: "true" }).success,
@@ -92,7 +111,8 @@ describe("refine op attributes", () => {
 		).toBe(true);
 	});
 
-	it("takes null for an attribute only on a set", () => {
+	it("keeps set attributes merged across element types", () => {
+		expect(setAttrs({ name: "x" }).success).toBe(true);
 		expect(setAttrs({ trimEnd: null }).success).toBe(true);
 		expect(voice({ name: null }).success).toBe(false);
 	});

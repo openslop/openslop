@@ -6,9 +6,12 @@ import {
 	everyAttributeDef,
 	type TypedAttributeDef,
 } from "@/lib/canvas/element-connector";
-import { AssetTypeSchema, ContentTypeSchema } from "@/lib/canvas/types";
+import {
+	AssetTypeSchema,
+	ContentTypeSchema,
+	type ElementType,
+} from "@/lib/canvas/types";
 import { optionsOf } from "@/lib/connectors/attributes/schema";
-import { conjunction } from "@/lib/format";
 
 const ELEMENT_TEXT = `The element's content: the spoken line for speech; the prompt for every other content type; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
 
@@ -25,11 +28,9 @@ function attributeValue(typed: TypedAttributeDef[]): z.ZodType<string> {
 	const value = first.perModel
 		? z.enum(uniq(typed.flatMap(({ def }) => optionsOf(def))))
 		: (first.edit?.value ?? z.string());
-	const types = uniq(typed.map(({ type }) => type));
 	return value.describe(
 		[
 			value.description,
-			`On ${conjunction(types)}.`,
 			first.unit && `Unit: ${first.unit}.`,
 			first.perModel && `By model: ${optionsByModel(typed)}`,
 		]
@@ -38,25 +39,43 @@ function attributeValue(typed: TypedAttributeDef[]): z.ZodType<string> {
 	);
 }
 
+const TYPED_ATTRIBUTES = everyAttributeDef();
+
 const ATTRIBUTES = mapValues(
-	groupBy(everyAttributeDef(), ({ def }) => def.key),
+	groupBy(TYPED_ATTRIBUTES, ({ def }) => def.key),
 	attributeValue,
 );
 
-// A generated key infers as possibly undefined, which parsed JSON never holds.
-const attrs = z.strictObject(ATTRIBUTES).partial() as z.ZodType<
-	Record<string, string>
->;
+const ATTRIBUTES_BY_TYPE = mapValues(
+	groupBy(TYPED_ATTRIBUTES, ({ type }) => type),
+	(typed) =>
+		mapValues(groupBy(typed, ({ def }) => def.key), attributeValue),
+);
+
+const attrsFor = (type: ElementType) =>
+	z.strictObject(ATTRIBUTES_BY_TYPE[type] ?? {}).partial() as z.ZodType<
+		Record<string, string>
+	>;
 
 const attrEdits = z
 	.strictObject(mapValues(ATTRIBUTES, (value) => value.nullable()))
 	.partial() as z.ZodType<Record<string, string | null>>;
 
-const newElement = z.object({
-	type: ContentTypeSchema,
-	attrs: attrs.optional(),
-	text: z.string().optional().describe(ELEMENT_TEXT),
-});
+const newElementOptions = ContentTypeSchema.options.map((type) =>
+	z.object({
+		type: z.literal(type),
+		attrs: attrsFor(type).optional(),
+		text: z.string().optional().describe(ELEMENT_TEXT),
+	}),
+);
+
+const newElement = z.discriminatedUnion(
+	"type",
+	newElementOptions as [
+		(typeof newElementOptions)[number],
+		...(typeof newElementOptions)[number][],
+	],
+);
 
 export type NewElement = z.infer<typeof newElement>;
 
@@ -77,12 +96,22 @@ const insertOp = z.object({
 		.describe("The new elements, in the order they appear."),
 });
 
-const assetOp = z.object({
-	op: z.literal("asset"),
-	type: AssetTypeSchema,
-	attrs: attrs.optional(),
-	text: z.string().optional().describe(ELEMENT_TEXT),
-});
+const assetOpOptions = AssetTypeSchema.options.map((type) =>
+	z.object({
+		op: z.literal("asset"),
+		type: z.literal(type),
+		attrs: attrsFor(type).optional(),
+		text: z.string().optional().describe(ELEMENT_TEXT),
+	}),
+);
+
+const assetOp = z.discriminatedUnion(
+	"type",
+	assetOpOptions as [
+		(typeof assetOpOptions)[number],
+		...(typeof assetOpOptions)[number][],
+	],
+);
 
 const removeOp = z.object({
 	op: z.literal("remove"),
