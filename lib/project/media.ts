@@ -53,16 +53,19 @@ export function requireMedia(media: MediaItem[], url: string): MediaItem {
 	return item;
 }
 
-export function checkMediaKind(
+/** A file to supply as `kind`: its library record, or the bare file when it is stored elsewhere. */
+export function uploadedMedia(
 	media: MediaItem[],
 	url: string,
 	kind: UploadKind,
-): void {
+): UploadedMedia {
 	const item = media.find((candidate) => candidate.url === url);
-	if (item && item.kind !== kind)
+	if (!item) return { kind, url };
+	if (item.kind !== kind)
 		throw new Error(
 			`${item.name} is ${UPLOAD_KINDS[item.kind].noun}, not ${UPLOAD_KINDS[kind].noun}.`,
 		);
+	return item;
 }
 
 /** The media of one kind whose name matches the query, best match first; ties newest first. */
