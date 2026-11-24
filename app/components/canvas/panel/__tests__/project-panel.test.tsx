@@ -7,7 +7,7 @@ const { mockTotalCost } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/project/project-cost", () => ({
-	useProjectTotalCost: () => mockTotalCost.current,
+	useProjectCostUsd: () => mockTotalCost.current,
 }));
 
 import { TooltipProvider } from "@/components/ui/tooltip";

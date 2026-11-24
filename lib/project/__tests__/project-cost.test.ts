@@ -1,53 +1,42 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
+import { readProjectCostUsd } from "../project-cost";
 
-const { select } = vi.hoisted(() => ({
-	select: vi.fn(),
-}));
+const jobsAnswering = (result: { data: unknown; error: unknown }) => {
+	const not = vi.fn().mockResolvedValue(result);
+	const eq = vi.fn().mockReturnValue({ not });
+	const supabase = {
+		from: () => ({ select: () => ({ eq }) }),
+	} as unknown as SupabaseClient;
+	return { supabase, eq, not };
+};
 
-vi.mock("@/lib/supabase/client", () => ({
-	createClient: () => ({
-		from: () => ({
-			select,
-		}),
-	}),
-}));
-
-import { fetchProjectTotalCost } from "../project-cost";
-
-describe("fetchProjectTotalCost", () => {
-	it("sums cost_usd of jobs for the project", async () => {
-		const notFn = vi.fn().mockResolvedValue({
+describe("readProjectCostUsd", () => {
+	it("sums the project's costed jobs", async () => {
+		const { supabase, eq, not } = jobsAnswering({
 			data: [{ cost_usd: 0.15 }, { cost_usd: 0.25 }, { cost_usd: 0.02 }],
 			error: null,
 		});
-		const eqFn = vi.fn().mockReturnValue({ not: notFn });
-		select.mockReturnValue({ eq: eqFn });
 
-		const cost = await fetchProjectTotalCost("proj-1");
-		expect(cost).toBeCloseTo(0.42);
-		expect(eqFn).toHaveBeenCalledWith("project_id", "proj-1");
-		expect(notFn).toHaveBeenCalledWith("cost_usd", "is", null);
+		expect(await readProjectCostUsd(supabase, "proj-1")).toBeCloseTo(0.42);
+		expect(eq).toHaveBeenCalledWith("project_id", "proj-1");
+		expect(not).toHaveBeenCalledWith("cost_usd", "is", null);
 	});
 
-	it("is zero when no costed jobs exist", async () => {
-		const notFn = vi.fn().mockResolvedValue({
-			data: [],
-			error: null,
-		});
-		const eqFn = vi.fn().mockReturnValue({ not: notFn });
-		select.mockReturnValue({ eq: eqFn });
+	it("is zero when no job has a cost", async () => {
+		const { supabase } = jobsAnswering({ data: [], error: null });
 
-		expect(await fetchProjectTotalCost("proj-2")).toBe(0);
+		expect(await readProjectCostUsd(supabase, "proj-2")).toBe(0);
 	});
 
-	it("throws when query errors", async () => {
-		const notFn = vi.fn().mockResolvedValue({
+	it("throws when the query fails", async () => {
+		const { supabase } = jobsAnswering({
 			data: null,
 			error: new Error("db failure"),
 		});
-		const eqFn = vi.fn().mockReturnValue({ not: notFn });
-		select.mockReturnValue({ eq: eqFn });
 
-		await expect(fetchProjectTotalCost("proj-3")).rejects.toThrow("db failure");
+		await expect(readProjectCostUsd(supabase, "proj-3")).rejects.toThrow(
+			"db failure",
+		);
 	});
 });

@@ -18,7 +18,7 @@ import { videoFormatLabel } from "@/lib/project/video-format";
 import { videoLengthLabel } from "@/lib/project/video-length";
 import { getTemplateById } from "@/lib/templates/templates";
 import { useProjectId } from "@/lib/project/project-provider";
-import { useProjectTotalCost } from "@/lib/project/project-cost";
+import { useProjectCostUsd } from "@/lib/project/project-cost";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCost } from "@/lib/format";
 import { PanelCard, PanelField } from "./panel-card";
@@ -46,7 +46,7 @@ function FixedSetting({
 }
 
 export function ProjectPanel() {
-	const totalCost = useProjectTotalCost(useProjectId());
+	const costUsd = useProjectCostUsd(useProjectId());
 	const { language, length, format, template } = useProject(
 		(state) => state.scriptSettings,
 	);
@@ -76,10 +76,10 @@ export function ProjectPanel() {
 			<PanelField label="Cost">
 				<Badge variant="subtle" size="xsLabel">
 					<Tag />
-					{totalCost === undefined ? (
+					{costUsd === undefined ? (
 						<Skeleton className="h-3 w-8" />
 					) : (
-						formatCost(totalCost)
+						formatCost(costUsd)
 					)}
 				</Badge>
 			</PanelField>

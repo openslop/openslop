@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import sum from "lodash/sum";
-import { createClient } from "@/lib/supabase/client";
+import { useLiveRead } from "@/lib/supabase/use-live-read";
 
-export async function fetchProjectTotalCost(
+export async function readProjectCostUsd(
+	supabase: SupabaseClient,
 	projectId: string,
 ): Promise<number> {
-	const { data, error } = await createClient()
+	const { data, error } = await supabase
 		.from("jobs")
 		.select("cost_usd")
 		.eq("project_id", projectId)
@@ -17,22 +18,8 @@ export async function fetchProjectTotalCost(
 }
 
 /** Undefined until the first read lands. */
-export function useProjectTotalCost(projectId: string): number | undefined {
-	const [totalCost, setTotalCost] = useState<number>();
-
-	useEffect(() => {
-		let cancelled = false;
-		fetchProjectTotalCost(projectId)
-			.then((cost) => {
-				if (!cancelled) setTotalCost(cost);
-			})
-			.catch((error: unknown) =>
-				console.error("Failed to read project cost", error),
-			);
-		return () => {
-			cancelled = true;
-		};
-	}, [projectId]);
-
-	return totalCost;
-}
+export const useProjectCostUsd = (projectId: string): number | undefined =>
+	useLiveRead(
+		(supabase) => readProjectCostUsd(supabase, projectId),
+		[{ table: "jobs", filter: `project_id=eq.${projectId}` }],
+	);
