@@ -1,7 +1,6 @@
 "use client";
 
-import type { IconComponent } from "@/components/ui/icon";
-import { Link } from "@/components/ui/icon";
+import { Link, type IconComponent } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
 import type { SettingsTab } from "@/lib/settings/use-settings";
 import { cn } from "@/lib/utils";

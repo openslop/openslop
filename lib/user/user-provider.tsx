@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { createRequiredContext } from "@/lib/components/create-required-context";
 import type { ProviderKeyRecord } from "@/lib/connectors/provider-key";
 import type { Account } from "./account";
