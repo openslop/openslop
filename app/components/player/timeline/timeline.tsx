@@ -256,11 +256,7 @@ export function Timeline() {
 			(node) => isScene(node) && node.id === placeholder.sceneId,
 		);
 		const targetIndex = sceneIndex >= 0 ? sceneIndex : 0;
-		const scene = editor.children[targetIndex];
-		const childCount = isScene(scene) ? scene.children.length : 0;
-		const insertPath = [targetIndex, childCount];
-
-		const newId = insertElement(editor, placeholder.type, insertPath);
+		const newId = insertElement(editor, placeholder.type, [targetIndex, 0]);
 
 		const found = findElementById(editor, newId);
 		if (found) {
