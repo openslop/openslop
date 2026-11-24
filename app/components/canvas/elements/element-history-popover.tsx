@@ -1,7 +1,7 @@
 "use client";
 
 import { renderPrompt } from "@/lib/connectors/character-refs";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TooltipIconButton } from "@/components/ui/icon-button";
@@ -10,6 +10,7 @@ import {
 	CloudUploadFilled,
 	History,
 	Maximize2,
+	Tag,
 	CornerDownLeft,
 } from "@/components/ui/icon";
 import {
@@ -23,7 +24,7 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useSlateStatic } from "slate-react";
 import { applyElementVersion } from "@/lib/canvas/editor-ops";
 import { getVolumeGain } from "@/lib/canvas/element-attributes";
-import { truncateMiddle } from "@/lib/format";
+import { formatCost, truncateMiddle } from "@/lib/format";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { versionKey, type ElementVersion } from "@/lib/generation/versions";
 import { relativeTime } from "@/lib/project/relative-time";
@@ -33,7 +34,6 @@ import {
 	useElementHistoryCostUsd,
 	useLoadElementHistory,
 } from "../hooks/use-element-history";
-import { CostBadge } from "../cost-badge";
 import { AudioPlayer } from "./audio-player";
 import { useElementGeneration } from "./element-generation-context";
 import { HeaderIconButton } from "./header-icon-button";
@@ -49,6 +49,25 @@ const Dot = () => (
 		·
 	</span>
 );
+
+function CostBadge({
+	costUsd,
+	size,
+	children,
+}: {
+	costUsd: number | undefined;
+	size: "xsLabel" | "inlineXs";
+	children: ReactNode;
+}) {
+	if (costUsd === undefined) return null;
+	return (
+		<Badge variant="subtle" size={size}>
+			<Tag />
+			{children}
+			<span>{formatCost(costUsd)}</span>
+		</Badge>
+	);
+}
 
 function HistoryTotal({ elementId }: { elementId: string }) {
 	return (

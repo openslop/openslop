@@ -29,7 +29,7 @@ describe("fetchProjectTotalCost", () => {
 		expect(notFn).toHaveBeenCalledWith("cost_usd", "is", null);
 	});
 
-	it("returns undefined when no costed jobs exist", async () => {
+	it("is zero when no costed jobs exist", async () => {
 		const notFn = vi.fn().mockResolvedValue({
 			data: [],
 			error: null,
@@ -37,8 +37,7 @@ describe("fetchProjectTotalCost", () => {
 		const eqFn = vi.fn().mockReturnValue({ not: notFn });
 		select.mockReturnValue({ eq: eqFn });
 
-		const cost = await fetchProjectTotalCost("proj-2");
-		expect(cost).toBeUndefined();
+		expect(await fetchProjectTotalCost("proj-2")).toBe(0);
 	});
 
 	it("throws when query errors", async () => {

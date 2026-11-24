@@ -6,40 +6,33 @@ import { createClient } from "@/lib/supabase/client";
 
 export async function fetchProjectTotalCost(
 	projectId: string,
-): Promise<number | undefined> {
-	const supabase = createClient();
-	const { data, error } = await supabase
+): Promise<number> {
+	const { data, error } = await createClient()
 		.from("jobs")
 		.select("cost_usd")
 		.eq("project_id", projectId)
 		.not("cost_usd", "is", null);
 	if (error) throw error;
-	const costs = (data ?? []).flatMap(
-		(row: { cost_usd: number | string | null }) =>
-			row.cost_usd != null ? [Number(row.cost_usd)] : [],
-	);
-	return costs.length > 0 ? sum(costs) : undefined;
+	return sum(data.map((row) => Number(row.cost_usd)));
 }
 
-export function useProjectTotalCost(
-	projectId: string | undefined,
-): number | undefined {
-	const [totalCost, setTotalCost] = useState<number | undefined>(undefined);
+/** Undefined until the first read lands. */
+export function useProjectTotalCost(projectId: string): number | undefined {
+	const [totalCost, setTotalCost] = useState<number>();
 
 	useEffect(() => {
-		if (!projectId) return;
 		let cancelled = false;
-		void fetchProjectTotalCost(projectId)
+		fetchProjectTotalCost(projectId)
 			.then((cost) => {
 				if (!cancelled) setTotalCost(cost);
 			})
-			.catch((error: unknown) => {
-				console.error("Failed to fetch project total cost", error);
-			});
+			.catch((error: unknown) =>
+				console.error("Failed to read project cost", error),
+			);
 		return () => {
 			cancelled = true;
 		};
 	}, [projectId]);
 
-	return projectId ? totalCost : undefined;
+	return totalCost;
 }

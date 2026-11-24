@@ -13,6 +13,7 @@ vi.mock("@/lib/project/project-cost", () => ({
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { languageLabel } from "@/lib/project/language";
+import { ProjectProvider } from "@/lib/project/project-provider";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore } from "@/lib/project/store";
 import { getTemplate } from "@/lib/templates/templates";
@@ -29,11 +30,17 @@ afterEach(() => canvas?.unmount());
 const renderPanel = (store = createProjectStore()) => {
 	canvas = mountOnCanvas();
 	return canvas.render(
-		<ProjectStoreProvider store={store}>
-			<TooltipProvider>
-				<ProjectPanel />
-			</TooltipProvider>
-		</ProjectStoreProvider>,
+		<ProjectProvider
+			projectId="project-1"
+			initialScript=""
+			initialTranscript={[]}
+		>
+			<ProjectStoreProvider store={store}>
+				<TooltipProvider>
+					<ProjectPanel />
+				</TooltipProvider>
+			</ProjectStoreProvider>
+		</ProjectProvider>,
 	);
 };
 
@@ -67,20 +74,18 @@ describe("ProjectPanel", () => {
 		expect(document.body.textContent).toContain("None");
 	});
 
-	it("hides the total cost badge when there are no costed jobs", async () => {
-		mockTotalCost.current = undefined;
+	it("shimmers the cost until it loads", async () => {
 		await renderPanel();
 
-		const badge = document.body.querySelector('[data-slot="badge"]');
-		expect(badge).toBeNull();
+		const cost = document.body.querySelector('[data-slot="badge"]');
+		expect(cost?.querySelector('[data-slot="skeleton"]')).not.toBeNull();
 	});
 
-	it("shows the total cost badge in the header when the project has costed jobs", async () => {
+	it("shows what the project has spent", async () => {
 		mockTotalCost.current = 0.42;
 		await renderPanel();
 
-		const badge = document.body.querySelector('[data-slot="badge"]');
-		expect(badge).not.toBeNull();
-		expect(badge?.textContent).toBe("Total$0.42");
+		const cost = document.body.querySelector('[data-slot="badge"]');
+		expect(cost?.textContent).toBe("$0.42");
 	});
 });

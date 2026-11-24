@@ -4,10 +4,12 @@ import type { ReactNode } from "react";
 import {
 	FilmSlate,
 	Hourglass,
+	Tag,
 	Template,
 	Translate,
 	type IconComponent,
 } from "@/components/ui/icon";
+import { Badge } from "@/components/ui/badge";
 import { SelectMenuTrigger } from "@/components/ui/select-menu";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useProject } from "@/lib/project/use-project";
@@ -15,9 +17,10 @@ import { languageLabel } from "@/lib/project/language";
 import { videoFormatLabel } from "@/lib/project/video-format";
 import { videoLengthLabel } from "@/lib/project/video-length";
 import { getTemplateById } from "@/lib/templates/templates";
-import { useMaybeProjectId } from "@/lib/project/project-provider";
+import { useProjectId } from "@/lib/project/project-provider";
 import { useProjectTotalCost } from "@/lib/project/project-cost";
-import { CostBadge } from "../cost-badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCost } from "@/lib/format";
 import { PanelCard, PanelField } from "./panel-card";
 
 /** A setting the project was created with, shown as the dropdown it was picked from. */
@@ -43,21 +46,13 @@ function FixedSetting({
 }
 
 export function ProjectPanel() {
-	const projectId = useMaybeProjectId();
-	const totalCost = useProjectTotalCost(projectId);
+	const totalCost = useProjectTotalCost(useProjectId());
 	const { language, length, format, template } = useProject(
 		(state) => state.scriptSettings,
 	);
 
 	return (
-		<PanelCard
-			title="Project"
-			action={
-				<CostBadge costUsd={totalCost} size="xsLabel">
-					Total
-				</CostBadge>
-			}
-		>
+		<PanelCard title="Project">
 			<FixedSetting
 				label="Language"
 				Icon={Translate}
@@ -78,6 +73,16 @@ export function ProjectPanel() {
 				Icon={Template}
 				value={getTemplateById(template)?.name ?? "None"}
 			/>
+			<PanelField label="Cost">
+				<Badge variant="subtle" size="xsLabel">
+					<Tag />
+					{totalCost === undefined ? (
+						<Skeleton className="h-3 w-8" />
+					) : (
+						formatCost(totalCost)
+					)}
+				</Badge>
+			</PanelField>
 		</PanelCard>
 	);
 }
