@@ -103,7 +103,7 @@ function costOf(modelId: string, usage: LanguageModelUsage): number {
 	);
 }
 
-/** A prefix the API keeps between requests and serves at a tenth of the price. */
+/** A prefix the API keeps between requests and bills at the cache-read rate. */
 const CACHED = { cacheControl: { type: "ephemeral" } };
 const CACHED_PREFIX: SharedV3ProviderOptions = { anthropic: CACHED };
 
