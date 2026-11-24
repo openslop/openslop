@@ -67,7 +67,7 @@ export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
 	);
 }
 
-type ReferenceTileProps = { url: string; index: number };
+type ReferenceTileProps = { url: string; index: number; onRemove: () => void };
 
 const referenceName = (index: number) => `Reference ${index + 1}`;
 
@@ -77,7 +77,7 @@ export function ReferenceTile({
 	index,
 	primary,
 	onRemove,
-}: ReferenceTileProps & { primary?: TilePrimary; onRemove: () => void }) {
+}: ReferenceTileProps & { primary?: TilePrimary }) {
 	return (
 		<AssetTile
 			name={referenceName(index)}
@@ -95,9 +95,7 @@ export function ReferenceTile({
 }
 
 /** A project reference image on the canvas strip or the assets panel, where choosing it edits the references. */
-export function ReferenceAssetTile(
-	tile: ReferenceTileProps & { onRemove: () => void },
-) {
+export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	const { editAsset } = useAssetEditors();
 	return (
 		<ReferenceTile
@@ -109,10 +107,7 @@ export function ReferenceAssetTile(
 	);
 }
 
-type MediaTileProps = TileProps & {
-	item: MediaItem;
-	menu?: ReactNode;
-};
+type MediaTileProps = TileProps & { item: MediaItem; menu?: ReactNode };
 
 /** A piece of the project's media as a small tile; the caller says what its face does, if anything. */
 export function MediaAssetTile({

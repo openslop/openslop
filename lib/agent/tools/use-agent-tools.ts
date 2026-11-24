@@ -166,7 +166,7 @@ export function useAgentTools() {
 					const kind = uploadKindOf(element);
 					const { media } = store.getState();
 					checkMediaKind(media, url, kind);
-					const item = media.find((m) => m.url === url);
+					const item = media.find((candidate) => candidate.url === url);
 					return commitUploaded(
 						queue,
 						buildNode(element, buildContext()),

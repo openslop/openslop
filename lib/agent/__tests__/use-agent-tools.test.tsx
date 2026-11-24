@@ -52,15 +52,13 @@ function Probe() {
 
 const turn = new AbortController().signal;
 const read = () => runTool({ toolName: "read_script", input: {} }, turn);
-const edit = (text: string) =>
+const edit = (text: string, id = "line") =>
 	runTool(
-		{
-			toolName: "edit_script",
-			input: { ops: [{ op: "set", id: "line", text }] },
-		},
+		{ toolName: "edit_script", input: { ops: [{ op: "set", id, text }] } },
 		turn,
 	);
-const text = () => getElementBodyText(requireElement(editor, "line")[0]);
+const bodyText = (id = "line") =>
+	getElementBodyText(requireElement(editor, id)[0]);
 
 beforeEach(() => {
 	editor = makeEditor([
@@ -87,7 +85,7 @@ describe("edit_script read guard", () => {
 		await read();
 
 		expect((await edit("Revised")).ok).toBe(true);
-		expect(text()).toBe("Revised");
+		expect(bodyText()).toBe("Revised");
 	});
 
 	it("names what it inserts, so it can edit that next without reading", async () => {
@@ -112,20 +110,8 @@ describe("edit_script read guard", () => {
 		)?.[1];
 
 		expect(id).toBeDefined();
-		expect(
-			(
-				await runTool(
-					{
-						toolName: "edit_script",
-						input: { ops: [{ op: "set", id, text: "A dog howls." }] },
-					},
-					turn,
-				)
-			).ok,
-		).toBe(true);
-		expect(getElementBodyText(requireElement(editor, String(id))[0])).toBe(
-			"A dog howls.",
-		);
+		expect((await edit("A dog howls.", String(id))).ok).toBe(true);
+		expect(bodyText(String(id))).toBe("A dog howls.");
 	});
 
 	it("refuses an edit before any read", async () => {
@@ -133,7 +119,7 @@ describe("edit_script read guard", () => {
 			ok: false,
 			errorText: expect.stringContaining("modified since read"),
 		});
-		expect(text()).toBe("The cat is on the mat.");
+		expect(bodyText()).toBe("The cat is on the mat.");
 	});
 
 	it("refuses an edit after the user changes the canvas", async () => {
@@ -143,7 +129,7 @@ describe("edit_script read guard", () => {
 		});
 
 		expect((await edit("Overwritten")).ok).toBe(false);
-		expect(text()).toBe("Hand edited. The cat is on the mat.");
+		expect(bodyText()).toBe("Hand edited. The cat is on the mat.");
 	});
 
 	it("keeps its read current through its own edits", async () => {
@@ -151,7 +137,7 @@ describe("edit_script read guard", () => {
 		await edit("First");
 
 		expect((await edit("Second")).ok).toBe(true);
-		expect(text()).toBe("Second");
+		expect(bodyText()).toBe("Second");
 	});
 
 	it("refuses an edit after the user changes what it edited", async () => {
