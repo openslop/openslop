@@ -1,15 +1,8 @@
 import { nameDef, OWN_MODEL_DEFS } from "@/lib/connectors/attributes/common";
 import { referenceImagesDef } from "@/lib/connectors/attributes/reference-images";
-import {
-	AttributeSchema,
-	type AttributeDef,
-} from "@/lib/connectors/attributes/schema";
+import { AttributeSchema } from "@/lib/connectors/attributes/schema";
 import { resolveAttributeSchema } from "@/lib/connectors/factory";
-import {
-	listModels,
-	resolveModel,
-	type ConnectorModels,
-} from "@/lib/connectors/models";
+import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
 import type { ConnectorRegistry } from "@/lib/connectors/registry";
 import { VOICE_ATTRIBUTES } from "@/lib/connectors/voice/attributes";
 import type {
@@ -22,7 +15,6 @@ import { flatAttributes } from "./element-attributes";
 import {
 	connectorOf,
 	ContentTypeSchema,
-	ElementTypeSchema,
 	type ElementType,
 	type ProjectAssetType,
 	type GeneratedElement,
@@ -80,26 +72,6 @@ export function attributeSchemaFor(
 	if (!connector) throw new Error(`"${type}" has no attributes`);
 	return resolveAttributeSchema(connector, resolveModel(connector, attributes));
 }
-
-export type TypedAttributeDef = {
-	type: ElementType;
-	model?: ModelRef;
-	def: AttributeDef;
-};
-
-/** Every attribute any element can hold, under each model its type runs on. */
-export const everyAttributeDef = (): TypedAttributeDef[] =>
-	ElementTypeSchema.options.flatMap((type) => {
-		const own = OWN_ATTRIBUTES[type];
-		if (own) return own.defs.map((def) => ({ type, def }));
-		const connector = connectorOf(type);
-		if (!connector) throw new Error(`"${type}" has no attributes`);
-		return listModels(connector).flatMap(({ provider, model }) =>
-			resolveAttributeSchema(connector, { provider, model }).defs.map(
-				(def) => ({ type, model: { provider, model }, def }),
-			),
-		);
-	});
 
 export const elementSchema = (element: CanvasElement): AttributeSchema =>
 	attributeSchemaFor(element.type, flatAttributes(element));

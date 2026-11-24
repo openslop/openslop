@@ -1,84 +1,59 @@
-import groupBy from "lodash/groupBy";
 import mapValues from "lodash/mapValues";
-import uniq from "lodash/uniq";
 import { z } from "zod";
-import {
-	everyAttributeDef,
-	type TypedAttributeDef,
-} from "@/lib/canvas/element-connector";
+import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
 	AssetTypeSchema,
 	ContentTypeSchema,
+	ElementTypeSchema,
 	type ElementType,
 } from "@/lib/canvas/types";
-import { optionsOf } from "@/lib/connectors/attributes/schema";
+import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 
 const ELEMENT_TEXT = `The element's content: the spoken line for speech; the prompt for every other content type; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
 
-const optionsByModel = (typed: TypedAttributeDef[]): string =>
-	uniq(
-		typed.flatMap(({ model, def }) =>
-			model ? [`${model.model}: ${optionsOf(def).join(", ")}.`] : [],
-		),
-	).join(" ");
+const MODEL_VALUE =
+	"Depends on the element's model: read_model_attributes lists its values.";
 
-/** A key's value on every type and model that carries it: a per-model key's options merged, else the value they share. */
-function attributeValue(typed: TypedAttributeDef[]): z.ZodType<string> {
-	const [{ def: first }] = typed;
-	const value = first.perModel
-		? z.enum(uniq(typed.flatMap(({ def }) => optionsOf(def))))
-		: (first.edit?.value ?? z.string());
+function attributeValue({ edit, unit, perModel }: AttributeDef) {
+	const value = perModel ? z.string() : (edit?.value ?? z.string());
 	return value.describe(
-		[
-			value.description,
-			first.unit && `Unit: ${first.unit}.`,
-			first.perModel && `By model: ${optionsByModel(typed)}`,
-		]
+		[value.description, unit && `Unit: ${unit}.`, perModel && MODEL_VALUE]
 			.filter(Boolean)
 			.join(" "),
 	);
 }
 
-const TYPED_ATTRIBUTES = everyAttributeDef();
+const shapeOf = (defs: readonly AttributeDef[]) =>
+	Object.fromEntries(defs.map((def) => [def.key, attributeValue(def)]));
 
-const ATTRIBUTES = mapValues(
-	groupBy(TYPED_ATTRIBUTES, ({ def }) => def.key),
-	attributeValue,
-);
-
-const ATTRIBUTES_BY_TYPE = mapValues(
-	groupBy(TYPED_ATTRIBUTES, ({ type }) => type),
-	(typed) =>
-		mapValues(
-			groupBy(typed, ({ def }) => def.key),
-			attributeValue,
-		),
-);
-
+// A generated key infers as possibly undefined, which parsed JSON never holds.
 const attrsFor = (type: ElementType) =>
-	z.strictObject(ATTRIBUTES_BY_TYPE[type] ?? {}).partial() as z.ZodType<
+	z.strictObject(shapeOf(attributeSchemaFor(type).defs)).partial() as z.ZodType<
 		Record<string, string>
 	>;
 
-const attrEdits = z
-	.strictObject(mapValues(ATTRIBUTES, (value) => value.nullable()))
-	.partial() as z.ZodType<Record<string, string | null>>;
+const everyAttribute = shapeOf(
+	ElementTypeSchema.options.flatMap((type) => attributeSchemaFor(type).defs),
+);
 
-const newElementOptions = ContentTypeSchema.options.map((type) =>
+const attrEdits = z
+	.strictObject(mapValues(everyAttribute, (value) => value.nullable()))
+	.partial();
+
+const elementOf = <Type extends ElementType>(type: Type) =>
 	z.object({
 		type: z.literal(type),
 		attrs: attrsFor(type).optional(),
 		text: z.string().optional().describe(ELEMENT_TEXT),
-	}),
-);
+	});
 
-const newElement = z.discriminatedUnion(
-	"type",
-	newElementOptions as [
-		(typeof newElementOptions)[number],
-		...(typeof newElementOptions)[number][],
-	],
-);
+// discriminatedUnion takes a non-empty tuple, which .map never infers.
+const oneOfType = <Option extends ReturnType<typeof elementOf>>([
+	first,
+	...rest
+]: Option[]) => z.discriminatedUnion("type", [first, ...rest]);
+
+const newElement = oneOfType(ContentTypeSchema.options.map(elementOf));
 
 export type NewElement = z.infer<typeof newElement>;
 
@@ -99,21 +74,10 @@ const insertOp = z.object({
 		.describe("The new elements, in the order they appear."),
 });
 
-const assetOpOptions = AssetTypeSchema.options.map((type) =>
-	z.object({
-		op: z.literal("asset"),
-		type: z.literal(type),
-		attrs: attrsFor(type).optional(),
-		text: z.string().optional().describe(ELEMENT_TEXT),
-	}),
-);
-
-const assetOp = z.discriminatedUnion(
-	"type",
-	assetOpOptions as [
-		(typeof assetOpOptions)[number],
-		...(typeof assetOpOptions)[number][],
-	],
+const assetOp = oneOfType(
+	AssetTypeSchema.options.map((type) =>
+		elementOf(type).extend({ op: z.literal("asset") }),
+	),
 );
 
 const removeOp = z.object({

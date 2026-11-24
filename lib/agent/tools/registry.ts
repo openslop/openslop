@@ -11,6 +11,7 @@ import { editScript } from "./edit-script";
 import { fitDurations } from "./fit-durations";
 import { generateCaptions } from "./generate-captions";
 import { listModels } from "./list-models";
+import { readModelAttributes } from "./read-model-attributes";
 import { outlineStory } from "./outline-story";
 import { readMedia } from "./read-media";
 import { readGeneration } from "./read-generation";
@@ -53,6 +54,7 @@ const TOOLS = {
 	fit_durations: fitDurations,
 	set_title: setTitle,
 	list_models: listModels,
+	read_model_attributes: readModelAttributes,
 	set_default_model: setDefaultModel,
 };
 
