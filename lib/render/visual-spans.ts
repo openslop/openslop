@@ -18,7 +18,6 @@ export type VisualSpan = {
 	type: ContentType;
 	sceneNumber: number;
 	words: number;
-	speechIds: string[];
 	/** Where generating it sets its length. */
 	duration?: DurationSetting;
 };
@@ -39,7 +38,6 @@ export const estimateVisualSpans = (
 					type: element.type,
 					sceneNumber: sceneIndex + 1,
 					words: 0,
-					speechIds: [],
 					...(outputKind === "video" &&
 						!holdsPinnedResult(getSnapshot(element.id)) && {
 							duration: {
@@ -53,7 +51,6 @@ export const estimateVisualSpans = (
 			const open = spans.at(-1);
 			if (!open || !isSpeech(element)) continue;
 			open.words += spokenWords(element);
-			open.speechIds.push(element.id);
 		}
 	}
 

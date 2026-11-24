@@ -13,14 +13,13 @@ const span = (over: Partial<VisualSpan> = {}): VisualSpan => ({
 	type: "video",
 	sceneNumber: 1,
 	words: 30,
-	speechIds: ["n1"],
 	duration: { sec: 10, maxSec: 15 },
 	...over,
 });
 
 describe("durationFits", () => {
 	it("leaves out a video with no speech under it, which plays its own length", () => {
-		expect(durationFits([span({ words: 0, speechIds: [] })])).toEqual([]);
+		expect(durationFits([span({ words: 0 })])).toEqual([]);
 	});
 
 	it("covers the speech under a video, plus the leeway", () => {
