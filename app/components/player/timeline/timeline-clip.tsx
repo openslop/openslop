@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Captions, type IconComponent } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
@@ -7,6 +8,9 @@ import type { ResultKind } from "@/lib/canvas/types";
 import { LOOP_FACES } from "@/lib/connectors/attributes/common";
 import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
+import { isGenerationActive } from "@/lib/generation/snapshots";
+import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
+import { GenerationIndicator } from "@/app/components/canvas/elements/generation-indicator";
 import { mediaUrlAt } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
 import type { ResolvedElement, Trim } from "@/lib/render/types";
@@ -48,7 +52,7 @@ function Preview({ width, children }: { width?: number; children: ReactNode }) {
 			)}
 			style={width === undefined ? undefined : { width }}
 		>
-			<div className="h-full overflow-hidden rounded-sm timeline-preview-surface">
+			<div className="relative h-full overflow-hidden rounded-sm timeline-preview-surface">
 				{children}
 			</div>
 		</div>
@@ -166,10 +170,15 @@ export function TimelineClip({
 	const { element } = clip;
 	const config = ELEMENT_CONFIGS[element.type];
 	const range = formatTimeRange(clip.start, clip.duration);
+	const { status, startedAt } = useQueueSelector((q) =>
+		q.getElementSnapshot(element.id),
+	);
+	const active = isGenerationActive(status);
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
 		element.captions && "captioned",
+		active && "regenerating",
 		range,
 	]
 		.filter(Boolean)
@@ -188,23 +197,32 @@ export function TimelineClip({
 				width={width}
 			/>
 			<div className="flex min-h-0 flex-1">
-				{config.layer === "audio" ? (
-					<Preview>
+				<Preview>
+					{config.layer === "audio" ? (
 						<ClipWaveform
 							src={element.url}
 							width={element.mediaDurationSec * pxPerSec}
 							offset={trim.trimStartSec * pxPerSec}
 						/>
-					</Preview>
-				) : (
-					<Preview>
+					) : (
 						<Footage
 							outputKind={config.outputKind}
 							src={mediaUrlAt(element.url, element.trimStartSec)}
 						/>
-					</Preview>
-				)}
+					)}
+					{status === "generating" ? (
+						<Skeleton className="absolute inset-0" aria-hidden />
+					) : null}
+				</Preview>
 			</div>
+			{active ? (
+				<GenerationIndicator
+					status={status}
+					startedAt={startedAt}
+					size="sm"
+					className="absolute top-0.5 right-0.5 z-10"
+				/>
+			) : null}
 			{sceneNumber ? (
 				<CornerChip className="font-numeric">
 					<span className="truncate">

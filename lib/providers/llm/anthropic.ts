@@ -75,7 +75,11 @@ const DEFAULT_MAX_TOKENS = 65536;
 type ModelId =
 	(typeof ANTHROPIC_LLM_MODELS)[keyof typeof ANTHROPIC_LLM_MODELS]["id"];
 
-const USD_PER_MTOK: Record<ModelId, { input: number; output: number }> = {
+const USD_PER_MTOK: Record<
+	ModelId,
+	{ input: number; output: number; cacheReadRate?: number }
+> = {
+	"claude-opus-5-5": { input: 4, output: 20, cacheReadRate: 0.05 },
 	"claude-opus-5": { input: 5, output: 25 },
 	"claude-sonnet-5": { input: 2, output: 10 },
 	"claude-haiku-4-5-20251001": { input: 1, output: 5 },
@@ -91,7 +95,7 @@ function costOf(modelId: string, usage: LanguageModelUsage): number {
 		usage.inputTokenDetails;
 	const billableInput =
 		(noCacheTokens ?? 0) +
-		(cacheReadTokens ?? 0) * CACHE_READ_RATE +
+		(cacheReadTokens ?? 0) * (price.cacheReadRate ?? CACHE_READ_RATE) +
 		(cacheWriteTokens ?? 0) * CACHE_WRITE_RATE;
 	return (
 		(billableInput * price.input + (usage.outputTokens ?? 0) * price.output) /
@@ -99,7 +103,7 @@ function costOf(modelId: string, usage: LanguageModelUsage): number {
 	);
 }
 
-/** A prefix the API keeps between requests and serves at a tenth of the price. */
+/** A prefix the API keeps between requests and bills at the cache-read rate. */
 const CACHED = { cacheControl: { type: "ephemeral" } };
 const CACHED_PREFIX: SharedV3ProviderOptions = { anthropic: CACHED };
 

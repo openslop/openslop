@@ -1,4 +1,10 @@
 export const ANTHROPIC_LLM_MODELS = {
+	"Claude Opus 5.5": {
+		id: "claude-opus-5-5",
+		cost: "high",
+		speed: "low",
+		description: "Best for the strongest writing and storytelling.",
+	},
 	"Claude Opus 5": {
 		id: "claude-opus-5",
 		cost: "high",

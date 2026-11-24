@@ -5,7 +5,6 @@ import { ChevronsLeft, ChevronsRight, Pause, Play } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { toFrames } from "@/lib/render/frames";
-import { findSegmentIndexAtFrame } from "@/lib/render/scene-segments";
 import { BottomViewToggle } from "./bottom-view-toggle";
 import { usePlayerControl } from "./player-control-context";
 import { usePlayerPlacement } from "./player-placement-context";
@@ -36,14 +35,14 @@ function BottomTransportBarComponent() {
 	const playLabel = playing ? "Pause" : "Play";
 
 	const seekToAdjacentScene = (direction: -1 | 1) => {
-		if (!player || segments.length === 0) return;
-		const current = findSegmentIndexAtFrame(
-			segments,
-			player.getCurrentFrame(),
-			layout.fps,
-		);
-		const target = segments[current + direction];
-		if (target) player.seekTo(toFrames(target.start, layout.fps));
+		if (!player) return;
+		const frame = player.getCurrentFrame();
+		const starts = segments.map(({ start }) => toFrames(start, layout.fps));
+		const target =
+			direction === 1
+				? starts.find((start) => start > frame)
+				: starts.findLast((start) => start < frame);
+		if (target !== undefined) player.seekTo(target);
 	};
 
 	return (

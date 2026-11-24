@@ -240,6 +240,34 @@ describe("AnthropicLLM", () => {
 			expect(costUsd).toBeCloseTo(((100 + 10 + 125) * 5) / 1_000_000);
 		});
 
+		it("prices Claude Opus 5.5 at its own rates, cache reads at a twentieth", () => {
+			const { costOf } = new AnthropicLLM("test-key").agentModel(
+				"claude-opus-5-5",
+			);
+			const million = (details: {
+				noCacheTokens?: number;
+				cacheReadTokens?: number;
+				cacheWriteTokens?: number;
+				outputTokens?: number;
+			}) =>
+				costOf({
+					inputTokens: 1_000_000,
+					inputTokenDetails: {
+						noCacheTokens: details.noCacheTokens ?? 0,
+						cacheReadTokens: details.cacheReadTokens ?? 0,
+						cacheWriteTokens: details.cacheWriteTokens ?? 0,
+					},
+					outputTokens: details.outputTokens ?? 0,
+					outputTokenDetails: { textTokens: 0, reasoningTokens: 0 },
+					totalTokens: 1_000_000,
+				});
+
+			expect(million({ noCacheTokens: 1_000_000 })).toBeCloseTo(4);
+			expect(million({ outputTokens: 1_000_000 })).toBeCloseTo(20);
+			expect(million({ cacheReadTokens: 1_000_000 })).toBeCloseTo(0.2);
+			expect(million({ cacheWriteTokens: 1_000_000 })).toBeCloseTo(5);
+		});
+
 		it("fails loudly for a model it has no price for", async () => {
 			respondWith("ok");
 
