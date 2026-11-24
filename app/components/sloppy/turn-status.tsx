@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Sparkles } from "@/components/ui/icon";
 import { useElapsedSeconds } from "@/lib/components/use-elapsed-seconds";
 import OrbLoader from "../orb-loader";

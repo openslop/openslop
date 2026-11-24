@@ -4,8 +4,7 @@ import { ActiveCaptionFont } from "./components/active-caption-font";
 import { VideoComposition } from "./compositions/video-composition";
 import { VideoSettingsSchema } from "@/lib/project/video-settings";
 import { buildRenderLayout } from "@/lib/render/scene-builder";
-import type { RenderLayout } from "@/lib/render/types";
-import { COMPOSITION_ID } from "@/lib/render/types";
+import { COMPOSITION_ID, type RenderLayout } from "@/lib/render/types";
 
 const defaultProps = buildRenderLayout([], VideoSettingsSchema.parse({}));
 

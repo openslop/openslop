@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { Image } from "@/components/ui/icon";
+import { Image, Play } from "@/components/ui/icon";
 import { describe, expect, it } from "vitest";
-import { Play } from "@/components/ui/icon";
 import {
 	durationDef,
 	loopsDef,
