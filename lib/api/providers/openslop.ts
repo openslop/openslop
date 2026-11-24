@@ -47,7 +47,10 @@ const OPENSLOP_PROVIDERS: {
 	music: Sources<"music", typeof OPENSLOP_MUSIC_MODELS>;
 	stt: Sources<"stt", typeof OPENSLOP_STT_MODELS>;
 } = {
-	llm: { "Claude Opus 5": hosted("ANTHROPIC_API_KEY", AnthropicLLM, MockLLM) },
+	llm: {
+		"Claude Opus 5.5": hosted("ANTHROPIC_API_KEY", AnthropicLLM, MockLLM),
+		"Claude Opus 5": hosted("ANTHROPIC_API_KEY", AnthropicLLM, MockLLM),
+	},
 	tts: { "Sonic 3.6": hosted("CARTESIA_API_KEY", CartesiaTTS, MockTTS) },
 	image: {
 		"Muse Image": hosted("RUNWARE_API_KEY", RunwareImage, MockImage),
