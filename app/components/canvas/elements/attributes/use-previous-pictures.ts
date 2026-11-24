@@ -6,6 +6,7 @@ import { useSlateSelector } from "slate-react";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
 import type { GeneratedElement } from "@/lib/canvas/types";
 import { previewFrames } from "@/lib/connectors/video/capture-frames";
+import { type ClipRange, clipRange } from "@/lib/connectors/video/clip-range";
 import { FRAMES, type FrameKey } from "@/lib/connectors/video/start-frame";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 
@@ -14,14 +15,22 @@ export type PreviousPictures =
 	| { kind: "empty"; reason: string }
 	| { kind: "ready"; pictures: { name: string; url: string }[] };
 
-/** Null when the video cannot decode, undefined while it does. */
-function useDecodedFrames(videoUrl: string | undefined) {
+/** Null when the video cannot decode, undefined while it does. Only the part that plays is decoded. */
+function useDecodedFrames(
+	videoUrl: string | undefined,
+	range: ClipRange | undefined,
+) {
 	const [frames, setFrames] = useState<Record<FrameKey, string> | null>();
+	const startSec = range?.startSec;
+	const endSec = range?.endSec;
 	useEffect(() => {
 		if (!videoUrl) return;
 		let urls: string[] = [];
 		let cancelled = false;
-		previewFrames(videoUrl).then(
+		previewFrames(
+			videoUrl,
+			startSec === undefined ? undefined : { startSec, endSec },
+		).then(
 			(jpegs) => {
 				if (cancelled) return;
 				const frameUrls = mapValues(jpegs, (jpeg) => URL.createObjectURL(jpeg));
@@ -36,7 +45,7 @@ function useDecodedFrames(videoUrl: string | undefined) {
 			urls.forEach((url) => URL.revokeObjectURL(url));
 			setFrames(undefined);
 		};
-	}, [videoUrl]);
+	}, [videoUrl, startSec, endSec]);
 	return frames;
 }
 
@@ -50,7 +59,10 @@ export function usePreviousPictures(
 	const result = useQueueSelector((q) =>
 		source ? q.getElementSnapshot(source.id).result : undefined,
 	);
-	const decoded = useDecodedFrames(result?.videoUrl);
+	const decoded = useDecodedFrames(
+		result?.videoUrl,
+		source?.type === "video" ? clipRange(source) : undefined,
+	);
 
 	if (!source)
 		return { kind: "empty", reason: "Nothing comes before this video" };

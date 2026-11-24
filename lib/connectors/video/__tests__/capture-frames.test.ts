@@ -56,6 +56,8 @@ vi.mock("@/lib/upload/upload-file", () => ({
 }));
 
 const { previewFrames, captureFrames } = await import("../capture-frames");
+const { clipRange } = await import("../clip-range");
+const { element } = await import("@/lib/canvas/__tests__/_assets");
 
 beforeEach(() => {
 	media.track = {
@@ -137,5 +139,60 @@ describe("previewFrames", () => {
 
 		await previewFrames("https://vid/newer-59.mp4");
 		expect(media.inputs).toBe(62);
+	});
+});
+
+describe("a trimmed clip", () => {
+	it("takes the beginning, middle and end of the part that plays", async () => {
+		await expect(
+			captureFrames("https://vid/trimmed.mp4", ["first", "middle", "last"], {
+				startSec: 2,
+				endSec: 6,
+			}),
+		).resolves.toEqual([
+			"https://img/frame@2.5",
+			"https://img/frame@4.5",
+			"https://img/frame@6.5",
+		]);
+		expect(media.timestamps).toEqual([[2.5, 4.5, 6.5]]);
+	});
+
+	it("plays to the end of its media without an out-point, and keeps the timeline's shortest clip", async () => {
+		await previewFrames("https://vid/in-only.mp4", { startSec: 6 });
+		await previewFrames("https://vid/past-end.mp4", {
+			startSec: 7.9,
+			endSec: 20,
+		});
+		expect(media.timestamps).toEqual([
+			[6.5, 7.5, 8.5],
+			[7.5, 8, 8.5],
+		]);
+	});
+
+	it("decodes each played range once, apart from the whole video", async () => {
+		await previewFrames("https://vid/ranges.mp4");
+		await previewFrames("https://vid/ranges.mp4", { startSec: 0 });
+		expect(media.inputs).toBe(1);
+		await previewFrames("https://vid/ranges.mp4", { startSec: 0, endSec: 4 });
+		await previewFrames("https://vid/ranges.mp4", { startSec: 0, endSec: 4 });
+		expect(media.inputs).toBe(2);
+		await previewFrames("https://vid/ranges.mp4", { startSec: 1, endSec: 4 });
+		expect(media.inputs).toBe(3);
+	});
+});
+
+describe("clipRange", () => {
+	it("is the trim of a trimmed video, and nothing for one that plays whole", () => {
+		expect(
+			clipRange(element("v", "video", "", { trimStart: "1.5", trimEnd: "4" })),
+		).toEqual({ startSec: 1.5, endSec: 4 });
+		expect(clipRange(element("v", "video", "", { trimEnd: "4" }))).toEqual({
+			startSec: 0,
+			endSec: 4,
+		});
+		expect(clipRange(element("v", "video", "", { trimStart: "0" }))).toBe(
+			undefined,
+		);
+		expect(clipRange(element("v", "video"))).toBe(undefined);
 	});
 });
