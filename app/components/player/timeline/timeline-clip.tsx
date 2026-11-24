@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Captions, type IconComponent } from "@/components/ui/icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
@@ -51,7 +52,7 @@ function Preview({ width, children }: { width?: number; children: ReactNode }) {
 			)}
 			style={width === undefined ? undefined : { width }}
 		>
-			<div className="h-full overflow-hidden rounded-sm timeline-preview-surface">
+			<div className="relative h-full overflow-hidden rounded-sm timeline-preview-surface">
 				{children}
 			</div>
 		</div>
@@ -172,11 +173,12 @@ export function TimelineClip({
 	const { status, startedAt } = useQueueSelector((q) =>
 		q.getElementSnapshot(element.id),
 	);
+	const active = isGenerationActive(status);
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
 		element.captions && "captioned",
-		isGenerationActive(status) && "regenerating",
+		active && "regenerating",
 		range,
 	]
 		.filter(Boolean)
@@ -195,24 +197,25 @@ export function TimelineClip({
 				width={width}
 			/>
 			<div className="flex min-h-0 flex-1">
-				{config.layer === "audio" ? (
-					<Preview>
+				<Preview>
+					{config.layer === "audio" ? (
 						<ClipWaveform
 							src={element.url}
 							width={element.mediaDurationSec * pxPerSec}
 							offset={trim.trimStartSec * pxPerSec}
 						/>
-					</Preview>
-				) : (
-					<Preview>
+					) : (
 						<Footage
 							outputKind={config.outputKind}
 							src={mediaUrlAt(element.url, element.trimStartSec)}
 						/>
-					</Preview>
-				)}
+					)}
+					{status === "generating" ? (
+						<Skeleton className="absolute inset-0" aria-hidden />
+					) : null}
+				</Preview>
 			</div>
-			{isGenerationActive(status) ? (
+			{active ? (
 				<GenerationIndicator
 					status={status}
 					startedAt={startedAt}

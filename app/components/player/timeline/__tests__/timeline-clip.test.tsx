@@ -48,8 +48,10 @@ function HoldStatus({ status }: { status: GenerationStatus }) {
 const markup = (
 	el: ResolvedElement,
 	duration: number,
-	trim: Trim = el,
-	status: GenerationStatus = "idle",
+	{
+		trim = el,
+		status = "idle",
+	}: { trim?: Trim; status?: GenerationStatus } = {},
 ) =>
 	renderToStaticMarkup(
 		<TooltipProvider>
@@ -88,8 +90,7 @@ describe("TimelineClip footage", () => {
 		expect(
 			sources(
 				markup(element(), 8, {
-					trimStartSec: 0.30000000000000004,
-					trimDurationSec: 7.7,
+					trim: { trimStartSec: 0.30000000000000004, trimDurationSec: 7.7 },
 				}),
 			),
 		).toEqual(["https://vid/a.mp4"]);
@@ -105,20 +106,24 @@ describe("TimelineClip footage", () => {
 	});
 });
 
+const SHIMMER = /data-slot="skeleton"[^>]*aria-hidden/;
+
 describe("TimelineClip regeneration", () => {
 	it("shows no indicator while the element is idle", () => {
 		const html = markup(element(), 5);
 		expect(html).not.toContain('role="status"');
 		expect(html).not.toContain("regenerating");
+		expect(html).not.toMatch(SHIMMER);
 	});
 
 	it.each([
-		["queued", "Queued…"],
-		["generating", "Generating 0s"],
-	] as const)("marks a clip whose element is %s", (status, label) => {
-		const html = markup(element(), 5, element(), status);
+		["queued", "Queued…", false],
+		["generating", "Generating 0s", true],
+	] as const)("marks a clip whose element is %s", (status, label, shimmers) => {
+		const html = markup(element(), 5, { status });
 		expect(html).toContain(`role="status" aria-label="${label}"`);
 		expect(html).toContain('aria-label="Video, regenerating, 0:00–0:05"');
+		expect(SHIMMER.test(html)).toBe(shimmers);
 	});
 });
 
