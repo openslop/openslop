@@ -50,6 +50,26 @@ describe("MediaWithSkeleton video", () => {
 		expect(shimmering()).toBe(false);
 	});
 
+	it("keeps shimmering while pending even after the video has settled", () => {
+		root = createRoot(container);
+		act(() =>
+			root.render(
+				<MediaWithSkeleton
+					outputKind="video"
+					src="https://vid/a.mp4"
+					alt=""
+					pending
+				/>,
+			),
+		);
+		expect(shimmering()).toBe(true);
+
+		settle(video(), { readyState: HTMLMediaElement.HAVE_METADATA });
+		act(() => video().dispatchEvent(new Event("loadedmetadata")));
+
+		expect(shimmering()).toBe(true);
+	});
+
 	it("stops shimmering when the video fails to load", () => {
 		render();
 

@@ -18,10 +18,12 @@ export function ClipWaveform({
 	src,
 	width,
 	offset,
+	pending = false,
 }: {
 	src: string;
 	width: number;
 	offset: number;
+	pending?: boolean;
 }) {
 	const decode = usePeaks(src);
 	const sampleCount = clamp(
@@ -38,12 +40,12 @@ export function ClipWaveform({
 
 	return (
 		<div className="h-full" style={{ width, translate: `${-offset}px` }}>
-			{decode.status === "failed" ? (
+			{!pending && decode.status === "failed" ? (
 				// A failed decode stops shimmering: the clip is there, its audio is not.
 				<div className="flex h-full items-center">
 					<div className="h-px w-full bg-current opacity-40" />
 				</div>
-			) : style ? (
+			) : !pending && style ? (
 				<div className="h-full bg-current" style={style} />
 			) : (
 				<Skeleton className="h-full rounded-xs" />

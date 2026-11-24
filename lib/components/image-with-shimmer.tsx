@@ -4,6 +4,10 @@ import { useState, type SyntheticEvent } from "react";
 import Image, { type ImageProps } from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface ImageWithShimmerProps extends ImageProps {
+	pending?: boolean;
+}
+
 /**
  * `next/image` with a shimmer overlay that hides once the image resolves.
  * Clears on error too, so a broken/expired URL falls back to the image's
@@ -13,8 +17,9 @@ export function ImageWithShimmer({
 	alt,
 	onLoad,
 	onError,
+	pending = false,
 	...props
-}: ImageProps) {
+}: ImageWithShimmerProps) {
 	const [settled, setSettled] = useState(false);
 	return (
 		<>
@@ -30,7 +35,7 @@ export function ImageWithShimmer({
 					setSettled(true);
 				}}
 			/>
-			{!settled && <Skeleton className="absolute inset-0" />}
+			{(pending || !settled) && <Skeleton className="absolute inset-0" />}
 		</>
 	);
 }

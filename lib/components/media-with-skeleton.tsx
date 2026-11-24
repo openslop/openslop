@@ -12,6 +12,7 @@ interface MediaWithSkeletonProps {
 	alt: string;
 	videoInteractive?: boolean;
 	objectFit?: "cover" | "contain";
+	pending?: boolean;
 }
 
 export function MediaWithSkeleton({
@@ -20,6 +21,7 @@ export function MediaWithSkeleton({
 	alt,
 	videoInteractive = false,
 	objectFit = "cover",
+	pending = false,
 }: MediaWithSkeletonProps) {
 	const [video, setVideo] = useState<HTMLVideoElement | null>(null);
 	const videoSettled = useMediaSettled(video);
@@ -33,6 +35,7 @@ export function MediaWithSkeleton({
 				fill
 				className={fitClass}
 				unoptimized
+				pending={pending}
 			/>
 		);
 	}
@@ -44,7 +47,7 @@ export function MediaWithSkeleton({
 				controls={videoInteractive}
 				className={`w-full h-full ${fitClass} ${videoInteractive ? "" : "pointer-events-none"}`}
 			/>
-			{!videoSettled && <Skeleton className="absolute inset-0" />}
+			{(pending || !videoSettled) && <Skeleton className="absolute inset-0" />}
 		</>
 	);
 }

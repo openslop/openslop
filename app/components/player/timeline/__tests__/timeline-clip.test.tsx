@@ -13,6 +13,10 @@ import {
 import type { ResolvedElement, Trim } from "@/lib/render/types";
 import { TimelineClip, TimelineExtension } from "../timeline-clip";
 
+vi.mock("@/lib/components/use-media-settled", () => ({
+	useMediaSettled: () => true,
+}));
+
 const PX_PER_SEC = 10;
 
 const element = (over: Partial<ResolvedElement> = {}): ResolvedElement => ({
@@ -108,7 +112,7 @@ describe("TimelineClip footage", () => {
 	});
 });
 
-const SHIMMER = /data-slot="skeleton"[^>]*aria-hidden/;
+const SHIMMER = /data-slot="skeleton"/;
 
 describe("TimelineClip regeneration", () => {
 	it("shows no indicator while the element is idle", () => {

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Captions, type IconComponent } from "@/components/ui/icon";
-import { Skeleton } from "@/components/ui/skeleton";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
@@ -35,10 +34,23 @@ const edge = (selected: boolean) =>
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
 
-function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
+function Footage({
+	outputKind,
+	src,
+	pending,
+}: {
+	outputKind: ResultKind;
+	src: string;
+	pending?: boolean;
+}) {
 	return (
 		<div className="relative aspect-square h-full overflow-hidden">
-			<MediaWithSkeleton outputKind={outputKind} src={src} alt="" />
+			<MediaWithSkeleton
+				outputKind={outputKind}
+				src={src}
+				alt=""
+				pending={pending}
+			/>
 		</div>
 	);
 }
@@ -203,16 +215,15 @@ export function TimelineClip({
 							src={element.url}
 							width={element.mediaDurationSec * pxPerSec}
 							offset={trim.trimStartSec * pxPerSec}
+							pending={status === "generating"}
 						/>
 					) : (
 						<Footage
 							outputKind={config.outputKind}
 							src={mediaUrlAt(element.url, element.trimStartSec)}
+							pending={status === "generating"}
 						/>
 					)}
-					{status === "generating" ? (
-						<Skeleton className="absolute inset-0" aria-hidden />
-					) : null}
 				</Preview>
 			</div>
 			{active ? (
