@@ -39,7 +39,7 @@ function BottomTransportBarComponent() {
 	const playLabel = playing ? "Pause" : "Play";
 
 	const seekToPreviousScene = () => {
-		if (!player || segments.length === 0) return;
+		if (!player) return;
 		player.seekTo(
 			previousSceneStart(segments, player.getCurrentFrame(), layout.fps),
 		);

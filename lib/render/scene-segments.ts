@@ -35,11 +35,8 @@ export function findSegmentIndexAtFrame(
 	return index === -1 ? segments.length - 1 : index;
 }
 
-/**
- * Where "Previous scene" seeks, in frames: the start of the scene the playhead
- * is in, or, when it is already there, the start of the scene before. On the
- * first scene that is frame 0 either way.
- */
+const RESTART_GRACE_SEC = 1;
+
 export function previousSceneStart(
 	segments: SceneSegment[],
 	frame: number,
@@ -48,7 +45,9 @@ export function previousSceneStart(
 	const current = findSegmentIndexAtFrame(segments, frame, fps);
 	if (current === -1) return 0;
 	const currentStart = toFrames(segments[current].start, fps);
-	if (frame > currentStart) return currentStart;
+	if (frame > currentStart + toFrames(RESTART_GRACE_SEC, fps)) {
+		return currentStart;
+	}
 	return toFrames(segments[Math.max(0, current - 1)].start, fps);
 }
 
