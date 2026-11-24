@@ -6,6 +6,7 @@ import { repairToolCall } from "../repair-tool-call";
 
 const OPS = `{"ops":[{"op":"set","id":"xgarXI0GnDmEdJ2E","attrs":{"duration":"15","motion":"handheldDrift"},"text":"Shot 1: distant seagulls."}]}`;
 const WITH_STRAY_BRACE = OPS.replace('"}]}', '"}}]}');
+const WITH_MISSING_QUOTE = OPS.replace('"15",', '"15,');
 
 const tools = {
 	edit_script: tool({
@@ -69,8 +70,17 @@ describe("repairToolCall", () => {
 		expect(toolCalls[0]).toMatchObject({ invalid: true });
 	});
 
-	it("does not complete a call that was cut off", async () => {
-		const { toolCalls } = await callWith(OPS.slice(0, -3));
+	it("runs a call whose input is missing a closing quote", async () => {
+		const { toolCalls } = await callWith(WITH_MISSING_QUOTE);
+
+		expect(toolCalls[0]).toMatchObject({ input: JSON.parse(OPS) });
+		expect(toolCalls[0]).not.toHaveProperty("invalid");
+	});
+
+	it("leaves a call jsonrepair cannot read invalid", async () => {
+		const { toolCalls } = await callWith(
+			'{"ops":[{"op":"set","text":Shot 1, wide}]}',
+		);
 
 		expect(toolCalls[0]).toMatchObject({ invalid: true });
 	});

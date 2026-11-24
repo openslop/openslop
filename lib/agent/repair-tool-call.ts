@@ -6,7 +6,6 @@ import {
 } from "ai";
 import { jsonrepair } from "jsonrepair";
 
-/** Only a repair that drops characters is trusted: one that adds them may be completing a truncated call. */
 export const repairToolCall: ToolCallRepairFunction<ToolSet> = async ({
 	toolCall,
 	error,
@@ -18,8 +17,7 @@ export const repairToolCall: ToolCallRepairFunction<ToolSet> = async ({
 		return null;
 	}
 	try {
-		const input = jsonrepair(toolCall.input);
-		return input.length < toolCall.input.length ? { ...toolCall, input } : null;
+		return { ...toolCall, input: jsonrepair(toolCall.input) };
 	} catch {
 		return null;
 	}
