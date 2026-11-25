@@ -18,7 +18,7 @@ type RawImageResult = { data: string; format: ImageFormat } & RawResult;
 
 const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
 
-const imageRef = (seat: number) => `the character from Image ${seat}`;
+const imageRef = (seat: number) => `the subject of Image ${seat}`;
 
 const runwareModel = (model: string) =>
 	Object.values(RUNWARE_IMAGE_MODELS).find(({ id }) => id === model);
