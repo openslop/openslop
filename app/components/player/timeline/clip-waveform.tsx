@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PEAK_COUNT } from "@/lib/components/peaks";
 import { soundwaveMaskStyle, toBarHeights } from "@/lib/components/soundwave";
-import { usePeaks } from "@/lib/components/use-peaks";
+import { LOADING, usePeaks } from "@/lib/components/use-peaks";
 import { clamp } from "@/lib/utils";
 
 const SAMPLE_SPACING_PX = 2;
@@ -18,14 +18,15 @@ export function ClipWaveform({
 	src,
 	width,
 	offset,
-	pending = false,
+	pending,
 }: {
 	src: string;
 	width: number;
 	offset: number;
-	pending?: boolean;
+	pending: boolean;
 }) {
-	const decode = usePeaks(src);
+	const peaksDecode = usePeaks(src);
+	const decode = pending ? LOADING : peaksDecode;
 	const sampleCount = clamp(
 		Math.round(width / SAMPLE_SPACING_PX / SAMPLE_QUANTUM) * SAMPLE_QUANTUM,
 		SAMPLE_RANGE.min,
@@ -40,12 +41,12 @@ export function ClipWaveform({
 
 	return (
 		<div className="h-full" style={{ width, translate: `${-offset}px` }}>
-			{!pending && decode.status === "failed" ? (
+			{decode.status === "failed" ? (
 				// A failed decode stops shimmering: the clip is there, its audio is not.
 				<div className="flex h-full items-center">
 					<div className="h-px w-full bg-current opacity-40" />
 				</div>
-			) : !pending && style ? (
+			) : style ? (
 				<div className="h-full bg-current" style={style} />
 			) : (
 				<Skeleton className="h-full rounded-xs" />

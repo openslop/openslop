@@ -186,6 +186,7 @@ export function TimelineClip({
 		q.getElementSnapshot(element.id),
 	);
 	const active = isGenerationActive(status);
+	const regenerating = status === "generating";
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
@@ -215,13 +216,13 @@ export function TimelineClip({
 							src={element.url}
 							width={element.mediaDurationSec * pxPerSec}
 							offset={trim.trimStartSec * pxPerSec}
-							pending={status === "generating"}
+							pending={regenerating}
 						/>
 					) : (
 						<Footage
 							outputKind={config.outputKind}
 							src={mediaUrlAt(element.url, element.trimStartSec)}
-							pending={status === "generating"}
+							pending={regenerating}
 						/>
 					)}
 				</Preview>
