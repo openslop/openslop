@@ -44,6 +44,15 @@ OpenSlop 把你喜欢的 AI 工具串成一条工作流，几分钟就能做出�
 
 它在浏览器里运行，什么都不用装。开源，永久免费。由来自 Meta、Google、Stripe 和 Dropbox 的工程师打造。
 
+## 快速开始
+
+OpenSlop 有两种用法：
+
+- **在线**：打开 [app.openslop.ai](https://app.openslop.ai)，无需安装。目前仅限邀请，请先[加入等候名单](https://openslop.ai)。
+- **本地模式**：在你自己的电脑上运行。[查看设置指南 →](local-mode.zh-CN.md)
+
+要改代码？按 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup) 搭建开发环境。
+
 ## 功能
 
 <table>
@@ -162,15 +171,6 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 - **[角色和画风](../../app/components/canvas/elements/asset-strip.tsx)** — 给角色起一次名，每张图片、每句配音和每个头像都保持一致。
 - **[模板](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime 等等。每个模板都预设了一种风格、一组角色和一个时长。
 - **[开发用的 mock](../../.env.example)** — 不填某个提供商的密钥，它的调用就会回退到预置结果，让你不花钱也能开发。
-
-## 快速开始
-
-OpenSlop 有两种用法：
-
-- **在线**：打开 [app.openslop.ai](https://app.openslop.ai)，无需安装。目前仅限邀请，请先[加入等候名单](https://openslop.ai)。
-- **本地模式**：在你自己的电脑上运行。[查看设置指南 →](local-mode.zh-CN.md)
-
-要改代码？按 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup) 搭建开发环境。
 
 ## 技术栈
 

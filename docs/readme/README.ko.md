@@ -44,6 +44,15 @@ OpenSlop은 여러분이 즐겨 쓰는 AI 도구를 하나의 워크플로로 �
 
 브라우저에서 돌아가니 설치할 게 없습니다. 오픈 소스이고, 영원히 무료입니다. Meta, Google, Stripe, Dropbox 출신 엔지니어들이 만들었습니다.
 
+## 시작하기
+
+OpenSlop은 두 가지 방법으로 쓸 수 있습니다.
+
+- **온라인**: [app.openslop.ai](https://app.openslop.ai)에서 씁니다. 설치할 것이 없습니다. 지금은 초대받은 분만 쓸 수 있으니 [대기자 명단에 올리세요](https://openslop.ai).
+- **로컬 모드**: 내 컴퓨터에서 실행합니다. [설치 가이드 보기 →](local-mode.ko.md)
+
+코드를 고치려면 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup)를 보고 개발 환경을 준비하세요.
+
 ## 기능
 
 <table>
@@ -162,15 +171,6 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 - **[캐릭터와 화풍](../../app/components/canvas/elements/asset-strip.tsx)** — 캐릭터 이름을 한 번만 정하면 모든 이미지, 음성 대사, 아바타가 일관되게 유지됩니다.
 - **[템플릿](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime 등. 각각 스타일, 캐릭터, 길이를 미리 채워 줍니다.
 - **[개발용 목(mock)](../../.env.example)** — 공급자 키를 비워 두면 그 호출은 미리 준비된 결과로 대체되어, 돈을 내지 않고도 개발할 수 있습니다.
-
-## 시작하기
-
-OpenSlop은 두 가지 방법으로 쓸 수 있습니다.
-
-- **온라인**: [app.openslop.ai](https://app.openslop.ai)에서 씁니다. 설치할 것이 없습니다. 지금은 초대받은 분만 쓸 수 있으니 [대기자 명단에 올리세요](https://openslop.ai).
-- **로컬 모드**: 내 컴퓨터에서 실행합니다. [설치 가이드 보기 →](local-mode.ko.md)
-
-코드를 고치려면 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup)를 보고 개발 환경을 준비하세요.
 
 ## 기술 스택
 

@@ -44,6 +44,15 @@ OpenSlop conecta todas tus herramientas de IA favoritas en un solo flujo de trab
 
 Corre en tu navegador, no hay nada que instalar. Código abierto, gratis para siempre. Hecho por ingenieros de Meta, Google, Stripe y Dropbox.
 
+## Primeros pasos
+
+Puedes usar OpenSlop de dos formas:
+
+- **En línea** en [app.openslop.ai](https://app.openslop.ai). No hay nada que instalar. Por ahora es solo con invitación, así que [apúntate a la lista de espera](https://openslop.ai).
+- **Modo local** en tu propio ordenador. [Sigue la guía de instalación →](local-mode.es.md)
+
+¿Vas a tocar el código? Prepara un entorno de desarrollo con [CONTRIBUTING.md](../../CONTRIBUTING.md#setup).
+
 ## Funciones
 
 <table>
@@ -162,15 +171,6 @@ Usa OpenSlop en tu propio Mac, Windows o Linux. Tus proyectos y vídeos se queda
 - **[Personajes y estilo artístico](../../app/components/canvas/elements/asset-strip.tsx)** — Nombra un personaje una vez y cada imagen, línea de voz y avatar se mantiene coherente.
 - **[Plantillas](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime y más. Cada una siembra un estilo, sus personajes y una duración.
 - **[Mocks para desarrollo](../../.env.example)** — Deja sin definir la clave de un proveedor y sus llamadas devuelven resultados de prueba, así puedes construir sin pagar.
-
-## Primeros pasos
-
-Puedes usar OpenSlop de dos formas:
-
-- **En línea** en [app.openslop.ai](https://app.openslop.ai). No hay nada que instalar. Por ahora es solo con invitación, así que [apúntate a la lista de espera](https://openslop.ai).
-- **Modo local** en tu propio ordenador. [Sigue la guía de instalación →](local-mode.es.md)
-
-¿Vas a tocar el código? Prepara un entorno de desarrollo con [CONTRIBUTING.md](../../CONTRIBUTING.md#setup).
 
 ## Tecnologías
 
