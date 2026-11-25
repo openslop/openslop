@@ -29,8 +29,7 @@
 </p>
 
 <p align="center">
-  <img src="../../assets/openslop-demo-light.svg#gh-light-mode-only" alt="OpenSlop - 무료 AI 비디오 제작 도구" width="100%">
-  <img src="../../assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="OpenSlop - 무료 AI 비디오 제작 도구" width="100%">
+  <img src="../../assets/openslop-hero-dark.svg" alt="OpenSlop - 무료 AI 비디오 제작 도구" width="100%">
 </p>
 
 ---
