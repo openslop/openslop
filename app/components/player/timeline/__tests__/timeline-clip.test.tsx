@@ -112,7 +112,7 @@ describe("TimelineClip footage", () => {
 	});
 });
 
-const SHIMMER = /data-slot="skeleton"/;
+const SHIMMER = /data-slot="skeleton"[^>]*aria-hidden/;
 
 describe("TimelineClip regeneration", () => {
 	it("shows no indicator while the element is idle", () => {
@@ -130,6 +130,11 @@ describe("TimelineClip regeneration", () => {
 		expect(html).toContain(`role="status" aria-label="${label}"`);
 		expect(html).toContain('aria-label="Video, regenerating, 0:00–0:05"');
 		expect(SHIMMER.test(html)).toBe(shimmers);
+	});
+
+	it("shimmers an audio clip over its whole preview while the waveform decodes", () => {
+		const music = element({ id: "music", type: "music", layer: "audio" });
+		expect(markup(music, 5)).toMatch(SHIMMER);
 	});
 
 	it("names the scene before the regenerating clip", () => {

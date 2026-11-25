@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { afterEach, describe, expect, it } from "vitest";
-import { act, type ComponentProps } from "react";
+import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MediaWithSkeleton } from "../media-with-skeleton";
 
@@ -12,23 +12,13 @@ Object.assign(HTMLMediaElement, { HAVE_NOTHING: 0, HAVE_METADATA: 1 });
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 
-type Props = Partial<ComponentProps<typeof MediaWithSkeleton>>;
-
-const draw = (props: Props = {}) =>
+function render() {
+	root = createRoot(container);
 	act(() =>
 		root.render(
-			<MediaWithSkeleton
-				outputKind="video"
-				src="https://vid/a.mp4"
-				alt=""
-				{...props}
-			/>,
+			<MediaWithSkeleton outputKind="video" src="https://vid/a.mp4" alt="" />,
 		),
 	);
-
-function render(props: Props = {}) {
-	root = createRoot(container);
-	draw(props);
 }
 
 afterEach(() => {
@@ -57,16 +47,6 @@ describe("MediaWithSkeleton video", () => {
 		settle(video(), { readyState: HTMLMediaElement.HAVE_METADATA });
 		act(() => video().dispatchEvent(new Event("loadedmetadata")));
 
-		expect(shimmering()).toBe(false);
-	});
-
-	it("shimmers while regenerating, then clears once the new video settles", () => {
-		render({ pending: true });
-		settle(video(), { readyState: HTMLMediaElement.HAVE_METADATA });
-		act(() => video().dispatchEvent(new Event("loadedmetadata")));
-		expect(shimmering()).toBe(true);
-
-		draw({ pending: false });
 		expect(shimmering()).toBe(false);
 	});
 
@@ -99,33 +79,5 @@ describe("MediaWithSkeleton video", () => {
 					readyState,
 				);
 		}
-	});
-});
-
-describe("MediaWithSkeleton image", () => {
-	const image = () => {
-		const element = container.querySelector("img");
-		if (!element) throw new Error("no image rendered");
-		return element;
-	};
-
-	const load = () =>
-		act(async () => {
-			image().dispatchEvent(new Event("load"));
-		});
-
-	it("shimmers again while a regenerated image loads", async () => {
-		render({ outputKind: "image", src: "https://img/a.png" });
-		await load();
-		expect(shimmering()).toBe(false);
-
-		draw({ outputKind: "image", src: "https://img/a.png", pending: true });
-		expect(shimmering()).toBe(true);
-
-		draw({ outputKind: "image", src: "https://img/b.png" });
-		expect(shimmering()).toBe(true);
-
-		await load();
-		expect(shimmering()).toBe(false);
 	});
 });

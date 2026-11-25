@@ -10,31 +10,27 @@ import { Skeleton } from "@/components/ui/skeleton";
  * own error state instead of shimmering forever.
  */
 export function ImageWithShimmer({
-	src,
 	alt,
 	onLoad,
 	onError,
-	pending = false,
 	...props
-}: ImageProps & { pending?: boolean }) {
-	const [settledSrc, setSettledSrc] = useState<ImageProps["src"]>();
-	const loading = pending || settledSrc !== src;
+}: ImageProps) {
+	const [settled, setSettled] = useState(false);
 	return (
 		<>
 			<Image
 				{...props}
-				src={src}
 				alt={alt}
 				onLoad={(event: SyntheticEvent<HTMLImageElement>) => {
 					onLoad?.(event);
-					setSettledSrc(src);
+					setSettled(true);
 				}}
 				onError={(event: SyntheticEvent<HTMLImageElement>) => {
 					onError?.(event);
-					setSettledSrc(src);
+					setSettled(true);
 				}}
 			/>
-			{loading && <Skeleton className="absolute inset-0" />}
+			{!settled && <Skeleton className="absolute inset-0" />}
 		</>
 	);
 }

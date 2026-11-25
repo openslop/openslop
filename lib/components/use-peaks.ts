@@ -8,7 +8,7 @@ export type PeaksDecode =
 	| { status: "ready"; peaks: number[] }
 	| { status: "failed" };
 
-export const LOADING: PeaksDecode = { status: "loading" };
+const LOADING: PeaksDecode = { status: "loading" };
 
 /** The decoded peaks of a source, loading again whenever the source changes. */
 export function usePeaks(src: string): PeaksDecode {
