@@ -3,7 +3,7 @@
   <img src="../../assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
-<p align="center"><b>Creador de vídeo con IA, libre y de código abierto.</b></p>
+<p align="center"><b>El estudio de producción con IA de código abierto.</b><br>Chatea y obtén películas, series y audiolibros terminados.</p>
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="Estado: beta privada"></a>
