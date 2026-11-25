@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const mockSend = vi.fn();
 vi.mock("@vercel/queue", () => ({
@@ -15,8 +15,6 @@ const { enqueueJob } = await import("@/lib/api/job-queue");
 const JOB_ID = "job-1";
 
 describe("enqueueJob", () => {
-	afterEach(() => vi.unstubAllEnvs());
-
 	it("sends the job to the hosted queue", async () => {
 		await enqueueJob(JOB_ID, { delaySeconds: 5 });
 

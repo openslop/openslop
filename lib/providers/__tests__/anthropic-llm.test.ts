@@ -7,7 +7,9 @@ import { generateText, tool, type ModelMessage } from "ai";
 import { z } from "zod";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 
-const { createAnthropic } = vi.hoisted(() => ({ createAnthropic: vi.fn() }));
+const { createAnthropic } = vi.hoisted(() => ({
+	createAnthropic: vi.fn(() => () => model),
+}));
 
 vi.mock("@ai-sdk/anthropic", () => ({ createAnthropic }));
 vi.mock("../resized-image", () => ({
@@ -25,7 +27,6 @@ const model = new MockLanguageModelV3({
 	// rather than downloaded and inlined.
 	supportedUrls: { "image/*": [/^https?:\/\/.*$/] },
 });
-createAnthropic.mockImplementation(() => () => model);
 
 const USAGE = {
 	inputTokens: { total: 10, noCache: 10, cacheRead: 0, cacheWrite: 0 },

@@ -38,7 +38,6 @@ const viewer = () => document.body.querySelector('[role="dialog"]');
 const viewLarger = () => chooseTileMenuItem("Mia", "View larger");
 
 beforeEach(() => {
-	onEdit.mockClear();
 	canvas = mountOnCanvas();
 });
 

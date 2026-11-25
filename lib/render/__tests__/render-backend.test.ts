@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../local-render", () => ({ localRender: { name: "local" } }));
 vi.mock("../lambda-render", () => ({ lambdaRender: { name: "lambda" } }));
@@ -6,8 +6,6 @@ vi.mock("../lambda-render", () => ({ lambdaRender: { name: "lambda" } }));
 const { renderBackend } = await import("../render-backend");
 
 describe("renderBackend", () => {
-	afterEach(() => vi.unstubAllEnvs());
-
 	it("renders on Lambda when hosted", async () => {
 		expect(await renderBackend()).toEqual({ name: "lambda" });
 	});

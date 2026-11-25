@@ -25,7 +25,6 @@ let container: HTMLDivElement;
 let root: Root;
 
 beforeEach(() => {
-	toastError.mockClear();
 	container = document.body.appendChild(document.createElement("div"));
 	root = createRoot(container);
 	act(() =>

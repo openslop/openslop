@@ -30,7 +30,6 @@ vi.mock("../auth", () => ({
 }));
 
 beforeEach(() => {
-	mockGetJob.mockReset();
 	mockGetUser.mockResolvedValue({
 		id: "user-1",
 		app_metadata: { api_access: true },

@@ -65,7 +65,6 @@ beforeEach(() => {
 	media.timestamps = [];
 	media.missing = false;
 	media.unencodable = false;
-	media.dispose.mockReset();
 	media.inputs = 0;
 	media.uploads = 0;
 });

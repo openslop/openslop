@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ConnectorModels } from "@/lib/connectors/models";
 import type { ProviderKeyRecord } from "@/lib/connectors/provider-key";
 import type { ModelRef } from "@/lib/connectors/types";
@@ -57,8 +57,6 @@ describe("createAccountStore model defaults", () => {
 	const payload = (models: ConnectorModels) => ({ data: { models } });
 	const store = (models: ConnectorModels = {}) =>
 		createAccountStore({ models, providerKeys: [] });
-
-	beforeEach(() => updateUser.mockReset());
 
 	it("merges a patch onto the current defaults and persists it", async () => {
 		const s = store({ llm });

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { act } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
@@ -34,7 +34,6 @@ Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 let canvas: ReturnType<typeof mountOnCanvas>;
 let store: ProjectStore;
 afterEach(() => canvas.unmount());
-beforeEach(() => transcribe.mockReset());
 
 const open = () => {
 	canvas = mountOnCanvas([asset("asset_media_image")]);
