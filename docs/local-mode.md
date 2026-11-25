@@ -1,3 +1,7 @@
+<p align="center">
+  <sub>English · <a href="readme/local-mode.zh-CN.md">中文</a> · <a href="readme/local-mode.ja.md">日本語</a> · <a href="readme/local-mode.ko.md">한국어</a> · <a href="readme/local-mode.es.md">Español</a> · <a href="readme/local-mode.fr.md">Français</a> · <a href="readme/local-mode.pt.md">Português</a></sub>
+</p>
+
 # Local mode
 
 <p>
@@ -7,6 +11,24 @@
 </p>
 
 Your projects and videos stay on your computer. Only your requests to AI services go online.
+
+<p align="center">
+  <img src="../assets/features/local-light.svg#gh-light-mode-only" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
+  <img src="../assets/features/local-dark.svg#gh-dark-mode-only" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
+</p>
+
+## What you need
+
+| Your computer        | Node.js 22+ |      Docker Desktop      |
+| -------------------- | :---------: | :----------------------: |
+| Mac with M1 or newer |     ✅      |            —             |
+| Mac with Intel       |     ✅      | ✅ open while you use it |
+| Windows 10 or 11     |     ✅      | ✅ open while you use it |
+| Linux (x64 or arm64) |     ✅      |            —             |
+
+You also need a key from at least one AI provider. Step 5 shows which.
+
+## Set up
 
 <table>
 <tr>
@@ -89,6 +111,33 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
 </tr>
 </table>
 
+## Every day after
+
+| To                | Do this                                                                   |
+| ----------------- | ------------------------------------------------------------------------- |
+| Start OpenSlop    | Open a terminal in the OpenSlop folder and run `npm run local`            |
+| Stop OpenSlop     | Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in that terminal                       |
+| Pick up your work | Run `npm run local` again. Your projects and keys are where you left them |
+
+## Local mode vs online
+
+|                    | Local mode                                     | Online at [app.openslop.ai](https://app.openslop.ai)  |
+| ------------------ | ---------------------------------------------- | ----------------------------------------------------- |
+| Who can use it     | Anyone, today                                  | Invite-only, [join the waitlist](https://openslop.ai) |
+| Install            | Node.js, plus Docker Desktop on some computers | Nothing                                               |
+| Sign-in            | Automatic, one user                            | Your account                                          |
+| Projects and media | On your computer                               | In the cloud                                          |
+| AI models          | Your own keys                                  | Hosted models, plus your own keys                     |
+| Exporting video    | Rendered on your computer                      | Rendered in the cloud                                 |
+
+## If something goes wrong
+
+| The terminal says                                          | Do this                                                                                 |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `OpenSlop needs Node.js 22 or newer`                       | Install Node.js 22 or newer from step 1, open a new terminal, and rerun `npm run local` |
+| `` `npx supabase start …` failed `` (Windows or Intel Mac) | Open Docker Desktop, wait until its engine is running, and rerun `npm run local`        |
+| Anything else                                              | Ask on [Discord](https://discord.gg/zeP5482ced) with what the terminal printed          |
+
 <details>
 <summary>What gets downloaded</summary>
 
@@ -98,3 +147,5 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
   - **Chrome Headless Shell**: used for rendering your final videos. Kept in `node_modules/.remotion`.
 
 </details>
+
+> Writing code for OpenSlop? To develop against hosted services instead, see [Develop against a Supabase project](../README.md#develop-against-a-supabase-project).

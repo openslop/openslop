@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="Status: beta privado"></a>
-  <a href="#local-mode"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="Roda em macOS, Windows e Linux"></a>
+  <a href="local-mode.pt.md"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="Roda em macOS, Windows e Linux"></a>
   <a href="https://github.com/openslop/openslop/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/openslop/openslop/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="Licença: Apache-2.0"></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16"></a>
@@ -36,7 +36,7 @@
 ---
 
 > **Beta privado.** Só por convite, por enquanto.
-> [Entre na lista de espera em openslop.ai](https://openslop.ai), ou [use o modo local](#local-mode) para rodar no seu próprio computador hoje.
+> [Entre na lista de espera em openslop.ai](https://openslop.ai), ou [use o modo local](local-mode.pt.md) para rodar no seu próprio computador hoje.
 
 ## Visão geral
 
@@ -144,7 +144,7 @@ Os modelos hospedados vêm com sua conta. Cole uma chave da Anthropic, Runware, 
 
 Use o OpenSlop no seu próprio Mac, Windows ou Linux. Seus projetos e vídeos ficam com você.
 
-[Modo local →](#local-mode)
+[Modo local →](local-mode.pt.md)
 
 </td>
 <td width="50%">
@@ -168,110 +168,7 @@ Use o OpenSlop no seu próprio Mac, Windows ou Linux. Seus projetos e vídeos fi
 Você pode usar o OpenSlop de duas formas:
 
 - **Online** em [app.openslop.ai](https://app.openslop.ai). Nada para instalar. Por enquanto é só por convite, então [entre na lista de espera](https://openslop.ai).
-- **Modo local** no seu próprio computador. Siga os passos abaixo.
-
-<a name="local-mode"></a>
-
-### Modo local
-
-<p>
-  <img src="https://img.shields.io/badge/macOS-Apple%20silicon%20%7C%20Intel-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: Apple silicon, Intel">
-  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMy40IDkuOCAydjkuNkgwek0xMSAxLjkgMjQgMHYxMS42SDExek0wIDEyLjRoOS44VjIyTDAgMjAuNnpNMTEgMTIuNGgxM1YyNGwtMTMtMS45eiIvPjwvc3ZnPg==" alt="Windows 10, 11">
-  <img src="https://img.shields.io/badge/Linux-x64%20%7C%20arm64-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: x64, arm64">
-</p>
-
-Seus projetos e vídeos ficam no seu computador. Só os seus pedidos aos serviços de IA vão para a internet.
-
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-#### 1. Instale o Node.js
-
-Acesse a [página de download do Node.js](https://nodejs.org/en/download). Clique no botão verde do instalador (**Windows Installer** ou **macOS Installer**), abra o arquivo e siga os passos. Qualquer versão a partir da 22 serve.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-node-light.svg#gh-light-mode-only" alt="No nodejs.org, o botão Windows Installer é clicado, o instalador roda e o Node.js fica instalado" width="100%">
-  <img src="../../assets/features/local-step-node-dark.svg#gh-dark-mode-only" alt="No nodejs.org, o botão Windows Installer é clicado, o instalador roda e o Node.js fica instalado" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 2. Instale o Docker Desktop (só Windows e Mac com Intel)
-
-_Pule este passo no Linux ou num Mac com chip M1 ou mais novo (M2, M3 etc.). Para conferir o seu Mac, abra o menu Apple > **Sobre Este Mac** e veja **Chip**._
-
-No [docker.com](https://www.docker.com/products/docker-desktop/), clique em **Download Docker Desktop**, escolha o seu computador e instale. Abra o Docker Desktop e deixe-o aberto enquanto usa o OpenSlop.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-docker-light.svg#gh-light-mode-only" alt="No docker.com, o download para Windows é escolhido e o Docker Desktop abre com o motor rodando" width="100%">
-  <img src="../../assets/features/local-step-docker-dark.svg#gh-dark-mode-only" alt="No docker.com, o download para Windows é escolhido e o Docker Desktop abre com o motor rodando" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 3. Baixe o OpenSlop
-
-Na [página do OpenSlop no GitHub](https://github.com/openslop/openslop), clique no botão verde **Code** e depois em **Download ZIP**. Você também pode [baixar o ZIP direto](https://github.com/openslop/openslop/archive/refs/heads/master.zip).
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-download-light.svg#gh-light-mode-only" alt="No GitHub, o botão verde Code abre um menu e Download ZIP é clicado" width="100%">
-  <img src="../../assets/features/local-step-download-dark.svg#gh-dark-mode-only" alt="No GitHub, o botão verde Code abre um menu e Download ZIP é clicado" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 4. Descompacte e inicie o OpenSlop
-
-No Windows, clique com o botão direito no ZIP > **Extract All** e depois com o botão direito na pasta nova > **Open in Terminal**. No Mac, clique duas vezes no ZIP e depois com o botão direito na pasta nova > **New Terminal at Folder**. No terminal, rode:
-
-```bash
-npm install
-npm run local
-```
-
-Na primeira vez leva alguns minutos. Depois o OpenSlop abre no seu navegador, já com login feito. Para parar, aperte Ctrl+C no terminal. Seus projetos ficam salvos para a próxima vez.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-terminal-light.svg#gh-light-mode-only" alt="Na pasta Downloads, o ZIP é extraído e aberto no terminal, e npm install e npm run local iniciam o OpenSlop" width="100%">
-  <img src="../../assets/features/local-step-terminal-dark.svg#gh-dark-mode-only" alt="Na pasta Downloads, o ZIP é extraído e aberto no terminal, e npm install e npm run local iniciam o OpenSlop" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 5. Adicione suas chaves de IA
-
-Clique no ícone do seu perfil, depois em **Settings** > **Add providers**, e conecte um provedor com a sua chave. As chaves de que você precisa dependem do que você faz:
-
-- **Tudo:** os 7 tipos: Text, Speech, Images, Videos, Music, Sound e Captions.
-- **Vídeos com narração sem rosto:** Text, Speech e Images.
-- **Vídeos cinematográficos:** Text e Videos.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-keys-light.svg#gh-light-mode-only" alt="O menu do perfil abre Settings, Add providers lista os provedores e uma chave da Anthropic é colada e conectada" width="100%">
-  <img src="../../assets/features/local-step-keys-dark.svg#gh-dark-mode-only" alt="O menu do perfil abre Settings, Add providers lista os provedores e uma chave da Anthropic é colada e conectada" width="100%">
-</td>
-</tr>
-</table>
-
-<details>
-<summary>O que é baixado</summary>
-
-- `npm install` baixa o código do app.
-- O primeiro `npm run local` também baixa, uma única vez:
-  - **Supabase**: o banco de dados e o armazenamento de arquivos, em `~/.supabase/cache`. No Windows e em Mac com Intel, fica guardado dentro do Docker Desktop.
-  - **Chrome Headless Shell**: transforma seu projeto em um arquivo de vídeo. Fica em `node_modules/.remotion`.
-
-</details>
+- **Modo local** no seu próprio computador. [Siga o guia de instalação →](local-mode.pt.md)
 
 ### Desenvolver com um projeto Supabase
 
