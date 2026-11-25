@@ -3,6 +3,7 @@ import { isGenerationActive } from "@/lib/generation/snapshots";
 import { AudioPlayer } from "../audio-player";
 import { useElementGeneration } from "../element-generation-context";
 import { getVolumeGain } from "@/lib/canvas/element-attributes";
+import type { VisualKind } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { GenerationIndicator } from "../generation-indicator";
 import type {
@@ -97,7 +98,7 @@ export function MediaResult({
 }: PlaceholderProps &
 	PreviewOverlays & {
 		url: string | undefined;
-		outputKind: "image" | "video";
+		outputKind: VisualKind;
 	}) {
 	if (!url) return <MediaPlaceholder {...state} />;
 	return (
@@ -115,7 +116,7 @@ export function MediaPreview({
 }: GenerationState &
 	PreviewOverlays & {
 		url: string;
-		outputKind: "image" | "video";
+		outputKind: VisualKind;
 		error: string | null;
 	}) {
 	return (

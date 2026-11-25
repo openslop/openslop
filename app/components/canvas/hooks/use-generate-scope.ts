@@ -14,15 +14,18 @@ import { useBuildContext } from "@/lib/generation/use-build-context";
 import { useLiveNodes } from "@/lib/generation/use-live-nodes";
 import type { ContentElement } from "@/lib/canvas/types";
 
-export type GenerateScope = {
+export type GenerateCounts = {
 	/** Nothing in scope carries a prompt, so there is nothing to generate. */
 	empty: boolean;
-	/** Something in scope is queued or running.  */
+	/** Something in scope is queued or running. */
 	active: boolean;
 	/** Elements with no result, or whose result no longer matches its inputs. */
 	pending: number;
 	/** Pending elements that already have a result, so a run redoes them. */
 	stale: number;
+};
+
+export type GenerateScope = GenerateCounts & {
 	/** Queues what is missing or out of date. */
 	run: () => void;
 	/** Tooltip text: what a click would do. */
@@ -30,11 +33,6 @@ export type GenerateScope = {
 };
 
 export type GenerateSubject = "project" | "scene";
-
-export type GenerateCounts = Pick<
-	GenerateScope,
-	"empty" | "active" | "pending" | "stale"
->;
 
 /** Button-sized version of {@link describe}. */
 export const countPhrase = ({ pending, stale }: GenerateCounts): string =>

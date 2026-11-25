@@ -11,6 +11,7 @@ import {
 	isGenerationActive,
 	type GenerationStatus,
 } from "@/lib/generation/snapshots";
+import type { VisualKind } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { GenerationIndicator } from "./generation-indicator";
 import {
@@ -42,7 +43,7 @@ export function AssetTile({
 }: {
 	name: string;
 	previewUrl?: string;
-	previewKind?: "image" | "video";
+	previewKind?: VisualKind;
 	/** What the picture is, as its larger view says. */
 	context?: string;
 	createdAt?: string;
