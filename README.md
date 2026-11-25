@@ -44,6 +44,15 @@ OpenSlop wires all your favorite AI tools into one workflow so you can make good
 
 It runs in your browser, nothing to install. Open-source, free forever. Built by engineers from Meta, Google, Stripe, and Dropbox.
 
+## Getting started
+
+You can use OpenSlop two ways:
+
+- **Online** at [app.openslop.ai](https://app.openslop.ai). Nothing to install. It's invite-only for now, so [join the waitlist](https://openslop.ai).
+- **Local mode** on your own computer. [Follow the setup guide →](docs/local-mode.md)
+
+Working on the code? Set up a dev environment with [CONTRIBUTING.md](CONTRIBUTING.md#setup).
+
 ## Features
 
 <table>
@@ -174,15 +183,6 @@ Bring your own accounts. A provider whose key is unset falls back to a mock, so 
   <a href="https://www.anthropic.com"><kbd><img src="https://www.google.com/s2/favicons?domain=anthropic.com&amp;sz=64" alt="Anthropic logo" width="16" valign="middle"> Anthropic &middot; LLM</kbd></a> &nbsp;
   <a href=".env.example"><kbd>+ more, see .env.example</kbd></a>
 </p>
-
-## Getting started
-
-You can use OpenSlop two ways:
-
-- **Online** at [app.openslop.ai](https://app.openslop.ai). Nothing to install. It's invite-only for now, so [join the waitlist](https://openslop.ai).
-- **Local mode** on your own computer. [Follow the setup guide →](docs/local-mode.md)
-
-Working on the code? Set up a dev environment with [CONTRIBUTING.md](CONTRIBUTING.md#setup).
 
 ## Tech stack
 

@@ -44,6 +44,15 @@ OpenSlop は、お気に入りの AI ツールをすべてひとつのワーク�
 
 ブラウザで動くので、インストールするものはありません。オープンソースで、ずっと無料。Meta、Google、Stripe、Dropbox 出身のエンジニアが作っています。
 
+## はじめ方
+
+OpenSlop の使い方は 2 つあります。
+
+- **オンライン**：[app.openslop.ai](https://app.openslop.ai) で使えます。インストールは不要です。今は招待制なので、[ウェイトリストに登録](https://openslop.ai)してください。
+- **ローカルモード**：自分のパソコンで動かします。[セットアップガイドを見る →](local-mode.ja.md)
+
+コードに手を入れるなら、[CONTRIBUTING.md](../../CONTRIBUTING.md#setup) で開発環境を用意してください。
+
 ## 機能
 
 <table>
@@ -162,15 +171,6 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 - **[キャラクターとアートスタイル](../../app/components/canvas/elements/asset-strip.tsx)** — キャラクターに一度名前をつければ、すべての画像、セリフ、アバターが一貫します。
 - **[テンプレート](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime など。それぞれがスタイル、キャラクター、長さの種になります。
 - **[開発用のモック](../../.env.example)** — プロバイダーのキーを未設定のままにすると、その呼び出しは用意された結果に切り替わるので、お金をかけずに開発できます。
-
-## はじめ方
-
-OpenSlop の使い方は 2 つあります。
-
-- **オンライン**：[app.openslop.ai](https://app.openslop.ai) で使えます。インストールは不要です。今は招待制なので、[ウェイトリストに登録](https://openslop.ai)してください。
-- **ローカルモード**：自分のパソコンで動かします。[セットアップガイドを見る →](local-mode.ja.md)
-
-コードに手を入れるなら、[CONTRIBUTING.md](../../CONTRIBUTING.md#setup) で開発環境を用意してください。
 
 ## 技術スタック
 
