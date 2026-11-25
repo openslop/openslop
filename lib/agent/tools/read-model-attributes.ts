@@ -20,6 +20,5 @@ export const readModelAttributes = defineTool({
 	icon: Eye,
 	label: ({ model }) => `Reading what ${model ?? "the model"} allows`,
 	execute: async ({ type, ...model }) =>
-		modelLine({ type, model }) ??
-		`<${type}> with model="${model.model}" has no attributes of its own.`,
+		modelLine({ type, model }) ?? "This model has no attributes of its own.",
 });
