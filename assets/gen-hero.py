@@ -394,7 +394,7 @@ def light_rays(c):
     c.grain(0, 0, W, H, 0, opacity=0.2)
 
 
-GREETINGS = ["What slop today, boss?", "Evening slop session, boss?", "3am slop hits different.", "Early bird gets the slop."]
+GREETINGS = ["What slop today, boss?", "Evening slop session, boss?", "3am slop hits different.", "Time to cook absolute slop, boss."]
 
 
 def composer(c, timeline):
