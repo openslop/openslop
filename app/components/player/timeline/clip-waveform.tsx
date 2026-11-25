@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PEAK_COUNT } from "@/lib/components/peaks";
 import { soundwaveMaskStyle, toBarHeights } from "@/lib/components/soundwave";
-import { usePeaks } from "@/lib/components/use-peaks";
+import type { PeaksDecode } from "@/lib/components/use-peaks";
 import { clamp } from "@/lib/utils";
 
 const SAMPLE_SPACING_PX = 2;
@@ -15,15 +14,14 @@ const SAMPLE_RANGE = { min: 8, max: PEAK_COUNT };
 
 /** Mask-painted so it takes the text colour; the clip's frame crops it to the trim. */
 export function ClipWaveform({
-	src,
+	decode,
 	width,
 	offset,
 }: {
-	src: string;
+	decode: PeaksDecode;
 	width: number;
 	offset: number;
 }) {
-	const decode = usePeaks(src);
 	const sampleCount = clamp(
 		Math.round(width / SAMPLE_SPACING_PX / SAMPLE_QUANTUM) * SAMPLE_QUANTUM,
 		SAMPLE_RANGE.min,
@@ -45,9 +43,7 @@ export function ClipWaveform({
 				</div>
 			) : style ? (
 				<div className="h-full bg-current" style={style} />
-			) : (
-				<Skeleton className="h-full rounded-xs" />
-			)}
+			) : null}
 		</div>
 	);
 }

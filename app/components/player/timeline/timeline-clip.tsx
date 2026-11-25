@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import Image from "next/image";
 import { Captions, type IconComponent } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
+import { useMediaSettled } from "@/lib/components/use-media-settled";
+import { usePeaks } from "@/lib/components/use-peaks";
 import { ELEMENT_CONFIGS } from "@/app/components/canvas/elements/element-configs";
 import { sceneLabel } from "@/lib/canvas/constants";
 import type { ResultKind } from "@/lib/canvas/types";
@@ -35,15 +37,15 @@ const edge = (selected: boolean) =>
 const fit = (text: string, width: number) =>
 	truncateMiddle(text, Math.max(MIN_CHARS, Math.floor(width / PX_PER_CHAR)));
 
-function Footage({ outputKind, src }: { outputKind: ResultKind; src: string }) {
-	return (
-		<div className="relative aspect-square h-full overflow-hidden">
-			<MediaWithSkeleton outputKind={outputKind} src={src} alt="" />
-		</div>
-	);
-}
-
-function Preview({ width, children }: { width?: number; children: ReactNode }) {
+function Preview({
+	width,
+	loading = false,
+	children,
+}: {
+	width?: number;
+	loading?: boolean;
+	children: ReactNode;
+}) {
 	return (
 		<div
 			className={cn(
@@ -54,8 +56,67 @@ function Preview({ width, children }: { width?: number; children: ReactNode }) {
 		>
 			<div className="relative h-full overflow-hidden rounded-sm timeline-preview-surface">
 				{children}
+				{loading ? <Skeleton className="absolute inset-0" aria-hidden /> : null}
 			</div>
 		</div>
+	);
+}
+
+function FootagePreview({
+	outputKind,
+	src,
+	width,
+	pending = false,
+}: {
+	outputKind: ResultKind;
+	src: string;
+	width?: number;
+	pending?: boolean;
+}) {
+	const [media, setMedia] = useState<
+		HTMLImageElement | HTMLVideoElement | null
+	>(null);
+	const settled = useMediaSettled(media);
+	return (
+		<Preview width={width} loading={pending || !settled}>
+			<div className="relative aspect-square h-full overflow-hidden">
+				{outputKind === "image" ? (
+					<Image
+						ref={setMedia}
+						src={src}
+						alt=""
+						fill
+						unoptimized
+						className="object-cover"
+					/>
+				) : (
+					<video
+						ref={setMedia}
+						src={src}
+						className="pointer-events-none h-full w-full object-cover"
+					/>
+				)}
+			</div>
+		</Preview>
+	);
+}
+
+function WaveformPreview({
+	src,
+	width,
+	offset,
+	pending,
+}: {
+	src: string;
+	width: number;
+	offset: number;
+	pending: boolean;
+}) {
+	const decode = usePeaks(src);
+	return (
+		<Preview loading={pending || decode.status === "loading"}>
+			<ClipWaveform decode={decode} width={width} offset={offset} />
+		</Preview>
 	);
 }
 
@@ -174,6 +235,7 @@ export function TimelineClip({
 		q.getElementSnapshot(element.id),
 	);
 	const active = isGenerationActive(status);
+	const regenerating = status === "generating";
 	const accessibleLabel = [
 		sceneNumber && sceneLabel(sceneNumber),
 		config.label,
@@ -197,23 +259,20 @@ export function TimelineClip({
 				width={width}
 			/>
 			<div className="flex min-h-0 flex-1">
-				<Preview>
-					{config.layer === "audio" ? (
-						<ClipWaveform
-							src={element.url}
-							width={element.mediaDurationSec * pxPerSec}
-							offset={trim.trimStartSec * pxPerSec}
-						/>
-					) : (
-						<Footage
-							outputKind={config.outputKind}
-							src={mediaUrlAt(element.url, element.trimStartSec)}
-						/>
-					)}
-					{status === "generating" ? (
-						<Skeleton className="absolute inset-0" aria-hidden />
-					) : null}
-				</Preview>
+				{config.layer === "audio" ? (
+					<WaveformPreview
+						src={element.url}
+						width={element.mediaDurationSec * pxPerSec}
+						offset={trim.trimStartSec * pxPerSec}
+						pending={regenerating}
+					/>
+				) : (
+					<FootagePreview
+						outputKind={config.outputKind}
+						src={mediaUrlAt(element.url, element.trimStartSec)}
+						pending={regenerating}
+					/>
+				)}
 			</div>
 			{active ? (
 				<GenerationIndicator
@@ -265,20 +324,18 @@ export function TimelineExtension({
 			<div className="flex min-h-0 flex-1 opacity-60">
 				{loop ? (
 					Array.from({ length: Math.ceil(width / clipWidth) }, (_, i) => (
-						<Preview key={i} width={clipWidth}>
-							<Footage
-								outputKind={config.outputKind}
-								src={mediaUrlAt(url, trimStartSec)}
-							/>
-						</Preview>
+						<FootagePreview
+							key={i}
+							width={clipWidth}
+							outputKind={config.outputKind}
+							src={mediaUrlAt(url, trimStartSec)}
+						/>
 					))
 				) : (
-					<Preview>
-						<Footage
-							outputKind={config.outputKind}
-							src={mediaUrlAt(url, trimStartSec + trimDurationSec)}
-						/>
-					</Preview>
+					<FootagePreview
+						outputKind={config.outputKind}
+						src={mediaUrlAt(url, trimStartSec + trimDurationSec)}
+					/>
 				)}
 			</div>
 		</ClipFrame>
