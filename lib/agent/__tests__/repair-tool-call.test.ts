@@ -23,7 +23,7 @@ const tools = {
 	}),
 };
 
-const callWith = (input: string, repair = repairToolCall) =>
+const callWith = (input: string) =>
 	generateText({
 		model: new MockLanguageModelV3({
 			doGenerate: async () => ({
@@ -44,7 +44,7 @@ const callWith = (input: string, repair = repairToolCall) =>
 			}),
 		}),
 		tools,
-		repairToolCall: repair,
+		repairToolCall,
 		prompt: "edit",
 	});
 

@@ -17,7 +17,8 @@ export function StaleIndicator({ reason }: { reason: string }) {
 		<SimpleTooltip label={reason}>
 			<Badge variant="indicator" size="xs">
 				<AlertCircleFilled />
-				Stale
+				<span aria-hidden="true">Stale</span>
+				<span className="sr-only">Stale: {reason}</span>
 			</Badge>
 		</SimpleTooltip>
 	);

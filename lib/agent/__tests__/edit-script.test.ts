@@ -19,7 +19,7 @@ describe("edit_script", () => {
 			);
 		}
 		for (const type of AssetTypeSchema.options) {
-			expect(parses({ op: "asset", type, attrs: { name: "Mia" } })).toBe(true);
+			expect(parses({ op: "asset", type })).toBe(true);
 			expect(parses({ op: "insert", elements: [{ type }] })).toBe(false);
 		}
 		expect(parses({ op: "insert", elements: [] })).toBe(false);

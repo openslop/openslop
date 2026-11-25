@@ -14,6 +14,7 @@ import { pickOther } from "@/lib/utils";
 import { PanelCard } from "../canvas/panel/panel-card";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { useSloppy } from "./sloppy-provider";
+import { WAIT_FOR_SLOPPY } from "./turn-display";
 import { SUGGESTIONS } from "./suggestions";
 
 function ModelPicker() {
@@ -32,7 +33,7 @@ function ModelPicker() {
 }
 
 function suggestionBlocker(sloppyBusy: boolean, hasOwnText: boolean) {
-	if (sloppyBusy) return "Wait for Sloppy to finish";
+	if (sloppyBusy) return WAIT_FOR_SLOPPY;
 	if (hasOwnText) return "Clear your message to get a suggestion";
 	return null;
 }

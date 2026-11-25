@@ -8,6 +8,12 @@ const LOCAL_EMAIL = "local@openslop.local";
 const LOCAL_BUCKET = readFileSync("supabase/config.toml", "utf8").match(
 	/^\[storage\.buckets\.([\w-]+)\]\r?$/m,
 )[1];
+// Native over auto, which picks Docker or Podman first, and Podman can't start Storage
+const SUPABASE_RUNTIME = ["darwin-arm64", "linux-x64", "linux-arm64"].includes(
+	`${process.platform}-${process.arch}`,
+)
+	? "native"
+	: "auto";
 // Relative, so a space in the user's folder path survives the Windows shell
 const REMOTION_BUNDLE = ".remotion/bundle";
 
@@ -51,10 +57,20 @@ if (Number(process.versions.node.split(".")[0]) < 22)
 	);
 
 const { env } = JSON.parse(
-	npx(["supabase", "start", "--output-format", "json"], {
-		capture: true,
-		hint: "On Windows or an Intel Mac, install Docker Desktop (https://www.docker.com/products/docker-desktop/), open it, then run `npm run local` again.",
-	}),
+	npx(
+		[
+			"supabase",
+			"start",
+			"--runtime",
+			SUPABASE_RUNTIME,
+			"--output-format",
+			"json",
+		],
+		{
+			capture: true,
+			hint: "On Windows or an Intel Mac, install Docker Desktop (https://www.docker.com/products/docker-desktop/), open it, then run `npm run local` again.",
+		},
+	),
 );
 npx(["supabase", "migration", "up"]);
 npx(["supabase", "seed", "buckets"]);

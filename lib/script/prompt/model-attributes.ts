@@ -1,3 +1,4 @@
+import compact from "lodash/compact";
 import uniqWith from "lodash/uniqWith";
 import { dedent } from "@/lib/dedent";
 import {
@@ -19,17 +20,17 @@ const allowedValues = (def: AttributeDef): string =>
 		? `${def.edit.min} to ${def.edit.max}`
 		: disjunction(optionsOf(def));
 
-const modelLines = ({ type, model }: ElementModel): string[] => {
+export function modelLine({ type, model }: ElementModel): string | undefined {
 	const defs = attributeSchemaFor(type, model).modelDefs;
-	if (defs.length === 0) return [];
+	if (defs.length === 0) return undefined;
 	const values = defs.map((def) => `${def.key} ${allowedValues(def)}`);
-	return [`- <${type}> with model="${model.model}": ${values.join(", ")}.`];
-};
+	return `- <${type}> with model="${model.model}": ${values.join(", ")}.`;
+}
 
 export function modelAttributesSection(
 	models: ElementModel[],
 ): string | undefined {
-	const lines = uniqWith(models, sameElementModel).flatMap(modelLines);
+	const lines = compact(uniqWith(models, sameElementModel).map(modelLine));
 	if (lines.length === 0) return undefined;
 	return dedent`
 		## Model attributes

@@ -3,6 +3,7 @@
 import { ReactEditor, useSlateStatic } from "slate-react";
 import { MagicVideo } from "@/components/ui/icon";
 import { useSloppy } from "@/app/components/sloppy/sloppy-provider";
+import { WAIT_FOR_SLOPPY } from "@/app/components/sloppy/turn-display";
 import { parentSceneId, sceneIndexOf } from "@/lib/canvas/scenes";
 import type { ContentElement } from "@/lib/canvas/types";
 import { isGenerationActive } from "@/lib/generation/snapshots";
@@ -12,7 +13,7 @@ import { ElementActionButton } from "./element-action-button";
 import { useElementGeneration } from "./element-generation-context";
 
 function animateBlocker(sloppyBusy: boolean, generating: boolean) {
-	if (sloppyBusy) return "Wait for Sloppy to finish";
+	if (sloppyBusy) return WAIT_FOR_SLOPPY;
 	if (generating) return "Wait for this element to finish generating";
 	return null;
 }
