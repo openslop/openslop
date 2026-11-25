@@ -775,6 +775,28 @@ describe("model tools", () => {
 			expect(output).toContain(`- ${model} from ${provider}`);
 	});
 
+	it("reads the values a model allows for its own attributes", async () => {
+		const outcome = await run("read_model_attributes", {
+			type: "video",
+			...KLING,
+		});
+
+		expect(outcome.ok && outcome.output).toMatch(
+			/^- <video> with model="Kling 3 Omni": .*duration/,
+		);
+	});
+
+	it("refuses to read a model the type does not have", async () => {
+		const outcome = await run("read_model_attributes", {
+			type: "music",
+			...KLING,
+		});
+
+		expect(!outcome.ok && outcome.errorText).toMatch(
+			/Not a model of that type/,
+		);
+	});
+
 	it("sets the default for every type the model's group covers, as the models panel does", async () => {
 		const updates: unknown[] = [];
 		const outcome = await run(

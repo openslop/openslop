@@ -1,22 +1,34 @@
 import groupBy from "lodash/groupBy";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { everyAttributeDef } from "@/lib/canvas/element-connector";
-import { optionsOf } from "@/lib/connectors/attributes/schema";
+import { attributeSchemaFor } from "@/lib/canvas/element-connector";
+import {
+	connectorOf,
+	ContentTypeSchema,
+	ElementTypeSchema,
+} from "@/lib/canvas/types";
+import { resolveAttributeSchema } from "@/lib/connectors/factory";
+import { listModels } from "@/lib/connectors/models";
 import { TTS_GENDERS, TTS_LANGUAGES } from "@/lib/connectors/tts/enums";
 import { refineOpSchema } from "../types";
 
-const insertMusic = (attrs: Record<string, unknown>) =>
+type Attrs = Record<string, unknown>;
+
+const insert = (type: string, attrs: Attrs) =>
 	refineOpSchema.safeParse({
 		op: "insert",
-		elements: [{ type: "music", text: "A calm piano cue", attrs }],
+		elements: [{ type, text: "A prompt", attrs }],
 	});
 
-const setAttrs = (attrs: Record<string, unknown>) =>
+const insertMusic = (attrs: Attrs) => insert("music", attrs);
+
+const setAttrs = (attrs: Attrs) =>
 	refineOpSchema.safeParse({ op: "set", id: "e1", attrs });
 
-const voice = (attrs: Record<string, unknown>) =>
-	refineOpSchema.safeParse({ op: "asset", type: "asset_voice", attrs });
+const asset = (type: string, attrs: Attrs) =>
+	refineOpSchema.safeParse({ op: "asset", type, attrs });
+
+const voice = (attrs: Attrs) => asset("asset_voice", attrs);
 
 const problems = ({ error }: z.ZodSafeParseResult<unknown>) =>
 	error?.issues.map(({ message }) => message).join("\n");
@@ -46,6 +58,11 @@ describe("refine op attributes", () => {
 
 	it("rejects a key no element has", () => {
 		expect(setAttrs({ tempo: "fast" }).success).toBe(false);
+	});
+
+	it("rejects an attribute only another type has", () => {
+		expect(insert("video", { name: "x" }).success).toBe(false);
+		expect(asset("asset_style", { name: "x" }).success).toBe(false);
 	});
 
 	it("takes what each type offers, in seconds, frames and a model's own options", () => {
@@ -84,11 +101,7 @@ describe("refine op attributes", () => {
 		).toBe(true);
 		expect(voice({ name: "Mia", pickedVoiceId: "v1" }).success).toBe(true);
 		expect(
-			refineOpSchema.safeParse({
-				op: "asset",
-				type: "asset_references",
-				attrs: { images: "https://a.test/1.png" },
-			}).success,
+			asset("asset_references", { images: "https://a.test/1.png" }).success,
 		).toBe(true);
 	});
 
@@ -97,21 +110,25 @@ describe("refine op attributes", () => {
 		expect(voice({ name: null }).success).toBe(false);
 	});
 
-	it("names each model's own options on a key that varies by model", () => {
-		const schema = JSON.stringify(z.toJSONSchema(refineOpSchema));
-
-		for (const { model, def } of everyAttributeDef()) {
-			if (!def.perModel || !model) continue;
-			expect(schema).toContain(`${model.model}: ${optionsOf(def).join(", ")}.`);
+	it("takes every key a type's models carry, from its default model", () => {
+		for (const type of ContentTypeSchema.options) {
+			const connector = connectorOf(type);
+			const keys = attributeSchemaFor(type).keys;
+			for (const model of listModels(connector))
+				expect(keys).toEqual(
+					expect.arrayContaining(resolveAttributeSchema(connector, model).keys),
+				);
 		}
 	});
 
-	it("gives a key one shape on every type and model that carries it", () => {
-		const byKey = groupBy(everyAttributeDef(), ({ def }) => def.key);
+	it("gives a key one shape on every type that carries it", () => {
+		const defs = ElementTypeSchema.options.flatMap(
+			(type) => attributeSchemaFor(type).defs,
+		);
 
-		for (const shared of Object.values(byKey)) {
+		for (const shared of Object.values(groupBy(defs, ({ key }) => key))) {
 			const shapes = new Set(
-				shared.map(({ def: { edit, unit, perModel } }) =>
+				shared.map(({ edit, unit, perModel }) =>
 					JSON.stringify({
 						kind: edit?.kind,
 						unit,

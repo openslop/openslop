@@ -56,8 +56,9 @@ export const editScript = defineTool({
 	  A video's ${START_FRAME_ATTR} URL is an image's or frame's URL from view_result, and
 	  ${PREVIOUS_VISUAL} opens on the visual before it. Leave a URL already set alone.
 
-	  To change a model, set provider and model to a pair from list_models. A speech element
-	  speaks on the model of the asset_voice its \`name\` names, so it always needs one.
+	  To change a model, set provider and model to a pair from list_models; read_model_attributes
+	  lists the values it allows. A speech element speaks on the model of the asset_voice its
+	  \`name\` names, so it always needs one.
 
 	  ${CHARACTER_REFS_RULE}
 
