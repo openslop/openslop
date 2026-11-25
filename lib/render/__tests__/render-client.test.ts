@@ -33,7 +33,6 @@ async function collect(
 
 beforeEach(() => {
 	vi.useFakeTimers();
-	apiJsonMock.mockReset();
 });
 
 afterEach(() => {

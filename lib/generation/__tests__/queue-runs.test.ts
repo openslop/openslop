@@ -34,7 +34,6 @@ const byId = (id: string) => {
 const nodeOf = (id: string) => buildNode(byId(id), context());
 
 beforeEach(() => {
-	mediaGenerate.mockReset();
 	registry = DEFAULT_CONNECTOR_REGISTRY;
 });
 

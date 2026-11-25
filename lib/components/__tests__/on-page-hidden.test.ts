@@ -13,7 +13,6 @@ describe("onPageHidden", () => {
 	};
 
 	beforeEach(() => {
-		listener.mockReset();
 		stop = onPageHidden(listener);
 	});
 

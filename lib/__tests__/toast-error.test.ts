@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import { ApiError } from "../clients/http";
 import { toastError } from "../toast-error";
@@ -8,10 +8,6 @@ vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 const errorToast = vi.mocked(toast.error);
 
 describe("toastError", () => {
-	beforeEach(() => {
-		errorToast.mockReset();
-	});
-
 	it("shows the error's message, not its serialized form", () => {
 		toastError(new Error("Upload failed"));
 		expect(errorToast).toHaveBeenCalledWith("Upload failed", expect.anything());
