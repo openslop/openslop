@@ -70,7 +70,7 @@
 <g class="s10"><rect x="218" y="292" width="105.04830000000001" height="22" rx="7" fill="none" stroke="#7a79d6" stroke-width="1.5" opacity="1" /></g>
 <g class="s3"><text x="335.04830000000004" y="306" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Cancel</text></g>
 <g class="s3"><text x="524" y="306" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="600" fill="#f1eaed" text-anchor="end" style="white-space:pre" text-decoration="underline">Get a key</text></g>
-<g class="s3"><g color="#f1eaed" opacity="1" transform="translate(527,298) scale(0.5625)"><path fill='currentColor' d='M12 10H11V5.707L4.354 12.354 3.646 11.647 10.293 5H6V4H12Z'/></g></g>
+<g class="s3"><g color="#f1eaed" opacity="1" transform="translate(527,298) scale(0.5625)"><path fill='currentColor' d='M6 2H2.833C2.563 2 2.337 2.083 2.19 2.193 2.044 2.303 2 2.417 2 2.5V13.5C2 13.583 2.044 13.697 2.19 13.807S2.563 14 2.833 14H13.167C13.437 14 13.663 13.917 13.81 13.807 13.956 13.697 14 13.583 14 13.5V9H15V13.5C15 13.969 14.745 14.355 14.41 14.607A2.08 2.08 0 0 1 13.167 15H2.833C2.367 15 1.927 14.86 1.591 14.607 1.255 14.355 1 13.97 1 13.5V2.5C1 2.031 1.255 1.645 1.59 1.393A2.08 2.08 0 0 1 2.834 1H6ZM15 6H14V2.707L8.354 8.354 7.646 7.646 13.293 2H10V1H15Z'/></g></g>
 <g class="a11"><rect x="208" y="216" width="340" height="66" rx="8" fill="#231e21" stroke="#332a2e" stroke-width="1" opacity="1" /></g>
 <g class="a11"><svg x="220" y="226" width="16" height="16" viewBox="0 0 20 20" overflow="visible" color="#f1eaed"><path d="M 6.68 0 L 10 0 L 10 3.32 L 6.68 3.32 Z M 13.36 0 L 16.64 0 L 16.64 3.32 L 13.36 3.32 Z M 3.36 3.36 L 6.64 3.36 L 6.64 6.64 L 3.36 6.64 Z M 10 3.36 L 13.32 3.36 L 13.32 6.64 L 10 6.64 Z M 16.68 3.36 L 20 3.36 L 20 6.64 L 16.68 6.64 Z M 0 6.68 L 3.32 6.68 L 3.32 13.32 L 0 13.32 Z M 6.68 6.68 L 10 6.68 L 10 13.32 L 6.68 13.32 Z M 3.36 13.36 L 6.64 13.36 L 6.64 16.64 L 3.36 16.64 Z M 10 13.36 L 13.32 13.36 L 13.32 16.64 L 10 16.64 Z M 16.68 13.36 L 20 13.36 L 20 16.64 L 16.68 16.64 Z M 6.68 16.68 L 10 16.68 L 10 20 L 6.68 20 Z M 13.36 16.68 L 16.64 16.68 L 16.64 20 L 13.36 20 Z" fill="#f1eaed"></path></svg></g>
 <g class="a11"><text x="244" y="237.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" fill="#f1eaed" text-anchor="start" style="white-space:pre" >Cartesia</text></g>
@@ -88,26 +88,10 @@
 <g class="a11"><g color="#ffffff" opacity="1" transform="translate(470.2431,259.25) scale(0.7188)"><path fill='currentColor' d='M9.999 1A1 1 0 0 1 10.999 2.002L10.997 3H14V4H12.957L12.553 13.35C12.553 13.781 12.403 14.195 12.135 14.5L12.029 14.608A1.33 1.33 0 0 1 11.124 14.976H5.01C4.631 14.976 4.268 14.805 4 14.5A1.73 1.73 0 0 1 3.589 13.512L3.582 13.351 3.057 4H2V3H5V2A1 1 0 0 1 6 1ZM4.58 13.295L4.582 13.323V13.351C4.582 13.555 4.654 13.73 4.751 13.84 4.844 13.946 4.941 13.976 5.01 13.976H11.124C11.194 13.976 11.29 13.946 11.384 13.84A.75.75 0 0 0 11.553 13.35V13.308L11.957 4H4.058ZM7 12.5H6V5.5H7ZM10 5.5V12.5H9V5.5ZM6 3H10.497L9.997 2.999 10 2H6Z'/></g></g>
 <g class="a11"><text x="486.7431" y="268.06" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="500" fill="#ffffff" text-anchor="start" style="white-space:pre" >Delete key</text></g>
 <g clip-path="url(#pane)"><g class="m13">
-<rect x="208" y="324" width="340" height="36" rx="8" fill="#231e21" stroke="#332a2e" stroke-width="1" opacity="1" />
-<svg x="220" y="334" width="16" height="16" viewBox="0 0 500 500" overflow="visible" color="#f1eaed">
-<g clip-path="url(#elevenlabs13-clip0_470_2)">
-<rect width="500" height="500" rx="100" fill="white"/>
-<path d="M314 355H271V145H314V355Z" fill="black"/>
-<path d="M229 355H186V145H229V355Z" fill="black"/>
-</g>
-<defs>
-<clipPath id="elevenlabs13-clip0_470_2">
-<rect width="500" height="500" fill="white"/>
-</clipPath>
-</defs>
-</svg>
-<text x="244" y="345.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" fill="#f1eaed" text-anchor="start" style="white-space:pre" >ElevenLabs</text>
-<text x="306.378" y="345.5" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Sound effects and music from a prompt.</text>
-<rect x="471.262" y="332" width="64.738" height="20" rx="6" fill="#e2dde0" opacity="1" />
-<g color="#231e21" opacity="1" transform="translate(478.262,336.25) scale(0.7188)"><g><path fill='currentColor' d='M10.968 7.43L13.524 9.987a2.502 2.502 0 0 1-3.537 3.538l-2.557-2.556-.707.707L9.28 14.23a3.501 3.501 0 1 0 4.95-4.95l-2.556-2.555z m-5.281-1.035l3.918 3.919.708-.709-3.919-3.918zM6.721 1.77a3.502 3.502 0 1 0-4.951 4.95l2.557 2.556.707-.707-2.557-2.556a2.501 2.501 0 1 1 3.538-3.537L8.482 4.944l.707-.707z'/></g></g>
-<text x="494.762" y="345.06" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="500" fill="#231e21" text-anchor="start" style="white-space:pre" >Connect</text>
-<line x1="208" y1="376" x2="548" y2="376" stroke="#332a2e"/>
-<text x="208" y="402" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Account defaults</text>
-<text x="548" y="402" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="400" fill="#9d8b93" text-anchor="end" style="white-space:pre" >Reset to recommended</text>
+<line x1="208" y1="330" x2="548" y2="330" stroke="#332a2e"/>
+<text x="208" y="356" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#9d8b93" text-anchor="start" style="white-space:pre" >Account defaults</text>
+<rect x="423.9762" y="344" width="124.02380000000001" height="18" rx="6" fill="#261c1f" opacity="1" />
+<g color="#f1eaed" opacity="1" transform="translate(430.9762,347.25) scale(0.7188)"><path fill='currentColor' d='M8.396 1.845C12.42 2.411 14.517 6.074 14.056 9.357S10.568 15.582 6.545 15.017C4.621 14.746 3.125 13.759 2.147 12.438 1.63 11.734 1.252 10.938 1.036 10.092L1.52 9.968 2.004 9.844C2.189 10.565 2.51 11.244 2.951 11.843 3.776 12.956 5.036 13.794 6.685 14.026 10.091 14.504 12.671 12.025 13.066 9.218S11.664 3.315 8.257 2.837C5.508 2.449 3.863 4.295 3.132 5.296L5.342 5.607 5.203 6.597 1.243 6.041 1.8 2.079 2.79 2.219 2.468 4.509C3.339 3.378 5.262 1.405 8.396 1.845'/></g>
+<text x="447.4762" y="356.06" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="8.5" font-weight="500" fill="#f1eaed" text-anchor="start" style="white-space:pre" >Reset to recommended</text>
 </g></g>
 </svg>

@@ -67,8 +67,7 @@ OpenSlop の使い方は 2 つあります。
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
-  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
+  <img src="../../assets/features/describe-dark.svg" alt="プロンプト欄がアイデアの例を順に見せ、そのあと一行が打ち込まれて送信される" width="100%">
 </td>
 </tr>
 <tr>
@@ -82,8 +81,7 @@ OpenSlop の使い方は 2 つあります。
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
-  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg" alt="Sloppy が考え、読み、骨組みを作り、台本を書き、シーンがキャンバスに現れる" width="100%">
 </td>
 </tr>
 <tr>
@@ -97,8 +95,7 @@ OpenSlop の使い方は 2 つあります。
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
-  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
+  <img src="../../assets/features/canvas-dark.svg" alt="行にホバーすると6種類の要素の挿入メニューが開き、新しい Sound カードが現れる" width="100%">
 </td>
 </tr>
 <tr>
@@ -112,8 +109,7 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
-  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
+  <img src="../../assets/features/generate-dark.svg" alt="Generate all がキューを走らせ、プレビューが埋まり、編集されたプロンプトが理由つきで stale と印される" width="100%">
 </td>
 </tr>
 <tr>
@@ -127,8 +123,7 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
-  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
+  <img src="../../assets/features/timeline-dark.svg" alt="プレイヤーが単語ごとの字幕つきで再生され、再生ヘッドが4レーンのタイムラインを掃いていく" width="100%">
 </td>
 </tr>
 <tr>
@@ -142,8 +137,7 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
-  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
+  <img src="../../assets/features/providers-dark.svg" alt="Cartesia のキーが貼り付けられて検証され、Unverified から Connected に変わる" width="100%">
 </td>
 </tr>
 <tr>
@@ -157,8 +151,7 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
 </td>
 </tr>
 </table>

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Emits assets/features/<card>-{light,dark}.svg: one looping animated card per README feature and local mode step.
+"""Emits assets/features/<card>-dark.svg for each README feature, and <step>-{light,dark}.svg for each local mode step:
+one looping animated card each.
 
 Every card is plain SVG plus CSS keyframes, so it plays on GitHub with no script and no GIF.
 Colors come from the tokens in app/globals.css, icons from components/ui/icons/*.css and
@@ -33,7 +34,7 @@ THEMES = {
         orb0="#d99b1f", orb1="#9c3813", onmedia="#000000", onmediafg="#ffffff",
         m_speech="#6a595f", m_image="#0891b2", m_video="#4f46e5", m_music="#7c3aed",
         m_sound="#059669", dot="#26171d", dotop="0.10", shadow="#26171d", shadowop="0.10",
-        blob="#f5d3a3", blobop="0.9",
+        blob="#f5d3a3", blobop="0.9", glow="#762e4e",
     ),
     "dark": dict(
         bg="#140e11", card="#251e21", elcard="#231e21", elinput="#2e282b", recessed="#140e11",
@@ -46,7 +47,7 @@ THEMES = {
         orb0="#ffbf48", orb1="#be4a1d", onmedia="#000000", onmediafg="#ffffff",
         m_speech="#9d8b93", m_image="#22d3ee", m_video="#818cf8", m_music="#a78bfa",
         m_sound="#34d399", dot="#f1eaed", dotop="0.08", shadow="#000000", shadowop="0.35",
-        blob="#4a3a2a", blobop="0.9",
+        blob="#4a3a2a", blobop="0.9", glow="#e4b5d4",
     ),
 }
 
@@ -554,75 +555,82 @@ class Card:
 # 1. Describe your video — the hero composer
 # =====================================================================================
 def card_describe(theme):
-    c = Card("describe", "Describe your video", "The hero prompt box cycles through example ideas, the user types one line, and Sloppy takes it from there.", 13, theme)
+    c = Card("describe", "Describe your video", "Sloppy greets you over the composer, the lightbulb suggests ideas, the user types one line, and Sloppy takes it from there.", 13, theme)
     t = c.t
     c.bg()
-    c.text(W / 2, 56, "Describe your video", 40, t["fg"], anchor="middle", family=SERIF, extra='letter-spacing="-1.4"')
+    greeting = "What slop today, boss?"
+    gw = tw(greeting, 34) * 0.86 + 40
+    gx = W / 2 - gw / 2
+    c.icon("robot-fill", gx, 26, 32, t["fg"])
+    c.text(gx + 40, 54, greeting, 34, t["fg"], family=SERIF, extra='letter-spacing="-1.2"')
 
-    bx, by, bw, bh = 90, 78, 460, 152
-    c.shadow(bx, by, bw, bh, 12, 0.6)
-    c.rect(bx, by, bw, bh, t["card"], rx=12, stroke=t["accent"], extra='stroke-opacity="0.35"')
+    bx, by, bw, bh = 70, 80, 500, 112
+    glow = c.pulse(4, 0.45)
+    c.raw(c.wrap(f'<rect x="{bx - 3}" y="{by - 3}" width="{bw + 6}" height="{bh + 6}" rx="14" fill="none" stroke="{t["glow"]}" stroke-width="6" opacity=".22" filter="url(#glow)"/>', glow))
+    c.defs.append('<filter id="glow" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>')
+    c.rect(bx, by, bw, bh, t["card"], rx=12, stroke=t["glow"], extra='stroke-opacity="0.35"')
     c.grain(bx, by, bw, bh, 12)
-    # segmented control: Describe a video | Paste a script
-    sx, sy, sw, sh = W / 2 - 104, by + 10, 208, 22
-    c.rect(sx, sy, sw, sh, t["recessed"], rx=7)
-    c.rect(sx + 3, sy + 3, 104, 16, t["card"], rx=5)
-    c.text(sx + 55, sy + 14.5, "Describe a video", 9.5, t["fg"], anchor="middle", weight=500)
-    c.text(sx + 157, sy + 14.5, "Paste a script", 9.5, t["muted"], anchor="middle", weight=500)
 
-    # the typewriter line: "Create " + rotating placeholder, then the user's own words
-    tx, ty = bx + 18, by + 66
-    ph = [
-        ("a claymation children's story about little red riding hood…", 0.4, 2.6, 3.7, 4.4),
-        ("a documentary-style video about the rise and fall of Rome…", 4.6, 6.7, 7.5, 8.1),
+    # placeholder, then two lightbulb ideas, then the user's own words
+    tx, ty = bx + 16, by + 26
+    c.text(tx, ty, "Describe your slop or paste a script", 12.5, t["muted"], cls=c.span(0, 1.4))
+    ideas = [
+        ("Create a claymation children's story about Little Red Riding Hood", 1.5, 4.2),
+        ("Create a documentary-style video about the rise and fall of Rome", 4.3, 7.0),
     ]
-    c.text(tx, ty, "Create ", 12.5, t["muted"], cls=c.span(0, 8.3))
-    cw = tw("Create ", 12.5) + 1
-    for s, t0, t1, e0, e1 in ph:
-        c.typewriter(tx + cw, ty, s, t0, t1, 12.5, t["muted"], erase=(e0, e1))
+    for s, t0, t1 in ideas:
+        c.text(tx, ty, s, 12.5, t["fg"], cls=c.span(t0, t1))
+    c.text(tx, ty, "Describe your slop or paste a script", 12.5, t["muted"], cls=c.span(7.1, 7.9))
     user = "A street race short in neon-lit Tokyo, two rivals, 45 seconds."
-    c.typewriter(tx, ty, user, 8.5, 10.6, 12.5, t["fg"], caret=True)
+    c.typewriter(tx, ty, user, 8.0, 10.4, 12.5, t["fg"], caret=True)
 
-    # control row
+    # control row: Attach, then ghost setting pills, then the lightbulb and submit
     ry = by + bh - 32
-    c.rect(bx + 16, ry + 1, 20, 20, "none", rx=10, stroke=t["border2"])
-    c.icon("plus", bx + 20, ry + 5, 12, t["muted"])
-    px = bx + 44
-    px += c.pill(px, ry + 2, "16:9", 9, t["secondary"], t["fg"], icon="aspect-ratio", chevron=True, h=18, weight=400) + 6
-    px += c.pill(px, ry + 2, "Auto", 9, t["secondary"], t["fg"], icon="translate", chevron=True, h=18, weight=400) + 6
-    # model pill carries the OpenSlop mark
-    mw = 7 + 10 + 5 + tw("Claude Opus 5", 9) + 6 + 8 + 6
-    c.rect(px, ry + 2, mw, 18, t["secondary"], rx=5)
-    c.provider_mark("anthropic", px + 7, ry + 6, 10)
-    c.text(px + 22, ry + 14.3, "Claude Opus 5", 9, t["fg"])
-    c.icon("chevron-down", px + mw - 14, ry + 7, 8, t["muted"])
-    px += mw + 6
-    c.pill(px, ry + 2, "Auto", 9, t["secondary"], t["fg"], icon="hour-glass", chevron=True, h=18, weight=400)
-    # submit: secondary until there is text, accent once the user presses enter
-    sbx, sby = bx + bw - 38, ry
-    c.rect(sbx, sby, 22, 22, t["secondary"], rx=6)
-    c.icon("corner-down-left", sbx + 4, sby + 4, 14, t["accent"], opacity=0.35, cls=c.span(0, 8.5))
-    c.icon("corner-down-left", sbx + 4, sby + 4, 14, t["accent"], cls=c.span(8.5, 11.2))
-    pressed = c.span(11.2, 13)
-    c.rect(sbx, sby, 22, 22, t["accent"], rx=6, cls=pressed)
-    c.icon("corner-down-left", sbx + 4, sby + 4, 14, t["accentfg"], cls=pressed)
-    # Sloppy picks it up
-    took = c.appear(11.6, dy=3)
-    c.orb(bx + bw - 120, by + bh + 6, 16, cls=took)
-    c.text(bx + bw - 100, by + bh + 18, "Slopping… · 1s", 9.5, t["muted"], cls=took)
+    c.icon("plus", bx + 14, ry + 6, 12, t["fg"])
+    px = bx + 34
 
-    c.text(W / 2, by + bh + 20, "Skip to a blank canvas", 10, t["muted"], anchor="middle", cls=c.span(0, 11.6))
+    def ghost(label, icon=None, mark=None):
+        x0 = px
+        x = x0 + 6
+        if icon:
+            c.icon(icon, x, ry + 6, 11, t["fg"])
+            x += 15
+        if mark:
+            c.provider_mark(mark, x, ry + 6.5, 10)
+            x += 14
+        c.text(x, ry + 15, label, 9.5, t["fg"], weight=500)
+        x += tw(label, 9.5, 500) + 3
+        c.icon("chevron-down", x, ry + 8, 8, t["muted"])
+        return x + 14 - x0
+
+    for label, icon, mark in (("16:9", "aspect-ratio", None), ("Auto", "film-slate", None), ("Auto", "translate", None), ("Claude Opus 5.5", None, "openslop"), ("Auto", "hour-glass", None)):
+        px += ghost(label, icon, mark) + 2
+    # the lightbulb gets clicked twice, then submit lights up once there is text
+    lbx, sbx = bx + bw - 56, bx + bw - 30
+    for at in (1.4, 4.2):
+        c.rect(lbx - 3, ry + 1, 20, 20, t["hover"], rx=6, cls=c.span(at, at + 0.35, fade=0.1))
+    c.icon("lightbulb", lbx, ry + 4, 14, t["fg"])
+    c.icon("corner-down-left", sbx, ry + 4, 14, t["fg"], opacity=0.35, cls=c.span(0, 8.0))
+    c.icon("corner-down-left", sbx, ry + 4, 14, t["fg"], cls=c.span(8.0, 13))
+    pressed = c.span(10.9, 11.3, fade=0.1)
+    c.rect(sbx - 3, ry + 1, 20, 20, t["hover"], rx=6, cls=pressed)
+    # Sloppy picks it up
+    took = c.appear(11.4, dy=3)
+    c.orb(W / 2 - 46, by + bh + 13, 16, cls=took)
+    c.text(W / 2 - 26, by + bh + 25, "Slopping… · 1s", 10, t["muted"], cls=took)
+
+    c.text(W / 2, by + bh + 26, "Skip to a blank canvas", 10, t["muted"], anchor="middle", weight=500, cls=c.span(0, 11.4))
 
     # Need inspiration? two real templates
-    gy = 270
-    c.text(bx, gy, "Need inspiration?", 10, t["muted"])
+    gy = 256
+    c.text(W / 2, gy, "Need inspiration?", 10, t["muted"], anchor="middle")
     cards = [
         ("POV Your Life as A...", "Second-person POV voiceover with…", "POV Life", "#F59E0B", "template-pov-life.jpg"),
         ("Get Sleepy with...", "Slow, soothing narration to lull…", "Sleep Story", "#6366F1", "template-sleep-story.jpg"),
     ]
     for i, (title, desc, name, col, img) in enumerate(cards):
-        x = bx + i * 236
-        y = gy + 8
+        x = 90 + i * 236
+        y = gy + 10
         c.rect(x, y, 224, 60, t["card"], rx=10, stroke=t["border"])
         c.defs.append(f'<clipPath id="tplc{i}"><path d="M{x + 10} {y}h36v60h-36a10 10 0 0 1 -10 -10v-40a10 10 0 0 1 10 -10z"/></clipPath>')
         c.file_image(img, x, y, 46, 60, clip=f"tplc{i}")
@@ -647,12 +655,13 @@ def card_sloppy(theme):
     t = c.t
     c.bg()
     # rail
-    rail = [("home", "Home", 26), ("layout", "Layout", 78), ("text-box", "Captions", 112), ("sliders-alt", "Properties", 146), ("insert-element", "Models", 180), ("history", "History", 214)]
-    c.raw(f'<line x1="6" y1="60.5" x2="46" y2="60.5" stroke="{t["border"]}"/>')
+    groups = [["folder-open", "Assets"], ["stock-alt", "Media"], ["text-box", "Captions"], ["layout", "Layout"], ["sliders-alt", "Properties"], ["magic", "Effects"], ["insert-element", "Models"], ["history", "History"], ["info", "Project"]]
+    rail = [("home", "Home", 12)] + [(ic, lab, 54 + i * 26) for i, (ic, lab) in enumerate(groups)]
+    c.raw(f'<line x1="6" y1="44.5" x2="46" y2="44.5" stroke="{t["border"]}"/>')
     c.raw(f'<line x1="6" y1="296.5" x2="46" y2="296.5" stroke="{t["border"]}"/>')
     for ic, lab, y in rail:
-        c.icon(ic, 19, y, 14, t["muted"])
-        c.text(26, y + 26, lab, 7.5, t["muted"], anchor="middle", weight=500)
+        c.icon(ic, 20, y, 12, t["muted"])
+        c.text(26, y + 21, lab, 6.5, t["muted"], anchor="middle", weight=500)
     c.rect(6, 304, 40, 44, t["secondary"], rx=10)
     c.icon("robot-fill", 19, 312, 14, t["panellabel"])
     c.text(26, 338, "Sloppy", 7.5, t["panellabel"], anchor="middle", weight=600)
@@ -699,7 +708,7 @@ def card_sloppy(theme):
     step(178, 5.8, "film", "Writing a new script")
     outcome(192, 8.4, "Wrote 3 scenes with 11 elements.")
     status(210, 5.8, 8.8, "Applying changes · 8s")
-    step(210, 8.8, "hour-glass", "Fitting video elements to the dialogue")
+    step(210, 8.8, "hour-glass", "Fitting video elements to the speech")
     outcome(224, 9.1, "Trimmed 2 visuals to their speech.")
     status(242, 8.8, 10.2, "Slopping… · 11s")
     rp = c.appear(10.2)
@@ -718,10 +727,10 @@ def card_sloppy(theme):
     c.rect(PX, cy, PW, 44, t["elcard"], rx=10)
     c.grain(PX, cy, PW, 44, 10)
     c.text(PX + 10, cy + 15, "Write or change the script…", 9.5, t["muted"])
-    c.provider_mark("anthropic", PX + 10, cy + 26, 10)
-    c.text(PX + 24, cy + 34.5, "Claude Opus 5", 9, t["muted"])
-    c.icon("chevron-down", PX + 24 + tw("Claude Opus 5", 9) + 6, cy + 27, 8, t["muted"])
-    c.icon("lightbulb", PX + 24 + tw("Claude Opus 5", 9) + 22, cy + 25, 11, t["muted"])
+    c.provider_mark("openslop", PX + 10, cy + 26, 10)
+    c.text(PX + 24, cy + 34.5, "Claude Opus 5.5", 9, t["muted"])
+    c.icon("chevron-down", PX + 24 + tw("Claude Opus 5.5", 9) + 6, cy + 27, 8, t["muted"])
+    c.icon("lightbulb", PX + 24 + tw("Claude Opus 5.5", 9) + 22, cy + 25, 11, t["muted"])
     c.rect(PX + PW - 30, cy + 20, 20, 20, t["secondary"], rx=6)
     c.icon("corner-down-left", PX + PW - 27, cy + 23, 14, t["accent"], opacity=0.4)
 
@@ -767,7 +776,7 @@ def card_sloppy(theme):
 # 3. The storyboard canvas — scenes, elements, the seven types
 # =====================================================================================
 def card_canvas(theme):
-    c = Card("canvas", "A storyboard you can edit", "A scene holds element cards; hovering a row shows the insert control, its menu lists the seven element types, and a new Sound card appears where it was picked.", 12, theme)
+    c = Card("canvas", "A storyboard you can edit", "A scene holds element cards; hovering a row shows the insert control, its menu lists the five element types, and a new Sound card appears where it was picked.", 12, theme)
     t = c.t
     c.bg()
     SX, SY, SW, SH = 8, 8, 624, 344
@@ -776,12 +785,10 @@ def card_canvas(theme):
 
     # assets row
     ay = SY + 36
-    c.icon("chevron-down", SX + 40, ay - 1, 10, t["muted"])
-    c.text(SX + 54, ay + 7, "Assets", 8.5, t["muted"], weight=500)
-    tiles = [("Art style", "magic", None), ("Narrator", "voice", None), ("Takeshi", None, "takeshi"), ("Ryu", None, "ryu"), ("Character", "user", "+"), ("Reference", "image", "+")]
+    tiles = [("Art style", "theme-swatches", None), ("Takeshi", None, "takeshi"), ("Ryu", None, "ryu"), ("Add asset", "plus", "+")]
     for i, (lab, ic, img) in enumerate(tiles):
         x = SX + 40 + i * 40
-        y = ay + 11
+        y = ay - 2
         dashed = img == "+"
         if img and not dashed:
             c.image(img, x, y, 30, 30, rx=6)
@@ -789,8 +796,6 @@ def card_canvas(theme):
             c.rect(x, y, 30, 30, t["secondary"] if dashed else t["card"], rx=6, stroke=t["border2"], extra='stroke-dasharray="3 2"' if dashed else "")
             if dashed:
                 c.icon(ic, x + 8, y + 8, 14, t["muted"])
-                c.raw(f'<circle cx="{x + 23}" cy="{y + 7}" r="4.5" fill="{t["secondary"]}"/>')
-                c.icon("plus", x + 19, y + 3, 8, t["muted"])
             else:
                 c.icon(ic, x + 8, y + 8, 14, t["muted"])
         c.text(x + 15, y + 39, lab, 7, t["muted"], anchor="middle")
@@ -802,7 +807,7 @@ def card_canvas(theme):
     c.text(SX + 96, sy, "0:00 – 0:12", 9, t["muted"])
     c.rect(SX + 152, sy - 9, 22, 12, t["secondary"], rx=3)
     c.text(SX + 163, sy, "12s", 8, t["muted"], anchor="middle")
-    for i, ic in enumerate(("magic", "play", "x")):
+    for i, ic in enumerate(("magic", "play", "trash")):
         c.rect(SX + SW - 100 + i * 26, sy - 12, 20, 20, t["secondary"], rx=6, opacity=0.6)
         c.icon(ic, SX + SW - 96 + i * 26, sy - 8, 12, t["muted"], opacity=0.7)
 
@@ -866,11 +871,14 @@ def card_generate(theme):
     c.text(322, 21, "/", 10, t["faint"])
     c.text(330, 21, "Neon Drift", 10, t["fg"], weight=500)
     c.button(566, 6, "Export", icon="download", variant="panel", size=9.5, h=22, pad=8)
-    states = [(0, 1.2, "Generate 7 elements", "magic", False), (1.2, 8.2, "Generating…", "spinner", True), (8.2, 10.4, "All generated", "check", False), (10.4, 14, "Regenerate 1 element", "rotate-ccw", False)]
+    states = [(0, 1.2, "Generate 7 elements", "magic", False), (1.2, 8.2, "Generating…", "spinner", True), (8.2, 10.4, "All generated", "check", False), (10.4, 14, "Regenerate 1 element", "magic", False)]
     for t0, t1, lab, ic, spin in states:
         s = c.span(t0, t1, fade=0.08)
         w = 18 + tw(lab, 9.5, 500) + 17.5
         x = 558 - w
+        cx = x - (30 if spin else 6)
+        bw_ = 22 + tw("$4.20", 9.5, 500)
+        c.pill(cx - bw_, 6, "$4.20", 9.5, t["secondary"], t["fg"], icon="credit-card", h=22, pad=7, cls=s)
         c.button(x, 6, lab, icon=ic, size=9.5, h=22, pad=9, cls=s, icon_cls=(s + " " + c.spin(1.0)) if spin else s)
         if spin:
             c.raw(c.wrap(f'<circle cx="{x - 16}" cy="17" r="10" fill="{t["secondary"]}"/>', s))
@@ -917,7 +925,7 @@ def card_generate(theme):
             st = c.appear(10.6)
             rw = tw("Regenerate", 8.5, 500) + 14 + 16.5
             bx = fx - rw - 6 - (tw("Stale", 9, 500) + 12 + 14)
-            bw = c.badge(bx, fy + 1, "Stale", "tertiary", icon="alert", cls=st)
+            bw = c.badge(bx, fy + 1, "Stale", "tertiary", icon="alert-filled", cls=st)
             tip = c.span(11.0, 13.6)
             msg = "The prompt changed — regenerate to update"
             tipw = tw(msg, 8.5) + 22
@@ -946,8 +954,10 @@ def card_generate(theme):
             c.text(PXX + 192, py + 24, "0:00/0:05" if kind == "speech" else "0:00/0:02", 7.5, t["muted"], anchor="end", cls=done)
         chip_x, chip_y = PXX + 6, (y + 8 if pk == "media" else y + (h - 40) / 2 + 10)
         q = c.span(1.3, g0, fade=0.05)
-        c.raw(c.wrap(f'<circle cx="{chip_x + 10}" cy="{chip_y + 10}" r="10" fill="{t["onmedia"]}" opacity="0.55"/>', q))
+        qw = 19 + tw("Queued…", 7.5, 500) + 8
+        c.rect(chip_x, chip_y, qw, 20, t["onmedia"], rx=10, opacity=0.55, cls=q)
         c.icon("hour-glass", chip_x + 5, chip_y + 5, 10, "#ffffff", cls=q + " " + c.pulse(1.2, 0.5))
+        c.text(chip_x + 19, chip_y + 13.5, "Queued…", 7.5, "#ffffff", weight=500, cls=q)
         gen = c.span(g0, g1, fade=0.05)
         gw = 19 + tw("Generating 9s", 7.5, 500) + 8
         c.rect(chip_x, chip_y, gw, 20, t["onmedia"], rx=10, opacity=0.55, cls=gen)
@@ -962,7 +972,7 @@ def card_generate(theme):
 # 5. Player and timeline
 # =====================================================================================
 def card_timeline(theme):
-    c = Card("timeline", "Player and timeline", "The player plays the cut with word-by-word captions while the playhead sweeps a four-lane timeline of video, voice, effects, and music clips.", 12, theme)
+    c = Card("timeline", "Player and timeline", "The player plays the cut with word-by-word captions while the playhead sweeps a timeline of caption, visual, speech, effects, and music clips.", 12, theme)
     t = c.t
     c.bg()
     c.stage(8, 8, 624, 344)
@@ -997,22 +1007,25 @@ def card_timeline(theme):
     c.icon("chevrons-left", W / 2 - 34, ry - 11, 13, t["fg"])
     c.icon("pause", W / 2 - 6, ry - 11, 13, t["fg"])
     c.icon("chevrons-right", W / 2 + 21, ry - 11, 13, t["fg"])
-    c.icon("volume-2", 546, ry - 11, 13, t["fg"])
-    c.rect(564, ry - 5, 30, 2, t["scrubtrack"], rx=1)
-    c.rect(564, ry - 5, 22, 2, t["scrubprog"], rx=1)
-    c.icon("maximize", 600, ry - 11, 13, t["fg"])
-    c.icon("timeline", 618, ry - 11, 13, t["fg"])
+    c.icon("minus", 434, ry - 10, 11, t["fg"])
+    c.text(460, ry, "100%", 9, t["fg"], anchor="middle", weight=500)
+    c.icon("plus", 476, ry - 10, 11, t["fg"])
+    c.icon("volume-2", 498, ry - 11, 13, t["fg"])
+    c.rect(515, ry - 5, 28, 2, t["scrubtrack"], rx=1)
+    c.rect(515, ry - 5, 20, 2, t["scrubprog"], rx=1)
+    c.icon("maximize", 550, ry - 11, 13, t["fg"])
+    c.rect(568, ry - 14, 54, 19, t["recessed"], rx=5)
+    c.rect(570, ry - 12, 16, 15, t["card"], rx=4)
+    for i, name in enumerate(("timeline", "expand-timeline", "collapse-timeline")):
+        c.icon(name, 572 + i * 17, ry - 10, 11, t["fg"] if i == 0 else t["muted"])
 
     # timeline
     TY = 194
-    gx, GW = 20, 30
+    gx, GW = 20, 0
     lx = gx + GW
     LW = 600 - GW
     pps = (LW - 16) / total
     c.raw(f'<line x1="{gx}" y1="{TY + 0.5}" x2="620" y2="{TY + 0.5}" stroke="{t["border"]}"/>')
-    c.icon("zoom-out", gx + 2, TY + 5, 10, t["muted"])
-    c.icon("zoom-in", gx + 15, TY + 5, 10, t["muted"])
-    c.raw(f'<line x1="{lx - 0.5}" y1="{TY}" x2="{lx - 0.5}" y2="344" stroke="{t["border"]}"/>')
     RH = 20
     for s in range(0, total * 5 + 1):
         c.raw(f'<circle cx="{lx + s * pps / 5:.1f}" cy="{TY + RH - 4}" r="0.8" fill="{t["border2"]}"/>')
@@ -1020,12 +1033,11 @@ def card_timeline(theme):
         x = lx + s * pps
         c.text(x if s else x + 1, TY + 12, f"0:{s:02d}", 8, t["muted"], anchor="middle" if s else "start")
     c.raw(f'<line x1="{lx}" y1="{TY + RH + 0.5}" x2="620" y2="{TY + RH + 0.5}" stroke="{t["border"]}"/>')
-    lanes = [("film", 44), ("voice", 32), ("wave-sine", 28), ("music", 28)]
+    lanes = [("captions", 14), ("film", 40), ("voice", 30), ("wave-sine", 26), ("music", 26)]
     ly = TY + RH + 1
     lane_y = {}
     for name, h in lanes:
         lane_y[name] = ly
-        c.icon(name, gx + 8, ly + h / 2 - 6, 12, t["muted"])
         c.raw(f'<line x1="{gx}" y1="{ly + h + 0.5}" x2="620" y2="{ly + h + 0.5}" stroke="{t["border"]}" stroke-opacity="0.6"/>')
         ly += h + 1
 
@@ -1051,6 +1063,10 @@ def card_timeline(theme):
             c.rect(x + 2, y + h - 12, 34, 10, t["onmedia"], rx=2, opacity=0.65)
             c.text(x + 19, y + h - 4.5, f"Scene {scene}", 6.5, "#ffffff", anchor="middle", weight=500)
 
+    for (a, b), words in lines:
+        x = lx + a * pps
+        c.rect(x, lane_y["captions"] + 2, (b - a) * pps - 2, 10, t["secondary"], rx=3, stroke=t["border"])
+        c.text(x + 4, lane_y["captions"] + 9.5, " ".join(words), 6.5, t["fg"])
     clip("film", 0, 4, "image", "A neon-lit tokyo street", 1, "city0")
     clip("film", 4, 7, "video", "Ryu steps out of the silvia", 2, "conf1")
     clip("film", 7, 10, "video", "Sideways through the corner", 3, "drift2")
@@ -1142,7 +1158,7 @@ def card_providers(theme):
     c.rect(IX + TP - 2, cy + 76, sw_ + 4, 22, "none", rx=7, stroke=t["accent"], sw=1.5, cls=c.span(3.5, 3.9, fade=0.08))
     c.text(IX + TP + sw_ + 14, cy + 90, "Cancel", 8.5, t["muted"], cls=form)
     c.text(IX + IW - TP - 12, cy + 90, "Get a key", 8.5, t["fg"], anchor="end", weight=600, cls=form, extra='text-decoration="underline"')
-    c.icon("arrow-up-right", IX + IW - TP - 9, cy + 82, 9, t["fg"], cls=form)
+    c.icon("external-link", IX + IW - TP - 9, cy + 82, 9, t["fg"], cls=form)
     CH = 66
     con = c.appear(7.5, dy=0)
     c.rect(IX, cy, IW, CH, t["elcard"], rx=8, stroke=t["border"], cls=con)
@@ -1155,17 +1171,11 @@ def card_providers(theme):
     # the rows below move up once the form collapses
     up = c.shift(7.5, dy=-(FH - CH), dur=0.3)
     c.raw(f'<g clip-path="url(#pane)"><g class="{up}">')
-    ey = cy + FH + 8
-    c.rect(IX, ey, IW, TH, t["elcard"], rx=8, stroke=t["border"])
-    c.provider_mark("elevenlabs", IX + TP, ey + 10, 16)
-    c.text(IX + TP + 24, ey + 21.5, "ElevenLabs", 10, t["fg"], weight=500)
-    c.text(IX + TP + 24 + tw("ElevenLabs", 10, 500) + 8, ey + 21.5, "Sound effects and music from a prompt.", 8.5, t["muted"])
-    cw_ = 14 + tw("Connect", 8.5, 500) + 16.5
-    c.button(IX + IW - TP - cw_, ey + 8, "Connect", icon="link", size=8.5, h=20, pad=7)
-    dy2 = ey + TH + 16
+    dy2 = cy + FH + 14
     c.raw(f'<line x1="{IX}" y1="{dy2}" x2="{IX + IW}" y2="{dy2}" stroke="{t["border"]}"/>')
     c.text(IX, dy2 + 26, "Account defaults", 10, t["muted"], weight=600)
-    c.text(IX + IW, dy2 + 26, "Reset to recommended", 8.5, t["muted"], anchor="end")
+    rw = c.button_w("Reset to recommended", icon="rotate-ccw", size=8.5, pad=7)
+    c.button(IX + IW - rw, dy2 + 14, "Reset to recommended", icon="rotate-ccw", variant="secondary", size=8.5, h=18, pad=7)
     c.raw("</g></g>")
     c.write()
 
@@ -1188,7 +1198,7 @@ def window(c, x, y, w, h, title, icon):
 # 7. Run it on your computer — npm run local
 # =====================================================================================
 def card_local(theme):
-    c = Card("local", "Run it on your computer", "A terminal runs npm run local: Supabase, the migrations and the video renderer start on this machine, then OpenSlop opens at localhost:3000 with the user's projects, saved on their own computer.", 12, theme)
+    c = Card("local", "Run it on your computer", "A terminal runs npm run local: Supabase, the migrations and the video renderer start on this machine, then Next.js starts and OpenSlop opens at localhost:3000 with the user's projects, saved on their own computer.", 12, theme)
     t = c.t
     c.bg()
 
@@ -1201,20 +1211,19 @@ def card_local(theme):
     col = lambda s: LX + tw(s, FS, family=MONO) * 1.06
     c.typewriter(col(prompt), LY, "npm run local", 0.4, 1.4, FS, t["fg"], family=MONO)
     steps = [
-        (2.0, "Supabase", "database, auth, storage"),
-        (2.8, "Migrations", "applied"),
-        (3.5, "Video renderer", "ready"),
+        (2.0, "> openslop@0.1.0 local"),
+        (2.4, "> node scripts/local.mjs"),
+        (3.5, "\u25b2 Next.js 16.4.6"),
     ]
-    for i, (at, name, note) in enumerate(steps):
+    for i, (at, line) in enumerate(steps):
         y = LY + (i + 1) * LH + 4
-        cl = c.appear(at, dy=3)
-        c.text(LX, y, "\u2713", FS, t["success"], family=MONO, weight=600, cls=cl)
-        c.text(col("\u2713 "), y, name, FS, t["fg"], family=MONO, cls=cl)
-        c.text(col(f"\u2713 {name} "), y, note, FS, t["muted"], family=MONO, cls=cl)
-    ry = LY + 4 * LH + 12
-    cl = c.appear(4.3, dy=3)
-    c.text(LX, ry, "Ready on", FS, t["fg"], family=MONO, cls=cl)
-    c.text(col("Ready on "), ry, "http://localhost:3000", FS, t["accent"], family=MONO, cls=cl, extra='text-decoration="underline"')
+        c.text(LX, y, line, FS, t["fg"] if i == 2 else t["muted"], family=MONO, weight=600 if i == 2 else 400, cls=c.appear(at, dy=3))
+    ry = LY + 4 * LH + 4
+    cl = c.appear(4.0, dy=3)
+    c.text(LX, ry, "- Local:", FS, t["muted"], family=MONO, cls=cl)
+    c.text(col("- Local:  "), ry, "http://localhost:3000", FS, t["accent"], family=MONO, cls=cl)
+    c.text(LX, ry + LH, "\u2713 Ready in 1.2s", FS, t["success"], family=MONO, cls=c.appear(4.3, dy=3))
+    ry += LH
     c.text(LX, ry + LH, "\u258f", FS, t["fg"], family=MONO, cls=f"{c.appear(4.4, dy=0)} {c.blink(1.0)}")
 
     # ---- the browser, opened by the launcher and already signed in
@@ -1237,11 +1246,12 @@ def card_local(theme):
     gap = 12
     gw = (BW - 36 - 2 * gap) / 3
     gy = hy + 28
-    for i, (img, name) in enumerate((("tokyo0", "Neon Drift"), ("city1", "City of Smoke"), ("drift2", "Last Lap"))):
+    for i, (img, name, edited) in enumerate((("tokyo0", "Neon Drift", "Edited just now"), ("city1", "City of Smoke", "Edited 2 days ago"), ("drift2", "Last Lap", "Edited last week"))):
         gx = PX + i * (gw + gap)
         cl = c.appear(5.6 + i * 0.25, dy=6)
         c.image(img, gx, gy, gw, gw * 9 / 16, rx=6, cls=cl, thumb=True)
         c.text(gx, gy + gw * 9 / 16 + 14, name, 9, t["fg"], weight=500, cls=cl)
+        c.text(gx, gy + gw * 9 / 16 + 25, edited, 7.5, t["muted"], cls=cl)
     c.raw("</g>")
 
     # ---- the point: it all lives here
@@ -1773,8 +1783,10 @@ def card_step_keys(theme):
 
 
 def main():
+    for fn in (card_describe, card_sloppy, card_canvas, card_generate, card_timeline, card_providers, card_local):
+        fn("dark")
     for theme in ("dark", "light"):
-        for fn in (card_describe, card_sloppy, card_canvas, card_generate, card_timeline, card_providers, card_local, card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys):
+        for fn in (card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys):
             fn(theme)
 
 

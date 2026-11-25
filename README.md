@@ -67,8 +67,7 @@ Type one line. Pick 16:9 or 9:16, a language, a model, and a length, or paste a 
 
 </td>
 <td width="50%">
-  <img src="./assets/features/describe-light.svg#gh-light-mode-only" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%">
-  <img src="./assets/features/describe-dark.svg#gh-dark-mode-only" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%">
+  <img src="./assets/features/describe-dark.svg" alt="The prompt box cycles through example ideas, then a line is typed and sent" width="100%">
 </td>
 </tr>
 <tr>
@@ -82,8 +81,7 @@ The copilot lives in the left panel. It reads the script, outlines the story, wr
 
 </td>
 <td width="50%">
-  <img src="./assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy thinks, reads, outlines, writes a script, and scenes appear on the canvas" width="100%">
-  <img src="./assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy thinks, reads, outlines, writes a script, and scenes appear on the canvas" width="100%">
+  <img src="./assets/features/sloppy-dark.svg" alt="Sloppy thinks, reads, outlines, writes a script, and scenes appear on the canvas" width="100%">
 </td>
 </tr>
 <tr>
@@ -97,8 +95,7 @@ Every scene is a stack of cards: speech, image, video, sound, music. Edit any pr
 
 </td>
 <td width="50%">
-  <img src="./assets/features/canvas-light.svg#gh-light-mode-only" alt="Hovering a row opens the insert menu with the five element types and a new Sound card appears" width="100%">
-  <img src="./assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Hovering a row opens the insert menu with the five element types and a new Sound card appears" width="100%">
+  <img src="./assets/features/canvas-dark.svg" alt="Hovering a row opens the insert menu with the five element types and a new Sound card appears" width="100%">
 </td>
 </tr>
 <tr>
@@ -112,8 +109,7 @@ Generate all queues every element and runs dependencies first: the video card a 
 
 </td>
 <td width="50%">
-  <img src="./assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%">
-  <img src="./assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%">
+  <img src="./assets/features/generate-dark.svg" alt="Generate all runs the queue, previews fill in, and an edited prompt is marked stale with a reason" width="100%">
 </td>
 </tr>
 <tr>
@@ -127,8 +123,7 @@ Watch the cut as it fills in, captions word by word. Four lanes underneath: visu
 
 </td>
 <td width="50%">
-  <img src="./assets/features/timeline-light.svg#gh-light-mode-only" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%">
-  <img src="./assets/features/timeline-dark.svg#gh-dark-mode-only" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%">
+  <img src="./assets/features/timeline-dark.svg" alt="The player plays with word-by-word captions while the playhead sweeps a four-lane timeline" width="100%">
 </td>
 </tr>
 <tr>
@@ -142,8 +137,7 @@ Hosted models come with your account. Paste a key for Anthropic, Runware, Cartes
 
 </td>
 <td width="50%">
-  <img src="./assets/features/providers-light.svg#gh-light-mode-only" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%">
-  <img src="./assets/features/providers-dark.svg#gh-dark-mode-only" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%">
+  <img src="./assets/features/providers-dark.svg" alt="A Cartesia key is pasted and validated, going from Unverified to Connected" width="100%">
 </td>
 </tr>
 <tr>
@@ -157,8 +151,7 @@ Run OpenSlop on your own Mac, Windows or Linux computer. Your projects and video
 
 </td>
 <td width="50%">
-  <img src="./assets/features/local-light.svg#gh-light-mode-only" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
-  <img src="./assets/features/local-dark.svg#gh-dark-mode-only" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
+  <img src="./assets/features/local-dark.svg" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
 </td>
 </tr>
 </table>
