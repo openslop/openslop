@@ -47,7 +47,7 @@ async function openingPicture(
 
 const PREVIOUS_VISUAL_LABEL = "the previous visual";
 
-const PREVIOUS_END_LABEL = "where the previous visual ends";
+const PREVIOUS_LAST_FRAME_LABEL = "the last frame of the previous visual";
 
 const linkedPrevious = (
 	{ id, generationAttributes: attrs = {} }: CanvasElement,
@@ -66,7 +66,9 @@ const previousWhenLinked: Dependency = (element, { canvas }) => ({
 /** Frames come from where the previous video is cut, so moving its end stales this one. */
 const previousEndWhenLinked: Read = (element, { canvas }) => {
 	const previous = linkedPrevious(element, canvas);
-	return { [PREVIOUS_END_LABEL]: previous && getTrimEnd(previous)?.toString() };
+	return {
+		[PREVIOUS_LAST_FRAME_LABEL]: previous && getTrimEnd(previous)?.toString(),
+	};
 };
 
 /** Opening on the previous visual takes its end as the start frame; linking carries on from its beginning and middle. */
@@ -80,7 +82,7 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 			ctx,
 		) {
 			const source = ctx.dependencies?.[PREVIOUS_VISUAL_LABEL];
-			const endSec = parseNumber(ctx.reads?.[PREVIOUS_END_LABEL]);
+			const endSec = parseNumber(ctx.reads?.[PREVIOUS_LAST_FRAME_LABEL]);
 			const frameImage = await openingPicture(frame, source, endSec);
 			const continuityFrames = isToggleOn(continuity)
 				? await previousPictures(source, CONTINUITY_FRAMES, endSec)

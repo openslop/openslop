@@ -99,10 +99,10 @@ describe("previous-visual plugin", () => {
 			layoutAttributes: { trimEnd: "3.5" },
 		};
 
-		it("reads where the previous visual ends only while linked to it", () => {
+		it("reads the last frame of the previous visual only while linked to it", () => {
 			expect(
 				readsOf(plugin, video({ continuity: "true" }), [cut, video()]),
-			).toEqual({ "where the previous visual ends": "3.5" });
+			).toEqual({ "the last frame of the previous visual": "3.5" });
 			expect(readsOf(plugin, video(), [cut, video()])).toEqual({});
 			expect(
 				readsOf(plugin, video({ startFrame: "previous" }), [image, video()]),
@@ -117,7 +117,7 @@ describe("previous-visual plugin", () => {
 				{ prompt: "slow pan", startFrame: "previous", continuity: "true" },
 				{
 					dependencies: PREVIOUS_VIDEO_RESULT,
-					reads: { "where the previous visual ends": "3.5" },
+					reads: { "the last frame of the previous visual": "3.5" },
 				},
 			);
 			expect(captureFrames).toHaveBeenCalledWith(
