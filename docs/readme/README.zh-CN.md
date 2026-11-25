@@ -66,8 +66,7 @@ OpenSlop 有两种用法：
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="提示框轮流展示示例创意，然后输入一行字并发送" width="100%">
-  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="提示框轮流展示示例创意，然后输入一行字并发送" width="100%">
+  <img src="../../assets/features/describe-dark.svg" alt="提示框轮流展示示例创意，然后输入一行字并发送" width="100%">
 </td>
 </tr>
 <tr>
@@ -81,8 +80,7 @@ OpenSlop 有两种用法：
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy 思考、阅读、列大纲、写脚本，场景在画布上出现" width="100%">
-  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy 思考、阅读、列大纲、写脚本，场景在画布上出现" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg" alt="Sloppy 思考、阅读、列大纲、写脚本，场景在画布上出现" width="100%">
 </td>
 </tr>
 <tr>
@@ -96,8 +94,7 @@ OpenSlop 有两种用法：
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
-  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
+  <img src="../../assets/features/canvas-dark.svg" alt="鼠标悬停在一行上打开插入菜单，列出六种元素类型，一张新的 Sound 卡片出现" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,8 +108,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all 跑完队列，预览逐个填上，一条改过的提示词被标为 Stale 并附上原因" width="100%">
-  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all 跑完队列，预览逐个填上，一条改过的提示词被标为 Stale 并附上原因" width="100%">
+  <img src="../../assets/features/generate-dark.svg" alt="Generate all 跑完队列，预览逐个填上，一条改过的提示词被标为 Stale 并附上原因" width="100%">
 </td>
 </tr>
 <tr>
@@ -126,8 +122,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="播放器逐词显示字幕，播放头扫过四条轨道的时间线" width="100%">
-  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="播放器逐词显示字幕，播放头扫过四条轨道的时间线" width="100%">
+  <img src="../../assets/features/timeline-dark.svg" alt="播放器逐词显示字幕，播放头扫过四条轨道的时间线" width="100%">
 </td>
 </tr>
 <tr>
@@ -141,8 +136,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="粘贴并验证一个 Cartesia 密钥，状态从 Unverified 变为 Connected" width="100%">
-  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="粘贴并验证一个 Cartesia 密钥，状态从 Unverified 变为 Connected" width="100%">
+  <img src="../../assets/features/providers-dark.svg" alt="粘贴并验证一个 Cartesia 密钥，状态从 Unverified 变为 Connected" width="100%">
 </td>
 </tr>
 <tr>
@@ -156,8 +150,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="终端运行 npm run local，随后 OpenSlop 在 localhost:3000 打开，显示保存在这台电脑上的项目" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="终端运行 npm run local，随后 OpenSlop 在 localhost:3000 打开，显示保存在这台电脑上的项目" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="终端运行 npm run local，随后 OpenSlop 在 localhost:3000 打开，显示保存在这台电脑上的项目" width="100%">
 </td>
 </tr>
 </table>

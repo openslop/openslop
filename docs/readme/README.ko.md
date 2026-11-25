@@ -66,8 +66,7 @@ OpenSlop은 두 가지 방법으로 쓸 수 있습니다.
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="프롬프트 상자에 예시 아이디어가 차례로 지나가고, 한 줄을 입력해 보냅니다" width="100%">
-  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="프롬프트 상자에 예시 아이디어가 차례로 지나가고, 한 줄을 입력해 보냅니다" width="100%">
+  <img src="../../assets/features/describe-dark.svg" alt="프롬프트 상자에 예시 아이디어가 차례로 지나가고, 한 줄을 입력해 보냅니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -81,8 +80,7 @@ OpenSlop은 두 가지 방법으로 쓸 수 있습니다.
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy가 생각하고, 읽고, 뼈대를 잡고, 스크립트를 쓰면 캔버스에 장면이 나타납니다" width="100%">
-  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy가 생각하고, 읽고, 뼈대를 잡고, 스크립트를 쓰면 캔버스에 장면이 나타납니다" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg" alt="Sloppy가 생각하고, 읽고, 뼈대를 잡고, 스크립트를 쓰면 캔버스에 장면이 나타납니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -96,8 +94,7 @@ OpenSlop은 두 가지 방법으로 쓸 수 있습니다.
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
-  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
+  <img src="../../assets/features/canvas-dark.svg" alt="줄에 마우스를 올리면 여섯 가지 요소 유형이 있는 삽입 메뉴가 열리고 새 Sound 카드가 나타납니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,8 +108,7 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all이 큐를 돌리고, 미리보기가 채워지고, 고친 프롬프트는 이유와 함께 Stale로 표시됩니다" width="100%">
-  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all이 큐를 돌리고, 미리보기가 채워지고, 고친 프롬프트는 이유와 함께 Stale로 표시됩니다" width="100%">
+  <img src="../../assets/features/generate-dark.svg" alt="Generate all이 큐를 돌리고, 미리보기가 채워지고, 고친 프롬프트는 이유와 함께 Stale로 표시됩니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -126,8 +122,7 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="플레이어가 단어 단위 자막과 함께 재생되고, 재생 헤드가 네 레인짜리 타임라인을 지나갑니다" width="100%">
-  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="플레이어가 단어 단위 자막과 함께 재생되고, 재생 헤드가 네 레인짜리 타임라인을 지나갑니다" width="100%">
+  <img src="../../assets/features/timeline-dark.svg" alt="플레이어가 단어 단위 자막과 함께 재생되고, 재생 헤드가 네 레인짜리 타임라인을 지나갑니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -141,8 +136,7 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Cartesia 키를 붙여 넣고 검증하면 Unverified(미확인)에서 Connected(연결됨)로 바뀝니다" width="100%">
-  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Cartesia 키를 붙여 넣고 검증하면 Unverified(미확인)에서 Connected(연결됨)로 바뀝니다" width="100%">
+  <img src="../../assets/features/providers-dark.svg" alt="Cartesia 키를 붙여 넣고 검증하면 Unverified(미확인)에서 Connected(연결됨)로 바뀝니다" width="100%">
 </td>
 </tr>
 <tr>
@@ -156,8 +150,7 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="터미널에서 npm run local을 실행하면 OpenSlop이 localhost:3000에서 열리고, 이 컴퓨터에 저장된 프로젝트가 보입니다" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="터미널에서 npm run local을 실행하면 OpenSlop이 localhost:3000에서 열리고, 이 컴퓨터에 저장된 프로젝트가 보입니다" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="터미널에서 npm run local을 실행하면 OpenSlop이 localhost:3000에서 열리고, 이 컴퓨터에 저장된 프로젝트가 보입니다" width="100%">
 </td>
 </tr>
 </table>

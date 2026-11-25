@@ -66,8 +66,7 @@ Escribe una línea. Elige 16:9 o 9:16, un idioma, un modelo y una duración, o p
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/describe-light.svg#gh-light-mode-only" alt="La caja de prompt recorre ideas de ejemplo, luego se escribe una línea y se envía" width="100%">
-  <img src="../../assets/features/describe-dark.svg#gh-dark-mode-only" alt="La caja de prompt recorre ideas de ejemplo, luego se escribe una línea y se envía" width="100%">
+  <img src="../../assets/features/describe-dark.svg" alt="La caja de prompt recorre ideas de ejemplo, luego se escribe una línea y se envía" width="100%">
 </td>
 </tr>
 <tr>
@@ -81,8 +80,7 @@ El copiloto vive en el panel izquierdo. Lee el guion, esboza la historia, escrib
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/sloppy-light.svg#gh-light-mode-only" alt="Sloppy piensa, lee, esboza, escribe un guion y las escenas aparecen en el lienzo" width="100%">
-  <img src="../../assets/features/sloppy-dark.svg#gh-dark-mode-only" alt="Sloppy piensa, lee, esboza, escribe un guion y las escenas aparecen en el lienzo" width="100%">
+  <img src="../../assets/features/sloppy-dark.svg" alt="Sloppy piensa, lee, esboza, escribe un guion y las escenas aparecen en el lienzo" width="100%">
 </td>
 </tr>
 <tr>
@@ -96,8 +94,7 @@ Cada escena es una pila de tarjetas: voz, imagen, vídeo, sonido, música. Edita
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/canvas-light.svg#gh-light-mode-only" alt="Al pasar el ratón por una fila se abre el menú de inserción con los seis tipos de elemento y aparece una tarjeta de Sound nueva" width="100%">
-  <img src="../../assets/features/canvas-dark.svg#gh-dark-mode-only" alt="Al pasar el ratón por una fila se abre el menú de inserción con los seis tipos de elemento y aparece una tarjeta de Sound nueva" width="100%">
+  <img src="../../assets/features/canvas-dark.svg" alt="Al pasar el ratón por una fila se abre el menú de inserción con los seis tipos de elemento y aparece una tarjeta de Sound nueva" width="100%">
 </td>
 </tr>
 <tr>
@@ -111,8 +108,7 @@ Generate all (generar todo) pone en cola cada elemento y corre primero las depen
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/generate-light.svg#gh-light-mode-only" alt="Generate all corre la cola, las vistas previas se rellenan y un prompt editado se marca como Stale con un motivo" width="100%">
-  <img src="../../assets/features/generate-dark.svg#gh-dark-mode-only" alt="Generate all corre la cola, las vistas previas se rellenan y un prompt editado se marca como Stale con un motivo" width="100%">
+  <img src="../../assets/features/generate-dark.svg" alt="Generate all corre la cola, las vistas previas se rellenan y un prompt editado se marca como Stale con un motivo" width="100%">
 </td>
 </tr>
 <tr>
@@ -126,8 +122,7 @@ Mira el montaje mientras se rellena, con subtítulos palabra por palabra. Cuatro
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/timeline-light.svg#gh-light-mode-only" alt="El reproductor reproduce con subtítulos palabra por palabra mientras el cabezal recorre una línea de tiempo de cuatro pistas" width="100%">
-  <img src="../../assets/features/timeline-dark.svg#gh-dark-mode-only" alt="El reproductor reproduce con subtítulos palabra por palabra mientras el cabezal recorre una línea de tiempo de cuatro pistas" width="100%">
+  <img src="../../assets/features/timeline-dark.svg" alt="El reproductor reproduce con subtítulos palabra por palabra mientras el cabezal recorre una línea de tiempo de cuatro pistas" width="100%">
 </td>
 </tr>
 <tr>
@@ -141,8 +136,7 @@ Los modelos alojados vienen con tu cuenta. Pega una clave de Anthropic, Runware,
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/providers-light.svg#gh-light-mode-only" alt="Se pega y valida una clave de Cartesia, pasando de Unverified a Connected" width="100%">
-  <img src="../../assets/features/providers-dark.svg#gh-dark-mode-only" alt="Se pega y valida una clave de Cartesia, pasando de Unverified a Connected" width="100%">
+  <img src="../../assets/features/providers-dark.svg" alt="Se pega y valida una clave de Cartesia, pasando de Unverified a Connected" width="100%">
 </td>
 </tr>
 <tr>
@@ -156,8 +150,7 @@ Usa OpenSlop en tu propio Mac, Windows o Linux. Tus proyectos y vídeos se queda
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="Un terminal ejecuta npm run local y OpenSlop se abre en localhost:3000 con proyectos guardados en este ordenador" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="Un terminal ejecuta npm run local y OpenSlop se abre en localhost:3000 con proyectos guardados en este ordenador" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="Un terminal ejecuta npm run local y OpenSlop se abre en localhost:3000 con proyectos guardados en este ordenador" width="100%">
 </td>
 </tr>
 </table>
