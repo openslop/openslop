@@ -10,10 +10,16 @@ import {
 import { keepFocus } from "@/components/ui/keep-focus";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Separator } from "@/components/ui/separator";
-import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
+import { ASSET_KIND_SPECS, type AssetKind } from "@/lib/canvas/assets";
 import type { Mention, MentionGroup } from "@/lib/canvas/name-refs";
 import { cn } from "@/lib/utils";
+import { ASSET_KIND_ICONS } from "./asset-kinds";
 import { NamedAssetImage } from "./named-asset-image";
+
+function KindIcon({ kind }: { kind: AssetKind }) {
+	const Icon = ASSET_KIND_ICONS[kind];
+	return <Icon size="1em" />;
+}
 
 export const optionId = (listboxId: string, index: number) =>
 	`${listboxId}-${index}`;
@@ -95,7 +101,11 @@ export function MentionMenu({
 							<Fragment key={kind}>
 								{start > 0 && <Separator className="my-1" />}
 								<div role="group" aria-labelledby={headingId}>
-									<SectionTitle id={headingId} className="px-2 py-1.5">
+									<SectionTitle
+										id={headingId}
+										className="flex items-center gap-1.5 px-2 py-1.5"
+									>
+										<KindIcon kind={kind} />
 										{ASSET_KIND_SPECS[kind].plural}
 									</SectionTitle>
 									{names.map((name, i) => (
