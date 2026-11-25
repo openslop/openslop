@@ -16,6 +16,7 @@ import {
 } from "@/lib/canvas/types";
 import { REFERENCE_IMAGES_ATTR } from "@/lib/connectors/attributes/reference-images";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
+import { queuedReason } from "@/lib/generation/queued-reason";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { findMedia } from "@/lib/project/media";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
@@ -45,13 +46,18 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 	const { status, startedAt } = useQueueSelector((q) =>
 		q.getElementSnapshot(id),
 	);
+	const waitingOn = useQueueSelector((q) => queuedReason(id, q));
 	if (!type || !isMediaDraftType(type) || !isGenerationActive(status))
 		return null;
 	const { label, Icon } = ELEMENT_CONFIGS[draftedType(type)];
 	if (kind === "audio")
 		return (
 			<AudioCard name={label}>
-				<GenerationIndicator status={status} startedAt={startedAt} />
+				<GenerationIndicator
+					status={status}
+					startedAt={startedAt}
+					queuedReason={waitingOn}
+				/>
 				<Skeleton className="h-5 flex-1 rounded-md" />
 			</AudioCard>
 		);

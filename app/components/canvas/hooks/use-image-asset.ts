@@ -3,6 +3,7 @@ import { shallow } from "zustand/shallow";
 import { findImageAsset, kindOfType } from "@/lib/canvas/assets";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
+import { queuedReason } from "@/lib/generation/queued-reason";
 
 /** A named asset's image asset: which one it is, and whatever it last generated. */
 export function useImageAsset(name = "") {
@@ -18,5 +19,6 @@ export function useImageAsset(name = "") {
 		),
 		status: useQueueSelector((q) => q.getElementSnapshot(id).status),
 		startedAt: useQueueSelector((q) => q.getElementSnapshot(id).startedAt),
+		queuedReason: useQueueSelector((q) => queuedReason(id, q)),
 	};
 }

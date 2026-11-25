@@ -43,6 +43,30 @@ describe("GenerationIndicator", () => {
 		},
 	);
 
+	it("names what a queued element waits on, keeping the short label on screen", () => {
+		const reason = "Waiting for Red's image";
+		const html = render(
+			<GenerationIndicator
+				status="queued"
+				startedAt={null}
+				queuedReason={reason}
+			/>,
+		);
+		expect(html).toContain(`aria-label="${reason.replace("'", "&#x27;")}"`);
+		expect(html).toMatch(/<span aria-hidden="true" class="[^"]*">Queued…</);
+	});
+
+	it("ignores a stale queued reason once generating", () => {
+		const html = render(
+			<GenerationIndicator
+				status="generating"
+				startedAt={null}
+				queuedReason="Waiting for Red's image"
+			/>,
+		);
+		expect(html).toContain('aria-label="Generating 0s"');
+	});
+
 	it("keeps the small indicator to its icon", () => {
 		const html = render(
 			<GenerationIndicator status="generating" startedAt={null} size="sm" />,

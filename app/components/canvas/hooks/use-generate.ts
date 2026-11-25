@@ -4,6 +4,7 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 import { hasPrompt } from "@/lib/generation/graph";
+import { queuedReason } from "@/lib/generation/queued-reason";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { buildNode } from "@/lib/generation/generation-graph";
 import { useBuildContext } from "@/lib/generation/use-build-context";
@@ -16,6 +17,7 @@ export function useGenerate(element: GeneratedElement) {
 	const node = useLiveNode(element);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
 	const reason = useQueueSelector((q) => staleReason(node, q));
+	const waitingOn = useQueueSelector((q) => queuedReason(node.id, q));
 
 	// Built again at the click: a live node's job may lag, see useLiveNode.
 	const generate = useCallback(() => {
@@ -38,6 +40,7 @@ export function useGenerate(element: GeneratedElement) {
 		result: snapshot.result,
 		error: snapshot.error,
 		staleReason: reason,
+		queuedReason: waitingOn,
 		hasPrompt: hasPrompt(node),
 		hasResult: Boolean(snapshot.result),
 		generate,

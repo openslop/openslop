@@ -12,6 +12,7 @@ import { truncateMiddle } from "@/lib/format";
 import { lineText } from "@/lib/captions/caption-layout";
 import { isGenerationActive } from "@/lib/generation/snapshots";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
+import { queuedReason } from "@/lib/generation/queued-reason";
 import { GenerationIndicator } from "@/app/components/canvas/elements/generation-indicator";
 import { mediaUrlAt } from "@/lib/render/clip-trim";
 import { formatTimeRange } from "@/lib/render/timestamps";
@@ -234,6 +235,7 @@ export function TimelineClip({
 	const { status, startedAt } = useQueueSelector((q) =>
 		q.getElementSnapshot(element.id),
 	);
+	const waitingOn = useQueueSelector((q) => queuedReason(element.id, q));
 	const active = isGenerationActive(status);
 	const regenerating = status === "generating";
 	const accessibleLabel = [
@@ -278,6 +280,7 @@ export function TimelineClip({
 				<GenerationIndicator
 					status={status}
 					startedAt={startedAt}
+					queuedReason={waitingOn}
 					size="sm"
 					className="absolute top-0.5 right-0.5 z-10"
 				/>

@@ -42,11 +42,14 @@ const SIZE_CLASSES: Record<
 export function GenerationIndicator({
 	status,
 	startedAt,
+	queuedReason,
 	size = "md",
 	className,
 }: {
 	status: ActiveGenerationStatus;
 	startedAt: number | null;
+	/** What a queued element waits on, for its tooltip; the visible label stays short. */
+	queuedReason?: string | null;
 	size?: Size;
 	className?: string;
 }) {
@@ -54,12 +57,13 @@ export function GenerationIndicator({
 	const sizes = SIZE_CLASSES[size];
 	const seconds = useElapsedSeconds(startedAt);
 	const label = labelFor(seconds);
+	const description = (status === "queued" && queuedReason) || label;
 
 	return (
-		<SimpleTooltip label={label}>
+		<SimpleTooltip label={description}>
 			<span
 				role="status"
-				aria-label={label}
+				aria-label={description}
 				className={cn(
 					"relative flex items-center justify-center rounded-full overflow-hidden text-on-media-foreground transition-[opacity,background-color]",
 					sizes.wrapper,

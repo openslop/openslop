@@ -58,9 +58,14 @@ export function staleReason(
 ): string | null {
 	if (!isNodeStale(node, queue)) return null;
 	const changes = changedInputs(node, queue);
-	const named = changes.slice(0, MAX_NAMED);
-	const rest = changes.length - named.length;
-	if (rest > 0) named.push(`${rest} more`);
-	const what = named.length > 0 ? conjunction(named) : "its inputs";
+	const what = changes.length > 0 ? namedList(changes) : "its inputs";
 	return `${upperFirst(what)} changed — regenerate to update`;
+}
+
+/** "a, b, and c", counting off whatever is past the first few. */
+export function namedList(items: readonly string[]): string {
+	const named = items.slice(0, MAX_NAMED);
+	const rest = items.length - named.length;
+	if (rest > 0) named.push(`${rest} more`);
+	return conjunction(named);
 }
