@@ -3,24 +3,33 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
-import { addCharacter, ensureAsset } from "@/lib/canvas/asset-ops";
+import { addAsset, ensureAsset } from "@/lib/canvas/asset-ops";
+import { pictureTypeOf } from "@/lib/canvas/assets";
 import type { ProjectAssetType } from "@/lib/canvas/types";
-import { AssetEditContext, type AssetEditors } from "../asset-edit-context";
+import {
+	AssetEditContext,
+	type AssetEditors,
+	type NewAsset,
+} from "../asset-edit-context";
 import { ArtStyleModal } from "../style/art-style-modal";
 import { CharacterEditModal } from "./character-edit-modal";
-import { NewCharacterDialog } from "./new-character-dialog";
+import { NewAssetDialog } from "./new-asset-dialog";
+import { PictureEditModal } from "./picture-edit-modal";
 
 /** The one asset dialog open at a time, so two can never stack. */
 type AssetEdit =
-	| { kind: "create" }
-	| { kind: "character"; name: string }
-	| { kind: "artStyle" };
+	| { dialog: "create"; preset: NewAsset }
+	| { dialog: "character"; name: string }
+	| { dialog: "picture"; name: string }
+	| { dialog: "artStyle" };
 
 const DIALOG_OF: Record<ProjectAssetType, (name?: string) => AssetEdit> = {
-	asset_avatar: (name = "") => ({ kind: "character", name }),
-	asset_voice: (name = "") => ({ kind: "character", name }),
-	asset_style: () => ({ kind: "artStyle" }),
-	asset_references: () => ({ kind: "artStyle" }),
+	asset_avatar: (name = "") => ({ dialog: "character", name }),
+	asset_voice: (name = "") => ({ dialog: "character", name }),
+	asset_location: (name = "") => ({ dialog: "picture", name }),
+	asset_prop: (name = "") => ({ dialog: "picture", name }),
+	asset_style: () => ({ dialog: "artStyle" }),
+	asset_references: () => ({ dialog: "artStyle" }),
 };
 
 /** Mounts the asset dialogs once, so no view wires openers down to its tiles. */
@@ -35,11 +44,8 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				ensureAsset(editor, type, name);
 				setEditing(DIALOG_OF[type](name));
 			},
-			createCharacter: (name) => {
-				addCharacter(editor, name);
-				setEditing({ kind: "character", name });
-			},
-			openCreateCharacter: () => setEditing({ kind: "create" }),
+			openCreateAsset: (preset = {}) =>
+				setEditing({ dialog: "create", preset }),
 		}),
 		[editor],
 	);
@@ -53,17 +59,30 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 					if (!open) close();
 				}}
 			>
-				{editing?.kind === "create" && (
-					<NewCharacterDialog onCreated={editors.createCharacter} />
+				{editing?.dialog === "create" && (
+					<NewAssetDialog
+						preset={editing.preset}
+						onCreated={(kind, name) => {
+							addAsset(editor, kind, name);
+							editors.editAsset(pictureTypeOf(kind), name);
+						}}
+					/>
 				)}
-				{editing?.kind === "character" && (
+				{editing?.dialog === "character" && (
 					<CharacterEditModal
 						key={editing.name}
 						name={editing.name}
 						onClose={close}
 					/>
 				)}
-				{editing?.kind === "artStyle" && <ArtStyleModal onClose={close} />}
+				{editing?.dialog === "picture" && (
+					<PictureEditModal
+						key={editing.name}
+						name={editing.name}
+						onClose={close}
+					/>
+				)}
+				{editing?.dialog === "artStyle" && <ArtStyleModal onClose={close} />}
 			</Dialog>
 		</AssetEditContext>
 	);

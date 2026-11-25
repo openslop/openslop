@@ -155,6 +155,8 @@ const MEDIA_DRAFT_SPECS = Object.fromEntries(
 /** Tiles ahead of the scenes; one with a connector generates like content does. */
 export const ASSET_TYPES = {
 	asset_avatar: { connector: "image", outputKind: "image" },
+	asset_location: { connector: "image", outputKind: "image" },
+	asset_prop: { connector: "image", outputKind: "image" },
 	asset_voice: { connector: "voice" },
 	asset_style: {},
 	asset_references: {},

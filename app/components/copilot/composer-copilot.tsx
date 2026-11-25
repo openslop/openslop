@@ -7,12 +7,12 @@ import {
 	FilmSlate,
 	Hourglass,
 	ImagePlus,
+	LayersPlus,
 	Lightbulb,
 	Media,
 	Palette,
 	Proportions,
 	Translate,
-	User,
 	X,
 } from "@/components/ui/icon";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
@@ -49,7 +49,7 @@ import { pickOther } from "@/lib/utils";
 import {
 	AssetStrip,
 	AssetStripArtStyle,
-	AssetStripCharacters,
+	AssetStripNamed,
 	AssetStripMedia,
 	AssetStripReferences,
 	AssetStripUploading,
@@ -91,7 +91,7 @@ function AttachMenu({
 	uploadMedia: () => void;
 	uploading: boolean;
 }) {
-	const { openCreateCharacter, editAsset } = useAssetEditors();
+	const { openCreateAsset, editAsset } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -107,10 +107,10 @@ function AttachMenu({
 			onSelect: uploadReferences,
 		},
 		{
-			key: "character",
-			label: "Create character",
-			icon: <User className={iconClass} />,
-			onSelect: openCreateCharacter,
+			key: "asset",
+			label: "Create asset",
+			icon: <LayersPlus className={iconClass} />,
+			onSelect: () => openCreateAsset(),
 		},
 		{
 			key: "art-style",
@@ -212,7 +212,7 @@ export default function ComposerCopilot({
 			<div className="px-4 py-3">
 				<AssetStrip>
 					<AssetStripArtStyle />
-					<AssetStripCharacters />
+					<AssetStripNamed />
 					<AssetStripReferences />
 					<AssetStripMedia />
 					<AssetStripUploading count={uploadingCount} />

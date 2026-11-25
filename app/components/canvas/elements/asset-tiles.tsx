@@ -2,10 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
-import { Image, Mic, Palette, Pencil, User, X } from "@/components/ui/icon";
+import { Image, Mic, Palette, Pencil, X } from "@/components/ui/icon";
+import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
 import type { MediaItem } from "@/lib/project/media";
-import { useHasAsset } from "@/lib/canvas/use-assets";
-import { useCharacterAvatar } from "../hooks/use-character-avatar";
+import { usePicture } from "../hooks/use-picture";
+import { ASSET_KIND_ICONS } from "./asset-kinds";
 import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
 import { AudioPlayer } from "./audio-player";
@@ -38,22 +39,21 @@ export function ArtStyleAssetTile(tile: TileProps) {
 	);
 }
 
-type CharacterTileProps = TileProps & { name: string; onDelete: () => void };
+type NamedTileProps = TileProps & { name: string; onDelete: () => void };
 
-/** A character by their look, or by their voice when they have no look. */
-export function CharacterAssetTile({ name, ...tile }: CharacterTileProps) {
+/** A character, location or prop by its picture, or a character by their voice when they have no look. */
+export function NamedAssetTile({ name, ...tile }: NamedTileProps) {
 	const { editAsset } = useAssetEditors();
-	const hasAvatar = useHasAsset("asset_avatar", name);
-	const avatar = useCharacterAvatar(name);
-	return hasAvatar ? (
+	const { type, kind, url, status, startedAt } = usePicture(name);
+	return type && kind ? (
 		<AssetTile
 			name={name}
-			previewUrl={avatar.url}
-			context="Character"
-			Icon={User}
-			status={avatar.status}
-			startedAt={avatar.startedAt}
-			primary={editing(name, () => editAsset("asset_avatar", name))}
+			previewUrl={url}
+			context={ASSET_KIND_SPECS[kind].label}
+			Icon={ASSET_KIND_ICONS[kind]}
+			status={status}
+			startedAt={startedAt}
+			primary={editing(name, () => editAsset(type, name))}
 			{...tile}
 		/>
 	) : (

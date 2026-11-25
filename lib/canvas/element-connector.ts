@@ -48,13 +48,17 @@ export function resolveElementConnector(
 	};
 }
 
+const PICTURE_ATTRIBUTES = AttributeSchema.from([
+	nameDef,
+	...OWN_MODEL_DEFS,
+	referenceImagesDef,
+]);
+
 /** A project asset's attributes are its own; content and drafts take their connector's. */
 const OWN_ATTRIBUTES: Partial<Record<ElementType, AttributeSchema>> = {
-	asset_avatar: AttributeSchema.from([
-		nameDef,
-		...OWN_MODEL_DEFS,
-		referenceImagesDef,
-	]),
+	asset_avatar: PICTURE_ATTRIBUTES,
+	asset_location: PICTURE_ATTRIBUTES,
+	asset_prop: PICTURE_ATTRIBUTES,
 	asset_voice: VOICE_ATTRIBUTES,
 	asset_style: AttributeSchema.from([]),
 	asset_references: AttributeSchema.from([

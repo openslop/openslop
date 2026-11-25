@@ -1,27 +1,13 @@
 "use client";
 
 import { useSlateStatic } from "slate-react";
-import { Trash2 } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
 import { ensureAsset, removeAsset } from "@/lib/canvas/asset-ops";
-import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { useAsset } from "@/lib/canvas/use-assets";
-import { updateElementText } from "@/lib/canvas/editor-ops";
 import type { AssetType } from "@/lib/canvas/types";
-import { ModelAttribute } from "../attributes/model-attribute";
-import { ElementGenerationProvider } from "../element-generation-context";
-import {
-	ElementGenerateButton,
-	ElementStaleIndicator,
-} from "../generate-button";
-import { ElementHistoryPopover } from "../element-history-popover";
-import { ElementSettings } from "../element-settings";
-import { ResetEditsButton } from "../reset-edits-button";
-import { AddMediaButton } from "../element-media-picker";
-import { OutputPreview } from "../output-preview";
+import { AppearanceEditor } from "./appearance-editor";
 import { AssetDialog } from "./asset-dialog";
-import { deleteCharacter } from "../delete-asset";
-import { SwitchField, TextAreaField } from "./fields";
+import { DeleteAssetButton } from "../delete-asset";
+import { SwitchField } from "./fields";
 import { VoiceEditor } from "./voice-editor";
 
 export function CharacterEditModal({
@@ -46,21 +32,7 @@ export function CharacterEditModal({
 					: "Edits save automatically."
 			}
 			onClose={onClose}
-			actions={
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onClick={() => {
-						deleteCharacter(editor, name);
-						onClose();
-					}}
-					className="text-muted-foreground sm:mr-auto"
-				>
-					<Trash2 />
-					Delete
-				</Button>
-			}
+			actions={<DeleteAssetButton name={name} onDeleted={onClose} />}
 		>
 			<SwitchField
 				label="Avatar"
@@ -69,34 +41,11 @@ export function CharacterEditModal({
 				onCheckedChange={toggle("asset_avatar")}
 			/>
 			{avatar && (
-				<ElementGenerationProvider element={avatar}>
-					<div className="grid gap-4 sm:grid-cols-2">
-						<div className="@container/element flex min-w-0 flex-col gap-2">
-							<TextAreaField
-								className="min-h-0 flex-1"
-								label="Appearance"
-								autoFocus
-								aside={
-									<div className="flex items-center gap-1">
-										<ModelAttribute element={avatar} label="Avatar model" />
-										<ElementSettings element={avatar} />
-										<ElementHistoryPopover elementId={avatar.id} />
-									</div>
-								}
-								value={getElementBodyText(avatar)}
-								onChange={(text) => updateElementText(editor, avatar.id, text)}
-								placeholder="Describe the character's look"
-							/>
-							<div className="flex items-center justify-end gap-2">
-								<ElementStaleIndicator />
-								<ResetEditsButton />
-								<AddMediaButton />
-								<ElementGenerateButton />
-							</div>
-						</div>
-						<OutputPreview outputKind="image" />
-					</div>
-				</ElementGenerationProvider>
+				<AppearanceEditor
+					element={avatar}
+					modelLabel="Avatar model"
+					placeholder="Describe the character's look"
+				/>
 			)}
 			<SwitchField
 				label="Voice"

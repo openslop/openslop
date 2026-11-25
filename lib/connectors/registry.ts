@@ -1,3 +1,4 @@
+import type { AssetKind } from "@/lib/canvas/assets";
 import {
 	draftedType,
 	MEDIA_DRAFT_TYPES,
@@ -6,7 +7,7 @@ import {
 } from "@/lib/canvas/types";
 import { fromKeys } from "@/lib/utils";
 import { createArtStylePlugin } from "./image/plugins/art-style";
-import { createCharacterAvatarPlugin } from "./image/plugins/character-avatar";
+import { createAssetPicturePlugin } from "./image/plugins/asset-picture";
 import { createReferenceImagesPlugin } from "./image/plugins/reference-images";
 import { createDimensionsPlugin } from "./plugins/dimensions";
 import { buildVisualPlugins } from "./plugins/visual-chain";
@@ -38,16 +39,20 @@ const DRAFTS = fromKeys(
 	(type) => CONTENT[draftedType(type)],
 );
 
+const picture = (kind: AssetKind): ConnectorConfig => ({
+	plugins: [
+		createAssetPicturePlugin(kind),
+		createArtStylePlugin(),
+		createReferenceImagesPlugin(),
+		createDimensionsPlugin("image"),
+	],
+});
+
 export const DEFAULT_CONNECTOR_REGISTRY: ConnectorRegistry = {
 	...CONTENT,
 	...DRAFTS,
-	asset_avatar: {
-		plugins: [
-			createCharacterAvatarPlugin(),
-			createArtStylePlugin(),
-			createReferenceImagesPlugin(),
-			createDimensionsPlugin("image"),
-		],
-	},
+	asset_avatar: picture("character"),
+	asset_location: picture("location"),
+	asset_prop: picture("prop"),
 	asset_voice: {},
 };

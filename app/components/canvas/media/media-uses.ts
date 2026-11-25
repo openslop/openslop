@@ -1,6 +1,10 @@
 import type { Descendant, Editor } from "slate";
 import { addElementReferences } from "@/lib/canvas/asset-ops";
-import { getAvatars } from "@/lib/canvas/assets";
+import {
+	ASSET_KIND_SPECS,
+	ASSET_KINDS,
+	picturesOfKind,
+} from "@/lib/canvas/assets";
 import { sceneLabel } from "@/lib/canvas/constants";
 import { elementOffers } from "@/lib/canvas/element-connector";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
@@ -59,16 +63,18 @@ const pinAsResult: MediaUse["apply"] = (
 
 /** Where a piece of the project's media can go, by what it is. */
 const MEDIA_USES: readonly MediaUse[] = [
-	{
-		label: "Character avatar",
-		kinds: ["image"],
-		targets: (nodes) =>
-			getAvatars(nodes).flatMap((avatar) => {
-				const name = avatar.generationAttributes?.name;
-				return name ? [{ label: name, element: avatar }] : [];
-			}),
-		apply: pinAsResult,
-	},
+	...ASSET_KINDS.map(
+		(kind): MediaUse => ({
+			label: ASSET_KIND_SPECS[kind].label,
+			kinds: ["image"],
+			targets: (nodes) =>
+				picturesOfKind(nodes, kind).flatMap((picture) => {
+					const name = picture.generationAttributes?.name;
+					return name ? [{ label: name, element: picture }] : [];
+				}),
+			apply: pinAsResult,
+		}),
+	),
 	{
 		label: "Scene visual",
 		kinds: ["image", "video"],

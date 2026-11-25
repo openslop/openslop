@@ -1,5 +1,5 @@
 import pickBy from "lodash/pickBy";
-import { findAsset } from "@/lib/canvas/assets";
+import { findPicture } from "@/lib/canvas/assets";
 import type { CanvasElement } from "@/lib/canvas/types";
 import { referencedNames } from "@/lib/connectors/character-refs";
 import { isPictured, isVoiced } from "@/lib/connectors/characters";
@@ -26,7 +26,7 @@ const shownAvatars: Dependency = (element, { canvas }) =>
 	Object.fromEntries(
 		shownCharacters(element).map((name) => [
 			avatarLabel(name),
-			findAsset(canvas, "asset_avatar", name),
+			findPicture(canvas, name),
 		]),
 	);
 

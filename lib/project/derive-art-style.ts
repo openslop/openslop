@@ -1,5 +1,5 @@
 import { dedent } from "@/lib/dedent";
-import { getAvatars, referenceUrls } from "@/lib/canvas/assets";
+import { picturesOfKind, referenceUrls } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import type { LLMConnector } from "@/lib/connectors/types";
@@ -17,12 +17,14 @@ export function artStyleReferences(
 	assets: AssetElement[],
 	queue: GenerationQueue,
 ): { images: string[]; avatars: CharacterAvatar[] } {
-	const avatars = getAvatars(assets).flatMap(({ id, generationAttributes }) => {
-		const { result } = queue.getElementSnapshot(id);
-		const url = result?.uploaded && getPrimaryUrl(result, "image");
-		const name = generationAttributes?.name;
-		return url && name ? [{ name, url }] : [];
-	});
+	const avatars = picturesOfKind(assets, "character").flatMap(
+		({ id, generationAttributes }) => {
+			const { result } = queue.getElementSnapshot(id);
+			const url = result?.uploaded && getPrimaryUrl(result, "image");
+			const name = generationAttributes?.name;
+			return url && name ? [{ name, url }] : [];
+		},
+	);
 	return { images: referenceUrls(assets), avatars };
 }
 

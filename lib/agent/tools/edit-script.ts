@@ -17,9 +17,15 @@ import { defineTool } from "./define-tool";
 const ASSETS = dedent`
 	A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their
 	lines and every {{Name}} in a prompt use, which never changes. A character has either or both.
+	Locations and props are named the same way, and no two characters, locations or props
+	share a name.
 	- asset_avatar: what a character looks like, as its text, written like an image
 	  prompt. Their avatar is drawn from it, and every visual that names them is drawn from that
 	  avatar.
+	- asset_location: a place that recurs, as its text, written like an image prompt of the
+	  place with nobody in it. Every visual that names it is drawn from its picture.
+	- asset_prop: an object that recurs, as its text, written like an image prompt of the
+	  object alone. Every visual that names it is drawn from its picture.
 	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described by
 	  its traits, or pinned by a pickedVoiceId you read; always set its language to the one its
 	  lines are in. A narrator, for example, is just a voice with no avatar.
@@ -68,7 +74,7 @@ export const editScript = defineTool({
 
 	  Send the fewest operations that do the job. Write element text in the language of the
 	  surrounding script, whatever language the request is in. Every other element's prompt, and
-	  avatar and style text, are always in English, except speech quoted inside a video prompt and
+	  avatar, location, prop and style text, are always in English, except speech quoted inside a video prompt and
 	  the lyrics in a music prompt.
 	`,
 	input: z.object({

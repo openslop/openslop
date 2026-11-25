@@ -55,6 +55,8 @@ export const UPLOADABLE_TYPES = [
 	"video",
 	"music",
 	"asset_avatar",
+	"asset_location",
+	"asset_prop",
 ] as const satisfies readonly OutputType[];
 
 type UploadableElement = ElementOf<(typeof UPLOADABLE_TYPES)[number]>;

@@ -9,12 +9,12 @@ import { Slate, withReact } from "slate-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { asset, element } from "@/lib/canvas/__tests__/_assets";
 
-vi.mock("@/app/components/canvas/hooks/use-character-avatar", () => ({
-	useCharacterAvatar: () => ({ url: "" }),
+vi.mock("@/app/components/canvas/hooks/use-picture", () => ({
+	usePicture: () => ({ url: "" }),
 }));
 
 vi.mock("../asset-edit-context", () => ({
-	useAssetEditors: () => ({ openCreateCharacter: () => {} }),
+	useAssetEditors: () => ({ openCreateAsset: () => {} }),
 }));
 
 import { CharacterSwitcher } from "../character-switcher";

@@ -4,6 +4,7 @@ import uniq from "lodash/uniq";
 import type { Descendant } from "slate";
 import { parseReferenceImages } from "@/lib/connectors/attributes/reference-images";
 import { VoiceSchema, type Voice } from "@/lib/project/types";
+import { fromKeys } from "@/lib/utils";
 import { flatAttributes } from "./element-attributes";
 import { isAssetElement } from "./guards";
 import { getElementBodyText } from "./osml-serializer";
@@ -58,25 +59,96 @@ const assetsOf =
 			(asset): asset is AssetElement<T> => asset.type === type,
 		);
 
-export const getAvatars = assetsOf("asset_avatar");
+/** What a `{{Name}}` can name, each held by its picture and, for a character, a voice. */
+export const ASSET_KIND_SPECS = {
+	character: {
+		label: "Character",
+		plural: "Characters",
+		types: ["asset_avatar", "asset_voice"],
+	},
+	location: {
+		label: "Location",
+		plural: "Locations",
+		types: ["asset_location"],
+	},
+	prop: { label: "Prop", plural: "Props", types: ["asset_prop"] },
+} as const satisfies Record<
+	string,
+	{ label: string; plural: string; types: readonly AssetType[] }
+>;
 
-const getVoices = assetsOf("asset_voice");
+export type AssetKind = keyof typeof ASSET_KIND_SPECS;
+
+export const ASSET_KINDS = Object.keys(ASSET_KIND_SPECS) as AssetKind[];
+
+export type PictureType = (typeof ASSET_KIND_SPECS)[AssetKind]["types"][0];
+
+export const pictureTypeOf = (kind: AssetKind): PictureType =>
+	ASSET_KIND_SPECS[kind].types[0];
+
+const KIND_OF_TYPE: Partial<Record<AssetType, AssetKind>> = Object.fromEntries(
+	ASSET_KINDS.flatMap((kind) =>
+		ASSET_KIND_SPECS[kind].types.map((type) => [type, kind]),
+	),
+);
+
+export const kindOfType = (type: AssetType): AssetKind | undefined =>
+	KIND_OF_TYPE[type];
+
+const PICTURE_TYPES: readonly AssetType[] = ASSET_KINDS.map(pictureTypeOf);
+
+const isPicture = (asset: AssetElement): asset is AssetElement<PictureType> =>
+	PICTURE_TYPES.includes(asset.type);
+
+export const isNamed = (node: unknown, name: string): node is AssetElement =>
+	isAssetElement(node) &&
+	node.generationAttributes?.name === name &&
+	kindOfType(node.type) !== undefined;
+
+/** What `name` is, if anything: names are unique across kinds. */
+export const kindOfName = (
+	nodes: readonly unknown[],
+	name: string,
+): AssetKind | undefined => {
+	const asset = getAssets(nodes).find((node) => isNamed(node, name));
+	return asset && kindOfType(asset.type);
+};
+
+export const getPictures = (
+	nodes: readonly unknown[],
+): AssetElement<PictureType>[] => getAssets(nodes).filter(isPicture);
+
+export const findPicture = (
+	nodes: readonly unknown[],
+	name: string,
+): AssetElement<PictureType> | undefined =>
+	getPictures(nodes).find((asset) => isNamed(asset, name));
+
+export const picturesOfKind = (
+	nodes: readonly unknown[],
+	kind: AssetKind,
+): AssetElement<PictureType>[] => assetsOf(pictureTypeOf(kind))(nodes);
 
 const namesOf = (assets: AssetElement[]): string[] =>
-	compact(assets.map((asset) => asset.generationAttributes?.name));
+	uniq(compact(assets.map((asset) => asset.generationAttributes?.name)));
 
-/** Everyone with a look or a voice. */
-export const characterNames = (nodes: readonly unknown[]): string[] =>
-	uniq(namesOf([...getAvatars(nodes), ...getVoices(nodes)]));
-
-export const isCharacter = (nodes: readonly unknown[], name: string): boolean =>
-	nodes.some(
-		(node) =>
-			isAsset(node, "asset_avatar", name) || isAsset(node, "asset_voice", name),
+/** Every name of a kind: for characters, everyone with a look or a voice. */
+export const assetNames = (
+	nodes: readonly unknown[],
+	kind: AssetKind,
+): string[] =>
+	namesOf(
+		ASSET_KIND_SPECS[kind].types.flatMap((type) => assetsOf(type)(nodes)),
 	);
 
-export const avatarNames = (nodes: readonly unknown[]): string[] =>
-	namesOf(getAvatars(nodes));
+/** Each kind's names a `{{Name}}` can draw, so a voice-only character is left out. */
+export const picturedNames = (
+	nodes: readonly unknown[],
+): Record<AssetKind, string[]> =>
+	fromKeys(ASSET_KINDS, (kind) => namesOf(picturesOfKind(nodes, kind)));
+
+export const allAssetNames = (nodes: readonly unknown[]): string[] =>
+	ASSET_KINDS.flatMap((kind) => assetNames(nodes, kind));
 
 export const assetText = (
 	nodes: readonly unknown[],

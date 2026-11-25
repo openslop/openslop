@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 import { ReactEditor, useSlateStatic } from "slate-react";
 import {
 	Popover,
@@ -8,14 +8,17 @@ import {
 	PopoverContent,
 } from "@/components/ui/popover";
 import { keepFocus } from "@/components/ui/keep-focus";
-import type { Mention } from "@/lib/canvas/character-refs";
+import { SectionTitle } from "@/components/ui/section-title";
+import { Separator } from "@/components/ui/separator";
+import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
+import type { Mention, MentionGroup } from "@/lib/canvas/character-refs";
 import { cn } from "@/lib/utils";
-import { CharacterAvatar } from "./character-pill";
+import { AssetAvatar } from "./asset-avatar";
 
 export const optionId = (listboxId: string, index: number) =>
 	`${listboxId}-${index}`;
 
-function CharacterOption({
+function MentionOption({
 	id,
 	name,
 	active,
@@ -38,22 +41,23 @@ function CharacterOption({
 				active && "bg-surface-hover",
 			)}
 		>
-			<CharacterAvatar name={name} />
+			<AssetAvatar name={name} />
 			<span className="min-w-0 truncate">{name}</span>
 		</div>
 	);
 }
 
-export function CharacterMentionMenu({
+/** The assets `@` can name, under a heading per kind. */
+export function MentionMenu({
 	mention,
-	options,
+	groups,
 	active,
 	listboxId,
 	onSelect,
 	onDismiss,
 }: {
 	mention: Mention;
-	options: string[];
+	groups: MentionGroup[];
 	active: number;
 	listboxId: string;
 	onSelect: (name: string) => void;
@@ -79,16 +83,29 @@ export function CharacterMentionMenu({
 				onOpenAutoFocus={(event) => event.preventDefault()}
 				onCloseAutoFocus={(event) => event.preventDefault()}
 			>
-				<div id={listboxId} role="listbox" aria-label="Characters">
-					{options.map((name, index) => (
-						<CharacterOption
-							key={name}
-							id={optionId(listboxId, index)}
-							name={name}
-							active={index === active}
-							onSelect={() => onSelect(name)}
-						/>
-					))}
+				<div id={listboxId} role="listbox" aria-label="Assets">
+					{groups.map(({ kind, names, start }) => {
+						const headingId = `${listboxId}-${kind}`;
+						return (
+							<Fragment key={kind}>
+								{start > 0 && <Separator className="my-1" />}
+								<div role="group" aria-labelledby={headingId}>
+									<SectionTitle id={headingId} className="px-2 py-1.5">
+										{ASSET_KIND_SPECS[kind].plural}
+									</SectionTitle>
+									{names.map((name, i) => (
+										<MentionOption
+											key={name}
+											id={optionId(listboxId, start + i)}
+											name={name}
+											active={start + i === active}
+											onSelect={() => onSelect(name)}
+										/>
+									))}
+								</div>
+							</Fragment>
+						);
+					})}
 				</div>
 			</PopoverContent>
 		</Popover>

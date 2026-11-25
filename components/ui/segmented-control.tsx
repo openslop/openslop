@@ -1,12 +1,14 @@
 "use client";
 
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
+import type { IconComponent } from "@/components/ui/icon";
 import { onOptionChange } from "@/components/ui/option-change";
 import { cn } from "@/lib/utils";
 
 export type SegmentedControlOption<T extends string> = {
 	value: T;
 	label: string;
+	Icon?: IconComponent;
 };
 
 /**
@@ -43,8 +45,9 @@ export function SegmentedControl<T extends string>({
 				<ToggleGroupPrimitive.Item
 					key={option.value}
 					value={option.value}
-					className="focus-ring inline-flex items-center justify-center rounded-md px-3 py-1 font-body text-label font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-elevation-1"
+					className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1 font-body text-label font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-elevation-1"
 				>
+					{option.Icon && <option.Icon />}
 					{option.label}
 				</ToggleGroupPrimitive.Item>
 			))}

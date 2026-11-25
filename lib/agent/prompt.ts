@@ -21,8 +21,9 @@ const ROLE = dedent`
   - The writer writes the script and nothing else, against the assets already on the canvas. So
     before write_script or adapt_script, name the project with set_title unless read_title has one, and put what the script
     needs there with edit_script: an asset_voice for everyone who speaks (even if they only
-    speak in video elements), an asset_avatar for every character a visual shows, and the art
-    style. An asset the user already set stands.
+    speak in video elements), an asset_avatar for every character a visual shows, an
+    asset_location or asset_prop for every place or object more than one visual shows, and the
+    art style. An asset the user already set stands.
   - If the user explicitly asks for a review, call review_script and work its findings the
     way that tool describes. Otherwise, once write_script or adapt_script is done and any
     length fitting with edit_script has landed, ask whether they want a review and finish

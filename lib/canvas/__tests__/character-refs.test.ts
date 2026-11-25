@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Editor, Transforms } from "slate";
-import { matchCharacterNames, mentionAt } from "../character-refs";
+import { matchNames, mentionAt, mentionGroups } from "../character-refs";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import { SCENE_TYPE, type ContentElement } from "../types";
 import { element, makeEditor } from "./_assets";
@@ -82,39 +82,61 @@ describe("mentionAt", () => {
 	});
 });
 
-describe("matchCharacterNames", () => {
+describe("matchNames", () => {
 	const names = ["Grace", "Granny Smith", "Gregory", "Bob"];
 
 	it("lists every character, in their own order, for an empty query", () => {
-		expect(matchCharacterNames(names, "")).toEqual(names);
+		expect(matchNames(names, "")).toEqual(names);
 	});
 
 	it("finds a name by the start of a later word", () => {
-		expect(matchCharacterNames(names, "smi")).toEqual(["Granny Smith"]);
+		expect(matchNames(names, "smi")).toEqual(["Granny Smith"]);
 	});
 
 	it("finds a name from letters typed with some skipped", () => {
-		expect(matchCharacterNames(["Granny", "Bob"], "grny")).toEqual(["Granny"]);
+		expect(matchNames(["Granny", "Bob"], "grny")).toEqual(["Granny"]);
 	});
 
 	it("ignores case", () => {
-		expect(matchCharacterNames(names, "BOB")).toEqual(["Bob"]);
+		expect(matchNames(names, "BOB")).toEqual(["Bob"]);
 	});
 
 	it("ranks names starting with the query above word-start and fuzzy hits", () => {
 		expect(
-			matchCharacterNames(["Old Gran", "Gertrude Rae Annie", "Gran"], "gra"),
+			matchNames(["Old Gran", "Gertrude Rae Annie", "Gran"], "gra"),
 		).toEqual(["Gran", "Old Gran", "Gertrude Rae Annie"]);
 	});
 
 	it("keeps the characters' own order among equally good matches", () => {
-		expect(matchCharacterNames(["Gregory", "Grace"], "gr")).toEqual([
+		expect(matchNames(["Gregory", "Grace"], "gr")).toEqual([
 			"Gregory",
 			"Grace",
 		]);
 	});
 
 	it("lists nothing when no name holds the typed letters in order", () => {
-		expect(matchCharacterNames(names, "zq")).toEqual([]);
+		expect(matchNames(names, "zq")).toEqual([]);
+	});
+});
+
+describe("mentionGroups", () => {
+	const names = {
+		character: ["Mia", "Bob"],
+		location: ["Mill"],
+		prop: [],
+	};
+
+	it("keeps each kind's matches under it, leaving out kinds with none", () => {
+		expect(mentionGroups(names, "mi")).toEqual([
+			{ kind: "character", names: ["Mia"], start: 0 },
+			{ kind: "location", names: ["Mill"], start: 1 },
+		]);
+	});
+
+	it("lists every kind that has names for an empty query", () => {
+		expect(mentionGroups(names, "").map(({ kind }) => kind)).toEqual([
+			"character",
+			"location",
+		]);
 	});
 });

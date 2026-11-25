@@ -10,7 +10,7 @@ import { keepFocus } from "@/components/ui/keep-focus";
 import { SelectMenu } from "@/components/ui/select-menu";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
 import type { ContentElement } from "@/lib/canvas/types";
-import { useCharacterNames } from "@/lib/canvas/use-assets";
+import { useAssetNames } from "@/lib/canvas/use-assets";
 import { useAssetEditors } from "./asset-edit-context";
 import { CharacterPill } from "./character-pill";
 
@@ -29,8 +29,8 @@ function MissingCharacterIcon() {
 
 export function CharacterSwitcher({ element }: { element: ContentElement }) {
 	const editor = useSlateStatic();
-	const names = useCharacterNames();
-	const { openCreateCharacter } = useAssetEditors();
+	const names = useAssetNames("character");
+	const { openCreateAsset } = useAssetEditors();
 	const currentName = element.generationAttributes?.name;
 	const missing = !(currentName && names.includes(currentName));
 	const tooltip = missing ? missingReason(currentName) : LABEL;
@@ -45,7 +45,10 @@ export function CharacterSwitcher({ element }: { element: ContentElement }) {
 			footer={
 				<>
 					{names.length > 0 && <DropdownMenuSeparator />}
-					<DropdownMenuItem onSelect={openCreateCharacter} className="py-1">
+					<DropdownMenuItem
+						onSelect={() => openCreateAsset({ kind: "character" })}
+						className="py-1"
+					>
 						<Plus />
 						New character
 					</DropdownMenuItem>

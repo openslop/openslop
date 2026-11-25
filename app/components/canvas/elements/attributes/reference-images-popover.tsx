@@ -3,7 +3,8 @@
 import { useSlateStatic } from "slate-react";
 import { addElementReferences } from "@/lib/canvas/asset-ops";
 import { mergeAttrs } from "@/lib/canvas/editor-ops";
-import { RotateCcw, User } from "@/components/ui/icon";
+import { RotateCcw } from "@/components/ui/icon";
+import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { THUMBNAIL_POPOVER_WIDTH } from "@/components/ui/thumbnail";
@@ -11,18 +12,19 @@ import {
 	parseReferenceImages,
 	serializeReferenceImages,
 } from "@/lib/connectors/attributes/reference-images";
-import { useCharacterAvatar } from "@/app/components/canvas/hooks/use-character-avatar";
+import { usePicture } from "@/app/components/canvas/hooks/use-picture";
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
 import { MediaPicker } from "../media-picker";
 import { AddButton } from "@/components/ui/add-button";
 import { AssetTile } from "../asset-tile";
+import { ASSET_KIND_ICONS } from "../asset-kinds";
 import { ReferenceTile } from "../asset-tiles";
 import { NoReferenceImages } from "../reference-images";
 import { TileRow } from "./tile-row";
 import type { GeneratedElement } from "@/lib/canvas/types";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
 import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
-import { useTaggedAvatars } from "./use-tagged-avatars";
+import { useTaggedPictures } from "./use-tagged-pictures";
 
 const summarize = (override: string[] | undefined, projectCount: number) => {
 	if (!override) return `Project (${projectCount})`;
@@ -41,7 +43,7 @@ const ownReferences = ({ element, attrKey }: AttributeTarget) =>
 /**
  * The element's reference images as tiles, under the menu that adds more. With no
  * override they are the project's; the first add or remove copies them onto it.
- * Under them, read-only, the avatars its tagged characters add.
+ * Under them, read-only, the pictures its tagged assets add.
  */
 export function ReferenceImagesEditor({
 	Section,
@@ -127,22 +129,27 @@ export function AddedReferences({
 	);
 }
 
-function TaggedAvatarTile({ name }: { name: string }) {
-	const { url } = useCharacterAvatar(name);
-	if (!url) return null;
+function TaggedPictureTile({ name }: { name: string }) {
+	const { url, kind } = usePicture(name);
+	if (!url || !kind) return null;
 	return (
-		<AssetTile name={name} previewUrl={url} context="Character" Icon={User} />
+		<AssetTile
+			name={name}
+			previewUrl={url}
+			context={ASSET_KIND_SPECS[kind].label}
+			Icon={ASSET_KIND_ICONS[kind]}
+		/>
 	);
 }
 
 function TaggedReferences({ element }: { element: GeneratedElement }) {
-	const tagged = useTaggedAvatars(element);
+	const tagged = useTaggedPictures(element);
 	if (tagged.count === 0) return null;
 	return (
-		<AddedReferences caption={`+${tagged.count} from tagged characters`}>
+		<AddedReferences caption={`+${tagged.count} from tagged assets`}>
 			<TileRow columns={2}>
 				{tagged.names.map((name) => (
-					<TaggedAvatarTile key={name} name={name} />
+					<TaggedPictureTile key={name} name={name} />
 				))}
 			</TileRow>
 		</AddedReferences>
@@ -155,7 +162,7 @@ export function ReferenceImagesPopover({
 	...target
 }: ReferenceImagesPopoverProps) {
 	const { urls: projectImages } = useReferenceImages();
-	const tagged = useTaggedAvatars(target.element);
+	const tagged = useTaggedPictures(target.element);
 	const total = added + tagged.count;
 	const summary =
 		summarize(ownReferences(target), projectImages.length) +

@@ -115,9 +115,9 @@ const tile = (name: string) =>
 	document.body.querySelector(`button[aria-label="More actions for ${name}"]`);
 
 describe("ReferenceImagesPopover", () => {
-	it("shows the avatars that tagged characters add, and counts them", () => {
+	it("shows the avatars that tagged assets add, and counts them", () => {
 		expect(open(tagging("image", "Mia"))).toBe("References: Project (0) + 1");
-		expect(document.body.textContent).toContain("+1 from tagged characters");
+		expect(document.body.textContent).toContain("+1 from tagged assets");
 		expect(tile("Mia")).not.toBeNull();
 		expect(document.body.querySelector(`img[src="${MIA}"]`)).not.toBeNull();
 	});
@@ -135,14 +135,14 @@ describe("ReferenceImagesPopover", () => {
 		expect(open(tagging("image", "Ned", "Vox"))).toBe(
 			"References: Project (0)",
 		);
-		expect(document.body.textContent).not.toContain("tagged characters");
+		expect(document.body.textContent).not.toContain("tagged assets");
 	});
 
 	it("adds them to the previous scene's pictures on a video", () => {
 		expect(open(tagging("video", "Mia"), true)).toBe(
 			"References: Project (0) + 2",
 		);
-		expect(document.body.textContent).toContain("+1 from tagged characters");
+		expect(document.body.textContent).toContain("+1 from tagged assets");
 		expect(document.body.textContent).toContain("+1 from the previous scene");
 	});
 
@@ -152,7 +152,7 @@ describe("ReferenceImagesPopover", () => {
 			element,
 			<ReferenceImagesEditor {...target(element)} Section={PanelSection} />,
 		);
-		expect(document.body.textContent).toContain("+1 from tagged characters");
+		expect(document.body.textContent).toContain("+1 from tagged assets");
 		expect(tile("Mia")).not.toBeNull();
 		expect(tile("Ned")).toBeNull();
 	});

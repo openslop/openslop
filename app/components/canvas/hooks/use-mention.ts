@@ -1,31 +1,35 @@
 "use client";
 
+import isEqual from "lodash/isEqual";
 import { useId, useState, type KeyboardEvent } from "react";
-import { Range } from "slate";
+import { Range, type Editor } from "slate";
 import { useSlateSelector, useSlateStatic } from "slate-react";
+import { picturedNames } from "@/lib/canvas/assets";
 import {
 	insertCharacterRef,
-	matchCharacterNames,
 	mentionAt,
+	mentionGroups,
 	type Mention,
 } from "@/lib/canvas/character-refs";
-import { useAvatarNames } from "@/lib/canvas/use-assets";
 
 const sameMention = (a: Mention | null | undefined, b: Mention | undefined) =>
 	a && b ? a.query === b.query && Range.equals(a.range, b.range) : !a && !b;
 
+const selectNames = (editor: Editor) => picturedNames(editor.children);
+
 /** `useSlateSelector` keeps the same `Mention` object until `sameMention` sees a change, so it keys the state below. */
-export function useCharacterMention() {
+export function useMention() {
 	const editor = useSlateStatic();
 	const listboxId = useId();
-	const names = useAvatarNames();
+	const names = useSlateSelector(selectNames, isEqual);
 	const typed = useSlateSelector(mentionAt, sameMention);
 	const [dismissed, setDismissed] = useState<Mention>();
 	const [highlight, setHighlight] = useState<{ for?: Mention; index: number }>({
 		index: 0,
 	});
 
-	const options = typed ? matchCharacterNames(names, typed.query) : [];
+	const groups = typed ? mentionGroups(names, typed.query) : [];
+	const options = groups.flatMap((group) => group.names);
 	const mention = typed !== dismissed && options.length > 0 ? typed : undefined;
 	const active = highlight.for === mention ? highlight.index : 0;
 
@@ -56,7 +60,7 @@ export function useCharacterMention() {
 
 	return {
 		mention,
-		options,
+		groups,
 		active,
 		listboxId,
 		select,

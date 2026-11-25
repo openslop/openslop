@@ -12,12 +12,24 @@ import { mountOnCanvas } from "./_mount";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-vi.mock("../elements/character/new-character-dialog", () => ({
-	NewCharacterDialog: ({
+vi.mock("../elements/character/new-asset-dialog", () => ({
+	NewAssetDialog: ({
+		preset,
 		onCreated,
 	}: {
-		onCreated: (name: string) => void;
-	}) => <button data-dialog="create" onClick={() => onCreated("Mia")} />,
+		preset: { kind?: string };
+		onCreated: (kind: string, name: string) => void;
+	}) => (
+		<button
+			data-dialog="create"
+			onClick={() => onCreated(preset.kind ?? "character", "Mia")}
+		/>
+	),
+}));
+vi.mock("../elements/character/picture-edit-modal", () => ({
+	PictureEditModal: (props: { name: string; onClose: () => void }) => (
+		<button data-dialog={`picture ${props.name}`} onClick={props.onClose} />
+	),
 }));
 vi.mock("../elements/character/character-edit-modal", () => ({
 	CharacterEditModal: (props: { name: string; onClose: () => void }) => (
@@ -74,13 +86,22 @@ describe("AssetEditProvider", () => {
 	});
 
 	it("adds a new character's look and voice and hands them to their edit dialog", () => {
-		act(() => editors.openCreateCharacter());
+		act(() => editors.openCreateAsset());
 		expect(openDialogs()).toEqual(["create"]);
 
 		clickDialog();
 		expect(findAsset(editor().children, "asset_avatar", "Mia")).toBeDefined();
 		expect(findAsset(editor().children, "asset_voice", "Mia")).toBeDefined();
 		expect(openDialogs()).toEqual(["character Mia"]);
+	});
+
+	it("adds a new prop's picture alone and hands it to its edit dialog", () => {
+		act(() => editors.openCreateAsset({ kind: "prop" }));
+
+		clickDialog();
+		expect(findAsset(editor().children, "asset_prop", "Mia")).toBeDefined();
+		expect(findAsset(editor().children, "asset_voice", "Mia")).toBeUndefined();
+		expect(openDialogs()).toEqual(["picture Mia"]);
 	});
 
 	it("adds only the asset it opens", () => {

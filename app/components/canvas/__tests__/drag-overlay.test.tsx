@@ -58,8 +58,8 @@ describe("DragOverlayPreview", () => {
 	it("resolves the cast against the canvas, not the dragged node alone", async () => {
 		await drag(image("Mia", "Kai"));
 
-		expect(document.body.textContent).not.toContain("Unknown character: Mia");
-		expect(document.body.textContent).toContain("Unknown character: Kai");
+		expect(document.body.textContent).not.toContain("Unknown asset: Mia");
+		expect(document.body.textContent).toContain("Unknown asset: Kai");
 	});
 
 	it("draws the gutter's own insert and drag buttons", async () => {

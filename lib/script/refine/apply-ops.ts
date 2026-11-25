@@ -1,5 +1,6 @@
 import { Editor, Path, Transforms } from "slate";
 import { setAsset } from "@/lib/canvas/asset-ops";
+import { kindOfName, kindOfType } from "@/lib/canvas/assets";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
@@ -26,8 +27,6 @@ export type RefineReport = {
 
 const OK: RefineOpResult = { ok: true, inserted: [] };
 
-const CHARACTER_ASSETS = new Set<AssetType>(["asset_avatar", "asset_voice"]);
-
 /** Every one of `edits` the element's own schema would never produce, or nothing. */
 function unofferedAttributes(
 	type: ElementType,
@@ -41,6 +40,19 @@ function unofferedAttributes(
 	return misses.length > 0
 		? `${type} offers no ${misses.join(", ")}`
 		: undefined;
+}
+
+/** A named asset needs a name no other kind already holds. */
+function nameProblem(
+	editor: Editor,
+	type: AssetType,
+	name: string | undefined,
+): string | undefined {
+	const kind = kindOfType(type);
+	if (!kind) return undefined;
+	if (!name) return `${type} needs a name`;
+	const taken = kindOfName(editor.children, name);
+	return taken && taken !== kind ? `${name} is already a ${taken}` : undefined;
 }
 
 export function applyRefineOp(editor: Editor, op: RefineOp): RefineOpResult {
@@ -130,9 +142,7 @@ function applyAsset(
 ): RefineOpResult {
 	const problems = [
 		unofferedAttributes(type, attrs ?? {}),
-		CHARACTER_ASSETS.has(type) && !attrs?.name
-			? `${type} needs a name`
-			: undefined,
+		nameProblem(editor, type, attrs?.name),
 	].filter((problem) => problem !== undefined);
 	if (problems.length > 0)
 		return { ok: false, reason: `asset: ${problems.join("; ")}` };
