@@ -127,6 +127,11 @@ The canvas is the project. Each term means one thing everywhere in the code:
 
 The harness is client-side, so Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new skill is a new tool, not a new pipeline.
 
+<p align="center">
+  <img src="./assets/openslop-demo-light.svg#gh-light-mode-only" alt="Sloppy rewrites a scene's music, adds a rival character, then builds a drift scene on the canvas and timeline" width="100%">
+  <img src="./assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="Sloppy rewrites a scene's music, adds a rival character, then builds a drift scene on the canvas and timeline" width="100%">
+</p>
+
 ## Layout and render
 
 | Term            | Where                    | Means                                                                                                                                                                                   |
