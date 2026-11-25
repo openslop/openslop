@@ -20,6 +20,11 @@ The numbers match the diagram.
 3. **Save.** The canvas, project store and snapshots save to one `projects` row, with autosaved history in `canvas_versions`.
 4. **Render.** The canvas and its results lay out into one Remotion timeline. The Player previews it in the browser; Lambdas render it in parallel chunks to an MP4 in S3.
 
+<p align="center">
+  <img src="./assets/openslop-demo-light.svg#gh-light-mode-only" alt="Sloppy rewrites a scene's music, adds a rival character, then builds a drift scene on the canvas and timeline" width="100%">
+  <img src="./assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="Sloppy rewrites a scene's music, adds a rival character, then builds a drift scene on the canvas and timeline" width="100%">
+</p>
+
 ## Project structure
 
 `lib/` is the domain layer and never imports from `app/`.
@@ -126,11 +131,6 @@ The canvas is the project. Each term means one thing everywhere in the code:
 | **Tool**   | `lib/agent/tools/`       | A `defineTool` the browser runs against the canvas, queue and stores. Its result goes back as the next request until the model answers in text. |
 
 The harness is client-side, so Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new skill is a new tool, not a new pipeline.
-
-<p align="center">
-  <img src="./assets/openslop-demo-light.svg#gh-light-mode-only" alt="Sloppy rewrites a scene's music, adds a rival character, then builds a drift scene on the canvas and timeline" width="100%">
-  <img src="./assets/openslop-demo-dark.svg#gh-dark-mode-only" alt="Sloppy rewrites a scene's music, adds a rival character, then builds a drift scene on the canvas and timeline" width="100%">
-</p>
 
 ## Layout and render
 
