@@ -228,28 +228,7 @@ npm run dev
 
 ## 프로젝트 구조
 
-```
-app/             Next.js 라우트, API 엔드포인트, 에디터 컴포넌트
-  api/v1/        에셋 유형별 REST API (image, video, music, sfx, tts, llm)
-  components/    에디터 UI (캔버스, 비디오 미리보기 등)
-lib/
-  agent/         Sloppy: 도구 정의, 레지스트리, 프롬프트와 턴 컨텍스트
-  connectors/    에셋 유형별 에디터용 클라이언트 API
-  gateway/       /api/v1/* 로 가는 HTTP 클라이언트
-  providers/     서버 측 벤더 어댑터 (Runware, ElevenLabs, …)
-  generation/    생성 큐와 작업 오케스트레이션
-  canvas/        Slate 문서 모델: 요소 유형, 가드, OSML 파싱/직렬화
-  script/        스크립트 작성과 다듬기
-  project/       프로젝트별 Zustand 스토어, 자동 저장, 영속화
-  render/        장면 레이아웃과 렌더 클라이언트
-  templates/     컴포저에서 제공하는 프롬프트 템플릿
-  upload/        클라이언트 측 파일 업로드 (이미지, 동영상, 오디오)
-  supabase/      브라우저/서버 Supabase 클라이언트
-remotion/        Remotion 진입점과 컴포지션
-supabase/        데이터베이스 마이그레이션
-```
-
-이 계층들이 어떻게 맞물리는지는 [`ARCHITECTURE.md`](../../ARCHITECTURE.md)를 보세요.
+코드 구성과 계층이 맞물리는 방식은 [`ARCHITECTURE.md`](../../ARCHITECTURE.md#project-structure)를 보세요.
 
 ## 스크립트
 

@@ -228,28 +228,7 @@ npm run dev
 
 ## プロジェクト構成
 
-```
-app/             Next.js のルート、API エンドポイント、エディターのコンポーネント
-  api/v1/        アセット種別ごとの REST API（image、video、music、sfx、tts、llm）
-  components/    エディター UI（キャンバス、動画プレビューなど）
-lib/
-  agent/         Sloppy: ツール定義、レジストリ、プロンプトとターンのコンテキスト
-  connectors/    アセット種別ごとの、エディター向けクライアント API
-  gateway/       /api/v1/* への HTTP クライアント
-  providers/     サーバー側のベンダーアダプター（Runware、ElevenLabs、…）
-  generation/    生成キューとジョブのオーケストレーション
-  canvas/        Slate ドキュメントモデル: 要素の型、ガード、OSML のパースとシリアライズ
-  script/        台本の執筆と推敲
-  project/       プロジェクトごとの Zustand ストア、自動保存、永続化
-  render/        シーンのレイアウトとレンダークライアント
-  templates/     コンポーザーで提供するプロンプトテンプレート
-  upload/        クライアント側のファイルアップロード（画像、動画、音声）
-  supabase/      ブラウザ用・サーバー用の Supabase クライアント
-remotion/        Remotion のエントリーポイントとコンポジション
-supabase/        データベースのマイグレーション
-```
-
-これらのレイヤーがどう関わり合うかは [`ARCHITECTURE.md`](../../ARCHITECTURE.md) を見てください。
+コードの構成とレイヤーの関わり方は [`ARCHITECTURE.md`](../../ARCHITECTURE.md#project-structure) を見てください。
 
 ## スクリプト
 

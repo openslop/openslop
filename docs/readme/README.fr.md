@@ -228,28 +228,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000) et vous devriez voir l'app
 
 ## Structure du projet
 
-```
-app/             Routes Next.js, endpoints API et composants de l'éditeur
-  api/v1/        API REST par type de ressource (image, video, music, sfx, tts, llm)
-  components/    UI de l'éditeur (canevas, aperçu vidéo, etc.)
-lib/
-  agent/         Sloppy : définitions d'outils, registre, prompt et contexte de tour
-  connectors/    API client côté éditeur par type de ressource
-  gateway/       Clients HTTP vers /api/v1/*
-  providers/     Adaptateurs fournisseurs côté serveur (Runware, ElevenLabs, …)
-  generation/    File de génération et orchestration des jobs
-  canvas/        Modèle de document Slate : types d'éléments, gardes, parse/sérialisation OSML
-  script/        Écriture et affinage du script
-  project/       Store Zustand par projet, sauvegarde automatique, persistance
-  render/        Mise en page des scènes et client de rendu
-  templates/     Modèles de prompt proposés dans le composeur
-  upload/        Envoi de fichiers côté client (image, vidéo, audio)
-  supabase/      Clients Supabase navigateur/serveur
-remotion/        Point d'entrée Remotion et compositions
-supabase/        Migrations de la base de données
-```
-
-Voir [`ARCHITECTURE.md`](../../ARCHITECTURE.md) pour la façon dont ces couches interagissent.
+L'organisation du code et la façon dont ses couches s'articulent : [`ARCHITECTURE.md`](../../ARCHITECTURE.md#project-structure).
 
 ## Scripts
 

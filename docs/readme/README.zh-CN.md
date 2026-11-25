@@ -228,28 +228,7 @@ npm run dev
 
 ## 项目结构
 
-```
-app/             Next.js 路由、API 端点和编辑器组件
-  api/v1/        按资源类型划分的 REST API（image、video、music、sfx、tts、llm）
-  components/    编辑器 UI（画布、视频预览等）
-lib/
-  agent/         Sloppy：工具定义、注册表、提示词和对话轮次上下文
-  connectors/    面向编辑器的客户端 API，按资源类型划分
-  gateway/       访问 /api/v1/* 的 HTTP 客户端
-  providers/     服务端的供应商适配器（Runware、ElevenLabs……）
-  generation/    生成队列和任务编排
-  canvas/        Slate 文档模型：元素类型、守卫、OSML 解析/序列化
-  script/        脚本撰写和润色
-  project/       每个项目的 Zustand store、自动保存、持久化
-  render/        场景布局和渲染客户端
-  templates/     编辑器里提供的提示词模板
-  upload/        客户端文件上传（图片、视频、音频）
-  supabase/      浏览器端/服务端的 Supabase 客户端
-remotion/        Remotion 入口和合成
-supabase/        数据库迁移
-```
-
-这些层之间如何交互，见 [`ARCHITECTURE.md`](../../ARCHITECTURE.md)。
+代码怎么组织、各层如何配合，见 [`ARCHITECTURE.md`](../../ARCHITECTURE.md#project-structure)。
 
 ## 脚本
 
