@@ -3,7 +3,6 @@ import type { IconComponent } from "@/components/ui/icon";
 import { errorMessage } from "@/lib/errors";
 import type { AgentToolContext } from "./context";
 import type { Retention } from "./define-tool";
-import { adaptScript } from "./adapt-script";
 import { captionMedia } from "./caption-media";
 import { estimateSpeechLengths } from "./estimate-speech-lengths";
 import { estimateTotalLength } from "./estimate-total-length";
@@ -11,7 +10,7 @@ import { editScript } from "./edit-script";
 import { fitDurations } from "./fit-durations";
 import { generateCaptions } from "./generate-captions";
 import { listModels } from "./list-models";
-import { outlineStory } from "./outline-story";
+import { loadSkill } from "./load-skill";
 import { readMedia } from "./read-media";
 import { readGeneration } from "./read-generation";
 import { readModelAttributes } from "./read-model-attributes";
@@ -20,7 +19,6 @@ import { readScriptSettings } from "./read-script-settings";
 import { readTitle } from "./read-title";
 import { readVideoSettings } from "./read-video-settings";
 import { viewMedia } from "./view-media";
-import { reviewScript } from "./review-script";
 import { setDefaultModel } from "./set-default-model";
 import { setElementResult } from "./set-element-result";
 import { setTitle } from "./set-title";
@@ -31,6 +29,7 @@ import { writeScript } from "./write-script";
 
 /** Registration is the contract: one entry is a tool's whole definition. */
 const TOOLS = {
+	load_skill: loadSkill,
 	read_script: readScript,
 	read_generation: readGeneration,
 	read_title: readTitle,
@@ -38,8 +37,6 @@ const TOOLS = {
 	read_video_settings: readVideoSettings,
 	edit_script: editScript,
 	write_script: writeScript,
-	adapt_script: adaptScript,
-	review_script: reviewScript,
 	update_script_settings: updateScriptSettings,
 	update_video_settings: updateVideoSettings,
 	generate_captions: generateCaptions,
@@ -48,7 +45,6 @@ const TOOLS = {
 	read_media: readMedia,
 	view_media: viewMedia,
 	set_element_result: setElementResult,
-	outline_story: outlineStory,
 	estimate_total_length: estimateTotalLength,
 	estimate_speech_lengths: estimateSpeechLengths,
 	fit_durations: fitDurations,
@@ -116,6 +112,13 @@ export const DRAFTING_TOOLS: ReadonlySet<string> = new Set(
 	Object.entries(TOOLS)
 		.filter(([, def]) => def.draftsScript)
 		.map(([name]) => name),
+);
+
+/** Each tool whose input streams onto the canvas, by name, with the field that holds the OSML. */
+export const SCRIPT_STREAM_FIELDS: ReadonlyMap<string, string> = new Map(
+	Object.entries(TOOLS).flatMap(([name, def]) =>
+		def.streamsScript ? [[name, def.streamsScript]] : [],
+	),
 );
 
 /** A failure is reported, not thrown: the model reads it as the next observation. */

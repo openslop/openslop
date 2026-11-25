@@ -98,18 +98,6 @@ export const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:4
 export const MOCK_STYLE =
 	"Warm, painterly storybook illustration with soft watercolor washes, gentle outlines, and golden hour lighting; whimsical and nostalgic.";
 
-export const MOCK_OUTLINE = `Premise: In a village at the edge of an enchanted forest, a cheerful girl named Red sets out to deliver vegetables to her ailing grandmother and unexpectedly befriends a gentle, vegetarian wolf gathering berries for his own sick mother.
-
-Characters: Red (curious, kind); Wolf (gentle, misunderstood); Mother and Granny (warm anchors of home); Hunter (a watchful protector); Owl (the forest's quiet conscience).
-
-Themes: Looking past appearances; small acts of care; the forest as a shared home.
-
-Conflict: Red has been warned not to dawdle, and Wolf's frightening exterior collides with her mother's caution — both must decide whether to trust what they see.
-
-Twists: The "big bad wolf" is the kindest soul in the forest; Owl has been silently steering their meeting all along.
-
-Resolution: Red and Wolf arrive together at Granny's cottage, share their baskets, and the village learns that friendship can grow in the most unlikely places.`;
-
 /** Long-winded so the mock thinks for a couple of seconds, the way a real model does. */
 export const MOCK_THOUGHT =
 	"Reading the canvas to see what is already on it. Working out which scene the request points at, which elements sit inside that scene, and what the script currently says about each of them. Weighing whether this reads as a question to answer or as an edit to make, since the two want different tools, and a wrong guess there means an edit nobody asked for. Then picking the smallest change that does what was asked, so nothing else in the script has to move around, and nothing already on the canvas gets rewritten by accident. ";

@@ -30,11 +30,6 @@ vi.mock("@/lib/generation/generation-queue-provider", () => ({
 vi.mock("@/lib/generation/use-build-context", () => ({
 	useBuildContext: () => () => ({ canvas: [] }),
 }));
-vi.mock("@/lib/connectors/use-create-connector", () => ({
-	useCreateConnector: () => () => ({
-		generate: async () => ({ text: "No findings." }),
-	}),
-}));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -50,13 +45,12 @@ function Probe() {
 	return null;
 }
 
-const turn = new AbortController().signal;
-const read = () => runTool({ toolName: "read_script", input: {} }, turn);
+const read = () => runTool({ toolName: "read_script", input: {} });
 const edit = (text: string, id = "line") =>
-	runTool(
-		{ toolName: "edit_script", input: { ops: [{ op: "set", id, text }] } },
-		turn,
-	);
+	runTool({
+		toolName: "edit_script",
+		input: { ops: [{ op: "set", id, text }] },
+	});
 const bodyText = (id = "line") =>
 	getElementBodyText(requireElement(editor, id)[0]);
 
@@ -90,21 +84,18 @@ describe("edit_script read guard", () => {
 
 	it("names what it inserts, so it can edit that next without reading", async () => {
 		await read();
-		const inserted = await runTool(
-			{
-				toolName: "edit_script",
-				input: {
-					ops: [
-						{
-							op: "insert",
-							anchor_id: "line",
-							elements: [{ type: "speech", text: "A dog barks." }],
-						},
-					],
-				},
+		const inserted = await runTool({
+			toolName: "edit_script",
+			input: {
+				ops: [
+					{
+						op: "insert",
+						anchor_id: "line",
+						elements: [{ type: "speech", text: "A dog barks." }],
+					},
+				],
 			},
-			turn,
-		);
+		});
 		const id = String(inserted.ok && inserted.output).match(
 			/Inserted (\S+?),/,
 		)?.[1];
@@ -148,11 +139,5 @@ describe("edit_script read guard", () => {
 		});
 
 		expect((await edit("Overwritten")).ok).toBe(false);
-	});
-
-	it("does not count review_script reading the script for itself", async () => {
-		await runTool({ toolName: "review_script", input: {} }, turn);
-
-		expect((await edit("Unseen")).ok).toBe(false);
 	});
 });

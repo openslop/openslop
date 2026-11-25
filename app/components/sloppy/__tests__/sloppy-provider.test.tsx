@@ -41,6 +41,8 @@ vi.mock("@/lib/agent/tools/use-agent-tools", () => ({
 	useAgentTools: () => state.runTool,
 }));
 
+vi.mock("slate-react", () => ({ useSlateStatic: () => ({}) }));
+
 vi.mock("@/lib/connectors/use-default-models", () => ({
 	useDefaultModels: () => ({ llm: { provider: "openai", model: "test" } }),
 }));
@@ -128,7 +130,7 @@ describe("SloppyProvider tool calls", () => {
 	const toolCall = {
 		type: "tool-call",
 		toolCallId: "call-0",
-		toolName: "review_script",
+		toolName: "read_script",
 		input: {},
 	} as const;
 
@@ -148,14 +150,14 @@ describe("SloppyProvider tool calls", () => {
 
 		await vi.waitFor(() =>
 			expect(state.addToolOutput).toHaveBeenCalledWith({
-				tool: "review_script",
+				tool: "read_script",
 				toolCallId: "call-0",
 				output: "Tighten act two",
 			}),
 		);
 	});
 
-	it("aborts the running tool and drops its output when the user stops", async () => {
+	it("drops a running tool's output when the user stops", async () => {
 		const tool = Promise.withResolvers<ToolOutcome>();
 		state.runTool.mockReturnValueOnce(tool.promise);
 		act(() => current().send("review it"));
@@ -165,8 +167,6 @@ describe("SloppyProvider tool calls", () => {
 		tool.resolve({ ok: true, output: "Tighten act two" });
 		await tool.promise;
 
-		const signal: AbortSignal = state.runTool.mock.calls[0]?.[1];
-		expect(signal.aborted).toBe(true);
 		expect(state.addToolOutput).not.toHaveBeenCalled();
 	});
 });

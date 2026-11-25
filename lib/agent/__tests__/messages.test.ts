@@ -19,7 +19,7 @@ const asked: SloppyMessage = {
 };
 
 const turn = (
-	state: "input-available" | "output-available",
+	state: "input-streaming" | "input-available" | "output-available",
 	parts = 1,
 ): SloppyMessage => ({
 	id: "m2",
@@ -64,6 +64,22 @@ describe("toolCallsMade", () => {
 describe("hasPendingToolCall", () => {
 	it("sees a call the editor has been handed and not answered", () => {
 		expect(hasPendingToolCall([asked, turn("input-available")])).toBe(true);
+	});
+
+	it("sees a script still streaming onto the canvas, not other streaming calls", () => {
+		const streaming = (type: "tool-write_script" | "tool-read_script") => ({
+			...turn("input-streaming"),
+			parts: [
+				{ type, toolCallId: "call-0", state: "input-streaming" as const },
+			],
+		});
+
+		expect(hasPendingToolCall([asked, streaming("tool-write_script")])).toBe(
+			true,
+		);
+		expect(hasPendingToolCall([asked, streaming("tool-read_script")])).toBe(
+			false,
+		);
 	});
 
 	it("sees none once the editor has answered", () => {

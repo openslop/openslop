@@ -5,6 +5,7 @@ import {
 	LOOPS_RULE,
 	TOGGLE_ON,
 } from "@/lib/canvas/types";
+import { nameRef } from "@/lib/connectors/name-refs";
 import {
 	DEFAULT_MOTION,
 	MOTION_EFFECTS,
@@ -15,28 +16,23 @@ import {
 	CONTINUITY_ATTR,
 	START_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
-import { VIDEO_FORMAT_RULES } from "./formats";
 import { TTS_EMOTIONS, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
-import { languagePrompt } from "./language";
-import { NAME_REFS_RULE } from "./name-refs";
-import { VIDEO_PROMPT_FORMAT } from "./video-prompt";
-import { MUSIC_PROMPT_FORMAT } from "./music-prompt";
+import type { Skill } from "./registry";
 
-/** Only the writer replies in XML; a review reads the same spec and replies in findings. */
-export const OSML_REPLY_FORMAT =
-	"Reply with the raw XML only: no code fences and no text around it. Your reply starts with < and ends with >.";
+export const osml = {
+	name: "osml",
+	description:
+		"How to write each script element (speech, image, video, sound, music) in OSML, the XML the canvas holds: attributes, names, and which language each part is in. Load it whenever you write or review element text.",
+	content: dedent`
+		The script is XML, one tag per element in the order they play. Never nest tags. Write the story and nothing else, using only the elements the format allows (the video-formats skill).
 
-export function osmlSpec(language: string): string {
-	return dedent`
-		The story script must be written in the XML format below. Never nest tags.
+		## Language
+		The script language is the project's language from read_script_settings. On auto, it is the language of the user's own topic or script, or English when that is unclear.
+		- Every spoken or sung line is in the script language, wherever the format puts it: a <speech> element, speech quoted in a <video> prompt, or the lyrics of a <music> prompt.
+		- Everything else in <image>, <video>, <sound> and <music> prompts is in English, and so is avatar, location, prop and style text.
 
-		## Format
-		${VIDEO_FORMAT_RULES}
-
-		${languagePrompt(language)}
-
-		## Order
-		Write the story and nothing else, using only the elements your format allows.
+		## Names
+		Write each character, location and prop in an <image> or <video> prompt as ${nameRef("Name")}, with its exact name, like ${nameRef("Red")} or ${nameRef("Cottage")}. Never describe how one looks, since the model sees it. Speech elements and every other prompt name them plainly.
 
 		## <speech>
 		- What one character says out loud. name is required: the character who says it. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
@@ -49,18 +45,16 @@ export function osmlSpec(language: string): string {
 		- The body is an image prompt: the time of day, the background, the weather if outdoors, and the objects, in detail.
 		- Depict the specific moment described by the speech that follows it, up to the next visual: who is there, what they do and their expressions, not just the setting.
 		- Each <image> prompt must stand alone. The image model knows nothing about the story or the other prompts, so repeat any detail it needs.
-		- ${NAME_REFS_RULE}
+		- Name characters, locations and props as {{Name}}, as Names says.
 		- motion: a camera move for the whole time the image is on screen. Set one on almost every image. Allowed values: ${MOTION_EFFECTS.join(", ")}.
 		- Example: <image motion="kenBurnsIn">{{Red}} hands a basket to {{Granny}} at the door of a thatched cottage on a rainy afternoon.</image>
 
 		## <video>
-		- A short generated video whose sound is written into its shots. The body is a video prompt, written as the Video prompts section says.
-		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values: see Model attributes.
-		- ${START_FRAME_ATTR}, ${CONTINUITY_ATTR} and ${loopDef.key}: see Format.
+		- A short generated video whose sound is written into its shots. The body is a video prompt, written as the video-prompts skill says.
+		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values depend on its model: read_model_attributes lists them.
+		- ${START_FRAME_ATTR}, ${CONTINUITY_ATTR} and ${loopDef.key}: see the video-formats skill.
 		- motion: normally set to "${DEFAULT_MOTION}". Only set one when the shots have no camera move of their own.
 		- Example: <video startFrame="none">Shot 1: Wide shot of a moonlit forest clearing as {{Red}} and {{Wolf}} walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby.</video>
-
-		${VIDEO_PROMPT_FORMAT}
 
 		## <sound>
 		- A sound effect that no <video> already makes. The body is a short, plain sound prompt, like rain, wind, a fire crackling or footsteps.
@@ -71,11 +65,9 @@ export function osmlSpec(language: string): string {
 		- Never a voice: no sighs, gasps, laughter or crying.
 
 		## <music>
-		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the Music prompts section says.
+		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the music-prompts skill says.
 		- Place it right before the first element it plays under.
 		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). ${LOOPS_RULE} A cue written to its runtime plays once; use more only for a short bed that should repeat.
 		- ${lyricsDef.key}: "${TOGGLE_ON}" makes the cue a song, sung over the scenes (default "${lyricsDef.default}", instrumental). Set it only when the story calls for a song, like a music video, a theme song or a character singing, and never under speech, where the singing would fight the voice.
-
-		${MUSIC_PROMPT_FORMAT}
-	`;
-}
+	`,
+} as const satisfies Skill;

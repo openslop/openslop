@@ -6,7 +6,11 @@ import {
 	type ModelMessage,
 	type ToolResultPart,
 } from "ai";
-import { retentionOf, SLOPPY_TOOLS } from "./tools/registry";
+import {
+	retentionOf,
+	SCRIPT_STREAM_FIELDS,
+	SLOPPY_TOOLS,
+} from "./tools/registry";
 import { sloppyMetadataSchema, type SloppyMessage } from "./types";
 
 export function upsertMessage(
@@ -31,14 +35,23 @@ export function toolCallsMade(messages: SloppyMessage[]): number {
 const isUnanswered = (part: SloppyMessage["parts"][number]) =>
 	isToolUIPart(part) && part.state === "input-available";
 
-/** A call the editor has been handed and not yet answered, of any tool or of `tools`. */
+type ToolPart = Extract<SloppyMessage["parts"][number], { toolCallId: string }>;
+
+const isPending = (part: ToolPart) =>
+	isUnanswered(part) ||
+	(part.state === "input-streaming" &&
+		SCRIPT_STREAM_FIELDS.has(getToolName(part)));
+
+/** A call handed to the editor and not yet answered, or writing the canvas as it streams in, of any tool or of `tools`. */
 export function hasPendingToolCall(
 	messages: SloppyMessage[],
 	tools?: ReadonlySet<string>,
 ): boolean {
-	return (trailingAssistant(messages)?.parts ?? []).some(
-		(part) => isUnanswered(part) && (!tools || tools.has(getToolName(part))),
-	);
+	return (trailingAssistant(messages)?.parts ?? [])
+		.filter(isToolUIPart)
+		.some(
+			(part) => isPending(part) && (!tools || tools.has(getToolName(part))),
+		);
 }
 
 const UNANSWERED = "Stopped before the editor ran it";

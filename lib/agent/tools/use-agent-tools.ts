@@ -3,11 +3,9 @@
 import { useCallback, useRef } from "react";
 import { useSlateStatic } from "slate-react";
 import pick from "lodash/pick";
-import { getAssets } from "@/lib/canvas/assets";
 import { findElementById, requireElement } from "@/lib/canvas/editor-ops";
-import { elementModel } from "@/lib/canvas/element-connector";
 import { serializeOSMLWithScenes } from "@/lib/canvas/osml-serializer";
-import { getContentElements, isScriptEmpty } from "@/lib/canvas/scenes";
+import { getContentElements } from "@/lib/canvas/scenes";
 import {
 	countSpokenWords,
 	estimateSpeechLengths,
@@ -28,19 +26,16 @@ import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNode, buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
-import { useCreateConnector } from "@/lib/connectors/use-create-connector";
 import { findProviderKey } from "@/lib/connectors/provider-key";
 import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
-import type { ScriptSource } from "@/lib/script/prompt/build";
 import {
 	commitUploaded,
 	isUploadable,
 	uploadKindOf,
 	uploadedResult,
 } from "@/lib/upload/uploaded-result";
-import { streamScript } from "@/lib/script/stream-script";
 import { elementResult, resultView } from "../element-result";
 import { elementState } from "../element-state";
 import { PROJECT_SETTERS, type AgentToolContext } from "./context";
@@ -54,30 +49,19 @@ export function useAgentTools() {
 	const account = useAccountStoreHandle();
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
-	const createConnector = useCreateConnector();
 	const projectId = useProjectId();
 	const captionMedia = useCaptionMedia();
 
 	return useCallback(
-		(call: { toolName: string; input: unknown }, signal?: AbortSignal) => {
+		(call: { toolName: string; input: unknown }) => {
 			const markScriptRead = () => {
 				lastRead.current = editor.children;
 			};
 			const isScriptReadCurrent = () => lastRead.current === editor.children;
-			const llm = () => createConnector("llm", editor.defaultModels().llm);
-			const draftScript = (source: ScriptSource) =>
-				streamScript(
-					editor,
-					store.getState().scriptSettings,
-					llm(),
-					source,
-					signal,
-				);
 			const ctx: AgentToolContext = {
 				readScript: () => serializeOSMLWithScenes(editor.children),
 				markScriptRead,
 				isScriptReadCurrent,
-				isScriptEmpty: () => isScriptEmpty(editor.children),
 				countSpokenWords: () => countSpokenWords(editor.children),
 				estimateSpeechLengths: () => estimateSpeechLengths(editor.children),
 				estimateVisualSpans: () =>
@@ -105,19 +89,6 @@ export function useAgentTools() {
 							),
 					);
 				},
-				generateText: async (prompt, options) => {
-					const { text } = await llm().generate(
-						{ prompt, ...options },
-						{ signal },
-					);
-					if (!text.trim())
-						throw new Error(
-							"The model spent its whole output budget thinking and replied with nothing. Ask for less thinking, or for a shorter answer.",
-						);
-					return text;
-				},
-				readAssets: () => getAssets(editor.children),
-				readModels: () => getContentElements(editor.children).map(elementModel),
 				readProject: () => store.getState(),
 				modelDefaults: () => ({
 					project: store.getState().models,
@@ -129,9 +100,6 @@ export function useAgentTools() {
 					if (current) markScriptRead();
 					return report;
 				},
-				writeScript: (brief) => draftScript({ kind: "brief", brief }),
-				adaptScript: (script, notes) =>
-					draftScript({ kind: "adapt", script, notes }),
 				isConnected: (provider) =>
 					findProviderKey(account.getState().providerKeys, provider) !== null,
 				generateCaptions: (ids) => {
@@ -174,15 +142,6 @@ export function useAgentTools() {
 			};
 			return executeToolCall(call, ctx);
 		},
-		[
-			editor,
-			store,
-			account,
-			queue,
-			buildContext,
-			createConnector,
-			projectId,
-			captionMedia,
-		],
+		[editor, store, account, queue, buildContext, projectId, captionMedia],
 	);
 }
