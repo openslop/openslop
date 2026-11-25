@@ -1,3 +1,4 @@
+import compact from "lodash/compact";
 import mapValues from "lodash/mapValues";
 import { z } from "zod";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
@@ -14,13 +15,20 @@ const ELEMENT_TEXT = `The element's content: the spoken line for speech; the pro
 const MODEL_VALUE =
 	"Depends on the element's model: read_model_attributes lists its values.";
 
-function attributeValue({ edit, unit, perModel }: AttributeDef) {
-	const value = perModel ? z.string() : (edit?.value ?? z.string());
-	return value.describe(
-		[value.description, unit && `Unit: ${unit}.`, perModel && MODEL_VALUE]
-			.filter(Boolean)
-			.join(" "),
-	);
+/** A model's own values are checked on apply, against the element's model. */
+function valueOf({ edit, perModel }: AttributeDef): z.ZodType<string> {
+	if (perModel) return z.string();
+	return edit?.value ?? z.string();
+}
+
+function attributeValue(def: AttributeDef) {
+	const value = valueOf(def);
+	const notes = compact([
+		value.description,
+		def.unit && `Unit: ${def.unit}.`,
+		def.perModel && MODEL_VALUE,
+	]);
+	return value.describe(notes.join(" "));
 }
 
 const shapeOf = (defs: readonly AttributeDef[]) =>
