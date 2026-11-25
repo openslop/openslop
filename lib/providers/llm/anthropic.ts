@@ -117,7 +117,7 @@ const thinking = (effort: ThinkingLevel) => ({
 
 /** The API's cap on images per request. Models with a 200k-token context window take fewer. */
 const MAX_IMAGES_PER_REQUEST = 600;
-const MAX_IMAGES_PER_REQUEST_BY_MODEL: Partial<Record<string, number>> = {
+const MAX_IMAGES_PER_REQUEST_BY_MODEL: Partial<Record<ModelId, number>> = {
 	"claude-haiku-4-5-20251001": 100,
 };
 const IMAGES_DROPPED_PER_BATCH = 10;
@@ -128,7 +128,8 @@ const MAX_IMAGE_EDGE_PX = 3000;
 
 const fitImageLimits = (modelId: string) => {
 	const max =
-		MAX_IMAGES_PER_REQUEST_BY_MODEL[modelId] ?? MAX_IMAGES_PER_REQUEST;
+		MAX_IMAGES_PER_REQUEST_BY_MODEL[modelId as ModelId] ??
+		MAX_IMAGES_PER_REQUEST;
 	return {
 		transformParams: async ({ params }) => {
 			const prompt = keepNewestImages(params.prompt, {
