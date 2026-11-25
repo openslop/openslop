@@ -15,6 +15,7 @@ import {
 	flatAttributes,
 	layoutAttributeSignature,
 	splitAttributes,
+	volumeToGain,
 } from "../element-attributes";
 import { element } from "./_assets";
 
@@ -68,9 +69,23 @@ describe("getVolume", () => {
 	});
 });
 
+describe("volumeToGain", () => {
+	const toDb = (volume: number) => 20 * Math.log10(volumeToGain(volume));
+
+	it("is silent at 0 and unity gain at 10", () => {
+		expect(volumeToGain(0)).toBe(0);
+		expect(volumeToGain(10)).toBe(1);
+	});
+
+	it("follows a 3 dB per step taper", () => {
+		expect(toDb(1)).toBeCloseTo(-27);
+		expect(toDb(5)).toBeCloseTo(-15);
+	});
+});
+
 describe("getVolumeGain", () => {
-	it("is the clamped volume on the 0-1 gain scale the player uses", () => {
-		expect(getVolumeGain(el({ volume: "3" }))).toBe(0.3);
+	it("is the clamped volume on the decibel taper", () => {
+		expect(getVolumeGain(el({ volume: "5" }))).toBe(volumeToGain(5));
 		expect(getVolumeGain(el({ volume: "0" }))).toBe(0);
 		expect(getVolumeGain(el({ volume: "42" }))).toBe(1);
 	});

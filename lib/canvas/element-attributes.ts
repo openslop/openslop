@@ -17,6 +17,7 @@ import {
 	isMotionEffect,
 	type MotionEffect,
 } from "../render/motion-effect-names";
+import { positionToGain } from "../render/gain-taper";
 
 /** Raw attribute keys omitted from generation inputs: layout knobs, and what the card remembers for the user. */
 export const LAYOUT_ATTRIBUTE_KEYS: readonly string[] = [
@@ -55,7 +56,7 @@ const DEFAULT_VOLUME = VOLUME.max;
 
 /** Converts the 0–10 authoring scale to the 0–1 gain players expect. */
 export function volumeToGain(volume: number): number {
-	return volume / VOLUME.max;
+	return positionToGain(volume / VOLUME.max);
 }
 
 export const parseNumber = (raw: string | undefined): number | undefined => {
