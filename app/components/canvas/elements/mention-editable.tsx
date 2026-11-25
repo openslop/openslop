@@ -5,7 +5,7 @@ import { Editable } from "slate-react";
 import { useMention } from "../hooks/use-mention";
 import { MentionMenu, optionId } from "./mention-menu";
 
-/** An editable where `@` opens the asset menu; keys the menu leaves pass on to `onKeyDown`. */
+/** An editable where `@` opens the named asset menu; keys the menu leaves pass on to `onKeyDown`. */
 export function MentionEditable({
 	onKeyDown,
 	...props

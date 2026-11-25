@@ -16,7 +16,7 @@ import {
 	type ContentElement,
 	type MediaDraftType,
 } from "@/lib/canvas/types";
-import { useAllAssetNames } from "@/lib/canvas/use-assets";
+import { useNamedAssetNames } from "@/lib/canvas/use-assets";
 import { useWriteThrough } from "../hooks/use-write-through";
 import { ElementInput } from "../elements/element-input";
 import { MentionEditable } from "../elements/mention-editable";
@@ -111,10 +111,10 @@ function ScratchPrompt({
 	);
 }
 
-/** Typed like an element's prompt on the canvas, `@` mentions and all; a new asset, or a prompt set from outside, rebuilds it. */
+/** Typed like an element's prompt on the canvas, `@` mentions and all; a new named asset, or a prompt set from outside, rebuilds it. */
 export function DraftPrompt({ draft }: { draft: Draft }) {
 	const canvas = useSlateStatic();
-	const names = useAllAssetNames();
+	const names = useNamedAssetNames();
 	const [, write, replaced] = useWriteThrough(
 		getElementBodyText(draft),
 		(text) =>

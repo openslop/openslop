@@ -4,12 +4,14 @@ import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
 import {
-	allAssetNames,
-	assetNames,
 	findAsset,
+	findImageAsset,
 	getAssets,
 	kindOfName,
+	namedAssetNames,
+	namesOfKind,
 	type AssetKind,
+	type ImageAssetType,
 } from "./assets";
 import type { AssetElement, AssetType } from "./types";
 
@@ -18,13 +20,16 @@ const selectAssets = (editor: Editor) => getAssets(editor.children);
 export const useAssets = (): AssetElement[] =>
 	useSlateSelector(selectAssets, shallow);
 
-export const useAssetNames = (kind: AssetKind): string[] =>
-	useSlateSelector((editor) => assetNames(editor.children, kind), shallow);
+export const useNamesOfKind = (kind: AssetKind): string[] =>
+	useSlateSelector((editor) => namesOfKind(editor.children, kind), shallow);
 
-export const useAllAssetNames = (): string[] =>
-	useSlateSelector((editor) => allAssetNames(editor.children), shallow);
+export const useNamedAssetNames = (): string[] =>
+	useSlateSelector((editor) => namedAssetNames(editor.children), shallow);
 
-export const useKindOf = (name: string): AssetKind | undefined =>
+export const useImageAssetType = (name: string): ImageAssetType | undefined =>
+	useSlateSelector((editor) => findImageAsset(editor.children, name)?.type);
+
+export const useKindOfName = (name: string): AssetKind | undefined =>
 	useSlateSelector((editor) => kindOfName(editor.children, name));
 
 export const useAsset = <T extends AssetType>(

@@ -1,9 +1,9 @@
 import type { ComponentType, ReactNode } from "react";
 import type { RenderElementProps } from "slate-react";
-import { isAssetElement, isCharacterRef } from "@/lib/canvas/guards";
+import { isAssetElement, isNameRef } from "@/lib/canvas/guards";
 import { isScene } from "@/lib/canvas/scenes";
 import type { ContentElement, Scene } from "@/lib/canvas/types";
-import { CharacterRef } from "./elements/character-ref";
+import { NameRef } from "./elements/name-ref";
 import { ELEMENT_CONFIGS } from "./elements/element-configs";
 import { ElementErrorBoundary } from "./elements/element-error-boundary";
 
@@ -26,11 +26,11 @@ export function renderCanvasElement({ Scene, Content }: Blocks) {
 		children,
 		element,
 	}: RenderElementProps) {
-		if (isCharacterRef(element))
+		if (isNameRef(element))
 			return (
-				<CharacterRef attributes={attributes} element={element}>
+				<NameRef attributes={attributes} element={element}>
 					{children}
-				</CharacterRef>
+				</NameRef>
 			);
 		if (isAssetElement(element))
 			return (

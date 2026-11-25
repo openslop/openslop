@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AssetAvatar } from "./asset-avatar";
+import { NamedAssetImage } from "./named-asset-image";
 
 function CharacterName({ name }: { name: string }) {
 	return (
@@ -24,7 +24,7 @@ export function CharacterPill({
 				name ? "gap-1.5 pl-1 pr-2" : "px-0.5"
 			}`}
 		>
-			<AssetAvatar name={name} className="rounded-md" />
+			<NamedAssetImage name={name} className="rounded-md" />
 			{name && <CharacterName name={name} />}
 			{children}
 		</div>

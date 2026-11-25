@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
-import { createCharacterRef } from "@/lib/canvas/character-refs";
+import { createNameRef } from "@/lib/canvas/name-refs";
 import type { ContentElement } from "@/lib/canvas/types";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,7 +25,7 @@ const image = (...cast: string[]): ContentElement => ({
 	children: [
 		{ id: "i-t", text: "" },
 		...cast.flatMap((name) => [
-			createCharacterRef(name),
+			createNameRef(name),
 			{ id: `${name}-t`, text: "" },
 		]),
 	],

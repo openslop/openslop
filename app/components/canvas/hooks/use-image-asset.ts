@@ -1,14 +1,14 @@
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
-import { findPicture, kindOfType } from "@/lib/canvas/assets";
+import { findImageAsset, kindOfType } from "@/lib/canvas/assets";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 
-/** A named asset's picture: which asset it is, and whatever it last generated. */
-export function usePicture(name = "") {
+/** A named asset's image asset: which one it is, and whatever it last generated. */
+export function useImageAsset(name = "") {
 	const [id = "", type] = useSlateSelector((editor) => {
-		const picture = findPicture(editor.children, name);
-		return [picture?.id, picture?.type] as const;
+		const asset = findImageAsset(editor.children, name);
+		return [asset?.id, asset?.type] as const;
 	}, shallow);
 	return {
 		type,

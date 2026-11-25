@@ -12,7 +12,7 @@ import {
 	AssetStrip,
 	AssetStripAdd,
 	AssetStripArtStyle,
-	AssetStripNamed,
+	AssetStripNamedAssets,
 	AssetStripReferences,
 } from "./canvas/elements/asset-strip";
 import { EditorSidebar } from "./canvas/panel/editor-sidebar";
@@ -61,7 +61,7 @@ export default function PostPromptView() {
 									<ProjectTitle />
 									<AssetStrip>
 										<AssetStripArtStyle />
-										<AssetStripNamed />
+										<AssetStripNamedAssets />
 										<AssetStripReferences />
 										<AssetStripAdd />
 									</AssetStrip>

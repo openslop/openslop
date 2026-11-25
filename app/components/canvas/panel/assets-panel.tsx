@@ -9,7 +9,7 @@ import {
 	ASSET_KINDS,
 	type AssetKind,
 } from "@/lib/canvas/assets";
-import { useAssetNames, useHasAsset } from "@/lib/canvas/use-assets";
+import { useNamesOfKind, useHasAsset } from "@/lib/canvas/use-assets";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
@@ -19,7 +19,7 @@ import {
 } from "../elements/asset-tiles";
 import { useAssetEditors } from "../elements/asset-edit-context";
 import { ASSET_KIND_ICONS } from "../elements/asset-kinds";
-import { deleteNamed } from "../elements/delete-asset";
+import { deleteNamedAsset } from "../elements/delete-asset";
 import { uploadingTiles } from "../elements/uploading-tile";
 import { AddMediaMenu } from "../elements/add-media-menu";
 import { NoReferenceImages } from "../elements/reference-images";
@@ -49,8 +49,8 @@ function AssetCard({
 
 function NamedAssetsCard({ kind }: { kind: AssetKind }) {
 	const editor = useSlateStatic();
-	const { openCreateAsset } = useAssetEditors();
-	const names = useAssetNames(kind);
+	const { openCreateNamedAsset } = useAssetEditors();
+	const names = useNamesOfKind(kind);
 	const { label, plural } = ASSET_KIND_SPECS[kind];
 	return (
 		<AssetCard
@@ -65,7 +65,7 @@ function NamedAssetsCard({ kind }: { kind: AssetKind }) {
 			action={
 				<AddButton
 					label={`Add ${label.toLowerCase()}`}
-					onClick={() => openCreateAsset({ kind })}
+					onClick={() => openCreateNamedAsset({ kind })}
 				/>
 			}
 		>
@@ -73,7 +73,7 @@ function NamedAssetsCard({ kind }: { kind: AssetKind }) {
 				<NamedAssetTile
 					key={name}
 					name={name}
-					onDelete={() => deleteNamed(editor, name)}
+					onDelete={() => deleteNamedAsset(editor, name)}
 				/>
 			))}
 		</AssetCard>

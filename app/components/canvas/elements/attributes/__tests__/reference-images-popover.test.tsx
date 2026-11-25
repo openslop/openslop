@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { createCharacterRef } from "@/lib/canvas/character-refs";
+import { createNameRef } from "@/lib/canvas/name-refs";
 import type { ContentElement, GeneratedElement } from "@/lib/canvas/types";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
@@ -58,10 +58,7 @@ function tagging(type: "image" | "video", ...names: string[]): ContentElement {
 		generationAttributes: type === "video" ? { continuity: "true" } : {},
 		children: [
 			text("t", "A scene with "),
-			...names.flatMap((name, i) => [
-				createCharacterRef(name),
-				text(`t${i}`, " "),
-			]),
+			...names.flatMap((name, i) => [createNameRef(name), text(`t${i}`, " ")]),
 		],
 	} as ContentElement;
 }
@@ -115,7 +112,7 @@ const tile = (name: string) =>
 	document.body.querySelector(`button[aria-label="More actions for ${name}"]`);
 
 describe("ReferenceImagesPopover", () => {
-	it("shows the avatars that tagged assets add, and counts them", () => {
+	it("shows the images that tagged assets add, and counts them", () => {
 		expect(open(tagging("image", "Mia"))).toBe("References: Project (0) + 1");
 		expect(document.body.textContent).toContain("+1 from tagged assets");
 		expect(tile("Mia")).not.toBeNull();

@@ -12,7 +12,7 @@ import {
 	parseReferenceImages,
 	serializeReferenceImages,
 } from "@/lib/connectors/attributes/reference-images";
-import { usePicture } from "@/app/components/canvas/hooks/use-picture";
+import { useImageAsset } from "@/app/components/canvas/hooks/use-image-asset";
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
 import { MediaPicker } from "../media-picker";
 import { AddButton } from "@/components/ui/add-button";
@@ -24,7 +24,7 @@ import { TileRow } from "./tile-row";
 import type { GeneratedElement } from "@/lib/canvas/types";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
 import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
-import { useTaggedPictures } from "./use-tagged-pictures";
+import { useTaggedImageAssets } from "./use-tagged-image-assets";
 
 const summarize = (override: string[] | undefined, projectCount: number) => {
 	if (!override) return `Project (${projectCount})`;
@@ -43,7 +43,7 @@ const ownReferences = ({ element, attrKey }: AttributeTarget) =>
 /**
  * The element's reference images as tiles, under the menu that adds more. With no
  * override they are the project's; the first add or remove copies them onto it.
- * Under them, read-only, the pictures its tagged assets add.
+ * Under them, read-only, the images its tagged named assets add.
  */
 export function ReferenceImagesEditor({
 	Section,
@@ -129,8 +129,8 @@ export function AddedReferences({
 	);
 }
 
-function TaggedPictureTile({ name }: { name: string }) {
-	const { url, kind } = usePicture(name);
+function TaggedImageAssetTile({ name }: { name: string }) {
+	const { url, kind } = useImageAsset(name);
 	if (!url || !kind) return null;
 	return (
 		<AssetTile
@@ -143,13 +143,13 @@ function TaggedPictureTile({ name }: { name: string }) {
 }
 
 function TaggedReferences({ element }: { element: GeneratedElement }) {
-	const tagged = useTaggedPictures(element);
+	const tagged = useTaggedImageAssets(element);
 	if (tagged.count === 0) return null;
 	return (
 		<AddedReferences caption={`+${tagged.count} from tagged assets`}>
 			<TileRow columns={2}>
 				{tagged.names.map((name) => (
-					<TaggedPictureTile key={name} name={name} />
+					<TaggedImageAssetTile key={name} name={name} />
 				))}
 			</TileRow>
 		</AddedReferences>
@@ -162,7 +162,7 @@ export function ReferenceImagesPopover({
 	...target
 }: ReferenceImagesPopoverProps) {
 	const { urls: projectImages } = useReferenceImages();
-	const tagged = useTaggedPictures(target.element);
+	const tagged = useTaggedImageAssets(target.element);
 	const total = added + tagged.count;
 	const summary =
 		summarize(ownReferences(target), projectImages.length) +

@@ -9,7 +9,7 @@ import { findAsset, REFERENCE_URLS_ATTR } from "@/lib/canvas/assets";
 import { parseReferenceImages } from "@/lib/connectors/attributes/reference-images";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore, type ProjectStore } from "@/lib/project/store";
-import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
+import { AssetEditProvider } from "@/app/components/canvas/elements/named-asset/asset-edit-provider";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
 import { MediaPanelProvider } from "@/app/components/canvas/media/media-panel-context";
 import {

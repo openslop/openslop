@@ -59,7 +59,7 @@ const assetsOf =
 			(asset): asset is AssetElement<T> => asset.type === type,
 		);
 
-/** What a `{{Name}}` can name, each held by its picture and, for a character, a voice. */
+/** What a `{{Name}}` can name: each kind's image asset first and, for a character, a voice. */
 export const ASSET_KIND_SPECS = {
 	character: {
 		label: "Character",
@@ -81,9 +81,9 @@ export type AssetKind = keyof typeof ASSET_KIND_SPECS;
 
 export const ASSET_KINDS = Object.keys(ASSET_KIND_SPECS) as AssetKind[];
 
-export type PictureType = (typeof ASSET_KIND_SPECS)[AssetKind]["types"][0];
+export type ImageAssetType = (typeof ASSET_KIND_SPECS)[AssetKind]["types"][0];
 
-export const pictureTypeOf = (kind: AssetKind): PictureType =>
+export const imageAssetTypeOf = (kind: AssetKind): ImageAssetType =>
 	ASSET_KIND_SPECS[kind].types[0];
 
 const KIND_OF_TYPE: Partial<Record<AssetType, AssetKind>> = Object.fromEntries(
@@ -95,12 +95,18 @@ const KIND_OF_TYPE: Partial<Record<AssetType, AssetKind>> = Object.fromEntries(
 export const kindOfType = (type: AssetType): AssetKind | undefined =>
 	KIND_OF_TYPE[type];
 
-const PICTURE_TYPES: readonly AssetType[] = ASSET_KINDS.map(pictureTypeOf);
+const IMAGE_ASSET_TYPES: readonly AssetType[] =
+	ASSET_KINDS.map(imageAssetTypeOf);
 
-const isPicture = (asset: AssetElement): asset is AssetElement<PictureType> =>
-	PICTURE_TYPES.includes(asset.type);
+const isImageAsset = (
+	asset: AssetElement,
+): asset is AssetElement<ImageAssetType> =>
+	IMAGE_ASSET_TYPES.includes(asset.type);
 
-export const isNamed = (node: unknown, name: string): node is AssetElement =>
+export const isNamedAsset = (
+	node: unknown,
+	name: string,
+): node is AssetElement =>
 	isAssetElement(node) &&
 	node.generationAttributes?.name === name &&
 	kindOfType(node.type) !== undefined;
@@ -110,30 +116,30 @@ export const kindOfName = (
 	nodes: readonly unknown[],
 	name: string,
 ): AssetKind | undefined => {
-	const asset = getAssets(nodes).find((node) => isNamed(node, name));
+	const asset = getAssets(nodes).find((node) => isNamedAsset(node, name));
 	return asset && kindOfType(asset.type);
 };
 
-export const getPictures = (
+export const getImageAssets = (
 	nodes: readonly unknown[],
-): AssetElement<PictureType>[] => getAssets(nodes).filter(isPicture);
+): AssetElement<ImageAssetType>[] => getAssets(nodes).filter(isImageAsset);
 
-export const findPicture = (
+export const findImageAsset = (
 	nodes: readonly unknown[],
 	name: string,
-): AssetElement<PictureType> | undefined =>
-	getPictures(nodes).find((asset) => isNamed(asset, name));
+): AssetElement<ImageAssetType> | undefined =>
+	getImageAssets(nodes).find((asset) => isNamedAsset(asset, name));
 
-export const picturesOfKind = (
+export const imageAssetsOfKind = (
 	nodes: readonly unknown[],
 	kind: AssetKind,
-): AssetElement<PictureType>[] => assetsOf(pictureTypeOf(kind))(nodes);
+): AssetElement<ImageAssetType>[] => assetsOf(imageAssetTypeOf(kind))(nodes);
 
 const namesOf = (assets: AssetElement[]): string[] =>
 	uniq(compact(assets.map((asset) => asset.generationAttributes?.name)));
 
-/** Every name of a kind: for characters, everyone with a look or a voice. */
-export const assetNames = (
+/** Every name of a kind: for characters, everyone with an avatar or a voice. */
+export const namesOfKind = (
 	nodes: readonly unknown[],
 	kind: AssetKind,
 ): string[] =>
@@ -142,13 +148,13 @@ export const assetNames = (
 	);
 
 /** Each kind's names a `{{Name}}` can draw, so a voice-only character is left out. */
-export const picturedNames = (
+export const imageAssetNamesByKind = (
 	nodes: readonly unknown[],
 ): Record<AssetKind, string[]> =>
-	fromKeys(ASSET_KINDS, (kind) => namesOf(picturesOfKind(nodes, kind)));
+	fromKeys(ASSET_KINDS, (kind) => namesOf(imageAssetsOfKind(nodes, kind)));
 
-export const allAssetNames = (nodes: readonly unknown[]): string[] =>
-	ASSET_KINDS.flatMap((kind) => assetNames(nodes, kind));
+export const namedAssetNames = (nodes: readonly unknown[]): string[] =>
+	ASSET_KINDS.flatMap((kind) => namesOfKind(nodes, kind));
 
 export const assetText = (
 	nodes: readonly unknown[],

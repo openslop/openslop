@@ -3,7 +3,7 @@ import { addElementReferences } from "@/lib/canvas/asset-ops";
 import {
 	ASSET_KIND_SPECS,
 	ASSET_KINDS,
-	picturesOfKind,
+	imageAssetsOfKind,
 } from "@/lib/canvas/assets";
 import { sceneLabel } from "@/lib/canvas/constants";
 import { elementOffers } from "@/lib/canvas/element-connector";
@@ -68,9 +68,9 @@ const MEDIA_USES: readonly MediaUse[] = [
 			label: ASSET_KIND_SPECS[kind].label,
 			kinds: ["image"],
 			targets: (nodes) =>
-				picturesOfKind(nodes, kind).flatMap((picture) => {
-					const name = picture.generationAttributes?.name;
-					return name ? [{ label: name, element: picture }] : [];
+				imageAssetsOfKind(nodes, kind).flatMap((asset) => {
+					const name = asset.generationAttributes?.name;
+					return name ? [{ label: name, element: asset }] : [];
 				}),
 			apply: pinAsResult,
 		}),

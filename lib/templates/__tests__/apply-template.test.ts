@@ -2,11 +2,11 @@ import type { Editor } from "slate";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
 	assetText,
-	assetNames,
+	namesOfKind,
 	findAsset,
 	getAssets,
 	getCanvasElements,
-	picturedNames,
+	imageAssetNamesByKind,
 	referenceUrls,
 	voiceOf,
 } from "@/lib/canvas/assets";
@@ -48,8 +48,8 @@ describe("applyTemplate", () => {
 			...voice
 		} = getTemplate("pov-life").characters?.Protagonist ?? {};
 
-		expect(picturedNames(assets()).character).toEqual(["Protagonist"]);
-		expect(assetNames(assets(), "character")).toEqual([
+		expect(imageAssetNamesByKind(assets()).character).toEqual(["Protagonist"]);
+		expect(namesOfKind(assets(), "character")).toEqual([
 			"Protagonist",
 			"Narrator",
 		]);
@@ -73,10 +73,10 @@ describe("applyTemplate", () => {
 
 	it("does not leak characters from a previous template", () => {
 		apply("pov-life");
-		expect(assetNames(assets(), "character")).toContain("Protagonist");
+		expect(namesOfKind(assets(), "character")).toContain("Protagonist");
 
 		apply("sleep-story");
-		expect(assetNames(assets(), "character")).toEqual(
+		expect(namesOfKind(assets(), "character")).toEqual(
 			Object.keys(getTemplate("sleep-story").characters),
 		);
 	});

@@ -10,15 +10,15 @@ import {
 	ThumbnailCaption,
 	ThumbnailFace,
 } from "@/components/ui/thumbnail";
-import { getPictures } from "@/lib/canvas/assets";
-import { useAllAssetNames, useHasAsset } from "@/lib/canvas/use-assets";
+import { getImageAssets } from "@/lib/canvas/assets";
+import { useNamedAssetNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { useEditorPanel } from "../panel/editor-panel-context";
-import { deleteNamed } from "./delete-asset";
+import { deleteNamedAsset } from "./delete-asset";
 import { UploadingTile } from "./uploading-tile";
 import {
 	ArtStyleAssetTile,
@@ -65,12 +65,15 @@ export function AssetStripArtStyle() {
 	);
 }
 
-export function AssetStripNamed() {
+export function AssetStripNamedAssets() {
 	const editor = useSlateStatic();
-	const names = useAllAssetNames();
+	const names = useNamedAssetNames();
 	return names.map((name) => (
 		<li key={name}>
-			<NamedAssetTile name={name} onDelete={() => deleteNamed(editor, name)} />
+			<NamedAssetTile
+				name={name}
+				onDelete={() => deleteNamedAsset(editor, name)}
+			/>
 		</li>
 	));
 }
@@ -88,19 +91,19 @@ export function AssetStripReferences() {
 	));
 }
 
-const pictureIdsOf = (editor: Editor) =>
-	getPictures(editor.children).map((asset) => asset.id);
+const imageAssetIdsOf = (editor: Editor) =>
+	getImageAssets(editor.children).map((asset) => asset.id);
 
-/** Whether a reference or a picture tile already shows the file at `url`. */
+/** Whether a reference or an image asset's tile already shows the file at `url`. */
 function useShownAsAsset(url: string): boolean {
 	const { urls } = useReferenceImages();
-	const pictureIds = useSlateSelector(pictureIdsOf, shallow);
-	const isPicture = useQueueSelector((q) =>
-		pictureIds.some(
+	const imageAssetIds = useSlateSelector(imageAssetIdsOf, shallow);
+	const shownByImageAsset = useQueueSelector((q) =>
+		imageAssetIds.some(
 			(id) => getPrimaryUrl(q.getElementSnapshot(id).result, "image") === url,
 		),
 	);
-	return urls.includes(url) || isPicture;
+	return urls.includes(url) || shownByImageAsset;
 }
 
 function AssetStripMediaItem({ item }: { item: MediaItem }) {
@@ -112,7 +115,7 @@ function AssetStripMediaItem({ item }: { item: MediaItem }) {
 	);
 }
 
-/** The project's media, each file once: what a reference or picture tile shows isn't listed again. */
+/** The project's media, each file once: what a reference or image asset's tile shows isn't listed again. */
 export function AssetStripMedia() {
 	const media = useProject((state) => state.media);
 	return media.map((item) => (

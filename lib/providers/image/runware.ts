@@ -6,7 +6,7 @@ import {
 	type ImageFormat,
 } from "@/lib/connectors/image/enums";
 import { BaseProvider, type RawResult } from "../base";
-import { renderPrompt, seats } from "@/lib/connectors/character-refs";
+import { renderPrompt, seats } from "@/lib/connectors/name-refs";
 import { pictured } from "@/lib/connectors/characters";
 import { validateRunwareKey, withRunware } from "../runware";
 import { renderSize, type VendorParams } from "@/lib/connectors/models";

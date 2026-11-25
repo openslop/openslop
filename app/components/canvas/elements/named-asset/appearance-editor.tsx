@@ -3,7 +3,7 @@
 import { useSlateStatic } from "slate-react";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { updateElementText } from "@/lib/canvas/editor-ops";
-import type { PictureType } from "@/lib/canvas/assets";
+import { kindOfType, type ImageAssetType } from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import { ModelAttribute } from "../attributes/model-attribute";
 import { ElementGenerationProvider } from "../element-generation-context";
@@ -21,11 +21,9 @@ import { TextAreaField } from "./fields";
 export function AppearanceEditor({
 	element,
 	modelLabel,
-	placeholder,
 }: {
-	element: AssetElement<PictureType>;
+	element: AssetElement<ImageAssetType>;
 	modelLabel: string;
-	placeholder: string;
 }) {
 	const editor = useSlateStatic();
 	return (
@@ -45,7 +43,7 @@ export function AppearanceEditor({
 						}
 						value={getElementBodyText(element)}
 						onChange={(text) => updateElementText(editor, element.id, text)}
-						placeholder={placeholder}
+						placeholder={`Describe the ${kindOfType(element.type)}'s appearance`}
 					/>
 					<div className="flex items-center justify-end gap-2">
 						<ElementStaleIndicator />

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import {
-	allAssetNames,
+	namedAssetNames,
 	assetText,
-	assetNames,
+	namesOfKind,
 	findAsset,
-	findPicture,
+	findImageAsset,
 	kindOfName,
-	picturedNames,
+	imageAssetNamesByKind,
 	getAssets,
 	getCanvasElements,
 	referenceUrls,
@@ -81,7 +81,7 @@ describe("referenceUrls", () => {
 	});
 });
 
-describe("assetNames and picturedNames", () => {
+describe("namesOfKind and imageAssetNamesByKind", () => {
 	const nodes = [
 		asset("asset_avatar", { name: "Mia" }),
 		asset("asset_voice", { name: "Mia" }),
@@ -91,11 +91,11 @@ describe("assetNames and picturedNames", () => {
 	];
 
 	it("lists everyone with a look or a voice once, the narrator among them", () => {
-		expect(assetNames(nodes, "character")).toEqual(["Mia", "Bob", "Narrator"]);
+		expect(namesOfKind(nodes, "character")).toEqual(["Mia", "Bob", "Narrator"]);
 	});
 
-	it("lists only who has an avatar as who a picture can show", () => {
-		expect(picturedNames(nodes).character).toEqual(["Mia", "Bob"]);
+	it("lists only who has an avatar as who an image can show", () => {
+		expect(imageAssetNamesByKind(nodes).character).toEqual(["Mia", "Bob"]);
 	});
 });
 
@@ -115,18 +115,23 @@ describe("named assets across kinds", () => {
 		expect(kindOfName(nodes, "Ghost")).toBeUndefined();
 	});
 
-	it("finds the picture a name is drawn from, whatever its kind, and none for a voice", () => {
-		expect(findPicture(nodes, "Mill")?.type).toBe("asset_location");
-		expect(findPicture(nodes, "Mia")?.type).toBe("asset_avatar");
-		expect(findPicture(nodes, "Narrator")).toBeUndefined();
+	it("finds the image asset a name is drawn from, whatever its kind, and none for a voice", () => {
+		expect(findImageAsset(nodes, "Mill")?.type).toBe("asset_location");
+		expect(findImageAsset(nodes, "Mia")?.type).toBe("asset_avatar");
+		expect(findImageAsset(nodes, "Narrator")).toBeUndefined();
 	});
 
 	it("lists every name, characters then locations then props", () => {
-		expect(allAssetNames(nodes)).toEqual(["Mia", "Narrator", "Mill", "Sword"]);
+		expect(namedAssetNames(nodes)).toEqual([
+			"Mia",
+			"Narrator",
+			"Mill",
+			"Sword",
+		]);
 	});
 
 	it("groups the names a {{Name}} can draw by kind", () => {
-		expect(picturedNames(nodes)).toEqual({
+		expect(imageAssetNamesByKind(nodes)).toEqual({
 			character: ["Mia"],
 			location: ["Mill"],
 			prop: ["Sword"],

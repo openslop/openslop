@@ -4,18 +4,18 @@ import isEqual from "lodash/isEqual";
 import { useId, useState, type KeyboardEvent } from "react";
 import { Range, type Editor } from "slate";
 import { useSlateSelector, useSlateStatic } from "slate-react";
-import { picturedNames } from "@/lib/canvas/assets";
+import { imageAssetNamesByKind } from "@/lib/canvas/assets";
 import {
-	insertCharacterRef,
+	insertNameRef,
 	mentionAt,
 	mentionGroups,
 	type Mention,
-} from "@/lib/canvas/character-refs";
+} from "@/lib/canvas/name-refs";
 
 const sameMention = (a: Mention | null | undefined, b: Mention | undefined) =>
 	a && b ? a.query === b.query && Range.equals(a.range, b.range) : !a && !b;
 
-const selectNames = (editor: Editor) => picturedNames(editor.children);
+const selectNames = (editor: Editor) => imageAssetNamesByKind(editor.children);
 
 /** `useSlateSelector` keeps the same `Mention` object until `sameMention` sees a change, so it keys the state below. */
 export function useMention() {
@@ -34,7 +34,7 @@ export function useMention() {
 	const active = highlight.for === mention ? highlight.index : 0;
 
 	const select = (name: string) => {
-		if (mention) insertCharacterRef(editor, mention, name);
+		if (mention) insertNameRef(editor, mention, name);
 	};
 
 	const move = (step: number) =>

@@ -22,12 +22,15 @@ export function SegmentedControl<T extends string>({
 	options,
 	onChange,
 	ariaLabel,
+	width = "fit",
 	className,
 }: {
 	value: T;
 	options: readonly SegmentedControlOption<T>[];
 	onChange: (value: T) => void;
 	ariaLabel: string;
+	/** `fill` stretches the control across its container, its options sharing the width evenly. */
+	width?: "fit" | "fill";
 	className?: string;
 }) {
 	return (
@@ -37,7 +40,8 @@ export function SegmentedControl<T extends string>({
 			value={value}
 			onValueChange={onOptionChange(options, onChange)}
 			className={cn(
-				"inline-flex w-fit items-center gap-1 rounded-lg bg-surface-recessed p-1",
+				"inline-flex items-center gap-1 rounded-lg bg-surface-recessed p-1",
+				width === "fill" ? "w-full" : "w-fit",
 				className,
 			)}
 		>
@@ -45,7 +49,10 @@ export function SegmentedControl<T extends string>({
 				<ToggleGroupPrimitive.Item
 					key={option.value}
 					value={option.value}
-					className="focus-ring inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1 font-body text-label font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-elevation-1"
+					className={cn(
+						"focus-ring inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1 font-body text-label font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-elevation-1",
+						width === "fill" && "flex-1",
+					)}
 				>
 					{option.Icon && <option.Icon />}
 					{option.label}

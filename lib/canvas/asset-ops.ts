@@ -10,7 +10,7 @@ import {
 import {
 	findAsset,
 	isAsset,
-	isNamed,
+	isNamedAsset,
 	ASSET_KIND_SPECS,
 	type AssetKind,
 	REFERENCE_URLS_ATTR,
@@ -125,14 +125,18 @@ export function removeAsset(
 	});
 }
 
-export function addAsset(editor: Editor, kind: AssetKind, name: string): void {
+export function addNamedAsset(
+	editor: Editor,
+	kind: AssetKind,
+	name: string,
+): void {
 	for (const type of ASSET_KIND_SPECS[kind].types)
 		ensureAsset(editor, type, name);
 }
 
 /** Removes everything named `name`, returning what puts it back. */
-export function removeNamed(editor: Editor, name: string): () => void {
-	const theirs = (node: unknown) => isNamed(node, name);
+export function removeNamedAsset(editor: Editor, name: string): () => void {
+	const theirs = (node: unknown) => isNamedAsset(node, name);
 	const removed = editor.children.filter(theirs);
 	Transforms.removeNodes(editor, { at: [], match: theirs });
 	return () => Transforms.insertNodes(editor, removed, { at: [0] });

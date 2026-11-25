@@ -5,7 +5,7 @@ import {
 	PREVIOUS_VISUAL,
 	START_FRAME_ATTR,
 } from "@/lib/connectors/video/start-frame";
-import { CHARACTER_REFS_RULE } from "@/lib/script/prompt/character-refs";
+import { NAME_REFS_RULE } from "@/lib/script/prompt/name-refs";
 import { MUSIC_PROMPT_FORMAT } from "@/lib/script/prompt/music-prompt";
 import { VIDEO_PROMPT_FORMAT } from "@/lib/script/prompt/video-prompt";
 import { refineOpSchema } from "@/lib/script/refine/types";
@@ -23,9 +23,9 @@ const ASSETS = dedent`
 	  prompt. Their avatar is drawn from it, and every visual that names them is drawn from that
 	  avatar.
 	- asset_location: a place that recurs, as its text, written like an image prompt of the
-	  place with nobody in it. Every visual that names it is drawn from its picture.
+	  place with nobody in it. Every visual that names it is drawn from its image.
 	- asset_prop: an object that recurs, as its text, written like an image prompt of the
-	  object alone. Every visual that names it is drawn from its picture.
+	  object alone. Every visual that names it is drawn from its image.
 	- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described by
 	  its traits, or pinned by a pickedVoiceId you read; always set its language to the one its
 	  lines are in. A narrator, for example, is just a voice with no avatar.
@@ -66,7 +66,7 @@ export const editScript = defineTool({
 	  lists the values it allows. A speech element speaks on the model of the asset_voice its
 	  \`name\` names, so it always needs one.
 
-	  ${CHARACTER_REFS_RULE}
+	  ${NAME_REFS_RULE}
 
 	  ${VIDEO_PROMPT_FORMAT}
 

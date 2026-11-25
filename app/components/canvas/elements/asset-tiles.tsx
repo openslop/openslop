@@ -5,7 +5,7 @@ import { useSlateStatic } from "slate-react";
 import { Image, Mic, Palette, Pencil, X } from "@/components/ui/icon";
 import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
 import type { MediaItem } from "@/lib/project/media";
-import { usePicture } from "../hooks/use-picture";
+import { useImageAsset } from "../hooks/use-image-asset";
 import { ASSET_KIND_ICONS } from "./asset-kinds";
 import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
@@ -41,10 +41,10 @@ export function ArtStyleAssetTile(tile: TileProps) {
 
 type NamedTileProps = TileProps & { name: string; onDelete: () => void };
 
-/** A character, location or prop by its picture, or a character by their voice when they have no look. */
+/** A named asset by its image, or a character by their voice when they have no avatar. */
 export function NamedAssetTile({ name, ...tile }: NamedTileProps) {
 	const { editAsset } = useAssetEditors();
-	const { type, kind, url, status, startedAt } = usePicture(name);
+	const { type, kind, url, status, startedAt } = useImageAsset(name);
 	return type && kind ? (
 		<AssetTile
 			name={name}

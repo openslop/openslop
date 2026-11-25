@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
-import { assetNames, findAsset } from "@/lib/canvas/assets";
+import { namesOfKind, findAsset } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
@@ -49,8 +49,8 @@ vi.mock("../voice-editor", () => ({
 }));
 
 const { CharacterEditModal } = await import("../character-edit-modal");
-const { NewAssetDialog } = await import("../new-asset-dialog");
-const { PictureEditModal } = await import("../picture-edit-modal");
+const { NewNamedAssetDialog } = await import("../new-named-asset-dialog");
+const { ImageAssetEditModal } = await import("../image-asset-edit-modal");
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 afterEach(() => canvas.unmount());
@@ -91,12 +91,12 @@ const has = (type: "asset_avatar" | "asset_voice") =>
 const voiceEditorShown = () =>
 	document.body.querySelector("[data-voice-editor]") !== null;
 
-describe("NewAssetDialog", () => {
+describe("NewNamedAssetDialog", () => {
 	const onCreated = vi.fn();
 	const open = (preset = {}) =>
 		canvas.render(
 			<Dialog open>
-				<NewAssetDialog preset={preset} onCreated={onCreated} />
+				<NewNamedAssetDialog preset={preset} onCreated={onCreated} />
 			</Dialog>,
 		);
 
@@ -125,7 +125,7 @@ describe("NewAssetDialog", () => {
 	});
 
 	it.each([
-		["a character's look", () => mia("a girl")],
+		["a character's avatar", () => mia("a girl")],
 		["a character's voice", miaVoice],
 		["a prop", () => asset("asset_prop", { name: "Mia" })],
 	])("refuses a name %s already holds, whatever the kind", async (_, held) => {
@@ -144,7 +144,7 @@ describe("NewAssetDialog", () => {
 	});
 });
 
-describe("PictureEditModal", () => {
+describe("ImageAssetEditModal", () => {
 	it("edits a location's appearance and deletes it", async () => {
 		const onClose = vi.fn();
 		canvas = mountOnCanvas([
@@ -152,7 +152,7 @@ describe("PictureEditModal", () => {
 		]);
 		canvas.render(
 			<Dialog open>
-				<PictureEditModal name="Mill" onClose={onClose} />
+				<ImageAssetEditModal name="Mill" onClose={onClose} />
 			</Dialog>,
 		);
 		const appearance = () => {
@@ -259,7 +259,7 @@ describe("CharacterEditModal", () => {
 		);
 		await act(async () => remove?.click());
 
-		expect(assetNames(canvas.editor.children, "character")).toEqual([
+		expect(namesOfKind(canvas.editor.children, "character")).toEqual([
 			"Narrator",
 		]);
 		expect(onClose).toHaveBeenCalledOnce();
@@ -268,7 +268,7 @@ describe("CharacterEditModal", () => {
 		act(() => action.props.onClick());
 
 		expect(message).toBe("Deleted Mia");
-		expect(assetNames(canvas.editor.children, "character")).toEqual([
+		expect(namesOfKind(canvas.editor.children, "character")).toEqual([
 			"Mia",
 			"Narrator",
 		]);

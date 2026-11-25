@@ -16,10 +16,10 @@ import {
 	ASSET_KINDS,
 	type AssetKind,
 } from "@/lib/canvas/assets";
-import { useAllAssetNames } from "@/lib/canvas/use-assets";
-import { normalizeCharacterName } from "@/lib/project/character-name";
+import { useNamedAssetNames } from "@/lib/canvas/use-assets";
+import { normalizeAssetName } from "@/lib/project/asset-name";
 import { ASSET_KIND_ICONS } from "../asset-kinds";
-import type { NewAsset } from "../asset-edit-context";
+import type { NewNamedAsset } from "../asset-edit-context";
 
 const KIND_OPTIONS = ASSET_KINDS.map((kind) => ({
 	value: kind,
@@ -27,18 +27,18 @@ const KIND_OPTIONS = ASSET_KINDS.map((kind) => ({
 	Icon: ASSET_KIND_ICONS[kind],
 }));
 
-export function NewAssetDialog({
+export function NewNamedAssetDialog({
 	preset,
 	onCreated,
 }: {
-	preset: NewAsset;
+	preset: NewNamedAsset;
 	onCreated: (kind: AssetKind, name: string) => void;
 }) {
-	const names = useAllAssetNames();
+	const names = useNamedAssetNames();
 	const [kind, setKind] = useState(preset.kind ?? "character");
 	const [name, setName] = useState(preset.name ?? "");
 
-	const normalized = normalizeCharacterName(name);
+	const normalized = normalizeAssetName(name);
 	const collision = names.includes(normalized);
 	const canSubmit = !!normalized && !collision;
 	const label = ASSET_KIND_SPECS[kind].label;
@@ -64,7 +64,7 @@ export function NewAssetDialog({
 					options={KIND_OPTIONS}
 					onChange={setKind}
 					ariaLabel="Kind"
-					className="w-full [&>*]:flex-1"
+					width="fill"
 				/>
 
 				<Input

@@ -1,7 +1,7 @@
 import type { AssetKind } from "@/lib/canvas/assets";
 import type { ConnectorPlugin } from "@/lib/connectors/types";
 
-type PictureParams = { prompt: string; name?: string };
+type ImageAssetParams = { prompt: string; name?: string };
 
 type Framing = { lead: (name: string) => string; rules: string[] };
 
@@ -29,15 +29,15 @@ const FRAMINGS: Record<AssetKind, Framing> = {
 	},
 };
 
-/** Frames an asset's appearance, its prompt, as the one picture every visual naming it is drawn after. */
-export function createAssetPicturePlugin(
+/** Frames a named asset's appearance, its prompt, as the image every visual naming it is drawn after. */
+export function createImageAssetPlugin(
 	kind: AssetKind,
-): ConnectorPlugin<PictureParams> {
+): ConnectorPlugin<ImageAssetParams> {
 	const { lead, rules } = FRAMINGS[kind];
 	return {
-		name: `${kind}-picture`,
+		name: `${kind}-image`,
 		beforeGenerate: ({ prompt, name, ...params }) => {
-			if (!name) throw new Error(`A ${kind} picture needs the ${kind}'s name`);
+			if (!name) throw new Error(`A ${kind} image needs the ${kind}'s name`);
 			return { ...params, prompt: [lead(name), prompt, ...rules].join(". ") };
 		},
 	};

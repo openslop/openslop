@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Editor, Transforms } from "slate";
-import { matchNames, mentionAt, mentionGroups } from "../character-refs";
+import { matchNames, mentionAt, mentionGroups } from "../name-refs";
 import { ZERO_WIDTH_SPACE } from "../constants";
 import { SCENE_TYPE, type ContentElement } from "../types";
 import { element, makeEditor } from "./_assets";

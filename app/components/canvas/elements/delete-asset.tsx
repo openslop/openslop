@@ -6,7 +6,7 @@ import { useSlateStatic } from "slate-react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "@/components/ui/icon";
 import { findAsset } from "@/lib/canvas/assets";
-import { removeAsset, removeNamed } from "@/lib/canvas/asset-ops";
+import { removeAsset, removeNamedAsset } from "@/lib/canvas/asset-ops";
 
 /** Says what was deleted, with the Undo that puts it back. */
 function toastDeleted(message: string, restore: () => void): void {
@@ -26,8 +26,8 @@ function toastDeleted(message: string, restore: () => void): void {
 	});
 }
 
-export function deleteNamed(editor: Editor, name: string): void {
-	toastDeleted(`Deleted ${name}`, removeNamed(editor, name));
+export function deleteNamedAsset(editor: Editor, name: string): void {
+	toastDeleted(`Deleted ${name}`, removeNamedAsset(editor, name));
 }
 
 export function deleteArtStyle(editor: Editor): void {
@@ -39,7 +39,7 @@ export function deleteArtStyle(editor: Editor): void {
 	);
 }
 
-export function DeleteAssetButton({
+export function DeleteNamedAssetButton({
 	name,
 	onDeleted,
 }: {
@@ -53,7 +53,7 @@ export function DeleteAssetButton({
 			variant="outline"
 			size="sm"
 			onClick={() => {
-				deleteNamed(editor, name);
+				deleteNamedAsset(editor, name);
 				onDeleted();
 			}}
 			className="text-muted-foreground sm:mr-auto"

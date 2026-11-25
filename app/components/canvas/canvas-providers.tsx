@@ -18,7 +18,7 @@ import { SloppyProvider } from "../sloppy/sloppy-provider";
 import { SloppyUnread } from "../sloppy/sloppy-unread";
 import { EditorPanelProvider } from "./panel/editor-panel-context";
 import { MediaPanelProvider } from "./media/media-panel-context";
-import { AssetEditProvider } from "./elements/character/asset-edit-provider";
+import { AssetEditProvider } from "./elements/named-asset/asset-edit-provider";
 import { useEditorSession } from "./hooks/use-editor-session";
 import { useProjectHistoryHotkeys } from "./project-history-keymap";
 

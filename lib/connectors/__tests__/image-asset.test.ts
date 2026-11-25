@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createAssetPicturePlugin } from "@/lib/connectors/image/plugins/asset-picture";
+import { createImageAssetPlugin } from "@/lib/connectors/image/plugins/image-asset";
 
-describe("asset-picture plugin", () => {
+describe("image-asset plugin", () => {
 	it("frames the character's appearance as their turnaround sheet, with no text drawn on it, beside the other params", () => {
-		const { beforeGenerate } = createAssetPicturePlugin("character");
+		const { beforeGenerate } = createImageAssetPlugin("character");
 		const params = {
 			prompt: "A young girl with red hair",
 			name: "Alice",
@@ -17,7 +17,7 @@ describe("asset-picture plugin", () => {
 	});
 
 	it("frames a location as an empty establishing shot", () => {
-		const { beforeGenerate } = createAssetPicturePlugin("location");
+		const { beforeGenerate } = createImageAssetPlugin("location");
 		expect(
 			beforeGenerate?.({ prompt: "A thatched cottage", name: "Cottage" }, {}),
 		).toEqual({
@@ -27,7 +27,7 @@ describe("asset-picture plugin", () => {
 	});
 
 	it("frames a prop as an isolated product shot", () => {
-		const { beforeGenerate } = createAssetPicturePlugin("prop");
+		const { beforeGenerate } = createImageAssetPlugin("prop");
 		expect(
 			beforeGenerate?.({ prompt: "A silver sword", name: "Sword" }, {}),
 		).toEqual({
@@ -36,8 +36,8 @@ describe("asset-picture plugin", () => {
 		});
 	});
 
-	it("refuses to draw a picture of nobody rather than one of 'undefined'", () => {
-		const { beforeGenerate } = createAssetPicturePlugin("character");
+	it("refuses to draw an image of nobody rather than one of 'undefined'", () => {
+		const { beforeGenerate } = createImageAssetPlugin("character");
 		expect(() =>
 			beforeGenerate?.({ prompt: "A young girl with red hair" }, {}),
 		).toThrow("needs the character's name");

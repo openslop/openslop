@@ -8,7 +8,7 @@ import { references } from "@/lib/canvas/__tests__/_assets";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore } from "@/lib/project/store";
 import { EditorPanelProvider } from "../editor-panel-context";
-import { AssetEditProvider } from "@/app/components/canvas/elements/character/asset-edit-provider";
+import { AssetEditProvider } from "@/app/components/canvas/elements/named-asset/asset-edit-provider";
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
 import { MediaPanelProvider } from "@/app/components/canvas/media/media-panel-context";
 import {

@@ -3,23 +3,23 @@
 import { getImageProps } from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ICON_SIZES } from "@/components/ui/icon-button";
-import { usePicture } from "../hooks/use-picture";
+import { useImageAsset } from "../hooks/use-image-asset";
 import { ASSET_KIND_ICONS } from "./asset-kinds";
 
-const AVATAR_PX = { sm: 24, xs: 18 };
+const IMAGE_PX = { sm: 24, xs: 18 };
 const FALLBACK_ICON_PX = { sm: ICON_SIZES.header, xs: ICON_SIZES.sm };
 
-/** A named asset's picture, or its kind's icon until there is one; a character's when there is no picture. */
-export function AssetAvatar({
+/** A named asset's image, or its kind's icon until it has one. */
+export function NamedAssetImage({
 	name,
 	size = "sm",
 	className,
 }: {
 	name?: string;
-	size?: keyof typeof AVATAR_PX;
+	size?: keyof typeof IMAGE_PX;
 	className?: string;
 }) {
-	const { url, kind = "character" } = usePicture(name);
+	const { url, kind = "character" } = useImageAsset(name);
 	const Icon = ASSET_KIND_ICONS[kind];
 	return (
 		// Radix keeps its "loaded" status after the image unmounts, so a new url remounts it.
@@ -30,8 +30,8 @@ export function AssetAvatar({
 					{...getImageProps({
 						src: url,
 						alt: name ?? "",
-						width: AVATAR_PX[size],
-						height: AVATAR_PX[size],
+						width: IMAGE_PX[size],
+						height: IMAGE_PX[size],
 					}).props}
 					className="object-cover object-center"
 				/>

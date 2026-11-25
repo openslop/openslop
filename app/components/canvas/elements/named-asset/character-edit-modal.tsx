@@ -6,7 +6,7 @@ import { useAsset } from "@/lib/canvas/use-assets";
 import type { AssetType } from "@/lib/canvas/types";
 import { AppearanceEditor } from "./appearance-editor";
 import { AssetDialog } from "./asset-dialog";
-import { DeleteAssetButton } from "../delete-asset";
+import { DeleteNamedAssetButton } from "../delete-asset";
 import { SwitchField } from "./fields";
 import { VoiceEditor } from "./voice-editor";
 
@@ -32,7 +32,7 @@ export function CharacterEditModal({
 					: "Edits save automatically."
 			}
 			onClose={onClose}
-			actions={<DeleteAssetButton name={name} onDeleted={onClose} />}
+			actions={<DeleteNamedAssetButton name={name} onDeleted={onClose} />}
 		>
 			<SwitchField
 				label="Avatar"
@@ -41,11 +41,7 @@ export function CharacterEditModal({
 				onCheckedChange={toggle("asset_avatar")}
 			/>
 			{avatar && (
-				<AppearanceEditor
-					element={avatar}
-					modelLabel="Avatar model"
-					placeholder="Describe the character's look"
-				/>
+				<AppearanceEditor element={avatar} modelLabel="Avatar model" />
 			)}
 			<SwitchField
 				label="Voice"

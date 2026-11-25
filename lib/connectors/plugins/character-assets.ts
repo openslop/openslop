@@ -1,7 +1,7 @@
 import pickBy from "lodash/pickBy";
-import { findPicture } from "@/lib/canvas/assets";
+import { findImageAsset } from "@/lib/canvas/assets";
 import type { CanvasElement } from "@/lib/canvas/types";
-import { referencedNames } from "@/lib/connectors/character-refs";
+import { referencedNames } from "@/lib/connectors/name-refs";
 import { isPictured, isVoiced } from "@/lib/connectors/characters";
 import type {
 	Character,
@@ -20,13 +20,13 @@ export type ParamsWithCharacters = {
 const shownCharacters = (element: CanvasElement): string[] =>
 	referencedNames(getPromptText(element));
 
-const avatarLabel = (name: string) => `${name}'s avatar`;
+const imageLabel = (name: string) => `${name}'s image`;
 
-const shownAvatars: Dependency = (element, { canvas }) =>
+const shownImages: Dependency = (element, { canvas }) =>
 	Object.fromEntries(
 		shownCharacters(element).map((name) => [
-			avatarLabel(name),
-			findPicture(canvas, name),
+			imageLabel(name),
+			findImageAsset(canvas, name),
 		]),
 	);
 
@@ -35,7 +35,7 @@ const characterOf = (ctx: PluginContext, name: string): Character => {
 	return {
 		name,
 		...pickBy({
-			avatarUrl: ctx.dependencies?.[avatarLabel(name)]?.imageUrl,
+			avatarUrl: ctx.dependencies?.[imageLabel(name)]?.imageUrl,
 			voice: voice?.audioUrl
 				? { url: voice.audioUrl, durationSec: voice.durationSec }
 				: undefined,
@@ -52,8 +52,8 @@ export function createCharacterAssetsPlugin({
 	return {
 		name: "character-assets",
 		dependencies: voices
-			? [shownAvatars, speakerVoices(shownCharacters)]
-			: [shownAvatars],
+			? [shownImages, speakerVoices(shownCharacters)]
+			: [shownImages],
 		beforeGenerate(params, ctx) {
 			const characters = referencedNames(params.prompt)
 				.map((name) => characterOf(ctx, name))

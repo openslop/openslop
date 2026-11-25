@@ -2,9 +2,9 @@ import { dedent } from "@/lib/dedent";
 import {
 	ASSET_KIND_SPECS,
 	ASSET_KINDS,
-	assetNames,
+	namesOfKind,
 	assetText,
-	pictureTypeOf,
+	imageAssetTypeOf,
 	voiceOf,
 	type AssetKind,
 } from "@/lib/canvas/assets";
@@ -24,12 +24,12 @@ function renderVoice(voice: Voice): string {
 }
 
 /** A character also says how they sound; every kind says how it looks. */
-function renderAsset(
+function renderNamedAsset(
 	assets: AssetElement[],
 	kind: AssetKind,
 	name: string,
 ): string {
-	const appearance = assetText(assets, pictureTypeOf(kind), name);
+	const appearance = assetText(assets, imageAssetTypeOf(kind), name);
 	const body = [
 		kind === "character" && renderVoice(voiceOf(assets, name)),
 		appearance && `- appearance: ${appearance}`,
@@ -53,14 +53,14 @@ export function projectPreamble(assets: AssetElement[]): string {
 	}
 
 	for (const kind of ASSET_KINDS) {
-		const names = assetNames(assets, kind);
+		const names = namesOfKind(assets, kind);
 		if (names.length === 0) continue;
 		sections.push(dedent`
 			# ${ASSET_KIND_SPECS[kind].plural}
 
 			Name one exactly as written here:
 
-			${names.map((name) => renderAsset(assets, kind, name)).join("\n\n")}`);
+			${names.map((name) => renderNamedAsset(assets, kind, name)).join("\n\n")}`);
 	}
 
 	return sections.join("\n\n");

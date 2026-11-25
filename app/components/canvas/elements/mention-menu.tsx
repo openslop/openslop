@@ -11,9 +11,9 @@ import { keepFocus } from "@/components/ui/keep-focus";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Separator } from "@/components/ui/separator";
 import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
-import type { Mention, MentionGroup } from "@/lib/canvas/character-refs";
+import type { Mention, MentionGroup } from "@/lib/canvas/name-refs";
 import { cn } from "@/lib/utils";
-import { AssetAvatar } from "./asset-avatar";
+import { NamedAssetImage } from "./named-asset-image";
 
 export const optionId = (listboxId: string, index: number) =>
 	`${listboxId}-${index}`;
@@ -41,13 +41,13 @@ function MentionOption({
 				active && "bg-surface-hover",
 			)}
 		>
-			<AssetAvatar name={name} />
+			<NamedAssetImage name={name} />
 			<span className="min-w-0 truncate">{name}</span>
 		</div>
 	);
 }
 
-/** The assets `@` can name, under a heading per kind. */
+/** The named assets `@` can name, under a heading per kind. */
 export function MentionMenu({
 	mention,
 	groups,
@@ -83,7 +83,7 @@ export function MentionMenu({
 				onOpenAutoFocus={(event) => event.preventDefault()}
 				onCloseAutoFocus={(event) => event.preventDefault()}
 			>
-				<div id={listboxId} role="listbox" aria-label="Assets">
+				<div id={listboxId} role="listbox" aria-label="Named assets">
 					{groups.map(({ kind, names, start }) => {
 						const headingId = `${listboxId}-${kind}`;
 						return (

@@ -7,7 +7,7 @@ import { ImageWithShimmer } from "@/lib/components/image-with-shimmer";
 import { truncateMiddle } from "@/lib/format";
 import { ART_STYLE_PRESETS, type ArtStyle } from "@/lib/project/art-styles";
 import { cn } from "@/lib/utils";
-import { FieldLabel } from "../character/fields";
+import { FieldLabel } from "../named-asset/fields";
 
 /** Three lines of the tile at `text-label`. The full text is in the field above. */
 const DESCRIPTION_LENGTH = 84;

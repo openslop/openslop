@@ -16,12 +16,11 @@ import {
 } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import type { CharacterRefElement } from "@/lib/canvas/types";
-import { useKindOf } from "@/lib/canvas/use-assets";
-import { usePicture } from "../hooks/use-picture";
+import type { NameRefElement } from "@/lib/canvas/types";
+import { useImageAssetType, useKindOfName } from "@/lib/canvas/use-assets";
 import { cn } from "@/lib/utils";
 import { useAssetEditors } from "./asset-edit-context";
-import { AssetAvatar } from "./asset-avatar";
+import { NamedAssetImage } from "./named-asset-image";
 
 const noSubscription = () => () => {};
 
@@ -57,9 +56,9 @@ function RefActionButton({
 	);
 }
 
-function EditAssetButton({ name }: { name: string }) {
+function EditNamedAssetButton({ name }: { name: string }) {
 	const { editAsset } = useAssetEditors();
-	const { type = "asset_voice" } = usePicture(name);
+	const type = useImageAssetType(name) ?? "asset_voice";
 	return (
 		<RefActionButton
 			label={`Edit ${name}`}
@@ -69,29 +68,29 @@ function EditAssetButton({ name }: { name: string }) {
 	);
 }
 
-function CreateAssetButton({ name }: { name: string }) {
-	const { openCreateAsset } = useAssetEditors();
+function CreateNamedAssetButton({ name }: { name: string }) {
+	const { openCreateNamedAsset } = useAssetEditors();
 	return (
 		<RefActionButton
 			label={`Create ${name}`}
 			icon={Plus}
-			onClick={() => openCreateAsset({ name })}
+			onClick={() => openCreateNamedAsset({ name })}
 		/>
 	);
 }
 
-function KnownAsset({ name }: { name: string }) {
+function KnownNamedAsset({ name }: { name: string }) {
 	const readOnly = useReadOnly();
 	return (
 		<Badge variant="subtle" size="inline" className="group/chip relative">
-			<AssetAvatar name={name} size="xs" className="rounded-none" />
+			<NamedAssetImage name={name} size="xs" className="rounded-none" />
 			<span className="min-w-0 self-baseline truncate">{name}</span>
-			{!readOnly && <EditAssetButton name={name} />}
+			{!readOnly && <EditNamedAssetButton name={name} />}
 		</Badge>
 	);
 }
 
-function UnknownAsset({ name }: { name: string }) {
+function UnknownNamedAsset({ name }: { name: string }) {
 	const readOnly = useReadOnly();
 	return (
 		<SimpleTooltip label={`Nothing named ${name}`}>
@@ -99,18 +98,18 @@ function UnknownAsset({ name }: { name: string }) {
 				<AlertTriangle />
 				<span className="sr-only">Unknown asset: </span>
 				<span className="min-w-0 self-baseline truncate">{name}</span>
-				{!readOnly && <CreateAssetButton name={name} />}
+				{!readOnly && <CreateNamedAssetButton name={name} />}
 			</Badge>
 		</SimpleTooltip>
 	);
 }
 
-export function CharacterRef({
+export function NameRef({
 	attributes,
 	children,
 	element,
-}: Omit<RenderElementProps, "element"> & { element: CharacterRefElement }) {
-	const known = useKindOf(element.name) !== undefined;
+}: Omit<RenderElementProps, "element"> & { element: NameRefElement }) {
+	const known = useKindOfName(element.name) !== undefined;
 	const selected = useSelected();
 	const focused = useFocused();
 	const isMac = useIsMac();
@@ -130,9 +129,9 @@ export function CharacterRef({
 			{isMac && children}
 			<span contentEditable={false} className="inline-flex">
 				{known ? (
-					<KnownAsset name={element.name} />
+					<KnownNamedAsset name={element.name} />
 				) : (
-					<UnknownAsset name={element.name} />
+					<UnknownNamedAsset name={element.name} />
 				)}
 			</span>
 			{!isMac && children}

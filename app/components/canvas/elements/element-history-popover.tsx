@@ -1,6 +1,6 @@
 "use client";
 
-import { renderPrompt } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/name-refs";
 import { useState, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -3,31 +3,31 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useSlateStatic } from "slate-react";
-import { addAsset, ensureAsset } from "@/lib/canvas/asset-ops";
-import { pictureTypeOf } from "@/lib/canvas/assets";
+import { addNamedAsset, ensureAsset } from "@/lib/canvas/asset-ops";
+import { imageAssetTypeOf } from "@/lib/canvas/assets";
 import type { ProjectAssetType } from "@/lib/canvas/types";
 import {
 	AssetEditContext,
 	type AssetEditors,
-	type NewAsset,
+	type NewNamedAsset,
 } from "../asset-edit-context";
 import { ArtStyleModal } from "../style/art-style-modal";
 import { CharacterEditModal } from "./character-edit-modal";
-import { NewAssetDialog } from "./new-asset-dialog";
-import { PictureEditModal } from "./picture-edit-modal";
+import { NewNamedAssetDialog } from "./new-named-asset-dialog";
+import { ImageAssetEditModal } from "./image-asset-edit-modal";
 
 /** The one asset dialog open at a time, so two can never stack. */
 type AssetEdit =
-	| { dialog: "create"; preset: NewAsset }
+	| { dialog: "create"; preset: NewNamedAsset }
 	| { dialog: "character"; name: string }
-	| { dialog: "picture"; name: string }
+	| { dialog: "imageAsset"; name: string }
 	| { dialog: "artStyle" };
 
 const DIALOG_OF: Record<ProjectAssetType, (name?: string) => AssetEdit> = {
 	asset_avatar: (name = "") => ({ dialog: "character", name }),
 	asset_voice: (name = "") => ({ dialog: "character", name }),
-	asset_location: (name = "") => ({ dialog: "picture", name }),
-	asset_prop: (name = "") => ({ dialog: "picture", name }),
+	asset_location: (name = "") => ({ dialog: "imageAsset", name }),
+	asset_prop: (name = "") => ({ dialog: "imageAsset", name }),
 	asset_style: () => ({ dialog: "artStyle" }),
 	asset_references: () => ({ dialog: "artStyle" }),
 };
@@ -44,7 +44,7 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				ensureAsset(editor, type, name);
 				setEditing(DIALOG_OF[type](name));
 			},
-			openCreateAsset: (preset = {}) =>
+			openCreateNamedAsset: (preset = {}) =>
 				setEditing({ dialog: "create", preset }),
 		}),
 		[editor],
@@ -60,11 +60,11 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 				}}
 			>
 				{editing?.dialog === "create" && (
-					<NewAssetDialog
+					<NewNamedAssetDialog
 						preset={editing.preset}
 						onCreated={(kind, name) => {
-							addAsset(editor, kind, name);
-							editors.editAsset(pictureTypeOf(kind), name);
+							addNamedAsset(editor, kind, name);
+							editors.editAsset(imageAssetTypeOf(kind), name);
 						}}
 					/>
 				)}
@@ -75,8 +75,8 @@ export function AssetEditProvider({ children }: { children: ReactNode }) {
 						onClose={close}
 					/>
 				)}
-				{editing?.dialog === "picture" && (
-					<PictureEditModal
+				{editing?.dialog === "imageAsset" && (
+					<ImageAssetEditModal
 						key={editing.name}
 						name={editing.name}
 						onClose={close}

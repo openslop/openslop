@@ -49,7 +49,7 @@ import { pickOther } from "@/lib/utils";
 import {
 	AssetStrip,
 	AssetStripArtStyle,
-	AssetStripNamed,
+	AssetStripNamedAssets,
 	AssetStripMedia,
 	AssetStripReferences,
 	AssetStripUploading,
@@ -91,7 +91,7 @@ function AttachMenu({
 	uploadMedia: () => void;
 	uploading: boolean;
 }) {
-	const { openCreateAsset, editAsset } = useAssetEditors();
+	const { openCreateNamedAsset, editAsset } = useAssetEditors();
 	const iconClass = "mr-1.5 h-3.5 w-3.5 text-foreground";
 	const items: ActionMenuItem[] = [
 		{
@@ -110,7 +110,7 @@ function AttachMenu({
 			key: "asset",
 			label: "Create asset",
 			icon: <LayersPlus className={iconClass} />,
-			onSelect: () => openCreateAsset(),
+			onSelect: () => openCreateNamedAsset(),
 		},
 		{
 			key: "art-style",
@@ -212,7 +212,7 @@ export default function ComposerCopilot({
 			<div className="px-4 py-3">
 				<AssetStrip>
 					<AssetStripArtStyle />
-					<AssetStripNamed />
+					<AssetStripNamedAssets />
 					<AssetStripReferences />
 					<AssetStripMedia />
 					<AssetStripUploading count={uploadingCount} />

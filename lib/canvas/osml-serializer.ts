@@ -1,17 +1,15 @@
 import { Descendant } from "slate";
-import { characterRef } from "@/lib/connectors/character-refs";
+import { nameRef } from "@/lib/connectors/name-refs";
 import type { CanvasElement } from "./types";
 import { isScene } from "./scenes";
-import { isAssetElement, isCharacterRef } from "./guards";
+import { isAssetElement, isNameRef } from "./guards";
 import { sceneMarker, withoutCaretMarker } from "./constants";
 import { flatAttributes } from "./element-attributes";
 import { escapeXml } from "./xml-escape";
 
 export function getElementText(element: CanvasElement): string {
 	return element.children
-		.map((child) =>
-			isCharacterRef(child) ? characterRef(child.name) : child.text,
-		)
+		.map((child) => (isNameRef(child) ? nameRef(child.name) : child.text))
 		.join("");
 }
 

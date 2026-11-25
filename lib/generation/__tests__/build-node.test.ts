@@ -109,7 +109,7 @@ describe("buildNode", () => {
 		const node = resolveOn(video, [img, video]);
 
 		expect(edgesOf(node)).toEqual({
-			"Alice's avatar": "avatar-Alice",
+			"Alice's image": "avatar-Alice",
 			"the previous visual": "img",
 		});
 	});
@@ -163,7 +163,7 @@ describe("buildNode", () => {
 			() => {
 				assets = [...assets, avatar("Bob", "tall")];
 			},
-			"Bob's avatar",
+			"Bob's image",
 		],
 		[
 			"a character's avatar is removed",
@@ -171,7 +171,7 @@ describe("buildNode", () => {
 			() => {
 				assets = assets.filter(({ type }) => type !== "asset_avatar");
 			},
-			"Alice's avatar",
+			"Alice's image",
 		],
 		[
 			"the aspect ratio it read changes",
