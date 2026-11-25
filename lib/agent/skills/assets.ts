@@ -6,22 +6,22 @@ export const assets = {
 	description:
 		"The project's assets (characters, voices, locations, props, art style, reference images): what each holds, and setting them up before a script and from the user's uploads. Load it before adding or changing an asset.",
 	content: dedent`
-		Ahead of the scenes sit the project's assets, which every scene draws on. Set them with edit_script asset ops.
+		Assets sit above the scenes and are shared by all of them. Change them with edit_script asset ops.
 
-		A character is the asset_avatar and asset_voice sharing a \`name\`: the exact name their lines and every {{Name}} in a prompt use, which never changes. A character has either or both. Locations and props are named the same way, and no two characters, locations or props share a name.
-		- asset_avatar: what a character looks like, as its text, written like an image prompt. Their avatar is drawn from it, and every visual that names them is drawn from that avatar.
-		- asset_location: a place that recurs, as its text, written like an image prompt of the place with nobody in it. Every visual that names it is drawn from its image.
-		- asset_prop: an object that recurs, as its text, written like an image prompt of the object alone. Every visual that names it is drawn from its image.
-		- asset_voice: how a speaker sounds, as its attributes and no text. A voice is described by its traits, or pinned by a pickedVoiceId you read; always set its language to the one its lines are in. A narrator, for example, is just a voice with no avatar.
-		- asset_style: the art style every visual is drawn in, as its text: the medium, linework, colors and lighting. Never a place, setting, subject or time of day.
-		- asset_references: the images every visual is drawn after, usually the user's uploads.
-		- asset_media_<type>: the user's Media panel drafts. Ignore them for now.
+		A character is an asset_avatar and an asset_voice with the same \`name\`. It can have one or both. Its lines and every {{Name}} in a prompt use that exact name, so never rename it. Locations and props have names too, and every character, location and prop name is unique.
+		- asset_avatar: how a character looks. Its text is an image prompt for the character's picture. Any visual that mentions the character gets that picture as a reference image.
+		- asset_location: a place that shows up more than once. Its text is an image prompt of the empty place. Any visual that mentions it gets its picture as a reference image.
+		- asset_prop: an object that shows up more than once. Its text is an image prompt of the object on its own. Any visual that mentions it gets its picture as a reference image.
+		- asset_voice: how someone sounds. It has attributes but no text. Describe the voice by its traits, or pick an exact one with a pickedVoiceId you read. Always set its language to the language of its lines. A narrator is just a voice with no avatar.
+		- asset_style: the art style, added to every image and video prompt. Describe the medium, linework, colors and lighting, never a place, subject or time of day.
+		- asset_references: images, usually the user's uploads, sent as reference images with every visual.
+		- asset_media_<type>: drafts from the user's Media panel. Ignore them for now.
 
 		## Before a new script
-		A script is written against the assets already on the canvas, so put what it needs there first: an asset_voice for everyone who speaks (even if they only speak in video elements), an asset_avatar for every character a visual shows, an asset_location or asset_prop for every place or object more than one visual shows, and the art style. An asset the user already set stands.
+		Add the assets a script needs before writing it: an asset_voice for everyone who speaks (even only inside videos), an asset_avatar for every character on screen, an asset_location or asset_prop for every place or object in more than one visual, and an art style. Keep any asset the user already set.
 
 		## From uploads
-		- An uploaded asset_avatar looks like that image, not like its text. Look at it with view_result and set its text to what you see, unless the text already describes that exact image.
-		- When there is no asset_style element, take the art style from what the user uploaded: the reference images first, otherwise an uploaded asset_avatar. Look with view_result, then insert the style in the same turn.
+		- An uploaded avatar image is what gets used, not its text. Look at it with view_result and update the text to match, unless it already does.
+		- If there is no asset_style, base one on the user's uploads: the reference images first, otherwise an uploaded avatar. Look with view_result, then add the style in the same turn.
 	`,
 } as const satisfies Skill;

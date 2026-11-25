@@ -129,6 +129,10 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 					);
 				});
 			},
+			onFinish: ({ isAbort, isDisconnect, isError }) => {
+				if (isAbort || isDisconnect || isError)
+					setMessages((current) => settleUnansweredCalls(current));
+			},
 			onError: (error) => toastError(error, "Sloppy could not finish that"),
 			throttle: 50,
 		});

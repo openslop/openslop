@@ -12,21 +12,21 @@ export const videoPrompts = {
 	description:
 		"How to write a <video> prompt: numbered shots, camera, place, characters, action, speech and sound. Load it before writing or reviewing video prompts.",
 	content: dedent`
-		A <video> prompt is one to three numbered shots, always labelled Shot 1, Shot 2, Shot 3 even when there is only one. Vary the shot count to suit the moment: a single held shot for a quiet beat or a static graphic, two or three for action, a reveal or a back-and-forth. Each prompt is standalone and has no context on any other element on the canvas, so it should include all relevant detail except for the art style or character appearance descriptions. Lay the shots out as a list: each shot starts on its own line, so there is a newline between one shot and the next, never one shot running into the next on the same line.
+		A <video> prompt has one to three shots, each on its own line and labelled Shot 1, Shot 2, Shot 3, even if there is only one. Use one shot for a quiet moment or a static graphic, and two or three for action, a reveal or a conversation. The video model sees only this prompt, so include every detail it needs, except the art style and how characters look.
 
-		Describe each shot in vivid detail, including:
+		Describe each shot in detail:
 		- Camera: the shot size (wide, medium, close-up) and the angle.
-		- Location: location in detail, the time of day, the light and the weather if outdoors.
-		- Characters: every character in frame as their {{Name}}, exactly where each one is in the place, which way each one faces.
-		- Action: one clear action for each character and the expression on their face.
-		- Objects: important props and set pieces, where they sit and what state they are in.
+		- Location: the place, time of day, light, and weather if outdoors.
+		- Characters: everyone in frame as {{Name}}, where they stand and which way they face.
+		- Action: one clear action and facial expression per character.
+		- Objects: key props, where they are and what state they're in.
 		- Then any Speech, then Sound.
 
-		- Keep the geography steady from shot to shot: a character on the left of frame stays on the left unless the shot shows them moving, and eyelines match (when {{Kai}} looks up at {{Mia}}, {{Mia}} looks down at {{Kai}}).
-		- Outside spoken lines, every mention of a character is their {{Name}}, every time, in every shot. Never refer to one with a pronoun (he, she, they, him, her, his) or a stand-in like "the boy", since the model only knows who a character is from their {{Name}}.
-		- Sound: name what makes the noise and how near it is ("rain drumming on a tin roof, a car passing far off"), never a mood. NEVER include music or voice-over in the video prompt.
-		- Speech: Write it as {{Name}} (tone): "line". Ensure the speech is perfectly idiomatic, appropriate, and realistic for the shot.
-		- A video that continues from the one before (${START_FRAME_ATTR}="${PREVIOUS_VISUAL}") starts exactly on the visual before it: that image, or the end of that video's last shot. Shot 1 keeps its place, framing, characters and action identically, then moves on from there.
+		- Keep positions consistent between shots: someone on the left stays on the left unless they move, and eyelines match (if {{Kai}} looks up at {{Mia}}, {{Mia}} looks down at {{Kai}}).
+		- Outside spoken lines, always call a character by {{Name}}, never "he", "she" or "the boy". The model only knows who someone is from their {{Name}}.
+		- Sound: what makes the noise and how close it is ("rain drumming on a tin roof, a car passing far off"), not a mood. No music or voice-over.
+		- Speech: {{Name}} (tone): "line". Keep it natural for the moment.
+		- With ${START_FRAME_ATTR}="${PREVIOUS_VISUAL}", the video starts on the previous image or the end of the previous video, so Shot 1 must begin with the same place, framing, characters and action before moving on.
 		- Example, 15 seconds (for ${VIDEO_FORMAT.cinematic} type):
 		  Shot 1: Low-angle wide shot, static camera. A penthouse at midnight in a thunderstorm: a shattered glass skylight, rain pouring through onto a white marble floor, tall windows on the right glowing with city lights, cold blue flashes of lightning from above. {{Kai}} falls through the skylight in the centre of frame, back to camera, arms flung wide. Three masked assassins crouch on the broken roof frame above {{Kai}}, facing down. Sound: glass shattering close by, wind roaring overhead.
 		  Shot 2: High-angle medium shot looking up through the broken skylight, slow push-in. The same stormy midnight sky, rain falling toward camera, purple light from the assassins' blades glinting on the wet steel frame. The three assassins kneel side by side on the frame, the lead assassin in the middle facing down toward camera, a crackling purple blade in each right hand. The lead assassin (cold, muffled): "Target found. Get him before dawn." Sound: rain hissing on the blades.

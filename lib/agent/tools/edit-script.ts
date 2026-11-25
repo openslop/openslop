@@ -14,7 +14,7 @@ import { defineTool } from "./define-tool";
 export const editScript = defineTool({
 	description: dedent`
 	  Change the canvas: add, remove, rewrite or reorder the script's elements, and
-	  set up the assets it draws on. Reference ids you read; never invent one.
+	  set up its assets. Only use ids you read.
 
 	  - insert: place new \`elements\` before or after \`anchor_id\`, in the order you list them.
 	    Omit \`anchor_id\` to append, or to prepend with position "before". To add several

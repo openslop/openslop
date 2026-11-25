@@ -32,15 +32,16 @@ export function toolCallsMade(messages: SloppyMessage[]): number {
 	return (trailingAssistant(messages)?.parts ?? []).filter(isToolUIPart).length;
 }
 
+const isStreamingScript = (part: SloppyMessage["parts"][number]) =>
+	isToolUIPart(part) &&
+	part.state === "input-streaming" &&
+	SCRIPT_STREAM_FIELDS.has(getToolName(part));
+
 const isUnanswered = (part: SloppyMessage["parts"][number]) =>
 	isToolUIPart(part) && part.state === "input-available";
 
-type ToolPart = Extract<SloppyMessage["parts"][number], { toolCallId: string }>;
-
-const isPending = (part: ToolPart) =>
-	isUnanswered(part) ||
-	(part.state === "input-streaming" &&
-		SCRIPT_STREAM_FIELDS.has(getToolName(part)));
+const isPending = (part: SloppyMessage["parts"][number]) =>
+	isUnanswered(part) || isStreamingScript(part);
 
 /** A call handed to the editor and not yet answered, or writing the canvas as it streams in, of any tool or of `tools`. */
 export function hasPendingToolCall(
@@ -56,16 +57,20 @@ export function hasPendingToolCall(
 
 const UNANSWERED = "Stopped before the editor ran it";
 
-/** A call the editor never answered, settled with `errorText` so nothing waits on it. Covers a turn stopped mid-call, including one reloaded from storage. */
+/** A call the editor never answered, settled with `errorText` so nothing waits on it, and a script cut off mid-stream, dropped. Covers a turn stopped or failed mid-call, including one reloaded from storage. */
 export function settleUnansweredCalls(
 	messages: SloppyMessage[],
 	errorText = UNANSWERED,
 ): SloppyMessage[] {
 	return messages.map((message) => ({
 		...message,
-		parts: message.parts.map((part) =>
-			isUnanswered(part) ? { ...part, state: "output-error", errorText } : part,
-		),
+		parts: message.parts
+			.filter((part) => !isStreamingScript(part))
+			.map((part) =>
+				isUnanswered(part)
+					? { ...part, state: "output-error", errorText }
+					: part,
+			),
 	}));
 }
 

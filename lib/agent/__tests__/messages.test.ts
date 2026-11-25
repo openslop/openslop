@@ -133,6 +133,25 @@ describe("settleUnansweredCalls", () => {
 		expect(hasPendingToolCall(settled)).toBe(false);
 	});
 
+	it("drops a script cut off mid-stream, so a stopped or failed turn frees the composer", () => {
+		const streaming: SloppyMessage = {
+			...turn("input-streaming"),
+			parts: [
+				{
+					type: "tool-write_script",
+					toolCallId: "call-0",
+					state: "input-streaming",
+					input: undefined,
+				},
+			],
+		};
+
+		const settled = settleUnansweredCalls([asked, streaming]);
+
+		expect(settled.at(-1)?.parts).toEqual([]);
+		expect(hasPendingToolCall(settled)).toBe(false);
+	});
+
 	it("leaves answered calls and what the user said alone", () => {
 		const transcript = [asked, turn("output-available")];
 

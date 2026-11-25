@@ -24,50 +24,49 @@ export const osml = {
 	description:
 		"How to write each script element (speech, image, video, sound, music) in OSML, the XML the canvas holds: attributes, names, and which language each part is in. Load it whenever you write or review element text.",
 	content: dedent`
-		The script is XML, one tag per element in the order they play. Never nest tags. Write the story and nothing else, using only the elements the format allows (the video-formats skill).
+		The script is XML with one tag per element, in play order. Never nest tags. Write only the story, using only the elements the format allows (see video-formats).
 
 		## Language
-		The script language is the project's language from read_script_settings. On auto, it is the language of the user's own topic or script, or English when that is unclear.
-		- Every spoken or sung line is in the script language, wherever the format puts it: a <speech> element, speech quoted in a <video> prompt, or the lyrics of a <music> prompt.
-		- Everything else in <image>, <video>, <sound> and <music> prompts is in English, and so is avatar, location, prop and style text.
+		The script language is the language in read_script_settings. If it is auto, use the language the user wrote their topic or script in, or English if unsure.
+		- Everything spoken or sung is in the script language: <speech>, lines inside a <video> prompt, and <music> lyrics.
+		- Everything else is in English: the rest of every prompt, and avatar, location, prop and style text.
 
 		## Names
-		Write each character, location and prop in an <image> or <video> prompt as ${nameRef("Name")}, with its exact name, like ${nameRef("Red")} or ${nameRef("Cottage")}. Never describe how one looks, since the model sees it. Speech elements and every other prompt name them plainly.
+		In <image> and <video> prompts, write each character, location and prop as ${nameRef("Name")} with its exact name, like ${nameRef("Red")} or ${nameRef("Cottage")}. Don't describe how it looks, since the model gets its picture. Everywhere else, use the plain name.
 
 		## <speech>
-		- What one character says out loud. name is required: the character who says it. A narrator, for example, is a character with no appearance. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
+		- A line one character says out loud. name (required) is who says it. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
 		- emotion: ${TTS_EMOTIONS.join(", ")}. speed: ${TTS_SPEEDS.join(", ")}.
-		- Never write words in ALL CAPS, because the voice engine mispronounces them. Acronyms like USA stay capitalized.
-		- The only nonverbal cue is [laughter]. Use ... for a pause and ! for strong feeling. Example: <speech name="Mia" emotion="happy">[laughter] That's the way I want it!</speech>
-		- Nobody sees the prompts, so let the speech mention some of what the pictures show.
+		- No words in ALL CAPS, the voice model mispronounces them. Acronyms like USA are fine.
+		- [laughter] is the only sound cue. Use ... for a pause and ! for strong feeling. Example: <speech name="Mia" emotion="happy">[laughter] That's the way I want it!</speech>
+		- The audience never reads the prompts, so the speech can mention some of what's on screen.
 
 		## <image>
-		- The body is an image prompt: the time of day, the background, the weather if outdoors, and the objects, in detail.
-		- Depict the specific moment described by the speech that follows it, up to the next visual: who is there, what they do and their expressions, not just the setting.
-		- Each <image> prompt must stand alone. The image model knows nothing about the story or the other prompts, so repeat any detail it needs.
-		- Name characters, locations and props as {{Name}}, as Names says.
-		- motion: a camera move for the whole time the image is on screen. Set one on almost every image. Allowed values: ${MOTION_EFFECTS.join(", ")}.
+		- The body is an image prompt: time of day, background, weather if outdoors, and objects, in detail.
+		- Show the moment the speech after it describes: who is there, what they're doing and their expressions, not just the setting.
+		- The image model sees only this prompt, so include every detail it needs.
+		- motion: a camera move while the image is on screen. Set one on almost every image. Values: ${MOTION_EFFECTS.join(", ")}.
 		- Example: <image motion="kenBurnsIn">{{Red}} hands a basket to {{Granny}} at the door of a thatched cottage on a rainy afternoon.</image>
 
 		## <video>
-		- A short generated video whose sound is written into its shots. The body is a video prompt, written as the video-prompts skill says.
-		- duration: how many seconds to generate (default ${DEFAULT_DURATION}). Allowed values depend on its model: read_model_attributes lists them.
-		- ${START_FRAME_ATTR}, ${CONTINUITY_ATTR} and ${loopDef.key}: see the video-formats skill.
-		- motion: normally set to "${DEFAULT_MOTION}". Only set one when the shots have no camera move of their own.
+		- A short generated video, with sound. The body is a video prompt (see video-prompts).
+		- duration: seconds to generate (default ${DEFAULT_DURATION}). read_model_attributes lists the values its model allows.
+		- ${START_FRAME_ATTR}, ${CONTINUITY_ATTR} and ${loopDef.key}: see video-formats.
+		- motion: usually "${DEFAULT_MOTION}". Set one only when the shots have no camera move.
 		- Example: <video startFrame="none">Shot 1: Wide shot of a moonlit forest clearing as {{Red}} and {{Wolf}} walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby.</video>
 
 		## <sound>
-		- A sound effect that no <video> already makes. The body is a short, plain sound prompt, like rain, wind, a fire crackling or footsteps.
-		- Place it right before the line it belongs to.
-		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). ${LOOPS_RULE} Use more for a sound that fills a scene, like rain or wind, and 1 for a single moment, like a door. Example:
+		- A sound effect a <video> doesn't already have. The body is a short prompt, like rain, wind, a crackling fire or footsteps.
+		- Put it right before the line it goes with.
+		- loops: how many times it repeats (default ${DEFAULT_LOOPS}). ${LOOPS_RULE} Use more for background sounds like rain or wind, and 1 for a one-off like a door. Example:
 		  <sound loops="4">Wind</sound>
 		  <speech name="Narrator" emotion="peaceful">They walked through the windy forest.</speech>
-		- Never a voice: no sighs, gasps, laughter or crying.
+		- No voices: no sighs, gasps, laughter or crying.
 
 		## <music>
-		- A music cue for the scenes from here to the next <music>. The body is a music prompt, written as the music-prompts skill says.
-		- Place it right before the first element it plays under.
-		- loops: how many times it plays back to back (default ${DEFAULT_LOOPS}). ${LOOPS_RULE} A cue written to its runtime plays once; use more only for a short bed that should repeat.
-		- ${lyricsDef.key}: "${TOGGLE_ON}" makes the cue a song, sung over the scenes (default "${lyricsDef.default}", instrumental). Set it only when the story calls for a song, like a music video, a theme song or a character singing, and never under speech, where the singing would fight the voice.
+		- Music for the scenes from here to the next <music>. The body is a music prompt (see music-prompts).
+		- Put it right before the first element it plays under.
+		- loops: how many times it repeats (default ${DEFAULT_LOOPS}). ${LOOPS_RULE} Music written to its runtime plays once; repeat only a short loop.
+		- ${lyricsDef.key}: "${TOGGLE_ON}" makes it a song with vocals (default "${lyricsDef.default}", instrumental). Use it only when the story needs a song, like a music video or a character singing, and never under speech.
 	`,
 } as const satisfies Skill;

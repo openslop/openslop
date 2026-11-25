@@ -6,12 +6,12 @@ export const editScript = {
 	description:
 		"Changing a script already on the canvas with edit_script, from one word to a rewrite: fewest operations, animating images, swapping models. Load it with osml, and video-prompts or music-prompts when you write those prompts.",
 	content: dedent`
-		Every change to a script already on the canvas, however large, goes through edit_script. write_script would throw the rest of the script away.
+		Use edit_script for every change to an existing script, however big. write_script replaces the whole script.
 
-		- Read the script with read_script before your first edit, and reference only ids you read.
-		- Send the fewest operations that do the job.
-		- Write each part in the language the osml skill assigns it, whatever language the request is in.
-		- To animate an image, insert a video that starts from it before the image, then remove the image.
-		- Before setting an attribute that depends on the model, like duration, or switching an element's model, check what that model allows with read_model_attributes.
+		- Run read_script before your first edit, and only use ids you read.
+		- Use as few operations as you can.
+		- Write each part in the language the osml skill gives it, whatever language the user writes in.
+		- To animate an image, insert a video before it that starts from it, then remove the image.
+		- Before changing a model, or a setting that depends on it like duration, check what the model allows with read_model_attributes.
 	`,
 } as const satisfies Skill;

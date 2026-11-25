@@ -6,8 +6,7 @@ import { defineTool } from "./define-tool";
 
 export const loadSkill = defineTool({
 	description: dedent`
-	  Load skills: how to do one kind of work, from the Skills list. Load every skill a piece of
-	  work needs in one call, before you start it.
+	  Load skills from the Skills list. Load every skill a task needs in one call, before starting it.
 	`,
 	input: z.object({
 		names: z.array(z.enum(SKILL_NAMES)).min(1).describe("Skills to load."),
