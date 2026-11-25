@@ -155,6 +155,8 @@ const MEDIA_DRAFT_SPECS = Object.fromEntries(
 /** Tiles ahead of the scenes; one with a connector generates like content does. */
 export const ASSET_TYPES = {
 	asset_avatar: { connector: "image", outputKind: "image" },
+	asset_location: { connector: "image", outputKind: "image" },
+	asset_prop: { connector: "image", outputKind: "image" },
 	asset_voice: { connector: "voice" },
 	asset_style: {},
 	asset_references: {},
@@ -228,11 +230,11 @@ export type SplitAttributes = {
 	layoutAttributes?: Record<string, string>;
 };
 
-export const CHARACTER_REF_TYPE = "character_ref" as const;
+export const NAME_REF_TYPE = "name_ref" as const;
 
-export type CharacterRefElement = {
+export type NameRefElement = {
 	id: string;
-	type: typeof CHARACTER_REF_TYPE;
+	type: typeof NAME_REF_TYPE;
 	name: string;
 	children: CanvasText[];
 };
@@ -240,7 +242,7 @@ export type CharacterRefElement = {
 export type ElementOf<T extends ElementType> = SplitAttributes & {
 	id: string;
 	type: T;
-	children: (CanvasText | CharacterRefElement)[];
+	children: (CanvasText | NameRefElement)[];
 };
 
 export type ContentElement = ElementOf<ContentType>;
@@ -267,7 +269,7 @@ export type CanvasText = {
 declare module "slate" {
 	interface CustomTypes {
 		Editor: CanvasEditor;
-		Element: CanvasBlock | CharacterRefElement;
+		Element: CanvasBlock | NameRefElement;
 		Text: CanvasText;
 	}
 }

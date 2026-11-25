@@ -10,20 +10,20 @@ import {
 	ThumbnailCaption,
 	ThumbnailFace,
 } from "@/components/ui/thumbnail";
-import { getAssets } from "@/lib/canvas/assets";
-import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
+import { getImageAssets } from "@/lib/canvas/assets";
+import { useNamedAssetNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import type { MediaItem } from "@/lib/project/media";
 import { useProject } from "@/lib/project/use-project";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import { useEditorPanel } from "../panel/editor-panel-context";
-import { deleteCharacter } from "./delete-asset";
+import { deleteNamedAsset } from "./delete-asset";
 import { UploadingTile } from "./uploading-tile";
 import {
 	ArtStyleAssetTile,
-	CharacterAssetTile,
 	LibraryMediaTile,
+	NamedAssetTile,
 	ReferenceAssetTile,
 } from "./asset-tiles";
 
@@ -65,14 +65,14 @@ export function AssetStripArtStyle() {
 	);
 }
 
-export function AssetStripCharacters() {
+export function AssetStripNamedAssets() {
 	const editor = useSlateStatic();
-	const names = useCharacterNames();
+	const names = useNamedAssetNames();
 	return names.map((name) => (
 		<li key={name}>
-			<CharacterAssetTile
+			<NamedAssetTile
 				name={name}
-				onDelete={() => deleteCharacter(editor, name)}
+				onDelete={() => deleteNamedAsset(editor, name)}
 			/>
 		</li>
 	));
@@ -91,21 +91,19 @@ export function AssetStripReferences() {
 	));
 }
 
-const avatarIdsOf = (editor: Editor) =>
-	getAssets(editor.children)
-		.filter((asset) => asset.type === "asset_avatar")
-		.map((asset) => asset.id);
+const imageAssetIdsOf = (editor: Editor) =>
+	getImageAssets(editor.children).map((asset) => asset.id);
 
-/** Whether a reference or an avatar tile already shows the file at `url`. */
+/** Whether a reference or an image asset's tile already shows the file at `url`. */
 function useShownAsAsset(url: string): boolean {
 	const { urls } = useReferenceImages();
-	const avatarIds = useSlateSelector(avatarIdsOf, shallow);
-	const isAvatar = useQueueSelector((q) =>
-		avatarIds.some(
+	const imageAssetIds = useSlateSelector(imageAssetIdsOf, shallow);
+	const shownByImageAsset = useQueueSelector((q) =>
+		imageAssetIds.some(
 			(id) => getPrimaryUrl(q.getElementSnapshot(id).result, "image") === url,
 		),
 	);
-	return urls.includes(url) || isAvatar;
+	return urls.includes(url) || shownByImageAsset;
 }
 
 function AssetStripMediaItem({ item }: { item: MediaItem }) {
@@ -117,7 +115,7 @@ function AssetStripMediaItem({ item }: { item: MediaItem }) {
 	);
 }
 
-/** The project's media, each file once: what a reference or avatar tile shows isn't listed again. */
+/** The project's media, each file once: what a reference or image asset's tile shows isn't listed again. */
 export function AssetStripMedia() {
 	const media = useProject((state) => state.media);
 	return media.map((item) => (

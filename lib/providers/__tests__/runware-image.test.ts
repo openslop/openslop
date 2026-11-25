@@ -62,8 +62,7 @@ describe("RunwareImage", () => {
 
 		expect(mockImageInference).toHaveBeenCalledWith(
 			expect.objectContaining({
-				positivePrompt:
-					"the character from Image 1 hands the character from Image 2 a cup and Granny smiles",
+				positivePrompt: "Image 1 hands Image 2 a cup and Granny smiles",
 				inputs: {
 					referenceImages: [
 						"https://img/red.png",

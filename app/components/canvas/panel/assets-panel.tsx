@@ -3,17 +3,23 @@
 import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Palette, User } from "@/components/ui/icon";
-import { useCharacterNames, useHasAsset } from "@/lib/canvas/use-assets";
+import { Palette } from "@/components/ui/icon";
+import {
+	ASSET_KIND_SPECS,
+	ASSET_KINDS,
+	type AssetKind,
+} from "@/lib/canvas/assets";
+import { useNamesOfKind, useHasAsset } from "@/lib/canvas/use-assets";
 import { useMediaUpload } from "@/lib/project/use-media-upload";
 import { useReferenceImages } from "../hooks/use-reference-images";
 import {
 	ArtStyleAssetTile,
-	CharacterAssetTile,
+	NamedAssetTile,
 	ReferenceAssetTile,
 } from "../elements/asset-tiles";
 import { useAssetEditors } from "../elements/asset-edit-context";
-import { deleteCharacter } from "../elements/delete-asset";
+import { ASSET_KIND_ICONS } from "../elements/asset-kinds";
+import { deleteNamedAsset } from "../elements/delete-asset";
 import { uploadingTiles } from "../elements/uploading-tile";
 import { AddMediaMenu } from "../elements/add-media-menu";
 import { NoReferenceImages } from "../elements/reference-images";
@@ -41,27 +47,33 @@ function AssetCard({
 	);
 }
 
-function CharactersCard() {
+function NamedAssetsCard({ kind }: { kind: AssetKind }) {
 	const editor = useSlateStatic();
-	const { openCreateCharacter } = useAssetEditors();
-	const names = useCharacterNames();
+	const { openCreateNamedAsset } = useAssetEditors();
+	const names = useNamesOfKind(kind);
+	const { label, plural } = ASSET_KIND_SPECS[kind];
 	return (
 		<AssetCard
-			title="Characters"
+			title={plural}
 			empty={
 				<EmptyState
-					icon={User}
-					title="No characters yet"
-					description="Characters you create show up here"
+					icon={ASSET_KIND_ICONS[kind]}
+					title={`No ${plural.toLowerCase()} yet`}
+					description={`${plural} you create show up here`}
 				/>
 			}
-			action={<AddButton label="Add character" onClick={openCreateCharacter} />}
+			action={
+				<AddButton
+					label={`Add ${label.toLowerCase()}`}
+					onClick={() => openCreateNamedAsset({ kind })}
+				/>
+			}
 		>
 			{names.map((name) => (
-				<CharacterAssetTile
+				<NamedAssetTile
 					key={name}
 					name={name}
-					onDelete={() => deleteCharacter(editor, name)}
+					onDelete={() => deleteNamedAsset(editor, name)}
 				/>
 			))}
 		</AssetCard>
@@ -132,7 +144,9 @@ export function AssetsPanel() {
 	return (
 		<>
 			<ArtStyleCard />
-			<CharactersCard />
+			{ASSET_KINDS.map((kind) => (
+				<NamedAssetsCard key={kind} kind={kind} />
+			))}
 			<ReferencesCard />
 		</>
 	);

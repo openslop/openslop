@@ -3,9 +3,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Editor, Transforms } from "slate";
 import { Editable, type RenderElementProps } from "slate-react";
-import { findAsset, isCharacter } from "@/lib/canvas/assets";
-import { createCharacterRef } from "@/lib/canvas/character-refs";
-import { isCharacterRef } from "@/lib/canvas/guards";
+import { findAsset, kindOfName } from "@/lib/canvas/assets";
+import { createNameRef } from "@/lib/canvas/name-refs";
+import { isNameRef } from "@/lib/canvas/guards";
 import type { ContentElement } from "@/lib/canvas/types";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,16 +15,18 @@ import {
 	mountOnCanvas,
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
-import { withCharacterRefs } from "@/app/components/canvas/plugins/with-character-refs";
-import { AssetEditProvider } from "../character/asset-edit-provider";
-import { CharacterRef } from "../character-ref";
+import { withNameRefs } from "@/app/components/canvas/plugins/with-name-refs";
+import { AssetEditProvider } from "../named-asset/asset-edit-provider";
+import { NameRef } from "../name-ref";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
-vi.mock("../character/new-character-dialog", () => ({
-	NewCharacterDialog: () => null,
+vi.mock("../named-asset/new-named-asset-dialog", () => ({
+	NewNamedAssetDialog: ({ preset }: { preset: { name?: string } }) => (
+		<div data-dialog={`create ${preset.name}`} />
+	),
 }));
-vi.mock("../character/character-edit-modal", () => ({
+vi.mock("../named-asset/character-edit-modal", () => ({
 	CharacterEditModal: ({ name }: { name: string }) => (
 		<div data-dialog={`character ${name}`} />
 	),
@@ -44,11 +46,11 @@ const image: ContentElement = {
 	type: "image",
 	children: [
 		text("t0"),
-		createCharacterRef("Mia"),
+		createNameRef("Mia"),
 		text("t1", " meets "),
-		createCharacterRef("Ned"),
+		createNameRef("Ned"),
 		text("t2", " and "),
-		createCharacterRef("Ghost"),
+		createNameRef("Ghost"),
 		text("t3"),
 	],
 };
@@ -58,10 +60,10 @@ const renderElement = ({
 	children,
 	element,
 }: RenderElementProps) =>
-	isCharacterRef(element) ? (
-		<CharacterRef attributes={attributes} element={element}>
+	isNameRef(element) ? (
+		<NameRef attributes={attributes} element={element}>
 			{children}
-		</CharacterRef>
+		</NameRef>
 	) : (
 		<div {...attributes}>{children}</div>
 	);
@@ -75,7 +77,7 @@ const mount = (readOnly = false) => {
 		asset("asset_voice", { name: "Ned" }),
 		image,
 	]);
-	withCharacterRefs(canvas.editor);
+	withNameRefs(canvas.editor);
 	const editable = (
 		<Editable readOnly={readOnly} renderElement={renderElement} />
 	);
@@ -108,7 +110,7 @@ const openDialogs = () =>
 
 afterEach(() => canvas.unmount());
 
-describe("CharacterRef", () => {
+describe("NameRef", () => {
 	describe("in an editable canvas", () => {
 		beforeEach(() => mount());
 
@@ -129,18 +131,18 @@ describe("CharacterRef", () => {
 			).toBeUndefined();
 		});
 
-		it("offers no edit button for a name that isn't a character", () => {
+		it("offers no edit button for a name that isn't a named asset", () => {
 			expect(editButton("Mia")).not.toBeNull();
 			expect(editButton("Ghost")).toBeNull();
 		});
 
-		it("creates an unknown character from its chip and opens its edit dialog", async () => {
+		it("opens the new named asset dialog on an unknown name from its chip, adding nothing yet", async () => {
 			expect(createButton("Ghost")).not.toBeNull();
 
 			await click('button[aria-label="Create Ghost"]');
 
-			expect(isCharacter(canvas.editor.children, "Ghost")).toBe(true);
-			expect(openDialogs()).toEqual(["character Ghost"]);
+			expect(kindOfName(canvas.editor.children, "Ghost")).toBeUndefined();
+			expect(openDialogs()).toEqual(["create Ghost"]);
 		});
 
 		it("leaves the selection alone when the edit button is clicked", async () => {

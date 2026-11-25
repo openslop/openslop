@@ -28,7 +28,9 @@ const targetsOf = (kind: "image" | "video" | "audio") =>
 describe("usesFor", () => {
 	it("offers a picture to avatars, matching visuals, start frames and references", () => {
 		expect(targetsOf("image")).toEqual({
-			"Character avatar": ["Mia"],
+			Character: ["Mia"],
+			Location: [],
+			Prop: [],
 			"Scene visual": ["Scene 1"],
 			"Start frame": ["Scene 2"],
 			"Reference image": ["Scene 1", "Scene 2"],

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
 	renderPrompt,
-	characterRef,
-	findCharacterRef,
+	nameRef,
+	findNameRef,
 	referencedNames,
 	seats,
-} from "../character-refs";
+} from "../name-refs";
 
 describe("character references", () => {
 	it("reads each name once, in the order the prompt first names it", () => {
@@ -22,12 +22,12 @@ describe("character references", () => {
 	);
 
 	it("finds where the first reference sits, braces included", () => {
-		expect(findCharacterRef("Hi {{Red}}!")).toEqual({
+		expect(findNameRef("Hi {{Red}}!")).toEqual({
 			name: "Red",
 			start: 3,
 			end: 10,
 		});
-		expect(findCharacterRef("Hi Red")).toBeUndefined();
+		expect(findNameRef("Hi Red")).toBeUndefined();
 	});
 
 	it("puts each seated character as the provider's token, and anyone else by name", () => {
@@ -41,7 +41,7 @@ describe("character references", () => {
 	});
 
 	it("names characters plainly by default, and round trips what it writes", () => {
-		const prompt = `${characterRef("Red")}'s basket`;
+		const prompt = `${nameRef("Red")}'s basket`;
 		expect(referencedNames(prompt)).toEqual(["Red"]);
 		expect(renderPrompt(prompt)).toBe("Red's basket");
 	});

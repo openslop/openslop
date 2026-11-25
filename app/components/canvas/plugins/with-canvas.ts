@@ -2,7 +2,7 @@ import flow from "lodash/flow";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import { withReact } from "slate-react";
 import { withAssets } from "./with-assets";
-import { withCharacterRefs } from "./with-character-refs";
+import { withNameRefs } from "./with-name-refs";
 import { withFlatPaste } from "./with-flat-paste";
 import { withLayout } from "./with-layout";
 import { withNodeId } from "./with-node-id";
@@ -13,7 +13,7 @@ export const withCanvas: (editor: CanvasEditor) => CanvasEditor = flow(
 	withReact,
 	withLayout,
 	withAssets,
-	withCharacterRefs,
+	withNameRefs,
 	withScenes,
 	withFlatPaste,
 	withNodeId,

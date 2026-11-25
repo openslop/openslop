@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
-import { characterNames, findAsset } from "@/lib/canvas/assets";
+import { namesOfKind, findAsset } from "@/lib/canvas/assets";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
@@ -49,7 +49,8 @@ vi.mock("../voice-editor", () => ({
 }));
 
 const { CharacterEditModal } = await import("../character-edit-modal");
-const { NewCharacterDialog } = await import("../new-character-dialog");
+const { NewNamedAssetDialog } = await import("../new-named-asset-dialog");
+const { ImageAssetEditModal } = await import("../image-asset-edit-modal");
 
 let canvas: ReturnType<typeof mountOnCanvas>;
 afterEach(() => canvas.unmount());
@@ -90,16 +91,16 @@ const has = (type: "asset_avatar" | "asset_voice") =>
 const voiceEditorShown = () =>
 	document.body.querySelector("[data-voice-editor]") !== null;
 
-describe("NewCharacterDialog", () => {
+describe("NewNamedAssetDialog", () => {
 	const onCreated = vi.fn();
-	const open = () =>
+	const open = (preset = {}) =>
 		canvas.render(
 			<Dialog open>
-				<NewCharacterDialog onCreated={onCreated} />
+				<NewNamedAssetDialog preset={preset} onCreated={onCreated} />
 			</Dialog>,
 		);
 
-	it("hands on the name, normalized, and adds nothing itself", async () => {
+	it("hands on a character's name, normalized, and adds nothing itself", async () => {
 		canvas = mountOnCanvas();
 		open();
 
@@ -109,25 +110,67 @@ describe("NewCharacterDialog", () => {
 		);
 		await click('button[type="submit"]');
 
-		expect(onCreated).toHaveBeenCalledWith("Narrator");
+		expect(onCreated).toHaveBeenCalledWith("character", "Narrator");
 		expect(canvas.editor.children).toEqual([]);
 	});
 
+	it("hands on the kind picked", async () => {
+		canvas = mountOnCanvas();
+		open({ name: "old mill" });
+
+		await click('button[role="radio"]:nth-child(2)');
+		await click('button[type="submit"]');
+
+		expect(onCreated).toHaveBeenCalledWith("location", "Old Mill");
+	});
+
 	it.each([
-		["a look", () => mia("a girl")],
-		["a voice", miaVoice],
-	])("refuses a name a character already has %s under", async (_, held) => {
+		["a character's avatar", () => mia("a girl")],
+		["a character's voice", miaVoice],
+		["a prop", () => asset("asset_prop", { name: "Mia" })],
+	])("refuses a name %s already holds, whatever the kind", async (_, held) => {
 		canvas = mountOnCanvas([held()]);
-		open();
+		open({ kind: "location" });
 
 		await type(
-			field<HTMLInputElement>('input[aria-label="Character name"]'),
+			field<HTMLInputElement>('input[aria-label="Location name"]'),
 			"Mia",
 		);
 
-		expect(field('[role="alert"]').textContent).toContain("already exists");
+		expect(field('[role="alert"]').textContent).toContain("already taken");
 		expect(field<HTMLButtonElement>('button[type="submit"]').disabled).toBe(
 			true,
+		);
+	});
+});
+
+describe("ImageAssetEditModal", () => {
+	it("edits a location's appearance and deletes it", async () => {
+		const onClose = vi.fn();
+		canvas = mountOnCanvas([
+			asset("asset_location", { name: "Mill", text: "an old mill" }),
+		]);
+		canvas.render(
+			<Dialog open>
+				<ImageAssetEditModal name="Mill" onClose={onClose} />
+			</Dialog>,
+		);
+		const appearance = () => {
+			const mill = findAsset(canvas.editor.children, "asset_location", "Mill");
+			return mill && getElementBodyText(mill);
+		};
+
+		expect(field<HTMLTextAreaElement>("textarea").value).toBe("an old mill");
+		await type(field<HTMLTextAreaElement>("textarea"), "a burnt mill");
+		expect(appearance()).toBe("a burnt mill");
+
+		const remove = Array.from(document.body.querySelectorAll("button")).find(
+			(button) => button.textContent === "Delete",
+		);
+		await act(async () => remove?.click());
+		expect(onClose).toHaveBeenCalled();
+		expect(findAsset(canvas.editor.children, "asset_location", "Mill")).toBe(
+			undefined,
 		);
 	});
 });
@@ -216,14 +259,19 @@ describe("CharacterEditModal", () => {
 		);
 		await act(async () => remove?.click());
 
-		expect(characterNames(canvas.editor.children)).toEqual(["Narrator"]);
+		expect(namesOfKind(canvas.editor.children, "character")).toEqual([
+			"Narrator",
+		]);
 		expect(onClose).toHaveBeenCalledOnce();
 
 		const [message, { action }] = toast.mock.lastCall ?? [];
 		act(() => action.props.onClick());
 
 		expect(message).toBe("Deleted Mia");
-		expect(characterNames(canvas.editor.children)).toEqual(["Mia", "Narrator"]);
+		expect(namesOfKind(canvas.editor.children, "character")).toEqual([
+			"Mia",
+			"Narrator",
+		]);
 		expect(appearanceOf("Mia")).toBe("a girl");
 		expect(toast.dismiss).toHaveBeenCalledOnce();
 	});

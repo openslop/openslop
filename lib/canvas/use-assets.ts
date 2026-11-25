@@ -3,7 +3,16 @@
 import type { Editor } from "slate";
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
-import { avatarNames, characterNames, findAsset, getAssets } from "./assets";
+import {
+	findAsset,
+	findImageAsset,
+	getAssets,
+	kindOfName,
+	namedAssetNames,
+	namesOfKind,
+	type AssetKind,
+	type ImageAssetType,
+} from "./assets";
 import type { AssetElement, AssetType } from "./types";
 
 const selectAssets = (editor: Editor) => getAssets(editor.children);
@@ -11,16 +20,17 @@ const selectAssets = (editor: Editor) => getAssets(editor.children);
 export const useAssets = (): AssetElement[] =>
 	useSlateSelector(selectAssets, shallow);
 
-const selectCharacterNames = (editor: Editor) =>
-	characterNames(editor.children);
+export const useNamesOfKind = (kind: AssetKind): string[] =>
+	useSlateSelector((editor) => namesOfKind(editor.children, kind), shallow);
 
-export const useCharacterNames = (): string[] =>
-	useSlateSelector(selectCharacterNames, shallow);
+export const useNamedAssetNames = (): string[] =>
+	useSlateSelector((editor) => namedAssetNames(editor.children), shallow);
 
-const selectAvatarNames = (editor: Editor) => avatarNames(editor.children);
+export const useImageAssetType = (name: string): ImageAssetType | undefined =>
+	useSlateSelector((editor) => findImageAsset(editor.children, name)?.type);
 
-export const useAvatarNames = (): string[] =>
-	useSlateSelector(selectAvatarNames, shallow);
+export const useKindOfName = (name: string): AssetKind | undefined =>
+	useSlateSelector((editor) => kindOfName(editor.children, name));
 
 export const useAsset = <T extends AssetType>(
 	type: T,

@@ -2,21 +2,19 @@
 
 import { useSlateSelector } from "slate-react";
 import { shallow } from "zustand/shallow";
-import { findAsset } from "@/lib/canvas/assets";
+import { findImageAsset } from "@/lib/canvas/assets";
 import type { GeneratedElement } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
-import { referencedNames } from "@/lib/connectors/character-refs";
+import { referencedNames } from "@/lib/connectors/name-refs";
 import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import { getPromptText } from "@/lib/generation/inputs";
 
-/** The characters tagged in the prompt, and how many have an avatar generation adds as a reference. */
-export function useTaggedAvatars(element: GeneratedElement) {
+/** The named assets tagged in the prompt, and how many have an image generation adds as a reference. */
+export function useTaggedImageAssets(element: GeneratedElement) {
 	const names = referencedNames(getPromptText(element));
 	const ids = useSlateSelector(
 		(editor) =>
-			names.flatMap(
-				(name) => findAsset(editor.children, "asset_avatar", name)?.id ?? [],
-			),
+			names.flatMap((name) => findImageAsset(editor.children, name)?.id ?? []),
 		shallow,
 	);
 	const count = useQueueSelector(

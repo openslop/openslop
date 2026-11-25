@@ -2,7 +2,7 @@
 
 import { AddButton } from "@/components/ui/add-button";
 import { useReferenceImages } from "@/app/components/canvas/hooks/use-reference-images";
-import { FieldHeader, FieldLabel } from "../character/fields";
+import { FieldHeader, FieldLabel } from "../named-asset/fields";
 import { MediaPicker } from "../media-picker";
 import { ReferenceTile } from "../asset-tiles";
 import { TileRow } from "../attributes/tile-row";

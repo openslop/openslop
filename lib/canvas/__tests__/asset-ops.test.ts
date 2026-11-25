@@ -2,22 +2,22 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_TTS_MODEL } from "@/lib/connectors/tts/models";
 import { getPromptText } from "@/lib/generation/inputs";
 import {
-	addCharacter,
+	addNamedAsset,
 	addElementReferences,
 	clearDraft,
 	restoreDraft,
 	ensureAsset,
 	removeAsset,
 	removeAssets,
-	removeCharacter,
+	removeNamedAsset,
 	setAsset,
 	setReferenceImages,
 } from "../asset-ops";
 import {
-	avatarNames,
-	characterNames,
+	namesOfKind,
 	findAsset,
 	getAssets,
+	imageAssetNamesByKind,
 	referenceUrls,
 } from "../assets";
 import { createCanvasElement } from "../create-canvas-element";
@@ -197,7 +197,7 @@ describe("removeAssets", () => {
 	});
 });
 
-describe("removeAsset and removeCharacter", () => {
+describe("removeAsset and removeNamedAsset", () => {
 	const showing = (
 		type: "image" | "video",
 		id: string,
@@ -222,14 +222,17 @@ describe("removeAsset and removeCharacter", () => {
 		const editor = makeCharacters();
 		const shown = shownBy(editor);
 
-		removeCharacter(editor, "Mia");
+		removeNamedAsset(editor, "Mia");
 
 		expect(labels(getAssets(editor.children))).toEqual([
 			"asset_style",
 			"asset_avatar:Bob",
 			"asset_voice:Narrator",
 		]);
-		expect(characterNames(editor.children)).toEqual(["Bob", "Narrator"]);
+		expect(namesOfKind(editor.children, "character")).toEqual([
+			"Bob",
+			"Narrator",
+		]);
 		expect(shownBy(editor)).toEqual(shown);
 	});
 
@@ -237,12 +240,16 @@ describe("removeAsset and removeCharacter", () => {
 		const editor = makeCharacters();
 		const before = getAssets(editor.children).map(flatAttributes);
 
-		removeCharacter(editor, "Mia")();
+		removeNamedAsset(editor, "Mia")();
 
 		expect(getAssets(editor.children).map(flatAttributes)).toEqual(
 			expect.arrayContaining(before),
 		);
-		expect(characterNames(editor.children)).toEqual(["Mia", "Bob", "Narrator"]);
+		expect(namesOfKind(editor.children, "character")).toEqual([
+			"Mia",
+			"Bob",
+			"Narrator",
+		]);
 	});
 
 	it("removes only the avatar, so the character keeps its voice and drops out of pictures", () => {
@@ -251,8 +258,8 @@ describe("removeAsset and removeCharacter", () => {
 		removeAsset(editor, "asset_avatar", "Mia");
 
 		expect(findAsset(editor.children, "asset_voice", "Mia")).toBeDefined();
-		expect(avatarNames(editor.children)).toEqual(["Bob"]);
-		expect(characterNames(editor.children)).toContain("Mia");
+		expect(imageAssetNamesByKind(editor.children).character).toEqual(["Bob"]);
+		expect(namesOfKind(editor.children, "character")).toContain("Mia");
 	});
 
 	it("removes an asset listed under nothing alone", () => {
@@ -274,15 +281,23 @@ describe("removeAsset and removeCharacter", () => {
 	});
 });
 
-describe("addCharacter", () => {
+describe("addNamedAsset", () => {
 	it("gives a new character a look and a voice", () => {
 		const editor = makeEditor([scene("s1", speech("n1"))]);
 
-		addCharacter(editor, "Mia");
+		addNamedAsset(editor, "character", "Mia");
 
 		expect(labels(editor.children)).toEqual(
 			expect.arrayContaining(["asset_avatar:Mia", "asset_voice:Mia"]),
 		);
+	});
+
+	it("gives a new location only its image asset", () => {
+		const editor = makeEditor([scene("s1", speech("n1"))]);
+
+		addNamedAsset(editor, "location", "Mill");
+
+		expect(labels(editor.children)).toEqual(["asset_location:Mill", "s1"]);
 	});
 });
 

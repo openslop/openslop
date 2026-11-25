@@ -1,5 +1,13 @@
 import { dedent } from "@/lib/dedent";
-import { assetText, characterNames, voiceOf } from "@/lib/canvas/assets";
+import {
+	ASSET_KIND_SPECS,
+	ASSET_KINDS,
+	namesOfKind,
+	assetText,
+	imageAssetTypeOf,
+	voiceOf,
+	type AssetKind,
+} from "@/lib/canvas/assets";
 import type { AssetElement } from "@/lib/canvas/types";
 import {
 	voiceTraitEntries,
@@ -15,10 +23,15 @@ function renderVoice(voice: Voice): string {
 		.join("\n");
 }
 
-function renderCharacter(assets: AssetElement[], name: string): string {
-	const appearance = assetText(assets, "asset_avatar", name);
+/** A character also says how they sound; every kind says how it looks. */
+function renderNamedAsset(
+	assets: AssetElement[],
+	kind: AssetKind,
+	name: string,
+): string {
+	const appearance = assetText(assets, imageAssetTypeOf(kind), name);
 	const body = [
-		renderVoice(voiceOf(assets, name)),
+		kind === "character" && renderVoice(voiceOf(assets, name)),
 		appearance && `- appearance: ${appearance}`,
 	]
 		.filter(Boolean)
@@ -39,14 +52,15 @@ export function projectPreamble(assets: AssetElement[]): string {
 			${style}`);
 	}
 
-	const characters = characterNames(assets);
-	if (characters.length > 0) {
+	for (const kind of ASSET_KINDS) {
+		const names = namesOfKind(assets, kind);
+		if (names.length === 0) continue;
 		sections.push(dedent`
-			# Characters
+			# ${ASSET_KIND_SPECS[kind].plural}
 
-			The characters. Name one exactly as written here:
+			Name one exactly as written here:
 
-			${characters.map((name) => renderCharacter(assets, name)).join("\n\n")}`);
+			${names.map((name) => renderNamedAsset(assets, kind, name)).join("\n\n")}`);
 	}
 
 	return sections.join("\n\n");

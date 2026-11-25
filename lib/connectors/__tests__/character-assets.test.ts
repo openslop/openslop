@@ -51,8 +51,8 @@ describe("character asset dependencies", () => {
 				canvas,
 			),
 		).toEqual({
-			"Wolf's avatar": wolf.id,
-			"Red's avatar": red.id,
+			"Wolf's image": wolf.id,
+			"Red's image": red.id,
 			"Red's voice": redVoiceTile.id,
 		});
 	});
@@ -64,7 +64,7 @@ describe("character asset dependencies", () => {
 				element("image", "{{Red}} waves"),
 				canvas,
 			),
-		).toEqual({ "Red's avatar": red.id });
+		).toEqual({ "Red's image": red.id });
 	});
 });
 
@@ -74,9 +74,9 @@ describe("character-assets plugin", () => {
 			before(
 				{ prompt: "{{Granny}} hugs {{Red}}, and {{Granny}} smiles" },
 				{
-					"Red's avatar": avatar(RED),
+					"Red's image": avatar(RED),
 					"Red's voice": voice(redVoice),
-					"Granny's avatar": avatar(GRANNY),
+					"Granny's image": avatar(GRANNY),
 				},
 			),
 		).toEqual({

@@ -1,6 +1,6 @@
 import { RenderElementProps } from "slate-react";
 import type { ContentElement } from "@/lib/canvas/types";
-import { renderPrompt } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/name-refs";
 import { getPromptText } from "@/lib/generation/inputs";
 import { ELEMENT_CONFIGS } from "./element-configs";
 import { splitTextDirection } from "../utils/text-direction";

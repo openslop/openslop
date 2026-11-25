@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
-import { createCharacterRef } from "@/lib/canvas/character-refs";
+import { createNameRef } from "@/lib/canvas/name-refs";
 import type { ContentElement } from "@/lib/canvas/types";
 import { asset } from "@/lib/canvas/__tests__/_assets";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,7 +25,7 @@ const image = (...cast: string[]): ContentElement => ({
 	children: [
 		{ id: "i-t", text: "" },
 		...cast.flatMap((name) => [
-			createCharacterRef(name),
+			createNameRef(name),
 			{ id: `${name}-t`, text: "" },
 		]),
 	],
@@ -58,8 +58,8 @@ describe("DragOverlayPreview", () => {
 	it("resolves the cast against the canvas, not the dragged node alone", async () => {
 		await drag(image("Mia", "Kai"));
 
-		expect(document.body.textContent).not.toContain("Unknown character: Mia");
-		expect(document.body.textContent).toContain("Unknown character: Kai");
+		expect(document.body.textContent).not.toContain("Unknown asset: Mia");
+		expect(document.body.textContent).toContain("Unknown asset: Kai");
 	});
 
 	it("draws the gutter's own insert and drag buttons", async () => {

@@ -10,7 +10,7 @@ import {
 } from "@/lib/canvas/types";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 
-const ELEMENT_TEXT = `The element's content: the spoken line for speech; the prompt for every other content type; the look for asset_avatar and asset_style. asset_voice and asset_references have none, so omit it.`;
+const ELEMENT_TEXT = `The element's content: the spoken line for speech; the prompt for every other content type; the appearance for asset_avatar, asset_location and asset_prop, and the style for asset_style. asset_voice and asset_references have none, so omit it.`;
 
 const MODEL_VALUE =
 	"Depends on the element's model: read_model_attributes lists its values.";

@@ -1,5 +1,5 @@
 import compact from "lodash/compact";
-import { renderPrompt, seats } from "@/lib/connectors/character-refs";
+import { renderPrompt, seats } from "@/lib/connectors/name-refs";
 import { pictured, type Voiced, voiced } from "@/lib/connectors/characters";
 import { cutVoice, secondsCap } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";

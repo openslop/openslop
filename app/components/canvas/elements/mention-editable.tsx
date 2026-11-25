@@ -2,15 +2,15 @@
 
 import type { ComponentProps } from "react";
 import { Editable } from "slate-react";
-import { useCharacterMention } from "../hooks/use-character-mention";
-import { CharacterMentionMenu, optionId } from "./character-mention-menu";
+import { useMention } from "../hooks/use-mention";
+import { MentionMenu, optionId } from "./mention-menu";
 
-/** An editable where `@` opens the character menu; keys the menu leaves pass on to `onKeyDown`. */
+/** An editable where `@` opens the named asset menu; keys the menu leaves pass on to `onKeyDown`. */
 export function MentionEditable({
 	onKeyDown,
 	...props
 }: ComponentProps<typeof Editable>) {
-	const menu = useCharacterMention();
+	const menu = useMention();
 	return (
 		<>
 			<Editable
@@ -25,11 +25,12 @@ export function MentionEditable({
 				}
 			/>
 			{menu.mention && (
-				<CharacterMentionMenu
+				<MentionMenu
 					mention={menu.mention}
-					options={menu.options}
+					groups={menu.groups}
 					active={menu.active}
 					listboxId={menu.listboxId}
+					onHighlight={menu.highlight}
 					onSelect={menu.select}
 					onDismiss={menu.dismiss}
 				/>

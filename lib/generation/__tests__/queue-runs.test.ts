@@ -65,7 +65,7 @@ describe("running a graph", () => {
 		);
 		expect(mediaGenerate).toHaveBeenCalledTimes(2);
 		const [, imageContext] = mediaGenerate.mock.calls[1] ?? [];
-		expect(imageContext?.dependencies?.["Red's avatar"]?.imageUrl).toBe(
+		expect(imageContext?.dependencies?.["Red's image"]?.imageUrl).toBe(
 			"red.png",
 		);
 		expect(imageContext?.reads?.["the art style"]).toBe("noir");

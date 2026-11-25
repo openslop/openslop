@@ -1,8 +1,12 @@
+"use client";
+
 import { Transforms, type Editor } from "slate";
 import { toast } from "sonner";
+import { useSlateStatic } from "slate-react";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "@/components/ui/icon";
 import { findAsset } from "@/lib/canvas/assets";
-import { removeAsset, removeCharacter } from "@/lib/canvas/asset-ops";
+import { removeAsset, removeNamedAsset } from "@/lib/canvas/asset-ops";
 
 /** Says what was deleted, with the Undo that puts it back. */
 function toastDeleted(message: string, restore: () => void): void {
@@ -22,8 +26,8 @@ function toastDeleted(message: string, restore: () => void): void {
 	});
 }
 
-export function deleteCharacter(editor: Editor, name: string): void {
-	toastDeleted(`Deleted ${name}`, removeCharacter(editor, name));
+export function deleteNamedAsset(editor: Editor, name: string): void {
+	toastDeleted(`Deleted ${name}`, removeNamedAsset(editor, name));
 }
 
 export function deleteArtStyle(editor: Editor): void {
@@ -32,5 +36,30 @@ export function deleteArtStyle(editor: Editor): void {
 	removeAsset(editor, "asset_style");
 	toastDeleted("Deleted the art style", () =>
 		Transforms.insertNodes(editor, style, { at: [0] }),
+	);
+}
+
+export function DeleteNamedAssetButton({
+	name,
+	onDeleted,
+}: {
+	name: string;
+	onDeleted: () => void;
+}) {
+	const editor = useSlateStatic();
+	return (
+		<Button
+			type="button"
+			variant="outline"
+			size="sm"
+			onClick={() => {
+				deleteNamedAsset(editor, name);
+				onDeleted();
+			}}
+			className="text-muted-foreground sm:mr-auto"
+		>
+			<Trash2 />
+			Delete
+		</Button>
 	);
 }

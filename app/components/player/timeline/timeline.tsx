@@ -8,7 +8,7 @@ import {
 	type ReactNode,
 } from "react";
 import { Timeline as TimelineIcon } from "@/components/ui/icon";
-import { renderPrompt } from "@/lib/connectors/character-refs";
+import { renderPrompt } from "@/lib/connectors/name-refs";
 import { toFrames } from "@/lib/render/frames";
 import { clamp, cn } from "@/lib/utils";
 import { usePlayerControl } from "../player-control-context";

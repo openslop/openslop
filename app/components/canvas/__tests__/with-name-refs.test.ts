@@ -2,20 +2,20 @@ import { describe, expect, it } from "vitest";
 import { createEditor, Editor, Transforms } from "slate";
 import { withReact } from "slate-react";
 import {
-	createCharacterRef,
-	insertCharacterRef,
+	createNameRef,
+	insertNameRef,
 	mentionAt,
-} from "@/lib/canvas/character-refs";
+} from "@/lib/canvas/name-refs";
 import { updateElementText } from "@/lib/canvas/editor-ops";
-import { isCharacterRef } from "@/lib/canvas/guards";
+import { isNameRef } from "@/lib/canvas/guards";
 import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { getContentElements } from "@/lib/canvas/scenes";
 import type { CanvasEditor, ContentElement } from "@/lib/canvas/types";
-import { withCharacterRefs } from "../plugins/with-character-refs";
+import { withNameRefs } from "../plugins/with-name-refs";
 import { content, scene, seedScene } from "./fixtures";
 
 const editorWith = (element: ContentElement): CanvasEditor => {
-	const editor = withCharacterRefs(withReact(createEditor()));
+	const editor = withNameRefs(withReact(createEditor()));
 	editor.defaultModels = () => ({});
 	seedScene(editor, scene([element]));
 	return editor;
@@ -29,7 +29,7 @@ const only = (editor: CanvasEditor) => {
 
 const refNames = (editor: CanvasEditor) =>
 	only(editor).children.flatMap((child) =>
-		isCharacterRef(child) ? [child.name] : [],
+		isNameRef(child) ? [child.name] : [],
 	);
 
 const mention = (editor: CanvasEditor) => {
@@ -38,7 +38,7 @@ const mention = (editor: CanvasEditor) => {
 	return found;
 };
 
-describe("withCharacterRefs", () => {
+describe("withNameRefs", () => {
 	it("makes each {{Name}} in a visual's prompt a chip, keeping the prompt's text", () => {
 		const prompt = "{{Red}} hands a basket to {{Granny}}";
 		const editor = editorWith(content("image", "i", prompt));
@@ -56,7 +56,7 @@ describe("withCharacterRefs", () => {
 	it("names a character plainly in speech", () => {
 		const editor = editorWith(content("speech", "n", "Hi !"));
 
-		Transforms.insertNodes(editor, createCharacterRef("Red"), {
+		Transforms.insertNodes(editor, createNameRef("Red"), {
 			at: { path: [0, 0, 0], offset: 3 },
 		});
 
@@ -88,14 +88,14 @@ describe("an @ mention", () => {
 	it("swaps the typed @ for a chip and puts the caret past it", () => {
 		const editor = editorWith(content("image", "i", "A field with @Gr"));
 
-		insertCharacterRef(editor, mention(editor), "Granny");
+		insertNameRef(editor, mention(editor), "Granny");
 		Transforms.insertText(editor, " smiling");
 
 		expect(refNames(editor)).toEqual(["Granny"]);
 		expect(getElementBodyText(only(editor))).toBe(
 			"A field with {{Granny}} smiling",
 		);
-		expect(Editor.above(editor, { match: isCharacterRef })).toBeUndefined();
+		expect(Editor.above(editor, { match: isNameRef })).toBeUndefined();
 	});
 
 	it.each([
@@ -110,7 +110,7 @@ describe("an @ mention", () => {
 				offset: prompt.indexOf("@") + 1,
 			});
 
-			insertCharacterRef(editor, mention(editor), "Granny");
+			insertNameRef(editor, mention(editor), "Granny");
 
 			expect(refNames(editor)).toEqual(["Granny"]);
 			expect(getElementBodyText(only(editor))).toBe(text);

@@ -6,7 +6,7 @@ import {
 	type ImageFormat,
 } from "@/lib/connectors/image/enums";
 import { BaseProvider, type RawResult } from "../base";
-import { renderPrompt, seats } from "@/lib/connectors/character-refs";
+import { renderPrompt, seats } from "@/lib/connectors/name-refs";
 import { pictured } from "@/lib/connectors/characters";
 import { validateRunwareKey, withRunware } from "../runware";
 import { renderSize, type VendorParams } from "@/lib/connectors/models";
@@ -18,7 +18,7 @@ type RawImageResult = { data: string; format: ImageFormat } & RawResult;
 
 const RUNWARE_FORMATS = { jpg: "JPG", png: "PNG", webp: "WEBP" } as const;
 
-const imageRef = (seat: number) => `the character from Image ${seat}`;
+const imageRef = (seat: number) => `Image ${seat}`;
 
 const runwareModel = (model: string) =>
 	Object.values(RUNWARE_IMAGE_MODELS).find(({ id }) => id === model);

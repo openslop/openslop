@@ -1,7 +1,7 @@
 import { Element } from "slate";
 import {
 	ASSET_TYPES,
-	CHARACTER_REF_TYPE,
+	NAME_REF_TYPE,
 	CONTENT_TYPES,
 	ELEMENT_TYPES,
 	type AssetElement,
@@ -10,7 +10,7 @@ import {
 	type ContentType,
 	type ElementType,
 	type CanvasElement,
-	type CharacterRefElement,
+	type NameRefElement,
 	type ElementOf,
 } from "./types";
 
@@ -23,11 +23,11 @@ export const isContentElement = (node: unknown): node is ContentElement =>
 export const isForeground = (node: unknown): node is ContentElement =>
 	isContentElement(node) && CONTENT_TYPES[node.type].role === "foreground";
 
-export const castsCharacters = (node: unknown): node is ContentElement =>
+export const takesNameRefs = (node: unknown): node is ContentElement =>
 	isContentElement(node) && CONTENT_TYPES[node.type].layer === "visual";
 
-export const isCharacterRef = (node: unknown): node is CharacterRefElement =>
-	Element.isElement(node) && node.type === CHARACTER_REF_TYPE;
+export const isNameRef = (node: unknown): node is NameRefElement =>
+	Element.isElement(node) && node.type === NAME_REF_TYPE;
 
 export const isSpeech = (node: unknown): node is ElementOf<"speech"> =>
 	isContentElement(node) && node.type === "speech";

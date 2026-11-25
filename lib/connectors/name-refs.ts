@@ -3,9 +3,9 @@ import uniq from "lodash/uniq";
 const CHARACTER_REF = /\{\{([^{}\s](?:[^{}]*[^{}\s])?)\}\}/;
 const CHARACTER_REFS = new RegExp(CHARACTER_REF, "g");
 
-export const characterRef = (name: string): string => `{{${name}}}`;
+export const nameRef = (name: string): string => `{{${name}}}`;
 
-export function findCharacterRef(
+export function findNameRef(
 	text: string,
 ): { name: string; start: number; end: number } | undefined {
 	const match = CHARACTER_REF.exec(text);

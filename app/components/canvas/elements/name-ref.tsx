@@ -5,7 +5,6 @@ import {
 	useFocused,
 	useReadOnly,
 	useSelected,
-	useSlateSelector,
 	type RenderElementProps,
 } from "slate-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +16,11 @@ import {
 } from "@/components/ui/icon";
 import { keepFocus } from "@/components/ui/keep-focus";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import type { CharacterRefElement } from "@/lib/canvas/types";
-import { isCharacter } from "@/lib/canvas/assets";
-import { useHasAsset } from "@/lib/canvas/use-assets";
+import type { NameRefElement } from "@/lib/canvas/types";
+import { useImageAssetType, useKindOfName } from "@/lib/canvas/use-assets";
 import { cn } from "@/lib/utils";
 import { useAssetEditors } from "./asset-edit-context";
-import { CharacterAvatar } from "./character-pill";
+import { NamedAssetImage } from "./named-asset-image";
 
 const noSubscription = () => () => {};
 
@@ -33,7 +31,7 @@ const useIsMac = () =>
 		() => false,
 	);
 
-function CharacterActionButton({
+function RefActionButton({
 	label,
 	icon: Icon,
 	onClick,
@@ -58,68 +56,63 @@ function CharacterActionButton({
 	);
 }
 
-function EditCharacterButton({ name }: { name: string }) {
+function EditNamedAssetButton({ name }: { name: string }) {
 	const { editAsset } = useAssetEditors();
-	const hasAvatar = useHasAsset("asset_avatar", name);
+	const type = useImageAssetType(name) ?? "asset_voice";
 	return (
-		<CharacterActionButton
+		<RefActionButton
 			label={`Edit ${name}`}
 			icon={Pencil}
-			onClick={() =>
-				editAsset(hasAvatar ? "asset_avatar" : "asset_voice", name)
-			}
+			onClick={() => editAsset(type, name)}
 		/>
 	);
 }
 
-function CreateCharacterButton({ name }: { name: string }) {
-	const { createCharacter } = useAssetEditors();
+function CreateNamedAssetButton({ name }: { name: string }) {
+	const { openCreateNamedAsset } = useAssetEditors();
 	return (
-		<CharacterActionButton
+		<RefActionButton
 			label={`Create ${name}`}
 			icon={Plus}
-			onClick={() => createCharacter(name)}
+			onClick={() => openCreateNamedAsset({ name })}
 		/>
 	);
 }
 
-function KnownCharacter({ name }: { name: string }) {
+function KnownNamedAsset({ name }: { name: string }) {
 	const readOnly = useReadOnly();
 	return (
 		<Badge variant="subtle" size="inline" className="group/chip relative">
-			<CharacterAvatar name={name} size="xs" className="rounded-none" />
+			<NamedAssetImage name={name} size="xs" className="rounded-none" />
 			<span className="min-w-0 self-baseline truncate">{name}</span>
-			{!readOnly && <EditCharacterButton name={name} />}
+			{!readOnly && <EditNamedAssetButton name={name} />}
 		</Badge>
 	);
 }
 
-function UnknownCharacter({ name }: { name: string }) {
+function UnknownNamedAsset({ name }: { name: string }) {
 	const readOnly = useReadOnly();
 	return (
-		<SimpleTooltip label={`No character named ${name}`}>
+		<SimpleTooltip label={`Nothing named ${name}`}>
 			<Badge variant="caution" size="inline" className="group/chip relative">
 				<AlertTriangle />
-				<span className="sr-only">Unknown character: </span>
+				<span className="sr-only">Unknown asset: </span>
 				<span className="min-w-0 self-baseline truncate">{name}</span>
-				{!readOnly && <CreateCharacterButton name={name} />}
+				{!readOnly && <CreateNamedAssetButton name={name} />}
 			</Badge>
 		</SimpleTooltip>
 	);
 }
 
-export function CharacterRef({
+export function NameRef({
 	attributes,
 	children,
 	element,
-}: Omit<RenderElementProps, "element"> & { element: CharacterRefElement }) {
-	const known = useSlateSelector((editor) =>
-		isCharacter(editor.children, element.name),
-	);
+}: Omit<RenderElementProps, "element"> & { element: NameRefElement }) {
+	const known = useKindOfName(element.name) !== undefined;
 	const selected = useSelected();
 	const focused = useFocused();
 	const isMac = useIsMac();
-	const Chip = known ? KnownCharacter : UnknownCharacter;
 
 	return (
 		<span
@@ -135,7 +128,11 @@ export function CharacterRef({
 			{/* IME composition needs the spacer first on macOS and last elsewhere: slate#3490, slate#5360. */}
 			{isMac && children}
 			<span contentEditable={false} className="inline-flex">
-				<Chip name={element.name} />
+				{known ? (
+					<KnownNamedAsset name={element.name} />
+				) : (
+					<UnknownNamedAsset name={element.name} />
+				)}
 			</span>
 			{!isMac && children}
 		</span>

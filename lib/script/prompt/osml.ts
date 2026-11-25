@@ -18,7 +18,7 @@ import {
 import { VIDEO_FORMAT_RULES } from "./formats";
 import { TTS_EMOTIONS, TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import { languagePrompt } from "./language";
-import { CHARACTER_REFS_RULE } from "./character-refs";
+import { NAME_REFS_RULE } from "./name-refs";
 import { VIDEO_PROMPT_FORMAT } from "./video-prompt";
 import { MUSIC_PROMPT_FORMAT } from "./music-prompt";
 
@@ -49,7 +49,7 @@ export function osmlSpec(language: string): string {
 		- The body is an image prompt: the time of day, the background, the weather if outdoors, and the objects, in detail.
 		- Depict the specific moment described by the speech that follows it, up to the next visual: who is there, what they do and their expressions, not just the setting.
 		- Each <image> prompt must stand alone. The image model knows nothing about the story or the other prompts, so repeat any detail it needs.
-		- ${CHARACTER_REFS_RULE}
+		- ${NAME_REFS_RULE}
 		- motion: a camera move for the whole time the image is on screen. Set one on almost every image. Allowed values: ${MOTION_EFFECTS.join(", ")}.
 		- Example: <image motion="kenBurnsIn">{{Red}} hands a basket to {{Granny}} at the door of a thatched cottage on a rainy afternoon.</image>
 

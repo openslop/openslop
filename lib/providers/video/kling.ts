@@ -1,6 +1,6 @@
 import compact from "lodash/compact";
 import { nanoid } from "nanoid";
-import { renderPrompt, seats } from "@/lib/connectors/character-refs";
+import { renderPrompt, seats } from "@/lib/connectors/name-refs";
 import { type Pictured, pictured } from "@/lib/connectors/characters";
 import { cutVoice } from "../audio-cut";
 import { type Conditioner, inputsOf } from "./conditioning";
