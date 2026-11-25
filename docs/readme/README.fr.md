@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="Statut : bêta privée"></a>
-  <a href="#local-mode"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="Fonctionne sur macOS, Windows et Linux"></a>
+  <a href="local-mode.fr.md"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="Fonctionne sur macOS, Windows et Linux"></a>
   <a href="https://github.com/openslop/openslop/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/openslop/openslop/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="Licence : Apache-2.0"></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16"></a>
@@ -36,7 +36,7 @@
 ---
 
 > **Bêta privée.** Sur invitation uniquement pour le moment.
-> [Inscrivez-vous sur la liste d'attente sur openslop.ai](https://openslop.ai), ou [utilisez le mode local](#local-mode) pour le lancer dès aujourd'hui sur votre ordinateur.
+> [Inscrivez-vous sur la liste d'attente sur openslop.ai](https://openslop.ai), ou [utilisez le mode local](local-mode.fr.md) pour le lancer dès aujourd'hui sur votre ordinateur.
 
 ## Aperçu
 
@@ -144,7 +144,7 @@ Les modèles hébergés viennent avec votre compte. Collez une clé Anthropic, R
 
 Utilisez OpenSlop sur votre propre Mac, PC Windows ou Linux. Vos projets et vos vidéos restent chez vous.
 
-[Mode local →](#local-mode)
+[Mode local →](local-mode.fr.md)
 
 </td>
 <td width="50%">
@@ -168,154 +168,9 @@ Utilisez OpenSlop sur votre propre Mac, PC Windows ou Linux. Vos projets et vos 
 Vous pouvez utiliser OpenSlop de deux façons :
 
 - **En ligne** sur [app.openslop.ai](https://app.openslop.ai). Rien à installer. C'est sur invitation pour l'instant, alors [inscrivez-vous sur la liste d'attente](https://openslop.ai).
-- **Mode local** sur votre propre ordinateur. Suivez les étapes ci-dessous.
+- **Mode local** sur votre propre ordinateur. [Suivez le guide d'installation →](local-mode.fr.md)
 
-<a name="local-mode"></a>
-
-### Mode local
-
-<p>
-  <img src="https://img.shields.io/badge/macOS-Apple%20silicon%20%7C%20Intel-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: Apple silicon, Intel">
-  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMy40IDkuOCAydjkuNkgwek0xMSAxLjkgMjQgMHYxMS42SDExek0wIDEyLjRoOS44VjIyTDAgMjAuNnpNMTEgMTIuNGgxM1YyNGwtMTMtMS45eiIvPjwvc3ZnPg==" alt="Windows 10, 11">
-  <img src="https://img.shields.io/badge/Linux-x64%20%7C%20arm64-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: x64, arm64">
-</p>
-
-Vos projets et vos vidéos restent sur votre ordinateur. Seules vos demandes aux services d'IA passent par Internet.
-
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-#### 1. Installez Node.js
-
-Allez sur la [page de téléchargement de Node.js](https://nodejs.org/en/download). Cliquez sur le bouton vert de l'installateur (**Windows Installer** ou **macOS Installer**), ouvrez le fichier et suivez les étapes. Toute version à partir de la 22 convient.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-node-light.svg#gh-light-mode-only" alt="Sur nodejs.org, on clique sur Windows Installer, l'installateur se lance et Node.js est installé" width="100%">
-  <img src="../../assets/features/local-step-node-dark.svg#gh-dark-mode-only" alt="Sur nodejs.org, on clique sur Windows Installer, l'installateur se lance et Node.js est installé" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 2. Installez Docker Desktop (Windows et Mac Intel uniquement)
-
-_Passez cette étape sous Linux ou sur un Mac avec une puce M1 ou plus récente (M2, M3, etc.). Pour vérifier, ouvrez le menu Apple > **À propos de ce Mac** et regardez **Puce**._
-
-Sur [docker.com](https://www.docker.com/products/docker-desktop/), cliquez sur **Download Docker Desktop**, choisissez votre ordinateur et installez-le. Ouvrez-le et laissez-le ouvert pendant que vous utilisez OpenSlop.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-docker-light.svg#gh-light-mode-only" alt="Sur docker.com, on choisit le téléchargement Windows et Docker Desktop s'ouvre avec son moteur lancé" width="100%">
-  <img src="../../assets/features/local-step-docker-dark.svg#gh-dark-mode-only" alt="Sur docker.com, on choisit le téléchargement Windows et Docker Desktop s'ouvre avec son moteur lancé" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 3. Téléchargez OpenSlop
-
-Sur la [page GitHub d'OpenSlop](https://github.com/openslop/openslop), cliquez sur le bouton vert **Code**, puis sur **Download ZIP**. Vous pouvez aussi [télécharger le ZIP directement](https://github.com/openslop/openslop/archive/refs/heads/master.zip).
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-download-light.svg#gh-light-mode-only" alt="Sur GitHub, le bouton vert Code ouvre un menu et on clique sur Download ZIP" width="100%">
-  <img src="../../assets/features/local-step-download-dark.svg#gh-dark-mode-only" alt="Sur GitHub, le bouton vert Code ouvre un menu et on clique sur Download ZIP" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 4. Décompressez-le et lancez OpenSlop
-
-Sous Windows, clic droit sur le ZIP > **Extract All**, puis clic droit sur le nouveau dossier > **Open in Terminal**. Sur Mac, double-cliquez sur le ZIP, puis clic droit sur le nouveau dossier > **New Terminal at Folder**. Dans le terminal, lancez :
-
-```bash
-npm install
-npm run local
-```
-
-Le premier lancement prend quelques minutes. OpenSlop s'ouvre ensuite dans votre navigateur, déjà connecté. Pour l'arrêter, appuyez sur Ctrl+C dans le terminal. Vos projets sont gardés pour la prochaine fois.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-terminal-light.svg#gh-light-mode-only" alt="Dans le dossier Téléchargements, le ZIP est extrait et ouvert dans le terminal, puis npm install et npm run local lancent OpenSlop" width="100%">
-  <img src="../../assets/features/local-step-terminal-dark.svg#gh-dark-mode-only" alt="Dans le dossier Téléchargements, le ZIP est extrait et ouvert dans le terminal, puis npm install et npm run local lancent OpenSlop" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 5. Ajoutez vos clés d'IA
-
-Cliquez sur votre icône de profil, puis sur **Settings** > **Add providers**, et connectez un fournisseur avec votre clé. Les clés nécessaires dépendent de ce que vous créez :
-
-- **Tout :** les 7 types : Text, Speech, Images, Videos, Music, Sound et Captions.
-- **Vidéos en voix off sans visage :** Text, Speech et Images.
-- **Vidéos cinématiques :** Text et Videos.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-keys-light.svg#gh-light-mode-only" alt="Le menu du profil ouvre Settings, Add providers liste les fournisseurs, et une clé Anthropic est collée puis connectée" width="100%">
-  <img src="../../assets/features/local-step-keys-dark.svg#gh-dark-mode-only" alt="Le menu du profil ouvre Settings, Add providers liste les fournisseurs, et une clé Anthropic est collée puis connectée" width="100%">
-</td>
-</tr>
-</table>
-
-<details>
-<summary>Ce qui est téléchargé</summary>
-
-- `npm install` récupère le code de l'app.
-- Le premier `npm run local` télécharge aussi, une seule fois :
-  - **Supabase** : la base de données et le stockage des fichiers, dans `~/.supabase/cache`. Sous Windows et sur Mac Intel, il est stocké dans Docker Desktop.
-  - **Chrome Headless Shell** : transforme votre projet en fichier vidéo. Stocké dans `node_modules/.remotion`.
-
-</details>
-
-### Développer avec un projet Supabase
-
-#### Prérequis
-
-- [Node.js](https://nodejs.org) 20.9+ (le minimum de Next.js 16 ; la CI tourne sur 22)
-- Un projet [Supabase](https://supabase.com) (pour l'auth et la base de données)
-
-#### Installation
-
-1. Clonez le dépôt :
-
-```bash
-git clone https://github.com/openslop/openslop.git
-cd openslop
-```
-
-2. Installez les dépendances :
-
-```bash
-npm install
-```
-
-3. Copiez le modèle d'env annoté et remplissez-le :
-
-```bash
-cp .env.example .env.local
-```
-
-Les variables Supabase sont obligatoires. Tout le reste est optionnel : un fournisseur dont la clé est absente retombe sur un mock.
-
-4. Lancez les migrations de la base de données :
-
-```bash
-npm run db:push
-```
-
-5. Démarrez le serveur de développement :
-
-```bash
-npm run dev
-```
-
-Ouvrez [http://localhost:3000](http://localhost:3000) et vous devriez voir l'app.
+Vous travaillez sur le code ? Préparez un environnement de développement avec [CONTRIBUTING.md](../../CONTRIBUTING.md#setup).
 
 ## Stack technique
 
@@ -331,28 +186,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000) et vous devriez voir l'app
 
 ## Structure du projet
 
-```
-app/             Routes Next.js, endpoints API et composants de l'éditeur
-  api/v1/        API REST par type de ressource (image, video, music, sfx, tts, llm)
-  components/    UI de l'éditeur (canevas, aperçu vidéo, etc.)
-lib/
-  agent/         Sloppy : définitions d'outils, registre, prompt et contexte de tour
-  connectors/    API client côté éditeur par type de ressource
-  gateway/       Clients HTTP vers /api/v1/*
-  providers/     Adaptateurs fournisseurs côté serveur (Runware, ElevenLabs, …)
-  generation/    File de génération et orchestration des jobs
-  canvas/        Modèle de document Slate : types d'éléments, gardes, parse/sérialisation OSML
-  script/        Écriture et affinage du script
-  project/       Store Zustand par projet, sauvegarde automatique, persistance
-  render/        Mise en page des scènes et client de rendu
-  templates/     Modèles de prompt proposés dans le composeur
-  upload/        Envoi de fichiers côté client (image, vidéo, audio)
-  supabase/      Clients Supabase navigateur/serveur
-remotion/        Point d'entrée Remotion et compositions
-supabase/        Migrations de la base de données
-```
-
-Voir [`ARCHITECTURE.md`](../../ARCHITECTURE.md) pour la façon dont ces couches interagissent.
+L'organisation du code et la façon dont ses couches s'articulent : [`ARCHITECTURE.md`](../../ARCHITECTURE.md#project-structure).
 
 ## Scripts
 

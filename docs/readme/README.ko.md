@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="상태: 비공개 베타"></a>
-  <a href="#local-mode"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="macOS, Windows, Linux에서 실행"></a>
+  <a href="local-mode.ko.md"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="macOS, Windows, Linux에서 실행"></a>
   <a href="https://github.com/openslop/openslop/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/openslop/openslop/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="라이선스: Apache-2.0"></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16"></a>
@@ -36,7 +36,7 @@
 ---
 
 > **비공개 베타.** 지금은 초대받은 분만 쓸 수 있습니다.
-> [openslop.ai에서 대기자 명단에 올리거나](https://openslop.ai) [로컬 모드](#local-mode)로 오늘 바로 내 컴퓨터에서 써 보세요.
+> [openslop.ai에서 대기자 명단에 올리거나](https://openslop.ai) [로컬 모드](local-mode.ko.md)로 오늘 바로 내 컴퓨터에서 써 보세요.
 
 ## 개요
 
@@ -144,7 +144,7 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 내 Mac, Windows, Linux 컴퓨터에서 OpenSlop을 실행하세요. 프로젝트와 비디오는 내 컴퓨터에 남습니다.
 
-[로컬 모드 →](#local-mode)
+[로컬 모드 →](local-mode.ko.md)
 
 </td>
 <td width="50%">
@@ -168,154 +168,9 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 OpenSlop은 두 가지 방법으로 쓸 수 있습니다.
 
 - **온라인**: [app.openslop.ai](https://app.openslop.ai)에서 씁니다. 설치할 것이 없습니다. 지금은 초대받은 분만 쓸 수 있으니 [대기자 명단에 올리세요](https://openslop.ai).
-- **로컬 모드**: 내 컴퓨터에서 실행합니다. 아래 단계를 따라 하세요.
+- **로컬 모드**: 내 컴퓨터에서 실행합니다. [설치 가이드 보기 →](local-mode.ko.md)
 
-<a name="local-mode"></a>
-
-### 로컬 모드
-
-<p>
-  <img src="https://img.shields.io/badge/macOS-Apple%20silicon%20%7C%20Intel-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: Apple silicon, Intel">
-  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMy40IDkuOCAydjkuNkgwek0xMSAxLjkgMjQgMHYxMS42SDExek0wIDEyLjRoOS44VjIyTDAgMjAuNnpNMTEgMTIuNGgxM1YyNGwtMTMtMS45eiIvPjwvc3ZnPg==" alt="Windows 10, 11">
-  <img src="https://img.shields.io/badge/Linux-x64%20%7C%20arm64-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: x64, arm64">
-</p>
-
-프로젝트와 비디오는 내 컴퓨터에 남습니다. 인터넷으로 나가는 것은 AI 서비스에 보내는 요청뿐입니다.
-
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-#### 1. Node.js 설치
-
-[Node.js 다운로드 페이지](https://nodejs.org/en/download)로 가세요. 초록색 설치 프로그램 버튼(**Windows Installer** 또는 **macOS Installer**)을 누르고, 받은 파일을 열어 안내대로 진행하세요. 22 이상이면 어떤 버전이든 됩니다.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-node-light.svg#gh-light-mode-only" alt="nodejs.org에서 Windows Installer를 누르고 설치 프로그램을 진행해 Node.js를 설치한다" width="100%">
-  <img src="../../assets/features/local-step-node-dark.svg#gh-dark-mode-only" alt="nodejs.org에서 Windows Installer를 누르고 설치 프로그램을 진행해 Node.js를 설치한다" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 2. Docker Desktop 설치 (Windows와 Intel Mac만)
-
-_Linux이거나 M1 이상 칩(M2, M3 등)의 Mac이라면 건너뛰세요. Mac의 칩은 Apple 메뉴 > **이 Mac에 관하여**의 **칩**에서 확인할 수 있습니다._
-
-[docker.com](https://www.docker.com/products/docker-desktop/)에서 **Download Docker Desktop**을 누르고, 내 컴퓨터를 고른 뒤 설치하세요. 실행한 다음, OpenSlop을 쓰는 동안 계속 열어 두세요.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-docker-light.svg#gh-light-mode-only" alt="docker.com에서 Windows용 다운로드를 고르고, Docker Desktop이 엔진이 실행된 상태로 열린다" width="100%">
-  <img src="../../assets/features/local-step-docker-dark.svg#gh-dark-mode-only" alt="docker.com에서 Windows용 다운로드를 고르고, Docker Desktop이 엔진이 실행된 상태로 열린다" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 3. OpenSlop 내려받기
-
-[OpenSlop GitHub 페이지](https://github.com/openslop/openslop)에서 초록색 **Code** 버튼을 누른 다음 **Download ZIP**을 누르세요. [ZIP을 바로 내려받을](https://github.com/openslop/openslop/archive/refs/heads/master.zip) 수도 있습니다.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-download-light.svg#gh-light-mode-only" alt="GitHub에서 초록색 Code 버튼이 메뉴를 열고 Download ZIP을 누른다" width="100%">
-  <img src="../../assets/features/local-step-download-dark.svg#gh-dark-mode-only" alt="GitHub에서 초록색 Code 버튼이 메뉴를 열고 Download ZIP을 누른다" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 4. 압축을 풀고 OpenSlop 시작
-
-Windows에서는 ZIP을 오른쪽 클릭 > **Extract All**, 그다음 새 폴더를 오른쪽 클릭 > **Open in Terminal**을 고르세요. Mac에서는 ZIP을 더블 클릭한 다음 새 폴더를 오른쪽 클릭 > **New Terminal at Folder**를 고르세요. 터미널에서 다음을 실행하세요.
-
-```bash
-npm install
-npm run local
-```
-
-처음에는 몇 분 걸립니다. 그다음 OpenSlop이 브라우저에서 열리고, 이미 로그인되어 있습니다. 멈추려면 터미널에서 Ctrl+C를 누르세요. 프로젝트는 다음에도 그대로 남아 있습니다.
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-terminal-light.svg#gh-light-mode-only" alt="다운로드 폴더에서 ZIP을 풀고 터미널로 연 다음, npm install과 npm run local로 OpenSlop을 시작한다" width="100%">
-  <img src="../../assets/features/local-step-terminal-dark.svg#gh-dark-mode-only" alt="다운로드 폴더에서 ZIP을 풀고 터미널로 연 다음, npm install과 npm run local로 OpenSlop을 시작한다" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 5. AI 키 추가
-
-프로필 아이콘을 누르고 **Settings** > **Add providers**로 가서, 내 키로 제공자를 연결하세요. 필요한 키는 무엇을 만드느냐에 따라 다릅니다.
-
-- **전부 쓰기**: 7가지 모두(Text, Speech, Images, Videos, Music, Sound, Captions)
-- **얼굴 없는 내레이션 비디오**: Text, Speech, Images
-- **시네마틱 비디오**: Text, Videos
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-keys-light.svg#gh-light-mode-only" alt="프로필 메뉴에서 Settings를 열고, Add providers에서 제공자를 골라 Anthropic 키를 붙여 넣고 연결한다" width="100%">
-  <img src="../../assets/features/local-step-keys-dark.svg#gh-dark-mode-only" alt="프로필 메뉴에서 Settings를 열고, Add providers에서 제공자를 골라 Anthropic 키를 붙여 넣고 연결한다" width="100%">
-</td>
-</tr>
-</table>
-
-<details>
-<summary>내려받는 것</summary>
-
-- `npm install`은 앱 코드를 받습니다.
-- 처음 `npm run local`을 실행하면 다음도 한 번만 내려받습니다.
-  - **Supabase**: 데이터베이스와 파일 저장소입니다. `~/.supabase/cache`에 저장됩니다. Windows와 Intel Mac에서는 대신 Docker Desktop 안에 저장됩니다.
-  - **Chrome Headless Shell**: 프로젝트를 비디오 파일로 만듭니다. `node_modules/.remotion`에 저장됩니다.
-
-</details>
-
-### Supabase 프로젝트로 개발하기
-
-#### 준비물
-
-- [Node.js](https://nodejs.org) 20.9 이상 (Next.js 16의 최소 요구 사항; CI는 22로 돌아갑니다)
-- [Supabase](https://supabase.com) 프로젝트 (인증과 데이터베이스용)
-
-#### 설정
-
-1. 저장소를 클론합니다:
-
-```bash
-git clone https://github.com/openslop/openslop.git
-cd openslop
-```
-
-2. 의존성을 설치합니다:
-
-```bash
-npm install
-```
-
-3. 주석이 달린 env 템플릿을 복사해 채웁니다:
-
-```bash
-cp .env.example .env.local
-```
-
-Supabase 변수는 필수입니다. 나머지는 모두 선택입니다: 키가 비어 있는 공급자는 목(mock)으로 대체됩니다.
-
-4. 데이터베이스 마이그레이션을 실행합니다:
-
-```bash
-npm run db:push
-```
-
-5. 개발 서버를 시작합니다:
-
-```bash
-npm run dev
-```
-
-[http://localhost:3000](http://localhost:3000)을 열면 앱이 보일 겁니다.
+코드를 고치려면 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup)를 보고 개발 환경을 준비하세요.
 
 ## 기술 스택
 
@@ -331,28 +186,7 @@ npm run dev
 
 ## 프로젝트 구조
 
-```
-app/             Next.js 라우트, API 엔드포인트, 에디터 컴포넌트
-  api/v1/        에셋 유형별 REST API (image, video, music, sfx, tts, llm)
-  components/    에디터 UI (캔버스, 비디오 미리보기 등)
-lib/
-  agent/         Sloppy: 도구 정의, 레지스트리, 프롬프트와 턴 컨텍스트
-  connectors/    에셋 유형별 에디터용 클라이언트 API
-  gateway/       /api/v1/* 로 가는 HTTP 클라이언트
-  providers/     서버 측 벤더 어댑터 (Runware, ElevenLabs, …)
-  generation/    생성 큐와 작업 오케스트레이션
-  canvas/        Slate 문서 모델: 요소 유형, 가드, OSML 파싱/직렬화
-  script/        스크립트 작성과 다듬기
-  project/       프로젝트별 Zustand 스토어, 자동 저장, 영속화
-  render/        장면 레이아웃과 렌더 클라이언트
-  templates/     컴포저에서 제공하는 프롬프트 템플릿
-  upload/        클라이언트 측 파일 업로드 (이미지, 동영상, 오디오)
-  supabase/      브라우저/서버 Supabase 클라이언트
-remotion/        Remotion 진입점과 컴포지션
-supabase/        데이터베이스 마이그레이션
-```
-
-이 계층들이 어떻게 맞물리는지는 [`ARCHITECTURE.md`](../../ARCHITECTURE.md)를 보세요.
+코드 구성과 계층이 맞물리는 방식은 [`ARCHITECTURE.md`](../../ARCHITECTURE.md#project-structure)를 보세요.
 
 ## 스크립트
 

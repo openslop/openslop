@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="状态：私测中"></a>
-  <a href="#local-mode"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="支持 macOS、Windows 和 Linux"></a>
+  <a href="local-mode.zh-CN.md"><img src="https://img.shields.io/badge/runs%20on-macOS%20%7C%20Windows%20%7C%20Linux-555555?style=flat" alt="支持 macOS、Windows 和 Linux"></a>
   <a href="https://github.com/openslop/openslop/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/openslop/openslop/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI"></a>
   <a href="../../LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat" alt="许可证：Apache-2.0"></a>
   <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js" alt="Next.js 16"></a>
@@ -36,7 +36,7 @@
 ---
 
 > **私测中。** 目前仅限邀请。
-> [在 openslop.ai 加入等候名单](https://openslop.ai)，或者[使用本地模式](#local-mode)，今天就在自己的电脑上运行。
+> [在 openslop.ai 加入等候名单](https://openslop.ai)，或者[使用本地模式](local-mode.zh-CN.md)，今天就在自己的电脑上运行。
 
 ## 概览
 
@@ -144,7 +144,7 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 在你自己的 Mac、Windows 或 Linux 电脑上运行 OpenSlop。项目和视频都留在你手里。
 
-[本地模式 →](#local-mode)
+[本地模式 →](local-mode.zh-CN.md)
 
 </td>
 <td width="50%">
@@ -168,154 +168,9 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 OpenSlop 有两种用法：
 
 - **在线**：打开 [app.openslop.ai](https://app.openslop.ai)，无需安装。目前仅限邀请，请先[加入等候名单](https://openslop.ai)。
-- **本地模式**：在你自己的电脑上运行，按下面的步骤操作。
+- **本地模式**：在你自己的电脑上运行。[查看设置指南 →](local-mode.zh-CN.md)
 
-<a name="local-mode"></a>
-
-### 本地模式
-
-<p>
-  <img src="https://img.shields.io/badge/macOS-Apple%20silicon%20%7C%20Intel-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS: Apple silicon, Intel">
-  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMy40IDkuOCAydjkuNkgwek0xMSAxLjkgMjQgMHYxMS42SDExek0wIDEyLjRoOS44VjIyTDAgMjAuNnpNMTEgMTIuNGgxM1YyNGwtMTMtMS45eiIvPjwvc3ZnPg==" alt="Windows 10, 11">
-  <img src="https://img.shields.io/badge/Linux-x64%20%7C%20arm64-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux: x64, arm64">
-</p>
-
-你的项目和视频都留在你的电脑上。只有发给 AI 服务的请求会上网。
-
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-#### 1. 安装 Node.js
-
-打开 [Node.js 下载页面](https://nodejs.org/en/download)。点击绿色的安装程序按钮（**Windows Installer** 或 **macOS Installer**），打开下载的文件，按提示一步步装好。22 或更新的版本都可以。
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-node-light.svg#gh-light-mode-only" alt="在 nodejs.org 点击 Windows Installer，运行安装程序，装好 Node.js" width="100%">
-  <img src="../../assets/features/local-step-node-dark.svg#gh-dark-mode-only" alt="在 nodejs.org 点击 Windows Installer，运行安装程序，装好 Node.js" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 2. 安装 Docker Desktop（仅限 Windows 和 Intel Mac）
-
-_如果是 Linux，或是 M1 及更新芯片（M2、M3 等）的 Mac，请跳过这一步。要查看你的 Mac，打开苹果菜单 > **关于本机**，看 **芯片** 一栏。_
-
-在 [docker.com](https://www.docker.com/products/docker-desktop/) 点击 **Download Docker Desktop**，选择你的电脑并安装。打开它，使用 OpenSlop 期间一直开着。
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-docker-light.svg#gh-light-mode-only" alt="在 docker.com 选择 Windows 版下载，Docker Desktop 打开并显示引擎正在运行" width="100%">
-  <img src="../../assets/features/local-step-docker-dark.svg#gh-dark-mode-only" alt="在 docker.com 选择 Windows 版下载，Docker Desktop 打开并显示引擎正在运行" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 3. 下载 OpenSlop
-
-在 [OpenSlop 的 GitHub 页面](https://github.com/openslop/openslop) 点击绿色的 **Code** 按钮，然后点 **Download ZIP**。也可以[直接下载 ZIP](https://github.com/openslop/openslop/archive/refs/heads/master.zip)。
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-download-light.svg#gh-light-mode-only" alt="在 GitHub 上，绿色的 Code 按钮打开菜单，然后点击 Download ZIP" width="100%">
-  <img src="../../assets/features/local-step-download-dark.svg#gh-dark-mode-only" alt="在 GitHub 上，绿色的 Code 按钮打开菜单，然后点击 Download ZIP" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 4. 解压并启动 OpenSlop
-
-Windows：右键点击 ZIP > **Extract All**，再右键点击新文件夹 > **Open in Terminal**。Mac：双击 ZIP，再右键点击新文件夹 > **New Terminal at Folder**。在终端里运行：
-
-```bash
-npm install
-npm run local
-```
-
-第一次运行需要几分钟。之后 OpenSlop 会在浏览器中打开，并且已经登录。要停止，在终端里按 Ctrl+C。你的项目会保留到下次。
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-terminal-light.svg#gh-light-mode-only" alt="在下载文件夹里解压 ZIP 并用终端打开，然后用 npm install 和 npm run local 启动 OpenSlop" width="100%">
-  <img src="../../assets/features/local-step-terminal-dark.svg#gh-dark-mode-only" alt="在下载文件夹里解压 ZIP 并用终端打开，然后用 npm install 和 npm run local 启动 OpenSlop" width="100%">
-</td>
-</tr>
-<tr>
-<td width="50%" valign="middle">
-
-#### 5. 添加你的 AI 密钥
-
-点击个人头像，然后点 **Settings** > **Add providers**，用你的密钥连接一个提供商。需要哪些密钥取决于你要做什么：
-
-- **全部功能**：全部 7 类（Text、Speech、Images、Videos、Music、Sound 和 Captions）。
-- **不露脸的配音视频**：Text、Speech 和 Images。
-- **电影感视频**：Text 和 Videos。
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-keys-light.svg#gh-light-mode-only" alt="从个人菜单打开 Settings，在 Add providers 中选择提供商，粘贴并连接 Anthropic 密钥" width="100%">
-  <img src="../../assets/features/local-step-keys-dark.svg#gh-dark-mode-only" alt="从个人菜单打开 Settings，在 Add providers 中选择提供商，粘贴并连接 Anthropic 密钥" width="100%">
-</td>
-</tr>
-</table>
-
-<details>
-<summary>会下载什么</summary>
-
-- `npm install` 获取应用代码。
-- 第一次运行 `npm run local` 还会下载以下内容，只下载一次：
-  - **Supabase**：数据库和文件存储，保存在 `~/.supabase/cache`。在 Windows 和 Intel Mac 上，则保存在 Docker Desktop 里。
-  - **Chrome Headless Shell**：把你的项目做成视频文件，保存在 `node_modules/.remotion`。
-
-</details>
-
-### 用 Supabase 项目开发
-
-#### 前置条件
-
-- [Node.js](https://nodejs.org) 20.9+（Next.js 16 的最低要求；CI 用的是 22）
-- 一个 [Supabase](https://supabase.com) 项目（用于认证和数据库）
-
-#### 安装
-
-1. 克隆仓库：
-
-```bash
-git clone https://github.com/openslop/openslop.git
-cd openslop
-```
-
-2. 安装依赖：
-
-```bash
-npm install
-```
-
-3. 复制带注释的环境变量模板并填写：
-
-```bash
-cp .env.example .env.local
-```
-
-Supabase 的变量是必填的。其他都可选：没填密钥的提供商会回退到 mock。
-
-4. 运行数据库迁移：
-
-```bash
-npm run db:push
-```
-
-5. 启动开发服务器：
-
-```bash
-npm run dev
-```
-
-打开 [http://localhost:3000](http://localhost:3000)，就能看到应用了。
+要改代码？按 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup) 搭建开发环境。
 
 ## 技术栈
 
@@ -331,28 +186,7 @@ npm run dev
 
 ## 项目结构
 
-```
-app/             Next.js 路由、API 端点和编辑器组件
-  api/v1/        按资源类型划分的 REST API（image、video、music、sfx、tts、llm）
-  components/    编辑器 UI（画布、视频预览等）
-lib/
-  agent/         Sloppy：工具定义、注册表、提示词和对话轮次上下文
-  connectors/    面向编辑器的客户端 API，按资源类型划分
-  gateway/       访问 /api/v1/* 的 HTTP 客户端
-  providers/     服务端的供应商适配器（Runware、ElevenLabs……）
-  generation/    生成队列和任务编排
-  canvas/        Slate 文档模型：元素类型、守卫、OSML 解析/序列化
-  script/        脚本撰写和润色
-  project/       每个项目的 Zustand store、自动保存、持久化
-  render/        场景布局和渲染客户端
-  templates/     编辑器里提供的提示词模板
-  upload/        客户端文件上传（图片、视频、音频）
-  supabase/      浏览器端/服务端的 Supabase 客户端
-remotion/        Remotion 入口和合成
-supabase/        数据库迁移
-```
-
-这些层之间如何交互，见 [`ARCHITECTURE.md`](../../ARCHITECTURE.md)。
+代码怎么组织、各层如何配合，见 [`ARCHITECTURE.md`](../../ARCHITECTURE.md#project-structure)。
 
 ## 脚本
 

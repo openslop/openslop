@@ -12,17 +12,61 @@ Please also refer to our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Setup
 
-See [Getting started](README.md#getting-started) in the README:
-
 - npm only. no pnpm, no yarn
-- Node 20.9+, CI is on 22
-- [Local mode](README.md#local-mode) runs it all on your computer with no accounts. To develop against hosted services instead, link your own Supabase and Vercel accounts via filling in .env.local
-- Supabase is the only hard requirement. Vercel Blob is needed for real generations (that's where providers store output), mocks skip it. Provider keys go in the app, leave them out and you get mocks, so no need to pay for an API
+- Node 22+ for local mode, 20.9+ against a Supabase project. CI is on 22
+- Two ways to run it: [local mode](#develop-in-local-mode), with no accounts, or [against your own Supabase project](#develop-against-a-supabase-project)
+- Provider keys go in the app, leave them out and you get mocks, so no need to pay for an API
 - On a Windows clone made before `.gitattributes` landed, run `git rm --cached -r . -q && git reset --hard` once to re-check files out with LF line endings
 
-### Running the generation queue
+### Develop in local mode
 
-Generations need a Vercel OIDC token. If you're not on our Vercel team, link a project on your own free Hobby account (no deploy needed) and pull its token:
+Start here. No accounts, no `.env.local`. On Windows and Intel Macs, have Docker Desktop open first.
+
+```bash
+git clone https://github.com/openslop/openslop.git
+cd openslop
+npm install
+npm run local
+```
+
+| `npm run local` does                                         | So you                               |
+| ------------------------------------------------------------ | ------------------------------------ |
+| Starts a local Supabase and applies `supabase/migrations`    | Rerun it to pick up a new migration  |
+| Signs you in as one local user                               | Skip signing up                      |
+| Runs `next dev`                                              | Get hot reload as usual              |
+| Runs jobs in-process, stores files in local Supabase Storage | Need no Vercel account or OIDC token |
+| Renders exports on your machine with Chrome Headless Shell   | Can test export without Lambda       |
+
+<kbd>Ctrl</kbd>+<kbd>C</kbd> stops the app and Supabase. The user-facing walkthrough is [docs/local-mode.md](docs/local-mode.md).
+
+### Develop against a Supabase project
+
+1. Clone the repo and install:
+
+```bash
+git clone https://github.com/openslop/openslop.git
+cd openslop
+npm install
+```
+
+2. Copy the annotated env template and fill it in. The Supabase variables are required, everything else is optional (an unset provider key falls back to a mock):
+
+```bash
+cp .env.example .env.local
+```
+
+3. Run the database migrations and start the dev server:
+
+```bash
+npm run db:push
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) and you should see the app.
+
+#### Running the generation queue
+
+Supabase is the only hard requirement. Vercel Blob is needed for real generations (that's where providers store output), mocks skip it. Generations also need a Vercel OIDC token. If you're not on our Vercel team, link a project on your own free Hobby account (no deploy needed) and pull its token:
 
 ```bash
 vercel link

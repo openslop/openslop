@@ -20,6 +20,56 @@ The numbers match the diagram.
 3. **Save.** The canvas, project store and snapshots save to one `projects` row, with autosaved history in `canvas_versions`.
 4. **Render.** The canvas and its results lay out into one Remotion timeline. The Player previews it in the browser; Lambdas render it in parallel chunks to an MP4 in S3.
 
+## Project structure
+
+`lib/` is the domain layer and never imports from `app/`.
+
+```
+app/                 Next.js routes and the editor UI
+  api/
+    v1/              Hosted model routes per media type (agent, llm, image, video, tts, stt, music, sfx)
+    third-party/     The same routes on the user's own key (BYOK)
+    queues/          Vercel Queue worker that runs generation jobs
+    render/          Starts an export and reports its progress
+    upload/          Uploads per kind (image, video, audio)
+    providers/       Connects and removes provider keys
+    validate-code/   Private beta access codes
+    dev/             Dev-only sign-in as any user, used by local mode
+  components/        Editor UI: canvas, player, Sloppy, composer, settings, projects
+  projects/[id]/     The editor page
+  login/ signup/ auth/   Sign-in pages and the auth callback
+components/
+  ui/                The design system, see DESIGN.md
+  captions/          Caption drawing shared by the player and the render
+lib/
+  agent/             Sloppy: tools, registry, prompt and turn context
+  api/               Route plumbing: auth, asset routes, job queue, agent turn
+  auth/              Session, access codes, impersonation
+  canvas/            Slate document model: element types, guards, OSML parse/serialize
+  captions/          Word timings, caption style, layout and presets
+  clients/           HTTP and SSE clients
+  color/             Color helpers
+  components/        Shared React hooks and media components with no domain logic
+  connectors/        Editor-facing client API per media type, models and plugins
+  gateway/           HTTP clients to /api/v1 and /api/third-party
+  generation/        Generation graph, staleness, snapshots and queue
+  project/           Project store, autosave, version history, media
+  providers/         Server-side vendor adapters (Anthropic, Runware, ElevenLabs, Cartesia)
+  render/            Timeline layout, and the Lambda and local render backends
+  script/            Script writing and refinement
+  settings/          Settings dialog state in the URL
+  store/             Store context and emitter shared by the stores
+  supabase/          Browser, server and service-role Supabase clients
+  templates/         Templates offered in the composer
+  upload/            Client-side file upload
+  user/              Account and balance
+remotion/            Remotion entry point and the composition
+supabase/            Local config and database migrations
+scripts/             npm run local, Remotion deploys, dark diagram export
+e2e/                 Playwright smoke tests
+docs/                Diagrams, the local mode guide and translated READMEs
+```
+
 ## Canvas and generation
 
 <p align="center">
