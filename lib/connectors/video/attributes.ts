@@ -28,7 +28,7 @@ export const videoAttributesFor = (model: ModelRef) => {
 		resolutionDef(resolutions),
 		durationDef(maxDurationSec),
 		loopDef,
-		volumeDef("5"),
+		volumeDef("10"),
 		motionDef,
 		trimStartDef,
 		trimEndDef,

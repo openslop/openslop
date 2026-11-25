@@ -2,11 +2,9 @@
 
 import { Pause, Play } from "@/components/ui/icon";
 
-export function PlayPauseFlash({
-	flash,
-}: {
-	flash: { key: number; playing: boolean } | null;
-}) {
+export type Flash = { key: number; playing: boolean };
+
+export function PlayPauseFlash({ flash }: { flash: Flash | null }) {
 	if (!flash) return null;
 	return (
 		<div className="pointer-events-none absolute inset-0 grid place-items-center">

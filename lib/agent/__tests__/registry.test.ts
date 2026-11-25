@@ -500,7 +500,7 @@ describe("executeToolCall", () => {
 		);
 	});
 
-	it("fits each video element to the speech under it and says it went stale", async () => {
+	it("fits each video element to the speech under it", async () => {
 		const ops: RefineOp[][] = [];
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },
@@ -511,7 +511,6 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						speechIds: ["nar1"],
 						duration: { sec: 10, maxSec: 15 },
 					},
 					{
@@ -519,7 +518,6 @@ describe("executeToolCall", () => {
 						type: "image",
 						sceneNumber: 1,
 						words: 90,
-						speechIds: ["nar2"],
 					},
 				],
 				editScript: (applied) => {
@@ -533,7 +531,7 @@ describe("executeToolCall", () => {
 		expect(outcome.ok && outcome.output).toContain(
 			"Scene 1 video ai1: 10s to 5s, for about 5.0s of estimated speech and leeway.",
 		);
-		expect(outcome.ok && outcome.output).toContain("need regenerating");
+		expect(outcome.ok && outcome.output).toContain("Fitted 1 of 1.");
 		expect(outcome.ok && outcome.output).toContain(
 			"1 image or video left alone.",
 		);
@@ -549,7 +547,6 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						speechIds: [],
 						duration: { sec: 10, maxSec: 15 },
 					},
 					{
@@ -557,7 +554,6 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 2,
 						words: 180,
-						speechIds: ["nar2"],
 						duration: { sec: 15, maxSec: 15 },
 					},
 				],
@@ -580,7 +576,6 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						speechIds: ["nar1"],
 						duration: { sec: 5, maxSec: 15 },
 					},
 				],
@@ -603,7 +598,6 @@ describe("executeToolCall", () => {
 						type: "video",
 						sceneNumber: 1,
 						words: 12,
-						speechIds: ["nar1"],
 						duration: { sec: 5, maxSec: 15 },
 					},
 				],
@@ -625,7 +619,6 @@ describe("executeToolCall", () => {
 						type: "image",
 						sceneNumber: 1,
 						words: 90,
-						speechIds: ["nar1"],
 					},
 				],
 			}),

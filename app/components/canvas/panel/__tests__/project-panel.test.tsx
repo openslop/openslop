@@ -1,9 +1,19 @@
 // @vitest-environment happy-dom
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const { mockTotalCost } = vi.hoisted(() => ({
+	mockTotalCost: { current: undefined as number | undefined },
+}));
+
+vi.mock("@/lib/project/project-cost", () => ({
+	useProjectCostUsd: () => mockTotalCost.current,
+}));
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { languageLabel } from "@/lib/project/language";
+import { ProjectProvider } from "@/lib/project/project-provider";
 import { ProjectStoreProvider } from "@/lib/project/project-store-provider";
 import { createProjectStore } from "@/lib/project/store";
 import { getTemplate } from "@/lib/templates/templates";
@@ -12,16 +22,25 @@ import { ProjectPanel } from "../project-panel";
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
 let canvas: ReturnType<typeof mountOnCanvas> | undefined;
+beforeEach(() => {
+	mockTotalCost.current = undefined;
+});
 afterEach(() => canvas?.unmount());
 
 const renderPanel = (store = createProjectStore()) => {
 	canvas = mountOnCanvas();
 	return canvas.render(
-		<ProjectStoreProvider store={store}>
-			<TooltipProvider>
-				<ProjectPanel />
-			</TooltipProvider>
-		</ProjectStoreProvider>,
+		<ProjectProvider
+			projectId="project-1"
+			initialScript=""
+			initialTranscript={[]}
+		>
+			<ProjectStoreProvider store={store}>
+				<TooltipProvider>
+					<ProjectPanel />
+				</TooltipProvider>
+			</ProjectStoreProvider>
+		</ProjectProvider>,
 	);
 };
 
@@ -53,5 +72,20 @@ describe("ProjectPanel", () => {
 		await renderPanel();
 
 		expect(document.body.textContent).toContain("None");
+	});
+
+	it("shimmers the cost until it loads", async () => {
+		await renderPanel();
+
+		const cost = document.body.querySelector('[data-slot="badge"]');
+		expect(cost?.querySelector('[data-slot="skeleton"]')).not.toBeNull();
+	});
+
+	it("shows what the project has spent", async () => {
+		mockTotalCost.current = 0.42;
+		await renderPanel();
+
+		const cost = document.body.querySelector('[data-slot="badge"]');
+		expect(cost?.textContent).toBe("$0.42");
 	});
 });

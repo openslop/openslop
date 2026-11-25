@@ -14,10 +14,10 @@ import { useProject } from "@/lib/project/use-project";
 import { useGenerateAll } from "./canvas/hooks/use-generate-all";
 import {
 	countPhrase,
-	NOTHING_TO_GENERATE,
 	type GenerateScope,
 } from "./canvas/hooks/use-generate-scope";
 import { useSloppy } from "./sloppy/sloppy-provider";
+import { WAIT_FOR_SLOPPY } from "./sloppy/turn-display";
 import { ExportButton } from "./player/export-button";
 import { BalancePill } from "./balance-pill";
 import editorStyles from "./editor.module.css";
@@ -111,7 +111,7 @@ function EditorToolbarComponent() {
 					size="sm"
 					className="shrink-0"
 					aria-label={generateLabel}
-					tooltip={loading ? NOTHING_TO_GENERATE : scope.description}
+					tooltip={loading ? WAIT_FOR_SLOPPY : scope.description}
 					tooltipSide="bottom"
 					unavailable={unavailable}
 					onClick={scope.run}

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { BaseAssetConnector } from "../asset-base";
-import { AssetBundle } from "@/lib/api/asset-bundle";
-import type { BundleResponse } from "@/lib/api/asset-bundle";
+import { AssetBundle, type BundleResponse } from "@/lib/api/asset-bundle";
 import type { AssetGateway, JobPoll } from "@/lib/gateway/base";
 import type { ConnectorType, ResolvedConnectorConfig } from "../types";
 

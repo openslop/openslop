@@ -35,10 +35,15 @@ describe("searchProviders", () => {
 
 	it("says which models matched, so a row can explain itself", () => {
 		expect(searchProviders("claude", all)).toEqual([
-			{ provider: "openslop", models: ["Claude Opus 5"] },
+			{ provider: "openslop", models: ["Claude Opus 5.5", "Claude Opus 5"] },
 			{
 				provider: "anthropic",
-				models: ["Claude Opus 5", "Claude Sonnet 5", "Claude Haiku 4.5"],
+				models: [
+					"Claude Opus 5.5",
+					"Claude Opus 5",
+					"Claude Sonnet 5",
+					"Claude Haiku 4.5",
+				],
 			},
 		]);
 	});

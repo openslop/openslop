@@ -39,7 +39,6 @@ vi.mock("../canvas/hooks/use-generate-all", () => ({
 
 vi.mock("../canvas/hooks/use-generate-scope", () => ({
 	countPhrase: () => "Generate pending",
-	NOTHING_TO_GENERATE: "Nothing to generate",
 }));
 
 vi.mock("../sloppy/sloppy-provider", () => ({
@@ -140,5 +139,16 @@ describe("EditorToolbar cancellation", () => {
 	it("shows no cancel action when neither operation is active", () => {
 		renderToolbar();
 		expect(container.querySelector('button[aria-label^="Cancel "]')).toBeNull();
+	});
+});
+
+describe("EditorToolbar generate all", () => {
+	it("asks to wait for Sloppy while Sloppy works", () => {
+		renderToolbar({ loading: true });
+		const button = container.querySelector<HTMLButtonElement>(
+			'button[aria-label="Writing…"]',
+		);
+		act(() => button?.focus());
+		expect(document.body.textContent).toContain("Wait for Sloppy to finish");
 	});
 });

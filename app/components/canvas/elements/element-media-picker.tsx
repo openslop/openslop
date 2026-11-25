@@ -5,6 +5,7 @@ import { Plus } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { isGenerationActive } from "@/lib/generation/snapshots";
+import { uploadedMedia } from "@/lib/project/media";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import type { UploadKind } from "@/lib/upload/upload-files";
 import {
@@ -44,10 +45,12 @@ export function AddMediaButton() {
 	const { element, node, status } = useElementGeneration();
 	if (!isUploadable(element)) return null;
 	const kind = uploadKindOf(element);
-	const pick = (url: string) => {
-		const media = store.getState().media.find((item) => item.url === url);
-		return commitUploaded(queue, node, media ?? { kind, url });
-	};
+	const pick = (url: string) =>
+		commitUploaded(
+			queue,
+			node,
+			uploadedMedia(store.getState().media, url, kind),
+		);
 	return (
 		<MediaPicker kind={kind} onPick={pick}>
 			<AddMediaPickerButton kind={kind} disabled={isGenerationActive(status)} />

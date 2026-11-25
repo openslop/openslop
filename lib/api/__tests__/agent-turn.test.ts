@@ -217,6 +217,28 @@ describe("streamAgentTurn", () => {
 		expect(chunks.map((chunk) => chunk.type)).not.toContain("error");
 	});
 
+	it("runs a call whose input had one stray closing brace", async () => {
+		const chunks = await runTurn([
+			{ type: "stream-start", warnings: [] },
+			{
+				type: "tool-call",
+				toolCallId: "call-1",
+				toolName: "edit_script",
+				input: '{"ops":[{"op":"remove","id":"n1"}}]}',
+			},
+			{ ...finish, finishReason: { unified: "tool-calls", raw: "tool_use" } },
+		]);
+
+		expect(chunks).toContainEqual(
+			expect.objectContaining({
+				type: "tool-input-available",
+				toolCallId: "call-1",
+				input: { ops: [{ op: "remove", id: "n1" }] },
+			}),
+		);
+		expect(chunks.map((chunk) => chunk.type)).not.toContain("tool-input-error");
+	});
+
 	it("logs input the model will retry as a warning naming the tool", async () => {
 		const warn = vi.spyOn(logger, "warn").mockImplementation(() => {});
 		const error = vi.spyOn(logger, "error").mockImplementation(() => {});
