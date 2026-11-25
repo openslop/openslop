@@ -48,12 +48,10 @@ const attrEdits = z
 	.strictObject(mapValues(everyAttribute, (value) => value.nullable()))
 	.partial();
 
+const text = z.string().optional().describe(ELEMENT_TEXT);
+
 const elementOf = <Type extends ElementType>(type: Type) =>
-	z.object({
-		type: z.literal(type),
-		attrs: attrsFor(type).optional(),
-		text: z.string().optional().describe(ELEMENT_TEXT),
-	});
+	z.object({ type: z.literal(type), attrs: attrsFor(type).optional(), text });
 
 // discriminatedUnion takes a non-empty tuple, which .map never infers.
 const oneOfType = <Option extends ReturnType<typeof elementOf>>([
@@ -103,7 +101,7 @@ const setOp = z.object({
 	op: z.literal("set"),
 	id: z.string(),
 	attrs: attrEdits.optional().nullable(),
-	text: z.string().optional().describe(ELEMENT_TEXT),
+	text,
 });
 
 export const refineOpSchema = z.discriminatedUnion("op", [

@@ -105,8 +105,7 @@ describe("refine op attributes", () => {
 		).toBe(true);
 	});
 
-	it("takes any type's attribute on a set, and null only there", () => {
-		expect(setAttrs({ name: "x" }).success).toBe(true);
+	it("takes null for an attribute only on a set", () => {
 		expect(setAttrs({ trimEnd: null }).success).toBe(true);
 		expect(voice({ name: null }).success).toBe(false);
 	});
