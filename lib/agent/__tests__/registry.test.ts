@@ -529,7 +529,15 @@ describe("executeToolCall", () => {
 			}),
 		);
 
-		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
+		expect(ops).toEqual([
+			[
+				{
+					op: "set",
+					id: "ai1",
+					element: { type: "video", attrs: { duration: "5" } },
+				},
+			],
+		]);
 		expect(outcome.ok && outcome.output).toContain(
 			"Scene 1 video ai1: 10s to 5s, for about 5.0s of estimated speech and leeway.",
 		);

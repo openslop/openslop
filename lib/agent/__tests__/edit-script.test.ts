@@ -8,7 +8,10 @@ const parses = (op: Record<string, unknown>) =>
 describe("edit_script", () => {
 	it("accepts an asset_voice with no text", () => {
 		expect(
-			parses({ op: "asset", type: "asset_voice", attrs: { name: "Mia" } }),
+			parses({
+				op: "asset",
+				element: { type: "asset_voice", attrs: { name: "Mia" } },
+			}),
 		).toBe(true);
 	});
 
@@ -19,7 +22,7 @@ describe("edit_script", () => {
 			);
 		}
 		for (const type of AssetTypeSchema.options) {
-			expect(parses({ op: "asset", type })).toBe(true);
+			expect(parses({ op: "asset", element: { type } })).toBe(true);
 			expect(parses({ op: "insert", elements: [{ type }] })).toBe(false);
 		}
 		expect(parses({ op: "insert", elements: [] })).toBe(false);

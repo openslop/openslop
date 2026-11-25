@@ -1,4 +1,4 @@
-import type { Tool } from "ai";
+import { zodSchema, type Tool } from "ai";
 import type { z } from "zod";
 import type { IconComponent } from "@/components/ui/icon";
 import type { AgentToolContext } from "./context";
@@ -39,7 +39,7 @@ export function defineTool<Input, Output>(def: {
 	// generic; the def parameter above already checks every field against it.
 	const spec = {
 		...rest,
-		inputSchema: input,
+		inputSchema: zodSchema(input, { useReferences: true }),
 		outputSchema: output,
 	} as unknown as Tool<Input, Output>;
 	const present = {

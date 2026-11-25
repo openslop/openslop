@@ -138,13 +138,15 @@ describe("the mock agent model", () => {
 		const assets = await step(prompt);
 		expect(assets.toolName).toBe("edit_script");
 		const { ops } = assets.input as { ops: RefineOp[] };
-		const assetOps = ops.flatMap((op) => (op.op === "asset" ? [op] : []));
-		expect(assetOps).toHaveLength(ops.length);
-		expect(new Set(assetOps.map(({ type }) => type))).toEqual(
+		const assetElements = ops.flatMap((op) =>
+			op.op === "asset" ? [op.element] : [],
+		);
+		expect(assetElements).toHaveLength(ops.length);
+		expect(new Set(assetElements.map(({ type }) => type))).toEqual(
 			new Set(["asset_style", "asset_avatar", "asset_voice"]),
 		);
 		expect(
-			assetOps.flatMap(({ attrs }) => Object.keys(attrs ?? {})),
+			assetElements.flatMap(({ attrs }) => Object.keys(attrs ?? {})),
 		).not.toContain("model");
 		prompt.push(...ran("edit_script", `Applied ${ops.length} operations.`));
 
@@ -192,7 +194,15 @@ describe("the mock agent model", () => {
 		const edit = await step(prompt);
 		expect(edit).toMatchObject({
 			toolName: "edit_script",
-			input: { ops: [{ op: "set", id: "n1", text: expect.any(String) }] },
+			input: {
+				ops: [
+					{
+						op: "set",
+						id: "n1",
+						element: { type: "speech", text: expect.any(String) },
+					},
+				],
+			},
 		});
 		prompt.push(...ran("edit_script", "Applied 1 operation."));
 

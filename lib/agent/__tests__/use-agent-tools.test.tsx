@@ -56,7 +56,9 @@ const edit = (text: string) =>
 	runTool(
 		{
 			toolName: "edit_script",
-			input: { ops: [{ op: "set", id: "line", text }] },
+			input: {
+				ops: [{ op: "set", id: "line", element: { type: "speech", text } }],
+			},
 		},
 		turn,
 	);
@@ -117,7 +119,15 @@ describe("edit_script read guard", () => {
 				await runTool(
 					{
 						toolName: "edit_script",
-						input: { ops: [{ op: "set", id, text: "A dog howls." }] },
+						input: {
+							ops: [
+								{
+									op: "set",
+									id,
+									element: { type: "speech", text: "A dog howls." },
+								},
+							],
+						},
 					},
 					turn,
 				)

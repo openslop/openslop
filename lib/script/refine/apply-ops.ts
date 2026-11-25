@@ -1,3 +1,4 @@
+import isEmpty from "lodash/isEmpty";
 import { Editor, Path, Transforms } from "slate";
 import { setAsset } from "@/lib/canvas/asset-ops";
 import { flatAttributes } from "@/lib/canvas/element-attributes";
@@ -6,12 +7,12 @@ import {
 	findElementById,
 	mergeAttrs,
 	updateElementText,
-	withAttrs,
 } from "@/lib/canvas/editor-ops";
 import { isAssetElement, isContentElement } from "@/lib/canvas/guards";
 import { insertElement } from "@/lib/canvas/insert-element";
 import { isScene } from "@/lib/canvas/scenes";
 import type { AssetType, ElementType } from "@/lib/canvas/types";
+import { fromKeys } from "@/lib/utils";
 import type { NewElement, RefineOp } from "./types";
 
 export type RefineOpResult =
@@ -126,7 +127,7 @@ function applyInsert(
 
 function applyAsset(
 	editor: Editor,
-	{ type, attrs, text }: Extract<RefineOp, { op: "asset" }>,
+	{ element: { type, attrs, text } }: Extract<RefineOp, { op: "asset" }>,
 ): RefineOpResult {
 	const problems = [
 		unofferedAttributes(type, attrs ?? {}),
@@ -177,30 +178,36 @@ function applyMove(
 
 function applySet(
 	editor: Editor,
-	op: Extract<RefineOp, { op: "set" }>,
+	{ id, element, drop = [] }: Extract<RefineOp, { op: "set" }>,
 ): RefineOpResult {
-	const entry = findElementById(editor, op.id);
-	if (!entry) return { ok: false, reason: `set: no element "${op.id}"` };
+	const entry = findElementById(editor, id);
+	if (!entry) return { ok: false, reason: `set: no element "${id}"` };
 	const [found] = entry;
+	if (found.type !== element.type)
+		return {
+			ok: false,
+			reason: `set: "${id}" is a ${found.type}, not a ${element.type}`,
+		};
 	const current = flatAttributes(found);
+	const edits = { ...element.attrs, ...fromKeys(drop, () => null) };
 
 	if (
 		isAssetElement(found) &&
-		op.attrs?.name !== undefined &&
-		op.attrs.name !== current.name
+		edits.name !== undefined &&
+		edits.name !== current.name
 	)
 		return {
 			ok: false,
-			reason: `set: an asset's name never changes; remove "${op.id}" and create it again with an asset op`,
+			reason: `set: an asset's name never changes; remove "${id}" and create it again with an asset op`,
 		};
 
 	const unoffered = unofferedAttributes(
 		found.type,
-		withAttrs({}, op.attrs ?? {}),
+		element.attrs ?? {},
 		current,
 	);
 	if (unoffered) return { ok: false, reason: `set: ${unoffered}` };
-	if (op.attrs) mergeAttrs(editor, op.id, op.attrs);
-	if (op.text !== undefined) updateElementText(editor, op.id, op.text);
+	if (!isEmpty(edits)) mergeAttrs(editor, id, edits);
+	if (element.text !== undefined) updateElementText(editor, id, element.text);
 	return OK;
 }

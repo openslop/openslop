@@ -222,6 +222,22 @@ describe("applyRefineOp — remove", () => {
 		expect(getContentIds(editor)).toEqual(["n2"]);
 	});
 
+	it("refuses a type that is not the element's, changing nothing", () => {
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
+
+		const result = applyRefineOp(editor, {
+			op: "set",
+			id: "n1",
+			element: { type: "sound", text: "rain" },
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason: 'set: "n1" is a speech, not a sound',
+		});
+		expect(getContentTexts(editor)).toEqual(["hello"]);
+	});
+
 	it("leaves the canvas alone when no element has the id", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
@@ -336,11 +352,26 @@ describe("applyRefineOp — move", () => {
 	});
 });
 
+type LineEdit = {
+	id?: string;
+	attrs?: Record<string, string>;
+	text?: string;
+	drop?: string[];
+};
+
+const setLine = (editor: Editor, { id = "n1", drop, ...element }: LineEdit) =>
+	applyRefineOp(editor, {
+		op: "set",
+		id,
+		element: { type: "speech", ...element },
+		drop,
+	});
+
 describe("applyRefineOp — set", () => {
 	it("updates text content", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "old")])]);
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" });
+		setLine(editor, { text: "new text" });
 
 		expect(getContentTexts(editor)).toEqual(["new text"]);
 	});
@@ -355,11 +386,7 @@ describe("applyRefineOp — set", () => {
 			]),
 		]);
 
-		applyRefineOp(editor, {
-			op: "set",
-			id: "n1",
-			attrs: { emotion: "excited" },
-		});
+		setLine(editor, { attrs: { emotion: "excited" } });
 
 		expect(flatAttributes(getNode(editor, "n1"))).toEqual({
 			name: "Lyra",
@@ -367,7 +394,7 @@ describe("applyRefineOp — set", () => {
 		});
 	});
 
-	it("removes attrs set to null", () => {
+	it("removes the attrs it drops", () => {
 		const editor = makeEditor([
 			scene([
 				content("speech", "n1", "hello", {
@@ -377,7 +404,7 @@ describe("applyRefineOp — set", () => {
 			]),
 		]);
 
-		applyRefineOp(editor, { op: "set", id: "n1", attrs: { emotion: null } });
+		setLine(editor, { drop: ["emotion"] });
 
 		expect(flatAttributes(getNode(editor, "n1"))).toEqual({ name: "Lyra" });
 	});
@@ -387,9 +414,7 @@ describe("applyRefineOp — set", () => {
 			scene([content("speech", "n1", "old", { name: "Lyra" })]),
 		]);
 
-		applyRefineOp(editor, {
-			op: "set",
-			id: "n1",
+		setLine(editor, {
 			attrs: { name: "Alice", emotion: "happy" },
 			text: "Hello!",
 		});
@@ -402,9 +427,7 @@ describe("applyRefineOp — set", () => {
 	it("refuses an attribute value the type does not offer, changing nothing", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
-		const result = applyRefineOp(editor, {
-			op: "set",
-			id: "n1",
+		const result = setLine(editor, {
 			attrs: { emotion: "unoffered" },
 			text: "changed",
 		});
@@ -419,17 +442,17 @@ describe("applyRefineOp — set", () => {
 	it("keeps the caret marker when text is replaced or cleared", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "old")])]);
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "new" });
+		setLine(editor, { text: "new" });
 		expect(Editor.string(editor, [0, 0])).toBe(`${ZERO_WIDTH_SPACE}new`);
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "" });
+		setLine(editor, { text: "" });
 		expect(Editor.string(editor, [0, 0])).toBe(ZERO_WIDTH_SPACE);
 	});
 
 	it("leaves the canvas alone when no element has the id", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
-		applyRefineOp(editor, { op: "set", id: "nonexistent", text: "new" });
+		setLine(editor, { id: "nonexistent", text: "new" });
 
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
@@ -498,7 +521,7 @@ describe("applyRefineOp — mixed operations", () => {
 	it("handles set then insert at same anchor", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "old text")])]);
 
-		applyRefineOp(editor, { op: "set", id: "n1", text: "new text" });
+		setLine(editor, { text: "new text" });
 		applyRefineOp(editor, {
 			op: "insert",
 			anchor_id: "n1",
@@ -542,8 +565,7 @@ describe("applyRefineOp — assets", () => {
 
 		const result = apply(editor, {
 			op: "asset",
-			type: "asset_avatar",
-			text: "a girl in a yellow cardigan",
+			element: { type: "asset_avatar", text: "a girl in a yellow cardigan" },
 		});
 
 		expect(result).toEqual({
@@ -559,9 +581,11 @@ describe("applyRefineOp — assets", () => {
 
 		const result = apply(editor, {
 			op: "asset",
-			type: "asset_avatar",
-			attrs: { name: "Mia" },
-			text: "a girl in a yellow cardigan",
+			element: {
+				type: "asset_avatar",
+				attrs: { name: "Mia" },
+				text: "a girl in a yellow cardigan",
+			},
 		});
 
 		expect(result).toEqual({ applied: 1, failures: [], inserted: [] });
@@ -588,36 +612,49 @@ describe("applyRefineOp — assets", () => {
 
 		apply(
 			editor,
-			{ op: "asset", type: "asset_style", text: "muted watercolor" },
 			{
 				op: "asset",
-				type: "asset_references",
-				attrs: { images: "a.png,b.png" },
-				text: "",
+				element: { type: "asset_style", text: "muted watercolor" },
 			},
 			{
 				op: "asset",
-				type: "asset_avatar",
-				attrs: { name: "Mia" },
-				text: "a girl in a yellow cardigan",
+				element: {
+					type: "asset_references",
+					attrs: { images: "a.png,b.png" },
+					text: "",
+				},
 			},
 			{
 				op: "asset",
-				type: "asset_voice",
-				attrs: { name: "Mia", pitch: "high" },
-				text: "",
+				element: {
+					type: "asset_avatar",
+					attrs: { name: "Mia" },
+					text: "a girl in a yellow cardigan",
+				},
 			},
 			{
 				op: "asset",
-				type: "asset_voice",
-				attrs: { name: "Narrator", age: "adult" },
-				text: "",
+				element: {
+					type: "asset_voice",
+					attrs: { name: "Mia", pitch: "high" },
+					text: "",
+				},
 			},
 			{
 				op: "asset",
-				type: "asset_voice",
-				attrs: { name: "Narrator", pitch: "low" },
-				text: "",
+				element: {
+					type: "asset_voice",
+					attrs: { name: "Narrator", age: "adult" },
+					text: "",
+				},
+			},
+			{
+				op: "asset",
+				element: {
+					type: "asset_voice",
+					attrs: { name: "Narrator", pitch: "low" },
+					text: "",
+				},
 			},
 		);
 
@@ -653,11 +690,16 @@ describe("applyRefineOp — assets", () => {
 
 		const result = apply(
 			editor,
-			{ op: "set", id: avatar.id, text: "a girl with a red scarf" },
+			{
+				op: "set",
+				id: avatar.id,
+				element: { type: "asset_avatar", text: "a girl with a red scarf" },
+			},
 			{
 				op: "set",
 				id: voice.id,
-				attrs: { age: "adult", pitch: null },
+				element: { type: "asset_voice", attrs: { age: "adult" } },
+				drop: ["pitch"],
 			},
 		);
 
@@ -673,8 +715,7 @@ describe("applyRefineOp — assets", () => {
 
 		const result = apply(editor, {
 			op: "asset",
-			type: "asset_voice",
-			attrs: { name: "Mia", age: "child" },
+			element: { type: "asset_voice", attrs: { name: "Mia", age: "child" } },
 		});
 
 		expect(result).toEqual({ applied: 1, failures: [], inserted: [] });
@@ -688,8 +729,7 @@ describe("applyRefineOp — assets", () => {
 
 		const result = apply(editor, {
 			op: "asset",
-			type: "asset_voice",
-			attrs: { name: "Mia", age: "ageless" },
+			element: { type: "asset_voice", attrs: { name: "Mia", age: "ageless" } },
 		});
 
 		expect(result).toEqual({
@@ -707,9 +747,7 @@ describe("applyRefineOp — assets", () => {
 
 		apply(editor, {
 			op: "asset",
-			type: "asset_avatar",
-			attrs: { name: "Mia" },
-			text: "",
+			element: { type: "asset_avatar", attrs: { name: "Mia" }, text: "" },
 		});
 
 		expect(describeAssets(editor)[0]?.[2]).toBe("a girl");
@@ -726,14 +764,18 @@ describe("applyRefineOp — assets", () => {
 			apply(editor, {
 				op: "set",
 				id: voice.id,
-				attrs: { name: "Lumi" },
+				element: { type: "asset_voice", attrs: { name: "Lumi" } },
 			}).failures,
 		).toEqual([
 			`set: an asset's name never changes; remove "${voice.id}" and create it again with an asset op`,
 		]);
 		expect(
-			apply(editor, { op: "set", id: voice.id, attrs: { name: null } })
-				.failures,
+			apply(editor, {
+				op: "set",
+				id: voice.id,
+				element: { type: "asset_voice" },
+				drop: ["name"],
+			}).failures,
 		).toEqual([
 			`set: an asset's name never changes; remove "${voice.id}" and create it again with an asset op`,
 		]);
@@ -749,7 +791,7 @@ describe("applyRefineOp — assets", () => {
 		const result = apply(editor, {
 			op: "set",
 			id: voice.id,
-			attrs: { name: "Mia", age: "adult" },
+			element: { type: "asset_voice", attrs: { name: "Mia", age: "adult" } },
 		});
 
 		expect(result).toEqual({ applied: 1, failures: [], inserted: [] });
@@ -829,7 +871,7 @@ describe("applyRefineOps", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOps(editor, [
-			{ op: "set", id: "n1", text: "goodbye" },
+			{ op: "set", id: "n1", element: { type: "speech", text: "goodbye" } },
 			{
 				op: "insert",
 				anchor_id: "n1",
@@ -849,7 +891,7 @@ describe("applyRefineOps", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 
 		const result = applyRefineOps(editor, [
-			{ op: "set", id: "gone", text: "nope" },
+			{ op: "set", id: "gone", element: { type: "speech", text: "nope" } },
 			{
 				op: "insert",
 				anchor_id: "n1",

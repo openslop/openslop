@@ -37,13 +37,14 @@ export const editScript = defineTool({
 	  - insert: place new \`elements\` before or after \`anchor_id\`, in the order you list them.
 	    Omit \`anchor_id\` to append, or to prepend with position "before". To add several
 	    elements in a row, send them as one insert: you cannot anchor on an element this call adds.
-	  - asset: create an asset, or update the one with the same \`type\` and \`name\`. Assets sit
-	    outside the script, so they take no anchor.
+	  - asset: create the asset \`element\`, or update the one with the same \`type\` and \`name\`.
+	    Assets sit outside the script, so they take no anchor.
 	  - remove: delete the element with \`id\`.
 	  - move: move the element with \`id\` before or after \`anchor_id\`, or to the start or end
 	    as insert does. It keeps its id, attributes and result.
-	  - set: change an element. Send only what changes, and the full replacement \`text\` when
-	    text changes. Set an attribute to null to drop it.
+	  - set: change the element with \`id\`, its \`element.type\` as you read it. Send only what
+	    changes, and the full replacement \`text\` when text changes. List attributes to clear in
+	    \`drop\`.
 
 	  To change an element's type, insert the new one before it, then remove it: that is a
 	  new, ungenerated element holding only what you send. To animate an image,
