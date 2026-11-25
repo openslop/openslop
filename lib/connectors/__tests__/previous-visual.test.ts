@@ -42,8 +42,6 @@ const PREVIOUS_VIDEO_RESULT: Record<string, AssetResult> = {
 	},
 };
 
-const TRIM_LABEL = "the previous visual's trim";
-
 const PREVIOUS_IMAGE_RESULT: Record<string, AssetResult> = {
 	"the previous visual": { imageUrl: "https://img/sunset.png", durationSec: 0 },
 };
@@ -95,39 +93,45 @@ describe("previous-visual plugin", () => {
 	});
 
 	describe("reads", () => {
-		const trimmed = (attrs: Record<string, string>): ContentElement => ({
-			id: "vid-0",
+		const cut: ContentElement = {
+			...image,
 			type: "video",
-			layoutAttributes: attrs,
-			children: [{ id: "t", text: "a wave" }],
-		});
-		const readOn = (element: ContentElement, previous: ContentElement) =>
-			readsOf(createPreviousVisualPlugin(), element, [previous, element]);
+			layoutAttributes: { trimEnd: "3.5" },
+		};
 
-		it.each<Record<string, string>>([
-			{ startFrame: "previous" },
-			{ continuity: "true" },
-		])("reads the trim of the video before it for %o", (attrs) => {
+		it("reads where the previous visual ends only while linked to it", () => {
 			expect(
-				readOn(video(attrs), trimmed({ trimStart: "1", trimEnd: "3.5" })),
-			).toEqual({ [TRIM_LABEL]: '{"startSec":1,"endSec":3.5}' });
-			expect(readOn(video(attrs), trimmed({ trimEnd: "3.5" }))).toEqual({
-				[TRIM_LABEL]: '{"startSec":0,"endSec":3.5}',
-			});
-		});
-
-		it("reads nothing for a video that plays whole, an image, or an unlinked video", () => {
-			expect(readOn(video({ startFrame: "previous" }), trimmed({}))).toEqual(
-				{},
-			);
-			expect(readOn(video({ startFrame: "previous" }), image)).toEqual({});
+				readsOf(plugin, video({ continuity: "true" }), [cut, video()]),
+			).toEqual({ "where the previous visual ends": "3.5" });
+			expect(readsOf(plugin, video(), [cut, video()])).toEqual({});
 			expect(
-				readOn(video(), trimmed({ trimStart: "1", trimEnd: "3.5" })),
+				readsOf(plugin, video({ startFrame: "previous" }), [image, video()]),
 			).toEqual({});
 		});
 	});
 
 	describe("beforeGenerate", () => {
+		it("takes the frames from where the previous video ends", async () => {
+			if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
+			await plugin.beforeGenerate(
+				{ prompt: "slow pan", startFrame: "previous", continuity: "true" },
+				{
+					dependencies: PREVIOUS_VIDEO_RESULT,
+					reads: { "where the previous visual ends": "3.5" },
+				},
+			);
+			expect(captureFrames).toHaveBeenCalledWith(
+				"https://vid/a.mp4",
+				["last"],
+				3.5,
+			);
+			expect(captureFrames).toHaveBeenCalledWith(
+				"https://vid/a.mp4",
+				["first", "middle"],
+				3.5,
+			);
+		});
+
 		it("leaves an unlinked video with no start frame alone", async () => {
 			await expect(
 				before({ prompt: "slow pan", continuity: "false" }),
@@ -232,32 +236,6 @@ describe("previous-visual plugin", () => {
 				frameImage: "https://img/a.png",
 				continuityFrames: ["https://img/first.png", "https://img/middle.png"],
 			});
-		});
-
-		it("takes the frames from the part of the previous video that plays", async () => {
-			if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
-			await expect(
-				plugin.beforeGenerate(
-					{ prompt: "slow pan", startFrame: "previous", continuity: "true" },
-					{
-						dependencies: PREVIOUS_VIDEO_RESULT,
-						reads: { [TRIM_LABEL]: '{"startSec":1,"endSec":3.5}' },
-					},
-				),
-			).resolves.toMatchObject({ frameImage: "https://img/last.png" });
-			expect(captureFrames).toHaveBeenCalledWith(
-				"https://vid/a.mp4",
-				["last"],
-				{
-					startSec: 1,
-					endSec: 3.5,
-				},
-			);
-			expect(captureFrames).toHaveBeenCalledWith(
-				"https://vid/a.mp4",
-				["first", "middle"],
-				{ startSec: 1, endSec: 3.5 },
-			);
 		});
 
 		it("fails loudly when the previous visual made no picture", async () => {

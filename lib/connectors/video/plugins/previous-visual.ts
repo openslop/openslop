@@ -1,10 +1,9 @@
 import { previousVisual } from "@/lib/canvas/scenes";
-import { isToggleOn } from "@/lib/canvas/types";
+import { type CanvasElement, isToggleOn } from "@/lib/canvas/types";
 import type { AssetResult, ConnectorPlugin } from "@/lib/connectors/types";
-import { z } from "zod";
+import { getTrimEnd, parseNumber } from "@/lib/canvas/element-attributes";
 import type { Dependency, Read } from "@/lib/generation/declare";
 import { captureFrames } from "@/lib/connectors/video/capture-frames";
-import { type ClipRange, clipRange } from "@/lib/connectors/video/clip-range";
 import {
 	CONTINUITY_ATTR,
 	CONTINUITY_FRAMES,
@@ -22,14 +21,14 @@ export type ParamsWithPreviousVisual = {
 	[CONTINUITY_ATTR]?: string;
 };
 
-/** No result means nothing came before the video. Frames come from the part of a video that plays. */
+/** No result means nothing came before the video. */
 async function previousPictures(
 	source: AssetResult | undefined,
 	frames: readonly FrameKey[],
-	range: ClipRange | undefined,
+	endSec: number | undefined,
 ): Promise<string[]> {
 	if (!source) return [];
-	if (source.videoUrl) return captureFrames(source.videoUrl, frames, range);
+	if (source.videoUrl) return captureFrames(source.videoUrl, frames, endSec);
 	if (source.imageUrl) return [source.imageUrl];
 	throw new Error("The previous visual generated no picture to hand on");
 }
@@ -37,46 +36,37 @@ async function previousPictures(
 async function openingPicture(
 	frame: string | undefined,
 	source: AssetResult | undefined,
-	range: ClipRange | undefined,
+	endSec: number | undefined,
 ): Promise<string | undefined> {
 	const opening = frameSource(frame);
 	if (opening.kind === "none") return undefined;
 	if (opening.kind === "upload") return opening.url;
-	const [picture] = await previousPictures(source, [START_FRAME], range);
+	const [picture] = await previousPictures(source, [START_FRAME], endSec);
 	return picture;
 }
 
 const PREVIOUS_VISUAL_LABEL = "the previous visual";
 
-const PREVIOUS_TRIM_LABEL = "the previous visual's trim";
+const PREVIOUS_END_LABEL = "where the previous visual ends";
 
-const ClipRangeSchema = z.object({
-	startSec: z.number(),
-	endSec: z.number().optional(),
-});
-
-const isLinked = (attrs: Record<string, string>) =>
+const linkedPrevious = (
+	{ id, generationAttributes: attrs = {} }: CanvasElement,
+	canvas: CanvasElement[],
+) =>
 	frameSource(attrs[START_FRAME_ATTR]).kind === "previous" ||
-	isToggleOn(attrs[CONTINUITY_ATTR]);
+	isToggleOn(attrs[CONTINUITY_ATTR])
+		? previousVisual(canvas, id)
+		: undefined;
 
 /** A start frame by URL is only an input; opening on or linking to the previous visual depends on it. */
-const previousWhenLinked: Dependency = (
-	{ id, generationAttributes: attrs = {} },
-	{ canvas },
-) => ({
-	[PREVIOUS_VISUAL_LABEL]: isLinked(attrs)
-		? previousVisual(canvas, id)
-		: undefined,
+const previousWhenLinked: Dependency = (element, { canvas }) => ({
+	[PREVIOUS_VISUAL_LABEL]: linkedPrevious(element, canvas),
 });
 
-/** Its frames come from the part of the previous video that plays, so trimming it stales the video. A whole video reads nothing. */
-const previousTrimWhenLinked: Read = (
-	{ id, generationAttributes: attrs = {} },
-	{ canvas },
-) => {
-	const previous = isLinked(attrs) ? previousVisual(canvas, id) : undefined;
-	const range = previous?.type === "video" ? clipRange(previous) : undefined;
-	return { [PREVIOUS_TRIM_LABEL]: range && JSON.stringify(range) };
+/** Frames come from where the previous video is cut, so moving its end stales this one. */
+const previousEndWhenLinked: Read = (element, { canvas }) => {
+	const previous = linkedPrevious(element, canvas);
+	return { [PREVIOUS_END_LABEL]: previous && getTrimEnd(previous)?.toString() };
 };
 
 /** Opening on the previous visual takes its end as the start frame; linking carries on from its beginning and middle. */
@@ -84,17 +74,16 @@ export function createPreviousVisualPlugin(): ConnectorPlugin<ParamsWithPrevious
 	return {
 		name: "previous-visual",
 		dependencies: [previousWhenLinked],
-		reads: [previousTrimWhenLinked],
+		reads: [previousEndWhenLinked],
 		async beforeGenerate(
 			{ [START_FRAME_ATTR]: frame, [CONTINUITY_ATTR]: continuity, ...params },
 			ctx,
 		) {
 			const source = ctx.dependencies?.[PREVIOUS_VISUAL_LABEL];
-			const trim = ctx.reads?.[PREVIOUS_TRIM_LABEL];
-			const range = trim ? ClipRangeSchema.parse(JSON.parse(trim)) : undefined;
-			const frameImage = await openingPicture(frame, source, range);
+			const endSec = parseNumber(ctx.reads?.[PREVIOUS_END_LABEL]);
+			const frameImage = await openingPicture(frame, source, endSec);
 			const continuityFrames = isToggleOn(continuity)
-				? await previousPictures(source, CONTINUITY_FRAMES, range)
+				? await previousPictures(source, CONTINUITY_FRAMES, endSec)
 				: [];
 			return { ...params, ...(frameImage && { frameImage }), continuityFrames };
 		},
