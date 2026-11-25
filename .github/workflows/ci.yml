@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Report to Vercel deployment checks
         if: github.event_name == 'push'
+        # Main step can race the jobs API (vercel/repository-dispatch#23); the post step still reports the real result
+        continue-on-error: true
         uses: vercel/repository-dispatch/actions/status@v1
         with:
           name: "Vercel - openslop-app: ci"
