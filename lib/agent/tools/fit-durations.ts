@@ -30,7 +30,7 @@ const isUnfitted = ({ span, duration }: DurationFit) =>
 const toSetOp = ({ span, duration }: DurationFit) => ({
 	op: "set" as const,
 	id: span.id,
-	element: { type: span.type, attrs: { duration: String(duration) } },
+	attrs: { duration: String(duration) },
 });
 
 /** The visuals asked for, and the ids that named none of them. */

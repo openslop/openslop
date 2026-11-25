@@ -1,9 +1,11 @@
 import compact from "lodash/compact";
+import mapValues from "lodash/mapValues";
 import { z } from "zod";
 import { attributeSchemaFor } from "@/lib/canvas/element-connector";
 import {
 	AssetTypeSchema,
 	ContentTypeSchema,
+	ElementTypeSchema,
 	type ElementType,
 } from "@/lib/canvas/types";
 import type { AttributeDef } from "@/lib/connectors/attributes/schema";
@@ -29,30 +31,37 @@ function attributeValue(def: AttributeDef) {
 	return value.describe(notes.join(" "));
 }
 
-const shapeOf = (type: ElementType) =>
-	Object.fromEntries(
-		attributeSchemaFor(type).defs.map((def) => [def.key, attributeValue(def)]),
-	);
+const shapeOf = (defs: readonly AttributeDef[]) =>
+	Object.fromEntries(defs.map((def) => [def.key, attributeValue(def)]));
 
 // A generated key infers as possibly undefined, which parsed JSON never holds.
 const attrsFor = (type: ElementType) =>
-	z.strictObject(shapeOf(type)).partial() as z.ZodType<Record<string, string>>;
+	z.strictObject(shapeOf(attributeSchemaFor(type).defs)).partial() as z.ZodType<
+		Record<string, string>
+	>;
 
-const text = z.string().optional().describe(ELEMENT_TEXT);
+const everyAttribute = shapeOf(
+	ElementTypeSchema.options.flatMap((type) => attributeSchemaFor(type).defs),
+);
+
+const attrEdits = z
+	.strictObject(mapValues(everyAttribute, (value) => value.nullable()))
+	.partial();
 
 const elementOf = <Type extends ElementType>(type: Type) =>
-	z.object({ type: z.literal(type), attrs: attrsFor(type).optional(), text });
+	z.object({
+		type: z.literal(type),
+		attrs: attrsFor(type).optional(),
+		text: z.string().optional().describe(ELEMENT_TEXT),
+	});
 
 // discriminatedUnion takes a non-empty tuple, which .map never infers.
-const oneOfType = <Option extends z.core.$ZodTypeDiscriminable>([
+const oneOfType = <Option extends ReturnType<typeof elementOf>>([
 	first,
 	...rest
 ]: Option[]) => z.discriminatedUnion("type", [first, ...rest]);
 
-const contentElements = ContentTypeSchema.options.map(elementOf);
-const assetElements = AssetTypeSchema.options.map(elementOf);
-
-const newElement = oneOfType(contentElements);
+const newElement = oneOfType(ContentTypeSchema.options.map(elementOf));
 
 export type NewElement = z.infer<typeof newElement>;
 
@@ -73,10 +82,11 @@ const insertOp = z.object({
 		.describe("The new elements, in the order they appear."),
 });
 
-const assetOp = z.object({
-	op: z.literal("asset"),
-	element: oneOfType(assetElements),
-});
+const assetOp = oneOfType(
+	AssetTypeSchema.options.map((type) =>
+		elementOf(type).extend({ op: z.literal("asset") }),
+	),
+);
 
 const removeOp = z.object({
 	op: z.literal("remove"),
@@ -92,8 +102,8 @@ const moveOp = z.object({
 const setOp = z.object({
 	op: z.literal("set"),
 	id: z.string(),
-	element: oneOfType([...contentElements, ...assetElements]),
-	drop: z.array(z.string()).optional().describe("Attributes to clear, by key."),
+	attrs: attrEdits.optional().nullable(),
+	text: z.string().optional().describe(ELEMENT_TEXT),
 });
 
 export const refineOpSchema = z.discriminatedUnion("op", [

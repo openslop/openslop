@@ -40,11 +40,9 @@ const MOCK_ASSETS: RefineOp[] = parseOSML(MOCK_ASSETS_OSML)
 	.filter(isAssetElement)
 	.map((asset) => ({
 		op: "asset",
-		element: {
-			type: asset.type,
-			attrs: omit(flatAttributes(asset), MODEL_REF_KEYS),
-			text: getElementBodyText(asset),
-		},
+		type: asset.type,
+		attrs: omit(flatAttributes(asset), MODEL_REF_KEYS),
+		text: getElementBodyText(asset),
 	}));
 
 const MOCK_RESPONSES: [matches: (prompt: string) => boolean, text: string][] = [
@@ -105,7 +103,7 @@ export class MockLLM implements LLMProvider {
 }
 
 /** The first element that says something: a blank canvas still holds an empty one. */
-const ELEMENT = /<(\w+)[^>]*\bid="([^"]+)"[^>]*>[^<]/;
+const ELEMENT_ID = /id="([^"]+)"[^>]*>[^<]/;
 const IMAGE_ID = /<image[^>]*\bid="([^"]+)"/;
 
 /** What a script reads as between one scene marker and the next. */
@@ -174,9 +172,10 @@ const READ_SCRIPT: MockStep = {
  */
 function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 	const scene = animateImageScene(asked);
-	const [, type, firstId] = ELEMENT.exec(sceneSection(script, 1)) ?? [];
 	const elementId =
-		scene === null ? firstId : IMAGE_ID.exec(sceneSection(script, scene))?.[1];
+		scene === null
+			? ELEMENT_ID.exec(sceneSection(script, 1))?.[1]
+			: IMAGE_ID.exec(sceneSection(script, scene))?.[1];
 
 	if (!elementId) {
 		return {
@@ -198,10 +197,7 @@ function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 					{
 						op: "set",
 						id: elementId,
-						element: {
-							type,
-							text: "A mock edit, from the agent running without an API key.",
-						},
+						text: "A mock edit, from the agent running without an API key.",
 					},
 				]
 			: [
