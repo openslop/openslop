@@ -394,15 +394,22 @@ def light_rays(c):
     c.grain(0, 0, W, H, 0, opacity=0.2)
 
 
+GREETINGS = ["What slop today, boss?", "Evening slop session, boss?", "3am slop hits different.", "Early bird gets the slop."]
+
+
 def composer(c, timeline):
     t = c.t
     light_rays(c)
     # headline: <RobotFill /> + greeting in the serif hero size
-    greet = "What slop today, boss?"
-    gw = tw(greet, 34, 400, SERIF)
-    gx = 320 - (gw + 40) / 2
-    c.icon("robot-fill", gx, 47, 32, t["fg"])
-    c.text(gx + 40, 72, greet, 34, t["fg"], family=SERIF, extra='letter-spacing="-0.4"')
+    for k, greet in enumerate(GREETINGS[: len(timeline)]):
+        t0 = timeline[k]["t"] if k else 0
+        t1 = timeline[k + 1]["t"] if k + 1 < len(timeline) else c.loop
+        gw = tw(greet, 34, 400, SERIF)
+        gx = 320 - (gw + 40) / 2
+        c.raw(f'<g class="{c.window(t0, t1, fade=0.05)}">')
+        c.icon("robot-fill", gx, 47, 32, t["fg"])
+        c.text(gx + 40, 72, greet, 34, t["fg"], family=SERIF, extra='letter-spacing="-0.4"')
+        c.raw("</g>")
 
     x, y, w, h = CB["x"], CB["y"], CB["w"], CB["h"]
     # .ambient-glow: berry light around the composer, breathing
