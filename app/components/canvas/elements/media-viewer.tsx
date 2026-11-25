@@ -13,13 +13,14 @@ import {
 import { Link, Tag } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import { Separator } from "@/components/ui/separator";
+import type { VisualKind } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { formatCost, formatDateTime } from "@/lib/format";
 import { toastError } from "@/lib/toast-error";
 
 export type Viewed = {
 	src: string;
-	kind: "image" | "video";
+	kind: VisualKind;
 	name: string;
 	/** Where the media sits in the project, e.g. "Character". */
 	context?: string;

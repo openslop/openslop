@@ -9,6 +9,8 @@ import { clamp, keysOf } from "@/lib/utils";
 
 export type ResultKind = "image" | "video" | "audio";
 
+export type VisualKind = Exclude<ResultKind, "audio">;
+
 /** How an element behaves on the rendered timeline. An overlay holds the screen for as long as it plays. */
 export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 

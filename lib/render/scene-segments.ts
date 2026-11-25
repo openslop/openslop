@@ -1,11 +1,11 @@
 import { sceneLabel } from "@/lib/canvas/constants";
-import { CONTENT_TYPES } from "@/lib/canvas/types";
+import { CONTENT_TYPES, type VisualKind } from "@/lib/canvas/types";
 import { mediaUrlAt } from "./clip-trim";
 import { toFrames } from "./frames";
 import { totalDuration } from "./sequences";
 import type { ResolvedElement, RenderLayout } from "./types";
 
-export type SeekThumbnail = { url: string; kind: "image" | "video" };
+export type SeekThumbnail = { url: string; kind: VisualKind };
 
 export type SceneSegment = {
 	id: string;

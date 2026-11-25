@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ResultKind } from "@/lib/canvas/types";
+import type { ResultKind, VisualKind } from "@/lib/canvas/types";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
 import { AudioResultPreview } from "./audio-result-preview";
 import { MediaResult } from "./results";
@@ -9,7 +9,7 @@ type ElementPreview = (props: ElementPreviewProps) => ReactNode;
 
 function renderMedia(
 	{ result, ...state }: ElementPreviewProps,
-	outputKind: "image" | "video",
+	outputKind: VisualKind,
 ) {
 	return (
 		<MediaResult
