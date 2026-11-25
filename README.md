@@ -3,7 +3,7 @@
   <img src="./assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
-<p align="center"><b>The open-source AI production studio.</b><br>Chat your way to finished films, shows, and audiobooks.</p>
+<p align="center"><b>The open-source AI production studio.</b><br>Chat your way to finished films, shows, audiobooks, YouTube videos, documentaries, dramas, and more.</p>
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="Status: private beta"></a>
