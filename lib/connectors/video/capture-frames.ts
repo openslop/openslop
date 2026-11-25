@@ -26,7 +26,10 @@ const toJpeg = (canvas: HTMLCanvasElement): Promise<Blob> =>
 		),
 	);
 
-async function decodeFrames(videoUrl: string): Promise<Frames> {
+async function decodeFrames(
+	videoUrl: string,
+	endSec?: number,
+): Promise<Frames> {
 	const input = new Input({
 		source: new UrlSource(videoUrl),
 		formats: ALL_FORMATS,
@@ -34,10 +37,11 @@ async function decodeFrames(videoUrl: string): Promise<Frames> {
 	try {
 		const track = await input.getPrimaryVideoTrack();
 		if (!track) throw new Error("The video has no picture to take frames from");
-		const [start, end] = await Promise.all([
+		const [start, mediaEnd] = await Promise.all([
 			track.getFirstTimestamp(),
 			track.computeDuration(),
 		]);
+		const end = Math.min(mediaEnd, start + (endSec ?? Infinity));
 		const frames: WrappedCanvas[] = [];
 		for await (const frame of new CanvasSink(track).canvasesAtTimestamps(
 			FRAME_KEYS.map((key) => start + (end - start) * FRAMES[key].at),
@@ -54,25 +58,28 @@ async function decodeFrames(videoUrl: string): Promise<Frames> {
 	}
 }
 
-/** Browser only. A hosted video never changes, so it is decoded once while it is among the latest. */
-export const previewFrames = memoAsync(decodeFrames, (videoUrl) => videoUrl, {
-	max: PREVIEW_VIDEOS_KEPT,
-});
+/** Browser only. A hosted video never changes, so each cut of it is decoded once while it is among the latest. */
+export const previewFrames = memoAsync(
+	decodeFrames,
+	(videoUrl: string, endSec?: number) => `${endSec ?? ""}@${videoUrl}`,
+	{ max: PREVIEW_VIDEOS_KEPT },
+);
 
 const uploadFrame = memoAsync(
-	async (videoUrl: string, key: FrameKey): Promise<string> => {
-		const jpeg = (await previewFrames(videoUrl))[key];
+	async (videoUrl: string, key: FrameKey, endSec?: number): Promise<string> => {
+		const jpeg = (await previewFrames(videoUrl, endSec))[key];
 		return uploadFile(
 			"image",
 			new File([jpeg], `frame-${key}.jpg`, { type: jpeg.type }),
 		);
 	},
-	(videoUrl, key) => `${key}@${videoUrl}`,
+	(videoUrl, key, endSec) => `${key}:${endSec ?? ""}@${videoUrl}`,
 );
 
 /** Browser only. */
 export const captureFrames = (
 	videoUrl: string,
 	keys: readonly FrameKey[],
+	endSec?: number,
 ): Promise<string[]> =>
-	Promise.all(keys.map((key) => uploadFrame(videoUrl, key)));
+	Promise.all(keys.map((key) => uploadFrame(videoUrl, key, endSec)));

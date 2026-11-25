@@ -3,6 +3,7 @@
 import mapValues from "lodash/mapValues";
 import { useEffect, useState } from "react";
 import { useSlateSelector } from "slate-react";
+import { getTrimEnd } from "@/lib/canvas/element-attributes";
 import { getContentElements, previousVisual } from "@/lib/canvas/scenes";
 import type { GeneratedElement } from "@/lib/canvas/types";
 import { previewFrames } from "@/lib/connectors/video/capture-frames";
@@ -15,13 +16,16 @@ export type PreviousPictures =
 	| { kind: "ready"; pictures: { name: string; url: string }[] };
 
 /** Null when the video cannot decode, undefined while it does. */
-function useDecodedFrames(videoUrl: string | undefined) {
+function useDecodedFrames(
+	videoUrl: string | undefined,
+	endSec: number | undefined,
+) {
 	const [frames, setFrames] = useState<Record<FrameKey, string> | null>();
 	useEffect(() => {
 		if (!videoUrl) return;
 		let urls: string[] = [];
 		let cancelled = false;
-		previewFrames(videoUrl).then(
+		previewFrames(videoUrl, endSec).then(
 			(jpegs) => {
 				if (cancelled) return;
 				const frameUrls = mapValues(jpegs, (jpeg) => URL.createObjectURL(jpeg));
@@ -36,7 +40,7 @@ function useDecodedFrames(videoUrl: string | undefined) {
 			urls.forEach((url) => URL.revokeObjectURL(url));
 			setFrames(undefined);
 		};
-	}, [videoUrl]);
+	}, [videoUrl, endSec]);
 	return frames;
 }
 
@@ -50,7 +54,10 @@ export function usePreviousPictures(
 	const result = useQueueSelector((q) =>
 		source ? q.getElementSnapshot(source.id).result : undefined,
 	);
-	const decoded = useDecodedFrames(result?.videoUrl);
+	const decoded = useDecodedFrames(
+		result?.videoUrl,
+		source && getTrimEnd(source),
+	);
 
 	if (!source)
 		return { kind: "empty", reason: "Nothing comes before this video" };

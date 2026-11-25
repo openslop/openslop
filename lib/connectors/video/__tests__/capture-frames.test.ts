@@ -139,3 +139,21 @@ describe("previewFrames", () => {
 		expect(media.inputs).toBe(62);
 	});
 });
+
+describe("a video cut short", () => {
+	it("takes its frames up to where it ends, decoding each cut once", async () => {
+		await expect(
+			captureFrames("https://vid/cut.mp4", ["first", "middle", "last"], 4),
+		).resolves.toEqual([
+			"https://img/frame@0.5",
+			"https://img/frame@2.5",
+			"https://img/frame@4.5",
+		]);
+		await previewFrames("https://vid/cut.mp4", 4);
+		await previewFrames("https://vid/cut.mp4", 20);
+		expect(media.timestamps).toEqual([
+			[0.5, 2.5, 4.5],
+			[0.5, 4.5, 8.5],
+		]);
+	});
+});

@@ -5,7 +5,7 @@ import {
 	type ParamsWithPreviousVisual,
 } from "../video/plugins/previous-visual";
 import type { AssetResult, ConnectorPlugin } from "../types";
-import { dependenciesOf } from "./_state-ctx";
+import { dependenciesOf, readsOf } from "./_state-ctx";
 
 const captureFrames = vi.hoisted(() =>
 	vi.fn(async (_url: string, frames: readonly string[]) =>
@@ -92,7 +92,46 @@ describe("previous-visual plugin", () => {
 		});
 	});
 
+	describe("reads", () => {
+		const cut: ContentElement = {
+			...image,
+			type: "video",
+			layoutAttributes: { trimEnd: "3.5" },
+		};
+
+		it("reads the last frame of the previous visual only while linked to it", () => {
+			expect(
+				readsOf(plugin, video({ continuity: "true" }), [cut, video()]),
+			).toEqual({ "the last frame of the previous visual": "3.5" });
+			expect(readsOf(plugin, video(), [cut, video()])).toEqual({});
+			expect(
+				readsOf(plugin, video({ startFrame: "previous" }), [image, video()]),
+			).toEqual({});
+		});
+	});
+
 	describe("beforeGenerate", () => {
+		it("takes the frames from where the previous video ends", async () => {
+			if (!plugin.beforeGenerate) throw new Error("no beforeGenerate");
+			await plugin.beforeGenerate(
+				{ prompt: "slow pan", startFrame: "previous", continuity: "true" },
+				{
+					dependencies: PREVIOUS_VIDEO_RESULT,
+					reads: { "the last frame of the previous visual": "3.5" },
+				},
+			);
+			expect(captureFrames).toHaveBeenCalledWith(
+				"https://vid/a.mp4",
+				["last"],
+				3.5,
+			);
+			expect(captureFrames).toHaveBeenCalledWith(
+				"https://vid/a.mp4",
+				["first", "middle"],
+				3.5,
+			);
+		});
+
 		it("leaves an unlinked video with no start frame alone", async () => {
 			await expect(
 				before({ prompt: "slow pan", continuity: "false" }),
@@ -152,7 +191,11 @@ describe("previous-visual plugin", () => {
 				frameImage: "https://img/last.png",
 				continuityFrames: [],
 			});
-			expect(captureFrames).toHaveBeenCalledWith("https://vid/a.mp4", ["last"]);
+			expect(captureFrames).toHaveBeenCalledWith(
+				"https://vid/a.mp4",
+				["last"],
+				undefined,
+			);
 		});
 
 		it("carries on from a previous video's beginning and middle when linked", async () => {
