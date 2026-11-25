@@ -36,10 +36,6 @@ export type GenerateCounts = Pick<
 	"empty" | "active" | "pending" | "stale"
 >;
 
-/** Covers every reason there is no work: no elements, none with a prompt, or a
- * script still being written. */
-export const NOTHING_TO_GENERATE = "Nothing to generate right now";
-
 /** Button-sized version of {@link describe}. */
 export const countPhrase = ({ pending, stale }: GenerateCounts): string =>
 	`${stale === pending ? "Regenerate" : "Generate"} ${pending} ${plural(pending, "element")}`;
@@ -48,7 +44,7 @@ function describe(
 	{ empty, active, pending, stale }: GenerateCounts,
 	subject: GenerateSubject,
 ): string {
-	if (empty) return NOTHING_TO_GENERATE;
+	if (empty) return "Nothing to generate right now";
 	if (active) return `Generating this ${subject}…`;
 	if (pending === 0) return `Everything in this ${subject} is generated`;
 

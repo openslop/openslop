@@ -3,6 +3,8 @@ import type { SloppyMessage } from "@/lib/agent/types";
 
 export type TurnPart = SloppyMessage["parts"][number];
 
+export const WAIT_FOR_SLOPPY = "Wait for Sloppy to finish";
+
 /** The editor runs a call after the model emits it, so a call still means work. */
 export function turnStatus(parts: TurnPart[]): string {
 	const last = parts.at(-1);
