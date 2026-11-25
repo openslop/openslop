@@ -24,24 +24,26 @@ export function useMention() {
 	const names = useSlateSelector(selectNames, isEqual);
 	const typed = useSlateSelector(mentionAt, sameMention);
 	const [dismissed, setDismissed] = useState<Mention>();
-	const [highlight, setHighlight] = useState<{ for?: Mention; index: number }>({
+	const [highlighted, setHighlight] = useState<{
+		for?: Mention;
+		index: number;
+	}>({
 		index: 0,
 	});
 
 	const groups = typed ? mentionGroups(names, typed.query) : [];
 	const options = groups.flatMap((group) => group.names);
 	const mention = typed !== dismissed && options.length > 0 ? typed : undefined;
-	const active = highlight.for === mention ? highlight.index : 0;
+	const active = highlighted.for === mention ? highlighted.index : 0;
 
 	const select = (name: string) => {
 		if (mention) insertNameRef(editor, mention, name);
 	};
 
+	const highlight = (index: number) => setHighlight({ for: mention, index });
+
 	const move = (step: number) =>
-		setHighlight({
-			for: mention,
-			index: (active + step + options.length) % options.length,
-		});
+		highlight((active + step + options.length) % options.length);
 
 	const onKeyDown = (event: KeyboardEvent) => {
 		const name = options[active];
@@ -62,6 +64,7 @@ export function useMention() {
 		mention,
 		groups,
 		active,
+		highlight,
 		listboxId,
 		select,
 		dismiss: () => setDismissed(mention),

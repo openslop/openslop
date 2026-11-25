@@ -22,11 +22,13 @@ function MentionOption({
 	id,
 	name,
 	active,
+	onHighlight,
 	onSelect,
 }: {
 	id: string;
 	name: string;
 	active: boolean;
+	onHighlight: () => void;
 	onSelect: () => void;
 }) {
 	return (
@@ -34,6 +36,7 @@ function MentionOption({
 			id={id}
 			role="option"
 			aria-selected={active}
+			onPointerMove={active ? undefined : onHighlight}
 			onPointerDown={keepFocus}
 			onClick={onSelect}
 			className={cn(
@@ -53,6 +56,7 @@ export function MentionMenu({
 	groups,
 	active,
 	listboxId,
+	onHighlight,
 	onSelect,
 	onDismiss,
 }: {
@@ -60,6 +64,7 @@ export function MentionMenu({
 	groups: MentionGroup[];
 	active: number;
 	listboxId: string;
+	onHighlight: (index: number) => void;
 	onSelect: (name: string) => void;
 	onDismiss: () => void;
 }) {
@@ -99,6 +104,7 @@ export function MentionMenu({
 											id={optionId(listboxId, start + i)}
 											name={name}
 											active={start + i === active}
+											onHighlight={() => onHighlight(start + i)}
 											onSelect={() => onSelect(name)}
 										/>
 									))}

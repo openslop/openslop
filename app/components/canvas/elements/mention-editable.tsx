@@ -30,6 +30,7 @@ export function MentionEditable({
 					groups={menu.groups}
 					active={menu.active}
 					listboxId={menu.listboxId}
+					onHighlight={menu.highlight}
 					onSelect={menu.select}
 					onDismiss={menu.dismiss}
 				/>
