@@ -16,7 +16,7 @@ See [Getting started](README.md#getting-started) in the README:
 
 - npm only. no pnpm, no yarn
 - Node 20.9+, CI is on 22
-- [Local mode](README.md#local-mode) runs it all on your computer with no accounts. To develop against hosted services instead, link your own Supabase and Vercel accounts via filling in .env.local
+- [Local mode](docs/local-mode.md) runs it all on your computer with no accounts. To develop against hosted services instead, link your own Supabase and Vercel accounts via filling in .env.local
 - Supabase is the only hard requirement. Vercel Blob is needed for real generations (that's where providers store output), mocks skip it. Provider keys go in the app, leave them out and you get mocks, so no need to pay for an API
 - On a Windows clone made before `.gitattributes` landed, run `git rm --cached -r . -q && git reset --hard` once to re-check files out with LF line endings
 
