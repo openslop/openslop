@@ -148,4 +148,4 @@ Haz clic en tu icono de perfil, luego en **Settings** > **Add providers**, y con
 
 </details>
 
-> ¿Vas a programar en OpenSlop? Para desarrollar con servicios alojados, mira [Desarrollar con un proyecto de Supabase](README.es.md#desarrollar-con-un-proyecto-de-supabase).
+> ¿Vas a programar en OpenSlop? Para desarrollar con servicios alojados, mira [Desarrollar con un proyecto de Supabase](../../CONTRIBUTING.md#develop-against-a-supabase-project).

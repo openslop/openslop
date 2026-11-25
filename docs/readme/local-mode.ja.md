@@ -148,4 +148,4 @@ npm run local
 
 </details>
 
-> OpenSlop のコードを書くなら、ホストされたサービスで開発する方法は[Supabase プロジェクトで開発する](README.ja.md#supabase-プロジェクトで開発する)を見てください。
+> OpenSlop のコードを書くなら、ホストされたサービスで開発する方法は[Supabase プロジェクトで開発する](../../CONTRIBUTING.md#develop-against-a-supabase-project)を見てください。

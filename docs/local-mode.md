@@ -148,4 +148,4 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
 
 </details>
 
-> Writing code for OpenSlop? To develop against hosted services instead, see [Develop against a Supabase project](../README.md#develop-against-a-supabase-project).
+> Writing code for OpenSlop? To develop against hosted services instead, see [Develop against a Supabase project](../CONTRIBUTING.md#develop-against-a-supabase-project).

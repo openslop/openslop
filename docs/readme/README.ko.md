@@ -170,49 +170,7 @@ OpenSlop은 두 가지 방법으로 쓸 수 있습니다.
 - **온라인**: [app.openslop.ai](https://app.openslop.ai)에서 씁니다. 설치할 것이 없습니다. 지금은 초대받은 분만 쓸 수 있으니 [대기자 명단에 올리세요](https://openslop.ai).
 - **로컬 모드**: 내 컴퓨터에서 실행합니다. [설치 가이드 보기 →](local-mode.ko.md)
 
-### Supabase 프로젝트로 개발하기
-
-#### 준비물
-
-- [Node.js](https://nodejs.org) 20.9 이상 (Next.js 16의 최소 요구 사항; CI는 22로 돌아갑니다)
-- [Supabase](https://supabase.com) 프로젝트 (인증과 데이터베이스용)
-
-#### 설정
-
-1. 저장소를 클론합니다:
-
-```bash
-git clone https://github.com/openslop/openslop.git
-cd openslop
-```
-
-2. 의존성을 설치합니다:
-
-```bash
-npm install
-```
-
-3. 주석이 달린 env 템플릿을 복사해 채웁니다:
-
-```bash
-cp .env.example .env.local
-```
-
-Supabase 변수는 필수입니다. 나머지는 모두 선택입니다: 키가 비어 있는 공급자는 목(mock)으로 대체됩니다.
-
-4. 데이터베이스 마이그레이션을 실행합니다:
-
-```bash
-npm run db:push
-```
-
-5. 개발 서버를 시작합니다:
-
-```bash
-npm run dev
-```
-
-[http://localhost:3000](http://localhost:3000)을 열면 앱이 보일 겁니다.
+코드를 고치려면 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup)를 보고 개발 환경을 준비하세요.
 
 ## 기술 스택
 

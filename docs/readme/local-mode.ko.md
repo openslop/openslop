@@ -148,4 +148,4 @@ npm run local
 
 </details>
 
-> OpenSlop 코드를 작성하나요? 호스팅 서비스로 개발하려면 [Supabase 프로젝트로 개발하기](README.ko.md#supabase-프로젝트로-개발하기)를 보세요.
+> OpenSlop 코드를 작성하나요? 호스팅 서비스로 개발하려면 [Supabase 프로젝트로 개발하기](../../CONTRIBUTING.md#develop-against-a-supabase-project)를 보세요.

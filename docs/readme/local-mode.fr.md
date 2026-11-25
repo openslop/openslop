@@ -148,4 +148,4 @@ Cliquez sur votre icône de profil, puis sur **Settings** > **Add providers**, e
 
 </details>
 
-> Vous codez sur OpenSlop ? Pour développer avec des services hébergés, voir [Développer avec un projet Supabase](README.fr.md#développer-avec-un-projet-supabase).
+> Vous codez sur OpenSlop ? Pour développer avec des services hébergés, voir [Développer avec un projet Supabase](../../CONTRIBUTING.md#develop-against-a-supabase-project).

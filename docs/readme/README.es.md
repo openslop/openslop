@@ -170,49 +170,7 @@ Puedes usar OpenSlop de dos formas:
 - **En línea** en [app.openslop.ai](https://app.openslop.ai). No hay nada que instalar. Por ahora es solo con invitación, así que [apúntate a la lista de espera](https://openslop.ai).
 - **Modo local** en tu propio ordenador. [Sigue la guía de instalación →](local-mode.es.md)
 
-### Desarrollar con un proyecto de Supabase
-
-#### Requisitos
-
-- [Node.js](https://nodejs.org) 20.9+ (el mínimo de Next.js 16; la CI corre 22)
-- Un proyecto de [Supabase](https://supabase.com) (para autenticación y base de datos)
-
-#### Instalación
-
-1. Clona el repo:
-
-```bash
-git clone https://github.com/openslop/openslop.git
-cd openslop
-```
-
-2. Instala las dependencias:
-
-```bash
-npm install
-```
-
-3. Copia la plantilla de entorno comentada y rellénala:
-
-```bash
-cp .env.example .env.local
-```
-
-Las variables de Supabase son obligatorias. Todo lo demás es opcional: un proveedor cuya clave no está definida usa un mock.
-
-4. Corre las migraciones de la base de datos:
-
-```bash
-npm run db:push
-```
-
-5. Arranca el servidor de desarrollo:
-
-```bash
-npm run dev
-```
-
-Abre [http://localhost:3000](http://localhost:3000) y deberías ver la app.
+¿Vas a tocar el código? Prepara un entorno de desarrollo con [CONTRIBUTING.md](../../CONTRIBUTING.md#setup).
 
 ## Tecnologías
 

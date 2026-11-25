@@ -148,4 +148,4 @@ npm run local
 
 </details>
 
-> 要为 OpenSlop 写代码？想改用托管服务开发，请看[用 Supabase 项目开发](README.zh-CN.md#用-supabase-项目开发)。
+> 要为 OpenSlop 写代码？想改用托管服务开发，请看[用 Supabase 项目开发](../../CONTRIBUTING.md#develop-against-a-supabase-project)。

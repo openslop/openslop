@@ -170,49 +170,7 @@ OpenSlop 有两种用法：
 - **在线**：打开 [app.openslop.ai](https://app.openslop.ai)，无需安装。目前仅限邀请，请先[加入等候名单](https://openslop.ai)。
 - **本地模式**：在你自己的电脑上运行。[查看设置指南 →](local-mode.zh-CN.md)
 
-### 用 Supabase 项目开发
-
-#### 前置条件
-
-- [Node.js](https://nodejs.org) 20.9+（Next.js 16 的最低要求；CI 用的是 22）
-- 一个 [Supabase](https://supabase.com) 项目（用于认证和数据库）
-
-#### 安装
-
-1. 克隆仓库：
-
-```bash
-git clone https://github.com/openslop/openslop.git
-cd openslop
-```
-
-2. 安装依赖：
-
-```bash
-npm install
-```
-
-3. 复制带注释的环境变量模板并填写：
-
-```bash
-cp .env.example .env.local
-```
-
-Supabase 的变量是必填的。其他都可选：没填密钥的提供商会回退到 mock。
-
-4. 运行数据库迁移：
-
-```bash
-npm run db:push
-```
-
-5. 启动开发服务器：
-
-```bash
-npm run dev
-```
-
-打开 [http://localhost:3000](http://localhost:3000)，就能看到应用了。
+要改代码？按 [CONTRIBUTING.md](../../CONTRIBUTING.md#setup) 搭建开发环境。
 
 ## 技术栈
 
