@@ -7,7 +7,7 @@ import {
 	seats,
 } from "../name-refs";
 
-describe("character references", () => {
+describe("name references", () => {
 	it("reads each name once, in the order the prompt first names it", () => {
 		expect(
 			referencedNames("{{Red}} meets {{Big Bad Wolf}}, then {{Red}} runs"),

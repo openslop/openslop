@@ -24,12 +24,10 @@ export function useMention() {
 	const names = useSlateSelector(selectNames, isEqual);
 	const typed = useSlateSelector(mentionAt, sameMention);
 	const [dismissed, setDismissed] = useState<Mention>();
-	const [highlighted, setHighlight] = useState<{
+	const [highlighted, setHighlighted] = useState<{
 		for?: Mention;
 		index: number;
-	}>({
-		index: 0,
-	});
+	}>({ index: 0 });
 
 	const groups = typed ? mentionGroups(names, typed.query) : [];
 	const options = groups.flatMap((group) => group.names);
@@ -40,7 +38,7 @@ export function useMention() {
 		if (mention) insertNameRef(editor, mention, name);
 	};
 
-	const highlight = (index: number) => setHighlight({ for: mention, index });
+	const highlight = (index: number) => setHighlighted({ for: mention, index });
 
 	const move = (step: number) =>
 		highlight((active + step + options.length) % options.length);
