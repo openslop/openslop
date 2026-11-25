@@ -36,7 +36,7 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
 	title: "OpenSlop",
-	description: "OpenSlop Beta Access",
+	description: "The open-source AI production studio.",
 };
 
 // Mirrors `--background` in globals.css; Viewport cannot read CSS variables.

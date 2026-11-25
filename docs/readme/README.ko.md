@@ -3,7 +3,7 @@
   <img src="../../assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
-<p align="center"><b>무료 오픈 소스 AI 비디오 제작 도구.</b></p>
+<p align="center"><b>오픈 소스 AI 프로덕션 스튜디오.</b><br>채팅만으로 영화, 시리즈, 오디오북, YouTube 영상, 다큐멘터리, 드라마 등을 완성하세요.</p>
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="상태: 비공개 베타"></a>

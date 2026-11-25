@@ -46,7 +46,7 @@ export default async function Home() {
 	return (
 		<OnboardingCard
 			heading="Welcome to the OpenSlop Beta"
-			subtitle="OpenSlop is your free, open-source video creator that brings together all your favorite AI tools, helping you get more done with less effort."
+			subtitle="OpenSlop is the open-source AI production studio. Chat your way to finished films, shows, audiobooks, YouTube videos, documentaries, dramas, and more."
 			extra={
 				<div className="flex w-full items-center justify-center gap-3 rounded-full border border-border bg-secondary px-4 py-2.5 sm:gap-5 sm:px-6 sm:py-3">
 					{icons.map((icon) => (
