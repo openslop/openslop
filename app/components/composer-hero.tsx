@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowLeft, RobotFill } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,10 @@ import ComposerCopilot from "./copilot/composer-copilot";
 import TemplateGallery from "./template-gallery";
 import { greetingFor } from "./greetings";
 import { useProjectId } from "@/lib/project/project-provider";
+
+const noSubscription = () => () => {};
+const localHour = () => new Date().getHours();
+const unknownHour = () => undefined;
 
 function BackToMySlopLink() {
 	return (
@@ -28,7 +32,8 @@ export default function ComposerHero() {
 	const { applyTemplate } = useTemplate();
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
-	const greeting = greetingFor(useProjectId());
+	const hour = useSyncExternalStore(noSubscription, localHour, unknownHour);
+	const greeting = greetingFor(useProjectId(), hour);
 
 	const start = (brief: string) => {
 		openWorkspace();
