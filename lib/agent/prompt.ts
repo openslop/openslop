@@ -25,7 +25,7 @@ const ROLE = dedent`
 
   # Skills
   Skills explain how to do each kind of work. Before starting, load every skill you need in one
-  load_skill call and follow them. They last one turn, so load them again in later turns.
+  load_skill call and follow them. They stay loaded, so load a skill only once.
 
   ${SKILL_INDEX}
 

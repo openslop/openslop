@@ -19,5 +19,4 @@ export const loadSkill = defineTool({
 		SKILLS.filter(({ name }) => names.includes(name))
 			.map(({ name, content }) => `# Skill: ${name}\n\n${content}`)
 			.join("\n\n"),
-	retention: "turn",
 });
