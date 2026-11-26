@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowLeft, RobotFill } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,11 @@ import ComposerCopilot from "./copilot/composer-copilot";
 import TemplateGallery from "./template-gallery";
 import { greetingFor } from "./greetings";
 import { useProjectId } from "@/lib/project/project-provider";
+import { cn } from "@/lib/utils";
+
+const noSubscription = () => () => {};
+const localHour = () => new Date().getHours();
+const unknownHour = () => undefined;
 
 function BackToMySlopLink() {
 	return (
@@ -28,7 +33,8 @@ export default function ComposerHero() {
 	const { applyTemplate } = useTemplate();
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
-	const greeting = greetingFor(useProjectId());
+	const hour = useSyncExternalStore(noSubscription, localHour, unknownHour);
+	const projectId = useProjectId();
 
 	const start = (brief: string) => {
 		openWorkspace();
@@ -38,9 +44,14 @@ export default function ComposerHero() {
 	return (
 		<div className="flex w-full max-w-4xl flex-col items-center px-4">
 			<BackToMySlopLink />
-			<h1 className="mb-6 text-center font-serif text-hero text-balance text-foreground">
+			<h1
+				className={cn(
+					"mb-6 text-center font-serif text-hero text-balance text-foreground",
+					hour === undefined && "invisible",
+				)}
+			>
 				<RobotFill size="1em" className="mr-[0.2em] align-[-0.15em]" />
-				{greeting}
+				{hour !== undefined && greetingFor(projectId, hour)}
 			</h1>
 
 			<ComposerCopilot
