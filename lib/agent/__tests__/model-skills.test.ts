@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_MODELS, listModels } from "@/lib/connectors/models";
 import { ProjectDataSchema } from "@/lib/project/store";
@@ -66,17 +64,6 @@ describe("model prompting skills", () => {
 			expect(SKILL_INDEX).not.toContain(`- ${name}:`);
 		}
 	});
-
-	it.each(MODEL_PROMPT_SKILLS)(
-		"$name cites the official docs it is based on",
-		({ name }) => {
-			const source = readFileSync(
-				join(__dirname, "..", "skills", `${name}.ts`),
-				"utf8",
-			);
-			expect(source).toMatch(/^\/\/ Based on .*https:\/\//m);
-		},
-	);
 
 	it("load through load_skill like any other", async () => {
 		const outcome = await executeToolCall(

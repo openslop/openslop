@@ -19,6 +19,6 @@ export const seedance = {
 		- Give every shot its sound.
 		- Keep writing ${nameRef("Name")}. OpenSlop turns each into Seedance's own image reference and attaches the character's voice, so never write @Image tags or describe a voice yourself.
 
-		Seedance 2.5 makes clips up to 30 seconds in one go, so a longer scene can stay one video. The same rules apply.
+		Seedance 2.5 makes long clips in one go, so a longer scene can stay one video. The same rules apply.
 	`,
 } as const satisfies Skill;
