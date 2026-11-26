@@ -21,5 +21,5 @@ export const writeScript = defineTool({
 	execute: async () =>
 		"Wrote a new script onto the canvas. Read it to see what landed.",
 	draftsScript: true,
-	streamsScript: "osml",
+	scriptStreamField: "osml",
 });

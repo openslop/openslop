@@ -119,7 +119,7 @@ export const DRAFTING_TOOLS: ReadonlySet<string> = new Set(
 /** Each tool whose input streams onto the canvas, by name, with the field that holds the OSML. */
 export const SCRIPT_STREAM_FIELDS: ReadonlyMap<string, string> = new Map(
 	Object.entries(TOOLS).flatMap(([name, def]) =>
-		def.streamsScript ? [[name, def.streamsScript]] : [],
+		def.scriptStreamField ? [[name, def.scriptStreamField]] : [],
 	),
 );
 

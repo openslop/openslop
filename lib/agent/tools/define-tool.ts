@@ -25,7 +25,7 @@ export function defineTool<Input, Output>(def: {
 	/** The call is part of writing the script, so what is rendered from the canvas is mid-change. */
 	draftsScript?: true;
 	/** The input field holding OSML the transport writes onto the canvas while the call streams in. */
-	streamsScript?: keyof Input & string;
+	scriptStreamField?: keyof Input & string;
 }) {
 	const {
 		input,
@@ -33,7 +33,7 @@ export function defineTool<Input, Output>(def: {
 		execute,
 		retention = "always",
 		draftsScript,
-		streamsScript,
+		scriptStreamField,
 		icon,
 		label,
 		...rest
@@ -55,7 +55,7 @@ export function defineTool<Input, Output>(def: {
 		spec,
 		retention,
 		draftsScript,
-		streamsScript,
+		scriptStreamField,
 		present,
 	};
 }
