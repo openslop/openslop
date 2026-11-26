@@ -12,7 +12,7 @@ export const assets = {
 		- asset_avatar: how a character looks. Its text is an image prompt for the character's picture.
 		- asset_location: a place that shows up more than once. Its text is an image prompt of the empty place.
 		- asset_prop: an object that shows up more than once. Its text is an image prompt of the object on its own.
-		- asset_voice: how someone sounds. Describe the voice by its traits, or pick an exact one with a pickedVoiceId you read. Always set its language to the language of its lines. A narrator is just a voice with no avatar.
+		- asset_voice: how someone sounds. Describe the voice by its traits. Only reuse a pickedVoiceId you saw on the canvas. Always set its language to the language of its lines. A narrator is just a voice with no avatar.
 		- asset_style: the art style, added to every image and video prompt. Describe the medium, linework, colors and lighting, never a place, subject or time of day.
 		- asset_references: images, usually the user's uploads, sent as reference images with every visual.
 		- asset_media_<type>: drafts from the user's Media panel. Ignore them for now.
