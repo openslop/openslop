@@ -22,6 +22,6 @@ export const assets = {
 
 		## From uploads
 		- An uploaded avatar image is what gets used, not its text. Look at it with view_result and update the text to match, unless it already does.
-		- If there is no asset_style, base one on the user's uploads: the reference images first, otherwise an uploaded avatar. Look with view_result, then add the style in the same turn.
+		- If there is no asset_style, base one on the user's uploads: the reference images first, otherwise an uploaded avatar, otherwise the images and videos in the media library. Look with view_result, or view_media for library files, then add the style in the same turn.
 	`,
 } as const satisfies Skill;

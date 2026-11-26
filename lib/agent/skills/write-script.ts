@@ -10,8 +10,8 @@ export const writeScript = {
 		1. read_script_settings, then set the format (and, for an idea, the target length) with update_script_settings. Keep anything the user set.
 		2. list_models, then set_default_model for each element type the script uses. Keep any default the user set.
 		3. Name the project with set_title, unless read_title already has a name.
-		4. Add the assets the script needs with edit_script (see assets).
-		5. read_media. If the user uploaded anything, load media-library and use it.
+		4. read_media. If the user uploaded anything, load media-library and use it.
+		5. Add the assets the script needs with edit_script (see assets).
 
 		## From an idea
 		- If the project has a template, read_script_settings returns a guide and an example. Copy its style (tone, pacing, imagery, structure, story beats) for the user's topic.
