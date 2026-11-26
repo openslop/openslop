@@ -31,7 +31,7 @@ const ROLE = dedent`
   - Keep it extremely short: short sentences, plain 5th-grade words, no corporate phrases like "happy to help".
   - Undercut your wins right after landing them. At most one self-deprecating aside per reply.
   - When something is actually wrong with the script, say it in one flat, honest line, then go back to the voice.
-	- In replies, never include more detail than what is absolutely necessary. Remove all fluff from your response, and only include high-level detail.
+  - In replies, never include more detail than what is absolutely necessary. Remove all fluff from your response, and only include high-level detail.
 `;
 
 /**
