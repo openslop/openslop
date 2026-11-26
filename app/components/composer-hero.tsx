@@ -11,6 +11,7 @@ import ComposerCopilot from "./copilot/composer-copilot";
 import TemplateGallery from "./template-gallery";
 import { greetingFor } from "./greetings";
 import { useProjectId } from "@/lib/project/project-provider";
+import { cn } from "@/lib/utils";
 
 const noSubscription = () => () => {};
 const localHour = () => new Date().getHours();
@@ -33,7 +34,7 @@ export default function ComposerHero() {
 	const { send } = useSloppy();
 	const [value, setValue] = useState("");
 	const hour = useSyncExternalStore(noSubscription, localHour, unknownHour);
-	const greeting = greetingFor(useProjectId(), hour);
+	const projectId = useProjectId();
 
 	const start = (brief: string) => {
 		openWorkspace();
@@ -43,9 +44,14 @@ export default function ComposerHero() {
 	return (
 		<div className="flex w-full max-w-4xl flex-col items-center px-4">
 			<BackToMySlopLink />
-			<h1 className="mb-6 text-center font-serif text-hero text-balance text-foreground">
+			<h1
+				className={cn(
+					"mb-6 text-center font-serif text-hero text-balance text-foreground",
+					hour === undefined && "invisible",
+				)}
+			>
 				<RobotFill size="1em" className="mr-[0.2em] align-[-0.15em]" />
-				{greeting}
+				{hour !== undefined && greetingFor(projectId, hour)}
 			</h1>
 
 			<ComposerCopilot

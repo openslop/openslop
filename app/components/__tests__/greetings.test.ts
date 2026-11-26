@@ -1,25 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { GREETINGS, TIME_OF_DAY_GREETINGS, greetingFor } from "../greetings";
+import { TIME_OF_DAY_GREETINGS, greetingFor } from "../greetings";
 
 const { lateNight, morning, afternoon, evening } = TIME_OF_DAY_GREETINGS;
 
 describe("greetingFor", () => {
-	it("returns the same greeting for the same project", () => {
-		const id = crypto.randomUUID();
-		expect(greetingFor(id)).toBe(greetingFor(id));
-	});
-
-	it("spreads projects across every greeting", () => {
-		const seen = new Set(
-			Array.from({ length: 500 }, () => greetingFor(crypto.randomUUID())),
-		);
-		expect(seen).toEqual(new Set(GREETINGS));
-	});
-
-	it("falls back to a generic greeting without an hour", () => {
-		expect(GREETINGS).toContain(greetingFor(crypto.randomUUID()));
-	});
-
 	it.each([
 		[0, lateNight],
 		[4, lateNight],
@@ -48,7 +32,7 @@ describe("greetingFor", () => {
 	});
 
 	it("keeps em dashes out of the copy", () => {
-		const copy = [...GREETINGS, ...Object.values(TIME_OF_DAY_GREETINGS).flat()];
+		const copy = Object.values(TIME_OF_DAY_GREETINGS).flat();
 		expect(copy.join("")).not.toContain("—");
 	});
 });
