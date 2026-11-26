@@ -182,19 +182,19 @@ Cómo está organizado el código y cómo encajan sus capas: [`ARCHITECTURE.md`]
 
 ## Scripts
 
-| Comando                   | Qué hace                          |
-| ------------------------- | --------------------------------- |
-| `npm run dev`             | Arranca el servidor de desarrollo |
-| `npm run local`           | Usa el modo local                 |
-| `npm run build`           | Build de producción               |
-| `npm run lint`            | ESLint                            |
-| `npm run format:check`    | Comprobación de Prettier          |
-| `npm run typecheck`       | Comprobación de TypeScript        |
-| `npm run knip`            | Comprobación de código muerto     |
-| `npm run test:run`        | Corre los tests una vez (Vitest)  |
-| `npm run test:e2e`        | Pruebas de humo (Playwright)      |
-| `npm run db:push`         | Sube las migraciones a Supabase   |
-| `npm run remotion:studio` | Abre Remotion Studio              |
+| Comando                   | Qué hace                                                 |
+| ------------------------- | -------------------------------------------------------- |
+| `npm run dev`             | Arranca el servidor de desarrollo                        |
+| `npm run local`           | Usa el modo local                                        |
+| `npm run build`           | Build de producción                                      |
+| `npm run lint`            | ESLint                                                   |
+| `npm run format:check`    | Comprobación de Prettier                                 |
+| `npm run typecheck`       | Comprobación de TypeScript                               |
+| `npm run knip`            | Comprobación de código muerto                            |
+| `npm run test:run`        | Corre los tests una vez (Vitest)                         |
+| `npm run test:e2e`        | Pruebas de humo (Playwright)                             |
+| `npm run db:push`         | Sube las migraciones a tu proyecto de Supabase vinculado |
+| `npm run remotion:studio` | Abre Remotion Studio                                     |
 
 ## Contribuir
 

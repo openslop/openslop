@@ -9,7 +9,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint --max-warnings 0",
-		"db:push": "supabase db push",
+		"db:push": "supabase db push --remote",
 		"db:migrate": "supabase migration up",
 		"db:reset": "supabase db reset",
 		"test": "vitest",

@@ -182,19 +182,19 @@ L'organisation du code et la façon dont ses couches s'articulent : [`ARCHITECTU
 
 ## Scripts
 
-| Commande                  | Ce qu'elle fait                     |
-| ------------------------- | ----------------------------------- |
-| `npm run dev`             | Démarre le serveur de développement |
-| `npm run local`           | Lance le mode local                 |
-| `npm run build`           | Build de production                 |
-| `npm run lint`            | ESLint                              |
-| `npm run format:check`    | Vérification Prettier               |
-| `npm run typecheck`       | Vérification TypeScript             |
-| `npm run knip`            | Vérification du code mort           |
-| `npm run test:run`        | Lance les tests une fois (Vitest)   |
-| `npm run test:e2e`        | Tests de fumée (Playwright)         |
-| `npm run db:push`         | Pousse les migrations vers Supabase |
-| `npm run remotion:studio` | Ouvre Remotion Studio               |
+| Commande                  | Ce qu'elle fait                                      |
+| ------------------------- | ---------------------------------------------------- |
+| `npm run dev`             | Démarre le serveur de développement                  |
+| `npm run local`           | Lance le mode local                                  |
+| `npm run build`           | Build de production                                  |
+| `npm run lint`            | ESLint                                               |
+| `npm run format:check`    | Vérification Prettier                                |
+| `npm run typecheck`       | Vérification TypeScript                              |
+| `npm run knip`            | Vérification du code mort                            |
+| `npm run test:run`        | Lance les tests une fois (Vitest)                    |
+| `npm run test:e2e`        | Tests de fumée (Playwright)                          |
+| `npm run db:push`         | Pousse les migrations vers votre projet Supabase lié |
+| `npm run remotion:studio` | Ouvre Remotion Studio                                |
 
 ## Contribuer
 

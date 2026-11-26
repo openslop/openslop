@@ -194,19 +194,19 @@ How the code is laid out and how its layers fit together: [`ARCHITECTURE.md`](AR
 
 ## Scripts
 
-| Command                   | What it does                |
-| ------------------------- | --------------------------- |
-| `npm run dev`             | Start the dev server        |
-| `npm run local`           | Run in local mode           |
-| `npm run build`           | Production build            |
-| `npm run lint`            | ESLint                      |
-| `npm run format:check`    | Prettier check              |
-| `npm run typecheck`       | TypeScript check            |
-| `npm run knip`            | Dead-code check             |
-| `npm run test:run`        | Run tests once (Vitest)     |
-| `npm run test:e2e`        | Smoke tests (Playwright)    |
-| `npm run db:push`         | Push migrations to Supabase |
-| `npm run remotion:studio` | Open Remotion Studio        |
+| Command                   | What it does                                    |
+| ------------------------- | ----------------------------------------------- |
+| `npm run dev`             | Start the dev server                            |
+| `npm run local`           | Run in local mode                               |
+| `npm run build`           | Production build                                |
+| `npm run lint`            | ESLint                                          |
+| `npm run format:check`    | Prettier check                                  |
+| `npm run typecheck`       | TypeScript check                                |
+| `npm run knip`            | Dead-code check                                 |
+| `npm run test:run`        | Run tests once (Vitest)                         |
+| `npm run test:e2e`        | Smoke tests (Playwright)                        |
+| `npm run db:push`         | Push migrations to your linked Supabase project |
+| `npm run remotion:studio` | Open Remotion Studio                            |
 
 ## Contributing
 

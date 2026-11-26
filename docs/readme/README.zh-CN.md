@@ -182,19 +182,19 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 ## 脚本
 
-| 命令                      | 作用                   |
-| ------------------------- | ---------------------- |
-| `npm run dev`             | 启动开发服务器         |
-| `npm run local`           | 以本地模式运行         |
-| `npm run build`           | 生产构建               |
-| `npm run lint`            | ESLint                 |
-| `npm run format:check`    | Prettier 检查          |
-| `npm run typecheck`       | TypeScript 检查        |
-| `npm run knip`            | 死代码检查             |
-| `npm run test:run`        | 跑一次测试（Vitest）   |
-| `npm run test:e2e`        | 冒烟测试（Playwright） |
-| `npm run db:push`         | 把迁移推送到 Supabase  |
-| `npm run remotion:studio` | 打开 Remotion Studio   |
+| 命令                      | 作用                               |
+| ------------------------- | ---------------------------------- |
+| `npm run dev`             | 启动开发服务器                     |
+| `npm run local`           | 以本地模式运行                     |
+| `npm run build`           | 生产构建                           |
+| `npm run lint`            | ESLint                             |
+| `npm run format:check`    | Prettier 检查                      |
+| `npm run typecheck`       | TypeScript 检查                    |
+| `npm run knip`            | 死代码检查                         |
+| `npm run test:run`        | 跑一次测试（Vitest）               |
+| `npm run test:e2e`        | 冒烟测试（Playwright）             |
+| `npm run db:push`         | 把迁移推送到已关联的 Supabase 项目 |
+| `npm run remotion:studio` | 打开 Remotion Studio               |
 
 ## 参与贡献
 
