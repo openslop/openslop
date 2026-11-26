@@ -106,7 +106,7 @@ export const MOCK_THOUGHT =
 export const MOCK_ANSWER = `No API key is set, so I'm a **mock**. Here's what I can still do:
 
 - **Edit the script:** ask me to *change*, *shorten* or *rewrite* something and I'll edit scene 1.
-- **Animate an image:** say "animate the image in scene 2" and I'll swap it for a video.
+- **Animate an image:** say “animate the image in scene 2” and I'll swap it for a video.
 - **Start a project:** on a blank canvas I name it, add the cast and write a script.
 
 To talk to a real model, set \`ANTHROPIC_API_KEY\` in \`.env.local\` and restart the dev server.`;

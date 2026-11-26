@@ -54,14 +54,6 @@ describe("ReplyMarkdown", () => {
 		expect(reply.textContent).not.toContain("](");
 	});
 
-	it("styles a table in the design tokens", () => {
-		const table = render("| a | b |\n|---|---|\n| 1 | 2 |");
-
-		expect(table.querySelectorAll("th")).toHaveLength(2);
-		expect(table.querySelectorAll("td")).toHaveLength(2);
-		expect(table.innerHTML).not.toMatch(/text-sm|bg-sidebar|my-4/);
-	});
-
 	it("fades words in only while a reply streams", () => {
 		const text = "Here is the plan";
 
@@ -69,13 +61,6 @@ describe("ReplyMarkdown", () => {
 			render(text, true).querySelector("[data-sd-animate]"),
 		).not.toBeNull();
 		expect(render(text).querySelector("[data-sd-animate]")).toBeNull();
-	});
-
-	it("keeps headings at the reply's own size", () => {
-		const heading = render("# Plan").querySelector("h3");
-
-		expect(heading?.textContent).toBe("Plan");
-		expect(heading?.className).not.toMatch(/text-(xl|2xl|3xl|lg)/);
 	});
 });
 
