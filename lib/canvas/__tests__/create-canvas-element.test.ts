@@ -61,10 +61,18 @@ describe("createCanvasElement", () => {
 		expect(flatAttributes(node)).toMatchObject(DEFAULT_MODELS.sfx);
 	});
 
-	it("gives speech a model of its own, like every other type", () => {
-		const pinned = { provider: "cartesia", model: "Sonic 3.6" } as const;
+	it("gives speech no model of its own, since it speaks on its voice's", () => {
 		const node = createCanvasElement("speech", {
-			defaultModels: { tts: pinned },
+			defaultModels: { tts: { provider: "cartesia", model: "Sonic 3.6" } },
+		});
+		expect(flatAttributes(node)).not.toHaveProperty("provider");
+		expect(flatAttributes(node)).not.toHaveProperty("model");
+	});
+
+	it("still gives every type that owns a model its default", () => {
+		const pinned = { provider: "runware", model: "Seedream 5 Lite" } as const;
+		const node = createCanvasElement("image", {
+			defaultModels: { image: pinned },
 		});
 		expect(flatAttributes(node)).toMatchObject(pinned);
 	});

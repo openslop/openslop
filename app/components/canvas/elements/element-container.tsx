@@ -1,5 +1,5 @@
 import { RenderElementProps } from "slate-react";
-import type { ContentElement } from "@/lib/canvas/types";
+import { ownsModel, type ContentElement } from "@/lib/canvas/types";
 import { splitTextDirection } from "../utils/text-direction";
 import { OutputPreview } from "./output-preview";
 import { DeleteButton } from "./delete-button";
@@ -54,7 +54,7 @@ export function ElementContainer({
 									</span>
 								</span>
 								{config.lead && <config.lead element={element} />}
-								{!config.hidesModel && (
+								{ownsModel(element.type) && (
 									<ModelAttribute
 										element={element}
 										label="Model"

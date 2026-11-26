@@ -146,7 +146,7 @@ The harness is client-side, so Sloppy works through the same canvas, queue and s
 
 | Term             | Where                  | Means                                                                                                                                                              |
 | ---------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Model**        | `MODELS`, `models.ts`  | A `{ provider, model }` pair. Each element stores its own; defaults resolve element, then project, then account.                                                   |
+| **Model**        | `MODELS`, `models.ts`  | A `{ provider, model }` pair. An element stores its own when its type `ownsModel` (speech uses its voice's); defaults resolve element, then project, then account. |
 | **Provider**     | `lib/providers/`       | A server-side vendor adapter (Anthropic, Runware, ElevenLabs, Cartesia), shared by both route families.                                                            |
 | **Hosted**       | `/api/v1`              | Models OpenSlop serves on its own keys.                                                                                                                            |
 | **BYOK**         | `/api/third-party`     | Models a user serves on their own key.                                                                                                                             |

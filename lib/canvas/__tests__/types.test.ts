@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isKindCaptionable, snapDurationUp } from "../types";
+import { isKindCaptionable, ownsModel, snapDurationUp } from "../types";
 
 describe("snapDurationUp", () => {
 	it("takes the shortest option that still covers the seconds asked for", () => {
@@ -22,5 +22,14 @@ describe("isKindCaptionable", () => {
 		expect(isKindCaptionable("video")).toBe(true);
 		expect(isKindCaptionable("audio")).toBe(true);
 		expect(isKindCaptionable("image")).toBe(false);
+	});
+});
+
+describe("ownsModel", () => {
+	it("is false only for speech, which speaks on its voice's model", () => {
+		expect(ownsModel("speech")).toBe(false);
+		expect(ownsModel("image")).toBe(true);
+		expect(ownsModel("asset_voice")).toBe(true);
+		expect(ownsModel("asset_media_music")).toBe(true);
 	});
 });

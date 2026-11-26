@@ -1,4 +1,9 @@
-import { connectorOf, type ElementOf, type ElementType } from "./types";
+import {
+	connectorOf,
+	ownsModel,
+	type ElementOf,
+	type ElementType,
+} from "./types";
 import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
 import { splitAttributes } from "./element-attributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
@@ -21,7 +26,9 @@ export function createCanvasElement<T extends ElementType>(
 	const { id = makeNodeId(), attrs, text = "", defaultModels = {} } = options;
 	const given = {
 		...attrs,
-		...(connector && resolveModel(connector, attrs, defaultModels[connector])),
+		...(connector &&
+			ownsModel(type) &&
+			resolveModel(connector, attrs, defaultModels[connector])),
 	};
 	const attributes = attributeSchemaFor(type, given).resolve(given);
 	return {

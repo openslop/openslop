@@ -35,8 +35,6 @@ type ElementPresentation = {
 	placeholder: string;
 	/** Beside the type pill. */
 	lead?: ElementControl;
-	/** Speaks on its asset_voice's model, so shows none of its own. */
-	hidesModel?: boolean;
 	/** Beside the history button. */
 	tools?: ElementControl[];
 	/** Beside the generate button. */
@@ -48,7 +46,6 @@ type ElementConfig = ContentSpec & ElementPresentation & { type: ContentType };
 const PRESENTATION: Record<ContentType, ElementPresentation> = {
 	speech: {
 		label: "Speech",
-		hidesModel: true,
 		Icon: Voice,
 		iconBgClass: "bg-media-speech/15",
 		colorClass: "text-media-speech",
