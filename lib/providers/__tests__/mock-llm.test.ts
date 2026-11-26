@@ -4,33 +4,10 @@ import type {
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3 } from "ai/test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { outlinePrompt } from "@/lib/script/prompt/outline";
-import { NO_FINDINGS, reviewPrompt } from "@/lib/script/prompt/review";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { MockLLM } from "../llm/mock";
 
 describe("MockLLM", () => {
-	it("answers an outline prompt with an outline, not a script", async () => {
-		const {
-			output: { text },
-		} = await new MockLLM().generate({
-			prompt: outlinePrompt("two friends in a forest", "English"),
-		});
-
-		expect(text).toContain("Premise:");
-		expect(text).not.toContain("<speech");
-	});
-
-	it("answers a review with no findings, so a mock run ends the loop", async () => {
-		const {
-			output: { text },
-		} = await new MockLLM().generate({
-			prompt: reviewPrompt('<video id="v1">Shot 1: a rabbit.</video>'),
-		});
-
-		expect(text).toBe(NO_FINDINGS);
-	});
-
 	it("falls back to a script for anything else", async () => {
 		const {
 			output: { text },
@@ -151,7 +128,7 @@ describe("the mock agent model", () => {
 		const written = await step(prompt);
 		expect(written).toMatchObject({
 			toolName: "write_script",
-			input: { brief: expect.any(String) },
+			input: { osml: expect.any(String) },
 		});
 		prompt.push(...ran("write_script", "The script is on the canvas."));
 

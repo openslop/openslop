@@ -6,7 +6,11 @@ import {
 	type ModelMessage,
 	type ToolResultPart,
 } from "ai";
-import { retentionOf, SLOPPY_TOOLS } from "./tools/registry";
+import {
+	retentionOf,
+	SCRIPT_STREAM_FIELDS,
+	SLOPPY_TOOLS,
+} from "./tools/registry";
 import { sloppyMetadataSchema, type SloppyMessage } from "./types";
 
 export function upsertMessage(
@@ -28,31 +32,45 @@ export function toolCallsMade(messages: SloppyMessage[]): number {
 	return (trailingAssistant(messages)?.parts ?? []).filter(isToolUIPart).length;
 }
 
+const isStreamingScript = (part: SloppyMessage["parts"][number]) =>
+	isToolUIPart(part) &&
+	part.state === "input-streaming" &&
+	SCRIPT_STREAM_FIELDS.has(getToolName(part));
+
 const isUnanswered = (part: SloppyMessage["parts"][number]) =>
 	isToolUIPart(part) && part.state === "input-available";
 
-/** A call the editor has been handed and not yet answered, of any tool or of `tools`. */
+const isPending = (part: SloppyMessage["parts"][number]) =>
+	isUnanswered(part) || isStreamingScript(part);
+
+/** A call handed to the editor and not yet answered, or writing the canvas as it streams in, of any tool or of `tools`. */
 export function hasPendingToolCall(
 	messages: SloppyMessage[],
 	tools?: ReadonlySet<string>,
 ): boolean {
-	return (trailingAssistant(messages)?.parts ?? []).some(
-		(part) => isUnanswered(part) && (!tools || tools.has(getToolName(part))),
-	);
+	return (trailingAssistant(messages)?.parts ?? [])
+		.filter(isToolUIPart)
+		.some(
+			(part) => isPending(part) && (!tools || tools.has(getToolName(part))),
+		);
 }
 
 const UNANSWERED = "Stopped before the editor ran it";
 
-/** A call the editor never answered, settled with `errorText` so nothing waits on it. Covers a turn stopped mid-call, including one reloaded from storage. */
+/** A call the editor never answered, settled with `errorText` so nothing waits on it, and a script cut off mid-stream, dropped. Covers a turn stopped or failed mid-call, including one reloaded from storage. */
 export function settleUnansweredCalls(
 	messages: SloppyMessage[],
 	errorText = UNANSWERED,
 ): SloppyMessage[] {
 	return messages.map((message) => ({
 		...message,
-		parts: message.parts.map((part) =>
-			isUnanswered(part) ? { ...part, state: "output-error", errorText } : part,
-		),
+		parts: message.parts
+			.filter((part) => !isStreamingScript(part))
+			.map((part) =>
+				isUnanswered(part)
+					? { ...part, state: "output-error", errorText }
+					: part,
+			),
 	}));
 }
 

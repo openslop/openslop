@@ -8,7 +8,6 @@ import type { VideoSettings } from "@/lib/project/video-settings";
 import { CaptionStyleSchema } from "@/lib/captions/caption-style";
 import { listModels as catalogModels } from "@/lib/connectors/models";
 import type { RefineOp } from "@/lib/script/refine/types";
-import { NO_FINDINGS } from "@/lib/script/prompt/review";
 import { toCaption } from "@/lib/captions/word-captions";
 
 const recordScriptSettings = (patches: Partial<ScriptSettings>[]) => ({
@@ -39,17 +38,11 @@ const context = (over: Partial<AgentToolContext> = {}): AgentToolContext => ({
 	estimateSpeechLengths: () => [],
 	estimateVisualSpans: () => [],
 	estimateRuntime: () => 0,
-	generateText: async () => "an outline",
 	elementResult: async () => undefined,
 	elementStates: () => [],
-	isScriptEmpty: () => false,
-	readAssets: () => [],
-	readModels: () => [],
 	readProject: () => project(),
 	modelDefaults: () => ({}),
 	editScript: () => ({ applied: 0, failures: [], inserted: [] }),
-	writeScript: async () => {},
-	adaptScript: async () => {},
 	setTitle: () => {},
 	updateVideoSettings: () => {},
 	updateScriptSettings: () => {},
@@ -199,15 +192,15 @@ describe("executeToolCall", () => {
 
 	it("reports a throwing tool rather than losing the turn to it", async () => {
 		const outcome = await executeToolCall(
-			{ toolName: "write_script", input: { brief: "a new story" } },
+			{ toolName: "set_title", input: { title: "Moon Cat" } },
 			context({
-				writeScript: vi.fn(async () => {
-					throw new Error("the stream died");
+				setTitle: vi.fn(() => {
+					throw new Error("the store refused it");
 				}),
 			}),
 		);
 
-		expect(outcome).toEqual({ ok: false, errorText: "the stream died" });
+		expect(outcome).toEqual({ ok: false, errorText: "the store refused it" });
 	});
 
 	it("reports a call it cannot read rather than running the wrong tool", async () => {
@@ -326,23 +319,6 @@ describe("executeToolCall", () => {
 		expect(!outcome.ok && outcome.errorText).toContain(
 			"Each URL must be a file in our store",
 		);
-	});
-
-	it("puts the user's own script on the canvas untouched", async () => {
-		const script = "NARRATOR\nHigh above the sleepy hills.";
-		const adapted: string[] = [];
-
-		const outcome = await executeToolCall(
-			{ toolName: "adapt_script", input: { script } },
-			context({
-				adaptScript: async (text) => {
-					adapted.push(text);
-				},
-			}),
-		);
-
-		expect(adapted).toEqual([script]);
-		expect(outcome.ok).toBe(true);
 	});
 
 	it("update_script_settings stores only the settings it was given", async () => {
@@ -678,73 +654,6 @@ describe("executeToolCall", () => {
 		);
 
 		expect(!outcome.ok && outcome.errorText).toContain("no element nope");
-	});
-
-	it("outlines a brief through one focused generation", async () => {
-		const prompts: string[] = [];
-		const outcome = await executeToolCall(
-			{ toolName: "outline_story", input: { brief: "a rabbit on the moon" } },
-			context({
-				generateText: async (prompt) => {
-					prompts.push(prompt);
-					return "1. A rabbit finds a lantern.";
-				},
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toBe("1. A rabbit finds a lantern.");
-		expect(prompts[0]).toContain("a rabbit on the moon");
-	});
-
-	it("reviews the script against the rules and the stored format", async () => {
-		const calls: { prompt: string; systemPrompt?: string }[] = [];
-		const outcome = await executeToolCall(
-			{ toolName: "review_script", input: {} },
-			context({
-				readProject: () => project({ scriptSettings: { format: "cinematic" } }),
-				generateText: async (prompt, options) => {
-					calls.push({ prompt, systemPrompt: options?.systemPrompt });
-					return NO_FINDINGS;
-				},
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toBe(NO_FINDINGS);
-		expect(calls[0]?.prompt).toContain("<speech>hi</speech>");
-		expect(calls[0]?.prompt).toContain("intended as a Cinematic");
-		expect(calls[0]?.systemPrompt).toContain(
-			"The story script must be written",
-		);
-	});
-
-	it("sets no token ceiling, so thinking cannot crowd out the findings", async () => {
-		const budgets: (number | undefined)[] = [];
-		await executeToolCall(
-			{ toolName: "review_script", input: {} },
-			context({
-				generateText: async (_prompt, options) => {
-					budgets.push(options?.maxTokens);
-					return NO_FINDINGS;
-				},
-			}),
-		);
-
-		expect(budgets[0]).toBeUndefined();
-	});
-
-	it("spends no generation reviewing a canvas that holds only assets", async () => {
-		const outcome = await executeToolCall(
-			{ toolName: "review_script", input: {} },
-			context({
-				readScript: () => '<asset_style id="style">Ink</asset_style>',
-				isScriptEmpty: () => true,
-				generateText: async () => {
-					throw new Error("reviewed an empty canvas");
-				},
-			}),
-		);
-
-		expect(outcome.ok && outcome.output).toContain("nothing to review");
 	});
 });
 

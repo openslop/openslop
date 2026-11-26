@@ -49,7 +49,7 @@ const groupSection = (
 export const listModels = defineTool({
 	description: dedent`
 	  List the models the user can generate with for each kind of element, what each is best
-	  at, and the current default and who set it. Only pick models from this list.
+	  at, and the current default and who set it.
 	`,
 	input: z.object({}),
 	output: z.string(),

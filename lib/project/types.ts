@@ -44,16 +44,6 @@ export const VOICE_TRAITS = [
 	"description",
 ] as const satisfies readonly (keyof z.infer<typeof voiceTraitsSchema>)[];
 
-/** The traits a voice declares, as [trait, value] pairs in reading order. */
-export function voiceTraitEntries(
-	voice: z.infer<typeof voiceTraitsSchema>,
-): [string, string][] {
-	return VOICE_TRAITS.flatMap((trait): [string, string][] => {
-		const value = voice[trait];
-		return value ? [[trait, value]] : [];
-	});
-}
-
 export const voiceSearchParamsSchema = voiceTraitsSchema.extend({
 	query: optionalString,
 	name: optionalString,

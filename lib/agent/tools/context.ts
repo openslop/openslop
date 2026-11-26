@@ -1,5 +1,3 @@
-import type { AssetElement } from "@/lib/canvas/types";
-import type { ElementModel } from "@/lib/canvas/element-connector";
 import type { ElementResult, ResultView } from "../element-result";
 import type { ElementState } from "../element-state";
 import type { SpeechEstimate } from "@/lib/canvas/spoken-words";
@@ -27,25 +25,15 @@ export type AgentToolContext = Pick<
 	readScript: () => string;
 	markScriptRead: () => void;
 	isScriptReadCurrent: () => boolean;
-	isScriptEmpty: () => boolean;
 	countSpokenWords: () => number;
 	estimateSpeechLengths: () => SpeechEstimate[];
 	estimateVisualSpans: () => VisualSpan[];
 	estimateRuntime: () => number;
 	elementResult: (id: string) => Promise<ElementResult | undefined>;
 	elementStates: () => ElementState[];
-	/** One focused LLM call, for tools whose whole job is a generation. */
-	generateText: (
-		prompt: string,
-		options?: { maxTokens?: number; systemPrompt?: string },
-	) => Promise<string>;
-	readAssets: () => AssetElement[];
-	readModels: () => ElementModel[];
 	readProject: () => ProjectData;
 	modelDefaults: () => ModelDefaults;
 	editScript: (ops: RefineOp[]) => RefineReport;
-	writeScript: (brief: string) => Promise<void>;
-	adaptScript: (script: string, notes?: string) => Promise<void>;
 	isConnected: (provider: Provider) => boolean;
 	generateCaptions: (ids?: string[]) => CaptionsReport;
 	captionMedia: (item: MediaItem) => Promise<void>;

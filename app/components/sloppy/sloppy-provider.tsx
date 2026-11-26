@@ -4,9 +4,13 @@ import { useMemo, useRef, type ReactNode } from "react";
 import {
 	DefaultChatTransport,
 	lastAssistantMessageIsCompleteWithToolCalls,
+	type HttpChatTransportInitOptions,
 } from "ai";
 import { useChat } from "@ai-sdk/react";
+import type { Editor } from "slate";
+import { useSlateStatic } from "slate-react";
 import { agentPathFor } from "@/lib/agent/client";
+import { tapToolInputText } from "@/lib/agent/tap-tool-input";
 import type { ModelRef } from "@/lib/connectors/types";
 import { useDefaultModels } from "@/lib/connectors/use-default-models";
 import {
@@ -14,9 +18,14 @@ import {
 	settleUnansweredCalls,
 } from "@/lib/agent/messages";
 import { sloppyMetadataSchema, type SloppyMessage } from "@/lib/agent/types";
-import { DRAFTING_TOOLS, type AgentToolName } from "@/lib/agent/tools/registry";
+import {
+	DRAFTING_TOOLS,
+	SCRIPT_STREAM_FIELDS,
+	type AgentToolName,
+} from "@/lib/agent/tools/registry";
 import { useAgentTools } from "@/lib/agent/tools/use-agent-tools";
 import { createRequiredContext } from "@/lib/components/create-required-context";
+import { createScriptSink } from "@/lib/script/script-writer";
 import {
 	useProjectId,
 	useInitialTranscript,
@@ -40,6 +49,29 @@ const [SloppyControlContext, useSloppy] =
 
 export { useSloppyMessages, useSloppy };
 
+/** Writes each script-streaming call onto the canvas while its OSML is still streaming in. */
+class SloppyTransport extends DefaultChatTransport<SloppyMessage> {
+	private readonly editor: Editor;
+
+	constructor(
+		editor: Editor,
+		options: HttpChatTransportInitOptions<SloppyMessage>,
+	) {
+		super(options);
+		this.editor = editor;
+	}
+
+	protected processResponseStream(stream: ReadableStream<Uint8Array>) {
+		return super
+			.processResponseStream(stream)
+			.pipeThrough(
+				tapToolInputText(SCRIPT_STREAM_FIELDS, () =>
+					createScriptSink(this.editor),
+				),
+			);
+	}
+}
+
 /**
  * The ReAct loop. A step ends at a tool call, the editor runs it against the
  * canvas, and the result goes straight back as the next step, until the model
@@ -48,10 +80,11 @@ export { useSloppyMessages, useSloppy };
 export function SloppyProvider({ children }: { children: ReactNode }) {
 	const projectId = useProjectId();
 	const initialTranscript = useInitialTranscript();
+	const editor = useSlateStatic();
 	const runTool = useAgentTools();
 	const model = useDefaultModels().llm;
 	const turnModel = useRef<ModelRef>(undefined);
-	// Stopping should also cancel the tool call in flight
+	// Stopping drops the output of a tool call still in flight
 	const turn = useRef<AbortController>(undefined);
 
 	const { messages, sendMessage, setMessages, stop, status, addToolOutput } =
@@ -59,7 +92,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			messages: initialTranscript,
 			messageMetadataSchema: sloppyMetadataSchema,
 			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
-			transport: new DefaultChatTransport<SloppyMessage>({
+			transport: new SloppyTransport(editor, {
 				prepareSendMessagesRequest: ({ messages, body }) => {
 					const picked = turnModel.current ?? model;
 					return {
@@ -83,7 +116,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 					tool: toolCall.toolName as AgentToolName,
 					toolCallId: toolCall.toolCallId,
 				};
-				void runTool(toolCall, signal).then((outcome) => {
+				void runTool(toolCall).then((outcome) => {
 					if (signal?.aborted) return;
 					addToolOutput(
 						outcome.ok
@@ -95,6 +128,10 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 								},
 					);
 				});
+			},
+			onFinish: ({ isAbort, isDisconnect, isError }) => {
+				if (isAbort || isDisconnect || isError)
+					setMessages((current) => settleUnansweredCalls(current));
 			},
 			onError: (error) => toastError(error, "Sloppy could not finish that"),
 			throttle: 50,

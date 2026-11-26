@@ -3,8 +3,28 @@ import { z } from "zod";
 import { Eye } from "@/components/ui/icon";
 import { connectorOf, ContentTypeSchema } from "@/lib/canvas/types";
 import { hasModel, modelRefSchema } from "@/lib/connectors/models";
-import { modelLine } from "@/lib/script/prompt/model-attributes";
+import {
+	attributeSchemaFor,
+	type ElementModel,
+} from "@/lib/canvas/element-connector";
+import {
+	optionsOf,
+	type AttributeDef,
+} from "@/lib/connectors/attributes/schema";
+import { disjunction } from "@/lib/format";
 import { defineTool } from "./define-tool";
+
+const allowedValues = (def: AttributeDef): string =>
+	def.edit?.kind === "range"
+		? `${def.edit.min} to ${def.edit.max}`
+		: disjunction(optionsOf(def));
+
+function modelLine({ type, model }: ElementModel): string | undefined {
+	const defs = attributeSchemaFor(type, model).modelDefs;
+	if (defs.length === 0) return undefined;
+	const values = defs.map((def) => `${def.key} ${allowedValues(def)}`);
+	return `- <${type}> with model="${model.model}": ${values.join(", ")}.`;
+}
 
 export const readModelAttributes = defineTool({
 	description: dedent`

@@ -42,3 +42,37 @@ export function createScriptWriter(editor: Editor): (chunk: string) => void {
 
 	return (chunk) => parser.appendChunk(chunk).filter(isContent).forEach(write);
 }
+
+export type ScriptSink = { write: (chunk: string) => void; flush: () => void };
+
+// One Slate change per token falls behind the stream, and a throw inside the timer would escape the caller.
+function batchWrites(write: (chunk: string) => void): ScriptSink {
+	const pending: string[] = [];
+	let failure: unknown;
+	const drain = () => {
+		try {
+			const text = pending.splice(0).join("");
+			if (text) write(text);
+		} catch (error) {
+			failure ??= error;
+		}
+	};
+	const rethrow = () => {
+		if (failure) throw failure;
+	};
+	return {
+		write: (chunk) => {
+			rethrow();
+			if (pending.length === 0) setTimeout(drain);
+			pending.push(chunk);
+		},
+		flush: () => {
+			drain();
+			rethrow();
+		},
+	};
+}
+
+/** A script writer whose chunks land once per turn of the event loop, flushed when the stream ends. */
+export const createScriptSink = (editor: Editor): ScriptSink =>
+	batchWrites(createScriptWriter(editor));

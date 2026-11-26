@@ -18,8 +18,6 @@ import { getElementBodyText } from "@/lib/canvas/osml-serializer";
 import { parseOSML } from "@/lib/canvas/osml-stream-parser";
 import type { AgentToolName } from "@/lib/agent/tools/registry";
 import { DERIVE_INSTRUCTION } from "@/lib/project/derive-art-style";
-import { OUTLINE_INSTRUCTION } from "@/lib/script/prompt/outline";
-import { NO_FINDINGS, REVIEW_INSTRUCTION } from "@/lib/script/prompt/review";
 import { animateImageScene } from "@/lib/script/refine/animate-prompt";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { sleep } from "@/lib/utils";
@@ -29,7 +27,6 @@ import type { AgentModel } from "./agent-model";
 import type { LLMProvider } from "./base";
 import {
 	MOCK_ASSETS_OSML,
-	MOCK_OUTLINE,
 	MOCK_SCRIPT,
 	MOCK_STYLE,
 	MOCK_THOUGHT,
@@ -47,8 +44,6 @@ const MOCK_ASSETS: RefineOp[] = parseOSML(MOCK_ASSETS_OSML)
 
 const MOCK_RESPONSES: [matches: (prompt: string) => boolean, text: string][] = [
 	[(prompt) => prompt.startsWith(DERIVE_INSTRUCTION), MOCK_STYLE],
-	[(prompt) => prompt.startsWith(OUTLINE_INSTRUCTION), MOCK_OUTLINE],
-	[(prompt) => prompt.startsWith(REVIEW_INSTRUCTION), NO_FINDINGS],
 ];
 
 function mockResponse({ prompt }: LLMGenerateParams): string {
@@ -236,7 +231,7 @@ const NEXT_STEP: Record<string, NextStep> = {
 			? {
 					say: "Writing a script onto the canvas. ",
 					toolName: "write_script",
-					input: { brief: "A short mock story, written without an API key." },
+					input: { osml: MOCK_SCRIPT },
 				}
 			: { say: "Done. That is as much as a mock can do without an API key." },
 } satisfies Partial<Record<AgentToolName, NextStep>>;

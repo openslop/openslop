@@ -9,7 +9,7 @@ import { defineTool } from "./define-tool";
 
 export const setElementResult = defineTool({
 	description: dedent`
-	  Put files from our store on elements, as if the user uploaded them. Generate All leaves
+	  Put files from our store on elements, as if the user uploaded them. Generating leaves
 	  them alone. Works on ${conjunction(UPLOADABLE_TYPES)} elements. Get the ids from
 	  read_script.
 	`,

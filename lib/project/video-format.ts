@@ -5,7 +5,7 @@ export const VIDEO_FORMAT_TARGETS = [
 	"audiobook",
 ] as const;
 
-/** `auto` is not classified yet; the writer falls back to the format closest to the brief. */
+/** `auto` is not classified yet; Sloppy picks the format closest to the request. */
 export const VIDEO_FORMAT_CHOICES = ["auto", ...VIDEO_FORMAT_TARGETS] as const;
 
 export type VideoFormatTarget = (typeof VIDEO_FORMAT_TARGETS)[number];
