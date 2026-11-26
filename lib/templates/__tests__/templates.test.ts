@@ -16,7 +16,7 @@ describe("templates", () => {
 
 	it.each([
 		["missing name", { name: undefined }],
-		["empty system prompt", { systemPrompt: "" }],
+		["empty guide", { guide: "" }],
 		["unknown length", { length: "forever" }],
 		["invalid color", { color: "orange" }],
 		[

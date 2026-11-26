@@ -34,7 +34,7 @@ export const financeTips = {
 		examplePrompt:
 			"Subscriptions, bank fees, impulse buys, unused gym memberships - the money leaks most people ignore",
 	},
-	systemPrompt: dedent`
+	guide: dedent`
 # Important
 - This is an Explainer: every visual, including every title card, is a <video>. Nobody speaks inside the videos; the Narrator carries every word.
 - Every video is a single continuous shot labelled Shot 1, with one camera move or a static frame. Never add a Shot 2.

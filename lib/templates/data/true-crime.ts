@@ -247,7 +247,7 @@ export const trueCrime = {
 #Image: A bronze memorial statue of Andres in a small plaza at sunset, bunches of flowers, candles and yellow scarves piled at its base, a few mourners standing quietly.
 #Narrator: And that's the wild, sad story of how a soccer game ended a man's life.
 	`,
-	systemPrompt: dedent`
+	guide: dedent`
 You write short narrative scripts in the style of viral YouTube true-story/crime videos. Pastiche these conventions precisely:
 
 # OPENING HOOK

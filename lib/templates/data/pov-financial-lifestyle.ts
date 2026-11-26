@@ -40,7 +40,7 @@ export const povFinancialLifestyle = {
 			"Walk the viewer through a money-driven lifestyle with advice along the way",
 		examplePrompt: "silent millionaire with $110 million",
 	},
-	systemPrompt: dedent`
+	guide: dedent`
 # Important
 - The main character (you) is always called Protagonist.
 - The Protagonist is already one of the characters: use him like a regular character in the story.
