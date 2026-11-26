@@ -1,6 +1,5 @@
 import { animateImage } from "./animate-image";
 import { assets } from "./assets";
-import { lengths } from "./lengths";
 import { mediaLibrary } from "./media-library";
 import { musicPrompts } from "./music-prompts";
 import { osml } from "./osml";
@@ -21,7 +20,6 @@ export const SKILLS = [
 	videoFormats,
 	videoPrompts,
 	musicPrompts,
-	lengths,
 	mediaLibrary,
 ] as const satisfies readonly Skill[];
 

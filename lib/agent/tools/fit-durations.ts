@@ -65,7 +65,8 @@ export const fitDurations = defineTool({
 	  Send \`element_ids\` to fit only those, or nothing for the whole canvas.
 
 	  Images already stretch, uploaded videos keep their own length, and videos with no
-	  speech under them have nothing to fit, so all three are left alone.
+	  speech under them have nothing to fit, so all three are left alone. To change how long a
+	  video with speech runs, change its speech.
 	`,
 	input: z.object({
 		element_ids: z.array(z.string()).min(1).optional(),

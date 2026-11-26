@@ -11,8 +11,8 @@ const line = ({ id, words, seconds: sec }: SpeechEstimate) =>
 export const estimateSpeechLengths = defineTool({
 	description: dedent`
 	  Estimates how long each speech element runs, from its words at
-	  ${SPEECH_WORDS_PER_MINUTE} words a minute. For how long the whole video runs, use
-	  estimate_total_length.
+	  ${SPEECH_WORDS_PER_MINUTE} words a minute. You can't tell length by reading the script.
+	  For how long the whole video runs, use estimate_total_length.
 	`,
 	input: z.object({}),
 	output: z.string(),

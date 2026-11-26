@@ -14,6 +14,9 @@ export const estimateTotalLength = defineTool({
 	  Estimate how long the video will be after Generate All, against the target length.
 	  Speech counts at ${SPEECH_WORDS_PER_MINUTE} words a minute. Each video counts its
 	  \`duration\`, or an uploaded video its own length, cut to its trim.
+
+	  You can't tell length by reading the script. To hit the target, add or cut speech, then
+	  run this again.
 	`,
 	input: z.object({}),
 	output: z.string(),
