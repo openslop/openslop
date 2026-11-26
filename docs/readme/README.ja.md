@@ -3,7 +3,7 @@
   <img src="../../assets/openslop-lockup-animated-dark.svg#gh-dark-mode-only" alt="OpenSlop" width="560">
 </p>
 
-<p align="center"><b>オープンソースの AI 制作スタジオ。</b><br>チャットするだけで、映画、シリーズ、オーディオブック、YouTube 動画、ドキュメンタリー、ドラマなどが完成。</p>
+<p align="center"><b>オープンソースの AI 制作スタジオ。</b><br>チャットするだけで、映画、シリーズ、オーディオブック、ミュージックビデオ、ドキュメンタリー、ドラマなどが完成。</p>
 
 <p align="center">
   <a href="https://openslop.ai"><img src="https://img.shields.io/badge/status-private%20beta-6b6bcf?style=flat" alt="ステータス: プライベートベータ"></a>
