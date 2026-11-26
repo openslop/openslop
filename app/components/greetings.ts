@@ -12,6 +12,13 @@ export const GREETINGS = [
 	"Hand over the slop, boss.",
 	"Got some slop for me, boss?",
 	"Hit me with the slop.",
+	"Time to slopmaxx, boss.",
+	"Slopmaxxing session, boss?",
+	"We slopmaxxing today?",
+	"Lock in and slopmaxx.",
+	"Cook mode: slopmaxx.",
+	"Peak slop incoming.",
+	"It's giving slop, boss.",
 ];
 
 // Seeded by the project id so the server and client render the same greeting
