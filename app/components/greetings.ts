@@ -4,20 +4,15 @@ export const TIME_OF_DAY_GREETINGS = {
 		"3am slop hits different.",
 		"Nobody's watching. Slop away.",
 		"Night shift slop, boss?",
-		"Can't sleep? Slop.",
 		"Lock in and slopmaxx.",
-		"Cook mode: slopmaxx.",
-		"Peak slop incoming.",
+		"Peak slop incoming, boss.",
 	],
 	morning: [
 		"Morning, boss. Slop's brewing.",
 		"Coffee first, then slop?",
 		"Early bird gets the slop.",
-		"Fresh slop, first thing.",
 		"What slop today, boss?",
-		"What are we yapping about today?",
 		"We slopmaxxing today?",
-		"Time to cook, boss.",
 		"Ready to cook absolute slop, boss.",
 	],
 	afternoon: [
@@ -32,14 +27,12 @@ export const TIME_OF_DAY_GREETINGS = {
 		"Time to slopmaxx, boss.",
 	],
 	evening: [
-		"Clocked out. Clocked into slop.",
 		"Evening slop session, boss?",
 		"Prime time slop, boss.",
 		"What's the vibe, boss?",
 		"What banger are we making?",
 		"Slop me up, boss.",
 		"Slopmaxxing session, boss?",
-		"It's giving slop, boss.",
 	],
 };
 
