@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "streamdown/styles.css";
 @import "shadcn/tailwind.css";
 @import "../components/ui/icons/base.css";
 @import "../components/ui/icons/arrows.css";
@@ -850,6 +851,8 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.animate-fadeInUp,
+	[data-sd-animate],
+	[data-sd-animate-marker]::marker,
 	.shimmer,
 	.shimmer-surface,
 	[class*="animate-in"],

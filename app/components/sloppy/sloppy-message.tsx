@@ -5,25 +5,26 @@ import { CopyButton } from "@/components/ui/copy-button";
 import type { SloppyMessage } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/panel-card";
 import { Reasoning } from "./reasoning";
+import { ReplyMarkdown } from "./reply-markdown";
 import { Tool } from "./tool";
 import { WorkedStatus } from "./turn-status";
 import { reasoningOpen, userText, type TurnPart } from "./turn-display";
 
 export function UserMessage({ message }: { message: SloppyMessage }) {
 	return (
-		<p className="ml-auto w-fit max-w-[88%] shrink-0 wrap-break-word rounded-xl rounded-br-sm bg-user-message px-3 py-2 text-label text-user-message-foreground">
+		<p className="ml-auto w-fit max-w-[88%] shrink-0 whitespace-pre-wrap wrap-break-word rounded-xl rounded-br-sm bg-user-message px-3 py-2 text-label text-user-message-foreground">
 			{userText(message)}
 		</p>
 	);
 }
 
-function ReplyText({ text }: { text: string }) {
+function ReplyText({ text, streaming }: { text: string; streaming: boolean }) {
 	return (
 		<div className="group/reply">
 			<PanelCard>
-				<p className="whitespace-pre-wrap wrap-break-word pr-6 text-label text-foreground">
-					{text}
-				</p>
+				<div className="pr-6 text-label text-foreground">
+					<ReplyMarkdown text={text} streaming={streaming} />
+				</div>
 				<CopyButton
 					text={text}
 					label="Copy reply"
@@ -45,7 +46,13 @@ function Step({
 	live: boolean;
 	superseded: boolean;
 }) {
-	if (isTextUIPart(part)) return <ReplyText text={part.text} />;
+	if (isTextUIPart(part))
+		return (
+			<ReplyText
+				text={part.text}
+				streaming={live && part.state === "streaming"}
+			/>
+		);
 	if (part.type === "reasoning") {
 		return (
 			<Reasoning

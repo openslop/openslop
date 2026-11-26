@@ -26,7 +26,9 @@ import { MOCK_COST_USD } from "../mock-utils";
 import type { AgentModel } from "./agent-model";
 import type { LLMProvider } from "./base";
 import {
+	MOCK_ANSWER,
 	MOCK_ASSETS_OSML,
+	MOCK_DONE,
 	MOCK_SCRIPT,
 	MOCK_STYLE,
 	MOCK_THOUGHT,
@@ -175,7 +177,7 @@ function afterReading(asked: string, { text: script }: ToolResult): MockStep {
 
 	if (scene === null && !EDIT_REQUEST.test(asked)) {
 		return {
-			say: "No API key is set, so I am a mock. Ask me to change the script and I will edit it.",
+			say: MOCK_ANSWER,
 		};
 	}
 
@@ -226,7 +228,7 @@ const NEXT_STEP: Record<string, NextStep> = {
 					toolName: "write_script",
 					input: { osml: MOCK_SCRIPT },
 				}
-			: { say: "Done. That is as much as a mock can do without an API key." },
+			: { say: MOCK_DONE },
 } satisfies Partial<Record<AgentToolName, NextStep>>;
 
 function mockCall(prompt: LanguageModelV3Prompt): MockStep {
