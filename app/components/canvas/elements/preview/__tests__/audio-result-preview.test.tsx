@@ -3,6 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
+import { volumeToGain } from "@/lib/canvas/element-attributes";
 import { AudioResultPreview } from "../audio-result-preview";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -47,7 +48,7 @@ const audio = () => {
 
 describe("AudioResultPreview", () => {
 	it("plays the result at the element's volume, the gain the player applies", () => {
-		expect(audio().volume).toBe(0.2);
+		expect(audio().volume).toBe(volumeToGain(2));
 	});
 
 	it("applies a volume change to the audio already playing", async () => {
@@ -57,6 +58,6 @@ describe("AudioResultPreview", () => {
 		renderPreview();
 
 		expect(audio()).toBe(playing);
-		expect(playing.volume).toBe(0.9);
+		expect(playing.volume).toBe(volumeToGain(9));
 	});
 });

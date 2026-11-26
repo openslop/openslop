@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { Editor } from "slate";
 import { ZERO_WIDTH_SPACE } from "@/lib/canvas/constants";
+import { volumeToGain } from "@/lib/canvas/element-attributes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { inputsFor } from "@/lib/generation/__tests__/_graph";
 import { totalCostUsd, type ElementVersion } from "@/lib/generation/versions";
@@ -139,11 +140,17 @@ describe("ElementHistoryPopover", () => {
 		await click('button[aria-label="Generation history"]');
 
 		const takes = () => Array.from(document.body.querySelectorAll("audio"));
-		expect(takes().map((audio) => audio.volume)).toEqual([0.4, 0.4]);
+		expect(takes().map((audio) => audio.volume)).toEqual([
+			volumeToGain(4),
+			volumeToGain(4),
+		]);
 
 		element = { layoutAttributes: { volume: "8" } };
 		renderPopover();
-		expect(takes().map((audio) => audio.volume)).toEqual([0.8, 0.8]);
+		expect(takes().map((audio) => audio.volume)).toEqual([
+			volumeToGain(8),
+			volumeToGain(8),
+		]);
 	});
 
 	it("plays a take full size over the history, which stays open behind it", async () => {

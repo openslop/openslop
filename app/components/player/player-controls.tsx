@@ -5,6 +5,7 @@ import { scrollToScene } from "@/app/components/canvas/utils/scroll-to";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { toSeconds } from "@/lib/render/frames";
+import { gainToPosition, positionToGain } from "@/lib/render/gain-taper";
 import { formatTime } from "@/lib/render/timestamps";
 import { usePlayerControl } from "./player-control-context";
 import {
@@ -65,7 +66,7 @@ export function VolumeControl() {
 	};
 	const onVolumeChange = (next: number) => {
 		if (!player) return;
-		player.setVolume(next);
+		player.setVolume(positionToGain(next));
 		if (next > 0 && player.isMuted()) player.unmute();
 	};
 
@@ -82,7 +83,7 @@ export function VolumeControl() {
 				<ScrubBar
 					className="w-18"
 					ariaLabel="Volume"
-					value={muted ? 0 : volume}
+					value={muted ? 0 : gainToPosition(volume)}
 					onScrub={onVolumeChange}
 					keyStep={VOLUME_KEY_STEP}
 					disabled={!player}

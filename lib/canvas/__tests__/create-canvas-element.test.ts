@@ -152,10 +152,10 @@ describe("createCanvasElement", () => {
 		expect(flatAttributes(node)).toEqual({});
 	});
 
-	it("defaults video, music, and speech to max volume (10), while sound stays at 2", () => {
+	it("defaults video, music, and speech to max volume (10), while sound sits at 5", () => {
 		expect(flatAttributes(createCanvasElement("video")).volume).toBe("10");
 		expect(flatAttributes(createCanvasElement("music")).volume).toBe("10");
 		expect(flatAttributes(createCanvasElement("speech")).volume).toBe("10");
-		expect(flatAttributes(createCanvasElement("sound")).volume).toBe("2");
+		expect(flatAttributes(createCanvasElement("sound")).volume).toBe("5");
 	});
 });

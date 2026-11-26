@@ -202,7 +202,7 @@ describe("parseOSML", () => {
 	it("replaces an attribute value the schema doesn't offer with its default", () => {
 		const [node] = parseOSML('<sound volume="loud">boom</sound>');
 
-		expect(flatAttributes(node).volume).toBe("2");
+		expect(flatAttributes(node).volume).toBe("5");
 	});
 
 	it("backfills defaultAttributes", () => {

@@ -10,7 +10,7 @@ import {
 export const SFX_ATTRIBUTES = AttributeSchema.from([
 	...OWN_MODEL_DEFS,
 	loopsDef,
-	volumeDef("2"),
+	volumeDef("5"),
 	trimStartDef,
 	trimEndDef,
 ]);

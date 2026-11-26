@@ -202,7 +202,7 @@ describe("applyRefineOp — insert", () => {
 		const [, sound] = contentElements(editor);
 		expect(flatAttributes(sound)).toEqual({
 			loops: "3",
-			volume: "2",
+			volume: "5",
 			...DEFAULT_MODELS.sfx,
 		});
 	});
