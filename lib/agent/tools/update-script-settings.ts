@@ -14,8 +14,7 @@ import { atLeastOne } from "./inputs";
 
 export const updateScriptSettings = defineTool({
 	description: dedent`
-	  Store the language, length and format the script should have, so you remember them; the
-	  script tools read them from here. Send only what changes.
+	  Store the language, length and format the script should have. Send only what changes.
 
 	  - language: what speech is written in. "auto" follows the language of
 	    the user's topic or script. ${LANGUAGE_CHOICES.map((choice) => `${choice} (${languageLabel(choice)})`).join(", ")}

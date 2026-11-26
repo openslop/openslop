@@ -6,11 +6,9 @@ export const writeScript = {
 	description:
 		"Putting a new script on the canvas with write_script, written from an idea or converted from a script the user wrote (a screenplay, draft, prose, transcript or lyrics): settings, models, title, assets, then the script. Load it with osml, video-formats, video-prompts, music-prompts and assets to start a project, a fresh idea, or whenever the user's message carries a script of their own.",
 	content: dedent`
-		For a new script only. To change an existing one, however much, use edit-script.
-
 		## Before writing
 		1. read_script_settings, then set the format (and, for an idea, the target length) with update_script_settings. Keep anything the user set.
-		2. list_models, then set_default_model for each element type the script uses. Keep any default the user set, and only use models from list_models. read_model_attributes shows what each allows, like durations.
+		2. list_models, then set_default_model for each element type the script uses. Keep any default the user set.
 		3. Name the project with set_title, unless read_title already has a name.
 		4. Add the assets the script needs with edit_script (see assets).
 		5. read_media. If the user uploaded anything, load media-library and use it.
@@ -28,6 +26,6 @@ export const writeScript = {
 		- Apply any setting they state with its tool: set_title, update_script_settings, update_video_settings, or edit_script for a character, voice or art style. Do requests about the text ("make this shorter") with edit_script after write_script.
 
 		## Writing
-		Call write_script once with the whole script. It replaces what's on the canvas, filling in as you write. When you're done, offer a review, and only do it if they say yes (see review-script).
+		Call write_script once with the whole script. When you're done, offer a review.
 	`,
 } as const satisfies Skill;

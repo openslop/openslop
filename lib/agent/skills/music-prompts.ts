@@ -10,8 +10,8 @@ export const musicPrompts = {
 	description:
 		"How to write a <music> prompt as a film cue: genre, runtime, arc, mood, key and tempo, and lyrics for a song. Load it before writing or reviewing music prompts.",
 	content: dedent`
-		A <music> prompt describes the music for the scenes from it to the next <music>, like a film score cue. The music model sees only the prompt and gets the length from it, so include:
-		- Genre, instruments and production style. Instrumental, unless ${lyricsDef.key}="${TOGGLE_ON}": then also the vocal style, and end the prompt with Lyrics: and every line to sing, in the script language.
+		A <music> prompt is written like a film score cue. The music model sees only the prompt and gets the length from it, so include:
+		- Genre, instruments and production style. Instrumental, unless ${lyricsDef.key}="${TOGGLE_ON}": then also the vocal style, and end the prompt with Lyrics: and every line to sing.
 		- Runtime as m:ss: the total of the scenes it covers. Each scene lasts its video's duration or its speech at ${SPEECH_WORDS_PER_SECOND} words a second, whichever is longer.
 		- How it opens, how it changes at timestamps that match the story, and how it ends.
 		- Mood, key, tempo in BPM and meter.

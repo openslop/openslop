@@ -1,10 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
-import { ContentTypeSchema } from "@/lib/canvas/types";
-import {
-	PREVIOUS_VISUAL,
-	START_FRAME_ATTR,
-} from "@/lib/connectors/video/start-frame";
+import { START_FRAME_ATTR } from "@/lib/connectors/video/start-frame";
 import { refineOpSchema } from "@/lib/script/refine/types";
 import { Pencil } from "@/components/ui/icon";
 import compact from "lodash/compact";
@@ -30,10 +26,8 @@ export const editScript = defineTool({
 	  To change an element's type, insert the new one before it, then remove it: that is a
 	  new, ungenerated element holding only what you send.
 
-	  Script types: ${ContentTypeSchema.options.join(", ")}
-
-	  A video's ${START_FRAME_ATTR} URL is an image's or frame's URL from view_result, and
-	  ${PREVIOUS_VISUAL} opens on the visual before it. Leave a URL already set alone.
+	  A video's ${START_FRAME_ATTR} can be an image's or frame's URL from view_result. Leave a
+	  URL already set alone.
 
 	  To change a model, set provider and model to a pair from list_models. A speech element
 	  speaks on the model of the asset_voice its \`name\` names, so it always needs one.
@@ -62,7 +56,7 @@ export const editScript = defineTool({
 				: `Applied ${applied} of ${ops.length} operations.`,
 			inserted.length > 0 && `Inserted ${inserted.join(", ")}, in order.`,
 			failures.length > 0 &&
-				`Failed: ${failures.join("; ")}. Read the script before retrying.`,
+				`Failed: ${failures.join("; ")}. Read the script and fix the call instead of retrying it.`,
 		]).join(" ");
 	},
 	draftsScript: true,

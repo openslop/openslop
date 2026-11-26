@@ -21,8 +21,8 @@ export const describeResult = ({ durationSec, images, words }: ResultView) =>
 
 export const viewResult = defineTool({
 	description: dedent`
-	  Look at what an element holds, generated or uploaded, so you can say whether a result
-	  matches what its text asks for. An image comes back as itself. A video
+	  Look at what an element holds, generated or uploaded, and compare it to the element's
+	  text. Look before commenting on a result. An image comes back as itself. A video
 	  comes back as frames from its ${frameNames(FRAME_KEYS)}, each with its time, and its
 	  length. A voice line, sound or music comes back as its length, with every word and when
 	  it is said where there are words. Take the id from read_script.

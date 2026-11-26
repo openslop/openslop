@@ -30,6 +30,7 @@ export const osml = {
 		The script language is the language in read_script_settings. If it is auto, use the language the user wrote their topic or script in, or English if unsure.
 		- Everything spoken or sung is in the script language: <speech>, lines inside a <video> prompt, and <music> lyrics.
 		- Everything else is in English: the rest of every prompt, and avatar, location, prop and style text.
+		- This holds when you edit, too, even when the user writes to you in another language.
 
 		## Names
 		In <image> and <video> prompts, write each character, location and prop as ${nameRef("Name")} with its exact name, like ${nameRef("Red")} or ${nameRef("Cottage")}. Don't describe how it looks, since the model gets its picture. Everywhere else, use the plain name.
@@ -50,7 +51,7 @@ export const osml = {
 
 		## <video>
 		- A short generated video, with sound. The body is a video prompt (see video-prompts).
-		- duration: seconds to generate (default ${DEFAULT_DURATION}). read_model_attributes lists the values its model allows.
+		- duration: seconds to generate (default ${DEFAULT_DURATION}).
 		- ${START_FRAME_ATTR}, ${CONTINUITY_ATTR} and ${loopDef.key}: see video-formats.
 		- motion: usually "${DEFAULT_MOTION}". Set one only when the shots have no camera move.
 		- Example: <video startFrame="none">Shot 1: Wide shot of a moonlit forest clearing as {{Red}} and {{Wolf}} walk in from the trees, rain falling through the branches. Sound: rain pattering on leaves, a stream nearby.</video>

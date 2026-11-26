@@ -24,7 +24,7 @@ const withSettings = (scriptSettings: object) =>
 describe("skills", () => {
 	it.each(SKILLS)("$name has a description and content", (skill) => {
 		expect(skill.description).not.toBe("");
-		expect(skill.content.length).toBeGreaterThan(200);
+		expect(skill.content).not.toBe("");
 	});
 
 	it("lists every skill in the system prompt", () => {

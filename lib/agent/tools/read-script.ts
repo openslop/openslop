@@ -6,8 +6,9 @@ import { defineTool } from "./define-tool";
 export const readScript = defineTool({
 	description: dedent`
 	  Read the canvas as XML with the \`id\` of every element: first the assets, then the
-	  script scene by scene. Read it before your first edit. Your own edit_script changes keep
-	  it current; edit_script tells you when something else changed the canvas.
+	  script scene by scene. It's the only way to see the canvas, so read it before your first
+	  edit. Your own edit_script changes keep it current; edit_script tells you when something
+	  else changed the canvas.
 	`,
 	input: z.object({}),
 	output: z.string(),

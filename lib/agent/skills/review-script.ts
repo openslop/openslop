@@ -6,8 +6,6 @@ export const reviewScript = {
 	description:
 		"Reviewing the script on the canvas against the rules it was written to, then fixing what breaks them. Load it with osml, video-formats, video-prompts and music-prompts when the user asks for a review or accepts your offer of one.",
 	content: dedent`
-		Review only when the user asks or accepts your offer, never on your own.
-
 		## Reading
 		Run read_script and read_script_settings. Review only the scenes, not the assets. If a format is set, review against it.
 

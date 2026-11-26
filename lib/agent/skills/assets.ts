@@ -6,13 +6,13 @@ export const assets = {
 	description:
 		"The project's assets (characters, voices, locations, props, art style, reference images): what each holds, and setting them up before a script and from the user's uploads. Load it before adding or changing an asset.",
 	content: dedent`
-		Assets are the first elements on the canvas and are globally shared by all elements. Change them with edit_script asset ops.
+		Change assets with edit_script asset ops. Any visual that names an avatar, location or prop as {{Name}} gets its generated picture as a reference image.
 
 		A character consists of either an asset_avatar and/or an asset_voice with the same \`name\`. It can have one or both. References to characters (i.e. every {{Name}} in a prompt) use that exact name, so never rename characters without updating every reference to it. Locations and props have names too, and every character, location and prop name is unique.
-		- asset_avatar: how a character looks. Its text is an image prompt for the character's picture. Any visual that mentions the character gets the resulting generated picture as a reference image.
-		- asset_location: a place that shows up more than once. Its text is an image prompt of the empty place. Any visual that mentions it gets the resulting generated picture as a reference image.
-		- asset_prop: an object that shows up more than once. Its text is an image prompt of the object on its own. Any visual that mentions it gets the resulting generated picture as a reference image.
-		- asset_voice: how someone sounds. It has attributes but no text. Describe the voice by its traits, or pick an exact one with a pickedVoiceId you read. Always set its language to the language of its lines. A narrator is just a voice with no avatar.
+		- asset_avatar: how a character looks. Its text is an image prompt for the character's picture.
+		- asset_location: a place that shows up more than once. Its text is an image prompt of the empty place.
+		- asset_prop: an object that shows up more than once. Its text is an image prompt of the object on its own.
+		- asset_voice: how someone sounds. Describe the voice by its traits, or pick an exact one with a pickedVoiceId you read. Always set its language to the language of its lines. A narrator is just a voice with no avatar.
 		- asset_style: the art style, added to every image and video prompt. Describe the medium, linework, colors and lighting, never a place, subject or time of day.
 		- asset_references: images, usually the user's uploads, sent as reference images with every visual.
 		- asset_media_<type>: drafts from the user's Media panel. Ignore them for now.
