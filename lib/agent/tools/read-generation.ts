@@ -7,7 +7,7 @@ export const readGeneration = defineTool({
 	description: dedent`
 	  Read where each generated element stands: ungenerated, queued, generating, generated,
 	  stale (and why), failed (and the error), or uploaded. It changes as the user generates,
-	  so read it fresh.
+	  so don't rely on an earlier read.
 	`,
 	input: z.object({}),
 	output: z.string(),
