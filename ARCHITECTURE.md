@@ -130,7 +130,7 @@ The canvas is the project. Each term means one thing everywhere in the code:
 | **Turn**   | `lib/api/agent-turn.ts`  | One model response. The server streams its text and tool calls; the tools have specs but no executors there.                                    |
 | **Tool**   | `lib/agent/tools/`       | A `defineTool` the browser runs against the canvas, queue and stores. Its result goes back as the next request until the model answers in text. |
 
-The harness is client-side, so Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new skill is a new tool, not a new pipeline.
+The harness is client-side, so Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new action is a new tool and new know-how is a new skill in `lib/agent/skills/`, not a new pipeline.
 
 ## Layout and render
 

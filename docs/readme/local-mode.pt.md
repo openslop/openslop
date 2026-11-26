@@ -13,8 +13,7 @@
 Seus projetos e vídeos ficam no seu computador. Só os seus pedidos aos serviços de IA vão para a internet.
 
 <p align="center">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="Um terminal roda npm run local e o OpenSlop abre em localhost:3000 com projetos salvos neste computador" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="Um terminal roda npm run local e o OpenSlop abre em localhost:3000 com projetos salvos neste computador" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="Um terminal roda npm run local e o OpenSlop abre em localhost:3000 com projetos salvos neste computador" width="100%">
 </p>
 
 ## O que você precisa

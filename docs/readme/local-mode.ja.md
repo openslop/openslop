@@ -13,8 +13,7 @@
 プロジェクトと動画はパソコンの中に残ります。インターネットに出るのは、AI サービスへのリクエストだけです。
 
 <p align="center">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="ターミナルで npm run local を実行すると、OpenSlop が localhost:3000 で開き、このパソコンに保存されたプロジェクトが表示される" width="100%">
 </p>
 
 ## 必要なもの

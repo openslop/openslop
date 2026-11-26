@@ -13,8 +13,7 @@
 Your projects and videos stay on your computer. Only your requests to AI services go online.
 
 <p align="center">
-  <img src="../assets/features/local-light.svg#gh-light-mode-only" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
-  <img src="../assets/features/local-dark.svg#gh-dark-mode-only" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
+  <img src="../assets/features/local-dark.svg" alt="A terminal runs npm run local, then OpenSlop opens at localhost:3000 with projects saved on this computer" width="100%">
 </p>
 
 ## What you need

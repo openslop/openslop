@@ -13,8 +13,7 @@
 프로젝트와 비디오는 내 컴퓨터에 남습니다. 인터넷으로 나가는 것은 AI 서비스에 보내는 요청뿐입니다.
 
 <p align="center">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="터미널에서 npm run local을 실행하면 OpenSlop이 localhost:3000에서 열리고, 이 컴퓨터에 저장된 프로젝트가 보입니다" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="터미널에서 npm run local을 실행하면 OpenSlop이 localhost:3000에서 열리고, 이 컴퓨터에 저장된 프로젝트가 보입니다" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="터미널에서 npm run local을 실행하면 OpenSlop이 localhost:3000에서 열리고, 이 컴퓨터에 저장된 프로젝트가 보입니다" width="100%">
 </p>
 
 ## 준비물
