@@ -19,9 +19,9 @@ describe("greetingFor", () => {
 		expect(pool).toContain(greetingFor(crypto.randomUUID(), hour));
 	});
 
-	it("returns the same greeting for the same project and hour", () => {
+	it("keeps the same greeting for a project across one time of day", () => {
 		const id = crypto.randomUUID();
-		expect(greetingFor(id, 3)).toBe(greetingFor(id, 3));
+		expect(greetingFor(id, 9)).toBe(greetingFor(id, 10));
 	});
 
 	it("spreads projects across every greeting of a time of day", () => {
@@ -31,8 +31,8 @@ describe("greetingFor", () => {
 		expect(seen).toEqual(new Set(morning));
 	});
 
-	it("keeps em dashes out of the copy", () => {
+	it("keeps em and en dashes out of the copy", () => {
 		const copy = Object.values(TIME_OF_DAY_GREETINGS).flat();
-		expect(copy.join("")).not.toContain("—");
+		expect(copy.join("")).not.toMatch(/[–—]/);
 	});
 });
