@@ -18,6 +18,7 @@ const fieldText = (input: unknown, field: string): string => {
 
 const writeNewText = (call: Call, input: unknown) => {
 	const text = fieldText(input, call.field);
+	// A repaired partial escape can parse shorter than the last read, so never rewind.
 	if (text.length <= call.written) return;
 	call.sink.write(text.slice(call.written));
 	call.written = text.length;
