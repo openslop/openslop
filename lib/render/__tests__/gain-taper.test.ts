@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-	DB_PER_VOLUME_STEP,
+	dbToGain,
+	gainToDb,
 	gainToPosition,
 	positionToGain,
+	TAPER_RANGE_DB,
 } from "../gain-taper";
-
-const toDb = (gain: number) => 20 * Math.log10(gain);
 
 describe("positionToGain", () => {
 	it("is unity gain at the top and silent at the bottom", () => {
@@ -17,13 +17,23 @@ describe("positionToGain", () => {
 		for (let step = 1; step < 10; step++) {
 			const louder = positionToGain((step + 1) / 10);
 			const quieter = positionToGain(step / 10);
-			expect(toDb(louder) - toDb(quieter)).toBeCloseTo(DB_PER_VOLUME_STEP);
+			expect(gainToDb(louder) - gainToDb(quieter)).toBeCloseTo(
+				TAPER_RANGE_DB / 10,
+			);
 		}
 	});
 
 	it("clamps positions outside 0–1", () => {
 		expect(positionToGain(-0.5)).toBe(0);
 		expect(positionToGain(1.5)).toBe(1);
+	});
+});
+
+describe("gainToDb", () => {
+	it("inverts dbToGain", () => {
+		for (const db of [-30, -6, 0, 6]) {
+			expect(gainToDb(dbToGain(db))).toBeCloseTo(db);
+		}
 	});
 });
 

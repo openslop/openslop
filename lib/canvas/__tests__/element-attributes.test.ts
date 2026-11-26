@@ -17,6 +17,7 @@ import {
 	splitAttributes,
 	volumeToGain,
 } from "../element-attributes";
+import { gainToDb } from "@/lib/render/gain-taper";
 import { element } from "./_assets";
 
 const el = (attributes: Record<string, string> = {}) =>
@@ -70,7 +71,7 @@ describe("getVolume", () => {
 });
 
 describe("volumeToGain", () => {
-	const toDb = (volume: number) => 20 * Math.log10(volumeToGain(volume));
+	const toDb = (volume: number) => gainToDb(volumeToGain(volume));
 
 	it("is silent at 0 and unity gain at 10", () => {
 		expect(volumeToGain(0)).toBe(0);
