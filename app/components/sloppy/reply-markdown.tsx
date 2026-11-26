@@ -32,7 +32,7 @@ const COMPONENTS: Components = {
 	inlineCode: styled("code", "rounded bg-foreground/10 px-1 font-numeric"),
 	pre: styled(
 		"pre",
-		"whitespace-pre-wrap wrap-break-word rounded-md bg-surface-recessed p-2 font-numeric",
+		"whitespace-pre-wrap wrap-break-word rounded-md bg-surface-recessed p-2 font-numeric [&>code]:bg-transparent [&>code]:p-0",
 	),
 	blockquote: styled("blockquote", "border-l-2 pl-3 text-muted-foreground"),
 	hr: styled("hr"),
