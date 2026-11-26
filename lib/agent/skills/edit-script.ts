@@ -10,7 +10,7 @@ export const editScript = {
 
 		- Run read_script before your first edit, and only use ids you read.
 		- Use as few operations as you can.
-		- Write each part in the language the osml skill gives it, whatever language the user writes in.
+		- Keep each part in its language: spoken and sung words in the script language, everything else in English, even when the user writes to you in another language.
 		- To animate an image, insert a video before it that starts from it, then remove the image.
 		- Before changing a model, or a setting that depends on it like duration, check what the model allows with read_model_attributes.
 	`,
