@@ -56,7 +56,7 @@ export const editScript = defineTool({
 				: `Applied ${applied} of ${ops.length} operations.`,
 			inserted.length > 0 && `Inserted ${inserted.join(", ")}, in order.`,
 			failures.length > 0 &&
-				`Failed: ${failures.join("; ")}. Read the script and fix the call instead of retrying it.`,
+				`Failed: ${failures.join("; ")}. Any operation not listed was applied. Read the script, then send only the fixes.`,
 		]).join(" ");
 	},
 	draftsScript: true,
