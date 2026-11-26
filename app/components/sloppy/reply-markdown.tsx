@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentProps } from "react";
-import { Streamdown, type Components } from "streamdown";
+import { Streamdown, type AnimateOptions, type Components } from "streamdown";
 
 /** Streamdown's stand-in href for a link whose URL is still streaming in. */
 const INCOMPLETE_LINK = "streamdown:incomplete-link";
@@ -50,6 +50,17 @@ const COMPONENTS: Components = {
 		/>
 	),
 	hr: () => <hr className="border-border" />,
+	table: ({ node: _node, ...props }) => (
+		<div className="overflow-x-auto">
+			<table className="w-full border-collapse text-left" {...props} />
+		</div>
+	),
+	th: ({ node: _node, ...props }) => (
+		<th className="border-b border-border px-2 py-1 font-semibold" {...props} />
+	),
+	td: ({ node: _node, ...props }) => (
+		<td className="border-b border-border px-2 py-1" {...props} />
+	),
 	a: ({ node: _node, href, children, ...props }) =>
 		href && href !== INCOMPLETE_LINK ? (
 			<a
@@ -66,6 +77,8 @@ const COMPONENTS: Components = {
 		),
 };
 
+const FADE_IN: AnimateOptions = { easing: "var(--ease-casual)" };
+
 export function ReplyMarkdown({
 	text,
 	streaming,
@@ -79,6 +92,7 @@ export function ReplyMarkdown({
 			components={COMPONENTS}
 			controls={false}
 			linkSafety={{ enabled: false }}
+			animated={FADE_IN}
 			isAnimating={streaming}
 		>
 			{text}

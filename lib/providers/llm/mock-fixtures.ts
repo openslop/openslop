@@ -101,3 +101,19 @@ export const MOCK_STYLE =
 /** Long-winded so the mock thinks for a couple of seconds, the way a real model does. */
 export const MOCK_THOUGHT =
 	"Reading the canvas to see what is already on it. Working out which scene the request points at, which elements sit inside that scene, and what the script currently says about each of them. Weighing whether this reads as a question to answer or as an edit to make, since the two want different tools, and a wrong guess there means an edit nobody asked for. Then picking the smallest change that does what was asked, so nothing else in the script has to move around, and nothing already on the canvas gets rewritten by accident. ";
+
+/** Markdown, so a mock reply shows how a real one renders. */
+export const MOCK_ANSWER = `No API key is set, so I'm a **mock**. Here's what I can still do:
+
+- **Edit the script:** ask me to *change*, *shorten* or *rewrite* something and I'll edit scene 1.
+- **Animate an image:** say "animate the image in scene 2" and I'll swap it for a video.
+- **Start a project:** on a blank canvas I name it, add the cast and write a script.
+
+To talk to a real model, set \`ANTHROPIC_API_KEY\` in \`.env.local\` and restart the dev server.`;
+
+export const MOCK_DONE = `**Done.** Here's what changed:
+
+1. Read the script
+2. Edited one element
+
+That's as much as a mock can do without an API key. Set \`ANTHROPIC_API_KEY\` for a real model.`;
