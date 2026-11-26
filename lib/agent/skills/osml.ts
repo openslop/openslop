@@ -41,6 +41,7 @@ export const osml = {
 		- No words in ALL CAPS, the voice model mispronounces them. Acronyms like USA are fine.
 		- [laughter] is the only sound cue. Use ... for a pause and ! for strong feeling. Example: <speech name="Mia" emotion="happy">[laughter] That's the way I want it!</speech>
 		- The audience never reads the prompts, so the speech can mention some of what's on screen.
+		- A line is read by its speaker's voice model. Before writing lines, call read_model_attributes for speech with that model: it names the model's prompting skill to load.
 
 		## <image>
 		- The body is an image prompt: time of day, background, weather if outdoors, and objects, in detail.
