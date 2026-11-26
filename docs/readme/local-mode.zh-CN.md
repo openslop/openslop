@@ -13,8 +13,7 @@
 你的项目和视频都留在你的电脑上。只有发给 AI 服务的请求会上网。
 
 <p align="center">
-  <img src="../../assets/features/local-light.svg#gh-light-mode-only" alt="终端运行 npm run local，随后 OpenSlop 在 localhost:3000 打开，显示保存在这台电脑上的项目" width="100%">
-  <img src="../../assets/features/local-dark.svg#gh-dark-mode-only" alt="终端运行 npm run local，随后 OpenSlop 在 localhost:3000 打开，显示保存在这台电脑上的项目" width="100%">
+  <img src="../../assets/features/local-dark.svg" alt="终端运行 npm run local，随后 OpenSlop 在 localhost:3000 打开，显示保存在这台电脑上的项目" width="100%">
 </p>
 
 ## 需要准备什么
