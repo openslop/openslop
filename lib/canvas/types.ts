@@ -23,6 +23,8 @@ export type ContentSpec = {
 	role: ElementRole;
 	layer: LayerType;
 	captionable?: true;
+	/** Generates on another element's model instead: speech speaks on its voice's. */
+	ownsModel?: false;
 };
 
 export const CONTENT_TYPES = {
@@ -32,6 +34,7 @@ export const CONTENT_TYPES = {
 		role: "overlay",
 		layer: "audio",
 		captionable: true,
+		ownsModel: false,
 	},
 	image: {
 		connector: "image",
@@ -120,7 +123,11 @@ export const isToggleOn = (value: string | undefined): boolean =>
 export const SCENE_TYPE = "scene" as const;
 
 /** What every element type declares: the connector it generates on and the kind it makes, if any. */
-type ElementSpec = { connector?: AssetConnectorType; outputKind?: ResultKind };
+type ElementSpec = {
+	connector?: AssetConnectorType;
+	outputKind?: ResultKind;
+	ownsModel?: false;
+};
 
 /** What the Media panel makes outside any scene, each on its own draft. */
 export const MEDIA_CONTENT_TYPES = [
@@ -193,6 +200,10 @@ export type GeneratedType = {
 		? T
 		: never;
 }[ElementType];
+
+/** Whether a new element of this type stores a model of its own. */
+export const ownsModel = (type: ElementType): boolean =>
+	ELEMENT_TYPES[type].ownsModel !== false;
 
 /** What a type generates on; metadata generates nothing. */
 export function connectorOf(type: GeneratedType): AssetConnectorType;
