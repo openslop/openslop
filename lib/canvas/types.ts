@@ -16,15 +16,21 @@ export type ElementRole = "foreground" | "background" | "overlay" | "effect";
 
 export type LayerType = "audio" | "visual";
 
+/** What every element type declares: the connector it generates on and the kind it makes, if any. */
+type ElementSpec = {
+	connector?: AssetConnectorType;
+	outputKind?: ResultKind;
+	/** Generates on another element's model instead: speech speaks on its voice's. */
+	ownsModel?: false;
+};
+
 /** The presentation-free facts about a content type. Its look lives in the canvas's `elementConfigs`. */
-export type ContentSpec = {
+export type ContentSpec = ElementSpec & {
 	connector: AssetConnectorType;
 	outputKind: ResultKind;
 	role: ElementRole;
 	layer: LayerType;
 	captionable?: true;
-	/** Generates on another element's model instead: speech speaks on its voice's. */
-	ownsModel?: false;
 };
 
 export const CONTENT_TYPES = {
@@ -121,13 +127,6 @@ export const isToggleOn = (value: string | undefined): boolean =>
 	value === TOGGLE_ON;
 
 export const SCENE_TYPE = "scene" as const;
-
-/** What every element type declares: the connector it generates on and the kind it makes, if any. */
-type ElementSpec = {
-	connector?: AssetConnectorType;
-	outputKind?: ResultKind;
-	ownsModel?: false;
-};
 
 /** What the Media panel makes outside any scene, each on its own draft. */
 export const MEDIA_CONTENT_TYPES = [

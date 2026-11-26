@@ -32,7 +32,7 @@ export const celebrityDeath = {
 			"Historical explainer of death of every celebrity of a certain category",
 		examplePrompt: "greatest footballer",
 	},
-	systemPrompt: dedent`
+	guide: dedent`
 # Important
 - This is an Explainer: every visual is a <video>, and nobody speaks inside them. The Narrator carries every word.
 - Every video is one continuous shot labelled Shot 1: a single camera setup with at most one camera move. Never add a Shot 2.

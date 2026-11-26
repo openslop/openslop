@@ -30,7 +30,7 @@ export const stickExplainer = {
 		description: "Stickman explainer about a certain topic",
 		examplePrompt: "AI slop",
 	},
-	systemPrompt: dedent`
+	guide: dedent`
 # Important
 - Write the script as if writing a Stickman-style explainer video about the topic in the user prompt.
 - This is an Explainer: every visual is a <video>, and nobody speaks inside them; the Narrator carries every word.

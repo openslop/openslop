@@ -16,7 +16,7 @@ export const readTemplate = defineTool({
 	execute: async (_input, ctx) => {
 		const template = getTemplateById(ctx.readProject().scriptSettings.template);
 		if (!template) return "This project has no template.";
-		return `${template.name}: ${template.systemPrompt}\n\nExample story: ${template.exampleText}`;
+		return `${template.name}: ${template.guide}\n\nExample story: ${template.exampleText}`;
 	},
 	retention: "turn",
 });

@@ -27,7 +27,7 @@ export const sleepStory = {
 			"Long-form, slow, soothing narration designed to lull listeners to sleep",
 		examplePrompt: "a cat who wanders around gardens at night",
 	},
-	systemPrompt: dedent`
+	guide: dedent`
 # Important
 Add motion to all images. Every <speech> has speed="slow".
 	`,

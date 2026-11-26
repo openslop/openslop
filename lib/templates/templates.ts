@@ -33,7 +33,7 @@ export const TemplateSchema = z.strictObject({
 	promptPrefix: text,
 	color: z.string().regex(/^#[\da-f]{6}$/i),
 	exampleText: text,
-	systemPrompt: text,
+	guide: text,
 	length: z.enum(VIDEO_LENGTHS),
 	style: z.strictObject({
 		description: text,

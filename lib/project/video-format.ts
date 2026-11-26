@@ -15,7 +15,7 @@ export const DEFAULT_VIDEO_FORMAT: VideoFormat = "auto";
 
 export type VideoFormatSpec = {
 	label: string;
-	/** One sentence for the user, next to the choice. The writer's rules live in the script prompt. */
+	/** One sentence for the user, next to the choice. Sloppy's rules for it live in the video-formats skill. */
 	summary: string;
 };
 

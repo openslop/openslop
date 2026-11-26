@@ -34,7 +34,7 @@ export const povLife = {
 			"Long-form, second-person POV voiceover with cartoon illustrations that walk a viewer through ascending stages of a role, career, or world",
 		examplePrompt: "tech CEO",
 	},
-	systemPrompt: dedent`
+	guide: dedent`
 # Important
 - The main character (you) is always called Protagonist.
 - The Protagonist is already one of the characters: use him like a regular character in the story.
