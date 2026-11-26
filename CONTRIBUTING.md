@@ -55,9 +55,10 @@ npm install
 cp .env.example .env.local
 ```
 
-3. Run the database migrations and start the dev server:
+3. Link your Supabase project, push the database migrations to it, and start the dev server:
 
 ```bash
+npx supabase link --project-ref <your-project-ref>
 npm run db:push
 npm run dev
 ```

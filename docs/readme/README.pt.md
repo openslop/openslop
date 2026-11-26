@@ -182,19 +182,19 @@ Como o código está organizado e como suas camadas se encaixam: [`ARCHITECTURE.
 
 ## Scripts
 
-| Comando                   | O que faz                            |
-| ------------------------- | ------------------------------------ |
-| `npm run dev`             | Inicia o servidor de desenvolvimento |
-| `npm run local`           | Roda no modo local                   |
-| `npm run build`           | Build de produção                    |
-| `npm run lint`            | ESLint                               |
-| `npm run format:check`    | Verificação do Prettier              |
-| `npm run typecheck`       | Verificação do TypeScript            |
-| `npm run knip`            | Verificação de código morto          |
-| `npm run test:run`        | Roda os testes uma vez (Vitest)      |
-| `npm run test:e2e`        | Testes de fumaça (Playwright)        |
-| `npm run db:push`         | Envia as migrações para o Supabase   |
-| `npm run remotion:studio` | Abre o Remotion Studio               |
+| Comando                   | O que faz                                                |
+| ------------------------- | -------------------------------------------------------- |
+| `npm run dev`             | Inicia o servidor de desenvolvimento                     |
+| `npm run local`           | Roda no modo local                                       |
+| `npm run build`           | Build de produção                                        |
+| `npm run lint`            | ESLint                                                   |
+| `npm run format:check`    | Verificação do Prettier                                  |
+| `npm run typecheck`       | Verificação do TypeScript                                |
+| `npm run knip`            | Verificação de código morto                              |
+| `npm run test:run`        | Roda os testes uma vez (Vitest)                          |
+| `npm run test:e2e`        | Testes de fumaça (Playwright)                            |
+| `npm run db:push`         | Envia as migrações para o seu projeto Supabase vinculado |
+| `npm run remotion:studio` | Abre o Remotion Studio                                   |
 
 ## Contribuindo
 

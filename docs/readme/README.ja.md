@@ -182,19 +182,19 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 
 ## スクリプト
 
-| コマンド                  | すること                            |
-| ------------------------- | ----------------------------------- |
-| `npm run dev`             | 開発サーバーを起動                  |
-| `npm run local`           | ローカルモードで起動                |
-| `npm run build`           | 本番ビルド                          |
-| `npm run lint`            | ESLint                              |
-| `npm run format:check`    | Prettier のチェック                 |
-| `npm run typecheck`       | TypeScript のチェック               |
-| `npm run knip`            | デッドコードのチェック              |
-| `npm run test:run`        | テストを一回実行（Vitest）          |
-| `npm run test:e2e`        | スモークテスト（Playwright）        |
-| `npm run db:push`         | マイグレーションを Supabase に push |
-| `npm run remotion:studio` | Remotion Studio を開く              |
+| コマンド                  | すること                                                    |
+| ------------------------- | ----------------------------------------------------------- |
+| `npm run dev`             | 開発サーバーを起動                                          |
+| `npm run local`           | ローカルモードで起動                                        |
+| `npm run build`           | 本番ビルド                                                  |
+| `npm run lint`            | ESLint                                                      |
+| `npm run format:check`    | Prettier のチェック                                         |
+| `npm run typecheck`       | TypeScript のチェック                                       |
+| `npm run knip`            | デッドコードのチェック                                      |
+| `npm run test:run`        | テストを一回実行（Vitest）                                  |
+| `npm run test:e2e`        | スモークテスト（Playwright）                                |
+| `npm run db:push`         | マイグレーションをリンク済みの Supabase プロジェクトに push |
+| `npm run remotion:studio` | Remotion Studio を開く                                      |
 
 ## コントリビュート
 

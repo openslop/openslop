@@ -182,19 +182,19 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 
 ## 스크립트
 
-| 명령                      | 하는 일                        |
-| ------------------------- | ------------------------------ |
-| `npm run dev`             | 개발 서버 시작                 |
-| `npm run local`           | 로컬 모드로 실행               |
-| `npm run build`           | 프로덕션 빌드                  |
-| `npm run lint`            | ESLint                         |
-| `npm run format:check`    | Prettier 검사                  |
-| `npm run typecheck`       | TypeScript 검사                |
-| `npm run knip`            | 죽은 코드 검사                 |
-| `npm run test:run`        | 테스트 한 번 실행 (Vitest)     |
-| `npm run test:e2e`        | 스모크 테스트 (Playwright)     |
-| `npm run db:push`         | 마이그레이션을 Supabase에 푸시 |
-| `npm run remotion:studio` | Remotion Studio 열기           |
+| 명령                      | 하는 일                                        |
+| ------------------------- | ---------------------------------------------- |
+| `npm run dev`             | 개발 서버 시작                                 |
+| `npm run local`           | 로컬 모드로 실행                               |
+| `npm run build`           | 프로덕션 빌드                                  |
+| `npm run lint`            | ESLint                                         |
+| `npm run format:check`    | Prettier 검사                                  |
+| `npm run typecheck`       | TypeScript 검사                                |
+| `npm run knip`            | 죽은 코드 검사                                 |
+| `npm run test:run`        | 테스트 한 번 실행 (Vitest)                     |
+| `npm run test:e2e`        | 스모크 테스트 (Playwright)                     |
+| `npm run db:push`         | 마이그레이션을 연결된 Supabase 프로젝트에 푸시 |
+| `npm run remotion:studio` | Remotion Studio 열기                           |
 
 ## 기여하기
 
