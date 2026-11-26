@@ -585,6 +585,31 @@ describe("executeToolCall", () => {
 		);
 	});
 
+	it("fits the whole canvas when element_ids is empty", async () => {
+		const ops: RefineOp[][] = [];
+		const outcome = await executeToolCall(
+			{ toolName: "fit_durations", input: { element_ids: [] } },
+			context({
+				estimateVisualSpans: () => [
+					{
+						id: "ai1",
+						type: "video",
+						sceneNumber: 1,
+						words: 12,
+						duration: { sec: 10, maxSec: 15 },
+					},
+				],
+				editScript: (applied) => {
+					ops.push(applied);
+					return { applied: applied.length, failures: [], inserted: [] };
+				},
+			}),
+		);
+
+		expect(ops).toEqual([[{ op: "set", id: "ai1", attrs: { duration: "5" } }]]);
+		expect(outcome.ok && outcome.output).toContain("Fitted 1 of 1.");
+	});
+
 	it("says there is nothing to fit when only stills are in scope", async () => {
 		const outcome = await executeToolCall(
 			{ toolName: "fit_durations", input: {} },

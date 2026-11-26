@@ -35,7 +35,7 @@ const toSetOp = ({ span, duration }: DurationFit) => ({
 
 /** The visuals asked for, and the ids that named none of them. */
 const scopeTo = (spans: VisualSpan[], ids?: string[]) => {
-	if (!ids) return { scoped: spans, unknown: [] };
+	if (!ids?.length) return { scoped: spans, unknown: [] };
 	const wanted = new Set(ids);
 	const scoped = spans.filter((span) => wanted.has(span.id));
 	const found = new Set(scoped.map((span) => span.id));
@@ -62,14 +62,14 @@ export const fitDurations = defineTool({
 
 	  The speech under a visual is every line between it and the next visual, whether or
 	  not a scene boundary falls between them, so this is scoped by element, never by scene.
-	  Send \`element_ids\` to fit only those, or nothing for the whole canvas.
+	  Send \`element_ids\` to fit only those, or nothing (or an empty list) for the whole canvas.
 
 	  Images already stretch, uploaded videos keep their own length, and videos with no
 	  speech under them have nothing to fit, so all three are left alone. To change how long a
 	  video with speech runs, change its speech.
 	`,
 	input: z.object({
-		element_ids: z.array(z.string()).min(1).optional(),
+		element_ids: z.array(z.string()).optional(),
 	}),
 	output: z.string(),
 	icon: Hourglass,
