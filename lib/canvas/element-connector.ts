@@ -18,7 +18,6 @@ import {
 	type ProjectAssetType,
 	type GeneratedElement,
 	type CanvasElement,
-	type GeneratedType,
 } from "./types";
 
 type ElementConnector = {
@@ -81,5 +80,3 @@ export const elementSchema = (element: CanvasElement): AttributeSchema =>
 
 export const elementOffers = (element: CanvasElement, key: string): boolean =>
 	elementSchema(element).keys.includes(key);
-
-export type ElementModel = { type: GeneratedType; model: ModelRef };

@@ -42,15 +42,8 @@ const MOCK_ASSETS: RefineOp[] = parseOSML(MOCK_ASSETS_OSML)
 		text: getElementBodyText(asset),
 	}));
 
-const MOCK_RESPONSES: [matches: (prompt: string) => boolean, text: string][] = [
-	[(prompt) => prompt.startsWith(DERIVE_INSTRUCTION), MOCK_STYLE],
-];
-
-function mockResponse({ prompt }: LLMGenerateParams): string {
-	return (
-		MOCK_RESPONSES.find(([matches]) => matches(prompt))?.[1] ?? MOCK_SCRIPT
-	);
-}
+const mockResponse = ({ prompt }: LLMGenerateParams): string =>
+	prompt.startsWith(DERIVE_INSTRUCTION) ? MOCK_STYLE : MOCK_SCRIPT;
 
 export class MockLLM implements LLMProvider {
 	async validate(): Promise<ValidationResult> {
