@@ -1,5 +1,5 @@
+import { animateImage } from "./animate-image";
 import { assets } from "./assets";
-import { editScript } from "./edit-script";
 import { lengths } from "./lengths";
 import { mediaLibrary } from "./media-library";
 import { musicPrompts } from "./music-prompts";
@@ -14,7 +14,7 @@ export type Skill = { name: string; description: string; content: string };
 
 export const SKILLS = [
 	writeScript,
-	editScript,
+	animateImage,
 	reviewScript,
 	assets,
 	osml,
