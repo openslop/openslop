@@ -12,7 +12,7 @@ import { reasoningOpen, userText, type TurnPart } from "./turn-display";
 
 export function UserMessage({ message }: { message: SloppyMessage }) {
 	return (
-		<p className="ml-auto w-fit max-w-[88%] shrink-0 wrap-break-word rounded-xl rounded-br-sm bg-user-message px-3 py-2 text-label text-user-message-foreground">
+		<p className="ml-auto w-fit max-w-[88%] shrink-0 whitespace-pre-wrap wrap-break-word rounded-xl rounded-br-sm bg-user-message px-3 py-2 text-label text-user-message-foreground">
 			{userText(message)}
 		</p>
 	);
