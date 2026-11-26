@@ -15,7 +15,7 @@ export const estimateTotalLength = defineTool({
 	  Speech counts at ${SPEECH_WORDS_PER_MINUTE} words a minute. Each video counts its
 	  \`duration\`, or an uploaded video its own length, cut to its trim.
 
-	  You can't tell length by reading the script. To hit the target, add or cut speech, then
+	  You can't tell length by reading the script. To hit the target, change the script, then
 	  run this again.
 	`,
 	input: z.object({}),
