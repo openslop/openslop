@@ -41,3 +41,10 @@ it("accepts the CLI's signed-out status exit code", async () => {
 	);
 	await expect(runClaude("user", ["-p"])).rejects.toThrow("did not complete");
 });
+it("reports a killed process as a timeout, not a sign-in problem", async () => {
+	mocks.exec.mockImplementation((_file, _args, _options, done) => {
+		queueMicrotask(() => done({ killed: true, signal: "SIGTERM" }, ""));
+		return { stdin: { on: vi.fn(), end: mocks.end } };
+	});
+	await expect(runClaude("user", ["-p"])).rejects.toThrow("timed out");
+});

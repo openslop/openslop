@@ -10,6 +10,7 @@ export async function runClaude(
 	input = "",
 	signal?: AbortSignal,
 	onOutput?: (chunk: string) => void,
+	timeout = 180_000,
 ): Promise<string> {
 	const project = createHash("sha256")
 		.update(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "local")
@@ -36,7 +37,7 @@ export async function runClaude(
 					CLAUDE_CONFIG_DIR: config,
 					CLAUDE_CODE_SAFE_MODE: "1",
 				},
-				timeout: 180_000,
+				timeout,
 				maxBuffer: 2_000_000,
 				signal,
 			},
@@ -57,7 +58,9 @@ export async function runClaude(
 								? "Install Claude Code on this computer, then retry."
 								: signal?.aborted
 									? "Claude request cancelled."
-									: "Claude Code did not complete. Check your subscription sign-in and usage limits, then retry.",
+									: error.killed
+										? "Claude Code timed out. Retry."
+										: "Claude Code did not complete. Check your subscription sign-in and usage limits, then retry.",
 						),
 					);
 				} else resolve(stdout);

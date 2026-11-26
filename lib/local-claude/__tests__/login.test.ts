@@ -19,7 +19,7 @@ it("accepts complete official authorization URLs, never partial or unrelated lin
 	).toBeUndefined();
 	expect(claudeLoginUrl("https://[invalid\n")).toBeUndefined();
 });
-it("exposes the link while the CLI waits and lets the owner cancel", async () => {
+it("gives the browser sign-in its own long timeout and lets the owner cancel", async () => {
 	let signal: AbortSignal | undefined;
 	vi.mocked(runClaude).mockImplementation(
 		(_user, _args, _input, passedSignal, onOutput) => {
@@ -33,6 +33,7 @@ it("exposes the link while the CLI waits and lets the owner cancel", async () =>
 		},
 	);
 	const url = await startClaudeLogin("login-user");
+	expect(vi.mocked(runClaude).mock.calls[0][5]).toBe(15 * 60_000);
 	expect(pendingClaudeLogin("login-user").loginUrl).toBe(url);
 	expect(pendingClaudeLogin("another-user").loginUrl).toBeUndefined();
 	cancelClaudeLogin("login-user");

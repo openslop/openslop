@@ -3,6 +3,7 @@ import { errorMessage } from "@/lib/errors";
 
 type Login = { controller: AbortController; url?: string; error?: string };
 const logins = new Map<string, Login>();
+const BROWSER_SIGN_IN_MS = 15 * 60_000;
 
 export function claudeLoginUrl(output: string): string | undefined {
 	for (const candidate of output.match(/https:\/\/[^\s\x1b]+(?=[\s\x1b])/g) ??
@@ -51,6 +52,7 @@ export async function startClaudeLogin(userId: string) {
 				login.url = url;
 				resolve(url);
 			},
+			BROWSER_SIGN_IN_MS,
 		)
 			.then(() => {
 				clearTimeout(timer);

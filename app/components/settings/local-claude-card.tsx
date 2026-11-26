@@ -57,7 +57,7 @@ export function LocalClaudeCard() {
 				}),
 			);
 		} catch (cause) {
-			setError(errorMessage(cause));
+			if (!controller.signal.aborted) setError(errorMessage(cause));
 		} finally {
 			setBusy(false);
 		}
