@@ -4,7 +4,7 @@ import type { Skill } from "./registry";
 export const assets = {
 	name: "assets",
 	description:
-		"The project's assets (characters, voices, locations, props, art style, reference images): what each holds, and setting them up before a script and from the user's uploads. Load it before adding or changing an asset.",
+		"Setting up the project's assets (characters, voices, locations, props, art style, reference images) before writing a script. Load it before adding or changing an asset in conjunction with writing or changing the script.",
 	content: dedent`
 		Change assets with edit_script asset ops. Any visual that names an avatar, location or prop as {{Name}} gets its generated picture as a reference image.
 
