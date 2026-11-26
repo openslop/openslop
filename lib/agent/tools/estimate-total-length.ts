@@ -11,7 +11,7 @@ const minutes = (sec: number) => (sec / 60).toFixed(1);
 
 export const estimateTotalLength = defineTool({
 	description: dedent`
-	  Estimate how long the video will be after Generate All, against the target length.
+	  Estimate how long the video will be once everything is generated, against the target length.
 	  Speech counts at ${SPEECH_WORDS_PER_MINUTE} words a minute. Each video counts its
 	  \`duration\`, or an uploaded video its own length, cut to its trim.
 

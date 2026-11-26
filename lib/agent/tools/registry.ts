@@ -16,6 +16,7 @@ import { readGeneration } from "./read-generation";
 import { readModelAttributes } from "./read-model-attributes";
 import { readScript } from "./read-script";
 import { readScriptSettings } from "./read-script-settings";
+import { readTemplate } from "./read-template";
 import { readTitle } from "./read-title";
 import { readVideoSettings } from "./read-video-settings";
 import { viewMedia } from "./view-media";
@@ -34,6 +35,7 @@ const TOOLS = {
 	read_generation: readGeneration,
 	read_title: readTitle,
 	read_script_settings: readScriptSettings,
+	read_template: readTemplate,
 	read_video_settings: readVideoSettings,
 	edit_script: editScript,
 	write_script: writeScript,

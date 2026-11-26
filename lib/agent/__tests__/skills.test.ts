@@ -61,27 +61,22 @@ describe("load_skill", () => {
 	});
 });
 
-describe("read_script_settings", () => {
+describe("read_template", () => {
 	const read = (scriptSettings: object) =>
 		executeToolCall(
-			{ toolName: "read_script_settings", input: {} },
+			{ toolName: "read_template", input: {} },
 			withSettings(scriptSettings),
 		);
 
-	it("hands a template's guide and example story along with the settings", async () => {
+	it("hands back the template's guide and example story", async () => {
 		const outcome = await read({ template: template.id });
 
-		expect(outcome.ok && outcome.output).toMatchObject({
-			template: template.id,
-			templateGuide: expect.stringContaining(template.exampleText),
-		});
+		expect(outcome.ok && outcome.output).toContain(template.exampleText);
 	});
 
-	it("gives no guide without a template", async () => {
+	it("says so when the project has no template", async () => {
 		const outcome = await read({});
 
-		expect(outcome.ok && outcome.output).toMatchObject({
-			templateGuide: undefined,
-		});
+		expect(outcome.ok && outcome.output).toBe("This project has no template.");
 	});
 });

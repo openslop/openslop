@@ -14,7 +14,7 @@ export const writeScript = {
 		5. Add the assets the script needs with edit_script (see assets).
 
 		## From an idea
-		- If the project has a template, read_script_settings returns a guide and an example. Copy its style (tone, pacing, imagery, structure, story beats) for the user's topic.
+		- If the settings name a template, read it with read_template and copy its style (tone, pacing, imagery, structure, story beats) for the user's topic.
 		- For a made-up story with no real plot yet, outline it first: premise, characters, themes, conflict, twists and ending. Skip this if the user gave the plot, a template sets the shape, or it isn't a story.
 		- Stay within the word budget for the target length, from update_script_settings. Only spoken words count.
 
