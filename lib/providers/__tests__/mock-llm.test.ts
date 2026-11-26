@@ -4,8 +4,11 @@ import type {
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3 } from "ai/test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { attributeSchemaFor } from "@/lib/canvas/element-connector";
+import { OSMLStreamParser } from "@/lib/canvas/osml-stream-parser";
 import type { RefineOp } from "@/lib/script/refine/types";
 import { MockLLM } from "../llm/mock";
+import { MOCK_ASSETS_OSML, MOCK_SCRIPT } from "../llm/mock-fixtures";
 
 describe("MockLLM", () => {
 	it("falls back to a script for anything else", async () => {
@@ -16,6 +19,21 @@ describe("MockLLM", () => {
 		});
 
 		expect(text).toContain("<speech");
+	});
+
+	it("writes only attribute values the canvas keeps", () => {
+		const elements = new OSMLStreamParser().appendChunk(
+			MOCK_ASSETS_OSML + MOCK_SCRIPT,
+		);
+		const dropped = elements.flatMap(({ type, attrs }) =>
+			Object.entries(attrs)
+				.filter(
+					([key, value]) => !attributeSchemaFor(type, attrs).offers(key, value),
+				)
+				.map(([key, value]) => `${type} ${key}="${value}"`),
+		);
+
+		expect(dropped).toEqual([]);
 	});
 });
 

@@ -22,11 +22,11 @@ export const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:4
 
 <video>Shot 1: Slow pan across a peaceful village at the edge of a lush green forest on a sunny morning, from a cozy cottage with a red door toward the dirt path into the woods. Sound: birds singing, a light breeze in the trees. Shot 2: Wide shot down the flower-lined path as birds fly overhead.</video>
 
-<speech name="Narrator" emotion="cheerful">Once upon a time, in a village at the edge of a great forest, there lived a kind girl named Red.</speech>
+<speech name="Narrator" emotion="happy">Once upon a time, in a village at the edge of a great forest, there lived a kind girl named Red.</speech>
 
 <image motion="pushIn">Inside a sunlit kitchen with copper pots hanging on the wall, {{Red}} (a cheerful girl with brown skin, dark curly hair in two puffs, brown eyes, wearing a bright red hooded cloak and a white dress) stands beside her {{Mother}} (a tall woman with warm brown skin, long black braided hair tied back with a green ribbon, kind dark eyes, wearing a long blue dress and a flour-dusted apron). {{Mother}} gently places a wicker basket of fresh vegetables in {{Red}}'s hands.</image>
 
-<speech name="Mother" emotion="gentle">"Take these straight to Granny, sweetheart. And please don't dawdle along the way."</speech>
+<speech name="Mother" emotion="affectionate">"Take these straight to Granny, sweetheart. And please don't dawdle along the way."</speech>
 
 <speech name="Red" emotion="excited">"I won't, Mama! I'll be back before sundown!"</speech>
 
@@ -42,7 +42,7 @@ export const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:4
 
 <video>Shot 1: Gentle upward pan through the forest canopy, sunlight filtering through the leaves, ending on {{Owl}} perched high in the branches of an ancient oak as she slowly turns her head toward the path below. Sound: leaves rustling high above.</video>
 
-<speech name="Narrator" emotion="wonder">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</speech>
+<speech name="Narrator" emotion="amazed">High above, Owl watched silently from the trees. She had been the keeper of these woods for longer than anyone could remember.</speech>
 
 <speech name="Owl" emotion="calm">"A child enters the forest today. The wind tells me she will not walk alone."</speech>
 
@@ -64,9 +64,9 @@ export const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:4
 
 <speech name="Wolf" emotion="happy">"For my mother. She has a cold. And you, little one?"</speech>
 
-<speech name="Red" emotion="cheerful">"Vegetables for my Granny. She lives just past the great oak."</speech>
+<speech name="Red" emotion="happy">"Vegetables for my Granny. She lives just past the great oak."</speech>
 
-<speech name="Narrator" emotion="warm">They decided to walk together, two unlikely friends sharing the forest path.</speech>
+<speech name="Narrator" emotion="content">They decided to walk together, two unlikely friends sharing the forest path.</speech>
 
 <sound loops="6">forest stream burbling</sound>
 
@@ -80,19 +80,19 @@ export const MOCK_SCRIPT = `<music>Gentle, playful storybook orchestral bed, 1:4
 
 <image motion="panLeft">A clearing where the forest path meets a sturdy bridge over a stream. {{Hunter}} (a broad-shouldered woodsman with a thick brown beard, blue eyes, wearing a green cloak with a hatchet at his belt) stands by the bridge waving warmly at {{Red}} and {{Wolf}} as they approach. His sturdy brown boots crunch on the gravel.</image>
 
-<speech name="Hunter" emotion="hearty">"Well now! Little Red and her woodland friend! You two heading to the old oak cottage?"</speech>
+<speech name="Hunter" emotion="enthusiastic">"Well now! Little Red and her woodland friend! You two heading to the old oak cottage?"</speech>
 
 <speech name="Red" emotion="excited">"Yes, Mr. Hunter! Granny isn't feeling well."</speech>
 
-<speech name="Hunter" emotion="kind">"Then walk safe. Tell her I'll bring firewood by tomorrow."</speech>
+<speech name="Hunter" emotion="sympathetic">"Then walk safe. Tell her I'll bring firewood by tomorrow."</speech>
 
 <sound>creaking wooden bridge</sound>
 
-<speech name="Narrator" emotion="warm">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</speech>
+<speech name="Narrator" emotion="peaceful">They thanked Hunter and crossed the little bridge, the stream singing beneath their feet.</speech>
 
 <video>Shot 1: Slow push-in toward the open door of a small thatched cottage among ancient oaks, smoke curling from the chimney above a window box of marigolds. Sound: birdsong, a fire crackling inside. Shot 2: Medium shot of {{Granny}} stepping into the doorway leaning on a wooden cane, smiling warmly. Shot 3: Close-up of {{Granny}}'s face as her eyes crinkle with delight. Sound: the cane tapping on the stone step.</video>
 
-<speech name="Granny" emotion="delighted">"Red, my darling! And who is this handsome fellow you've brought along?"</speech>
+<speech name="Granny" emotion="elated">"Red, my darling! And who is this handsome fellow you've brought along?"</speech>
 `;
 
 export const MOCK_STYLE =
