@@ -1,3 +1,4 @@
+import PQueue from "p-queue";
 import { createEmitter } from "@/lib/store/emitter";
 import type { Autosaver } from "./autosave";
 import type { ProjectDocument } from "./project-document";
@@ -43,6 +44,8 @@ export class CanvasHistory {
 	private open: { id: string; until: number } | null = null;
 	/** What the canvas returns to, held for as long as a preview lasts. */
 	private stash: SavedProject | null = null;
+	/** One write at a time, so each save sees the version the last one opened. */
+	private readonly writes = new PQueue({ concurrency: 1 });
 	private readonly emitter = createEmitter();
 
 	constructor(
@@ -71,7 +74,10 @@ export class CanvasHistory {
 		}
 	};
 
-	record = async (content: SavedProject): Promise<void> => {
+	record = (content: SavedProject): Promise<void> =>
+		this.writes.add(() => this.write(content));
+
+	private async write(content: SavedProject) {
 		const version =
 			this.open && Date.now() < this.open.until
 				? await this.storage.update(this.open.id, content)
@@ -83,7 +89,7 @@ export class CanvasHistory {
 				...this.state.versions.filter((entry) => entry.id !== version.id),
 			],
 		});
-	};
+	}
 
 	preview = async (id: string): Promise<void> => {
 		if (this.state.previewId === id) return;

@@ -126,6 +126,23 @@ describe("CanvasHistory", () => {
 			expect(storage.rows.get("v1")).toEqual(content("b"));
 		});
 
+		it("folds a save that lands while the previous one is still being written", async () => {
+			const created = Promise.withResolvers<CanvasVersion>();
+			vi.spyOn(storage, "create").mockImplementationOnce((body) => {
+				storage.rows.set("slow", body);
+				return created.promise;
+			});
+
+			const first = history.record(content("a"));
+			const second = history.record(content("b"));
+			created.resolve({ id: "slow", updatedAt: "updated-slow" });
+			await Promise.all([first, second]);
+
+			expect(storage.rows.size).toBe(1);
+			expect(storage.rows.get("slow")).toEqual(content("b"));
+			expect(ids(history)).toEqual(["slow"]);
+		});
+
 		it("starts a new version for the first save of a session", async () => {
 			storage.rows.set("old", content("old"));
 			await history.load();
