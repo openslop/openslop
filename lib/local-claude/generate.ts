@@ -1,8 +1,11 @@
 import { z } from "zod";
+import { LLM_MODELS } from "@/lib/connectors/llm/models";
+import { LOCAL_PROVIDER } from "@/lib/connectors/provider-catalog";
 import { claudeAccount } from "./account";
 import { runClaude } from "./process";
 
-export const CLAUDE_MODEL = "sonnet";
+export const CLAUDE_MODEL =
+	LLM_MODELS[LOCAL_PROVIDER]["Claude subscription"].id;
 
 const Result = z.object({
 	is_error: z.boolean().optional(),

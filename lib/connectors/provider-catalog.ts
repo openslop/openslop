@@ -17,8 +17,8 @@ export type BYOKProviderMeta = ProviderMeta & { keysUrl: string };
 
 /**
  * Every provider a generation can be routed through. `openslop` is the hosted
- * one and needs no key; the rest are the user's own, reached with the key they
- * store on their account.
+ * one and `claude-code` the local Claude sign-in, so neither needs a key; the
+ * rest are the user's own, reached with the key they store on their account.
  */
 export const PROVIDER_CATALOG: Record<
 	typeof MANAGED_PROVIDER | typeof LOCAL_PROVIDER,
