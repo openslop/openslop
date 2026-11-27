@@ -139,7 +139,6 @@ export function TileRemoveActions({
 	removeFrom,
 	onDelete,
 }: {
-	/** The tile's name, for the buttons' labels. */
 	name: string;
 	onRemove?: () => void;
 	/** What Remove takes the tile off, when its label should say. */
@@ -147,7 +146,7 @@ export function TileRemoveActions({
 	onDelete?: () => void;
 }) {
 	if (!onRemove && !onDelete) return null;
-	const remove = removeFrom ? `Remove from ${removeFrom}` : "Remove";
+	const from = removeFrom ? ` from ${removeFrom}` : "";
 	return (
 		<Toolbar
 			variant="tile"
@@ -158,10 +157,8 @@ export function TileRemoveActions({
 		>
 			{onRemove && (
 				<TileToolbarButton
-					label={
-						removeFrom ? `Remove ${name} from ${removeFrom}` : `Remove ${name}`
-					}
-					tooltip={remove}
+					label={`Remove ${name}${from}`}
+					tooltip={`Remove${from}`}
 					onClick={onRemove}
 				>
 					<X size={ICON_SIZES.header} />
@@ -183,7 +180,7 @@ export function TileRemoveActions({
 
 type MenuAction = { onSelect: () => void };
 
-/** Delete as a menu item, for rows too small for the corner button (audio rows). */
+/** Delete as a menu item, for rows too small for the corner button. */
 export const DeleteItem = ({ onSelect }: MenuAction) => (
 	<TileMenuItem icon={Trash2} variant="destructive" onSelect={onSelect}>
 		Delete

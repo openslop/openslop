@@ -68,7 +68,7 @@ describe("AssetsPanel", () => {
 		open();
 		await click('button[aria-label="Add art style"]');
 
-		// With no picture, Delete was all its ⋮ held, so there is no ⋮.
+		// With no picture there is nothing to view larger, so there is no ⋮.
 		expect(
 			document.body.querySelector(
 				'button[aria-label="More actions for Art style"]',

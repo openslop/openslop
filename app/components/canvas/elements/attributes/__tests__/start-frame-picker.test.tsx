@@ -8,6 +8,7 @@ import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import {
 	chooseTileMenuItem,
+	click,
 	mountOnCanvas,
 } from "@/app/components/canvas/__tests__/_mount";
 import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
@@ -120,13 +121,7 @@ describe("StartFramePicker", () => {
 	it("forgets the uploaded picture from its corner button", async () => {
 		openPicker(PICTURE);
 
-		await act(async () =>
-			document.body
-				.querySelector<HTMLButtonElement>(
-					'button[aria-label="Remove Uploaded picture"]',
-				)
-				?.click(),
-		);
+		await click('button[aria-label="Remove Uploaded picture"]');
 
 		const [video] = findElementById(canvas.editor, "v1") ?? [];
 		const attributes = video && flatAttributes(video);
