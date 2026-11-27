@@ -110,6 +110,22 @@ Clique no ícone do seu perfil, depois em **Settings** > **Add providers**, e co
 </tr>
 </table>
 
+## Ou use seu agente de programação
+
+<table>
+<tr>
+<td width="50%" valign="middle">
+
+Já usa Claude Code, Codex, Gemini CLI ou Cursor? O Sloppy e a geração de texto podem rodar nele, sem chave de texto. Entre no agente uma vez pelo terminal (por exemplo, rode `claude`) e escolha-o em **Local agent** num seletor de modelo de texto. Voz, imagens, música e vídeo continuam precisando das chaves deles. [Como funciona](../local-agents.md)
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="Num terminal, entra-se no Claude Code e, no seletor de modelo, Claude Code é escolhido entre os agentes locais" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="Num terminal, entra-se no Claude Code e, no seletor de modelo, Claude Code é escolhido entre os agentes locais" width="100%">
+</td>
+</tr>
+</table>
+
 ## No dia a dia
 
 | Para                    | Faça isto                                                         |
@@ -120,14 +136,14 @@ Clique no ícone do seu perfil, depois em **Settings** > **Add providers**, e co
 
 ## Modo local ou online
 
-|                  | Modo local                                       | Online em [app.openslop.ai](https://app.openslop.ai)            |
-| ---------------- | ------------------------------------------------ | --------------------------------------------------------------- |
-| Quem pode usar   | Qualquer pessoa, hoje                            | Só com convite, [entre na lista de espera](https://openslop.ai) |
-| Instalação       | Node.js, e Docker Desktop em alguns computadores | Nada                                                            |
-| Login            | Automático, um usuário                           | Sua conta                                                       |
-| Projetos e mídia | No seu computador                                | Na nuvem                                                        |
-| Modelos de IA    | Suas próprias chaves                             | Modelos hospedados, mais suas próprias chaves                   |
-| Exportar vídeo   | Renderizado no seu computador                    | Renderizado na nuvem                                            |
+|                  | Modo local                                                          | Online em [app.openslop.ai](https://app.openslop.ai)            |
+| ---------------- | ------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Quem pode usar   | Qualquer pessoa, hoje                                               | Só com convite, [entre na lista de espera](https://openslop.ai) |
+| Instalação       | Node.js, e Docker Desktop em alguns computadores                    | Nada                                                            |
+| Login            | Automático, um usuário                                              | Sua conta                                                       |
+| Projetos e mídia | No seu computador                                                   | Na nuvem                                                        |
+| Modelos de IA    | Suas próprias chaves, ou um agente de programação no seu computador | Modelos hospedados, mais suas próprias chaves                   |
+| Exportar vídeo   | Renderizado no seu computador                                       | Renderizado na nuvem                                            |
 
 ## Se algo der errado
 

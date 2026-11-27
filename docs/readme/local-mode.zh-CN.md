@@ -110,6 +110,22 @@ npm run local
 </tr>
 </table>
 
+## 改用你的编程智能体
+
+<table>
+<tr>
+<td width="50%" valign="middle">
+
+已经在用 Claude Code、Codex、Gemini CLI 或 Cursor？Sloppy 和文本生成可以直接用它运行，不需要文本密钥。在终端里登录一次该智能体（例如运行 `claude`），然后在文本模型选择器的 **Local agent** 下选中它。语音、图片、音乐和视频仍然需要各自的密钥。[工作原理](../local-agents.md)
+
+</td>
+<td width="50%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="在终端登录 Claude Code，然后在模型选择器的本地智能体中选择 Claude Code" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="在终端登录 Claude Code，然后在模型选择器的本地智能体中选择 Claude Code" width="100%">
+</td>
+</tr>
+</table>
+
 ## 之后每天
 
 | 想要           | 这样做                                             |
@@ -120,14 +136,14 @@ npm run local
 
 ## 本地模式与在线版
 
-|            | 本地模式                             | 在线版 [app.openslop.ai](https://app.openslop.ai) |
-| ---------- | ------------------------------------ | ------------------------------------------------- |
-| 谁能用     | 任何人，今天就能用                   | 仅限邀请，[加入等候名单](https://openslop.ai)     |
-| 安装       | Node.js，部分电脑还要 Docker Desktop | 无需安装                                          |
-| 登录       | 自动登录，单个用户                   | 你的账号                                          |
-| 项目和媒体 | 在你的电脑上                         | 在云端                                            |
-| AI 模型    | 你自己的密钥                         | 自带的托管模型，加上你自己的密钥                  |
-| 导出视频   | 在你的电脑上渲染                     | 在云端渲染                                        |
+|            | 本地模式                               | 在线版 [app.openslop.ai](https://app.openslop.ai) |
+| ---------- | -------------------------------------- | ------------------------------------------------- |
+| 谁能用     | 任何人，今天就能用                     | 仅限邀请，[加入等候名单](https://openslop.ai)     |
+| 安装       | Node.js，部分电脑还要 Docker Desktop   | 无需安装                                          |
+| 登录       | 自动登录，单个用户                     | 你的账号                                          |
+| 项目和媒体 | 在你的电脑上                           | 在云端                                            |
+| AI 模型    | 你自己的密钥，或这台电脑上的编程智能体 | 自带的托管模型，加上你自己的密钥                  |
+| 导出视频   | 在你的电脑上渲染                       | 在云端渲染                                        |
 
 ## 遇到问题
 

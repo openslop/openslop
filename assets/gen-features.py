@@ -1782,11 +1782,91 @@ def card_step_keys(theme):
     c.write()
 
 
+def card_step_agent(theme):
+    c = Card("local-step-agent", "Use your coding agent", "A terminal signs in to Claude Code, then the composer's model picker lists the local agents, Claude Code is picked, and Sloppy starts on it.", 11, theme)
+    t = c.t
+    c.bg()
+    # sign in once, in the agent's own terminal
+    TX, TY, TW, TH = 24, 16, 300, 92
+    window(c, TX, TY, TW, TH, "Terminal", "terminal")
+    LX, LY, FS = TX + 14, TY + 46, 9.5
+    col = lambda s: LX + tw(s, FS, family=MONO) * 1.06
+    c.text(LX, LY, "~ $ ", FS, t["muted"], family=MONO)
+    c.typewriter(col("~ $ "), LY, "claude", 0.4, 0.9, FS, t["fg"], family=MONO)
+    signed = c.appear(1.4, dy=3)
+    c.text(LX, LY + 20, "✓", FS, t["success"], family=MONO, cls=signed)
+    c.text(col("✓ "), LY + 20, "Logged in with your Claude account", FS, t["fg"], family=MONO, cls=signed)
+
+    # the composer, with its model picker
+    bx, by, bw, bh = 70, 120, 500, 80
+    app = c.appear(2.0, dy=8, fade=0.3)
+    c.raw(f'<g class="{app}">')
+    c.shadow(bx, by, bw, bh, 12, 0.8)
+    c.rect(bx, by, bw, bh, t["card"], rx=12, stroke=t["border"])
+    c.grain(bx, by, bw, bh, 12)
+    tx, ty = bx + 16, by + 26
+    c.text(tx, ty, "Describe your slop or paste a script", 12.5, t["muted"], cls=c.span(2.0, 5.3))
+    c.typewriter(tx, ty, "A 15 second video about a cat who loves rain.", 5.4, 7.2, 12.5, t["fg"], caret=True)
+    ry = by + bh - 32
+    c.icon("plus", bx + 14, ry + 6, 12, t["fg"])
+    px = bx + 34
+    for label, icon in (("16:9", "aspect-ratio"), ("Auto", "film-slate")):
+        c.icon(icon, px + 6, ry + 6, 11, t["fg"])
+        c.text(px + 21, ry + 15, label, 9.5, t["fg"], weight=500)
+        px += 21 + tw(label, 9.5, 500) + 19
+    MX = px
+    for label, before in (("Claude Opus 5.5", True), ("Claude Code", False)):
+        cl = c.span(0, 4.7, fade=0.1) if before else c.span(4.7, 11)
+        if before:
+            c.provider_mark("openslop", MX + 6, ry + 6.5, 10, cls=cl)
+        else:
+            c.icon("terminal", MX + 6, ry + 6, 11, t["fg"], cls=cl)
+        c.text(MX + 21, ry + 15, label, 9.5, t["fg"], weight=500, cls=cl)
+        c.icon("chevron-down", MX + 24 + tw(label, 9.5, 500), ry + 8, 8, t["muted"], cls=cl)
+    pick = (MX + 50, ry + 11)
+    sbx = bx + bw - 30
+    c.icon("corner-down-left", sbx, ry + 4, 14, t["fg"], opacity=0.35, cls=c.span(0, 5.4))
+    c.icon("corner-down-left", sbx, ry + 4, 14, t["fg"], cls=c.span(5.4, 11))
+    c.rect(sbx - 3, ry + 1, 20, 20, t["hover"], rx=6, cls=c.span(7.7, 8.1, fade=0.1))
+    send = (sbx + 7, ry + 11)
+    took = c.appear(8.2, dy=3)
+    c.orb(W / 2 - 46, by + bh + 13, 16, cls=took)
+    c.text(W / 2 - 26, by + bh + 25, "Slopping… · 1s", 10, t["muted"], cls=took)
+    c.raw("</g>")
+
+    # the picker: hosted models first, then the agents on this computer
+    rows = [("openslop", "Claude Opus 5.5", "$$$"), ("anthropic", "Claude Sonnet 5", "$$"), ("terminal", "Claude Code", "$"), ("terminal", "Codex", "$"), ("terminal", "Gemini CLI", "$"), ("terminal", "Cursor", "$")]
+    DX, DY, DW, RH = MX - 4, ry + 26, 196, 22
+    DH = RH * len(rows) + 8
+    menu = c.span(3.2, 4.7, fade=0.12)
+    c.shadow(DX, DY, DW, DH, 8, 0.9, cls=menu)
+    c.rect(DX, DY, DW, DH, t["card"], rx=8, stroke=t["border"], cls=menu)
+    c.rect(DX + 4, DY + 4 + 2 * RH, DW - 8, RH, t["hover"], rx=5, cls=f"{menu} {c.span(3.9, 4.7, fade=0.08)}")
+    for i, (mark, name, cost) in enumerate(rows):
+        yy = DY + 4 + i * RH
+        if i == 0:
+            c.icon("check", DX + 8, yy + 6, 10, t["fg"], cls=menu)
+        if mark == "terminal":
+            c.icon("terminal", DX + 24, yy + 5.5, 11, t["fg"], cls=menu)
+        else:
+            c.provider_mark(mark, DX + 24, yy + 6, 10, cls=menu)
+        c.text(DX + 41, yy + 14.5, name, 9.5, t["fg"], cls=menu)
+        c.pill(DX + DW - 12 - c.pill_w(cost, 8, pad=5), yy + 4, cost, 8, t["secondary"], t["muted"], h=14, pad=5, cls=menu)
+    claude = (DX + 80, DY + 4 + 2.5 * RH)
+    done_pill(c, W / 2, H - 46, "Runs on your Claude sign-in, no key needed", 8.6)
+
+    c.click(3.0, *pick)
+    c.click(4.45, *claude)
+    c.click(7.8, *send)
+    c.cursor([(0, 560, 330), (2.2, 560, 330), (2.8, *pick), (3.1, *pick), (3.8, *claude), (4.6, *claude), (5.2, tx + 140, ty - 4), (7.3, tx + 140, ty - 4), (7.6, *send), (8.0, *send), (9.6, 560, 330)])
+    c.write()
+
+
 def main():
     for fn in (card_describe, card_sloppy, card_canvas, card_generate, card_timeline, card_providers, card_local):
         fn("dark")
     for theme in ("dark", "light"):
-        for fn in (card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys):
+        for fn in (card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys, card_step_agent):
             fn(theme)
 
 

@@ -110,6 +110,22 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
 </tr>
 </table>
 
+## Use your coding agent instead
+
+<table>
+<tr>
+<td width="50%" valign="middle">
+
+Already use Claude Code, Codex, Gemini CLI or Cursor? Sloppy and text generation can run on it instead of a Text key. Sign in to the agent once in a terminal (for example, run `claude`), then pick it under **Local agent** in a text model picker. Speech, images, music and video still need their keys. [How it works](local-agents.md)
+
+</td>
+<td width="50%">
+  <img src="../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="In a terminal, Claude Code is signed in, then Claude Code is picked from the local agents in the model picker" width="100%">
+  <img src="../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="In a terminal, Claude Code is signed in, then Claude Code is picked from the local agents in the model picker" width="100%">
+</td>
+</tr>
+</table>
+
 ## Every day after
 
 | To                | Do this                                                                   |
@@ -120,14 +136,14 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
 
 ## Local mode vs online
 
-|                    | Local mode                                     | Online at [app.openslop.ai](https://app.openslop.ai)  |
-| ------------------ | ---------------------------------------------- | ----------------------------------------------------- |
-| Who can use it     | Anyone, today                                  | Invite-only, [join the waitlist](https://openslop.ai) |
-| Install            | Node.js, plus Docker Desktop on some computers | Nothing                                               |
-| Sign-in            | Automatic, one user                            | Your account                                          |
-| Projects and media | On your computer                               | In the cloud                                          |
-| AI models          | Your own keys                                  | Hosted models, plus your own keys                     |
-| Exporting video    | Rendered on your computer                      | Rendered in the cloud                                 |
+|                    | Local mode                                        | Online at [app.openslop.ai](https://app.openslop.ai)  |
+| ------------------ | ------------------------------------------------- | ----------------------------------------------------- |
+| Who can use it     | Anyone, today                                     | Invite-only, [join the waitlist](https://openslop.ai) |
+| Install            | Node.js, plus Docker Desktop on some computers    | Nothing                                               |
+| Sign-in            | Automatic, one user                               | Your account                                          |
+| Projects and media | On your computer                                  | In the cloud                                          |
+| AI models          | Your own keys, or a coding agent on this computer | Hosted models, plus your own keys                     |
+| Exporting video    | Rendered on your computer                         | Rendered in the cloud                                 |
 
 ## If something goes wrong
 
