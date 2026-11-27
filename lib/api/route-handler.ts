@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import { notFound } from "./response";
-import { withHostedBalance, withPublic, withSession } from "./with-auth";
+import { withHostedBalance, withErrorEnvelope, withSession } from "./with-auth";
 import { parseBody, parseSearchParams, type ParseResult } from "./parse";
 
 type AuthTier = typeof withSession;
@@ -81,7 +81,7 @@ function publicRouteHandler(parse: ParseSource) {
 		>,
 	) {
 		return async (request: NextRequest) =>
-			withPublic(options.label, () =>
+			withErrorEnvelope(options.label, () =>
 				withParsed(parse(request, options.schema, options.label), (input) =>
 					options.handle({ input, request }),
 				),

@@ -14,15 +14,14 @@ import {
 
 type RouteBody = (user: User) => Promise<Response>;
 
-// Uniform error envelope: an unconnected provider is the caller's to fix, so it
-// comes back as a 400; anything else is logged and returned as 500.
-async function runGuarded(
+export async function withErrorEnvelope(
 	label: string,
 	run: () => Promise<Response>,
 ): Promise<Response> {
 	try {
 		return await run();
 	} catch (error) {
+		// An unconnected provider is the caller's to fix, so it comes back as a 400.
 		if (error instanceof MissingProviderKeyError)
 			return badRequest(error.message);
 		const requestId = (await headers()).get("x-vercel-id");
@@ -32,7 +31,7 @@ async function runGuarded(
 }
 
 export const withSession = (label: string, run: RouteBody) =>
-	runGuarded(label, async () => {
+	withErrorEnvelope(label, async () => {
 		const user = await getUser();
 		return user ? run(user) : unauthorized();
 	});
@@ -44,6 +43,3 @@ export const withHostedBalance = (label: string, run: RouteBody) =>
 			? outOfBalance()
 			: run(user),
 	);
-
-export const withPublic = (label: string, run: () => Promise<Response>) =>
-	runGuarded(label, run);
