@@ -110,6 +110,20 @@ describe("AssetStrip", () => {
 		).toBeNull();
 	});
 
+	it("shows no ⋮ on media with nothing in its menu", async () => {
+		open(<AssetStripMedia />);
+		await act(async () =>
+			store
+				.getState()
+				.addMedia([{ kind: "audio", name: "voice.mp3", url: "https://a/v" }]),
+		);
+
+		expect(document.body.textContent).toContain("voice");
+		expect(
+			document.body.querySelector('button[aria-label^="More actions"]'),
+		).toBeNull();
+	});
+
 	const openUploadedReference = async () => {
 		open(<AssetStripReferences />, [references("https://img/a.png")]);
 		await act(async () =>
