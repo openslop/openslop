@@ -10,10 +10,8 @@ import { claudeAccount } from "@/lib/local-claude/account";
 import { startClaudeLogin, cancelClaudeLogin } from "@/lib/local-claude/login";
 import { runClaude } from "@/lib/local-claude/process";
 import { generateWithClaude } from "@/lib/local-claude/generate";
-vi.mock("@/lib/api/with-auth", () => ({
-	withHostedBudget: vi.fn(),
-	withApiAccess: vi.fn(),
-	withPublic: vi.fn(),
+vi.mock("@/lib/api/with-auth", async (importOriginal) => ({
+	...(await importOriginal<typeof import("@/lib/api/with-auth")>()),
 	withSession: (
 		_label: string,
 		run: (user: { id: string }) => Promise<Response>,
