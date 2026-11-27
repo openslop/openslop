@@ -53,6 +53,9 @@ const COMPONENTS: Components = {
 	),
 };
 
+/** A reply never loads a URL by itself, or injected text could send the chat to any host. */
+const SELF_LOADING = ["img", "source"];
+
 const FADE_IN: AnimateOptions = { easing: "var(--ease-casual)" };
 
 /** A link still streaming its URL shows as plain text, never as a dead link. */
@@ -69,6 +72,7 @@ export function ReplyMarkdown({
 		<Streamdown
 			className="space-y-2 wrap-break-word"
 			components={COMPONENTS}
+			disallowedElements={SELF_LOADING}
 			remend={REMEND}
 			animated={FADE_IN}
 			isAnimating={streaming}

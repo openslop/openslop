@@ -39,6 +39,16 @@ describe("ReplyMarkdown", () => {
 		expect(link?.getAttribute("rel")).toBe("noreferrer");
 	});
 
+	it.each([
+		"![logo](https://example.com/logo.png?chat=secret)",
+		'<img src="https://example.com/logo.png?chat=secret">',
+		'<picture><source srcset="https://example.com/logo.png?chat=secret"></picture>',
+	])("never loads a URL by itself: %s", (text) => {
+		const markup = render(text).innerHTML;
+
+		expect(markup).not.toContain("example.com");
+	});
+
 	it("never shows half-streamed syntax while a reply arrives", () => {
 		const reply = render("Here is the **plan", true);
 
