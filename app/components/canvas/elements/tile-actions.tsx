@@ -178,15 +178,6 @@ export function TileRemoveActions({
 	);
 }
 
-type MenuAction = { onSelect: () => void };
-
-/** Delete as a menu item, for rows too small for the corner button. */
-export const DeleteItem = ({ onSelect }: MenuAction) => (
-	<TileMenuItem icon={Trash2} variant="destructive" onSelect={onSelect}>
-		Delete
-	</TileMenuItem>
-);
-
 /** The large view of `viewed`: its menu item, and the dialog that outlives the menu closing. */
 export function useViewLarger(viewed: Viewed | undefined) {
 	const [open, setOpen] = useState(false);

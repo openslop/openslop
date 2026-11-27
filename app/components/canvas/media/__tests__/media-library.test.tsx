@@ -53,6 +53,13 @@ const open = () => {
 	);
 };
 
+const confirm = (label: string) =>
+	act(async () =>
+		Array.from(document.querySelectorAll("[role=alertdialog] button"))
+			.find((button) => button.textContent === label)
+			?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+	);
+
 const chooseCaptions = (action: string) =>
 	chooseTileMenuItem("song", "Captions", action);
 
@@ -76,11 +83,7 @@ describe("MediaLibrary", () => {
 			"Delete theme?",
 		);
 
-		await act(async () =>
-			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Delete")
-				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-		);
+		await confirm("Delete");
 
 		expect(store.getState().media).toEqual([]);
 	});
@@ -103,11 +106,7 @@ describe("MediaLibrary", () => {
 			"Delete pic?",
 		);
 
-		await act(async () =>
-			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Delete")
-				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-		);
+		await confirm("Delete");
 
 		expect(store.getState().media).toEqual([]);
 	});
@@ -138,11 +137,7 @@ describe("MediaLibrary", () => {
 		expect(transcribe).toHaveBeenCalledTimes(2);
 
 		await chooseCaptions("Remove captions");
-		await act(async () =>
-			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Remove captions")
-				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-		);
+		await confirm("Remove captions");
 
 		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});

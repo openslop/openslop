@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
-import { Image, Mic, Palette, Pencil } from "@/components/ui/icon";
+import { Image, Mic, Palette, Pencil, Trash2 } from "@/components/ui/icon";
 import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
 import type { MediaItem } from "@/lib/project/media";
 import { useImageAsset } from "../hooks/use-image-asset";
@@ -11,7 +11,7 @@ import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
 import { AudioPlayer } from "./audio-player";
 import { MEDIA_KINDS } from "./media-kinds";
-import { DeleteItem, useTilePlayer, type TilePrimary } from "./tile-actions";
+import { TileMenuItem, useTilePlayer, type TilePrimary } from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
 import { deleteArtStyle } from "./delete-asset";
 import { LoadRequestItem, useLoadRequest } from "../media/load-request";
@@ -178,7 +178,15 @@ function MediaAudioRow({ item, menu, onDelete }: MediaTileProps) {
 				<>
 					{request && <LoadRequestItem {...request} />}
 					{menu}
-					{onDelete && <DeleteItem onSelect={onDelete} />}
+					{onDelete && (
+						<TileMenuItem
+							icon={Trash2}
+							variant="destructive"
+							onSelect={onDelete}
+						>
+							Delete
+						</TileMenuItem>
+					)}
 				</>
 			}
 		>
