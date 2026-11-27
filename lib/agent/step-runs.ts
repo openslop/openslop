@@ -53,17 +53,22 @@ export function turnClock(message: SloppyMessage, now: number) {
 	const startedAt = message.metadata?.startedAt ?? now;
 	const runs = [...(message.metadata?.stepSeconds ?? [])];
 	let runStartedAt = message.metadata?.runStartedAt ?? null;
+	// Before anything streams, the working status counts from the start of the turn.
+	let replied = runs.length > 0;
 
 	return {
 		onPart(type: StreamPartType, at: number): SloppyMetadata | undefined {
 			if (STEP_STARTS.has(type) && runStartedAt === null) {
-				runStartedAt = runs.length === 0 ? startedAt : at;
+				runStartedAt = replied ? at : startedAt;
 				runs.push(0);
 			}
 			if (type !== "text-start" && type !== "finish") return;
 			if (runStartedAt !== null)
 				runs[runs.length - 1] = (at - runStartedAt) / 1000;
-			if (type === "text-start") runStartedAt = null;
+			if (type === "text-start") {
+				runStartedAt = null;
+				replied = true;
+			}
 			return {
 				startedAt,
 				runStartedAt,

@@ -68,6 +68,18 @@ describe("turnClock", () => {
 		});
 	});
 
+	it("times a run after an opening reply from its first step", () => {
+		const clock = turnClock(asked, 0);
+
+		clock.onPart("text-start", 2000);
+		clock.onPart("tool-input-start", 5000);
+
+		expect(clock.onPart("finish", 9000)).toMatchObject({
+			stepSeconds: [4],
+			runStartedAt: 5000,
+		});
+	});
+
 	it("starts a new run for steps after a reply", () => {
 		const clock = turnClock(asked, 0);
 
