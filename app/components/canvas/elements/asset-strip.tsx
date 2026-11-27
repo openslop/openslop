@@ -32,7 +32,6 @@ export function AssetStrip({ children }: { children: ReactNode }) {
 	);
 }
 
-/** Whether the asset canvas's strip has a tile to show: the art style, a named asset or a reference. */
 function useHasCanvasAssets(): boolean {
 	const hasArtStyle = useHasAsset("asset_style");
 	const names = useNamedAssetNames();
@@ -40,7 +39,6 @@ function useHasCanvasAssets(): boolean {
 	return hasArtStyle || names.length > 0 || urls.length > 0;
 }
 
-/** The asset canvas's strip: its tiles, or a placeholder when there are none, with + in the top-right corner opening the Assets panel. */
 export function AssetCanvasStrip() {
 	const { setActive } = useEditorPanel();
 	const hasAssets = useHasCanvasAssets();
@@ -61,11 +59,7 @@ export function AssetCanvasStrip() {
 					/>
 				)}
 			</div>
-			<AddButton
-				label="Add asset"
-				onClick={() => setActive("assets")}
-				className="shrink-0"
-			/>
+			<AddButton label="Add asset" onClick={() => setActive("assets")} />
 		</div>
 	);
 }
