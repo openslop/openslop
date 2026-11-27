@@ -14,7 +14,6 @@ import {
 
 type RouteBody = (user: User) => Promise<Response>;
 
-// An unconnected provider is the caller's to fix, so it comes back as a 400.
 export async function withErrorEnvelope(
 	label: string,
 	run: () => Promise<Response>,
@@ -22,6 +21,7 @@ export async function withErrorEnvelope(
 	try {
 		return await run();
 	} catch (error) {
+		// An unconnected provider is the caller's to fix, so it comes back as a 400.
 		if (error instanceof MissingProviderKeyError)
 			return badRequest(error.message);
 		const requestId = (await headers()).get("x-vercel-id");
