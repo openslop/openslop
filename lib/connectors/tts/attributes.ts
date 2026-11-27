@@ -3,7 +3,6 @@ import { z } from "zod";
 import { AttributeSchema } from "../attributes/schema";
 import {
 	nameDef,
-	OWN_MODEL_DEFS,
 	trimEndDef,
 	trimStartDef,
 	volumeDef,
@@ -17,7 +16,6 @@ import {
 
 export const TTS_ATTRIBUTES = AttributeSchema.from([
 	nameDef,
-	...OWN_MODEL_DEFS,
 	{
 		key: "emotion",
 		label: "Emotion",

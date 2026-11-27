@@ -416,6 +416,21 @@ describe("applyRefineOp — set", () => {
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
+	it("refuses a model on speech, which speaks on its voice's", () => {
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
+
+		const result = applyRefineOp(editor, {
+			op: "set",
+			id: "n1",
+			attrs: { provider: "cartesia", model: "Sonic 3.6" },
+		});
+
+		expect(result).toEqual({
+			ok: false,
+			reason: 'set: speech offers no provider "cartesia", model "Sonic 3.6"',
+		});
+	});
+
 	it("keeps the caret marker when text is replaced or cleared", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "old")])]);
 

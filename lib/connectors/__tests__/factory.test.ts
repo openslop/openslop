@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createConnector, resolveAttributeSchema } from "../factory";
 import { DEFAULT_MODELS } from "../models";
-import { CONTENT_TYPES } from "@/lib/canvas/types";
+import { CONTENT_TYPES, ownsModel } from "@/lib/canvas/types";
+import { keysOf } from "@/lib/utils";
 import type { ConnectorType } from "../types";
 
 const stubConfig = {};
@@ -32,8 +33,6 @@ describe("resolveAttributeSchema", () => {
 	it("resolves the connector type's base schema, keyed by connector type not element type", () => {
 		expect(resolveAttributeSchema("tts", DEFAULT_MODELS.tts).keys).toEqual([
 			"name",
-			"provider",
-			"model",
 			"emotion",
 			"speed",
 			"volume",
@@ -68,15 +67,15 @@ describe("resolveAttributeSchema", () => {
 		]);
 	});
 
-	it("carries the model pair on every connector content generates with", () => {
-		for (const { connector } of Object.values(CONTENT_TYPES)) {
-			const schema = resolveAttributeSchema(
+	it("carries the model pair exactly on the content types that own a model", () => {
+		for (const type of keysOf(CONTENT_TYPES)) {
+			const { connector } = CONTENT_TYPES[type];
+			const { keys } = resolveAttributeSchema(
 				connector,
 				DEFAULT_MODELS[connector],
 			);
-			expect(schema.keys).toEqual(
-				expect.arrayContaining(["provider", "model"]),
-			);
+			expect(keys.includes("provider")).toBe(ownsModel(type));
+			expect(keys.includes("model")).toBe(ownsModel(type));
 		}
 	});
 
