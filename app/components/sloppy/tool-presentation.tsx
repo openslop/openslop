@@ -1,7 +1,7 @@
 "use client";
 
 import type { ToolUIPart } from "ai";
-import { Brain, Robot } from "@/components/ui/icon";
+import { Lightbulb, Robot } from "@/components/ui/icon";
 import {
 	presentToolCall,
 	type ToolPresentation,
@@ -22,7 +22,7 @@ export function toolPresentation(
 	);
 }
 
-const THINKING: ToolPresentation = { icon: Brain, label: "Thinking" };
+const THINKING: ToolPresentation = { icon: Lightbulb, label: "Thinking" };
 
 export const stepPresentation = (step: StepPart): ToolPresentation =>
 	step.type === "reasoning" ? THINKING : toolPresentation(step);
