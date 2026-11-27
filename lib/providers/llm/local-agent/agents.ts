@@ -8,8 +8,14 @@ export type Agent = {
 	capabilities: acp.AgentCapabilities;
 };
 
-/** Kinds that change something on this computer. Anything else is safe to allow. */
-const SIDE_EFFECTS: acp.ToolKind[] = ["edit", "delete", "move", "execute"];
+/** Kinds that change this computer or reach the web. Anything else is safe to allow. */
+const SIDE_EFFECTS: acp.ToolKind[] = [
+	"edit",
+	"delete",
+	"move",
+	"execute",
+	"fetch",
+];
 
 /** Enough of the user's environment for an agent to find itself and its sign-in, and none of the app's secrets. */
 const PASSED_ENV = [
@@ -66,6 +72,7 @@ async function start(command: string): Promise<Agent> {
 	const [bin, ...args] = command.split(" ");
 	const child = spawn(bin, args, {
 		env: agentEnv(),
+		shell: process.platform === "win32",
 		stdio: ["pipe", "pipe", "ignore"],
 	});
 	let spawnError: NodeJS.ErrnoException | undefined;
