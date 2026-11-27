@@ -53,7 +53,7 @@ function promptFor({
 	return { text: `${lead}\n\n${transcript(prompt)}`, tools: offered };
 }
 
-/** Text and thoughts each stream as a block, and a new block starts whenever the agent switches between them. */
+/** Text and thoughts each stream as a block, which ends when the agent switches to the other or to a tool of its own. */
 async function* parts(
 	command: string,
 	options: LanguageModelV3CallOptions,
@@ -87,6 +87,8 @@ async function* parts(
 					input: JSON.stringify(event.input),
 				};
 				finishReason = { unified: "tool-calls", raw: undefined };
+				break;
+			case "own-tool":
 				break;
 			case "stop":
 				finishReason = {

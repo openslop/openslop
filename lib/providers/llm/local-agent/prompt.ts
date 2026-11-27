@@ -10,6 +10,7 @@ import { serveTools, type ToolCall } from "./tool-server";
 export type AgentEvent =
 	| { type: "text"; delta: string }
 	| { type: "reasoning"; delta: string }
+	| { type: "own-tool" }
 	| ({ type: "tool-call" } & ToolCall)
 	| { type: "stop"; stopReason: acp.StopReason };
 
@@ -33,6 +34,8 @@ function chunk({ update }: { update: acp.SessionUpdate }): AgentEvent | null {
 			return update.content.type === "text"
 				? { type: "reasoning", delta: update.content.text }
 				: null;
+		case "tool_call":
+			return { type: "own-tool" };
 		default:
 			return null;
 	}

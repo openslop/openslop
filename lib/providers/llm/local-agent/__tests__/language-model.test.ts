@@ -35,7 +35,7 @@ const ADD_NOTE: LanguageModelV3FunctionTool = {
 };
 
 describe("localAgentModel", () => {
-	it("streams thoughts and text as blocks and ends with the agent's turn", async () => {
+	it("streams thoughts and messages as their own blocks and ends with the agent's turn", async () => {
 		const streamed = await parts(options());
 		expect(streamed.map(({ type }) => type)).toEqual([
 			"stream-start",
@@ -44,6 +44,9 @@ describe("localAgentModel", () => {
 			"reasoning-end",
 			"text-start",
 			"text-delta",
+			"text-delta",
+			"text-end",
+			"text-start",
 			"text-delta",
 			"text-end",
 			"finish",
