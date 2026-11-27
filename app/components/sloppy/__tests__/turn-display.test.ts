@@ -1,41 +1,42 @@
 import { describe, expect, it } from "vitest";
-import { reasoningOpen, turnStatus, type TurnPart } from "../turn-display";
+import type { StepPart } from "@/lib/agent/step-runs";
+import { reasoningOpen, stepsLabel } from "../turn-display";
 
-const thought: TurnPart = { type: "reasoning", text: "weighing" };
-const said: TurnPart = { type: "text", text: "on it" };
-const calling: TurnPart = {
-	type: "tool-edit_script",
-	toolCallId: "c1",
-	state: "input-available",
-	input: { ops: [] },
+const thinking: StepPart = {
+	type: "reasoning",
+	text: "weighing",
+	state: "done",
 };
-const called: TurnPart = {
-	type: "tool-edit_script",
+const reading: StepPart = {
+	type: "tool-read_script",
 	toolCallId: "c1",
 	state: "output-available",
-	input: { ops: [] },
-	output: "Applied 1 operation.",
+	input: {},
+	output: "the script",
+};
+const failed: StepPart = {
+	type: "tool-read_script",
+	toolCallId: "c2",
+	state: "output-error",
+	input: {},
+	errorText: "no script yet",
 };
 
-describe("turnStatus", () => {
-	it("reads as slopping before anything has streamed", () => {
-		expect(turnStatus([])).toBe("Slopping…");
+describe("stepsLabel", () => {
+	it("names the latest step, how many steps ran, and how long they took", () => {
+		expect(stepsLabel([thinking, reading], 11.2)).toBe(
+			"Reading the script · 2 steps · 12s",
+		);
 	});
 
-	it("reads as slopping while only thoughts have streamed", () => {
-		expect(turnStatus([thought])).toBe("Slopping…");
+	it("counts a single step in the singular", () => {
+		expect(stepsLabel([thinking], 0.4)).toBe("Thinking · 1 step · 1s");
 	});
 
-	it("reads as responding once text follows the thought", () => {
-		expect(turnStatus([thought, said])).toBe("Responding");
-	});
-
-	it("keeps working after a tool call, which the editor still has to run", () => {
-		expect(turnStatus([said, calling])).toBe("Applying changes");
-	});
-
-	it("goes back to slopping once the editor has answered and the model has not", () => {
-		expect(turnStatus([said, called])).toBe("Slopping…");
+	it("leaves out a time it never recorded and says when a call failed", () => {
+		expect(stepsLabel([reading, failed])).toBe(
+			"Reading the script · 2 steps · failed",
+		);
 	});
 });
 

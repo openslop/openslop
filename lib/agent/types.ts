@@ -6,6 +6,8 @@ import { SLOPPY_TOOLS } from "./tools/registry";
 export const sloppyMetadataSchema = z.object({
 	/** Every step of the turn, end to end. Excludes the edits, which the client runs. */
 	workSeconds: z.number().optional(),
+	/** Working time of each run of steps between replies, in order, so a run's row keeps it after a reload. */
+	stepSeconds: z.array(z.number()).optional(),
 });
 export type SloppyMetadata = z.infer<typeof sloppyMetadataSchema>;
 

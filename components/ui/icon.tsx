@@ -65,6 +65,7 @@ export const ArrowLeft = icon("arrow-left");
 export const PushIn = icon("push-in");
 export const ArrowsStretch = icon("arrows-stretch");
 export const Bold = icon("bold");
+export const Brain = icon("brain");
 export const BookOpen = icon("book-open");
 export const Film = icon("film");
 export const FilmSlate = icon("film-slate");

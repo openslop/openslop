@@ -8,15 +8,20 @@ export function Disclosure({
 	icon,
 	label,
 	children,
+	marker,
 	pending = false,
 	defaultOpen = false,
+	disabled = false,
 }: {
-	icon: ReactNode;
-	label: string;
+	icon?: ReactNode;
+	label: ReactNode;
 	children: ReactNode;
+	/** Stands in for the chevron, such as a loader while work is in flight. */
+	marker?: ReactNode;
 	/** Work still in flight, shown the way the rest of the editor shows it. */
 	pending?: boolean;
 	defaultOpen?: boolean;
+	disabled?: boolean;
 }) {
 	const [open, setOpen] = useState(defaultOpen);
 	const bodyId = useId();
@@ -29,9 +34,10 @@ export function Disclosure({
 				onClick={() => setOpen((prev) => !prev)}
 				aria-expanded={open}
 				aria-controls={bodyId}
-				className="flex items-center gap-1.5 self-start rounded-md px-1 py-0.5 text-left text-label-xs text-muted-foreground transition-colors hover:text-foreground focus-ring"
+				disabled={disabled}
+				className="flex items-center gap-1.5 self-start rounded-md px-1 py-0.5 text-left text-label-xs text-muted-foreground transition-colors enabled:hover:text-foreground focus-ring"
 			>
-				<Chevron className="h-3 w-3" />
+				{marker ?? <Chevron className="h-3 w-3" />}
 				{icon}
 				<span className={pending ? "shimmer" : undefined}>{label}</span>
 			</button>

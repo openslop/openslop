@@ -321,6 +321,22 @@ describe("a turn that takes more than one step", () => {
 		expect(finishSeconds(chunks)).toBeGreaterThanOrEqual(3);
 	});
 
+	it("keeps timing the run of steps the editor just answered", async () => {
+		const chunks = await runTurn(TEXT_TURN, {
+			message: answered(reading("call-1", "the script")),
+			history: recorded(
+				{ ...spent, stepSeconds: [5] },
+				reading("call-1", "the script"),
+			),
+		});
+
+		const { stepSeconds } = chunks.at(-1)?.messageMetadata as {
+			stepSeconds: number[];
+		};
+		expect(stepSeconds).toHaveLength(1);
+		expect(stepSeconds[0]).toBeGreaterThanOrEqual(5);
+	});
+
 	it("runs the model the step was sent with", async () => {
 		await runTurn(TEXT_TURN, {
 			message: answered(reading("call-1", "the script")),

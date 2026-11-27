@@ -1,18 +1,20 @@
-import { isStaticToolUIPart, isTextUIPart } from "ai";
+import { isTextUIPart } from "ai";
+import compact from "lodash/compact";
+import { plural } from "@/lib/format";
+import type { StepPart } from "@/lib/agent/step-runs";
 import type { SloppyMessage } from "@/lib/agent/types";
-
-export type TurnPart = SloppyMessage["parts"][number];
+import { stepPresentation } from "./tool-presentation";
 
 export const WAIT_FOR_SLOPPY = "Wait for Sloppy to finish";
 
-/** The editor runs a call after the model emits it, so a call still means work. */
-export function turnStatus(parts: TurnPart[]): string {
-	const last = parts.at(-1);
-	if (last && isTextUIPart(last)) return "Responding";
-	if (last && isStaticToolUIPart(last) && last.state === "input-available") {
-		return "Applying changes";
-	}
-	return "Slopping…";
+export function stepsLabel(steps: StepPart[], seconds?: number): string {
+	const latest = steps.at(-1);
+	return compact([
+		latest && stepPresentation(latest).label,
+		`${steps.length} ${plural(steps.length, "step")}`,
+		seconds !== undefined && `${Math.ceil(seconds)}s`,
+		steps.some((step) => step.state === "output-error") && "failed",
+	]).join(" · ");
 }
 
 export function userText(message: SloppyMessage): string {

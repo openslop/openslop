@@ -16,6 +16,7 @@ import {
 	pruneTranscript,
 } from "@/lib/agent/messages";
 import { repairToolCall } from "@/lib/agent/repair-tool-call";
+import { stepClock } from "@/lib/agent/step-runs";
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
 import type { ModelRef } from "@/lib/connectors/types";
@@ -87,6 +88,7 @@ export async function streamAgentTurn(
 	});
 
 	const startedAt = Date.now();
+	const clock = stepClock(incoming, startedAt);
 	const result = streamText({
 		model,
 		instructions: sloppyInstructions(cachedPrefix),
@@ -119,11 +121,16 @@ export async function streamAgentTurn(
 			originalMessages: messages,
 			generateMessageId: nanoid,
 			messageMetadata: ({ part }) => {
-				if (part.type === "finish") {
-					return {
-						workSeconds: carried + Math.round((Date.now() - startedAt) / 1000),
-					};
-				}
+				const now = Date.now();
+				const stepSeconds = clock.onPart(part.type, now);
+				return (
+					stepSeconds && {
+						stepSeconds,
+						...(part.type === "finish" && {
+							workSeconds: carried + Math.round((now - startedAt) / 1000),
+						}),
+					}
+				);
 			},
 			onEnd: ({ responseMessage }) =>
 				saveConversationMessage(conversationId, responseMessage),

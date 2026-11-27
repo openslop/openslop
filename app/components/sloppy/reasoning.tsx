@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles } from "@/components/ui/icon";
+import { Brain } from "@/components/ui/icon";
 import { Disclosure, DisclosureText } from "@/components/ui/disclosure";
 
 export function Reasoning({
@@ -18,7 +18,7 @@ export function Reasoning({
 			// once Sloppy moves on, while a reader's own toggle still sticks.
 			key={String(open)}
 			defaultOpen={open}
-			icon={<Sparkles className="h-3 w-3" />}
+			icon={<Brain className="h-3 w-3" />}
 			label={streaming ? "Thinking…" : "Done thinking"}
 			pending={streaming}
 		>
