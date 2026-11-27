@@ -35,8 +35,7 @@ export function ModelsTab({
 	const settings = useSettings();
 
 	const stored = providerKeys.map((row) => row.provider);
-	// A link that named a provider leads here: it goes first, so what the link
-	// was about is the first thing read.
+	// A provider a link opened on shows first, even before it has a key.
 	const shown = (
 		selected && !stored.includes(selected) ? [selected, ...stored] : stored
 	).filter(isByokProvider);
