@@ -14,10 +14,7 @@ export type ToolCall = { toolName: string; input: unknown };
 
 export type ToolServer = { declaration: McpServer; close(): void };
 
-/**
- * Offers the app's tools to an agent over MCP on loopback. A call is handed to
- * `onCall` and never answered here: the editor runs it, and the step ends.
- */
+/** The app's tools over MCP on loopback. A call goes to `onCall` and is never answered: the editor runs it. */
 export async function serveTools(
 	tools: LanguageModelV3FunctionTool[],
 	onCall: (call: ToolCall) => void,

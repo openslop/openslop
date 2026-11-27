@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { Readable, Writable } from "node:stream";
 import * as acp from "@agentclientprotocol/sdk";
+import pick from "lodash/pick";
 
 export type Agent = {
 	context: acp.ClientContext;
@@ -36,12 +37,7 @@ const PASSED_ENV = [
 ];
 
 // Next types NODE_ENV as always set, but an agent should not inherit the app's.
-const agentEnv = () =>
-	Object.fromEntries(
-		PASSED_ENV.flatMap((key) =>
-			process.env[key] ? [[key, process.env[key]]] : [],
-		),
-	) as NodeJS.ProcessEnv;
+const agentEnv = () => pick(process.env, PASSED_ENV) as NodeJS.ProcessEnv;
 
 function permit({
 	toolCall,

@@ -11,10 +11,14 @@ import { LOCAL_PROVIDER } from "@/lib/connectors/provider-catalog";
 import { promptAgent } from "./prompt";
 import { transcript } from "./transcript";
 
+const CONTINUE = "Continue this conversation as the assistant.";
 const ACT_THROUGH_TOOLS =
 	"Act on the project only through the openslop tools, never your own tools or files.";
 
-const UNIFIED: Record<StopReason, LanguageModelV3FinishReason["unified"]> = {
+const FINISH_REASONS: Record<
+	StopReason,
+	LanguageModelV3FinishReason["unified"]
+> = {
 	end_turn: "stop",
 	max_tokens: "length",
 	max_turn_requests: "length",
@@ -44,7 +48,8 @@ function promptFor({
 					(tool): tool is LanguageModelV3FunctionTool =>
 						tool.type === "function",
 				);
-	const lead = `Continue this conversation as the assistant.${offered.length > 0 ? ` ${ACT_THROUGH_TOOLS}` : ""}`;
+	const lead =
+		offered.length > 0 ? `${CONTINUE} ${ACT_THROUGH_TOOLS}` : CONTINUE;
 	return { text: `${lead}\n\n${transcript(prompt)}`, tools: offered };
 }
 
@@ -85,7 +90,7 @@ async function* parts(
 				break;
 			case "stop":
 				finishReason = {
-					unified: UNIFIED[event.stopReason],
+					unified: FINISH_REASONS[event.stopReason],
 					raw: event.stopReason,
 				};
 		}

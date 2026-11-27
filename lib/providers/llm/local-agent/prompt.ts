@@ -24,16 +24,18 @@ function explained(error: unknown): unknown {
 }
 
 function chunk({ update }: { update: acp.SessionUpdate }): AgentEvent | null {
-	if (
-		update.sessionUpdate !== "agent_message_chunk" &&
-		update.sessionUpdate !== "agent_thought_chunk"
-	)
-		return null;
-	if (update.content.type !== "text") return null;
-	const delta = update.content.text;
-	return update.sessionUpdate === "agent_message_chunk"
-		? { type: "text", delta }
-		: { type: "reasoning", delta };
+	switch (update.sessionUpdate) {
+		case "agent_message_chunk":
+			return update.content.type === "text"
+				? { type: "text", delta: update.content.text }
+				: null;
+		case "agent_thought_chunk":
+			return update.content.type === "text"
+				? { type: "reasoning", delta: update.content.text }
+				: null;
+		default:
+			return null;
+	}
 }
 
 function end({ context, capabilities }: Agent, session: acp.ActiveSession) {
@@ -46,10 +48,7 @@ function end({ context, capabilities }: Agent, session: acp.ActiveSession) {
 	session.dispose();
 }
 
-/**
- * One prompt in a fresh session, as events, until the agent ends its turn or
- * calls one of `tools`. A tool call ends the session: the editor runs it.
- */
+/** One prompt in a fresh session, until the agent ends its turn or calls a tool for the editor to run. */
 export async function* promptAgent(
 	command: string,
 	prompt: string,
