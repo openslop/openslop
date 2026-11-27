@@ -82,7 +82,7 @@ function FrameTile({
 				<ThumbnailCaption>{label}</ThumbnailCaption>
 			</ThumbnailRadio>
 			<TileRemoveActions name={label} onRemove={onRemove} />
-			<TileMenu label={label}>{viewer.item}</TileMenu>
+			{viewer.item && <TileMenu label={label}>{viewer.item}</TileMenu>}
 			{viewer.dialog}
 		</div>
 	);

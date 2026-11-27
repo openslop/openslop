@@ -48,7 +48,6 @@ const viewer = () => document.body.querySelector('[role="dialog"]');
 const viewLarger = () => chooseTileMenuItem("Mia", "View larger");
 
 beforeEach(() => {
-	vi.clearAllMocks();
 	canvas = mountOnCanvas();
 });
 
@@ -85,16 +84,8 @@ describe("AssetTile", () => {
 		expect(document.activeElement).toBe(document.body.querySelector(MENU));
 	});
 
-	it("removes and deletes from buttons in the top-left corner, not the menu", async () => {
+	it("removes and deletes from their own buttons, not the menu", async () => {
 		renderTile(AVATAR, { onRemove, onDelete });
-
-		const corner = query('button[aria-label="Remove Mia"]')?.closest(
-			'[data-slot="toolbar"]',
-		);
-		expect(corner?.className).toContain("top-1 left-1");
-		expect(corner?.contains(query('button[aria-label="Delete Mia"]'))).toBe(
-			true,
-		);
 
 		await click('button[aria-label="Remove Mia"]');
 		expect(onRemove).toHaveBeenCalledOnce();

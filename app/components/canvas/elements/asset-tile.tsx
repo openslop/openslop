@@ -115,10 +115,12 @@ export function AssetTile({
 							removeFrom={removeFrom}
 							onDelete={onDelete}
 						/>
-						<TileMenu label={name}>
-							{viewer.item}
-							{menu}
-						</TileMenu>
+						{(viewer.item || menu) && (
+							<TileMenu label={name}>
+								{viewer.item}
+								{menu}
+							</TileMenu>
+						)}
 					</>
 				)}
 			</ThumbnailFace>

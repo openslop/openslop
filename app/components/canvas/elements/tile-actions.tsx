@@ -1,13 +1,6 @@
 "use client";
 
-import {
-	Children,
-	Fragment,
-	isValidElement,
-	useState,
-	type ComponentProps,
-	type ReactNode,
-} from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -63,16 +56,7 @@ export function TilePrimaryAction({
 	);
 }
 
-/** Whether `node` holds anything to show, looking inside fragments; an element counts even if it renders nothing. */
-function hasItems(node: ReactNode): boolean {
-	return Children.toArray(node).some((child) =>
-		isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment
-			? hasItems(child.props.children)
-			: true,
-	);
-}
-
-/** A tile's other actions, behind the ⋮ on its toolbar in the top-right corner; no ⋮ when there are none. */
+/** A tile's other actions, behind the ⋮ on its toolbar in the top-right corner. */
 export function TileMenu({
 	label,
 	children,
@@ -80,7 +64,6 @@ export function TileMenu({
 	label: string;
 	children: ReactNode;
 }) {
-	if (!hasItems(children)) return null;
 	return (
 		<Toolbar
 			variant="tile"
