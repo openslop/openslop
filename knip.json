@@ -4,7 +4,8 @@
 		"remotion/index.ts",
 		"remotion/root.tsx",
 		"remotion.config.ts",
-		"scripts/**"
+		"scripts/**",
+		"lib/**/__tests__/_*.mjs"
 	],
 	"ignore": ["components/ui/**"],
 	"ignoreIssues": {
@@ -15,6 +16,5 @@
 	"ignoreDependencies": ["turbo"],
 	"rules": {
 		"types": "warn"
-	},
-	"ignoreBinaries": ["claude"]
+	}
 }

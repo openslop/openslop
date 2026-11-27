@@ -17,20 +17,14 @@ export type BYOKProviderMeta = ProviderMeta & { keysUrl: string };
 
 /**
  * Every provider a generation can be routed through. `openslop` is the hosted
- * one and `claude-code` the local Claude sign-in, so neither needs a key; the
- * rest are the user's own, reached with the key they store on their account.
+ * one and `local` runs the agents installed on this computer, so neither needs
+ * a key; the rest are the user's own, reached with the key they store.
  */
 export const PROVIDER_CATALOG: Record<
 	typeof MANAGED_PROVIDER | typeof LOCAL_PROVIDER,
 	ProviderMeta
 > &
 	Record<BYOKProvider, BYOKProviderMeta> = {
-	"claude-code": {
-		name: "Claude subscription",
-		description:
-			"Your personal Claude Code subscription, on this computer only.",
-		mark: { src: "/icons/claude.svg", masked: false },
-	},
 	openslop: {
 		name: "OpenSlop",
 		description: "Hosted models, included with your account. No key needed.",
@@ -60,9 +54,14 @@ export const PROVIDER_CATALOG: Record<
 		mark: { src: "/icons/elevenlabs.svg", masked: false },
 		keysUrl: "https://elevenlabs.io/app/settings/api-keys",
 	},
+	local: {
+		name: "Local agent",
+		description: "A coding agent on this computer, signed in on its own.",
+		mark: { src: "/icons/terminal.svg", masked: true },
+	},
 };
 
-export const LOCAL_PROVIDER = "claude-code" as const;
+export const LOCAL_PROVIDER = "local" as const;
 
 export const MANAGED_PROVIDER = "openslop" as const;
 

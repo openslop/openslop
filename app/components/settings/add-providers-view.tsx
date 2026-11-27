@@ -12,7 +12,6 @@ import { useProviderKeyLookup } from "@/app/components/models/use-provider-keys"
 import { MODEL_GROUPS } from "@/lib/connectors/model-groups";
 import {
 	isByokProvider,
-	LOCAL_PROVIDER,
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
@@ -33,10 +32,7 @@ export function AddProvidersView({
 	const capabilities =
 		MODEL_GROUPS.find((group) => group.key === groupKey)?.types ?? null;
 	const matches = useMemo(
-		() =>
-			searchProviders(query, capabilities).filter(
-				({ provider }) => provider !== LOCAL_PROVIDER,
-			),
+		() => searchProviders(query, capabilities),
 		[query, capabilities],
 	);
 
@@ -92,8 +88,8 @@ export function AddProvidersView({
 									</div>
 									{!isByokProvider(provider) ? (
 										// Reads like the other connected rows, but there is
-										// nothing to do: everyone generates on the hosted
-										// provider, so there is no key to bring.
+										// nothing to do: the hosted provider and local agents
+										// take no key.
 										<span
 											className={buttonVariants({
 												variant: "secondary",

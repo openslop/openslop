@@ -35,6 +35,7 @@
 		]
 	},
 	"dependencies": {
+		"@agentclientprotocol/sdk": "^2.12.0",
 		"@ai-sdk/anthropic": "^4.0.39",
 		"@ai-sdk/openai": "^4.0.42",
 		"@ai-sdk/provider": "^4.0.7",
@@ -44,6 +45,7 @@
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
 		"@elevenlabs/elevenlabs-js": "^2.38.1",
+		"@modelcontextprotocol/sdk": "^1.32.2",
 		"@number-flow/react": "^0.6.2",
 		"@remotion/captions": "4.0.481",
 		"@remotion/cli": "4.0.481",

@@ -13,9 +13,12 @@ export const OPENSLOP_API_PREFIX = "/api/v1";
  */
 export const THIRD_PARTY_API_PREFIX = "/api/third-party";
 
-export const apiPrefixFor = (provider: Provider): string =>
-	provider === LOCAL_PROVIDER
-		? "/api/local/claude"
-		: isByokProvider(provider)
-			? THIRD_PARTY_API_PREFIX
-			: OPENSLOP_API_PREFIX;
+/** Where the agents installed on the user's own computer are served from, in development only. */
+const LOCAL_API_PREFIX = "/api/local";
+
+export function apiPrefixFor(provider: Provider): string {
+	if (provider === LOCAL_PROVIDER) return LOCAL_API_PREFIX;
+	return isByokProvider(provider)
+		? THIRD_PARTY_API_PREFIX
+		: OPENSLOP_API_PREFIX;
+}

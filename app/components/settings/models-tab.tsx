@@ -1,6 +1,5 @@
 "use client";
 
-import { LocalClaudeCard } from "./local-claude-card";
 import { Button } from "@/components/ui/button";
 import { Plus, RotateCcw } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
@@ -13,10 +12,7 @@ import {
 	differsFromRecommended,
 	modelEntry,
 } from "@/lib/connectors/models";
-import {
-	isByokProvider,
-	LOCAL_PROVIDER,
-} from "@/lib/connectors/provider-catalog";
+import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { Provider } from "@/lib/connectors/types";
 import { toastError } from "@/lib/toast-error";
 import { useSettings } from "@/lib/settings/use-settings";
@@ -41,14 +37,12 @@ export function ModelsTab({
 	const stored = providerKeys.map((row) => row.provider);
 	// A link that named a provider leads here: it goes first, so what the link
 	// was about is the first thing read.
-	const shown = (
-		selected && !stored.includes(selected) ? [selected, ...stored] : stored
-	).filter((provider) => provider !== LOCAL_PROVIDER);
+	const shown =
+		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
 
 	return (
 		<div className="flex flex-col gap-6">
 			<SectionTitle>Models</SectionTitle>
-			{process.env.NODE_ENV === "development" && <LocalClaudeCard />}
 
 			<SettingsSection
 				title="Providers"
@@ -66,9 +60,7 @@ export function ModelsTab({
 				) : (
 					<div className="flex flex-col gap-2">
 						{shown.map((provider) =>
-							!isByokProvider(provider) ? (
-								<HostedProviderCard key={provider} />
-							) : (
+							isByokProvider(provider) ? (
 								<ProviderCard
 									key={provider}
 									provider={provider}
@@ -76,6 +68,8 @@ export function ModelsTab({
 									// A link pointing at a row that is gone has nothing to open.
 									onDismissed={() => settings.open("models")}
 								/>
+							) : (
+								<HostedProviderCard key={provider} />
 							),
 						)}
 					</div>

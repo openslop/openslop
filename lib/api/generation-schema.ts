@@ -5,6 +5,7 @@ import { THINKING_LEVELS } from "@/lib/connectors/llm/enums";
 import { hasModel, listModels } from "@/lib/connectors/models";
 import {
 	isByokProvider,
+	LOCAL_PROVIDER,
 	MANAGED_PROVIDER,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
@@ -52,6 +53,15 @@ export const byokModel = (type: ConnectorType): z.ZodType<BYOKModelRef> =>
 		.object({ provider: byokProviderField, model: z.string() })
 		.refine((pick) => hasModel(type, pick), {
 			error: `Invalid model. Supported: ${byokModelNames(type).join(", ")}`,
+		});
+
+export type LocalModelRef = ModelRef & { provider: typeof LOCAL_PROVIDER };
+
+export const localModel = (type: ConnectorType): z.ZodType<LocalModelRef> =>
+	z
+		.object({ provider: z.literal(LOCAL_PROVIDER), model: z.string() })
+		.refine((pick) => hasModel(type, pick), {
+			error: "No local agent by that name",
 		});
 
 export const bodySchema = <

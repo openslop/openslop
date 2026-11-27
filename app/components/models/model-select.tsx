@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/tooltip";
 import { listModels, sameModel } from "@/lib/connectors/models";
 import {
+	isByokProvider,
 	PROVIDER_CATALOG,
-	LOCAL_PROVIDER,
 } from "@/lib/connectors/provider-catalog";
 import type { ConnectorType, ModelRef, Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/use-settings";
@@ -93,48 +93,40 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 	const keyFor = useProviderKeyLookup();
 	const settings = useSettings();
 
-	return listModels(type)
-		.filter(
-			({ provider }) =>
-				provider !== LOCAL_PROVIDER || process.env.NODE_ENV === "development",
-		)
-		.map((entry) => {
-			const { provider, model, description } = entry;
-			const missing = provider !== LOCAL_PROVIDER && keyFor(provider) === null;
-			return (
-				<SelectMenuItem
-					key={`${provider}/${model}`}
-					aria-label={modelLabel({ provider, model })}
-					selected={sameModel({ provider, model }, value)}
-					onSelect={() =>
-						missing
-							? settings.open("models", provider)
-							: onChange({ provider, model })
-					}
-					className="gap-2"
+	return listModels(type).map((entry) => {
+		const { provider, model, description } = entry;
+		const missing = isByokProvider(provider) && keyFor(provider) === null;
+		return (
+			<SelectMenuItem
+				key={`${provider}/${model}`}
+				aria-label={modelLabel({ provider, model })}
+				selected={sameModel({ provider, model }, value)}
+				onSelect={() =>
+					missing
+						? settings.open("models", provider)
+						: onChange({ provider, model })
+				}
+				className="gap-2"
+			>
+				<ProviderIcon
+					provider={provider}
+					size={14}
+					className={cn(missing && "opacity-40")}
+				/>
+				<span
+					className={cn("min-w-0 truncate", missing && "text-muted-foreground")}
 				>
-					<ProviderIcon
-						provider={provider}
-						size={14}
-						className={cn(missing && "opacity-40")}
-					/>
-					<span
-						className={cn(
-							"min-w-0 truncate",
-							missing && "text-muted-foreground",
-						)}
-					>
-						{model}
-					</span>
-					{description && <InfoTip label={description} />}
-					{missing ? (
-						<ConnectHint provider={provider} />
-					) : (
-						<ModelChips meta={entry} className="ml-auto" />
-					)}
-				</SelectMenuItem>
-			);
-		});
+					{model}
+				</span>
+				{description && <InfoTip label={description} />}
+				{missing ? (
+					<ConnectHint provider={provider} />
+				) : (
+					<ModelChips meta={entry} className="ml-auto" />
+				)}
+			</SelectMenuItem>
+		);
+	});
 }
 
 /** A way into the models settings from a picker that stands far from them. */
