@@ -16,7 +16,7 @@ type RouteBody = (user: User) => Promise<Response>;
 
 // Uniform error envelope: an unconnected provider is the caller's to fix, so it
 // comes back as a 400; anything else is logged and returned as 500.
-async function runGuarded(
+export async function withPublic(
 	label: string,
 	run: () => Promise<Response>,
 ): Promise<Response> {
@@ -32,7 +32,7 @@ async function runGuarded(
 }
 
 export const withSession = (label: string, run: RouteBody) =>
-	runGuarded(label, async () => {
+	withPublic(label, async () => {
 		const user = await getUser();
 		return user ? run(user) : unauthorized();
 	});
@@ -44,6 +44,3 @@ export const withHostedBalance = (label: string, run: RouteBody) =>
 			? outOfBalance()
 			: run(user),
 	);
-
-export const withPublic = (label: string, run: () => Promise<Response>) =>
-	runGuarded(label, run);
