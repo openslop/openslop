@@ -31,6 +31,10 @@ import {
 	useInitialTranscript,
 } from "@/lib/project/project-provider";
 import { fetchOrThrow } from "@/lib/clients/http";
+import {
+	DEPLOYMENT_HEADER,
+	pageDeploymentId,
+} from "@/lib/deployment/deployment-id";
 import { toastError } from "@/lib/toast-error";
 
 const STOPPED_TEXT = "Stopped by you before the editor finished it";
@@ -99,8 +103,12 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 				fetch: fetchOrThrow,
 				prepareSendMessagesRequest: ({ messages, body }) => {
 					const picked = turnModel.current ?? model;
+					const deploymentId = pageDeploymentId();
 					return {
 						api: agentPathFor(picked),
+						headers: deploymentId
+							? { [DEPLOYMENT_HEADER]: deploymentId }
+							: undefined,
 						body: {
 							...body,
 							projectId,

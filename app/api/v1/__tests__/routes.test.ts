@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { DEPLOYMENT_HEADER } from "@/lib/deployment/deployment-id";
 
 const mockLLMGenerate = vi.fn();
 const mockLLMStream = vi.fn();
@@ -66,12 +67,14 @@ function makeRequest(
 	url: string,
 	body?: Record<string, unknown>,
 	method = "POST",
+	headers?: Record<string, string>,
 ) {
 	const type = url.split("/")[3] ?? "";
 	const withModel =
 		body && "prompt" in body ? { model: HOSTED_MODELS[type], ...body } : body;
 	return new NextRequest(new URL(url, "http://localhost:3000"), {
 		method,
+		headers,
 		...(withModel ? { body: JSON.stringify(withModel) } : {}),
 	});
 }
@@ -605,20 +608,59 @@ describe("API routes", () => {
 	});
 
 	describe("POST /api/v1/agent", () => {
-		const turn = () =>
+		const turn = (headers?: Record<string, string>) =>
 			import("@/app/api/v1/agent/route").then(({ POST }) =>
 				POST(
-					makeRequest("/api/v1/agent", {
-						model: "Claude Opus 5",
-						projectId: PROJECT_ID,
-						message: {
-							id: "m1",
-							role: "user",
-							parts: [{ type: "text", text: "hi" }],
+					makeRequest(
+						"/api/v1/agent",
+						{
+							model: "Claude Opus 5",
+							projectId: PROJECT_ID,
+							message: {
+								id: "m1",
+								role: "user",
+								parts: [{ type: "text", text: "hi" }],
+							},
 						},
-					}),
+						"POST",
+						headers,
+					),
 				),
 			);
+
+		describe("from a tab on another deployment", () => {
+			beforeEach(() => vi.stubEnv("NEXT_DEPLOYMENT_ID", "dpl-new"));
+
+			it("returns 409 stale_deployment before the turn starts", async () => {
+				const res = await turn({ [DEPLOYMENT_HEADER]: "dpl-old" });
+
+				expect(res.status).toBe(409);
+				expect(await res.json()).toMatchObject({ code: "stale_deployment" });
+				expect(mockStreamAgentTurn).not.toHaveBeenCalled();
+			});
+
+			it("runs the turn for a tab on this deployment", async () => {
+				mockStreamAgentTurn.mockResolvedValue(new Response());
+
+				const res = await turn({ [DEPLOYMENT_HEADER]: "dpl-new" });
+
+				expect(res.status).toBe(200);
+				expect(mockStreamAgentTurn).toHaveBeenCalledOnce();
+			});
+
+			it("runs the turn for a caller that names no deployment", async () => {
+				mockStreamAgentTurn.mockResolvedValue(new Response());
+
+				expect((await turn()).status).toBe(200);
+			});
+		});
+
+		it("never refuses a turn when the server has no deployment ID (local dev)", async () => {
+			vi.stubEnv("NEXT_DEPLOYMENT_ID", "");
+			mockStreamAgentTurn.mockResolvedValue(new Response());
+
+			expect((await turn({ [DEPLOYMENT_HEADER]: "dpl-old" })).status).toBe(200);
+		});
 
 		it("returns 402 before the turn starts once the balance is spent", async () => {
 			mockReadBalance.mockResolvedValue(-0.5);

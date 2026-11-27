@@ -2,7 +2,7 @@ import isUndefined from "lodash/isUndefined";
 import mapValues from "lodash/mapValues";
 import omitBy from "lodash/omitBy";
 import type { z } from "zod";
-import { ApiErrorEnvelope } from "@/lib/api/error-envelope";
+import { ApiErrorEnvelope, type ApiErrorCode } from "@/lib/api/error-envelope";
 
 export type QueryParams = Record<string, string | number | undefined>;
 
@@ -13,12 +13,15 @@ type RequestOptions = {
 	signal?: AbortSignal;
 };
 
-async function readErrorMessage(response: Response): Promise<string> {
+async function readError(
+	response: Response,
+): Promise<{ message: string; code?: ApiErrorCode }> {
 	const body: unknown = await response.json().catch(() => undefined);
-	return (
-		ApiErrorEnvelope.safeParse(body).data?.error ??
-		`${response.status} ${response.statusText}`
-	);
+	const envelope = ApiErrorEnvelope.safeParse(body).data;
+	return {
+		message: envelope?.error ?? `${response.status} ${response.statusText}`,
+		code: envelope?.code,
+	};
 }
 
 function buildInit(method: string, body: unknown): RequestInit {
@@ -52,6 +55,7 @@ export class ApiError extends Error {
 	constructor(
 		message: string,
 		readonly requestId: string | null,
+		readonly code?: ApiErrorCode,
 	) {
 		super(message);
 		this.name = "ApiError";
@@ -68,11 +72,10 @@ function asUnreachable(error: unknown): never {
 /** `fetch` for our own API routes, surfacing their error envelope as a thrown `ApiError`. */
 export const fetchOrThrow: typeof fetch = async (input, init) => {
 	const response = await fetch(input, init).catch(asUnreachable);
-	if (!response.ok)
-		throw new ApiError(
-			await readErrorMessage(response),
-			response.headers.get("x-vercel-id"),
-		);
+	if (!response.ok) {
+		const { message, code } = await readError(response);
+		throw new ApiError(message, response.headers.get("x-vercel-id"), code);
+	}
 	return response;
 };
 

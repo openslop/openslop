@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "./components/theme-provider";
 import { AppToaster } from "./components/app-toaster";
 import { GlobalErrorToaster } from "./components/global-error-toaster";
+import { NewVersionWatcher } from "./components/new-version-watcher";
 import { ToastErrorBoundary } from "./components/toast-error-boundary";
 
 const slopella = localFont({
@@ -67,6 +68,7 @@ export default function RootLayout({
 						<ToastErrorBoundary>{children}</ToastErrorBoundary>
 					</div>
 					<GlobalErrorToaster />
+					<NewVersionWatcher />
 					<AppToaster />
 				</ThemeProvider>
 			</body>
