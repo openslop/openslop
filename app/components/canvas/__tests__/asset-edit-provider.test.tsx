@@ -10,8 +10,6 @@ import {
 import { AssetEditProvider } from "../elements/named-asset/asset-edit-provider";
 import { mountOnCanvas } from "./_mount";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("../elements/named-asset/new-named-asset-dialog", () => ({
 	NewNamedAssetDialog: ({
 		preset,

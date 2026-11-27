@@ -24,8 +24,6 @@ import {
 import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
 import { ArtStyleModal } from "../art-style-modal";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const generate = vi.fn(async (_params: LLMGenerateParams) => ({
 	text: "Soft watercolor.",
 	model: "test",

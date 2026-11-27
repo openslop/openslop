@@ -29,8 +29,6 @@ vi.mock("@/app/components/canvas/workspace-context", () => ({
 }));
 vi.mock("../../elements/audio-player", () => ({ AudioPlayer: () => null }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let canvas: ReturnType<typeof mountOnCanvas>;
 let store: ProjectStore;
 afterEach(() => canvas.unmount());

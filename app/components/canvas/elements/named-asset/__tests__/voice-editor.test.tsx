@@ -12,8 +12,6 @@ import { GenerationQueue } from "@/lib/generation/queue";
 import { jobNode } from "@/lib/generation/__tests__/_graph";
 import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("@/components/ui/dropdown-menu", () => {
 	const Pass = ({ children }: { children: ReactNode }) => <>{children}</>;
 	return {

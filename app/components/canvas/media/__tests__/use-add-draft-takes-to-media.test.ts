@@ -10,8 +10,6 @@ import { buildCtx } from "@/lib/generation/__tests__/_context";
 import type { Upload } from "@/lib/upload/upload-files";
 import { useAddDraftTakesToMedia } from "../use-add-draft-takes-to-media";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const queue = new GenerationQueue();
 vi.mock("@/lib/generation/generation-queue-provider", () => ({
 	useGenerationQueue: () => queue,

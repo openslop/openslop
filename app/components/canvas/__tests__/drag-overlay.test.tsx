@@ -17,8 +17,6 @@ vi.mock("../elements/element-container", () => ({
 	),
 }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const image = (...cast: string[]): ContentElement => ({
 	id: "i",
 	type: "image",

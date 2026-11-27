@@ -28,8 +28,6 @@ vi.mock("@/lib/project/use-media-upload", () => ({
 	}),
 }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const PICTURE = "https://img/frame.png";
 
 let canvas: ReturnType<typeof mountOnCanvas>;

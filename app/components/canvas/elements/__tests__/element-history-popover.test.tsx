@@ -13,8 +13,6 @@ import { content, scene } from "@/app/components/canvas/__tests__/fixtures";
 import { click, mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { ElementHistoryPopover } from "../element-history-popover";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const loadHistory = vi.fn();
 let history: ElementVersionHistory;
 vi.mock("@/app/components/canvas/hooks/use-element-history", () => ({

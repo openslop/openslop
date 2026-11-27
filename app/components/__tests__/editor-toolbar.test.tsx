@@ -51,8 +51,6 @@ vi.mock("../sloppy/sloppy-provider", () => ({
 
 vi.mock("../player/export-button", () => ({ ExportButton: () => null }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 

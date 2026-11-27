@@ -15,8 +15,6 @@ import { SortableItem } from "../dnd/sortable-item";
 import { useDragAndDrop } from "../dnd/use-drag-and-drop";
 import { content, scene } from "./fixtures";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let root: Root;
 let editor: Editor;
 const container = document.body.appendChild(document.createElement("div"));

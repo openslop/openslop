@@ -10,8 +10,6 @@ import {
 	TooltipTrigger,
 } from "../tooltip";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 const onOpenChange = vi.fn();

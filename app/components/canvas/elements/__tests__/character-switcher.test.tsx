@@ -19,8 +19,6 @@ vi.mock("../asset-edit-context", () => ({
 
 import { CharacterSwitcher } from "../character-switcher";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const LABEL = "Select which character speaks";
 const label = (html: string) => /aria-label="([^"]*)"/.exec(html)?.[1];
 

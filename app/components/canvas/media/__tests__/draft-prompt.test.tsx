@@ -15,8 +15,6 @@ vi.hoisted(() => {
 	Object.assign(InputEvent.prototype, { getTargetRanges: () => [] });
 });
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const DRAFT = "asset_media_image";
 
 function Prompt() {

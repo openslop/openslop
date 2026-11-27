@@ -31,8 +31,6 @@ vi.mock("@/lib/generation/use-build-context", () => ({
 	useBuildContext: () => () => ({ canvas: [] }),
 }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 let runTool: ReturnType<typeof useAgentTools>;

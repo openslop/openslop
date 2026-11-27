@@ -9,8 +9,6 @@ vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: vi.fn() }),
 }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 

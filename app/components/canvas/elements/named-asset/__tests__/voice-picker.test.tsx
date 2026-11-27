@@ -10,8 +10,6 @@ import { VoiceRow } from "../voice-picker";
 const toastError = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/toast-error", () => ({ toastError }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const VOICE: VoiceInfo = {
 	id: "v1",
 	name: "Aria",

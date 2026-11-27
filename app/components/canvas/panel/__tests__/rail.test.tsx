@@ -6,8 +6,6 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { PINNED_PANEL_KEYS, RAIL_PANEL_GROUPS } from "../panel-keys";
 import { Rail } from "../rail";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let container: HTMLDivElement;
 let root: Root;
 

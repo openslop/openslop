@@ -37,8 +37,6 @@ vi.mock("@/lib/project/use-media-upload", () => ({
 	}),
 }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const MIA = "https://img/mia.png";
 const mia = asset("asset_avatar", { name: "Mia" });
 const ned = asset("asset_avatar", { name: "Ned" });

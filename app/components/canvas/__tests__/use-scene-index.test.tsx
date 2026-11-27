@@ -8,8 +8,6 @@ import { Slate, withReact } from "slate-react";
 import { SCENE_TYPE } from "@/lib/canvas/types";
 import { useSceneIndex } from "../hooks/use-scene-index";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const scene = (id: string): Descendant => ({
 	id,
 	type: SCENE_TYPE,

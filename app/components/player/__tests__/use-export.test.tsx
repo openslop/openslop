@@ -8,8 +8,6 @@ import { runRender, type RenderUpdate } from "@/lib/render/render-client";
 import type { RenderLayout } from "@/lib/render/types";
 import { useExport } from "../use-export";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("sonner", () => ({
 	toast: { custom: vi.fn(), error: vi.fn(), dismiss: vi.fn() },
 }));

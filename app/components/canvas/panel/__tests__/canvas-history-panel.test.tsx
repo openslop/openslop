@@ -17,8 +17,6 @@ import { CanvasHistoryPanel } from "../canvas-history-panel";
 vi.mock("@/app/components/user-avatar", () => ({ UserAvatar: () => null }));
 vi.mock("@/lib/user/user-provider", () => ({ useUser: () => null }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const content = (script: string): SavedProject => ({
 	script,
 	store: ProjectDataSchema.parse({}),

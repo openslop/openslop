@@ -11,8 +11,6 @@ import { ElementErrorBoundary } from "../element-error-boundary";
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let brokenId: string | null;
 
 function Card({ attributes, element, children }: RenderElementProps) {

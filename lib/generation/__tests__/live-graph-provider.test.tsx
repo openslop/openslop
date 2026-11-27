@@ -16,8 +16,6 @@ import type { GenerationNode } from "../graph";
 import { LiveGraphProvider, useResolveNode } from "../live-graph-provider";
 import { buildCtx } from "./_context";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const editor = { children: [] as Descendant[] };
 vi.mock("slate-react", () => ({ useSlateStatic: () => editor }));
 

@@ -5,8 +5,6 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ConfirmDeleteDialog } from "../confirm-delete-dialog";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 const onClose = vi.fn();

@@ -34,8 +34,6 @@ vi.mock("@/app/components/canvas/workspace-context", () => ({
 	useShowWorkspace: () => true,
 }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let canvas: ReturnType<typeof mountOnCanvas>;
 let store: ProjectStore;
 afterEach(() => canvas.unmount());

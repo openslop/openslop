@@ -8,8 +8,6 @@ import { ToastErrorBoundary } from "../toast-error-boundary";
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let broken = false;
 function Flaky() {
 	if (broken) throw new Error("player crashed");
