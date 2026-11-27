@@ -38,7 +38,7 @@ export const viewResult = defineTool({
 	toModelOutput: ({ output }) =>
 		imageOutput(describeResult(output), ...output.images.map(({ url }) => url)),
 	retention: "turn",
-	label: ({ id }) => (id ? `Looking at ${id}` : "Looking at a result"),
+	label: "Viewing result",
 	execute: async ({ id }, ctx) => {
 		const result = await ctx.elementResult(id);
 		if (!result)

@@ -25,8 +25,12 @@ const failed: StepPart = {
 describe("stepsLabel", () => {
 	it("names the latest step, how many steps ran, and how long they took", () => {
 		expect(stepsLabel([thinking, reading], 11.2)).toBe(
-			"Reading the script · 2 steps · 12s",
+			"Reading script · 2 steps · 12s",
 		);
+	});
+
+	it("names a run for its latest call, not the thought after it", () => {
+		expect(stepsLabel([reading, thinking])).toBe("Reading script · 2 steps");
 	});
 
 	it("counts a single step in the singular", () => {
@@ -35,7 +39,7 @@ describe("stepsLabel", () => {
 
 	it("leaves out a time it never recorded and says when a call failed", () => {
 		expect(stepsLabel([reading, failed])).toBe(
-			"Reading the script · 2 steps · failed",
+			"Reading script · 2 steps · failed",
 		);
 	});
 });

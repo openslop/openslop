@@ -10,7 +10,7 @@ export const setTitle = defineTool({
 	input: z.object({ title: z.string().min(1) }),
 	output: z.string(),
 	icon: SlidersHorizontal,
-	label: "Naming the project",
+	label: "Naming project",
 	execute: async ({ title }, ctx) => {
 		ctx.setTitle(title);
 		return `Set the title to ${title}.`;

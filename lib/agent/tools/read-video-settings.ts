@@ -12,7 +12,7 @@ export const readVideoSettings = defineTool({
 	input: z.object({}),
 	output: VideoSettingsSchema,
 	icon: Film,
-	label: "Reading the video settings",
+	label: "Reading video settings",
 	execute: async (_input, ctx) => ctx.readProject().videoSettings,
 	retention: "turn",
 });

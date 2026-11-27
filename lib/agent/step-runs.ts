@@ -8,7 +8,7 @@ import {
 	type ToolUIPart,
 } from "ai";
 import type { SLOPPY_TOOLS } from "./tools/registry";
-import type { SloppyMessage, SloppyTools } from "./types";
+import type { SloppyMessage, SloppyMetadata, SloppyTools } from "./types";
 
 export type TurnPart = SloppyMessage["parts"][number];
 
@@ -40,13 +40,6 @@ export function turnBlocks(parts: TurnPart[]): TurnBlock[] {
 	return blocks;
 }
 
-const endsInSteps = (message: SloppyMessage): boolean => {
-	const last = message.parts.findLast(
-		(part) => isTextUIPart(part) || isStepPart(part),
-	);
-	return message.role === "assistant" && !!last && !isTextUIPart(last);
-};
-
 type StreamPartType = TextStreamPart<typeof SLOPPY_TOOLS>["type"];
 
 const STEP_STARTS = new Set<StreamPartType>([
@@ -55,24 +48,30 @@ const STEP_STARTS = new Set<StreamPartType>([
 	"tool-call",
 ]);
 
-/** A request that picks up after the editor ran a call is still inside that run, so it keeps timing it. */
-export function stepClock(message: SloppyMessage, startedAt: number) {
+/** Times run from saved start times, so they include the editor running calls between requests, as the reader saw it. */
+export function turnClock(message: SloppyMessage, now: number) {
+	const startedAt = message.metadata?.startedAt ?? now;
 	const runs = [...(message.metadata?.stepSeconds ?? [])];
-	let open: { index: number; since: number } | null = endsInSteps(message)
-		? { index: Math.max(runs.length - 1, 0), since: startedAt }
-		: null;
+	let runStartedAt = message.metadata?.runStartedAt ?? null;
 
 	return {
-		onPart(type: StreamPartType, now: number): number[] | undefined {
-			if (STEP_STARTS.has(type)) {
-				open ??= { index: runs.push(0) - 1, since: now };
-				return;
+		onPart(type: StreamPartType, at: number): SloppyMetadata | undefined {
+			if (STEP_STARTS.has(type) && runStartedAt === null) {
+				runStartedAt = runs.length === 0 ? startedAt : at;
+				runs.push(0);
 			}
 			if (type !== "text-start" && type !== "finish") return;
-			if (open)
-				runs[open.index] = (runs[open.index] ?? 0) + (now - open.since) / 1000;
-			open = null;
-			return [...runs];
+			if (runStartedAt !== null)
+				runs[runs.length - 1] = (at - runStartedAt) / 1000;
+			if (type === "text-start") runStartedAt = null;
+			return {
+				startedAt,
+				runStartedAt,
+				stepSeconds: [...runs],
+				...(type === "finish" && {
+					workSeconds: Math.round((at - startedAt) / 1000),
+				}),
+			};
 		},
 	};
 }

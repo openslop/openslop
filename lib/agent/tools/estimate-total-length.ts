@@ -21,7 +21,7 @@ export const estimateTotalLength = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Estimating the total length",
+	label: "Timing video",
 	execute: async (_input, ctx) => {
 		const words = ctx.countSpokenWords();
 		const runtime = ctx.estimateRuntime();

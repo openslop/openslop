@@ -14,7 +14,7 @@ const part = (type: string) =>
 describe("toolPresentation", () => {
 	it("names the tool a live call runs", () => {
 		expect(toolPresentation(part("tool-read_script")).label).toBe(
-			"Reading the script",
+			"Reading script",
 		);
 	});
 

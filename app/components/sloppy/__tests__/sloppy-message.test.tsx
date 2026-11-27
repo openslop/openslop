@@ -68,7 +68,7 @@ describe("AgentTurn", () => {
 			false,
 		);
 
-		expect(rows()).toEqual(["Reading the script · 2 steps · 12s"]);
+		expect(rows()).toEqual(["Reading script · 2 steps · 12s"]);
 		expect(container.textContent).not.toContain("weighing");
 		expect(container.textContent).toContain("Worked for 14s");
 	});
@@ -88,7 +88,7 @@ describe("AgentTurn", () => {
 		);
 
 		expect(rows()).toEqual([
-			"Reading the script · 1 step · 1s",
+			"Reading script · 1 step · 1s",
 			"Thinking · 1 step · 2s",
 		]);
 	});
@@ -112,13 +112,13 @@ describe("AgentTurn", () => {
 	it("says so when a step failed", async () => {
 		await render(turn([read, failed]), false);
 
-		expect(rows()).toEqual(["Reading the script · 2 steps · failed"]);
+		expect(rows()).toEqual(["Reading script · 2 steps · failed"]);
 	});
 
 	it("shows the run Sloppy is still on as the working status", async () => {
 		await render(turn([read]), true);
 
-		expect(rows()).toEqual(["Reading the script· 0s"]);
+		expect(rows()).toEqual(["Reading script…· 0s"]);
 	});
 
 	it("shows the working status before anything has streamed", async () => {
@@ -139,7 +139,7 @@ describe("AgentTurn", () => {
 		);
 
 		const row = container.querySelector("button[aria-expanded]");
-		expect(row?.textContent).toBe("Reading the script · 1 step");
+		expect(row?.textContent).toBe("Reading script · 1 step");
 		expect(row?.getAttribute("aria-expanded")).toBe("true");
 	});
 

@@ -16,7 +16,7 @@ import {
 	pruneTranscript,
 } from "@/lib/agent/messages";
 import { repairToolCall } from "@/lib/agent/repair-tool-call";
-import { stepClock } from "@/lib/agent/step-runs";
+import { turnClock } from "@/lib/agent/step-runs";
 import { SLOPPY_TOOLS } from "@/lib/agent/tools/registry";
 import type { SloppyMessage } from "@/lib/agent/types";
 import type { ModelRef } from "@/lib/connectors/types";
@@ -57,6 +57,7 @@ export type AgentTurnRequest = {
 export async function streamAgentTurn(
 	request: AgentTurnRequest,
 ): Promise<Response> {
+	const receivedAt = Date.now();
 	// Reading the key this turn runs on depends on nothing else here, and would
 	// otherwise sit in front of the first token.
 	const [llm, conversationId] = await Promise.all([
@@ -72,7 +73,6 @@ export async function streamAgentTurn(
 	const messages = upsertMessage(history, incoming);
 	await saveConversationMessage(conversationId, incoming);
 
-	const carried = stored?.metadata?.workSeconds ?? 0;
 	const { model, providerOptions, cachedPrefix, costOf } = llm.agentModel(
 		request.model,
 	);
@@ -87,8 +87,7 @@ export async function streamAgentTurn(
 		emptyMessages: "remove",
 	});
 
-	const startedAt = Date.now();
-	const clock = stepClock(incoming, startedAt);
+	const clock = turnClock(incoming, receivedAt);
 	const result = streamText({
 		model,
 		instructions: sloppyInstructions(cachedPrefix),
@@ -120,18 +119,7 @@ export async function streamAgentTurn(
 			tools: SLOPPY_TOOLS,
 			originalMessages: messages,
 			generateMessageId: nanoid,
-			messageMetadata: ({ part }) => {
-				const now = Date.now();
-				const stepSeconds = clock.onPart(part.type, now);
-				return (
-					stepSeconds && {
-						stepSeconds,
-						...(part.type === "finish" && {
-							workSeconds: carried + Math.round((now - startedAt) / 1000),
-						}),
-					}
-				);
-			},
+			messageMetadata: ({ part }) => clock.onPart(part.type, Date.now()),
 			onEnd: ({ responseMessage }) =>
 				saveConversationMessage(conversationId, responseMessage),
 			onError: errorMessage,

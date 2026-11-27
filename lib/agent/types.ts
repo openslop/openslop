@@ -4,9 +4,10 @@ import { SLOPPY_TOOLS } from "./tools/registry";
 
 /** Carried on the message, so one turn stays one row however many steps it took. */
 export const sloppyMetadataSchema = z.object({
-	/** Every step of the turn, end to end. Excludes the edits, which the client runs. */
+	startedAt: z.number().optional(),
 	workSeconds: z.number().optional(),
-	/** Working time of each run of steps between replies, in order, so a run's row keeps it after a reload. */
+	/** Null once the run is replied to: a metadata merge skips undefined. */
+	runStartedAt: z.number().nullable().optional(),
 	stepSeconds: z.array(z.number()).optional(),
 });
 export type SloppyMetadata = z.infer<typeof sloppyMetadataSchema>;

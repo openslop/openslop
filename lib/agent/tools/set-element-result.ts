@@ -30,8 +30,8 @@ export const setElementResult = defineTool({
 	icon: Upload,
 	label: ({ results }) =>
 		results?.length
-			? `Setting files on ${results.length} ${plural(results.length, "element")}`
-			: "Setting files",
+			? `Attaching ${results.length} ${plural(results.length, "file")}`
+			: "Attaching files",
 	execute: async ({ results }, ctx) => {
 		const outcomes = await Promise.allSettled(
 			results.map(async ({ id, url }) => ctx.setElementResult(id, url)),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
 	DefaultChatTransport,
 	lastAssistantMessageIsCompleteWithToolCalls,
@@ -87,8 +87,10 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 	const turnModel = useRef<ModelRef>(undefined);
 	// Stopping drops the output of a tool call still in flight
 	const turn = useRef<AbortController>(undefined);
+	// Between steps the SDK reads as ready, with every call answered, until it sends the next one.
+	const [working, setWorking] = useState(false);
 
-	const { messages, sendMessage, setMessages, stop, status, addToolOutput } =
+	const { messages, sendMessage, setMessages, stop, addToolOutput } =
 		useChat<SloppyMessage>({
 			messages: initialTranscript,
 			messageMetadataSchema: sloppyMetadataSchema,
@@ -131,35 +133,34 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 					);
 				});
 			},
-			onFinish: ({ isAbort, isDisconnect, isError }) => {
-				if (isAbort || isDisconnect || isError)
-					setMessages((current) => settleUnansweredCalls(current));
+			onFinish: ({ isAbort, isDisconnect, isError, finishReason }) => {
+				const broken = isAbort || isDisconnect || isError;
+				if (broken) setMessages((current) => settleUnansweredCalls(current));
+				if (broken || finishReason !== "tool-calls") setWorking(false);
 			},
 			onError: (error) => toastError(error, "Sloppy could not finish that"),
 			throttle: 50,
 		});
 
-	const loading =
-		status === "submitted" ||
-		status === "streaming" ||
-		hasPendingToolCall(messages);
 	const writingScript = hasPendingToolCall(messages, DRAFTING_TOOLS);
 	const control = useMemo<SloppyControl>(
 		() => ({
 			send: (message) => {
 				turnModel.current = model;
 				turn.current = new AbortController();
+				setWorking(true);
 				void sendMessage({ text: message });
 			},
 			stop: () => {
 				turn.current?.abort();
+				setWorking(false);
 				void stop();
 				setMessages((current) => settleUnansweredCalls(current, STOPPED_TEXT));
 			},
-			loading,
+			loading: working,
 			writingScript,
 		}),
-		[sendMessage, setMessages, stop, loading, writingScript, model],
+		[sendMessage, setMessages, stop, working, writingScript, model],
 	);
 
 	return (

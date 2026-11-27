@@ -310,9 +310,9 @@ describe("a turn that takes more than one step", () => {
 		{ id: "m-agent", role: "assistant", metadata, parts },
 	];
 
-	const spent = { workSeconds: 3 };
+	const spent = { startedAt: Date.now() - 3000 };
 
-	it("adds a step's time to what the turn already worked", async () => {
+	it("times the turn from when it began, across steps", async () => {
 		const chunks = await runTurn(TEXT_TURN, {
 			message: answered(reading("call-1", "the script")),
 			history: recorded(spent, reading("call-1", "the script")),
@@ -325,7 +325,7 @@ describe("a turn that takes more than one step", () => {
 		const chunks = await runTurn(TEXT_TURN, {
 			message: answered(reading("call-1", "the script")),
 			history: recorded(
-				{ ...spent, stepSeconds: [5] },
+				{ ...spent, stepSeconds: [5], runStartedAt: Date.now() - 5000 },
 				reading("call-1", "the script"),
 			),
 		});
@@ -350,7 +350,7 @@ describe("a turn that takes more than one step", () => {
 	it("does not take what a turn cost from the editor", async () => {
 		const claimed: SloppyMessage = {
 			...answered(reading("call-1", "the script")),
-			metadata: { workSeconds: 9999 },
+			metadata: { startedAt: 0 },
 		};
 		const chunks = await runTurn(TEXT_TURN, {
 			message: claimed,

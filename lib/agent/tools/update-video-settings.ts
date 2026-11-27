@@ -74,7 +74,7 @@ export const updateVideoSettings = defineTool({
 		.refine(...atLeastOne("video setting")),
 	output: z.string(),
 	icon: Film,
-	label: "Updating the video settings",
+	label: "Updating video settings",
 	execute: async ({ captionPreset, captionStyle, ...rest }, ctx) => {
 		const style = captionPreset
 			? merge({}, captionPresetStyle(captionPreset), captionStyle)

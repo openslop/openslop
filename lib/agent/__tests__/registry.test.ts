@@ -824,7 +824,7 @@ describe("a call the editor cannot run", () => {
 describe("presentToolCall", () => {
 	it("presents a call to a tool the editor can run", () => {
 		expect(presentToolCall("set_title", { title: "Moon Cat" })).toMatchObject({
-			label: "Naming the project",
+			label: "Naming project",
 		});
 	});
 

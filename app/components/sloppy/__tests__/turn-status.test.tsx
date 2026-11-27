@@ -66,8 +66,8 @@ describe("StepRun while live", () => {
 
 		await render([thinking, reading()]);
 
-		expect(leaving()?.textContent).toBe("Thinking");
-		expect(button()?.textContent).toContain("Reading what the model allows");
+		expect(leaving()?.textContent).toBe("Thinking…");
+		expect(button()?.textContent).toContain("Reading model options");
 	});
 
 	it("updates a step's label in place as its input streams in", async () => {
@@ -75,7 +75,7 @@ describe("StepRun while live", () => {
 		await render([reading("kling")]);
 
 		expect(leaving()).toBeNull();
-		expect(button()?.textContent).toContain("Reading what kling allows");
+		expect(button()?.textContent).toContain("Reading kling options");
 	});
 
 	it("shows the steps so far when expanded", async () => {

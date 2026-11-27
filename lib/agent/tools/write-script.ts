@@ -17,7 +17,7 @@ export const writeScript = defineTool({
 	}),
 	output: z.string(),
 	icon: Film,
-	label: "Writing a new script",
+	label: "Writing script",
 	execute: async () =>
 		"Wrote a new script onto the canvas. Read it to see what landed.",
 	draftsScript: true,

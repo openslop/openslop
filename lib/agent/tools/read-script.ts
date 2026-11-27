@@ -13,7 +13,7 @@ export const readScript = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: Eye,
-	label: "Reading the script",
+	label: "Reading script",
 	execute: async (_input, ctx) => {
 		ctx.markScriptRead();
 		const script = ctx.readScript().trim();

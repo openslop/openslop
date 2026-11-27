@@ -9,7 +9,7 @@ import OrbLoader from "../orb-loader";
 import { Reasoning } from "./reasoning";
 import { Tool } from "./tool";
 import { stepPresentation } from "./tool-presentation";
-import { reasoningOpen, stepsLabel } from "./turn-display";
+import { headline, reasoningOpen, stepsLabel } from "./turn-display";
 
 function StepList({ steps, live }: { steps: StepPart[]; live: boolean }) {
 	return (
@@ -30,16 +30,14 @@ function StepList({ steps, live }: { steps: StepPart[]; live: boolean }) {
 	);
 }
 
-const SLOPPING = "Slopping…";
-
 function StepFace({ step }: { step: StepPart | undefined }) {
 	const { icon: Icon, label } = step
 		? stepPresentation(step)
-		: { icon: undefined, label: SLOPPING };
+		: { icon: undefined, label: "Slopping" };
 	return (
 		<span className="flex items-center gap-1.5">
 			{Icon && <Icon className="h-3 w-3" />}
-			<span className="shimmer">{label}</span>
+			<span className="shimmer">{`${label}…`}</span>
 		</span>
 	);
 }
@@ -93,7 +91,7 @@ export function StepRun({
 	live: boolean;
 	seconds?: number;
 }) {
-	const latest = steps.at(-1);
+	const latest = headline(steps);
 	const face = latest && stepPresentation(latest);
 	return (
 		<Disclosure
