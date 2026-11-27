@@ -30,6 +30,17 @@ const disjunctionList = new Intl.ListFormat("en", { type: "disjunction" });
 export const disjunction = (items: readonly string[]): string =>
 	disjunctionList.format(items);
 
+/** How many items are named before the rest are counted off. */
+const MAX_NAMED = 3;
+
+/** "a, b, c, and 2 more". */
+export function namedList(items: readonly string[]): string {
+	const named = items.slice(0, MAX_NAMED);
+	const rest = items.length - named.length;
+	if (rest > 0) named.push(`${rest} more`);
+	return conjunction(named);
+}
+
 export function plural(count: number, noun: string): string {
 	return count === 1 ? noun : `${noun}s`;
 }

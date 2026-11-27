@@ -45,7 +45,7 @@ function generateLabel(status: GenerationStatus, hasResult: boolean) {
 function generateTooltip(
 	hasPrompt: boolean,
 	hasResult: boolean,
-	queuedReason: string | null | undefined,
+	queuedReason: string | null,
 ) {
 	if (queuedReason) return queuedReason;
 	if (!hasPrompt) return "Add a prompt first";
@@ -63,7 +63,7 @@ export function GenerateButton({
 	status: GenerationStatus;
 	hasPrompt: boolean;
 	hasResult: boolean;
-	queuedReason?: string | null;
+	queuedReason: string | null;
 	onGenerate: () => void;
 	className?: string;
 }) {

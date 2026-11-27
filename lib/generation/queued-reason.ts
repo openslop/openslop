@@ -1,8 +1,8 @@
 import uniq from "lodash/uniq";
+import { namedList } from "@/lib/format";
 import type { AssetConnectorType } from "../connectors/types";
 import type { GenerationNode } from "./graph";
 import type { GenerationQueue } from "./queue";
-import { namedList } from "./stale-reason";
 
 const MEDIA_NAMES: Record<AssetConnectorType, string> = {
 	image: "image",
@@ -25,10 +25,7 @@ function waitingFor(node: GenerationNode, queue: GenerationQueue): string[] {
 	);
 }
 
-/**
- * Why a queued element hasn't started, in the user's terms: a dependency often
- * has no card on the canvas, so naming it is the point. `null` means not waiting.
- */
+/** Why a queued element hasn't started, naming dependencies that often have no card on the canvas. */
 export function queuedReason(
 	id: string,
 	queue: GenerationQueue,

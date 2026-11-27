@@ -196,7 +196,6 @@ export class GenerationQueue {
 		this.pending = this.pending.filter((node) => node.id !== id);
 	}
 
-	/** The node waiting its turn under `id`, if it is waiting rather than running. */
 	pendingNode = (id: string): GenerationNode | undefined =>
 		this.pending.find((node) => node.id === id);
 
@@ -215,7 +214,7 @@ export class GenerationQueue {
 		const running = [...this.active.values()].filter(
 			(job) => job.connectorType === connectorType,
 		).length;
-		return running < this.limits[connectorType];
+		return running < this.limitFor(connectorType);
 	}
 
 	private nextReady() {

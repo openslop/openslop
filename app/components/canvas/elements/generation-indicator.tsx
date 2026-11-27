@@ -48,7 +48,6 @@ export function GenerationIndicator({
 }: {
 	status: ActiveGenerationStatus;
 	startedAt: number | null;
-	/** What a queued element waits on, for its tooltip; the visible label stays short. */
 	queuedReason?: string | null;
 	size?: Size;
 	className?: string;

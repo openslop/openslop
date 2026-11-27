@@ -66,8 +66,9 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 			name={label}
 			Icon={Icon}
 			fallback="icon"
-			status="generating"
+			status={status}
 			startedAt={startedAt}
+			queuedReason={waitingOn}
 		/>
 	);
 }

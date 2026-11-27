@@ -3,13 +3,10 @@ import lowerCase from "lodash/lowerCase";
 import union from "lodash/union";
 import uniq from "lodash/uniq";
 import upperFirst from "lodash/upperFirst";
-import { conjunction } from "@/lib/format";
+import { namedList } from "@/lib/format";
 import type { GenerationNode } from "./graph";
 import type { GenerationQueue } from "./queue";
 import { generationInputs, isNodeStale, needsGeneration } from "./staleness";
-
-/** How many changes are named before the rest are counted off. */
-const MAX_NAMED = 3;
 
 const changedKeys = (
 	current: Record<string, unknown>,
@@ -60,12 +57,4 @@ export function staleReason(
 	const changes = changedInputs(node, queue);
 	const what = changes.length > 0 ? namedList(changes) : "its inputs";
 	return `${upperFirst(what)} changed — regenerate to update`;
-}
-
-/** "a, b, and c", counting off whatever is past the first few. */
-export function namedList(items: readonly string[]): string {
-	const named = items.slice(0, MAX_NAMED);
-	const rest = items.length - named.length;
-	if (rest > 0) named.push(`${rest} more`);
-	return conjunction(named);
 }
