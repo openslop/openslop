@@ -112,19 +112,7 @@ Cliquez sur votre icône de profil, puis sur **Settings** > **Add providers**, e
 
 ## Ou utilisez votre agent de code
 
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-Vous utilisez déjà Claude Code, Codex, Gemini CLI ou Cursor ? Sloppy et la génération de texte peuvent tourner dessus, sans clé pour le texte. Connectez-vous une fois à l'agent dans un terminal (par exemple avec `claude`), puis choisissez-le sous **Local agent** dans un sélecteur de modèle de texte. La voix, les images, la musique et la vidéo demandent toujours leurs clés. [Comment ça marche](../local-agents.md)
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="Dans le compositeur, le sélecteur de modèle liste les agents locaux, Claude Code est choisi et Sloppy démarre dessus" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="Dans le compositeur, le sélecteur de modèle liste les agents locaux, Claude Code est choisi et Sloppy démarre dessus" width="100%">
-</td>
-</tr>
-</table>
+Vous utilisez déjà Claude Code, Codex, Gemini CLI ou Cursor ? Sloppy et la génération de texte peuvent tourner dessus, sans clé pour le texte. Voir [Local agents](../local-agents.md).
 
 ## Au quotidien
 

@@ -112,19 +112,7 @@ npm run local
 
 ## 改用你的编程智能体
 
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-已经在用 Claude Code、Codex、Gemini CLI 或 Cursor？Sloppy 和文本生成可以直接用它运行，不需要文本密钥。在终端里登录一次该智能体（例如运行 `claude`），然后在文本模型选择器的 **Local agent** 下选中它。语音、图片、音乐和视频仍然需要各自的密钥。[工作原理](../local-agents.md)
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="在输入框的模型选择器中列出本地智能体，选中 Claude Code 后 Sloppy 就用它开始工作" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="在输入框的模型选择器中列出本地智能体，选中 Claude Code 后 Sloppy 就用它开始工作" width="100%">
-</td>
-</tr>
-</table>
+已经在用 Claude Code、Codex、Gemini CLI 或 Cursor？Sloppy 和文本生成可以直接用它运行，不需要文本密钥。详见 [Local agents](../local-agents.md)。
 
 ## 之后每天
 

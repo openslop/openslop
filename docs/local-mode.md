@@ -112,19 +112,7 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
 
 ## Use your coding agent instead
 
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-Already use Claude Code, Codex, Gemini CLI or Cursor? Sloppy and text generation can run on it instead of a Text key. Sign in to the agent once in a terminal (for example, run `claude`), then pick it under **Local agent** in a text model picker. Speech, images, music and video still need their keys. [How it works](local-agents.md)
-
-</td>
-<td width="50%">
-  <img src="../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="In the composer, the model picker lists the local agents, Claude Code is picked, and Sloppy starts on it" width="100%">
-  <img src="../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="In the composer, the model picker lists the local agents, Claude Code is picked, and Sloppy starts on it" width="100%">
-</td>
-</tr>
-</table>
+Already use Claude Code, Codex, Gemini CLI or Cursor? Sloppy and text generation can run on it instead of a Text key. See [Local agents](local-agents.md).
 
 ## Every day after
 

@@ -112,19 +112,7 @@ npm run local
 
 ## コーディングエージェントを使う
 
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-Claude Code、Codex、Gemini CLI、Cursor をすでに使っているなら、テキスト用のキーの代わりにそれで Sloppy とテキスト生成を動かせます。ターミナルで一度エージェントにサインインし（例：`claude` を実行）、テキストのモデル選択で **Local agent** の中から選びます。音声・画像・音楽・動画には引き続きそれぞれのキーが必要です。[仕組み](../local-agents.md)
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="入力欄のモデル選択にローカルエージェントが並び、Claude Code を選ぶと Sloppy がそれで動き出す" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="入力欄のモデル選択にローカルエージェントが並び、Claude Code を選ぶと Sloppy がそれで動き出す" width="100%">
-</td>
-</tr>
-</table>
+Claude Code、Codex、Gemini CLI、Cursor をすでに使っているなら、テキスト用のキーの代わりにそれで Sloppy とテキスト生成を動かせます。詳しくは [Local agents](../local-agents.md) を参照してください。
 
 ## 次からの使い方
 

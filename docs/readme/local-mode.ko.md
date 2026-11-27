@@ -112,19 +112,7 @@ npm run local
 
 ## 코딩 에이전트 사용하기
 
-<table>
-<tr>
-<td width="50%" valign="middle">
-
-이미 Claude Code, Codex, Gemini CLI, Cursor를 쓰고 있다면 텍스트 키 대신 그걸로 Sloppy와 텍스트 생성을 돌릴 수 있습니다. 터미널에서 에이전트에 한 번 로그인한 뒤(예: `claude` 실행), 텍스트 모델 선택에서 **Local agent** 아래의 에이전트를 고르세요. 음성, 이미지, 음악, 영상에는 여전히 각각의 키가 필요합니다. [작동 방식](../local-agents.md)
-
-</td>
-<td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="입력창의 모델 선택에 로컬 에이전트가 보이고, Claude Code를 고르면 Sloppy가 그걸로 시작한다" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="입력창의 모델 선택에 로컬 에이전트가 보이고, Claude Code를 고르면 Sloppy가 그걸로 시작한다" width="100%">
-</td>
-</tr>
-</table>
+이미 Claude Code, Codex, Gemini CLI, Cursor를 쓰고 있다면 텍스트 키 대신 그걸로 Sloppy와 텍스트 생성을 돌릴 수 있습니다. [Local agents](../local-agents.md)를 참고하세요.
 
 ## 그다음부터
 

@@ -5,7 +5,22 @@
   <img src="../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="In the composer, the model picker lists the local agents, Claude Code is picked, and Sloppy starts on it" width="100%">
 </p>
 
-To set one up, see [Use your coding agent instead](local-mode.md#use-your-coding-agent-instead). The agent's own limits apply, and OpenSlop records no spend for these calls.
+When OpenSlop runs on your own computer, with [`npm run local`](local-mode.md) or `npm run dev`, Sloppy and text generation can run on a coding agent you already use, on that agent's own sign-in. No API key is needed for text.
+
+## Set up
+
+1. Install the agent and sign in to it once in a terminal:
+
+   | Agent       | Sign in with |
+   | ----------- | ------------ |
+   | Claude Code | `claude`     |
+   | Codex       | `codex`      |
+   | Gemini CLI  | `gemini`     |
+   | Cursor      | `agent`      |
+
+2. Open OpenSlop on this computer at `localhost`, and pick the agent under **Local agent** in any text model picker, such as the one in the composer or under Settings > Models.
+
+The agent's own limits apply, and OpenSlop records no spend for these calls. Speech, images, music and video still need their own keys.
 
 ## How it works
 
