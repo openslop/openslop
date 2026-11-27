@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { StockAlt, PanelLeft, PlusCircle, Upload } from "@/components/ui/icon";
+import { StockAlt, PlusCircle, Upload, Wand2 } from "@/components/ui/icon";
 import { TooltipIconButton } from "@/components/ui/icon-button";
 import {
 	Popover,
@@ -139,14 +139,14 @@ export function MediaPicker({
 					icon={StockAlt}
 					action={
 						<TooltipIconButton
-							label="Open Media"
+							label="Generate"
 							variant="inherit"
 							onClick={() => {
 								setOpen(false);
 								setActive("media");
 							}}
 						>
-							<PanelLeft />
+							<Wand2 />
 						</TooltipIconButton>
 					}
 				/>
