@@ -12,7 +12,7 @@ export const videoPrompts = {
 	description:
 		"How to write a <video> prompt: numbered shots, camera, place, characters, action, speech and sound. Load it before writing or reviewing video prompts.",
 	content: dedent`
-		Before writing for a video model, call read_model_attributes for it: it names the model's own prompting skill. Load that skill and follow it on top of this one.
+		Before writing for a video model, call read_model_attributes for it: it names the model's own prompting skill to load.
 
 		A <video> prompt has one to three shots, each on its own line and labelled Shot 1, Shot 2, Shot 3, even if there is only one. Use one shot for a quiet moment or a static graphic, and two or three for action, a reveal or a conversation. The video model sees only this prompt, so include every detail it needs, except the art style and how characters look.
 

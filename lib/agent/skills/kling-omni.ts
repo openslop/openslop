@@ -6,7 +6,7 @@ import type { Skill } from "./registry";
 export const klingOmni = {
 	name: "kling-omni",
 	description:
-		"How Kling Omni video models (3 Omni, 3 Omni Pro, 4 Omni) read a <video> prompt: camera words, light, motion and speech. Load it when read_model_attributes names it.",
+		"How Kling Omni video models (3 Omni, 3 Omni Pro, 4 Omni) read a <video> prompt: camera words, light, motion and speech.",
 	content: dedent`
 		Kling Omni films several shots in one clip and speaks the dialogue itself. Write the prompt as video-prompts says, with these additions:
 

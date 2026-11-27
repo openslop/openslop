@@ -39,8 +39,7 @@ export const readModelAttributes = defineTool({
 			defs.length === 0
 				? "This model has no attributes of its own."
 				: `- <${type}> with model="${model.model}": ${values.join(", ")}.`,
-			skill &&
-				`Before writing prompts for it, load the ${skill} skill and follow it on top of the general ones.`,
+			skill && `Before writing prompts for it, load the ${skill} skill.`,
 		]
 			.filter(Boolean)
 			.join("\n");

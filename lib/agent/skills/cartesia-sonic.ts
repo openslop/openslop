@@ -5,7 +5,7 @@ import type { Skill } from "./registry";
 export const cartesiaSonic = {
 	name: "cartesia-sonic",
 	description:
-		"How Cartesia Sonic voices read <speech> lines: punctuation, numbers, codes, hesitations, emotion and speed. Load it when read_model_attributes names it.",
+		"How Cartesia Sonic voices read <speech> lines: punctuation, numbers, codes, hesitations, emotion and speed.",
 	content: dedent`
 		Sonic speaks a <speech> line exactly as written: it never adds words or sounds of its own. On top of the <speech> rules in osml:
 

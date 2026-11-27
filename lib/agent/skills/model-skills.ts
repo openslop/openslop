@@ -12,7 +12,6 @@ const MODEL_PROMPT_SKILL: Record<string, ModelPromptSkillName> = {
 	"bytedance:seedance@2.5": "seedance",
 };
 
-/** The skill to load before writing a prompt for this model, if it has one. */
 export const promptSkillFor = (
 	type: ConnectorType,
 	model: ModelRef,

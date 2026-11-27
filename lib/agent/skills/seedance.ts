@@ -6,7 +6,7 @@ import type { Skill } from "./registry";
 export const seedance = {
 	name: "seedance",
 	description:
-		"How Seedance video models (2 Fast, 2.5) read a <video> prompt: shot order, one camera move per shot, slow clear motion, emotion through the body. Load it when read_model_attributes names it.",
+		"How Seedance video models (2 Fast, 2.5) read a <video> prompt: shot order, one camera move per shot, slow clear motion, emotion through the body.",
 	content: dedent`
 		Seedance follows numbered shots in story order. Write the prompt as video-prompts says, with these additions:
 
