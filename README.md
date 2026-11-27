@@ -186,7 +186,6 @@ Bring your own accounts. A provider whose key is unset falls back to a mock, so 
 | Auth + DB | [Supabase](https://supabase.com) (Auth, Postgres, RLS)                                                       |
 | Video     | [Remotion 4](https://remotion.dev) (composition, rendering, player)                                          |
 | Storage   | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) (generated asset storage)                         |
-| Icons     | In-house masked-SVG set (`components/ui/icon.tsx` + `components/ui/icons/`), no icon dependency              |
 
 ## Project structure
 

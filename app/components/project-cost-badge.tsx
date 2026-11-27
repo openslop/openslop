@@ -24,7 +24,7 @@ export function ProjectCostBadge({
 export function ToolbarProjectCost() {
 	return (
 		<SimpleTooltip label="What this project has spent so far" side="bottom">
-			<ProjectCostBadge variant="mutedOutline" size="lg">
+			<ProjectCostBadge size="lg">
 				<span className="sr-only">Project cost</span>
 			</ProjectCostBadge>
 		</SimpleTooltip>

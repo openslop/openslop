@@ -1,60 +1,73 @@
 # OpenSlop Design System
 
-The source of truth for visual decisions across the studio (editor, gallery, auth, onboarding). Read it before any UI work and flag code that deviates.
+A snapshot of how the studio looks and why. Read it before UI work, and flag code that drifts from it.
 
-Clean, warm, quiet. Surfaces carry the weight; color marks what is live or actionable. No glass, no rainbow backdrops.
+## Philosophy
 
-Tokens live in `app/globals.css`, light and dark, exposed to Tailwind via `@theme inline`.
+Clean, warm, quiet. Surfaces carry the layout and color carries meaning: a hue appears only where something is live, actionable, or needs attention. Everything else is warm neutral. Depth comes from layered surfaces and soft shadows, never from glass, glow, or gradients. When in doubt, take something away.
 
-## Theme
+Every visual decision is a token. Components in `components/ui/` own the look, built with `class-variance-authority`, and feature code composes them without restyling. A new need becomes a new named variant or size on the primitive, never one-off classes at the call site.
 
-`next-themes`, `attribute="class"`, default light, system enabled. One theme covers every surface; nothing is forced light or dark. Light / Dark / System sit in the Appearance submenu of `UserProfile`. Ramps flip in `.dark`, so semantic tokens adapt on their own.
+## Tokens and theme
+
+Tokens live in `app/globals.css` and reach Tailwind through `@theme inline`. Light and dark share one set of semantic names; the raw ramps flip under `.dark`, so components never branch on theme. Use semantic tokens, never raw hexes or palette steps.
 
 ## Color
 
-Semantic tokens only. Never raw hexes, `bg-black/N`, or `*-white/N`.
-
-- **Neutrals:** warm, red-tinted greys, `--grey-900` (foreground) through `--grey-0`.
-- **Surfaces:** `--background`; `--surface-recessed` (panels); `--card` / `--surface-elevated` (popovers, select menus) with `--surface-hover` for hovered controls on them; `--element-card` (element cards and side-panel sections, text from `--panel-fg` / `--panel-label`). Hairline `--border`.
-- **Accent:** blurple `--accent` / `--ring`, for focus rings, selection, links, send, and `accent` CTAs only. Never an ambient wash.
-- **State:** `--destructive`, `--success`, `--caution`, `--tertiary` (not-working badges), each with a `-foreground` for solid fills, plus `--caution-soft` / `--caution-soft-foreground` for banners. One ramp per state; never a second red, green, or amber.
-- **Indicators:** `--indicator` / `--indicator-foreground` fill the `indicator` badge, reserved for caution like Stale. A rounded square with a filled icon and a short label, so it never reads as a button. Neutral info chips (Uploaded, Connect) use `muted`; set inside a line of `text-foreground` (a history row's Uploaded and cost) they use `subtle` to match its color; `mutedOutline` adds a hairline for a pill standing alone in chrome, like the toolbar project cost.
-- **Media tints:** `--media-speech/image/video/music/sound` color the element-card icon so each storyboard type reads at a glance. Brighter in dark, deeper in light.
-- **Scrims:** theme-independent dark washes. `bg-overlay` for modal scrims; `bg-on-media/55…80` over media with `text-on-media-foreground` (`--on-media` is solid black, so the opacity sets the strength).
+- **Neutrals:** a warm, slightly red-tinted grey ramp. Text runs from `foreground` to `muted-foreground`; hierarchy within a block comes from these two before size or weight.
+- **Surfaces:** a small stack from recessed (`surface-recessed`) through the page (`background`) to raised (`card`, `element-card`, `surface-elevated`), separated by a hairline `border`.
+- **Primary:** `generate`, a deep wine in light and a pale rose in dark, is the color of the main action in a context.
+- **Accent:** blurple `accent` marks focus, selection, and links, plus the call to action on entry pages. It is never an ambient wash.
+- **State:** one ramp each for `destructive`, `success`, `caution`, and `tertiary`, each with a `-foreground` for solid fills and a soft form for banners.
+- **Indicator:** a berry tint for caution that sits on content, such as stale or low. It should read as a status, never as a button.
+- **Media tints:** one hue per media type, used only to tell types apart at a glance.
+- **Scrims:** `overlay` and `on-media` are theme-independent dark washes for modals and text over media.
 
 ## Typography
 
-- **Slopella** (`--font-sans`, `.font-title`): UI and titles.
-- **Inter** (`--font-body`): body text and form controls (inputs, textareas, selects, dropdown menus).
-- **`font-numeric`** (Slopella with `tnum`): numbers that update in place (timecodes, durations, counters, percentages) and preformatted output (`DisclosureText` / `DisclosureJson`, with `whitespace-pre-wrap`). Never pair it with `tabular-nums`. Skip it only where the digit count itself changes, which tabular figures cannot steady anyway (the player's "N of M generated").
-- Marketing only: **Instrument Serif** (`--font-serif`) for hero headlines, **Sentient** (`.font-sentient`) for the onboarding wordmark. There is no monospace stack.
+- **Slopella** (`font-sans`, `font-title`) for interface and titles.
+- **Inter** (`font-body`) for body copy and form controls.
+- **`font-numeric`** for numbers that update in place, so digits keep their width.
+- **Instrument Serif** and **Sentient** are for marketing surfaces only.
 
-Sizes: `text-badge-xs` / `text-badge` / `text-label-xs` / `text-label` / `text-body` / `text-body-lg` / `text-heading-sm` / `text-heading` / `text-heading-lg` / `text-display` / `text-hero` (fluid, bakes its tracking too, marketing headlines only). Never `text-xs`, `text-sm`, or `text-[Npx]`.
+Size comes from the named scale (`text-badge-xs` up to `text-hero`). Each step bakes its line-height and tracking, so reach for `leading-*` or a weight only to override. Never use raw Tailwind sizes or pixel values.
 
-- Each bakes its own line-height, so add `leading-*` only to override it, and `font-medium` for weight. `text-label-xs` also bakes weight 475; `font-book` is that same weight for the sizes that do not.
-- `.font-body` and `.font-title` are unlayered, so their line-height (1.5 / 1.2) beats a token's baked leading wherever they pair (form controls, buttons, titles). Those need an explicit `leading-*`.
-- In a dense row, a label and its description share one size and weight, separated by color alone: `text-foreground` against `text-muted-foreground`.
+## Spacing, shape, depth
 
-## Spacing, radius, elevation
+- **Spacing:** a 4px grid. Dense tools stay tight and marketing pages breathe.
+- **Shape:** radius derives from `--radius`. Containers are the roundest, controls are moderate, and chips are pills.
+- **Depth:** a single elevation scale (`shadow-elevation-1/3/5/10`). The higher a layer floats, the stronger its shadow, and popovers and menus share one level.
 
-4px base spacing. Radius from `--radius`: cards `rounded-xl`, overlays and form controls `rounded-md`, pills `rounded-full`. Depth is `shadow-elevation-1/3/5/10`, never glow; popovers and menus sit at 3. The one exception is ambient light (below).
+## Buttons
 
-## Motion
+`variant` sets color and `size` sets dimensions; never hand-size a button with height, padding, or text classes.
 
-Eases `--ease-casual` / `--ease-productive` / `--ease-expressive`, durations `--duration-faster` / `--duration-fast`. `fadeInUp` for entrances, `shimmer` for skeletons. `prefers-reduced-motion` is honored.
+- **`generate`:** the primary action. Use at most one per context.
+- **`accent`:** the call to action on entry surfaces such as auth and landing pages.
+- **`secondary`:** a bordered, neutral action that sits beside the primary one.
+- **`panel` and `ghost`:** quiet chrome that is present without competing for attention.
+- **`outline`:** a bordered action with no fill, for neutral actions that shouldn't add a surface.
+- **`destructive`:** removes something, usually behind a confirmation.
+- **`link`:** an action set in running text.
+- **Icon buttons:** follow the same quiet-to-loud logic and carry a tooltip that names the action.
 
-## Texture
+An unavailable control keeps its place and tooltip and fades through the `unavailable:` variant. Inert controls never react to hover or press.
 
-Two opt-in treatments, both quiet:
+## Badges and chips
 
-- `.grain`: film grain (`--grain-opacity`) on raised surfaces (dialogs, panel cards, the canvas card, onboarding, the inline copilot). Needs a positioned element and paints through `::after`. Not on dense element cards.
-- Ambient light, hero composer only: `<LightRays />` (`components/ui/light-rays.tsx`) paints still-grained rays from the top-left over the dot grid, and `.ambient-glow` wraps the composer in the same light, breathing slowly and brighter on focus. Both take `--ambient-light` (the indicator berry, deep wine in light and rose in dark). Nowhere else.
-- `.dot-grid-bg`: the "+" grid behind the editor and gallery. Reach for `<DotGrid />` (`components/ui/dot-grid.tsx`), which renders it `aria-hidden` and `pointer-events-none`, behind content.
+Badges are status, not actions. Neutral facts use `muted`, or `subtle` when they sit inside a line of text. State uses its own ramp, and caution on content uses `indicator` with a filled icon. Amounts animate as they change and shimmer while loading.
 
-## Components
+## Surfaces and overlays
 
-shadcn-consistent primitives in `components/ui/`, built with `class-variance-authority`, tokens only. Icons are a masked SVG set (`components/ui/icons/`, one file per category), filled.
+- **Cards and panels:** group content on raised surfaces.
+- **Dialogs, popovers, and menus:** float above the page, take a scrim when modal, and return focus when they close.
+- **Empty and loading states:** use the shared empty-state and skeleton primitives, never ad hoc spinners or blank space.
 
-Button `variant` sets color only: `default` (near-black inverse, in-tool actions), `accent` (blurple, hero/auth CTAs), `generate` (the `--generate` family, including its disabled state), `panel` (the side panel's quiet look, for chrome next to a primary action), plus `secondary` / `outline` / `ghost` / `destructive` / `link`. Size comes from the `size` prop (`2xs`/`xs`/`sm`/`default`/`cta`/`lg`/`icon`, plus `inline` for a link set in running text): never hand-size with `h-*`, `px-*`, or `text-*`; add a named size instead.
+## Iconography
 
-Style an unavailable control through the `unavailable:` variant, which covers `:disabled` and `aria-disabled` alike, so one that stays hoverable for its tooltip still looks unavailable. `hover:` and `active:` skip those same states, so an inert control never lights up under the pointer.
+One filled, masked SVG set (`components/ui/icons/`) that inherits color and size from its text. Icons support a label and never replace one, except on icon buttons, which name their action in a tooltip and an accessible label.
+
+## Motion and texture
+
+- **Motion:** short and purposeful. Shared eases (`--ease-casual/productive/expressive`) and durations, with fade-up for entrances and shimmer for loading. Motion respects `prefers-reduced-motion`.
+- **Texture:** opt-in and quiet. Film grain on raised surfaces, a dot grid behind workspaces, and ambient light reserved for the single hero moment.
