@@ -37,7 +37,7 @@ function TopPlayerPanelComponent() {
 
 	return (
 		<div className="shrink-0 max-sm:max-h-1/4" style={{ height: size }}>
-			<div className="relative mx-auto h-[calc(100%-0.5rem)] max-w-6xl p-2">
+			<div className="relative mx-auto h-[calc(100%-0.5rem)] max-w-6xl p-1">
 				<FitToAspectRatio>
 					<PreviewPanel />
 				</FitToAspectRatio>
@@ -69,7 +69,7 @@ function SidePlayerPanelComponent() {
 				resizing={resizing}
 				handleProps={handleProps}
 			/>
-			<div className="flex flex-1 flex-col justify-center overflow-hidden p-4">
+			<div className="flex flex-1 flex-col justify-center overflow-hidden p-2">
 				<FitToAspectRatio>
 					<PreviewPanel />
 				</FitToAspectRatio>
