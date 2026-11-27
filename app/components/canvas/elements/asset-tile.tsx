@@ -33,7 +33,7 @@ export function AssetTile({
 	Icon,
 	status = "idle",
 	startedAt = null,
-	queuedReason,
+	queuedReason = null,
 	primary,
 	menu,
 	onRemove,

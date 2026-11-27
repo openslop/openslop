@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { ElementSnapshot } from "@/lib/generation/snapshots";
 
 export type GenerationState = Pick<ElementSnapshot, "status" | "startedAt"> & {
-	queuedReason?: string | null;
+	queuedReason: string | null;
 };
 
 export type PlaceholderProps = GenerationState & {

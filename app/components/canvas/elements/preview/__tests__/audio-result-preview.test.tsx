@@ -23,6 +23,7 @@ function renderPreview() {
 			<AudioResultPreview
 				status="idle"
 				startedAt={null}
+				queuedReason={null}
 				error={null}
 				onDiscard={() => {}}
 				result={{ audioUrl: "https://audio/sfx.mp3", durationSec: 2 }}

@@ -14,7 +14,7 @@ const MEDIA_NAMES: Record<AssetConnectorType, string> = {
 	stt: "transcription",
 };
 
-/** What is actually holding `node` back: a blocker still queued behind its own dependencies gives way to those. */
+/** The blockers at the bottom of `node`'s chain, past any still queued behind their own. */
 function waitingFor(node: GenerationNode, queue: GenerationQueue): string[] {
 	return uniq(
 		queue.blockingDependencies(node).flatMap(([label, dep]) => {

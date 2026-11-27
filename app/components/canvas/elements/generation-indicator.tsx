@@ -48,7 +48,7 @@ export function GenerationIndicator({
 }: {
 	status: ActiveGenerationStatus;
 	startedAt: number | null;
-	queuedReason?: string | null;
+	queuedReason: string | null;
 	size?: Size;
 	className?: string;
 }) {
