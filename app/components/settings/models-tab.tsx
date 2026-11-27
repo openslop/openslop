@@ -37,8 +37,9 @@ export function ModelsTab({
 	const stored = providerKeys.map((row) => row.provider);
 	// A link that named a provider leads here: it goes first, so what the link
 	// was about is the first thing read.
-	const shown =
-		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
+	const shown = (
+		selected && !stored.includes(selected) ? [selected, ...stored] : stored
+	).filter(isByokProvider);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -53,27 +54,18 @@ export function ModelsTab({
 					</Button>
 				}
 			>
-				{shown.length === 0 ? (
-					<p className="rounded-xl border border-dashed border-border p-6 text-center text-label text-muted-foreground">
-						No providers connected yet. Add one to generate on your own key.
-					</p>
-				) : (
-					<div className="flex flex-col gap-2">
-						{shown.map((provider) =>
-							isByokProvider(provider) ? (
-								<ProviderCard
-									key={provider}
-									provider={provider}
-									selected={provider === selected}
-									// A link pointing at a row that is gone has nothing to open.
-									onDismissed={() => settings.open("models")}
-								/>
-							) : (
-								<HostedProviderCard key={provider} />
-							),
-						)}
-					</div>
-				)}
+				<div className="flex flex-col gap-2">
+					<HostedProviderCard />
+					{shown.map((provider) => (
+						<ProviderCard
+							key={provider}
+							provider={provider}
+							selected={provider === selected}
+							// A link pointing at a row that is gone has nothing to open.
+							onDismissed={() => settings.open("models")}
+						/>
+					))}
+				</div>
 			</SettingsSection>
 
 			<Separator />

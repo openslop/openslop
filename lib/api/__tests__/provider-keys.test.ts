@@ -22,7 +22,7 @@ vi.mock("@/lib/supabase/service", () => ({
 }));
 
 describe("listProviderKeys", () => {
-	it("lists the hosted provider ahead of the stored keys", async () => {
+	it("lists the stored keys", async () => {
 		rows.mockReturnValue([
 			{
 				provider: "anthropic",
@@ -33,9 +33,15 @@ describe("listProviderKeys", () => {
 			},
 		]);
 		const keys = await listProviderKeys("u1");
-		expect(keys.map((row) => row.provider)).toEqual(["openslop", "anthropic"]);
-		expect(keys[0]?.status).toBe("valid");
-		expect(keys[1]).toMatchObject({ last4: "abcd", createdAt: "2026-01-01" });
+		expect(keys).toEqual([
+			{
+				provider: "anthropic",
+				last4: "abcd",
+				status: "valid",
+				verifiedAt: null,
+				createdAt: "2026-01-01",
+			},
+		]);
 	});
 });
 

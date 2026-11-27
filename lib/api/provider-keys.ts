@@ -8,7 +8,6 @@ import {
 	type ValidationResult,
 } from "@/lib/connectors/provider-key";
 import {
-	MANAGED_PROVIDER,
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
@@ -49,18 +48,8 @@ const toRecord = (
 	createdAt: row.created_at,
 });
 
-/** The balance gates each hosted call, not the key. */
-const HOSTED_KEY: ProviderKeyRecord = {
-	provider: MANAGED_PROVIDER,
-	last4: "",
-	status: "valid",
-	verifiedAt: null,
-	createdAt: "",
-};
-
 /**
- * The keys an account can generate on: the hosted one, then whatever it has
- * stored. Only ever the metadata: the key itself lives in the vault and is
+ * The keys an account has stored. Only ever the metadata: the key itself lives in the vault and is
  * read one generation at a time. Read through the caller's own session, so
  * row-level security is a second lock on the filter below.
  */
@@ -74,10 +63,7 @@ export async function listProviderKeys(
 		.eq("user_id", userId)
 		.order("created_at", { ascending: true });
 	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);
-	return [
-		HOSTED_KEY,
-		...z.array(ProviderKeyRowSchema).parse(data).map(toRecord),
-	];
+	return z.array(ProviderKeyRowSchema).parse(data).map(toRecord);
 }
 
 /**

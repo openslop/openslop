@@ -24,16 +24,14 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { listModels, sameModel } from "@/lib/connectors/models";
-import {
-	isByokProvider,
-	PROVIDER_CATALOG,
-} from "@/lib/connectors/provider-catalog";
+import { PROVIDER_CATALOG } from "@/lib/connectors/provider-catalog";
+import { isConnected } from "@/lib/connectors/provider-key";
 import type { ConnectorType, ModelRef, Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/use-settings";
+import { useAccount } from "@/lib/user/use-account";
 import { cn } from "@/lib/utils";
 import { ModelChips } from "./model-chips";
 import { ProviderIcon } from "./provider-icon";
-import { useProviderKeyLookup } from "./use-provider-keys";
 
 /** Read aloud, the icon says nothing, so the provider is spelled out. */
 export const modelLabel = ({ provider, model }: ModelRef): string =>
@@ -90,12 +88,12 @@ export function ModelSelect({
 
 /** Mounted only while the menu is open, so a closed picker subscribes to nothing. */
 function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
-	const keyFor = useProviderKeyLookup();
+	const providerKeys = useAccount((state) => state.providerKeys);
 	const settings = useSettings();
 
 	return listModels(type).map((entry) => {
 		const { provider, model, description } = entry;
-		const missing = isByokProvider(provider) && keyFor(provider) === null;
+		const missing = !isConnected(providerKeys, provider);
 		return (
 			<SelectMenuItem
 				key={`${provider}/${model}`}

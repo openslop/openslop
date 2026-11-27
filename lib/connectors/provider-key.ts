@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isByokProvider } from "./provider-catalog";
 import { ProviderSchema, type Provider } from "./types";
 
 /** Whether a stored key has been seen to work since it was last written. */
@@ -26,6 +27,10 @@ export const findProviderKey = (
 	provider: Provider,
 ): ProviderKeyRecord | null =>
 	keys.find((key) => key.provider === provider) ?? null;
+
+/** The hosted provider and local agents take no key; any other needs one stored. */
+export const isConnected = (keys: ProviderKeyRecord[], provider: Provider) =>
+	!isByokProvider(provider) || findProviderKey(keys, provider) !== null;
 
 export const ValidationResultSchema = z.discriminatedUnion("ok", [
 	z.object({ ok: z.literal(true) }),
