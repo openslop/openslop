@@ -121,6 +121,6 @@ it("rejects cross-origin generation before accessing the CLI", async () => {
 			headers: { origin: "https://evil.example" },
 		}),
 	);
-	expect(response.status).toBe(403);
+	expect(response.status).toBe(404);
 	expect(generateWithClaude).not.toHaveBeenCalled();
 });

@@ -10,6 +10,17 @@ export class ClaudeNotInstalledError extends Error {
 	}
 }
 
+export class ClaudeExitError extends Error {
+	constructor(
+		readonly code: number,
+		readonly stdout: string,
+	) {
+		super(
+			"Claude Code did not complete. Check your subscription sign-in and usage limits, then retry.",
+		);
+	}
+}
+
 export async function runClaude(
 	userId: string,
 	args: string[],
@@ -47,27 +58,13 @@ export async function runClaude(
 				signal,
 			},
 			(error, stdout) => {
-				if (
-					error &&
-					!(
-						args[0] === "auth" &&
-						args[1] === "status" &&
-						error.code === 1 &&
-						stdout.trim().startsWith("{")
-					)
-				) {
-					reject(
-						error.code === "ENOENT"
-							? new ClaudeNotInstalledError()
-							: new Error(
-									signal?.aborted
-										? "Claude request cancelled."
-										: error.killed
-											? "Claude Code timed out. Retry."
-											: "Claude Code did not complete. Check your subscription sign-in and usage limits, then retry.",
-								),
-					);
-				} else resolve(stdout);
+				if (!error) resolve(stdout);
+				else if (error.code === "ENOENT") reject(new ClaudeNotInstalledError());
+				else if (signal?.aborted)
+					reject(new Error("Claude request cancelled."));
+				else if (error.killed)
+					reject(new Error("Claude Code timed out. Retry."));
+				else reject(new ClaudeExitError(Number(error.code), stdout));
 			},
 		);
 		if (onOutput) child.stdout?.on("data", (chunk) => onOutput(String(chunk)));

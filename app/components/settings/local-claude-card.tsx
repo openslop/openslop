@@ -10,11 +10,19 @@ import { SettingsSection } from "./settings-section";
 
 const ENDPOINT = "/api/local/claude/account";
 
+type ClaudeAccount = z.infer<typeof ClaudeAccountSchema>;
+
+function statusText(account: ClaudeAccount | null) {
+	if (account?.connected)
+		return `Connected as ${account.email ?? "your Claude account"} (${account.subscription ?? "subscription"})`;
+	if (account?.loginUrl) return "Continue to Claude to finish signing in…";
+	if (account?.installed === false) return "Install Claude Code, then refresh.";
+	return "Not connected";
+}
+
 export function LocalClaudeCard() {
 	const pending = useRef<AbortController | null>(null);
-	const [account, setAccount] = useState<z.infer<
-		typeof ClaudeAccountSchema
-	> | null>(null);
+	const [account, setAccount] = useState<ClaudeAccount | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	useEffect(() => {
@@ -79,15 +87,7 @@ export function LocalClaudeCard() {
 				computer. This uses a separate Claude Code login for OpenSlop.
 			</p>
 			<p role="status" className="text-label">
-				{busy
-					? "Contacting Claude…"
-					: account?.connected
-						? `Connected as ${account.email ?? "your Claude account"} (${account.subscription ?? "subscription"})`
-						: account?.loginUrl
-							? "Continue to Claude to finish signing in…"
-							: account?.installed === false
-								? "Install Claude Code, then refresh."
-								: "Not connected"}
+				{busy ? "Contacting Claude…" : statusText(account)}
 			</p>
 			<div className="flex flex-wrap gap-2">
 				{account?.loginUrl && (

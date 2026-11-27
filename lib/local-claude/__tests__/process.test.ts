@@ -1,5 +1,9 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { ClaudeNotInstalledError, runClaude } from "../process";
+import {
+	ClaudeExitError,
+	ClaudeNotInstalledError,
+	runClaude,
+} from "../process";
 const mocks = vi.hoisted(() => ({ exec: vi.fn(), end: vi.fn() }));
 vi.mock("node:child_process", () => ({ execFile: mocks.exec }));
 vi.mock("node:fs/promises", () => ({ mkdir: vi.fn() }));
@@ -31,15 +35,18 @@ it("isolates credentials and passes cancellation to a bounded process", async ()
 	expect(options.shell).toBeUndefined();
 	expect(mocks.end).toHaveBeenCalledWith("prompt");
 });
-it("accepts the CLI's signed-out status exit code", async () => {
+it("reports a failed exit with its code and output", async () => {
 	mocks.exec.mockImplementation((_file, _args, _options, done) => {
 		queueMicrotask(() => done({ code: 1 }, '{"loggedIn":false}'));
 		return { stdin: { on: vi.fn(), end: mocks.end } };
 	});
-	await expect(runClaude("user", ["auth", "status"])).resolves.toBe(
-		'{"loggedIn":false}',
-	);
-	await expect(runClaude("user", ["-p"])).rejects.toThrow("did not complete");
+	const failure = runClaude("user", ["-p"]);
+	await expect(failure).rejects.toThrow("did not complete");
+	await expect(failure).rejects.toBeInstanceOf(ClaudeExitError);
+	await expect(failure).rejects.toMatchObject({
+		code: 1,
+		stdout: '{"loggedIn":false}',
+	});
 });
 it("reports a killed process as a timeout, not a sign-in problem", async () => {
 	mocks.exec.mockImplementation((_file, _args, _options, done) => {

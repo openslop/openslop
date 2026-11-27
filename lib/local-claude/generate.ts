@@ -2,10 +2,10 @@ import { z } from "zod";
 import { LLM_MODELS } from "@/lib/connectors/llm/models";
 import { LOCAL_PROVIDER } from "@/lib/connectors/provider-catalog";
 import { claudeAccount } from "./account";
+import { LOCAL_CLAUDE_MODEL } from "./schema";
 import { runClaude } from "./process";
 
-export const CLAUDE_MODEL =
-	LLM_MODELS[LOCAL_PROVIDER]["Claude subscription"].id;
+export const CLAUDE_MODEL = LLM_MODELS[LOCAL_PROVIDER][LOCAL_CLAUDE_MODEL].id;
 
 const Result = z.object({
 	is_error: z.boolean().optional(),

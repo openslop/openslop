@@ -5,6 +5,7 @@ import type {
 	LanguageModelV3StreamPart,
 } from "@ai-sdk/provider";
 import { z } from "zod";
+import { LOCAL_PROVIDER } from "@/lib/connectors/provider-catalog";
 import type { AgentModel } from "@/lib/providers/llm/agent-model";
 import { CLAUDE_MODEL, generateWithClaude } from "./generate";
 
@@ -12,6 +13,7 @@ const Reply = z.object({
 	text: z.string(),
 	calls: z.array(z.object({ name: z.string(), input: z.string() })),
 });
+const ReplyJsonSchema = z.toJSONSchema(Reply, { target: "draft-7" });
 const usage = {
 	inputTokens: {
 		total: undefined,
@@ -38,7 +40,7 @@ export function claudeAgentModel(
 					signal && options.abortSignal
 						? AbortSignal.any([signal, options.abortSignal])
 						: (signal ?? options.abortSignal),
-					z.toJSONSchema(Reply, { target: "draft-7" }),
+					ReplyJsonSchema,
 				),
 			),
 		);
@@ -73,7 +75,7 @@ export function claudeAgentModel(
 	};
 	const model: LanguageModelV3 = {
 		specificationVersion: "v3",
-		provider: "claude-code",
+		provider: LOCAL_PROVIDER,
 		modelId: CLAUDE_MODEL,
 		supportedUrls: {},
 		doGenerate: generate,

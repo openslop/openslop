@@ -1,5 +1,9 @@
 import { beforeEach, expect, it, vi } from "vitest";
-import { ClaudeNotInstalledError, runClaude } from "../process";
+import {
+	ClaudeExitError,
+	ClaudeNotInstalledError,
+	runClaude,
+} from "../process";
 import { claudeAccount } from "../account";
 vi.mock("../process", async (importOriginal) => ({
 	...(await importOriginal<typeof import("../process")>()),
@@ -39,4 +43,10 @@ it("reports a missing CLI as setup required", async () => {
 		installed: false,
 		connected: false,
 	});
+});
+it("reads the signed-out status the CLI prints on exit code 1", async () => {
+	vi.mocked(runClaude).mockRejectedValue(
+		new ClaudeExitError(1, JSON.stringify({ loggedIn: false })),
+	);
+	expect((await claudeAccount("user")).connected).toBe(false);
 });

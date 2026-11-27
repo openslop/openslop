@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { forbidden, notFound } from "@/lib/api/response";
+import { notFound } from "@/lib/api/response";
 
 const LOOPBACK_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 
@@ -13,5 +13,10 @@ export function localClaudeAccess(request: NextRequest): Response | null {
 		(forwardedHost === null || forwardedHost === url.host);
 	const sameOrigin =
 		origin === url.origin || (!origin && request.method === "GET");
-	return loopback && sameOrigin ? null : forbidden();
+	return loopback && sameOrigin ? null : notFound();
 }
+
+export const localOnly =
+	(handler: (request: NextRequest) => Promise<Response>) =>
+	async (request: NextRequest) =>
+		localClaudeAccess(request) ?? handler(request);

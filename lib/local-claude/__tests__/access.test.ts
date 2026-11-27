@@ -36,7 +36,7 @@ describe("local Claude access", () => {
 					headers: { origin },
 				}),
 			)?.status,
-		).toBe(403);
+		).toBe(404);
 	});
 });
 
@@ -48,7 +48,7 @@ it("rejects a forwarded remote hostname", () => {
 				headers: { "x-forwarded-host": "remote.example" },
 			}),
 		)?.status,
-	).toBe(403);
+	).toBe(404);
 });
 it("accepts a matching forwarded loopback hostname", () => {
 	vi.stubEnv("NODE_ENV", "development");
