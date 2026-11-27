@@ -14,9 +14,8 @@ import {
 
 type RouteBody = (user: User) => Promise<Response>;
 
-// Uniform error envelope: an unconnected provider is the caller's to fix, so it
-// comes back as a 400; anything else is logged and returned as 500.
-export async function withPublic(
+// An unconnected provider is the caller's to fix, so it comes back as a 400.
+export async function withErrorEnvelope(
 	label: string,
 	run: () => Promise<Response>,
 ): Promise<Response> {
@@ -32,7 +31,7 @@ export async function withPublic(
 }
 
 export const withSession = (label: string, run: RouteBody) =>
-	withPublic(label, async () => {
+	withErrorEnvelope(label, async () => {
 		const user = await getUser();
 		return user ? run(user) : unauthorized();
 	});

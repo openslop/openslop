@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { logger } from "../logger";
 import { MissingProviderKeyError } from "../provider-keys";
-import { withPublic } from "../with-auth";
+import { withErrorEnvelope } from "../with-auth";
 
 vi.mock("next/headers", () => ({
 	headers: async () => new Headers({ "x-vercel-id": "iad1::abc-123" }),
@@ -23,7 +23,7 @@ describe("unexpected route errors", () => {
 	it("returns a generic message and logs the internal error under the platform request id", async () => {
 		const internal =
 			'Postgres error: relation "users_private_notes" does not exist';
-		const response = await withPublic("TestRoute", async () => {
+		const response = await withErrorEnvelope("TestRoute", async () => {
 			throw new Error(internal);
 		});
 
@@ -39,7 +39,7 @@ describe("unexpected route errors", () => {
 	});
 
 	it("keeps the typed provider-key message on the 400 path", async () => {
-		const response = await withPublic("TestRoute", async () => {
+		const response = await withErrorEnvelope("TestRoute", async () => {
 			throw new MissingProviderKeyError("openslop");
 		});
 
