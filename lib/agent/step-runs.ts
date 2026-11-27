@@ -58,7 +58,8 @@ export function turnTimer(message: SloppyMessage, now: number) {
 			const last = runs.at(-1);
 			const open = last !== undefined && last.endedAt === undefined;
 			if (STEP_STARTS.has(type) && !open) runs = [...runs, { startedAt: at }];
-			else if (type === "text-start" && open)
+			// Sent only once something ends, so a saved start always has an end after it.
+			if (type === "text-start" && open)
 				runs = runs.with(-1, { ...last, endedAt: at });
 			else if (type !== "finish") return;
 			return {

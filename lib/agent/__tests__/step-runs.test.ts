@@ -60,12 +60,23 @@ describe("turnTimer", () => {
 	it("stamps a run's start at its first step and its end at the reply", () => {
 		const timer = turnTimer(asked, 0);
 
-		expect(timer.onPart("reasoning-start", 100)).toMatchObject({
-			runs: [{ startedAt: 100 }],
-		});
+		expect(timer.onPart("reasoning-start", 100)).toBeUndefined();
 		expect(timer.onPart("tool-input-start", 300)).toBeUndefined();
 		expect(timer.onPart("text-start", 1100)).toMatchObject({
 			runs: [{ startedAt: 100, endedAt: 1100 }],
+		});
+	});
+
+	it("sends a run's start only once something ends after it", () => {
+		const timer = turnTimer(
+			answering({ startedAt: 0, endedAt: 5000, runs: [] }, said),
+			6000,
+		);
+
+		expect(timer.onPart("tool-input-start", 7000)).toBeUndefined();
+		expect(timer.onPart("finish", 8000)).toMatchObject({
+			endedAt: 8000,
+			runs: [{ startedAt: 7000 }],
 		});
 	});
 
