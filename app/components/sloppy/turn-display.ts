@@ -28,10 +28,11 @@ export function runSeconds(
 	opensTurn: boolean,
 ): number | undefined {
 	const run = metadata?.runs?.[index];
-	const end = run?.endedAt ?? metadata?.endedAt;
-	if (metadata?.startedAt === undefined || !run || end === undefined)
-		return undefined;
-	return (end - (opensTurn ? metadata.startedAt : run.startedAt)) / 1000;
+	if (!metadata || !run) return undefined;
+	const start = opensTurn ? metadata.startedAt : run.startedAt;
+	const end = run.endedAt ?? metadata.endedAt;
+	if (start === undefined || end === undefined) return undefined;
+	return (end - start) / 1000;
 }
 
 export function workedSeconds(

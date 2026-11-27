@@ -51,19 +51,19 @@ const STEP_STARTS = new Set<StreamPartType>([
 /** Stamps when the turn and each run start and end; the client works out the durations. */
 export function turnTimer(message: SloppyMessage, now: number) {
 	const startedAt = message.metadata?.startedAt ?? now;
-	const runs = [...(message.metadata?.runs ?? [])];
+	let runs = message.metadata?.runs ?? [];
 
 	return {
 		onPart(type: StreamPartType, at: number): SloppyMetadata | undefined {
 			const last = runs.at(-1);
 			const open = last !== undefined && last.endedAt === undefined;
-			if (STEP_STARTS.has(type) && !open) runs.push({ startedAt: at });
+			if (STEP_STARTS.has(type) && !open) runs = [...runs, { startedAt: at }];
 			else if (type === "text-start" && open)
-				runs[runs.length - 1] = { ...last, endedAt: at };
+				runs = runs.with(-1, { ...last, endedAt: at });
 			else if (type !== "finish") return;
 			return {
 				startedAt,
-				runs: [...runs],
+				runs,
 				...(type === "finish" && { endedAt: at }),
 			};
 		},
