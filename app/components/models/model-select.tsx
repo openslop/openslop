@@ -100,7 +100,7 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 				aria-label={modelLabel({ provider, model })}
 				selected={sameModel({ provider, model }, value)}
 				onSelect={() =>
-					needsKey(providerKeys, provider)
+					missing
 						? settings.open("models", provider)
 						: onChange({ provider, model })
 				}
