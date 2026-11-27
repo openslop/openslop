@@ -8,13 +8,7 @@ import UserProfile from "./user-profile";
 import { EditorToolbar } from "./editor-toolbar";
 import Canvas from "./canvas/canvas";
 import { CanvasVersionBanner } from "./canvas/canvas-version-banner";
-import {
-	AssetStrip,
-	AssetStripAdd,
-	AssetStripArtStyle,
-	AssetStripNamedAssets,
-	AssetStripReferences,
-} from "./canvas/elements/asset-strip";
+import { AssetCanvasStrip } from "./canvas/elements/asset-strip";
 import { EditorSidebar } from "./canvas/panel/editor-sidebar";
 import { TopPlayerPanel, SidePlayerPanel } from "./player/player-panel";
 import { BottomDock } from "./player/bottom-dock";
@@ -59,12 +53,7 @@ export default function PostPromptView() {
 							<div className="flex-1 overflow-y-auto scrollbar-gutter-stable">
 								<div className="@container/canvas mx-auto max-w-6xl px-4 py-4">
 									<ProjectTitle />
-									<AssetStrip>
-										<AssetStripArtStyle />
-										<AssetStripNamedAssets />
-										<AssetStripReferences />
-										<AssetStripAdd />
-									</AssetStrip>
+									<AssetCanvasStrip />
 									<Canvas />
 								</div>
 							</div>

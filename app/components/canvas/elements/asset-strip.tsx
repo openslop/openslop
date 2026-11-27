@@ -4,12 +4,9 @@ import type { ReactNode } from "react";
 import type { Editor } from "slate";
 import { useSlateSelector, useSlateStatic } from "slate-react";
 import { shallow } from "zustand/shallow";
-import { Plus } from "@/components/ui/icon";
-import {
-	Thumbnail,
-	ThumbnailCaption,
-	ThumbnailFace,
-} from "@/components/ui/thumbnail";
+import { AddButton } from "@/components/ui/add-button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FolderOpen } from "@/components/ui/icon";
 import { getImageAssets } from "@/lib/canvas/assets";
 import { useNamedAssetNames, useHasAsset } from "@/lib/canvas/use-assets";
 import { getPrimaryUrl } from "@/lib/connectors/asset-url";
@@ -35,24 +32,41 @@ export function AssetStrip({ children }: { children: ReactNode }) {
 	);
 }
 
-/** Opens the Assets panel, which adds every kind of asset; so the strip shows even before there are any. */
-export function AssetStripAdd() {
+/** Whether the asset canvas's strip has a tile to show: the art style, a named asset or a reference. */
+function useHasCanvasAssets(): boolean {
+	const hasArtStyle = useHasAsset("asset_style");
+	const names = useNamedAssetNames();
+	const { urls } = useReferenceImages();
+	return hasArtStyle || names.length > 0 || urls.length > 0;
+}
+
+/** The asset canvas's strip: its tiles, or a placeholder when there are none, with + in the top-right corner opening the Assets panel. */
+export function AssetCanvasStrip() {
 	const { setActive } = useEditorPanel();
+	const hasAssets = useHasCanvasAssets();
 	return (
-		<li>
-			<Thumbnail asChild>
-				<button
-					type="button"
-					onClick={() => setActive("assets")}
-					className="focus-ring rounded-md"
-				>
-					<ThumbnailFace look="dashed">
-						<Plus className="size-5" />
-					</ThumbnailFace>
-					<ThumbnailCaption>Add asset</ThumbnailCaption>
-				</button>
-			</Thumbnail>
-		</li>
+		<div className="flex items-start gap-2">
+			<div className="min-w-0 flex-1">
+				{hasAssets ? (
+					<AssetStrip>
+						<AssetStripArtStyle />
+						<AssetStripNamedAssets />
+						<AssetStripReferences />
+					</AssetStrip>
+				) : (
+					<EmptyState
+						icon={FolderOpen}
+						title="No assets yet"
+						description="Assets you add show up here"
+					/>
+				)}
+			</div>
+			<AddButton
+				label="Add asset"
+				onClick={() => setActive("assets")}
+				className="shrink-0"
+			/>
+		</div>
 	);
 }
 

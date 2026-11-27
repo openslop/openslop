@@ -30,8 +30,6 @@ const thumbnailFaceVariants = cva(
 			look: {
 				card: "border-border bg-card",
 				muted: "border-border bg-muted",
-				dashed:
-					"border-dashed border-border bg-muted transition-colors hover:text-foreground",
 			},
 			selected: { true: "border-accent ring-2 ring-accent" },
 		},

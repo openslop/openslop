@@ -24,8 +24,8 @@ import {
 	noHistory,
 } from "@/app/components/canvas/__tests__/_mount";
 import {
+	AssetCanvasStrip,
 	AssetStrip,
-	AssetStripAdd,
 	AssetStripMedia,
 	AssetStripReferences,
 } from "../asset-strip";
@@ -40,7 +40,7 @@ let canvas: ReturnType<typeof mountOnCanvas>;
 let store: ProjectStore;
 afterEach(() => canvas.unmount());
 
-const open = (tiles: ReactNode, children: Descendant[] = []) => {
+const mount = (node: ReactNode, children: Descendant[] = []) => {
 	canvas = mountOnCanvas(children);
 	store = createProjectStore();
 	canvas.render(
@@ -49,9 +49,7 @@ const open = (tiles: ReactNode, children: Descendant[] = []) => {
 				<TooltipProvider>
 					<EditorPanelProvider>
 						<MediaPanelProvider>
-							<AssetEditProvider>
-								<AssetStrip>{tiles}</AssetStrip>
-							</AssetEditProvider>
+							<AssetEditProvider>{node}</AssetEditProvider>
 						</MediaPanelProvider>
 					</EditorPanelProvider>
 				</TooltipProvider>
@@ -60,36 +58,62 @@ const open = (tiles: ReactNode, children: Descendant[] = []) => {
 	);
 };
 
+const open = (tiles: ReactNode, children: Descendant[] = []) =>
+	mount(<AssetStrip>{tiles}</AssetStrip>, children);
+
 function OpenPanel() {
 	const { active } = useEditorPanel();
-	return <li data-open-panel={active ?? "none"} />;
+	return <span data-open-panel={active ?? "none"} />;
 }
+
+const openCanvasStrip = (children: Descendant[] = []) =>
+	mount(
+		<>
+			<AssetCanvasStrip />
+			<OpenPanel />
+		</>,
+		children,
+	);
+
+const ADD = 'button[aria-label="Add asset"]';
+const list = () => document.querySelector('ul[aria-label="Assets"]');
+const placeholder = () => document.querySelector('[role="status"]');
 
 const openPanel = () =>
 	document.querySelector("[data-open-panel]")?.getAttribute("data-open-panel");
 
 describe("AssetStrip", () => {
-	it("offers to add an asset when the project has none yet", () => {
-		open(<AssetStripAdd />);
-		const add = document.querySelector<HTMLButtonElement>(
-			'ul[aria-label="Assets"] > li > button',
-		);
-		expect(add?.textContent).toBe("Add asset");
+	it("shows a placeholder and a bare + button when the project has no assets yet", () => {
+		openCanvasStrip();
+
+		expect(list()).toBeNull();
+		expect(placeholder()?.textContent).toContain("No assets yet");
+		const add = document.querySelector<HTMLButtonElement>(ADD);
 		expect(add?.type).toBe("button");
+		expect(add?.textContent).toBe("");
+		expect(add?.querySelector('[data-slot="thumbnail-face"]')).toBeNull();
 	});
 
-	it("opens the Assets panel from the add tile, and keeps it open", async () => {
-		open(
-			<>
-				<AssetStripAdd />
-				<OpenPanel />
-			</>,
-		);
+	it("opens the Assets panel from the + button, and keeps it open", async () => {
+		openCanvasStrip();
+
 		expect(openPanel()).toBe("none");
-		await click('ul[aria-label="Assets"] button');
+		await click(ADD);
 		expect(openPanel()).toBe("assets");
-		await click('ul[aria-label="Assets"] button');
+		await click(ADD);
 		expect(openPanel()).toBe("assets");
+	});
+
+	it("lists the assets beside the + button, not with it", () => {
+		openCanvasStrip([references("https://img/a.png")]);
+
+		expect(placeholder()).toBeNull();
+		expect(
+			list()?.querySelector('[aria-label="More actions for Reference 1"]'),
+		).not.toBeNull();
+		const add = document.querySelector(ADD);
+		expect(add).not.toBeNull();
+		expect(list()?.contains(add)).toBe(false);
 	});
 
 	it("shows the project's media without offering to delete it", async () => {
