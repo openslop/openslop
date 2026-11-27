@@ -49,9 +49,9 @@ const toRecord = (
 });
 
 /**
- * The keys an account has stored. Only ever the metadata: the key itself lives in the vault and is
- * read one generation at a time. Read through the caller's own session, so
- * row-level security is a second lock on the filter below.
+ * The keys an account has stored. Only ever the metadata: the key itself lives
+ * in the vault and is read one generation at a time. Read through the caller's
+ * own session, so row-level security is a second lock on the filter below.
  */
 export async function listProviderKeys(
 	userId: string,

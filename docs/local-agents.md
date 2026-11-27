@@ -1,17 +1,6 @@
 # Local agents
 
-When OpenSlop runs on your own computer (`npm run local` or `npm run dev`), Sloppy and text generation can run on a coding agent you already use, on that agent's own sign-in. No API key is needed.
-
-Pick one under **Local agent** in any text model picker:
-
-| Agent       | Before you pick it                                      |
-| ----------- | ------------------------------------------------------- |
-| Claude Code | Install Claude Code and run `claude` once to sign in.   |
-| Codex       | Install Codex and run `codex` once to sign in.          |
-| Gemini CLI  | Install Gemini CLI and run `gemini` once to sign in.    |
-| Cursor      | Install the Cursor CLI and run `agent` once to sign in. |
-
-The agent's own limits apply, and OpenSlop records no spend for these calls. Images, voice, music and video still use their usual providers.
+To set one up, see [Use your coding agent instead](local-mode.md#use-your-coding-agent-instead). The agent's own limits apply, and OpenSlop records no spend for these calls.
 
 ## How it works
 
