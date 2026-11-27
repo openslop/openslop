@@ -7,9 +7,9 @@ const supabase = { rpc } as unknown as SupabaseClient;
 
 describe("balanceLevel", () => {
 	it.each([
+		[20, "ok"],
 		[5, "ok"],
-		[1, "ok"],
-		[0.99, "low"],
+		[4.99, "low"],
 		[0, "empty"],
 		[-0.18, "empty"],
 	])("rates $%s as %s", (usd, level) => {

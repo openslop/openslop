@@ -3,7 +3,7 @@ import { z } from "zod";
 
 type BalanceLevel = "ok" | "low" | "empty";
 
-const LOW_BALANCE_USD = 1;
+const LOW_BALANCE_USD = 5;
 
 export function balanceLevel(usd: number): BalanceLevel {
 	if (usd <= 0) return "empty";
