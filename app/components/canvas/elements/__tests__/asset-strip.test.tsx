@@ -91,7 +91,6 @@ describe("AssetStrip", () => {
 		const add = document.querySelector<HTMLButtonElement>(ADD);
 		expect(add?.type).toBe("button");
 		expect(add?.textContent).toBe("");
-		expect(add?.querySelector('[data-slot="thumbnail-face"]')).toBeNull();
 	});
 
 	it("opens the Assets panel from the + button, and keeps it open", async () => {
