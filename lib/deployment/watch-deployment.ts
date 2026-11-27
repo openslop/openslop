@@ -28,19 +28,14 @@ export function createDeploymentCheck({
 }
 
 /** Runs `check` when the tab comes back into view, and on an interval while it is in view. */
-export function whileVisible(
-	check: () => void,
-	intervalMs = DEPLOYMENT_CHECK_INTERVAL_MS,
-): () => void {
-	const onVisibilityChange = () => {
+export function whileVisible(check: () => void): () => void {
+	const checkIfVisible = () => {
 		if (document.visibilityState === "visible") check();
 	};
-	const interval = setInterval(() => {
-		if (document.visibilityState === "visible") check();
-	}, intervalMs);
-	document.addEventListener("visibilitychange", onVisibilityChange);
+	const interval = setInterval(checkIfVisible, DEPLOYMENT_CHECK_INTERVAL_MS);
+	document.addEventListener("visibilitychange", checkIfVisible);
 	return () => {
 		clearInterval(interval);
-		document.removeEventListener("visibilitychange", onVisibilityChange);
+		document.removeEventListener("visibilitychange", checkIfVisible);
 	};
 }

@@ -23,7 +23,7 @@ export interface Autosaver {
 	schedule: () => void;
 	/** Run any pending save immediately. */
 	flush: () => void;
-	/** Run any pending save and wait for every save; true when nothing is left unsaved. */
+	/** Save the current state and wait for every save; true when nothing is left unsaved. */
 	settle: () => Promise<boolean>;
 	/** Persist any pending edit, then hold every later save until {@link resume}. */
 	suspend: () => void;
@@ -85,6 +85,7 @@ export function createAutosaver({
 		schedule,
 		flush: schedule.flush,
 		settle: async () => {
+			schedule();
 			schedule.flush();
 			await queue.onIdle();
 			return suspended || isEqual(buildInput(), lastSaved);

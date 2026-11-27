@@ -306,6 +306,17 @@ describe("createAutosaver", () => {
 			await expect(autosaver.settle()).resolves.toBe(false);
 		});
 
+		it("retries an edit whose save failed", async () => {
+			saveProject.mockRejectedValueOnce(new Error("offline"));
+			const autosaver = build();
+			edit();
+			autosaver.schedule();
+			await expect(autosaver.settle()).resolves.toBe(false);
+
+			await expect(autosaver.settle()).resolves.toBe(true);
+			expect(saveProject).toHaveBeenCalledTimes(2);
+		});
+
 		it("has nothing to save for an untouched project", async () => {
 			await expect(build().settle()).resolves.toBe(true);
 			expect(saveProject).not.toHaveBeenCalled();
