@@ -8,7 +8,6 @@ describe("isOtherDeployment", () => {
 		[null, "dpl-2", false],
 		["dpl-1", null, false],
 		["", "dpl-2", false],
-		[undefined, undefined, false],
 	])("own %o, other %o: %s", (own, other, expected) => {
 		expect(isOtherDeployment(own, other)).toBe(expected);
 	});

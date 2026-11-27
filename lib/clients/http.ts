@@ -13,15 +13,13 @@ type RequestOptions = {
 	signal?: AbortSignal;
 };
 
-async function readError(
-	response: Response,
-): Promise<{ message: string; code?: ApiErrorCode }> {
+async function readError(response: Response): Promise<ApiErrorEnvelope> {
 	const body: unknown = await response.json().catch(() => undefined);
-	const envelope = ApiErrorEnvelope.safeParse(body).data;
-	return {
-		message: envelope?.error ?? `${response.status} ${response.statusText}`,
-		code: envelope?.code,
-	};
+	return (
+		ApiErrorEnvelope.safeParse(body).data ?? {
+			error: `${response.status} ${response.statusText}`,
+		}
+	);
 }
 
 function buildInit(method: string, body: unknown): RequestInit {
@@ -73,8 +71,8 @@ function asUnreachable(error: unknown): never {
 export const fetchOrThrow: typeof fetch = async (input, init) => {
 	const response = await fetch(input, init).catch(asUnreachable);
 	if (!response.ok) {
-		const { message, code } = await readError(response);
-		throw new ApiError(message, response.headers.get("x-vercel-id"), code);
+		const { error, code } = await readError(response);
+		throw new ApiError(error, response.headers.get("x-vercel-id"), code);
 	}
 	return response;
 };

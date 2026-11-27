@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { apiJson, UnreachableError } from "@/lib/clients/http";
 import {
-	DEPLOYMENT_PATH,
 	DeploymentResponse,
 	pageDeploymentId,
 } from "@/lib/deployment/deployment-id";
@@ -15,7 +14,7 @@ import {
 
 // Offline or mid-deploy, the next check asks again.
 const latestDeployment = () =>
-	apiJson(DEPLOYMENT_PATH, DeploymentResponse).then(
+	apiJson("/api/deployment", DeploymentResponse).then(
 		({ deploymentId }) => deploymentId,
 		(error: unknown) => {
 			if (error instanceof UnreachableError) return null;

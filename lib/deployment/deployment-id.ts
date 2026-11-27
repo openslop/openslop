@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-/** Carries the client's deployment ID on requests that break when client and server disagree. */
 export const DEPLOYMENT_HEADER = "x-openslop-deployment-id";
-
-export const DEPLOYMENT_PATH = "/api/deployment";
 
 export const DeploymentResponse = z.object({
 	deploymentId: z.string().nullable(),
@@ -18,13 +15,12 @@ export const serverDeploymentId = (): string | null =>
 export const pageDeploymentId = (): string | null =>
 	document.documentElement.dataset.dplId ?? null;
 
-/** Whether `other` is a different deployment from `own`; unknown on either side never counts. */
+/** Unknown on either side never counts. */
 export const isOtherDeployment = (
-	own: string | null | undefined,
-	other: string | null | undefined,
+	own: string | null,
+	other: string | null,
 ): other is string => Boolean(own && other && own !== other);
 
-/** Whether `request` came from a tab on another deployment; one that names none never counts. */
 export const isFromOtherDeployment = (request: Request): boolean =>
 	isOtherDeployment(
 		serverDeploymentId(),
