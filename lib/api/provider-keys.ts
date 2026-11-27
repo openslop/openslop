@@ -1,4 +1,3 @@
-import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import {
 	KEY_STATUSES,
@@ -50,24 +49,14 @@ const toRecord = (
 	createdAt: row.created_at,
 });
 
-const AccessMetadata = z.object({ api_access: z.boolean().default(false) });
-
-export const hasApiAccess = (user: User): boolean =>
-	AccessMetadata.parse(user.app_metadata).api_access;
-
-/**
- * The hosted provider has a key row like any other, so nothing downstream asks
- * which provider needs a key. Every account has it; API access is what makes
- * it valid today, and when it takes a key of its own it will be stored like
- * the rest.
- */
-const hostedKey = (user: User): ProviderKeyRecord => ({
+/** The balance gates each hosted call, not the key. */
+const HOSTED_KEY: ProviderKeyRecord = {
 	provider: MANAGED_PROVIDER,
 	last4: "",
-	status: hasApiAccess(user) ? "valid" : "invalid",
+	status: "valid",
 	verifiedAt: null,
 	createdAt: "",
-});
+};
 
 /**
  * The keys an account can generate on: the hosted one, then whatever it has
@@ -76,17 +65,17 @@ const hostedKey = (user: User): ProviderKeyRecord => ({
  * row-level security is a second lock on the filter below.
  */
 export async function listProviderKeys(
-	user: User,
+	userId: string,
 ): Promise<ProviderKeyRecord[]> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("provider_keys")
 		.select(PROVIDER_KEY_COLUMNS)
-		.eq("user_id", user.id)
+		.eq("user_id", userId)
 		.order("created_at", { ascending: true });
 	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);
 	return [
-		hostedKey(user),
+		HOSTED_KEY,
 		...z.array(ProviderKeyRowSchema).parse(data).map(toRecord),
 	];
 }
@@ -163,13 +152,15 @@ export async function setKeyStatus(
 	);
 }
 
-export async function providerKeysView(user: User): Promise<ProviderKeysView> {
-	return { providerKeys: await listProviderKeys(user) };
+export async function providerKeysView(
+	userId: string,
+): Promise<ProviderKeysView> {
+	return { providerKeys: await listProviderKeys(userId) };
 }
 
 export async function providerKeyCheck(
-	user: User,
+	userId: string,
 	validation: ValidationResult,
 ): Promise<ProviderKeyCheck> {
-	return { ...(await providerKeysView(user)), validation };
+	return { ...(await providerKeysView(userId)), validation };
 }

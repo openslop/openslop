@@ -61,7 +61,7 @@ export function ExportButton() {
 			<PopoverTrigger asChild>
 				<Button
 					type="button"
-					variant="panel"
+					variant="secondary"
 					size="sm"
 					className="shrink-0"
 					aria-label="Export"

@@ -39,7 +39,7 @@ export default async function ProjectPage({
 	if (!project) notFound();
 
 	const [providerKeys, transcript] = await Promise.all([
-		listProviderKeys(user),
+		listProviderKeys(user.id),
 		loadTranscript(id, user.id),
 	]);
 

@@ -17,7 +17,8 @@ const mockEnqueueJob = vi.fn();
 const mockUpdateJob = vi.fn();
 const mockGetJob = vi.fn();
 const mockReadBalance = vi.fn();
-vi.mock("@/lib/user/balance", () => ({
+vi.mock("@/lib/user/balance", async (importOriginal) => ({
+	...(await importOriginal()),
 	readBalanceUsd: (...args: unknown[]) => mockReadBalance(...args),
 }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
@@ -125,10 +126,7 @@ const PROJECT_ID = "00000000-0000-4000-8000-000000000000";
 
 describe("API routes", () => {
 	beforeEach(() => {
-		mockGetUser.mockResolvedValue({
-			id: "user-1",
-			app_metadata: { api_access: true },
-		});
+		mockGetUser.mockResolvedValue({ id: "user-1" });
 		mockCreateJob.mockResolvedValue({ id: "job-abc" });
 		mockReadBalance.mockResolvedValue(5);
 		mockEnqueueJob.mockResolvedValue(undefined);

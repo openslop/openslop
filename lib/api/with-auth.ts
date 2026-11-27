@@ -2,19 +2,17 @@ import type { User } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { getUser } from "./auth";
 import { createClient } from "@/lib/supabase/server";
-import { readBalanceUsd } from "@/lib/user/balance";
-import { hasApiAccess, MissingProviderKeyError } from "./provider-keys";
+import { balanceLevel, readBalanceUsd } from "@/lib/user/balance";
+import { MissingProviderKeyError } from "./provider-keys";
 import { logger } from "./logger";
 import {
 	badRequest,
-	forbidden,
 	outOfBalance,
 	serverError,
 	unauthorized,
 } from "./response";
 
 type RouteBody = (user: User) => Promise<Response>;
-type Authorize = (user: User) => Promise<Response | null>;
 
 // Uniform error envelope: an unconnected provider is the caller's to fix, so it
 // comes back as a 400; anything else is logged and returned as 500.
@@ -33,36 +31,19 @@ async function runGuarded(
 	}
 }
 
-async function guard(
-	label: string,
-	run: RouteBody,
-	...tiers: Authorize[]
-): Promise<Response> {
-	return runGuarded(label, async () => {
+export const withSession = (label: string, run: RouteBody) =>
+	runGuarded(label, async () => {
 		const user = await getUser();
-		if (!user) return unauthorized();
-		for (const tier of tiers) {
-			const denied = await tier(user);
-			if (denied) return denied;
-		}
-		return run(user);
+		return user ? run(user) : unauthorized();
 	});
-}
-
-const requireApiAccess: Authorize = async (user) =>
-	hasApiAccess(user) ? null : forbidden();
-
-export const withApiAccess = (label: string, run: RouteBody) =>
-	guard(label, run, requireApiAccess);
 
 // Post-paid: jobs already running may take the balance a little below zero.
-const refuseWithoutBalance: Authorize = async () =>
-	(await readBalanceUsd(await createClient())) > 0 ? null : outOfBalance();
-
 export const withHostedBalance = (label: string, run: RouteBody) =>
-	guard(label, run, requireApiAccess, refuseWithoutBalance);
-
-export const withSession = (label: string, run: RouteBody) => guard(label, run);
+	withSession(label, async (user) =>
+		balanceLevel(await readBalanceUsd(await createClient())) === "empty"
+			? outOfBalance()
+			: run(user),
+	);
 
 export const withPublic = (label: string, run: () => Promise<Response>) =>
 	runGuarded(label, run);

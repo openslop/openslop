@@ -8,24 +8,18 @@ import { createJob } from "./jobs";
 import { byokProviderFor } from "./providers/byok";
 import { hostedProviderFor } from "./providers/openslop";
 import {
-	createApiParamRouteHandler,
-	createApiQueryRouteHandler,
 	createHostedRouteHandler,
-	createSessionParamRouteHandler,
-	createSessionQueryRouteHandler,
 	createSessionRouteHandler,
 } from "./route-handler";
 
 /**
- * Everything that differs between the two route families, in one place: who a
- * route lets in, how it names its models, whose key a picked model runs on,
- * and whether its streamed LLM spend is booked. A route picks a family and a
- * connector type; nothing else about it varies.
+ * Everything that differs between the two route families, in one place: who
+ * a generation route lets in, how it names its models, whose key a picked
+ * model runs on, and whether its streamed LLM spend is booked. A route picks a
+ * family and a connector type; nothing else about it varies.
  */
 export type RouteFamily<TPicked extends ModelRef> = {
 	createHandler: typeof createHostedRouteHandler;
-	createQueryHandler: typeof createApiQueryRouteHandler;
-	createParamHandler: typeof createApiParamRouteHandler;
 	model: (type: ConnectorType) => z.ZodType<TPicked>;
 	providerFor: <K extends ProviderType>(
 		userId: string,
@@ -41,8 +35,6 @@ export type RouteFamily<TPicked extends ModelRef> = {
 
 export const HOSTED: RouteFamily<ModelRef> = {
 	createHandler: createHostedRouteHandler,
-	createQueryHandler: createApiQueryRouteHandler,
-	createParamHandler: createApiParamRouteHandler,
 	model: hostedModel,
 	providerFor: async (_userId, type, picked) =>
 		hostedProviderFor(type, picked.model),
@@ -60,8 +52,6 @@ export const HOSTED: RouteFamily<ModelRef> = {
 
 export const BYOK: RouteFamily<BYOKModelRef> = {
 	createHandler: createSessionRouteHandler,
-	createQueryHandler: createSessionQueryRouteHandler,
-	createParamHandler: createSessionParamRouteHandler,
 	model: byokModel,
 	providerFor: (userId, type, picked) =>
 		byokProviderFor(userId, picked.provider, type),

@@ -16,7 +16,6 @@ vi.mock("../auth", () => ({
 }));
 
 vi.mock("../provider-keys", () => ({
-	hasApiAccess: () => true,
 	MissingProviderKeyError: class MissingProviderKeyError extends Error {},
 }));
 

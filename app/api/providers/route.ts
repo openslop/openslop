@@ -28,6 +28,6 @@ export const POST = createSessionRouteHandler({
 			await saveProviderKey(user.id, provider, apiKey);
 			await setKeyStatus(user.id, provider, "valid");
 		}
-		return NextResponse.json(await providerKeyCheck(user, validation));
+		return NextResponse.json(await providerKeyCheck(user.id, validation));
 	},
 });

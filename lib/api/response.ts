@@ -21,21 +21,11 @@ export function unauthorized(message = "Unauthorized") {
 	return errorResponse({ error: message }, 401);
 }
 
-export function forbidden() {
-	return errorResponse(
-		{
-			error:
-				"Forbidden, your API access has been revoked. Please contact hi@openslop.ai or post on our Discord server for help.",
-		},
-		403,
-	);
-}
-
 export function outOfBalance() {
 	return errorResponse(
 		{
 			error:
-				"You're out of balance. Questions? Email hi@openslop.ai or message us on Discord: https://discord.gg/zeP5482ced",
+				"You've run out of balance for OpenSlop models. Please top up your account or pick a different provider via Profile picture > Settings > Models. Contact hi@openslop.ai or post on our Discord for help: https://discord.gg/zeP5482ced",
 		},
 		402,
 	);

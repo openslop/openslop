@@ -19,6 +19,7 @@ import { withOwnedProject } from "./with-owned-project";
 import { notFound } from "./response";
 import { rowId } from "./request-schema-fields";
 import type { RouteFamily } from "./route-families";
+import { createSessionParamRouteHandler } from "./route-handler";
 
 /** What each asset route takes beyond the prompt and model, and how the log names it. */
 const ASSET_ROUTES = {
@@ -60,22 +61,19 @@ export const createAssetRouteHandler = <TPicked extends ModelRef>(
 	});
 };
 
-export const createJobPollHandler = (
-	family: Pick<RouteFamily<ModelRef>, "createParamHandler">,
-) =>
-	family.createParamHandler({
-		schema: z.object({ jobId: rowId }),
-		label: "Job poll",
-		handle: async ({ user, params }) => {
-			const found = await getJob(params.jobId, user.id);
-			if (!found) return notFound();
-			const job = await failIfExpired(found);
-			return NextResponse.json<JobPoll>({
-				jobId: job.id,
-				status: job.status,
-				result: job.result,
-				error: job.error,
-				costUsd: job.cost_usd,
-			});
-		},
-	});
+export const jobPollHandler = createSessionParamRouteHandler({
+	schema: z.object({ jobId: rowId }),
+	label: "Job poll",
+	handle: async ({ user, params }) => {
+		const found = await getJob(params.jobId, user.id);
+		if (!found) return notFound();
+		const job = await failIfExpired(found);
+		return NextResponse.json<JobPoll>({
+			jobId: job.id,
+			status: job.status,
+			result: job.result,
+			error: job.error,
+			costUsd: job.cost_usd,
+		});
+	},
+});

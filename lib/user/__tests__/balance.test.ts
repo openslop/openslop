@@ -1,9 +1,21 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
-import { readBalanceUsd } from "../balance";
+import { balanceLevel, readBalanceUsd } from "../balance";
 
 const rpc = vi.fn();
 const supabase = { rpc } as unknown as SupabaseClient;
+
+describe("balanceLevel", () => {
+	it.each([
+		[5, "ok"],
+		[1, "ok"],
+		[0.99, "low"],
+		[0, "empty"],
+		[-0.18, "empty"],
+	])("rates $%s as %s", (usd, level) => {
+		expect(balanceLevel(usd)).toBe(level);
+	});
+});
 
 describe("readBalanceUsd", () => {
 	it("reads the user's balance", async () => {

@@ -154,7 +154,7 @@ The harness is client-side, so Sloppy works through the same canvas, queue and s
 | **Job**          | `jobs`                 | An asset route records a row and hands it to a Vercel Queue worker, which calls the provider and uploads the result to Blob. The client polls it until it settles. |
 | **Provider key** | `provider_keys`, Vault | A user's key for a vendor. Read by the service role only for the request that uses it, never sent to a client.                                                     |
 
-`proxy.ts` refreshes the Supabase session; `withSession` and `withApiAccess` guard the routes.
+`proxy.ts` refreshes the Supabase session; `withSession` guards the routes, and `withHostedBalance` also checks the balance before each hosted call.
 
 ## Data
 

@@ -2,15 +2,10 @@ import { NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { z } from "zod";
 import { notFound } from "./response";
-import {
-	withApiAccess,
-	withHostedBalance,
-	withPublic,
-	withSession,
-} from "./with-auth";
+import { withHostedBalance, withPublic, withSession } from "./with-auth";
 import { parseBody, parseSearchParams, type ParseResult } from "./parse";
 
-type AuthTier = typeof withApiAccess;
+type AuthTier = typeof withSession;
 
 /** Turns a request into validated data, or into the 400 that explains why not. */
 type ParseSource = <TSchema extends z.ZodType>(
@@ -54,10 +49,6 @@ export const createHostedRouteHandler = routeHandler(
 	parseBody,
 );
 export const createSessionRouteHandler = routeHandler(withSession, parseBody);
-export const createApiQueryRouteHandler = routeHandler(
-	withApiAccess,
-	parseSearchParams,
-);
 export const createSessionQueryRouteHandler = routeHandler(
 	withSession,
 	parseSearchParams,
@@ -68,27 +59,19 @@ export const createSessionQueryRouteHandler = routeHandler(
  * external input, and a shape the schema will not take names nothing that
  * exists, so it answers 404 rather than surfacing the mismatch.
  */
-function paramRouteHandler(authTier: AuthTier) {
-	return function createHandler<TSchema extends z.ZodType>(
-		options: RouteOptions<
-			TSchema,
-			{ user: User; params: z.infer<TSchema>; request: NextRequest }
-		>,
-	) {
-		return async (
-			request: NextRequest,
-			context: { params: Promise<unknown> },
-		) =>
-			authTier(options.label, async (user) => {
-				const parsed = options.schema.safeParse(await context.params);
-				if (!parsed.success) return notFound();
-				return options.handle({ user, params: parsed.data, request });
-			});
-	};
+export function createSessionParamRouteHandler<TSchema extends z.ZodType>(
+	options: RouteOptions<
+		TSchema,
+		{ user: User; params: z.infer<TSchema>; request: NextRequest }
+	>,
+) {
+	return async (request: NextRequest, context: { params: Promise<unknown> }) =>
+		withSession(options.label, async (user) => {
+			const parsed = options.schema.safeParse(await context.params);
+			if (!parsed.success) return notFound();
+			return options.handle({ user, params: parsed.data, request });
+		});
 }
-
-export const createApiParamRouteHandler = paramRouteHandler(withApiAccess);
-export const createSessionParamRouteHandler = paramRouteHandler(withSession);
 
 function publicRouteHandler(parse: ParseSource) {
 	return function createHandler<TSchema extends z.ZodType>(

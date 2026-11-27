@@ -10,11 +10,12 @@ import { voiceSearchParamsSchema } from "@/lib/project/types";
 import { voicePreview } from "@/lib/providers/tts/voice-preview";
 import { requiredVoiceId } from "./request-schema-fields";
 import type { RouteFamily } from "./route-families";
+import { createSessionQueryRouteHandler } from "./route-handler";
 
 export const createVoiceSearchHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,
 ) =>
-	family.createQueryHandler({
+	createSessionQueryRouteHandler({
 		schema: voiceSearchParamsSchema.and(family.model("tts")),
 		label: "Voice search",
 		handle: async ({ user, input }) => {
@@ -29,7 +30,7 @@ const previewParamsSchema = z.object({ voiceId: requiredVoiceId });
 export const createVoicePreviewHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,
 ) =>
-	family.createQueryHandler({
+	createSessionQueryRouteHandler({
 		schema: previewParamsSchema.and(family.model("tts")),
 		label: "Voice preview",
 		handle: async ({ user, input }) => {
