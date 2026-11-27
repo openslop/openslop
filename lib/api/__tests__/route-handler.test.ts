@@ -1,7 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
-import { createJobPollHandler } from "../asset-routes";
-import { HOSTED } from "../route-families";
+import { jobPollHandler } from "../asset-routes";
 import { bodySchema, hostedModel } from "../generation-schema";
 import {
 	createHostedRouteHandler,
@@ -17,7 +16,10 @@ vi.mock("../jobs", () => ({
 }));
 vi.mock("../job-queue", () => ({ enqueueJob: vi.fn() }));
 
-vi.mock("@/lib/user/balance", () => ({ readBalanceUsd: async () => 5 }));
+vi.mock("@/lib/user/balance", async (importOriginal) => ({
+	...(await importOriginal()),
+	readBalanceUsd: async () => 5,
+}));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({}) }));
 
 vi.mock("../logger", () => ({
@@ -30,10 +32,7 @@ vi.mock("../auth", () => ({
 }));
 
 beforeEach(() => {
-	mockGetUser.mockResolvedValue({
-		id: "user-1",
-		app_metadata: { api_access: true },
-	});
+	mockGetUser.mockResolvedValue({ id: "user-1" });
 });
 
 const VALID_BODY = { prompt: "hello", model: "Seedream 5 Lite" };
@@ -68,27 +67,6 @@ describe("createHostedRouteHandler", () => {
 		const handler = makeHandler(handle);
 		const res = await handler(makeRequest({ prompt: "hello" }));
 		expect(res.status).toBe(401);
-		expect(handle).not.toHaveBeenCalled();
-	});
-
-	it("returns 403 when the user lacks api_access", async () => {
-		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
-		const handle = vi.fn(async () => NextResponse.json({}));
-		const handler = makeHandler(handle);
-		const res = await handler(makeRequest({ prompt: "hello" }));
-		expect(res.status).toBe(403);
-		expect(handle).not.toHaveBeenCalled();
-	});
-
-	it("returns 500 when the api_access flag is not a boolean", async () => {
-		mockGetUser.mockResolvedValue({
-			id: "user-1",
-			app_metadata: { api_access: "true" },
-		});
-		const handle = vi.fn(async () => NextResponse.json({}));
-		const handler = makeHandler(handle);
-		const res = await handler(makeRequest({ prompt: "hello" }));
-		expect(res.status).toBe(500);
 		expect(handle).not.toHaveBeenCalled();
 	});
 
@@ -198,8 +176,7 @@ describe("createSessionRouteHandler", () => {
 		expect(res.status).toBe(401);
 	});
 
-	it("allows signed-in users without api_access", async () => {
-		mockGetUser.mockResolvedValue({ id: "user-1", app_metadata: {} });
+	it("allows signed-in users", async () => {
 		const res = await makeUserHandler()(makeRequest(VALID_BODY));
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual({ prompt: "hello" });
@@ -211,12 +188,11 @@ describe("createSessionRouteHandler", () => {
 	});
 });
 
-describe("createJobPollHandler", () => {
-	const pollJob = createJobPollHandler(HOSTED);
+describe("jobPollHandler", () => {
 	const request = new NextRequest("http://localhost/api/v1/image/bruh");
 
 	function poll(jobId: string) {
-		return pollJob(request, { params: Promise.resolve({ jobId }) });
+		return jobPollHandler(request, { params: Promise.resolve({ jobId }) });
 	}
 
 	it("returns 404 for a malformed job id without querying the database", async () => {

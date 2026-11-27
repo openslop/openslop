@@ -86,6 +86,6 @@ describe("ProjectPanel", () => {
 		await renderPanel();
 
 		const cost = document.body.querySelector('[data-slot="badge"]');
-		expect(cost?.textContent).toBe("$0.42");
+		expect(cost?.textContent).toContain("$0.42");
 	});
 });

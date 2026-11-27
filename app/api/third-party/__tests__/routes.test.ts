@@ -49,8 +49,7 @@ describe("POST /api/third-party/image", () => {
 		model: "Seedream 5 Lite",
 	};
 
-	// A signed-in user generating on their own key needs no API grant from us.
-	it("takes a session without the api_access grant", async () => {
+	it("takes any signed-in session", async () => {
 		const res = await post(BYOK_BODY);
 		expect(res.status).toBe(200);
 	});

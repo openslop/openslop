@@ -65,22 +65,22 @@ function asUnreachable(error: unknown): never {
 	throw error;
 }
 
-/** Calls one of our own API routes, surfacing its error envelope as a thrown `ApiError`. */
-export async function apiFetch(
-	url: string,
-	{ method = "GET", body, params, signal }: RequestOptions = {},
-): Promise<Response> {
-	const response = await fetch(buildUrl(url, params), {
-		...buildInit(method, body),
-		signal,
-	}).catch(asUnreachable);
+/** `fetch` for our own API routes, surfacing their error envelope as a thrown `ApiError`. */
+export const fetchOrThrow: typeof fetch = async (input, init) => {
+	const response = await fetch(input, init).catch(asUnreachable);
 	if (!response.ok)
 		throw new ApiError(
 			await readErrorMessage(response),
 			response.headers.get("x-vercel-id"),
 		);
 	return response;
-}
+};
+
+export const apiFetch = (
+	url: string,
+	{ method = "GET", body, params, signal }: RequestOptions = {},
+): Promise<Response> =>
+	fetchOrThrow(buildUrl(url, params), { ...buildInit(method, body), signal });
 
 export async function apiJson<T>(
 	url: string,

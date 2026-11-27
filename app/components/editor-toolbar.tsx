@@ -19,7 +19,7 @@ import {
 import { useSloppy } from "./sloppy/sloppy-provider";
 import { WAIT_FOR_SLOPPY } from "./sloppy/turn-display";
 import { ExportButton } from "./player/export-button";
-import { BalancePill } from "./balance-pill";
+import { ToolbarProjectCost } from "./project-cost-badge";
 import editorStyles from "./editor.module.css";
 
 function Breadcrumbs() {
@@ -91,7 +91,7 @@ function EditorToolbarComponent() {
 		>
 			<Breadcrumbs />
 			<div className="flex items-center justify-end gap-2">
-				<BalancePill />
+				<ToolbarProjectCost />
 				{cancelActions.map(({ label, onClick }) => (
 					<TooltipIconButton
 						key={label}

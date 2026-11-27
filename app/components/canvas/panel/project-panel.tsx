@@ -4,12 +4,10 @@ import type { ReactNode } from "react";
 import {
 	FilmSlate,
 	Hourglass,
-	Tag,
 	Template,
 	Translate,
 	type IconComponent,
 } from "@/components/ui/icon";
-import { Badge } from "@/components/ui/badge";
 import { SelectMenuTrigger } from "@/components/ui/select-menu";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { useProject } from "@/lib/project/use-project";
@@ -17,10 +15,7 @@ import { languageLabel } from "@/lib/project/language";
 import { videoFormatLabel } from "@/lib/project/video-format";
 import { videoLengthLabel } from "@/lib/project/video-length";
 import { getTemplateById } from "@/lib/templates/templates";
-import { useProjectId } from "@/lib/project/project-provider";
-import { useProjectCostUsd } from "@/lib/project/project-cost";
-import { Skeleton } from "@/components/ui/skeleton";
-import { formatCost } from "@/lib/format";
+import { ProjectCostBadge } from "@/app/components/project-cost-badge";
 import { PanelCard, PanelField } from "./panel-card";
 
 /** A setting the project was created with, shown as the dropdown it was picked from. */
@@ -46,7 +41,6 @@ function FixedSetting({
 }
 
 export function ProjectPanel() {
-	const costUsd = useProjectCostUsd(useProjectId());
 	const { language, length, format, template } = useProject(
 		(state) => state.scriptSettings,
 	);
@@ -74,14 +68,7 @@ export function ProjectPanel() {
 				value={getTemplateById(template)?.name ?? "None"}
 			/>
 			<PanelField label="Cost">
-				<Badge variant="subtle" size="xsLabel">
-					<Tag />
-					{costUsd === undefined ? (
-						<Skeleton className="h-3 w-8" />
-					) : (
-						formatCost(costUsd)
-					)}
-				</Badge>
+				<ProjectCostBadge size="xsLabel" />
 			</PanelField>
 		</PanelCard>
 	);

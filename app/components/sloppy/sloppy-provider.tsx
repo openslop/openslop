@@ -30,6 +30,7 @@ import {
 	useProjectId,
 	useInitialTranscript,
 } from "@/lib/project/project-provider";
+import { fetchOrThrow } from "@/lib/clients/http";
 import { toastError } from "@/lib/toast-error";
 
 const STOPPED_TEXT = "Stopped by you before the editor finished it";
@@ -93,6 +94,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			messageMetadataSchema: sloppyMetadataSchema,
 			// eslint-disable-next-line react-hooks/refs -- the SDK calls this per request, not per render
 			transport: new SloppyTransport(editor, {
+				fetch: fetchOrThrow,
 				prepareSendMessagesRequest: ({ messages, body }) => {
 					const picked = turnModel.current ?? model;
 					return {

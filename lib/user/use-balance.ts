@@ -8,6 +8,6 @@ const BALANCE_WATCHES = [
 	{ table: "funds" },
 ];
 
-/** $0 until the first read lands, and if it can't be read. */
-export const useBalance = (): number =>
-	useLiveRead(readBalanceUsd, BALANCE_WATCHES) ?? 0;
+/** Undefined until the first read lands. */
+export const useBalance = (): number | undefined =>
+	useLiveRead(readBalanceUsd, BALANCE_WATCHES);

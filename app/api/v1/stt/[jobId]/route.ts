@@ -1,4 +1,3 @@
-import { createJobPollHandler } from "@/lib/api/asset-routes";
-import { HOSTED } from "@/lib/api/route-families";
+import { jobPollHandler } from "@/lib/api/asset-routes";
 
-export const GET = createJobPollHandler(HOSTED);
+export const GET = jobPollHandler;

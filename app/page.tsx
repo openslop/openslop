@@ -28,7 +28,7 @@ export default async function Home() {
 				.from("projects")
 				.select(PROJECT_ROW_COLUMNS)
 				.order("updated_at", { ascending: false }),
-			listProviderKeys(user),
+			listProviderKeys(user.id),
 		]);
 		if (error) throw error;
 		return (

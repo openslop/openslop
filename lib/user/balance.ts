@@ -1,6 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
+type BalanceLevel = "ok" | "low" | "empty";
+
+const LOW_BALANCE_USD = 5;
+
+export function balanceLevel(usd: number): BalanceLevel {
+	if (usd <= 0) return "empty";
+	if (usd < LOW_BALANCE_USD) return "low";
+	return "ok";
+}
+
 /** The signed-in user's, so the client must carry their session. */
 export async function readBalanceUsd(
 	supabase: SupabaseClient,

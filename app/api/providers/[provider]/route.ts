@@ -20,7 +20,7 @@ export const POST = createSessionParamRouteHandler({
 		const key = await readProviderKey(user.id, params.provider);
 		if (!key) throw new MissingProviderKeyError(params.provider);
 		const validation = await verifyProviderKey(user.id, params.provider, key);
-		return NextResponse.json(await providerKeyCheck(user, validation));
+		return NextResponse.json(await providerKeyCheck(user.id, validation));
 	},
 });
 
@@ -29,6 +29,6 @@ export const DELETE = createSessionParamRouteHandler({
 	label: "Provider key removal",
 	handle: async ({ user, params }) => {
 		await deleteProviderKey(user.id, params.provider);
-		return NextResponse.json(await providerKeysView(user));
+		return NextResponse.json(await providerKeysView(user.id));
 	},
 });

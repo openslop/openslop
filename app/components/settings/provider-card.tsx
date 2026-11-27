@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDeleteDialog } from "@/components/ui/confirm-delete-dialog";
 import {
 	AlertCircle,
+	AlertCircleFilled,
 	CheckCircle,
+	CreditCard,
 	Hourglass,
 	Pencil,
 	RefreshCw,
@@ -34,6 +36,9 @@ import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/toast-error";
 import { useAccount } from "@/lib/user/use-account";
+import { balanceLevel } from "@/lib/user/balance";
+import { useBalance } from "@/lib/user/use-balance";
+import { UsdAmount } from "../usd-amount";
 import { ProviderKeyForm } from "./provider-key-form";
 
 const KEY_STATUS = {
@@ -48,6 +53,29 @@ function KeyStatusBadge({ status }: { status: KeyStatus }) {
 		<Badge variant={variant}>
 			<Icon />
 			{label}
+		</Badge>
+	);
+}
+
+const BALANCE_LEVEL = {
+	ok: { variant: "muted", Icon: CreditCard, label: "Balance" },
+	low: { variant: "indicator", Icon: AlertCircleFilled, label: "Low balance" },
+	empty: {
+		variant: "indicator",
+		Icon: AlertCircleFilled,
+		label: "No balance left",
+	},
+} as const;
+
+function BalanceBadge() {
+	const usd = useBalance();
+	const { variant, Icon, label } =
+		BALANCE_LEVEL[usd === undefined ? "ok" : balanceLevel(usd)];
+	return (
+		<Badge variant={variant} className="ml-auto">
+			<Icon />
+			<span className="sr-only">{label}:</span>
+			<UsdAmount usd={usd} />
 		</Badge>
 	);
 }
@@ -71,16 +99,11 @@ function ProviderHeading({
 }
 
 export function HostedProviderCard() {
-	const status = useProviderKey(MANAGED_PROVIDER)?.status ?? "invalid";
 	return (
 		<Tile>
 			<ProviderHeading provider={MANAGED_PROVIDER}>
-				<KeyStatusBadge status={status} />
-				<p className="ml-auto text-label-xs text-muted-foreground">
-					{status === "valid"
-						? "Included with your account"
-						: "Not included with your account"}
-				</p>
+				<KeyStatusBadge status="valid" />
+				<BalanceBadge />
 			</ProviderHeading>
 		</Tile>
 	);
