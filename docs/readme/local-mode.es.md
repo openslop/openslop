@@ -112,7 +112,7 @@ Haz clic en tu icono de perfil, luego en **Settings** > **Add providers**, y con
 
 ## O usa tu agente de programación
 
-¿Ya usas Claude Code, Codex, Gemini CLI o Cursor? Sloppy y la generación de texto pueden funcionar con él en lugar de una clave de texto. Consulta [Local agents](../local-agents.md).
+¿Ya usas Claude Code, Codex o Cursor? Sloppy y la generación de texto pueden funcionar con él en lugar de una clave de texto. Consulta [Local agents](../local-agents.md).
 
 ## El día a día
 

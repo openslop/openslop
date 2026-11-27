@@ -112,7 +112,7 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
 
 ## Use your coding agent instead
 
-Already use Claude Code, Codex, Gemini CLI or Cursor? Sloppy and text generation can run on it instead of a Text key. See [Local agents](local-agents.md).
+Already use Claude Code, Codex or Cursor? Sloppy and text generation can run on it instead of a Text key. See [Local agents](local-agents.md).
 
 ## Every day after
 

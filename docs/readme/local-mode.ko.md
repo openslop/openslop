@@ -112,7 +112,7 @@ npm run local
 
 ## 코딩 에이전트 사용하기
 
-이미 Claude Code, Codex, Gemini CLI, Cursor를 쓰고 있다면 텍스트 키 대신 그걸로 Sloppy와 텍스트 생성을 돌릴 수 있습니다. [Local agents](../local-agents.md)를 참고하세요.
+이미 Claude Code, Codex, Cursor를 쓰고 있다면 텍스트 키 대신 그걸로 Sloppy와 텍스트 생성을 돌릴 수 있습니다. [Local agents](../local-agents.md)를 참고하세요.
 
 ## 그다음부터
 

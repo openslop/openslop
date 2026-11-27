@@ -112,7 +112,7 @@ npm run local
 
 ## コーディングエージェントを使う
 
-Claude Code、Codex、Gemini CLI、Cursor をすでに使っているなら、テキスト用のキーの代わりにそれで Sloppy とテキスト生成を動かせます。詳しくは [Local agents](../local-agents.md) を参照してください。
+Claude Code、Codex、Cursor をすでに使っているなら、テキスト用のキーの代わりにそれで Sloppy とテキスト生成を動かせます。詳しくは [Local agents](../local-agents.md) を参照してください。
 
 ## 次からの使い方
 

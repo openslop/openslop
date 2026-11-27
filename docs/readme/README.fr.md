@@ -164,6 +164,16 @@ Utilisez OpenSlop sur votre propre Mac, PC Windows ou Linux. Vos projets et vos 
 - **[Modèles](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime, et plus. Chacun amorce un style, ses personnages et une durée.
 - **[Mocks pour le développement](../../.env.example)** — Laissez une clé de fournisseur vide et ses appels retombent sur des résultats préenregistrés, pour que vous puissiez développer sans payer.
 
+## Agents pris en charge
+
+En [mode local](local-mode.fr.md), Sloppy peut tourner sur un agent de code que vous utilisez déjà, avec sa propre connexion et sans clé d'API. Voir [Local agents](../local-agents.md).
+
+<p>
+  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
+  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
+  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a>
+</p>
+
 ## Stack technique
 
 | Couche     | Techno                                                                                                       |

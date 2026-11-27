@@ -7,16 +7,23 @@
 
 When OpenSlop runs on your own computer, with [`npm run local`](local-mode.md) or `npm run dev`, Sloppy and text generation can run on a coding agent you already use, on that agent's own sign-in. No API key is needed for text.
 
+## Supported agents
+
+<p>
+  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
+  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
+  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a>
+</p>
+
 ## Set up
 
 1. Install the agent and sign in to it once in a terminal:
 
-   | Agent       | Sign in with |
-   | ----------- | ------------ |
-   | Claude Code | `claude`     |
-   | Codex       | `codex`      |
-   | Gemini CLI  | `gemini`     |
-   | Cursor      | `agent`      |
+   | Agent       | Sign in with  |
+   | ----------- | ------------- |
+   | Claude Code | `claude`      |
+   | Codex       | `codex login` |
+   | Cursor      | `agent login` |
 
 2. Open OpenSlop on this computer at `localhost`, and pick the agent under **Local agent** in any text model picker, such as the one in the composer or under Settings > Models.
 

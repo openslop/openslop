@@ -112,7 +112,7 @@ npm run local
 
 ## 改用你的编程智能体
 
-已经在用 Claude Code、Codex、Gemini CLI 或 Cursor？Sloppy 和文本生成可以直接用它运行，不需要文本密钥。详见 [Local agents](../local-agents.md)。
+已经在用 Claude Code、Codex 或 Cursor？Sloppy 和文本生成可以直接用它运行，不需要文本密钥。详见 [Local agents](../local-agents.md)。
 
 ## 之后每天
 

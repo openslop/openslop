@@ -1878,7 +1878,7 @@ def card_step_agent(theme):
     c.text(W / 2 - 26, by + bh + 25, "Slopping… · 1s", 10, t["muted"], cls=took)
 
     # the picker: hosted models first, then the agents on this computer
-    rows = [("openslop", "Claude Opus 5.5", "$$$"), ("anthropic", "Claude Sonnet 5", "$$"), ("terminal", "Claude Code", "$"), ("terminal", "Codex", "$"), ("terminal", "Gemini CLI", "$"), ("terminal", "Cursor", "$")]
+    rows = [("openslop", "Claude Opus 5.5", "$$$"), ("anthropic", "Claude Sonnet 5", "$$"), ("terminal", "Claude Code", "$"), ("terminal", "Codex", "$"), ("terminal", "Cursor", "$")]
     DX, DY, DW, RH = MX - 4, ry + 26, 196, 22
     DH = RH * len(rows) + 8
     menu = c.span(1.2, 3.0, fade=0.12)

@@ -164,6 +164,16 @@ Use o OpenSlop no seu próprio Mac, Windows ou Linux. Seus projetos e vídeos fi
 - **[Templates](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime e mais. Cada um define um estilo, seus personagens e uma duração.
 - **[Mocks para desenvolvimento](../../.env.example)** — Deixe a chave de um provedor sem definir e as chamadas dele caem em resultados prontos, para você construir sem pagar.
 
+## Agentes compatíveis
+
+No [modo local](local-mode.pt.md), o Sloppy pode rodar em um agente de programação que você já usa, com o login dele e sem chave de API. Veja [Local agents](../local-agents.md).
+
+<p>
+  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
+  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
+  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a>
+</p>
+
 ## Stack
 
 | Camada        | Tecnologia                                                                                                          |
