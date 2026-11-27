@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, type ComponentProps, type ReactNode } from "react";
+import {
+	Children,
+	Fragment,
+	isValidElement,
+	useState,
+	type ComponentProps,
+	type ReactNode,
+} from "react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -56,7 +63,16 @@ export function TilePrimaryAction({
 	);
 }
 
-/** A tile's other actions, behind the ⋮ on its toolbar in the top-right corner. */
+/** Whether `node` holds anything to show, looking inside fragments; an element counts even if it renders nothing. */
+function hasItems(node: ReactNode): boolean {
+	return Children.toArray(node).some((child) =>
+		isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment
+			? hasItems(child.props.children)
+			: true,
+	);
+}
+
+/** A tile's other actions, behind the ⋮ on its toolbar in the top-right corner; no ⋮ when there are none. */
 export function TileMenu({
 	label,
 	children,
@@ -64,6 +80,7 @@ export function TileMenu({
 	label: string;
 	children: ReactNode;
 }) {
+	if (!hasItems(children)) return null;
 	return (
 		<Toolbar
 			variant="tile"
@@ -115,16 +132,58 @@ function TileToolbarButton({
 	);
 }
 
+/** Remove and Delete, on their own toolbar in the tile's top-left corner; nothing when the tile offers neither. */
+export function TileRemoveActions({
+	name,
+	onRemove,
+	removeFrom,
+	onDelete,
+}: {
+	/** The tile's name, for the buttons' labels. */
+	name: string;
+	onRemove?: () => void;
+	/** What Remove takes the tile off, when its label should say. */
+	removeFrom?: string;
+	onDelete?: () => void;
+}) {
+	if (!onRemove && !onDelete) return null;
+	const remove = removeFrom ? `Remove from ${removeFrom}` : "Remove";
+	return (
+		<Toolbar
+			variant="tile"
+			className={cn(
+				"absolute top-1 left-1 z-10 transition-opacity",
+				REVEAL_ON_HOVER,
+			)}
+		>
+			{onRemove && (
+				<TileToolbarButton
+					label={
+						removeFrom ? `Remove ${name} from ${removeFrom}` : `Remove ${name}`
+					}
+					tooltip={remove}
+					onClick={onRemove}
+				>
+					<X size={ICON_SIZES.header} />
+				</TileToolbarButton>
+			)}
+			{onDelete && (
+				<TileToolbarButton
+					label={`Delete ${name}`}
+					tooltip="Delete"
+					tone="destructive"
+					onClick={onDelete}
+				>
+					<Trash2 size={ICON_SIZES.header} />
+				</TileToolbarButton>
+			)}
+		</Toolbar>
+	);
+}
+
 type MenuAction = { onSelect: () => void };
 
-/** Takes it off this list; the media itself stays. */
-export const RemoveItem = ({ onSelect }: MenuAction) => (
-	<TileMenuItem icon={X} onSelect={onSelect}>
-		Remove
-	</TileMenuItem>
-);
-
-/** Takes it out of the project for good. */
+/** Delete as a menu item, for rows too small for the corner button (audio rows). */
 export const DeleteItem = ({ onSelect }: MenuAction) => (
 	<TileMenuItem icon={Trash2} variant="destructive" onSelect={onSelect}>
 		Delete

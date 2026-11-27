@@ -105,6 +105,9 @@ describe("AssetStrip", () => {
 		await chooseTileMenuItem("intro");
 
 		expect(menuItems()).not.toContain("Delete");
+		expect(
+			document.body.querySelector('button[aria-label="Delete intro"]'),
+		).toBeNull();
 	});
 
 	const openUploadedReference = async () => {
@@ -125,7 +128,7 @@ describe("AssetStrip", () => {
 	it("takes a reference off the references and keeps its file", async () => {
 		await openUploadedReference();
 
-		await chooseTileMenuItem("Reference 1", "Remove from references");
+		await click('button[aria-label="Remove Reference 1 from references"]');
 
 		expect(referenceUrls()).toEqual([]);
 		expect(store.getState().media).toHaveLength(1);
@@ -137,6 +140,9 @@ describe("AssetStrip", () => {
 		await chooseTileMenuItem("Reference 1");
 
 		expect(menuItems()).not.toContain("Delete");
+		expect(
+			document.body.querySelector('button[aria-label="Delete Reference 1"]'),
+		).toBeNull();
 	});
 
 	it("shows an uploaded reference once, as a reference", async () => {

@@ -12,7 +12,6 @@ import { AssetEditProvider } from "@/app/components/canvas/elements/named-asset/
 import { GenerationQueueProvider } from "@/lib/generation/generation-queue-provider";
 import { MediaPanelProvider } from "@/app/components/canvas/media/media-panel-context";
 import {
-	chooseTileMenuItem,
 	click,
 	mountOnCanvas,
 	noHistory,
@@ -65,11 +64,18 @@ describe("AssetsPanel", () => {
 		expect(openDialog()).toBe("asset_style");
 	});
 
-	it("deletes the art style from its menu and offers to add one again", async () => {
+	it("deletes the art style from its corner button and offers to add one again", async () => {
 		open();
 		await click('button[aria-label="Add art style"]');
 
-		await chooseTileMenuItem("Art style", "Delete");
+		// With no picture, Delete was all its ⋮ held, so there is no ⋮.
+		expect(
+			document.body.querySelector(
+				'button[aria-label="More actions for Art style"]',
+			),
+		).toBeNull();
+
+		await click('button[aria-label="Delete Art style"]');
 
 		expect(findAsset(canvas.editor.children, "asset_style")).toBeUndefined();
 		expect(

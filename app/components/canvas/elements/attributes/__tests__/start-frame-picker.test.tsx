@@ -117,6 +117,36 @@ describe("StartFramePicker", () => {
 		expect(tile("Previous scene")?.getAttribute("aria-checked")).toBe("true");
 	});
 
+	it("forgets the uploaded picture from its corner button", async () => {
+		openPicker(PICTURE);
+
+		await act(async () =>
+			document.body
+				.querySelector<HTMLButtonElement>(
+					'button[aria-label="Remove Uploaded picture"]',
+				)
+				?.click(),
+		);
+
+		const [video] = findElementById(canvas.editor, "v1") ?? [];
+		const attributes = video && flatAttributes(video);
+		expect(attributes?.startFrame).toBe("none");
+		expect(attributes).not.toHaveProperty("uploadedFrame");
+	});
+
+	it("shows no ⋮ on a tile with no picture to view larger", () => {
+		openPicker("none", PICTURE);
+
+		expect(
+			document.body.querySelector('button[aria-label="More actions for None"]'),
+		).toBeNull();
+		expect(
+			document.body.querySelector(
+				'button[aria-label="More actions for Uploaded picture"]',
+			),
+		).not.toBeNull();
+	});
+
 	it("offers the media library when the start frame is not a picture", () => {
 		openPicker("previous");
 

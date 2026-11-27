@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useSlateStatic } from "slate-react";
-import { Image, Mic, Palette, Pencil, X } from "@/components/ui/icon";
+import { Image, Mic, Palette, Pencil } from "@/components/ui/icon";
 import { ASSET_KIND_SPECS } from "@/lib/canvas/assets";
 import type { MediaItem } from "@/lib/project/media";
 import { useImageAsset } from "../hooks/use-image-asset";
@@ -11,7 +11,7 @@ import { AssetTile } from "./asset-tile";
 import { AudioCard } from "./audio-card";
 import { AudioPlayer } from "./audio-player";
 import { MEDIA_KINDS } from "./media-kinds";
-import { TileMenuItem, useTilePlayer, type TilePrimary } from "./tile-actions";
+import { DeleteItem, useTilePlayer, type TilePrimary } from "./tile-actions";
 import { useAssetEditors } from "./asset-edit-context";
 import { deleteArtStyle } from "./delete-asset";
 import { LoadRequestItem, useLoadRequest } from "../media/load-request";
@@ -71,7 +71,7 @@ type ReferenceTileProps = { url: string; index: number; onRemove: () => void };
 
 const referenceName = (index: number) => `Reference ${index + 1}`;
 
-/** A reference image: its menu takes it off the references. */
+/** A reference image: its corner button takes it off the references. */
 export function ReferenceTile({
 	url,
 	index,
@@ -85,11 +85,8 @@ export function ReferenceTile({
 			context="Reference image"
 			Icon={Image}
 			primary={primary}
-			menu={
-				<TileMenuItem icon={X} onSelect={onRemove}>
-					Remove from references
-				</TileMenuItem>
-			}
+			onRemove={onRemove}
+			removeFrom="references"
 		/>
 	);
 }
@@ -107,13 +104,18 @@ export function ReferenceAssetTile(tile: ReferenceTileProps) {
 	);
 }
 
-type MediaTileProps = TileProps & { item: MediaItem; menu?: ReactNode };
+type MediaTileProps = TileProps & {
+	item: MediaItem;
+	menu?: ReactNode;
+	onDelete?: () => void;
+};
 
 /** A piece of the project's media as a small tile; the caller says what its face does, if anything. */
 export function MediaAssetTile({
 	item: { name, kind, url, createdAt, costUsd },
 	primary,
 	menu,
+	onDelete,
 	children,
 }: MediaTileProps & { primary: TilePrimary | undefined }) {
 	const previewKind = kind === "audio" ? undefined : kind;
@@ -129,6 +131,7 @@ export function MediaAssetTile({
 			fallback="icon"
 			primary={primary}
 			menu={menu}
+			onDelete={onDelete}
 		>
 			{children}
 		</AssetTile>
@@ -136,7 +139,12 @@ export function MediaAssetTile({
 }
 
 /** Media as a library shows it: a video's face plays it, anything else's loads its request, which is otherwise in the menu. */
-export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
+export function LibraryMediaTile({
+	item,
+	menu,
+	onDelete,
+	children,
+}: MediaTileProps) {
 	const player = useTilePlayer(
 		item.kind === "video" ? item.url : undefined,
 		item.name,
@@ -152,6 +160,7 @@ export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
 					{menu}
 				</>
 			}
+			onDelete={onDelete}
 		>
 			{player.video}
 			{children}
@@ -159,8 +168,8 @@ export function LibraryMediaTile({ item, menu, children }: MediaTileProps) {
 	);
 }
 
-/** Audio has no face to choose, so its request is always in the menu. */
-function MediaAudioRow({ item, menu }: MediaTileProps) {
+/** Audio has no face to choose, so its request is always in the menu; a row keeps Delete there too. */
+function MediaAudioRow({ item, menu, onDelete }: MediaTileProps) {
 	const request = useLoadRequest(item);
 	return (
 		<AudioCard
@@ -169,6 +178,7 @@ function MediaAudioRow({ item, menu }: MediaTileProps) {
 				<>
 					{request && <LoadRequestItem {...request} />}
 					{menu}
+					{onDelete && <DeleteItem onSelect={onDelete} />}
 				</>
 			}
 		>
@@ -178,11 +188,16 @@ function MediaAudioRow({ item, menu }: MediaTileProps) {
 }
 
 /** A piece of media as a library lists it: pictures and video as tiles, audio a row wide. */
-export function MediaLibraryItem({ item, menu, children }: MediaTileProps) {
+export function MediaLibraryItem({
+	item,
+	menu,
+	onDelete,
+	children,
+}: MediaTileProps) {
 	return item.kind === "audio" ? (
-		<MediaAudioRow item={item} menu={menu} />
+		<MediaAudioRow item={item} menu={menu} onDelete={onDelete} />
 	) : (
-		<LibraryMediaTile item={item} menu={menu}>
+		<LibraryMediaTile item={item} menu={menu} onDelete={onDelete}>
 			{children}
 		</LibraryMediaTile>
 	);
