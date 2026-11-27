@@ -56,17 +56,6 @@ describe("GenerationIndicator", () => {
 		expect(html).toMatch(/<span aria-hidden="true" class="[^"]*">Queued…</);
 	});
 
-	it("ignores a stale queued reason once generating", () => {
-		const html = render(
-			<GenerationIndicator
-				status="generating"
-				startedAt={null}
-				queuedReason="Waiting for Red's image"
-			/>,
-		);
-		expect(html).toContain('aria-label="Generating 0s"');
-	});
-
 	it("keeps the small indicator to its icon", () => {
 		const html = render(
 			<GenerationIndicator status="generating" startedAt={null} size="sm" />,

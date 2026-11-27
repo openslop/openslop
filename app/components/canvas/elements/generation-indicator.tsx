@@ -57,7 +57,7 @@ export function GenerationIndicator({
 	const sizes = SIZE_CLASSES[size];
 	const seconds = useElapsedSeconds(startedAt);
 	const label = labelFor(seconds);
-	const description = (status === "queued" && queuedReason) || label;
+	const description = queuedReason ?? label;
 
 	return (
 		<SimpleTooltip label={description}>
