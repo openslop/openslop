@@ -524,6 +524,53 @@ class Card:
         op = 0.26 if self.theme == "dark" else 0.2
         self.raw(self.wrap(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="url(#grainp)" opacity="{op}"/>', cls))
 
+    def grain_texture(self):
+        """public/grain.png, the app's .grain, tiled at 50 app pixels. Returns its pattern id."""
+        if "graintex" not in self._images:
+            self._images.add("graintex")
+            import base64
+            import io
+
+            from PIL import Image
+
+            buf = io.BytesIO()
+            Image.open(ROOT / "public" / "grain.png").save(buf, "PNG", optimize=True)
+            href = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+            self.defs.append(f'<pattern id="graintex" width="25" height="25" patternUnits="userSpaceOnUse"><image width="25" height="25" href="{href}"/></pattern>')
+        return "graintex"
+
+    # .light-rays > span:nth-child(n) in app/globals.css, as (offset %, alpha) stops of each --ray
+    RAYS = [
+        [(0, 0), (20, 1), (36, 0), (55, 1), (67, 0.13), (78, 1), (97, 0)],
+        [(11, 0), (25, 1), (41, 0.55), (67, 0.13), (78, 1), (97, 0)],
+        [(9, 0), (20, 1), (28, 0.55), (40, 0.42), (48, 1), (54, 0.27), (78, 0.13), (88, 1), (97, 0)],
+        [(0, 0), (17, 1), (26, 0.55), (35, 1), (47, 0), (69, 0.13), (79, 1), (97, 0)],
+        [(0, 0), (20, 1), (27, 0.55), (42, 1), (48, 0), (67, 0.13), (74, 1), (82, 1), (88, 0.47), (97, 0)],
+    ]
+
+    def light_rays(self):
+        """<LightRays /> as .light-rays draws it: a card-colored corner glow and five skewed ambient bands,
+        with the grain overlaid, all masked to an ellipse from the top-left."""
+        t = self.t
+        self.defs.append(
+            f'<radialGradient id="rays-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="{W * 1.25}" gradientTransform="scale(1,{H / (W * 1.25):.4f})">'
+            '<stop offset="0" stop-color="#fff"/><stop offset=".88" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+            f'<mask id="rays-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}"><rect width="{W}" height="{H}" fill="url(#rays-fade)"/></mask>'
+            f'<radialGradient id="rays-card" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="{W}" gradientTransform="scale(1,{H / W:.4f})"><stop offset="0" stop-color="{t["card"]}"/><stop offset=".7" stop-color="{t["card"]}" stop-opacity="0"/></radialGradient>'
+            f'<linearGradient id="rays-v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{t["glow"]}"/><stop offset="1" stop-color="{t["glow"]}" stop-opacity="0"/></linearGradient>'
+        )
+        out = [f'<g mask="url(#rays-mask)" style="isolation:isolate"><rect width="{W}" height="{H}" fill="url(#rays-card)"/>']
+        for i, stops in enumerate(self.RAYS):
+            st = "".join(f'<stop offset="{o}%" stop-color="#fff" stop-opacity="{a}"/>' for o, a in stops)
+            self.defs.append(
+                f'<linearGradient id="ray{i}g" gradientUnits="userSpaceOnUse" x1="{-0.4 * W}" y1="0" x2="{1.4 * W}" y2="0">{st}</linearGradient>'
+                f'<mask id="ray{i}" maskUnits="userSpaceOnUse" x="{-0.4 * W}" y="0" width="{1.8 * W}" height="{H}"><rect x="{-0.4 * W}" width="{1.8 * W}" height="{H}" fill="url(#ray{i}g)"/></mask>'
+            )
+            out.append(f'<g transform="translate(0,{H / 2}) skewX(45) translate(0,{-H / 2})"><rect x="{-0.4 * W}" width="{1.8 * W}" height="{H}" fill="url(#rays-v)" mask="url(#ray{i})" opacity=".22"/></g>')
+        grain = 0.9 if self.theme == "dark" else 1
+        out.append(f'<rect width="{W}" height="{H}" fill="url(#{self.grain_texture()})" opacity="{grain}" style="mix-blend-mode:overlay"/></g>')
+        self.raw("".join(out))
+
     # ---- chrome shared by the cards
     def bg(self):
         t = self.t
@@ -558,6 +605,7 @@ def card_describe(theme):
     c = Card("describe", "Describe your video", "Sloppy greets you over the composer, the lightbulb suggests ideas, the user types one line, and Sloppy takes it from there.", 13, theme)
     t = c.t
     c.bg()
+    c.light_rays()
     greeting = "What slop today, boss?"
     gw = tw(greeting, 34) * 0.86 + 40
     gx = W / 2 - gw / 2
@@ -1786,6 +1834,7 @@ def card_step_agent(theme):
     c = Card("local-step-agent", "Use your coding agent", "In the composer, the model picker lists the local agents under the hosted models, Claude Code is picked, a prompt is sent, and Sloppy starts on it.", 10, theme)
     t = c.t
     c.bg()
+    c.light_rays()
     greeting = "What slop today, boss?"
     gw = tw(greeting, 34) * 0.86 + 40
     gx = W / 2 - gw / 2
