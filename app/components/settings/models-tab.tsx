@@ -12,8 +12,7 @@ import {
 	differsFromRecommended,
 	modelEntry,
 } from "@/lib/connectors/models";
-import { isByokProvider } from "@/lib/connectors/provider-catalog";
-import type { Provider } from "@/lib/connectors/types";
+import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
 import { toastError } from "@/lib/toast-error";
 import { useSettings } from "@/lib/settings/use-settings";
 import { useAccount } from "@/lib/user/use-account";
@@ -25,7 +24,7 @@ export function ModelsTab({
 	onAddProviders,
 }: {
 	/** The provider a link asked to open on, shown even before it has a key. */
-	selected: Provider | null;
+	selected: BYOKProvider | null;
 	onAddProviders: () => void;
 }) {
 	const models = useAccount((state) => state.models);
@@ -36,9 +35,8 @@ export function ModelsTab({
 
 	const stored = providerKeys.map((row) => row.provider);
 	// A provider a link opened on shows first, even before it has a key.
-	const shown = (
-		selected && !stored.includes(selected) ? [selected, ...stored] : stored
-	).filter(isByokProvider);
+	const shown =
+		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
 
 	return (
 		<div className="flex flex-col gap-6">

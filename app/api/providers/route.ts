@@ -7,11 +7,11 @@ import {
 } from "@/lib/api/provider-keys";
 import { MIN_KEY_LENGTH } from "@/lib/connectors/provider-key";
 import { validateKey } from "@/lib/api/providers/byok";
-import { byokProviderField } from "@/lib/api/request-schema-fields";
+import { BYOKProviderSchema } from "@/lib/connectors/provider-catalog";
 import { createSessionRouteHandler } from "@/lib/api/route-handler";
 
 const saveSchema = z.object({
-	provider: byokProviderField,
+	provider: BYOKProviderSchema,
 	apiKey: z
 		.string()
 		.min(MIN_KEY_LENGTH, { error: "That key looks too short." }),

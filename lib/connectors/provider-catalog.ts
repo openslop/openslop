@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { PROVIDERS, type Provider } from "./types";
 
 /**
@@ -77,3 +78,5 @@ export const isByokProvider = (provider: Provider): provider is BYOKProvider =>
 	provider !== MANAGED_PROVIDER && provider !== LOCAL_PROVIDER;
 
 export const BYOK_PROVIDERS = PROVIDERS.filter(isByokProvider);
+
+export const BYOKProviderSchema = z.enum(BYOK_PROVIDERS);

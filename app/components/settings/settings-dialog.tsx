@@ -12,7 +12,7 @@ import { CloseButton } from "@/components/ui/close-button";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
-import type { Provider } from "@/lib/connectors/types";
+import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
 import { useSettings } from "@/lib/settings/use-settings";
 import { AddProvidersView } from "./add-providers-view";
 import { ModelsTab } from "./models-tab";
@@ -27,7 +27,7 @@ export function SettingsDialog() {
 		settings.close();
 	};
 
-	const pick = (provider: Provider) => {
+	const pick = (provider: BYOKProvider) => {
 		setBrowsing(false);
 		settings.open("models", provider);
 	};

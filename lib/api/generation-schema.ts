@@ -4,6 +4,7 @@ import { IMAGE_FORMATS } from "@/lib/connectors/image/enums";
 import { THINKING_LEVELS } from "@/lib/connectors/llm/enums";
 import { hasModel, listModels } from "@/lib/connectors/models";
 import {
+	BYOKProviderSchema,
 	isByokProvider,
 	LOCAL_PROVIDER,
 	MANAGED_PROVIDER,
@@ -12,7 +13,6 @@ import {
 import { TTS_SPEEDS } from "@/lib/connectors/tts/enums";
 import type { ConnectorType, ModelRef } from "@/lib/connectors/types";
 import {
-	byokProviderField,
 	optionalCharacterAssets,
 	optionalContinuityFrames,
 	optionalDurationSeconds,
@@ -50,7 +50,7 @@ export type BYOKModelRef = ModelRef & { provider: BYOKProvider };
 
 export const byokModel = (type: ConnectorType): z.ZodType<BYOKModelRef> =>
 	z
-		.object({ provider: byokProviderField, model: z.string() })
+		.object({ provider: BYOKProviderSchema, model: z.string() })
 		.refine((pick) => hasModel(type, pick), {
 			error: `Invalid model. Supported: ${byokModelNames(type).join(", ")}`,
 		});

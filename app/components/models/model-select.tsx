@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import { listModels, sameModel } from "@/lib/connectors/models";
 import { PROVIDER_CATALOG } from "@/lib/connectors/provider-catalog";
-import { isConnected } from "@/lib/connectors/provider-key";
+import { needsKey } from "@/lib/connectors/provider-key";
 import type { ConnectorType, ModelRef, Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/use-settings";
 import { useAccount } from "@/lib/user/use-account";
@@ -93,14 +93,14 @@ function ModelMenuItems({ type, value, onChange }: ModelSelectProps) {
 
 	return listModels(type).map((entry) => {
 		const { provider, model, description } = entry;
-		const missing = !isConnected(providerKeys, provider);
+		const missing = needsKey(providerKeys, provider);
 		return (
 			<SelectMenuItem
 				key={`${provider}/${model}`}
 				aria-label={modelLabel({ provider, model })}
 				selected={sameModel({ provider, model }, value)}
 				onSelect={() =>
-					missing
+					needsKey(providerKeys, provider)
 						? settings.open("models", provider)
 						: onChange({ provider, model })
 				}

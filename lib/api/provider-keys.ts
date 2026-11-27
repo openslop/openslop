@@ -8,6 +8,7 @@ import {
 	type ValidationResult,
 } from "@/lib/connectors/provider-key";
 import {
+	BYOKProviderSchema,
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
@@ -15,7 +16,6 @@ import type { Provider } from "@/lib/connectors/types";
 import { createClient } from "@/lib/supabase/server";
 import { selectColumns } from "@/lib/supabase/select-columns";
 import { createServiceClient } from "@/lib/supabase/service";
-import { byokProviderField } from "./request-schema-fields";
 
 /**
  * The account has no key for a provider it was asked to generate with. An
@@ -30,7 +30,7 @@ export class MissingProviderKeyError extends Error {
 }
 
 const ProviderKeyRowSchema = z.object({
-	provider: byokProviderField,
+	provider: BYOKProviderSchema,
 	last4: z.string(),
 	status: z.enum(KEY_STATUSES),
 	verified_at: z.string().nullable(),
