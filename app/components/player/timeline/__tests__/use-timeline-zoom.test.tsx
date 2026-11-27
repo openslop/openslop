@@ -5,8 +5,6 @@ import { createRoot } from "react-dom/client";
 import { describe, expect, it } from "vitest";
 import { useTimelineZoom } from "../use-timeline-zoom";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 function renderTimelineHook(
 	totalDurationSec = 100,
 	viewportWidth = 1000,

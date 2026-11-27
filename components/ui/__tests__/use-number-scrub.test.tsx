@@ -5,8 +5,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useNumberScrub } from "../use-number-scrub";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 function Harness({ onChange }: { onChange: (value: number) => void }) {
 	const { editing, inputProps, scrubProps } = useNumberScrub({
 		value: 400,

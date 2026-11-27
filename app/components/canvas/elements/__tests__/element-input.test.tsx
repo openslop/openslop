@@ -20,8 +20,6 @@ const upload = (imageUrl: string): AssetResult => ({
 	uploaded: true,
 });
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const UNLOCK = "button";
 
 let canvas: ReturnType<typeof mountOnCanvas>;

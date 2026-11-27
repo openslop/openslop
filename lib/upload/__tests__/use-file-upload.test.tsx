@@ -5,8 +5,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useFileUpload } from "../use-file-upload";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const { uploadFile, landings } = vi.hoisted(() => {
 	const landings: (() => void)[] = [];
 	const uploadFile = vi.fn(

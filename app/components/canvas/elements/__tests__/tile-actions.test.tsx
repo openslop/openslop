@@ -6,8 +6,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TilePrimaryAction, useTilePlayer } from "../tile-actions";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const toastError = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/toast-error", () => ({ toastError }));
 

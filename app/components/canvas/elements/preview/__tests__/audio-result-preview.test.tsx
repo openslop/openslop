@@ -6,8 +6,6 @@ import { mountOnCanvas } from "@/app/components/canvas/__tests__/_mount";
 import { volumeToGain } from "@/lib/canvas/element-attributes";
 import { AudioResultPreview } from "../audio-result-preview";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("@/lib/components/use-peaks", () => ({
 	usePeaks: () => ({ status: "ready", peaks: [] }),
 }));

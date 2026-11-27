@@ -9,8 +9,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CanvasEditor } from "@/lib/canvas/types";
 import { useProjectHistoryHotkeys } from "../project-history-keymap";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const roots: Root[] = [];
 const containers: HTMLElement[] = [];
 

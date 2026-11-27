@@ -7,8 +7,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { type } from "@/app/components/canvas/__tests__/_mount";
 import { TextAreaField } from "../fields";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 const root = createRoot(container);
 const write = vi.fn();

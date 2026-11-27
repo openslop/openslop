@@ -5,8 +5,6 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { keepFocus } from "../keep-focus";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 const root = createRoot(container);
 

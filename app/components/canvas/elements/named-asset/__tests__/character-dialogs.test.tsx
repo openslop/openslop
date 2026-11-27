@@ -13,8 +13,6 @@ import {
 	type,
 } from "@/app/components/canvas/__tests__/_mount";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const Nothing = () => null;
 const toast = Object.assign(vi.fn(), { dismiss: vi.fn() });
 vi.mock("sonner", () => ({ toast }));

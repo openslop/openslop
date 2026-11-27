@@ -7,8 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { SloppyMessage } from "@/lib/agent/types";
 import { AgentTurn } from "../sloppy-message";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const read = {
 	type: "tool-read_script",
 	toolCallId: "c1",

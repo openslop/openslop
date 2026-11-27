@@ -53,8 +53,6 @@ vi.mock("@/lib/connectors/use-default-models", () => ({
 	useDefaultModels: () => ({ llm: { provider: "openai", model: "test" } }),
 }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const asked: SloppyMessage = {
 	id: "m1",
 	role: "user",

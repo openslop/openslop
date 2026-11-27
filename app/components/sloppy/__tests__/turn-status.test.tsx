@@ -6,8 +6,6 @@ import { createRoot, type Root } from "react-dom/client";
 import type { StepPart } from "@/lib/agent/step-runs";
 import { StepRun } from "../turn-status";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const thinking: StepPart = {
 	type: "reasoning",
 	text: "weighing it up",

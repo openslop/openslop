@@ -7,8 +7,6 @@ import { loadCaptionFonts } from "@/lib/captions/caption-fonts";
 import { toastError } from "@/lib/toast-error";
 import { CaptionFontLibrary } from "../caption-fonts";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("@/lib/captions/caption-fonts", () => ({ loadCaptionFonts: vi.fn() }));
 vi.mock("@/lib/toast-error", () => ({ toastError: vi.fn() }));
 

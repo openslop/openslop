@@ -7,8 +7,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { GenerationIndicator } from "../generation-indicator";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const render = (node: React.ReactNode) =>
 	renderToStaticMarkup(<TooltipProvider>{node}</TooltipProvider>);
 

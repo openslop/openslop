@@ -11,8 +11,6 @@ import type { AttributeDef } from "@/lib/connectors/attributes/schema";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AttributeBadge } from "@/app/components/canvas/elements/attribute-badge";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let canvas: ReturnType<typeof mountOnCanvas>;
 
 afterEach(() => canvas.unmount());

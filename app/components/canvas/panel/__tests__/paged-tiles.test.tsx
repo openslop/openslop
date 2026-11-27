@@ -6,8 +6,6 @@ import { createRoot } from "react-dom/client";
 import { click } from "@/app/components/canvas/__tests__/_mount";
 import { PagedTiles } from "../paged-tiles";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 const root = createRoot(container);
 

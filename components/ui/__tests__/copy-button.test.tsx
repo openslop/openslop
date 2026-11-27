@@ -7,8 +7,6 @@ import { toastError } from "@/lib/toast-error";
 import { CopyButton } from "../copy-button";
 import { TooltipProvider } from "../tooltip";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("@/lib/toast-error", () => ({ toastError: vi.fn() }));
 
 const writeText = vi.fn<(text: string) => Promise<void>>();

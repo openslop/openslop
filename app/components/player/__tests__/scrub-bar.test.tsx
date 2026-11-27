@@ -5,8 +5,6 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { breakMask, ScrubBar } from "../scrub-bar";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 describe("breakMask", () => {
 	it("cuts a 2px notch centred on each break", () => {
 		expect(breakMask([0.25, 0.75])).toBe(

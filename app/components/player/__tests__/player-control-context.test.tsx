@@ -9,8 +9,6 @@ import {
 	usePlayerControl,
 } from "../player-control-context";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const spies = vi.hoisted(() => ({
 	showPlayer: vi.fn(),
 	startPlaybackAt: vi.fn(),

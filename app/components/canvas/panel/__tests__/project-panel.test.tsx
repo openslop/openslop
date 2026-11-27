@@ -19,8 +19,6 @@ import { createProjectStore } from "@/lib/project/store";
 import { getTemplate } from "@/lib/templates/templates";
 import { ProjectPanel } from "../project-panel";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let canvas: ReturnType<typeof mountOnCanvas> | undefined;
 beforeEach(() => {
 	mockTotalCost.current = undefined;

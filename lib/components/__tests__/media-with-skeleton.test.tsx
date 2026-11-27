@@ -5,7 +5,6 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MediaWithSkeleton } from "../media-with-skeleton";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 // happy-dom leaves out the standard readyState constants.
 Object.assign(HTMLMediaElement, { HAVE_NOTHING: 0, HAVE_METADATA: 1 });
 

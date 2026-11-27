@@ -19,8 +19,6 @@ import { withNameRefs } from "@/app/components/canvas/plugins/with-name-refs";
 import { AssetEditProvider } from "../named-asset/asset-edit-provider";
 import { NameRef } from "../name-ref";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("../named-asset/new-named-asset-dialog", () => ({
 	NewNamedAssetDialog: ({ preset }: { preset: { name?: string } }) => (
 		<div data-dialog={`create ${preset.name}`} />

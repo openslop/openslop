@@ -58,7 +58,6 @@ class LoadedImage {
 
 describe("NamedAssetImage after its image goes away", () => {
 	it("brings the placeholder back, as when undo unpicks a character", () => {
-		Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 		vi.stubGlobal("Image", LoadedImage);
 		const container = document.createElement("div");
 		const root = createRoot(container);

@@ -5,8 +5,6 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Popover, PopoverContent, PopoverHeader } from "../popover";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const container = document.body.appendChild(document.createElement("div"));
 let root: Root;
 const onOpenChange = vi.fn();

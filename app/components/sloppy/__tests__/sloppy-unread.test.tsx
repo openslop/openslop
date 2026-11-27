@@ -9,8 +9,6 @@ import {
 } from "@/app/components/canvas/panel/editor-panel-context";
 import { SloppyUnread } from "../sloppy-unread";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 let loading = false;
 vi.mock("../sloppy-provider", () => ({ useSloppy: () => ({ loading }) }));
 vi.mock("@/app/components/canvas/workspace-context", () => ({

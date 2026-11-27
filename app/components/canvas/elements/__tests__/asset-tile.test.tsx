@@ -11,8 +11,6 @@ import {
 } from "@/app/components/canvas/__tests__/_mount";
 import { AssetTile } from "../asset-tile";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const AVATAR = "https://cdn.example/mia.png";
 const EDIT = 'button[aria-label="Edit Mia"]';
 const MENU = 'button[aria-label="More actions for Mia"]';

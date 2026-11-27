@@ -6,8 +6,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { ResizeHandle } from "../resize-handle";
 import { useResize } from "../use-resize";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 function Harness() {
 	const { handleProps, resizing } = useResize({
 		axis: "vertical",

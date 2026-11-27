@@ -12,3 +12,5 @@ vi.mock("next/headers", async (importOriginal) => ({
 	...(await importOriginal<typeof import("next/headers")>()),
 	headers: async () => new Headers(),
 }));
+
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });

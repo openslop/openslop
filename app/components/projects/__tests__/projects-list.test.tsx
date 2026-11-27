@@ -18,8 +18,6 @@ vi.mock("@/lib/project/api", () => ({
 vi.mock("@/lib/toast-error", () => ({ toastError: vi.fn() }));
 vi.mock("@/app/components/user-profile", () => ({ default: () => null }));
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 const project = (name: string): ProjectRow => ({
 	id: `id-${name}`,
 	name,

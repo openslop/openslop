@@ -18,8 +18,6 @@ import {
 	useAssetPrefetch,
 } from "../use-asset-prefetch";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("remotion", () => {
 	throw new Error("Loading chunk remotion failed");
 });

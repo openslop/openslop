@@ -12,8 +12,6 @@ import {
 	type PanelKey,
 } from "../panel-keys";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-
 vi.mock("@/app/components/canvas/workspace-context", () => ({
 	useShowWorkspace: () => true,
 }));
