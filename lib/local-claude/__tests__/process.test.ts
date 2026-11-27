@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { runClaude } from "../process";
+import { ClaudeNotInstalledError, runClaude } from "../process";
 const mocks = vi.hoisted(() => ({ exec: vi.fn(), end: vi.fn() }));
 vi.mock("node:child_process", () => ({ execFile: mocks.exec }));
 vi.mock("node:fs/promises", () => ({ mkdir: vi.fn() }));
@@ -47,4 +47,13 @@ it("reports a killed process as a timeout, not a sign-in problem", async () => {
 		return { stdin: { on: vi.fn(), end: mocks.end } };
 	});
 	await expect(runClaude("user", ["-p"])).rejects.toThrow("timed out");
+});
+it("reports a missing CLI as not installed", async () => {
+	mocks.exec.mockImplementation((_file, _args, _options, done) => {
+		queueMicrotask(() => done({ code: "ENOENT" }, ""));
+		return { stdin: { on: vi.fn(), end: mocks.end } };
+	});
+	await expect(runClaude("user", ["auth", "status"])).rejects.toBeInstanceOf(
+		ClaudeNotInstalledError,
+	);
 });

@@ -4,12 +4,13 @@ import { createSessionRouteHandler } from "@/lib/api/route-handler";
 import { badRequest } from "@/lib/api/response";
 import { formatSSE } from "@/lib/api/sse";
 import { errorMessage } from "@/lib/errors";
+import { LOCAL_PROVIDER } from "@/lib/connectors/provider-catalog";
 import { localClaudeAccess } from "@/lib/local-claude/access";
 import { generateWithClaude } from "@/lib/local-claude/generate";
 
 const generate = createSessionRouteHandler({
 	schema: z.object({
-		provider: z.literal("claude-code"),
+		provider: z.literal(LOCAL_PROVIDER),
 		model: z.literal("Claude subscription"),
 		prompt: z.string().min(1).max(200_000),
 		systemPrompt: z.string().max(100_000).default("Return the requested text."),

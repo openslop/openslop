@@ -1,7 +1,10 @@
 import { beforeEach, expect, it, vi } from "vitest";
-import { runClaude } from "../process";
+import { ClaudeNotInstalledError, runClaude } from "../process";
 import { claudeAccount } from "../account";
-vi.mock("../process", () => ({ runClaude: vi.fn() }));
+vi.mock("../process", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../process")>()),
+	runClaude: vi.fn(),
+}));
 beforeEach(() => vi.clearAllMocks());
 it("does not treat API-key authentication as a subscription", async () => {
 	vi.mocked(runClaude).mockResolvedValue(
@@ -31,9 +34,7 @@ it("returns only public subscription status", async () => {
 	});
 });
 it("reports a missing CLI as setup required", async () => {
-	vi.mocked(runClaude).mockRejectedValue(
-		new Error("Install Claude Code on this computer, then retry."),
-	);
+	vi.mocked(runClaude).mockRejectedValue(new ClaudeNotInstalledError());
 	expect(await claudeAccount("user")).toEqual({
 		installed: false,
 		connected: false,

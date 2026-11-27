@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { pendingClaudeLogin } from "./login";
-import { runClaude } from "./process";
+import { ClaudeNotInstalledError, runClaude } from "./process";
 
 const AuthStatus = z.object({
 	loggedIn: z.boolean(),
@@ -14,10 +14,7 @@ export async function claudeAccount(userId: string) {
 	try {
 		output = await runClaude(userId, ["auth", "status"]);
 	} catch (error) {
-		if (
-			error instanceof Error &&
-			error.message.startsWith("Install Claude Code")
-		)
+		if (error instanceof ClaudeNotInstalledError)
 			return { installed: false, connected: false };
 		throw error;
 	}

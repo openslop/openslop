@@ -2,6 +2,8 @@ import { z } from "zod";
 import { claudeAccount } from "./account";
 import { runClaude } from "./process";
 
+export const CLAUDE_MODEL = "sonnet";
+
 const Result = z.object({
 	is_error: z.boolean().optional(),
 	result: z.string().optional(),
@@ -21,7 +23,7 @@ export async function generateWithClaude(
 		"--safe-mode",
 		"-p",
 		"--model",
-		"sonnet",
+		CLAUDE_MODEL,
 		"--output-format",
 		"json",
 		"--tools",

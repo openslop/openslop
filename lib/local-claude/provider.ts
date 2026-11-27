@@ -1,7 +1,7 @@
 import type { LLMProvider, LLMRequest } from "@/lib/providers/llm/base";
 import { claudeAgentModel } from "./agent-model";
 import { claudeAccount } from "./account";
-import { generateWithClaude } from "./generate";
+import { CLAUDE_MODEL, generateWithClaude } from "./generate";
 
 export class LocalClaudeProvider implements LLMProvider {
 	constructor(
@@ -22,7 +22,7 @@ export class LocalClaudeProvider implements LLMProvider {
 					params.systemPrompt ?? "",
 					this.signal,
 				),
-				model: "sonnet",
+				model: CLAUDE_MODEL,
 			},
 			costUsd: 0,
 		};

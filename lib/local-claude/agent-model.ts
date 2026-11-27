@@ -6,7 +6,7 @@ import type {
 } from "@ai-sdk/provider";
 import { z } from "zod";
 import type { AgentModel } from "@/lib/providers/llm/agent-model";
-import { generateWithClaude } from "./generate";
+import { CLAUDE_MODEL, generateWithClaude } from "./generate";
 
 const Reply = z.object({
 	text: z.string(),
@@ -74,7 +74,7 @@ export function claudeAgentModel(
 	const model: LanguageModelV3 = {
 		specificationVersion: "v3",
 		provider: "claude-code",
-		modelId: "sonnet",
+		modelId: CLAUDE_MODEL,
 		supportedUrls: {},
 		doGenerate: generate,
 		doStream: async (options) => {
@@ -108,7 +108,7 @@ export function claudeAgentModel(
 	};
 	return {
 		model,
-		modelId: "sonnet",
+		modelId: CLAUDE_MODEL,
 		providerOptions: {},
 		cachedPrefix: {},
 		costOf: () => 0,

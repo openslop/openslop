@@ -2,7 +2,10 @@ import { beforeEach, expect, it, vi } from "vitest";
 import type { LanguageModelV3 } from "@ai-sdk/provider";
 import { claudeAgentModel } from "../agent-model";
 import { generateWithClaude } from "../generate";
-vi.mock("../generate", () => ({ generateWithClaude: vi.fn() }));
+vi.mock("../generate", async (importOriginal) => ({
+	...(await importOriginal<typeof import("../generate")>()),
+	generateWithClaude: vi.fn(),
+}));
 beforeEach(() => vi.clearAllMocks());
 it("returns tool requests to the app instead of executing them in Claude Code", async () => {
 	vi.mocked(generateWithClaude).mockResolvedValue(

@@ -11,7 +11,7 @@ import { ProviderIcon } from "@/app/components/models/provider-icon";
 import { useProviderKeyLookup } from "@/app/components/models/use-provider-keys";
 import { MODEL_GROUPS } from "@/lib/connectors/model-groups";
 import {
-	MANAGED_PROVIDER,
+	isByokProvider,
 	LOCAL_PROVIDER,
 	PROVIDER_CATALOG,
 	type BYOKProvider,
@@ -33,7 +33,10 @@ export function AddProvidersView({
 	const capabilities =
 		MODEL_GROUPS.find((group) => group.key === groupKey)?.types ?? null;
 	const matches = useMemo(
-		() => searchProviders(query, capabilities),
+		() =>
+			searchProviders(query, capabilities).filter(
+				({ provider }) => provider !== LOCAL_PROVIDER,
+			),
 		[query, capabilities],
 	);
 
@@ -66,58 +69,54 @@ export function AddProvidersView({
 				</p>
 			) : (
 				<ul className="flex flex-col gap-2">
-					{matches
-						.filter(({ provider }) => provider !== LOCAL_PROVIDER)
-						.map(({ provider, models }) => {
-							const meta = PROVIDER_CATALOG[provider];
-							const connected = keyFor(provider) !== null;
-							return (
-								<Tile key={provider} asChild className="flex-row items-center">
-									<li>
-										<ProviderIcon provider={provider} size={28} />
-										<div className="flex min-w-0 flex-1 flex-col gap-1">
-											<p className="truncate text-label font-medium text-foreground">
-												{meta.name}
-											</p>
+					{matches.map(({ provider, models }) => {
+						const meta = PROVIDER_CATALOG[provider];
+						const connected = keyFor(provider) !== null;
+						return (
+							<Tile key={provider} asChild className="flex-row items-center">
+								<li>
+									<ProviderIcon provider={provider} size={28} />
+									<div className="flex min-w-0 flex-1 flex-col gap-1">
+										<p className="truncate text-label font-medium text-foreground">
+											{meta.name}
+										</p>
+										<p className="text-label-xs text-muted-foreground">
+											{meta.description}
+										</p>
+										<ModalityPills modalities={modalitiesFor(provider)} />
+										{models.length > 0 && (
 											<p className="text-label-xs text-muted-foreground">
-												{meta.description}
+												Serves {models.join(", ")}
 											</p>
-											<ModalityPills modalities={modalitiesFor(provider)} />
-											{models.length > 0 && (
-												<p className="text-label-xs text-muted-foreground">
-													Serves {models.join(", ")}
-												</p>
-											)}
-										</div>
-										{provider === MANAGED_PROVIDER ? (
-											// Reads like the other connected rows, but there is
-											// nothing to do: everyone generates on the hosted
-											// provider, so there is no key to bring.
-											<span
-												className={buttonVariants({
-													variant: "secondary",
-													size: "sm",
-												})}
-											>
-												<Check />
-												Connected
-											</span>
-										) : (
-											<Button
-												size="sm"
-												variant={connected ? "secondary" : "generate"}
-												onClick={() => {
-													if (provider !== LOCAL_PROVIDER) onPick(provider);
-												}}
-											>
-												{connected ? <Check /> : <Link />}
-												{connected ? "Connected" : "Connect"}
-											</Button>
 										)}
-									</li>
-								</Tile>
-							);
-						})}
+									</div>
+									{!isByokProvider(provider) ? (
+										// Reads like the other connected rows, but there is
+										// nothing to do: everyone generates on the hosted
+										// provider, so there is no key to bring.
+										<span
+											className={buttonVariants({
+												variant: "secondary",
+												size: "sm",
+											})}
+										>
+											<Check />
+											Connected
+										</span>
+									) : (
+										<Button
+											size="sm"
+											variant={connected ? "secondary" : "generate"}
+											onClick={() => onPick(provider)}
+										>
+											{connected ? <Check /> : <Link />}
+											{connected ? "Connected" : "Connect"}
+										</Button>
+									)}
+								</li>
+							</Tile>
+						);
+					})}
 				</ul>
 			)}
 		</div>

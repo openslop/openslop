@@ -4,6 +4,12 @@ import { mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
+export class ClaudeNotInstalledError extends Error {
+	constructor() {
+		super("Install Claude Code on this computer, then retry.");
+	}
+}
+
 export async function runClaude(
 	userId: string,
 	args: string[],
@@ -19,7 +25,6 @@ export async function runClaude(
 	const config = join(homedir(), ".openslop", "claude", project, userId);
 	const cwd = join(config, "workspace");
 	await mkdir(cwd, { recursive: true, mode: 0o700 });
-	// Only the dedicated login and basic OS environment reach the CLI.
 	const env = Object.fromEntries(
 		["PATH", "HOME", "USER", "TMPDIR", "SYSTEMROOT"].flatMap((key) =>
 			process.env[key] ? [[key, process.env[key]]] : [],
@@ -51,17 +56,16 @@ export async function runClaude(
 						stdout.trim().startsWith("{")
 					)
 				) {
-					const code = "code" in error ? error.code : undefined;
 					reject(
-						new Error(
-							code === "ENOENT"
-								? "Install Claude Code on this computer, then retry."
-								: signal?.aborted
-									? "Claude request cancelled."
-									: error.killed
-										? "Claude Code timed out. Retry."
-										: "Claude Code did not complete. Check your subscription sign-in and usage limits, then retry.",
-						),
+						error.code === "ENOENT"
+							? new ClaudeNotInstalledError()
+							: new Error(
+									signal?.aborted
+										? "Claude request cancelled."
+										: error.killed
+											? "Claude Code timed out. Retry."
+											: "Claude Code did not complete. Check your subscription sign-in and usage limits, then retry.",
+								),
 					);
 				} else resolve(stdout);
 			},

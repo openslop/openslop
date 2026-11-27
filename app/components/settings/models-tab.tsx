@@ -14,7 +14,7 @@ import {
 	modelEntry,
 } from "@/lib/connectors/models";
 import {
-	MANAGED_PROVIDER,
+	isByokProvider,
 	LOCAL_PROVIDER,
 } from "@/lib/connectors/provider-catalog";
 import type { Provider } from "@/lib/connectors/types";
@@ -41,8 +41,9 @@ export function ModelsTab({
 	const stored = providerKeys.map((row) => row.provider);
 	// A link that named a provider leads here: it goes first, so what the link
 	// was about is the first thing read.
-	const shown =
-		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
+	const shown = (
+		selected && !stored.includes(selected) ? [selected, ...stored] : stored
+	).filter((provider) => provider !== LOCAL_PROVIDER);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -65,8 +66,7 @@ export function ModelsTab({
 				) : (
 					<div className="flex flex-col gap-2">
 						{shown.map((provider) =>
-							provider === LOCAL_PROVIDER ? null : provider ===
-							  MANAGED_PROVIDER ? (
+							!isByokProvider(provider) ? (
 								<HostedProviderCard key={provider} />
 							) : (
 								<ProviderCard

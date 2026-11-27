@@ -5,13 +5,14 @@ import { agentTurnSchema, streamAgentTurn } from "@/lib/api/agent-turn";
 import { ownsProject } from "@/lib/api/projects";
 import { badRequest, notFound } from "@/lib/api/response";
 import { parseSloppyMessage } from "@/lib/agent/messages";
+import { LOCAL_PROVIDER } from "@/lib/connectors/provider-catalog";
 import { localClaudeAccess } from "@/lib/local-claude/access";
 import { LocalClaudeProvider } from "@/lib/local-claude/provider";
 
 const agent = createSessionRouteHandler({
 	schema: agentTurnSchema(
 		z.object({
-			provider: z.literal("claude-code"),
+			provider: z.literal(LOCAL_PROVIDER),
 			model: z.literal("Claude subscription"),
 		}),
 	),

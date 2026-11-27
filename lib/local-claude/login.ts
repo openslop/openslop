@@ -3,6 +3,7 @@ import { errorMessage } from "@/lib/errors";
 
 type Login = { controller: AbortController; url?: string; error?: string };
 const logins = new Map<string, Login>();
+const LINK_WAIT_MS = 15_000;
 const BROWSER_SIGN_IN_MS = 15 * 60_000;
 
 export function claudeLoginUrl(output: string): string | undefined {
@@ -38,7 +39,7 @@ export async function startClaudeLogin(userId: string) {
 		const timer = setTimeout(() => {
 			login.controller.abort();
 			reject(new Error("Claude did not provide a sign-in link. Try again."));
-		}, 15000);
+		}, LINK_WAIT_MS);
 		void runClaude(
 			userId,
 			["auth", "login", "--claudeai"],
@@ -55,7 +56,6 @@ export async function startClaudeLogin(userId: string) {
 			BROWSER_SIGN_IN_MS,
 		)
 			.then(() => {
-				clearTimeout(timer);
 				if (logins.get(userId) === login) logins.delete(userId);
 				if (!login.url)
 					reject(
@@ -65,10 +65,10 @@ export async function startClaudeLogin(userId: string) {
 					);
 			})
 			.catch((error) => {
-				clearTimeout(timer);
 				login.url = undefined;
 				login.error = errorMessage(error);
 				reject(error);
-			});
+			})
+			.finally(() => clearTimeout(timer));
 	});
 }

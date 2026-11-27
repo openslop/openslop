@@ -32,18 +32,21 @@ export function LocalClaudeCard() {
 	useEffect(() => {
 		if (!account?.loginUrl || account.connected) return;
 		const controller = new AbortController();
-		const timer = setInterval(() => {
+		const timer = setTimeout(() => {
 			apiJson(ENDPOINT, ClaudeAccountSchema, { signal: controller.signal })
-				.then(setAccount)
+				.then((next) => {
+					setError(null);
+					setAccount(next);
+				})
 				.catch((cause) => {
 					if (!controller.signal.aborted) setError(errorMessage(cause));
 				});
 		}, 2000);
 		return () => {
-			clearInterval(timer);
+			clearTimeout(timer);
 			controller.abort();
 		};
-	}, [account?.loginUrl, account?.connected]);
+	}, [account]);
 	const act = async (method: "GET" | "POST" | "DELETE") => {
 		const controller = new AbortController();
 		pending.current = controller;
@@ -82,12 +85,13 @@ export function LocalClaudeCard() {
 			<div className="flex flex-wrap gap-2">
 				{account?.loginUrl && (
 					<>
-						<Button asChild>
+						<Button size="sm" asChild>
 							<a href={account.loginUrl} target="_blank" rel="noreferrer">
 								Continue to Claude
 							</a>
 						</Button>
 						<Button
+							size="sm"
 							variant="secondary"
 							disabled={busy}
 							onClick={() => void act("DELETE")}
@@ -97,11 +101,16 @@ export function LocalClaudeCard() {
 					</>
 				)}
 				{busy && (
-					<Button variant="secondary" onClick={() => pending.current?.abort()}>
+					<Button
+						size="sm"
+						variant="secondary"
+						onClick={() => pending.current?.abort()}
+					>
 						Cancel
 					</Button>
 				)}
 				<Button
+					size="sm"
 					disabled={
 						busy || Boolean(account?.loginUrl) || account?.installed === false
 					}
@@ -110,6 +119,7 @@ export function LocalClaudeCard() {
 					{account?.connected ? "Disconnect Claude" : "Sign in with Claude"}
 				</Button>
 				<Button
+					size="sm"
 					variant="secondary"
 					disabled={busy}
 					onClick={() => void act("GET")}
