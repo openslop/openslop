@@ -1,73 +1,78 @@
 # OpenSlop Design System
 
-A snapshot of how the studio looks and why. Read it before UI work, and flag code that drifts from it.
+Read before UI work. Flag code that deviates.
 
-## Philosophy
+## Principles
 
-Clean, warm, quiet. Surfaces carry the layout and color carries meaning: a hue appears only where something is live, actionable, or needs attention. Everything else is warm neutral. Depth comes from layered surfaces and soft shadows, never from glass, glow, or gradients. When in doubt, take something away.
+- Clean, warm, quiet. Neutral surfaces carry layout; color only marks what is live, actionable, or needs attention.
+- Depth from surfaces and shadow. No glass, glow, gradients, or ambient color washes.
+- Primitives in `components/ui/` (shadcn-style, `class-variance-authority`) own the look. Feature code composes them and never restyles them.
+- One meaning, one look: a color, variant, or size means the same thing everywhere.
+- Reuse before adding: existing primitive, then a new named variant or size on it, then a new primitive. No one-off classes at the call site.
+- A look used in more than one place lives in one home: a primitive variant or an `@utility` (`focus-ring`, `elevated-surface`, `font-numeric`).
 
-Every visual decision is a token. Components in `components/ui/` own the look, built with `class-variance-authority`, and feature code composes them without restyling. A new need becomes a new named variant or size on the primitive, never one-off classes at the call site.
+## Tokens
 
-## Tokens and theme
+`app/globals.css`, in three layers:
 
-Tokens live in `app/globals.css` and reach Tailwind through `@theme inline`. Light and dark share one set of semantic names; the raw ramps flip under `.dark`, so components never branch on theme. Use semantic tokens, never raw hexes or palette steps.
+1. **Ramps:** raw palette steps (`--grey-*`, `--blurple-*`, ...), flipped under `.dark`.
+2. **Semantic tokens:** named for a role (`--surface-elevated`, `--caution`), pointing at ramp steps.
+3. **Tailwind:** semantic tokens exposed through `@theme inline`.
+
+- Components use semantic tokens only. Never ramps, raw hexes, `bg-black/N`, or `*-white/N`.
+- A new token gets a role name, a value in both themes, and an `@theme inline` entry.
+- One token per role. Never a second red, green, or amber.
+
+## Theme
+
+`next-themes` with a `.dark` class, light by default, system supported. Nothing is forced light or dark, and components never branch on theme.
 
 ## Color
 
-- **Neutrals:** a warm, slightly red-tinted grey ramp. Text runs from `foreground` to `muted-foreground`; hierarchy within a block comes from these two before size or weight.
-- **Surfaces:** a small stack from recessed (`surface-recessed`) through the page (`background`) to raised (`card`, `element-card`, `surface-elevated`), separated by a hairline `border`.
-- **Primary:** `generate`, a deep wine in light and a pale rose in dark, is the color of the main action in a context.
-- **Accent:** blurple `accent` marks focus, selection, and links, plus the call to action on entry pages. It is never an ambient wash.
-- **State:** one ramp each for `destructive`, `success`, `caution`, and `tertiary`, each with a `-foreground` for solid fills and a soft form for banners.
-- **Indicator:** a berry tint for caution that sits on content, such as stale or low. It should read as a status, never as a button.
-- **Media tints:** one hue per media type, used only to tell types apart at a glance.
-- **Scrims:** `overlay` and `on-media` are theme-independent dark washes for modals and text over media.
+- **Neutrals:** warm, red-tinted greys. Hierarchy comes from `foreground` against `muted-foreground` before size or weight.
+- **Surfaces:** recessed (`surface-recessed`), page (`background`), raised (`card`, `element-card`, `surface-elevated`), separated by a hairline `border`.
+- **Primary:** `generate`, for the main action.
+- **Accent:** blurple `accent` / `ring`, for focus, selection, links, and entry-page calls to action only.
+- **State:** `destructive`, `success`, `caution`, `tertiary`, each with a `-foreground` for solid fills, plus a soft form for banners.
+- **Indicator:** berry, for caution on content only. Reads as status, never as a button.
+- **Media tints:** one per media type, only to tell types apart.
+- **Scrims:** `overlay` and `on-media` are theme-independent dark washes. Opacity sets the strength.
 
 ## Typography
 
-- **Slopella** (`font-sans`, `font-title`) for interface and titles.
-- **Inter** (`font-body`) for body copy and form controls.
-- **`font-numeric`** for numbers that update in place, so digits keep their width.
-- **Instrument Serif** and **Sentient** are for marketing surfaces only.
+- **Slopella** (`font-sans`, `font-title`): interface and titles.
+- **Inter** (`font-body`): body copy and form controls.
+- **`font-numeric`:** Slopella's tabular figures, for numbers that update in place. Never combine with `tabular-nums`.
+- **Instrument Serif**, **Sentient:** marketing only. No monospace stack.
 
-Size comes from the named scale (`text-badge-xs` up to `text-hero`). Each step bakes its line-height and tracking, so reach for `leading-*` or a weight only to override. Never use raw Tailwind sizes or pixel values.
+- Sizes come from the named scale (`text-badge-xs` to `text-hero`). Never `text-xs`, `text-sm`, or `text-[Npx]`.
+- Each size bakes its line-height. Add `leading-*` only to override, and wherever `font-body` or `font-title` applies, since their unlayered line-height wins.
 
-## Spacing, shape, depth
+## Spacing, radius, elevation
 
-- **Spacing:** a 4px grid. Dense tools stay tight and marketing pages breathe.
-- **Shape:** radius derives from `--radius`. Containers are the roundest, controls are moderate, and chips are pills.
-- **Depth:** a single elevation scale (`shadow-elevation-1/3/5/10`). The higher a layer floats, the stronger its shadow, and popovers and menus share one level.
+- 4px spacing grid.
+- Radius from `--radius`: cards `rounded-xl`, controls and overlays `rounded-md`, pills `rounded-full`.
+- Depth from `shadow-elevation-1/3/5/10` only. Popovers and menus sit at 3.
 
 ## Buttons
 
-`variant` sets color and `size` sets dimensions; never hand-size a button with height, padding, or text classes.
+- `variant` sets color, `size` sets dimensions. Never hand-size with `h-*`, `px-*`, or `text-*`; add a named size.
+- Loudest to quietest: `generate` (primary, one per context), `accent` (entry-page calls to action), `secondary`, `outline`, `panel` / `ghost` (quiet chrome), `link` (in running text). `destructive` removes things.
+- Icon buttons follow the same ladder and name their action in a tooltip and an accessible label.
+- Unavailable controls style through the `unavailable:` variant (`:disabled` or `aria-disabled`). `hover:` and `active:` skip those states.
 
-- **`generate`:** the primary action. Use at most one per context.
-- **`accent`:** the call to action on entry surfaces such as auth and landing pages.
-- **`secondary`:** a bordered, neutral action that sits beside the primary one.
-- **`panel` and `ghost`:** quiet chrome that is present without competing for attention.
-- **`outline`:** a bordered action with no fill, for neutral actions that shouldn't add a surface.
-- **`destructive`:** removes something, usually behind a confirmation.
-- **`link`:** an action set in running text.
-- **Icon buttons:** follow the same quiet-to-loud logic and carry a tooltip that names the action.
+## Badges
 
-An unavailable control keeps its place and tooltip and fades through the `unavailable:` variant. Inert controls never react to hover or press.
+- Status, never actions.
+- Neutral facts: `muted`, or `subtle` inside a line of text. Caution on content: `indicator` with a filled icon. Other states use their own ramp.
 
-## Badges and chips
+## Icons
 
-Badges are status, not actions. Neutral facts use `muted`, or `subtle` when they sit inside a line of text. State uses its own ramp, and caution on content uses `indicator` with a filled icon. Amounts animate as they change and shimmer while loading.
-
-## Surfaces and overlays
-
-- **Cards and panels:** group content on raised surfaces.
-- **Dialogs, popovers, and menus:** float above the page, take a scrim when modal, and return focus when they close.
-- **Empty and loading states:** use the shared empty-state and skeleton primitives, never ad hoc spinners or blank space.
-
-## Iconography
-
-One filled, masked SVG set (`components/ui/icons/`) that inherits color and size from its text. Icons support a label and never replace one, except on icon buttons, which name their action in a tooltip and an accessible label.
+One filled, masked SVG set (`components/ui/icons/`) that inherits color and size from its text. No icon dependency.
 
 ## Motion and texture
 
-- **Motion:** short and purposeful. Shared eases (`--ease-casual/productive/expressive`) and durations, with fade-up for entrances and shimmer for loading. Motion respects `prefers-reduced-motion`.
-- **Texture:** opt-in and quiet. Film grain on raised surfaces, a dot grid behind workspaces, and ambient light reserved for the single hero moment.
+- **Motion:** shared eases (`--ease-casual/productive/expressive`) and durations (`--duration-faster/fast`). `fadeInUp` for entrances, `shimmer` for loading. Respect `prefers-reduced-motion`.
+- **Grain:** `.grain` on raised surfaces, not on dense cards.
+- **Dot grid:** behind workspaces, through `<DotGrid />`.
+- **Ambient light:** the hero composer only.
