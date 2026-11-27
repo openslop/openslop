@@ -6,14 +6,17 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "@/components/ui/icon";
 import { scrollableAncestor } from "@/lib/components/scroll-into-container";
 import { cn } from "@/lib/utils";
-import { trailingAssistant } from "@/lib/agent/messages";
 import type { SloppyMessage } from "@/lib/agent/types";
 import { AgentTurn, UserMessage } from "./sloppy-message";
 import { useSloppy, useSloppyMessages } from "./sloppy-provider";
-import { turnStatus } from "./turn-display";
-import { WorkingStatus } from "./turn-status";
 
 const EMPTY_HINT = "Ask Sloppy to change the script however you want.";
+
+const PENDING_TURN: SloppyMessage = {
+	id: "pending",
+	role: "assistant",
+	parts: [],
+};
 
 /** A settled message never changes, so only the one being streamed re-renders. */
 const Row = memo(function Row({
@@ -61,23 +64,21 @@ function Transcript({
 		);
 	}
 
+	const rows =
+		loading && messages.at(-1)?.role === "user"
+			? [...messages, PENDING_TURN]
+			: messages;
+
 	return (
 		<ol className="flex flex-col gap-3">
-			{messages.map((message, index) => (
+			{rows.map((message, index) => (
 				<Row
-					key={message.id}
+					key={index}
 					message={message}
-					streaming={loading && index === messages.length - 1}
+					streaming={loading && index === rows.length - 1}
 					entering={index >= restoredCount}
 				/>
 			))}
-			{loading && (
-				<li>
-					<WorkingStatus
-						status={turnStatus(trailingAssistant(messages)?.parts ?? [])}
-					/>
-				</li>
-			)}
 		</ol>
 	);
 }

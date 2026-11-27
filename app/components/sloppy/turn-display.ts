@@ -1,18 +1,46 @@
-import { isStaticToolUIPart, isTextUIPart } from "ai";
-import type { SloppyMessage } from "@/lib/agent/types";
-
-export type TurnPart = SloppyMessage["parts"][number];
+import { isTextUIPart } from "ai";
+import compact from "lodash/compact";
+import { plural } from "@/lib/format";
+import type { StepPart } from "@/lib/agent/step-runs";
+import type { SloppyMessage, SloppyMetadata } from "@/lib/agent/types";
+import { stepPresentation } from "./tool-presentation";
 
 export const WAIT_FOR_SLOPPY = "Wait for Sloppy to finish";
 
-/** The editor runs a call after the model emits it, so a call still means work. */
-export function turnStatus(parts: TurnPart[]): string {
-	const last = parts.at(-1);
-	if (last && isTextUIPart(last)) return "Responding";
-	if (last && isStaticToolUIPart(last) && last.state === "input-available") {
-		return "Applying changes";
-	}
-	return "Slopping…";
+/** A run is named for its latest call; a thought only names a run of thoughts. */
+export const namingStep = (steps: StepPart[]): StepPart | undefined =>
+	steps.findLast((step) => step.type !== "reasoning") ?? steps.at(-1);
+
+export function runLabel(steps: StepPart[], seconds?: number): string {
+	const latest = namingStep(steps);
+	return compact([
+		latest && stepPresentation(latest).label,
+		`${steps.length} ${plural(steps.length, "step")}`,
+		seconds !== undefined && `${Math.ceil(seconds)}s`,
+		steps.some((step) => step.state === "output-error") && "failed",
+	]).join(" · ");
+}
+
+/** A run that opens the turn counts from the turn's start, as its working status did; a run cut off ends with the turn. */
+export function runSeconds(
+	metadata: SloppyMetadata | undefined,
+	index: number,
+	opensTurn: boolean,
+): number | undefined {
+	const run = metadata?.runs?.[index];
+	if (!metadata || !run) return undefined;
+	const start = opensTurn ? metadata.startedAt : run.startedAt;
+	const end = run.endedAt ?? metadata.endedAt;
+	if (start === undefined || end === undefined) return undefined;
+	return (end - start) / 1000;
+}
+
+export function workedSeconds(
+	metadata: SloppyMetadata | undefined,
+): number | undefined {
+	if (metadata?.startedAt === undefined || metadata.endedAt === undefined)
+		return undefined;
+	return (metadata.endedAt - metadata.startedAt) / 1000;
 }
 
 export function userText(message: SloppyMessage): string {

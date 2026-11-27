@@ -4,8 +4,12 @@ import { SLOPPY_TOOLS } from "./tools/registry";
 
 /** Carried on the message, so one turn stays one row however many steps it took. */
 export const sloppyMetadataSchema = z.object({
-	/** Every step of the turn, end to end. Excludes the edits, which the client runs. */
-	workSeconds: z.number().optional(),
+	startedAt: z.number().optional(),
+	endedAt: z.number().optional(),
+	/** One per run of steps; a run with no end is still going. */
+	runs: z
+		.array(z.object({ startedAt: z.number(), endedAt: z.number().optional() }))
+		.optional(),
 });
 export type SloppyMetadata = z.infer<typeof sloppyMetadataSchema>;
 

@@ -7,7 +7,7 @@ export const readTitle = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: TextBox,
-	label: "Reading the title",
+	label: "Reading title",
 	execute: async (_input, ctx) => ctx.readProject().title,
 	retention: "turn",
 });

@@ -54,7 +54,7 @@ export const listModels = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: InsertElement,
-	label: "Reading the models",
+	label: "Reading models",
 	execute: async (_, ctx) => {
 		const defaults = ctx.modelDefaults();
 		return MODEL_GROUPS.map((group) =>

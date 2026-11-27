@@ -800,6 +800,37 @@
 	animation: fadeInUp 0.3s var(--ease-casual) both;
 }
 
+.fold-stack {
+	display: inline-grid;
+	overflow: hidden;
+}
+
+.fold-stack > * {
+	grid-area: 1 / 1;
+}
+
+@keyframes foldIn {
+	from {
+		opacity: 0;
+		transform: translateY(100%);
+	}
+}
+
+@keyframes foldOut {
+	to {
+		opacity: 0;
+		transform: translateY(-100%);
+	}
+}
+
+.fold-in {
+	animation: foldIn var(--duration-fast) var(--ease-productive) both;
+}
+
+.fold-out {
+	animation: foldOut var(--duration-fast) var(--ease-productive) both;
+}
+
 @keyframes shimmer {
 	0% {
 		background-position: -200% center;
@@ -850,7 +881,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.fold-out {
+		display: none;
+	}
+
 	.animate-fadeInUp,
+	.fold-in,
 	[data-sd-animate],
 	[data-sd-animate-marker]::marker,
 	.shimmer,

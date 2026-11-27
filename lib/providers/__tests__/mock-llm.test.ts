@@ -37,7 +37,13 @@ describe("MockLLM", () => {
 	});
 });
 
-type Step = { text: string; toolName?: string; input?: unknown };
+type Step = {
+	text: string;
+	thought: string;
+	toolName?: string;
+	toolCallId?: string;
+	input?: unknown;
+};
 
 const EMPTY_CANVAS = "## Script\nThe canvas is empty.";
 const WRITTEN_CANVAS = [
@@ -102,14 +108,24 @@ async function step(prompt: LanguageModelV3Prompt): Promise<Step> {
 		text: chunks
 			.flatMap((chunk) => (chunk.type === "text-delta" ? [chunk.delta] : []))
 			.join(""),
+		thought: chunks
+			.flatMap((chunk) =>
+				chunk.type === "reasoning-delta" ? [chunk.delta] : [],
+			)
+			.join(""),
 		toolName: call?.toolName,
+		toolCallId: call?.toolCallId,
 		input: call ? JSON.parse(call.input) : undefined,
 	};
 }
 
 describe("the mock agent model", () => {
+	const random = (value: number) =>
+		vi.spyOn(Math, "random").mockReturnValue(value);
+
 	beforeEach(() => {
 		vi.useFakeTimers();
+		random(0.99);
 	});
 
 	afterEach(() => {
@@ -168,6 +184,7 @@ describe("the mock agent model", () => {
 			["write_script", "The script is on the canvas."],
 			["read_script", WRITTEN_CANVAS],
 			["edit_script", "Applied 1 operation."],
+			["fit_durations", "Every video fits its speech."],
 		] as const;
 
 		for (const [toolName, result] of steps) {
@@ -191,8 +208,57 @@ describe("the mock agent model", () => {
 		});
 		prompt.push(...ran("edit_script", "Applied 1 operation."));
 
+		expect((await step(prompt)).toolName).toBe("fit_durations");
+		prompt.push(...ran("fit_durations", "Every video fits its speech."));
+
 		const done = await step(prompt);
 		expect(done.toolName).toBeUndefined();
 		expect(done.text).not.toBe("");
+	});
+
+	it("looks around a few times at random before it acts", async () => {
+		random(0);
+		const prompt = user("make the opening warmer");
+		const looks: string[] = [];
+
+		for (;;) {
+			const { toolName } = await step(prompt);
+			if (toolName === "read_script") break;
+			looks.push(String(toolName));
+			prompt.push(...ran(String(toolName), "Nothing much."));
+		}
+
+		expect(looks).toHaveLength(3);
+		expect(new Set(looks).size).toBe(3);
+	});
+
+	it("loads up to six skills in one call", async () => {
+		// Look, pick the last look (load_skill), take the most skills.
+		random(0.99).mockReturnValueOnce(0).mockReturnValueOnce(0.99);
+
+		const { toolName, input } = await step(user("make the opening warmer"));
+
+		expect(toolName).toBe("load_skill");
+		const { names } = input as { names: string[] };
+		expect(new Set(names).size).toBe(6);
+	});
+
+	it("gives every call in a turn its own id", async () => {
+		const prompt = user("make the opening warmer");
+
+		const read = await step(prompt);
+		prompt.push(...ran("read_script", WRITTEN_CANVAS));
+		const edit = await step(prompt);
+
+		expect(read.toolCallId).not.toBe(edit.toolCallId);
+	});
+
+	it("thinks before the first step and not always after", async () => {
+		const prompt = user("make the opening warmer");
+
+		expect((await step(prompt)).thought).not.toBe("");
+		prompt.push(...ran("read_script", WRITTEN_CANVAS));
+
+		expect((await step(prompt)).thought).toBe("");
 	});
 });

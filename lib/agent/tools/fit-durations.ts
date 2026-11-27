@@ -73,7 +73,7 @@ export const fitDurations = defineTool({
 	}),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Fitting video elements to the speech",
+	label: "Fitting video durations",
 	execute: async ({ element_ids }, ctx) => {
 		const { scoped, unknown } = scopeTo(ctx.estimateVisualSpans(), element_ids);
 		const fits = durationFits(scoped);

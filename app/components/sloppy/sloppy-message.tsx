@@ -1,14 +1,12 @@
 "use client";
 
-import { isStaticToolUIPart, isTextUIPart } from "ai";
 import { CopyButton } from "@/components/ui/copy-button";
+import { turnBlocks, type TurnBlock } from "@/lib/agent/step-runs";
 import type { SloppyMessage } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/panel-card";
-import { Reasoning } from "./reasoning";
 import { ReplyMarkdown } from "./reply-markdown";
-import { Tool } from "./tool";
-import { WorkedStatus } from "./turn-status";
-import { reasoningOpen, userText, type TurnPart } from "./turn-display";
+import { StepRun, WorkedStatus } from "./turn-status";
+import { runSeconds, userText, workedSeconds } from "./turn-display";
 
 export function UserMessage({ message }: { message: SloppyMessage }) {
 	return (
@@ -36,35 +34,8 @@ function ReplyText({ text, streaming }: { text: string; streaming: boolean }) {
 	);
 }
 
-function Step({
-	part,
-	live,
-	superseded,
-}: {
-	part: TurnPart;
-	/** A restored transcript is never live, however its parts were stored. */
-	live: boolean;
-	superseded: boolean;
-}) {
-	if (isTextUIPart(part))
-		return (
-			<ReplyText
-				text={part.text}
-				streaming={live && part.state === "streaming"}
-			/>
-		);
-	if (part.type === "reasoning") {
-		return (
-			<Reasoning
-				text={part.text}
-				streaming={live && part.state === "streaming"}
-				open={reasoningOpen(live, superseded, part.text)}
-			/>
-		);
-	}
-	if (isStaticToolUIPart(part)) return <Tool part={part} />;
-	return null;
-}
+/** A turn that has streamed nothing yet still shows its first run, waiting on its first step. */
+const FIRST_RUN: TurnBlock[] = [{ kind: "run", index: 0, steps: [] }];
 
 export function AgentTurn({
 	message,
@@ -73,21 +44,29 @@ export function AgentTurn({
 	message: SloppyMessage;
 	streaming: boolean;
 }) {
-	const newest = message.parts.at(-1);
-	const worked = message.parts.some((part) => !isTextUIPart(part));
+	const blocks = turnBlocks(message.parts);
+	const rows = streaming && blocks.length === 0 ? FIRST_RUN : blocks;
 
 	return (
 		<>
-			{message.parts.map((part, index) => (
-				<Step
-					key={`${message.id}-${index}`}
-					part={part}
-					live={streaming}
-					superseded={part !== newest}
-				/>
-			))}
-			{!streaming && worked && (
-				<WorkedStatus seconds={message.metadata?.workSeconds} />
+			{rows.map((block, index) =>
+				block.kind === "reply" ? (
+					<ReplyText
+						key={index}
+						text={block.part.text}
+						streaming={streaming && block.part.state === "streaming"}
+					/>
+				) : (
+					<StepRun
+						key={index}
+						steps={block.steps}
+						live={streaming && index === rows.length - 1}
+						seconds={runSeconds(message.metadata, block.index, index === 0)}
+					/>
+				),
+			)}
+			{!streaming && blocks.some((block) => block.kind === "run") && (
+				<WorkedStatus seconds={workedSeconds(message.metadata)} />
 			)}
 		</>
 	);

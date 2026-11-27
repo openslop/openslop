@@ -12,7 +12,7 @@ export const readGeneration = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: Sparkles,
-	label: "Reading the generation state",
+	label: "Reading generations",
 	execute: async (_input, ctx) => {
 		const states = ctx.elementStates();
 		if (states.length === 0) return "No element on the canvas generates media.";

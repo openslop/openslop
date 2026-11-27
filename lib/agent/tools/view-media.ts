@@ -33,7 +33,7 @@ export const viewMedia = defineTool({
 			...output.flatMap(({ images }) => images.map(({ url }) => url)),
 		),
 	retention: "turn",
-	label: "Looking at the media library",
+	label: "Viewing media",
 	execute: async ({ urls }, ctx) => {
 		const media = ctx.readProject().media;
 		return Promise.all(

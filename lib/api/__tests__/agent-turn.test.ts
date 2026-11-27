@@ -5,7 +5,7 @@ import type {
 	SharedV3ProviderOptions,
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
-import type { SloppyMessage } from "@/lib/agent/types";
+import type { SloppyMessage, SloppyMetadata } from "@/lib/agent/types";
 
 const { conversations, provider, recordSpend } = vi.hoisted(() => ({
 	conversations: {
@@ -109,9 +109,12 @@ async function runTurn(...args: Parameters<typeof startTurn>) {
 	return chunksOf(await startTurn(...args));
 }
 
+const finished = (chunks: Record<string, unknown>[]) =>
+	chunks.at(-1)?.messageMetadata as Required<SloppyMetadata>;
+
 const finishSeconds = (chunks: Record<string, unknown>[]) => {
-	const metadata = chunks.at(-1)?.messageMetadata as { workSeconds: number };
-	return metadata.workSeconds;
+	const { startedAt, endedAt } = finished(chunks);
+	return (endedAt - startedAt) / 1000;
 };
 
 const saved = (call: number) =>
@@ -310,15 +313,31 @@ describe("a turn that takes more than one step", () => {
 		{ id: "m-agent", role: "assistant", metadata, parts },
 	];
 
-	const spent = { workSeconds: 3 };
+	const spent = { startedAt: Date.now() - 3000 };
 
-	it("adds a step's time to what the turn already worked", async () => {
+	it("times the turn from when it began, across steps", async () => {
 		const chunks = await runTurn(TEXT_TURN, {
 			message: answered(reading("call-1", "the script")),
 			history: recorded(spent, reading("call-1", "the script")),
 		});
 
 		expect(finishSeconds(chunks)).toBeGreaterThanOrEqual(3);
+	});
+
+	it("keeps timing the run of steps the editor just answered", async () => {
+		const chunks = await runTurn(TEXT_TURN, {
+			message: answered(reading("call-1", "the script")),
+			history: recorded(
+				{ ...spent, runs: [{ startedAt: Date.now() - 5000 }] },
+				reading("call-1", "the script"),
+			),
+		});
+
+		const [run, ...rest] = finished(chunks).runs;
+		expect(rest).toEqual([]);
+		expect((run?.endedAt ?? 0) - (run?.startedAt ?? 0)).toBeGreaterThanOrEqual(
+			5000,
+		);
 	});
 
 	it("runs the model the step was sent with", async () => {
@@ -334,7 +353,7 @@ describe("a turn that takes more than one step", () => {
 	it("does not take what a turn cost from the editor", async () => {
 		const claimed: SloppyMessage = {
 			...answered(reading("call-1", "the script")),
-			metadata: { workSeconds: 9999 },
+			metadata: { startedAt: 0 },
 		};
 		const chunks = await runTurn(TEXT_TURN, {
 			message: claimed,

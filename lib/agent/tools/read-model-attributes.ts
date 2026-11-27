@@ -28,7 +28,7 @@ export const readModelAttributes = defineTool({
 		}),
 	output: z.string(),
 	icon: Eye,
-	label: ({ model }) => `Reading what ${model ?? "the model"} allows`,
+	label: ({ model }) => `Reading ${model ?? "model"} options`,
 	execute: async ({ type, ...model }) => {
 		const defs = attributeSchemaFor(type, model).modelDefs;
 		if (defs.length === 0) return "This model has no attributes of its own.";

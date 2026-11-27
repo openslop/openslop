@@ -17,7 +17,7 @@ export const estimateSpeechLengths = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Estimating speech lengths",
+	label: "Timing speech",
 	execute: async (_input, ctx) => {
 		const estimates = ctx.estimateSpeechLengths();
 		if (estimates.length === 0) return "No speech on the canvas yet.";

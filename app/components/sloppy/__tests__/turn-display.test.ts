@@ -1,41 +1,85 @@
 import { describe, expect, it } from "vitest";
-import { reasoningOpen, turnStatus, type TurnPart } from "../turn-display";
+import type { StepPart } from "@/lib/agent/step-runs";
+import {
+	reasoningOpen,
+	runLabel,
+	runSeconds,
+	workedSeconds,
+} from "../turn-display";
 
-const thought: TurnPart = { type: "reasoning", text: "weighing" };
-const said: TurnPart = { type: "text", text: "on it" };
-const calling: TurnPart = {
-	type: "tool-edit_script",
-	toolCallId: "c1",
-	state: "input-available",
-	input: { ops: [] },
+const thinking: StepPart = {
+	type: "reasoning",
+	text: "weighing",
+	state: "done",
 };
-const called: TurnPart = {
-	type: "tool-edit_script",
+const reading: StepPart = {
+	type: "tool-read_script",
 	toolCallId: "c1",
 	state: "output-available",
-	input: { ops: [] },
-	output: "Applied 1 operation.",
+	input: {},
+	output: "the script",
+};
+const failed: StepPart = {
+	type: "tool-read_script",
+	toolCallId: "c2",
+	state: "output-error",
+	input: {},
+	errorText: "no script yet",
 };
 
-describe("turnStatus", () => {
-	it("reads as slopping before anything has streamed", () => {
-		expect(turnStatus([])).toBe("Slopping…");
+describe("runLabel", () => {
+	it("names the latest step, how many steps ran, and how long they took", () => {
+		expect(runLabel([thinking, reading], 11.2)).toBe(
+			"Reading script · 2 steps · 12s",
+		);
 	});
 
-	it("reads as slopping while only thoughts have streamed", () => {
-		expect(turnStatus([thought])).toBe("Slopping…");
+	it("names a run for its latest call, not the thought after it", () => {
+		expect(runLabel([reading, thinking])).toBe("Reading script · 2 steps");
 	});
 
-	it("reads as responding once text follows the thought", () => {
-		expect(turnStatus([thought, said])).toBe("Responding");
+	it("counts a single step in the singular", () => {
+		expect(runLabel([thinking], 0.4)).toBe("Thinking · 1 step · 1s");
 	});
 
-	it("keeps working after a tool call, which the editor still has to run", () => {
-		expect(turnStatus([said, calling])).toBe("Applying changes");
+	it("leaves out a time it never recorded and says when a call failed", () => {
+		expect(runLabel([reading, failed])).toBe(
+			"Reading script · 2 steps · failed",
+		);
+	});
+});
+
+describe("runSeconds", () => {
+	const times = {
+		startedAt: 0,
+		endedAt: 9000,
+		runs: [{ startedAt: 1500, endedAt: 4000 }, { startedAt: 6000 }],
+	};
+
+	it("counts a run that opens the turn from the turn's start", () => {
+		expect(runSeconds(times, 0, true)).toBe(4);
 	});
 
-	it("goes back to slopping once the editor has answered and the model has not", () => {
-		expect(turnStatus([said, called])).toBe("Slopping…");
+	it("counts a run after a reply from its first step", () => {
+		expect(runSeconds(times, 0, false)).toBe(2.5);
+	});
+
+	it("ends a run cut off by the end of the turn there", () => {
+		expect(runSeconds(times, 1, false)).toBe(3);
+	});
+
+	it("has no time for a run it never stamped", () => {
+		expect(runSeconds(undefined, 0, true)).toBeUndefined();
+	});
+});
+
+describe("workedSeconds", () => {
+	it("is the turn from start to end", () => {
+		expect(workedSeconds({ startedAt: 1000, endedAt: 13_400 })).toBe(12.4);
+	});
+
+	it("has no time before the turn has ended", () => {
+		expect(workedSeconds({ startedAt: 1000 })).toBeUndefined();
 	});
 });
 

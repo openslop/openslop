@@ -3,31 +3,37 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ChatOnToolCallCallback } from "ai";
+import type { ChatOnFinishCallback, ChatOnToolCallCallback } from "ai";
 import type { SloppyMessage } from "@/lib/agent/types";
 import type { ToolOutcome } from "@/lib/agent/tools/registry";
 import { SloppyProvider, useSloppy } from "../sloppy-provider";
 
 const state = vi.hoisted(() => ({
 	messages: [] as SloppyMessage[],
+	status: "streaming",
 	setMessages: vi.fn(),
 	sendMessage: vi.fn(),
 	stop: vi.fn(),
 	addToolOutput: vi.fn(),
 	runTool: vi.fn(),
 	onToolCall: undefined as ChatOnToolCallCallback<SloppyMessage> | undefined,
+	onFinish: undefined as ChatOnFinishCallback<SloppyMessage> | undefined,
 }));
 
 vi.mock("@ai-sdk/react", () => ({
-	useChat: (options: { onToolCall: typeof state.onToolCall }) => {
+	useChat: (options: {
+		onToolCall: typeof state.onToolCall;
+		onFinish: typeof state.onFinish;
+	}) => {
 		state.onToolCall = options.onToolCall;
+		state.onFinish = options.onFinish;
 		return {
 			messages: state.messages,
 			setMessages: state.setMessages,
 			sendMessage: state.sendMessage,
 			stop: state.stop,
 			addToolOutput: state.addToolOutput,
-			status: "streaming",
+			status: state.status,
 		};
 	},
 }));
@@ -83,8 +89,13 @@ function Probe({
 
 beforeEach(() => {
 	state.messages = [asked, pending];
+	state.status = "streaming";
 	vi.clearAllMocks();
 	root = createRoot(container);
+	render();
+});
+
+function render() {
 	act(() => {
 		root.render(
 			<SloppyProvider>
@@ -92,7 +103,7 @@ beforeEach(() => {
 			</SloppyProvider>,
 		);
 	});
-});
+}
 
 function current() {
 	if (!control) throw new Error("SloppyProvider did not render");
@@ -168,5 +179,57 @@ describe("SloppyProvider tool calls", () => {
 		await tool.promise;
 
 		expect(state.addToolOutput).not.toHaveBeenCalled();
+	});
+});
+
+describe("SloppyProvider loading", () => {
+	const answered: SloppyMessage = {
+		...pending,
+		parts: [
+			{
+				type: "tool-read_script",
+				toolCallId: "call-0",
+				input: {},
+				state: "output-available",
+				output: "the script",
+			},
+		],
+	};
+
+	const finish = (finishReason: "tool-calls" | "stop") =>
+		act(() =>
+			state.onFinish?.({
+				message: answered,
+				messages: [asked, answered],
+				isAbort: false,
+				isDisconnect: false,
+				isError: false,
+				finishReason,
+			}),
+		);
+
+	beforeEach(() => {
+		state.messages = [asked, answered];
+		state.status = "ready";
+		render();
+		act(() => current().send("make it shorter"));
+	});
+
+	it("keeps working between steps, once every call is answered and before the next is sent", () => {
+		finish("tool-calls");
+
+		expect(current().loading).toBe(true);
+	});
+
+	it("stops working once a step ends without asking for more calls", () => {
+		finish("stop");
+
+		expect(current().loading).toBe(false);
+	});
+
+	it("stops working when the user stops the turn", () => {
+		act(() => current().stop());
+
+		expect(current().loading).toBe(false);
 	});
 });

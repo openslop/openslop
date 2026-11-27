@@ -32,7 +32,7 @@ export const updateScriptSettings = defineTool({
 		.refine(...atLeastOne("script setting")),
 	output: z.string(),
 	icon: Hourglass,
-	label: "Storing the script settings",
+	label: "Updating script settings",
 	execute: async (patch, ctx) => {
 		ctx.updateScriptSettings(patch);
 		const changed = Object.entries(patch).map(

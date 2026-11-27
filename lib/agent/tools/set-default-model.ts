@@ -19,7 +19,7 @@ export const setDefaultModel = defineTool({
 	output: z.string(),
 	icon: InsertElement,
 	label: ({ model }) =>
-		`Setting the default model${model ? ` to ${model}` : ""}`,
+		model ? `Setting ${model} as default` : "Setting default model",
 	execute: async ({ type, ...model }, ctx) => {
 		if (!ctx.isConnected(model.provider))
 			throw new Error(

@@ -2,8 +2,8 @@ import styles from "./orb-loader.module.css";
 
 export default function OrbLoader() {
 	return (
-		<div className="size-4.5 shrink-0 rotate-90">
-			<div className={`${styles.loader} scale-[0.18] origin-top-left`}>
+		<span className="block size-4.5 shrink-0 rotate-90">
+			<span className={`${styles.loader} block scale-[0.18] origin-top-left`}>
 				<svg width="100" height="100" viewBox="0 0 100 100" aria-hidden="true">
 					<defs>
 						<mask id="clipping">
@@ -14,8 +14,8 @@ export default function OrbLoader() {
 						</mask>
 					</defs>
 				</svg>
-				<div className={styles.box} />
-			</div>
-		</div>
+				<span className={`${styles.box} block`} />
+			</span>
+		</span>
 	);
 }

@@ -42,7 +42,9 @@ export const editScript = defineTool({
 	icon: Pencil,
 	label: ({ ops }) => {
 		const count = ops?.length ?? 0;
-		return `Editing the script (${count} ${plural(count, "change")})`;
+		return count
+			? `Making ${count} ${plural(count, "edit")}`
+			: "Editing script";
 	},
 	execute: async ({ ops }, ctx) => {
 		if (!ctx.isScriptReadCurrent())

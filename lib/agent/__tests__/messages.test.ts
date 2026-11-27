@@ -24,7 +24,7 @@ const turn = (
 ): SloppyMessage => ({
 	id: "m2",
 	role: "assistant",
-	metadata: { workSeconds: 3 },
+	metadata: { startedAt: 1000, endedAt: 4000 },
 	parts: Array.from({ length: parts }, (_part, index) => ({
 		type: "tool-read_script",
 		toolCallId: `call-${index}`,

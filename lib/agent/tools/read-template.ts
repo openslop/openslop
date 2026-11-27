@@ -12,7 +12,7 @@ export const readTemplate = defineTool({
 	input: z.object({}),
 	output: z.string(),
 	icon: Template,
-	label: "Reading the template",
+	label: "Reading template",
 	execute: async (_input, ctx) => {
 		const template = getTemplateById(ctx.readProject().scriptSettings.template);
 		if (!template) return "This project has no template.";

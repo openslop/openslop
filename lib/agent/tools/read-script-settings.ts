@@ -9,7 +9,7 @@ export const readScriptSettings = defineTool({
 	input: z.object({}),
 	output: ScriptSettingsSchema,
 	icon: SlidersHorizontal,
-	label: "Reading the script settings",
+	label: "Reading script settings",
 	execute: async (_input, ctx) => ctx.readProject().scriptSettings,
 	retention: "turn",
 });

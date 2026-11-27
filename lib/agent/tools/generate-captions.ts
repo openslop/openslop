@@ -1,5 +1,6 @@
 import { dedent } from "@/lib/dedent";
 import { z } from "zod";
+import { plural } from "@/lib/format";
 import { MagicCaptions } from "@/components/ui/icon";
 import { defineTool } from "./define-tool";
 
@@ -20,7 +21,9 @@ export const generateCaptions = defineTool({
 	output: z.string(),
 	icon: MagicCaptions,
 	label: ({ ids }) =>
-		ids?.length ? `Captioning ${ids.join(", ")}` : "Captioning the timeline",
+		ids?.length
+			? `Captioning ${ids.length} ${plural(ids.length, "element")}`
+			: "Captioning timeline",
 	execute: async ({ ids }, ctx) => {
 		const { queued, skipped } = ctx.generateCaptions(ids);
 		return [
