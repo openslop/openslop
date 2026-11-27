@@ -29,10 +29,14 @@ export function LocalClaudeCard() {
 			pending.current?.abort();
 		};
 	}, []);
+	const signingIn = Boolean(account?.loginUrl) && !account?.connected;
 	useEffect(() => {
-		if (!account?.loginUrl || account.connected) return;
+		if (!signingIn) return;
 		const controller = new AbortController();
-		const timer = setTimeout(() => {
+		let polling = false;
+		const timer = setInterval(() => {
+			if (polling) return;
+			polling = true;
 			apiJson(ENDPOINT, ClaudeAccountSchema, { signal: controller.signal })
 				.then((next) => {
 					setError(null);
@@ -40,13 +44,16 @@ export function LocalClaudeCard() {
 				})
 				.catch((cause) => {
 					if (!controller.signal.aborted) setError(errorMessage(cause));
+				})
+				.finally(() => {
+					polling = false;
 				});
 		}, 2000);
 		return () => {
-			clearTimeout(timer);
+			clearInterval(timer);
 			controller.abort();
 		};
-	}, [account]);
+	}, [signingIn]);
 	const act = async (method: "GET" | "POST" | "DELETE") => {
 		const controller = new AbortController();
 		pending.current = controller;
