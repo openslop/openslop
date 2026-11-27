@@ -1,6 +1,5 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import {
 	useFocused,
 	useReadOnly,
@@ -18,18 +17,13 @@ import { keepFocus } from "@/components/ui/keep-focus";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import type { NameRefElement } from "@/lib/canvas/types";
 import { useImageAssetType, useKindOfName } from "@/lib/canvas/use-assets";
+import { useClientValue } from "@/lib/components/use-client-value";
 import { cn } from "@/lib/utils";
 import { useAssetEditors } from "./asset-edit-context";
 import { NamedAssetImage } from "./named-asset-image";
 
-const noSubscription = () => () => {};
-
 const useIsMac = () =>
-	useSyncExternalStore(
-		noSubscription,
-		() => /Mac OS X/.test(navigator.userAgent),
-		() => false,
-	);
+	useClientValue(() => /Mac OS X/.test(navigator.userAgent), false);
 
 function RefActionButton({
 	label,
