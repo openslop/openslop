@@ -88,7 +88,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 	// Stopping drops the output of a tool call still in flight
 	const turn = useRef<AbortController>(undefined);
 	// Between steps the SDK reads as ready, with every call answered, until it sends the next one.
-	const [working, setWorking] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const { messages, sendMessage, setMessages, stop, addToolOutput } =
 		useChat<SloppyMessage>({
@@ -136,7 +136,7 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			onFinish: ({ isAbort, isDisconnect, isError, finishReason }) => {
 				const broken = isAbort || isDisconnect || isError;
 				if (broken) setMessages((current) => settleUnansweredCalls(current));
-				if (broken || finishReason !== "tool-calls") setWorking(false);
+				if (broken || finishReason !== "tool-calls") setLoading(false);
 			},
 			onError: (error) => toastError(error, "Sloppy could not finish that"),
 			throttle: 50,
@@ -148,19 +148,19 @@ export function SloppyProvider({ children }: { children: ReactNode }) {
 			send: (message) => {
 				turnModel.current = model;
 				turn.current = new AbortController();
-				setWorking(true);
+				setLoading(true);
 				void sendMessage({ text: message });
 			},
 			stop: () => {
 				turn.current?.abort();
-				setWorking(false);
+				setLoading(false);
 				void stop();
 				setMessages((current) => settleUnansweredCalls(current, STOPPED_TEXT));
 			},
-			loading: working,
+			loading,
 			writingScript,
 		}),
-		[sendMessage, setMessages, stop, working, writingScript, model],
+		[sendMessage, setMessages, stop, loading, writingScript, model],
 	);
 
 	return (

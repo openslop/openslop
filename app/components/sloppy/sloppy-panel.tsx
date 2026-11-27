@@ -12,7 +12,11 @@ import { useSloppy, useSloppyMessages } from "./sloppy-provider";
 
 const EMPTY_HINT = "Ask Sloppy to change the script however you want.";
 
-const WAITING: SloppyMessage = { id: "waiting", role: "assistant", parts: [] };
+const PENDING_TURN: SloppyMessage = {
+	id: "pending",
+	role: "assistant",
+	parts: [],
+};
 
 /** A settled message never changes, so only the one being streamed re-renders. */
 const Row = memo(function Row({
@@ -62,7 +66,7 @@ function Transcript({
 
 	const rows =
 		loading && messages.at(-1)?.role === "user"
-			? [...messages, WAITING]
+			? [...messages, PENDING_TURN]
 			: messages;
 
 	return (

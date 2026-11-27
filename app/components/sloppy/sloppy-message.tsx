@@ -35,7 +35,7 @@ function ReplyText({ text, streaming }: { text: string; streaming: boolean }) {
 }
 
 /** A turn that has streamed nothing yet still shows its first run, waiting on its first step. */
-const WAITING: TurnBlock[] = [{ kind: "steps", run: 0, steps: [] }];
+const FIRST_RUN: TurnBlock[] = [{ kind: "run", index: 0, steps: [] }];
 
 export function AgentTurn({
 	message,
@@ -45,7 +45,7 @@ export function AgentTurn({
 	streaming: boolean;
 }) {
 	const blocks = turnBlocks(message.parts);
-	const rows = streaming && blocks.length === 0 ? WAITING : blocks;
+	const rows = streaming && blocks.length === 0 ? FIRST_RUN : blocks;
 
 	return (
 		<>
@@ -61,11 +61,11 @@ export function AgentTurn({
 						key={index}
 						steps={block.steps}
 						live={streaming && index === rows.length - 1}
-						seconds={message.metadata?.stepSeconds?.[block.run]}
+						seconds={message.metadata?.runSeconds?.[block.index]}
 					/>
 				),
 			)}
-			{!streaming && blocks.some((block) => block.kind === "steps") && (
+			{!streaming && blocks.some((block) => block.kind === "run") && (
 				<WorkedStatus seconds={message.metadata?.workSeconds} />
 			)}
 		</>

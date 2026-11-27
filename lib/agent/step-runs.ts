@@ -17,23 +17,23 @@ export type StepPart = ReasoningUIPart | ToolUIPart<SloppyTools>;
 const isStepPart = (part: TurnPart): part is StepPart =>
 	isReasoningUIPart(part) || isStaticToolUIPart(part);
 
-/** `run` indexes the run's time in `stepSeconds`. */
+/** A run is the steps between two replies; `index` finds its time in `runSeconds`. */
 export type TurnBlock =
 	| { kind: "reply"; part: TextUIPart }
-	| { kind: "steps"; run: number; steps: StepPart[] };
+	| { kind: "run"; index: number; steps: StepPart[] };
 
 export function turnBlocks(parts: TurnPart[]): TurnBlock[] {
 	const blocks: TurnBlock[] = [];
-	let run = 0;
+	let index = 0;
 	for (const part of parts) {
 		const last = blocks.at(-1);
 		if (isTextUIPart(part)) {
 			blocks.push({ kind: "reply", part });
 		} else if (isStepPart(part)) {
-			if (last?.kind === "steps") last.steps.push(part);
+			if (last?.kind === "run") last.steps.push(part);
 			else {
-				blocks.push({ kind: "steps", run, steps: [part] });
-				run += 1;
+				blocks.push({ kind: "run", index, steps: [part] });
+				index += 1;
 			}
 		}
 	}
@@ -51,15 +51,15 @@ const STEP_STARTS = new Set<StreamPartType>([
 /** Times run from saved start times, so they include the editor running calls between requests, as the reader saw it. */
 export function turnClock(message: SloppyMessage, now: number) {
 	const startedAt = message.metadata?.startedAt ?? now;
-	const runs = [...(message.metadata?.stepSeconds ?? [])];
+	const runs = [...(message.metadata?.runSeconds ?? [])];
 	let runStartedAt = message.metadata?.runStartedAt ?? null;
 	// Before anything streams, the working status counts from the start of the turn.
-	let replied = runs.length > 0;
+	let streamed = runs.length > 0;
 
 	return {
 		onPart(type: StreamPartType, at: number): SloppyMetadata | undefined {
 			if (STEP_STARTS.has(type) && runStartedAt === null) {
-				runStartedAt = replied ? at : startedAt;
+				runStartedAt = streamed ? at : startedAt;
 				runs.push(0);
 			}
 			if (type !== "text-start" && type !== "finish") return;
@@ -67,12 +67,12 @@ export function turnClock(message: SloppyMessage, now: number) {
 				runs[runs.length - 1] = (at - runStartedAt) / 1000;
 			if (type === "text-start") {
 				runStartedAt = null;
-				replied = true;
+				streamed = true;
 			}
 			return {
 				startedAt,
 				runStartedAt,
-				stepSeconds: [...runs],
+				runSeconds: [...runs],
 				...(type === "finish" && {
 					workSeconds: Math.round((at - startedAt) / 1000),
 				}),

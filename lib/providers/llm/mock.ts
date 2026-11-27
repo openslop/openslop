@@ -31,7 +31,7 @@ import {
 	MOCK_ANSWER,
 	MOCK_ASSETS_OSML,
 	MOCK_DONE,
-	MOCK_GLANCES,
+	MOCK_QUICK_THOUGHTS,
 	MOCK_SCRIPT,
 	MOCK_STYLE,
 	MOCK_THOUGHT,
@@ -178,7 +178,7 @@ const LOOK_CHANCE = 0.6;
 const LOOKS_IN_A_ROW = 3;
 
 /** Each look at most once a turn, so the looking always runs out. */
-function look(results: ToolResult[]): MockStep | undefined {
+function lookAround(results: ToolResult[]): MockStep | undefined {
 	const trailing = results.slice(
 		results.findLastIndex(({ toolName }) => !LOOK_NAMES.has(toolName)) + 1,
 	).length;
@@ -253,8 +253,8 @@ function mockCall(
 	prompt: LanguageModelV3Prompt,
 	results: ToolResult[],
 ): MockStep {
-	const looked = look(results);
-	if (looked) return looked;
+	const look = lookAround(results);
+	if (look) return look;
 	const actions = results.filter(({ toolName }) => !LOOK_NAMES.has(toolName));
 	const last = actions.at(-1);
 	// The canvas is never in the prompt, so a turn reads it before anything else.
@@ -266,11 +266,11 @@ function mockCall(
 }
 
 /** A turn thinks hard before its first step, and only now and then after that. */
-const thought = (results: ToolResult[]): string | undefined =>
+const mockThought = (results: ToolResult[]): string | undefined =>
 	results.length === 0
 		? MOCK_THOUGHT
 		: Math.random() < 0.4
-			? pickRandom(MOCK_GLANCES)
+			? pickRandom(MOCK_QUICK_THOUGHTS)
 			: undefined;
 
 /**
@@ -282,10 +282,10 @@ function mockAgentModel() {
 		doStream: async ({ prompt }) => {
 			const results = turnToolResults(prompt);
 			const { say, toolName, input } = mockCall(prompt, results);
-			const think = thought(results);
+			const reasoning = mockThought(results);
 			const chunks: LanguageModelV3StreamPart[] = [
 				{ type: "stream-start", warnings: [] },
-				...(think ? parts("reasoning", "r0", think) : []),
+				...(reasoning ? parts("reasoning", "r0", reasoning) : []),
 				...(say ? parts("text", "t0", say) : []),
 				...(toolName
 					? ([

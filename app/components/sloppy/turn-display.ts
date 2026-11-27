@@ -8,11 +8,11 @@ import { stepPresentation } from "./tool-presentation";
 export const WAIT_FOR_SLOPPY = "Wait for Sloppy to finish";
 
 /** A run is named for its latest call; a thought only names a run of thoughts. */
-export const headline = (steps: StepPart[]): StepPart | undefined =>
+export const namingStep = (steps: StepPart[]): StepPart | undefined =>
 	steps.findLast((step) => step.type !== "reasoning") ?? steps.at(-1);
 
-export function stepsLabel(steps: StepPart[], seconds?: number): string {
-	const latest = headline(steps);
+export function runLabel(steps: StepPart[], seconds?: number): string {
+	const latest = namingStep(steps);
 	return compact([
 		latest && stepPresentation(latest).label,
 		`${steps.length} ${plural(steps.length, "step")}`,

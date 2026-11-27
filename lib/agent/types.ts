@@ -8,7 +8,7 @@ export const sloppyMetadataSchema = z.object({
 	workSeconds: z.number().optional(),
 	/** Null once the run is replied to: a metadata merge skips undefined. */
 	runStartedAt: z.number().nullable().optional(),
-	stepSeconds: z.array(z.number()).optional(),
+	runSeconds: z.array(z.number()).optional(),
 });
 export type SloppyMetadata = z.infer<typeof sloppyMetadataSchema>;
 

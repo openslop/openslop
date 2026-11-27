@@ -9,7 +9,7 @@ import OrbLoader from "../orb-loader";
 import { Reasoning } from "./reasoning";
 import { Tool } from "./tool";
 import { stepPresentation } from "./tool-presentation";
-import { headline, reasoningOpen, stepsLabel } from "./turn-display";
+import { namingStep, reasoningOpen, runLabel } from "./turn-display";
 
 function StepList({ steps, live }: { steps: StepPart[]; live: boolean }) {
 	return (
@@ -30,7 +30,7 @@ function StepList({ steps, live }: { steps: StepPart[]; live: boolean }) {
 	);
 }
 
-function StepFace({ step }: { step: StepPart | undefined }) {
+function StepName({ step }: { step: StepPart | undefined }) {
 	const { icon: Icon, label } = step
 		? stepPresentation(step)
 		: { icon: undefined, label: "Slopping" };
@@ -47,11 +47,11 @@ function LiveLabel({ steps }: { steps: StepPart[] }) {
 	const [startedAt] = useState(Date.now);
 	const elapsed = useElapsedSeconds(startedAt);
 	const [fold, setFold] = useState({
-		shown: steps.length,
+		current: steps.length,
 		leaving: null as number | null,
 	});
-	if (fold.shown !== steps.length) {
-		setFold({ shown: steps.length, leaving: fold.shown });
+	if (fold.current !== steps.length) {
+		setFold({ current: steps.length, leaving: fold.current });
 	}
 
 	return (
@@ -66,14 +66,14 @@ function LiveLabel({ steps }: { steps: StepPart[] }) {
 							setFold((current) => ({ ...current, leaving: null }))
 						}
 					>
-						<StepFace step={steps[fold.leaving - 1]} />
+						<StepName step={steps[fold.leaving - 1]} />
 					</span>
 				)}
 				<span
 					key={steps.length}
 					className={fold.leaving === null ? undefined : "fold-in"}
 				>
-					<StepFace step={steps.at(-1)} />
+					<StepName step={steps.at(-1)} />
 				</span>
 			</span>
 			<span className="shimmer">{`· ${elapsed}s`}</span>
@@ -91,14 +91,14 @@ export function StepRun({
 	live: boolean;
 	seconds?: number;
 }) {
-	const latest = headline(steps);
+	const latest = namingStep(steps);
 	const face = latest && stepPresentation(latest);
 	return (
 		<Disclosure
 			marker={live ? <OrbLoader /> : undefined}
 			icon={!live && face && <face.icon className="h-3 w-3" />}
 			disabled={!latest}
-			label={live ? <LiveLabel steps={steps} /> : stepsLabel(steps, seconds)}
+			label={live ? <LiveLabel steps={steps} /> : runLabel(steps, seconds)}
 		>
 			<StepList steps={steps} live={live} />
 		</Disclosure>

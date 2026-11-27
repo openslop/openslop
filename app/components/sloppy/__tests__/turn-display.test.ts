@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { StepPart } from "@/lib/agent/step-runs";
-import { reasoningOpen, stepsLabel } from "../turn-display";
+import { reasoningOpen, runLabel } from "../turn-display";
 
 const thinking: StepPart = {
 	type: "reasoning",
@@ -22,23 +22,23 @@ const failed: StepPart = {
 	errorText: "no script yet",
 };
 
-describe("stepsLabel", () => {
+describe("runLabel", () => {
 	it("names the latest step, how many steps ran, and how long they took", () => {
-		expect(stepsLabel([thinking, reading], 11.2)).toBe(
+		expect(runLabel([thinking, reading], 11.2)).toBe(
 			"Reading script · 2 steps · 12s",
 		);
 	});
 
 	it("names a run for its latest call, not the thought after it", () => {
-		expect(stepsLabel([reading, thinking])).toBe("Reading script · 2 steps");
+		expect(runLabel([reading, thinking])).toBe("Reading script · 2 steps");
 	});
 
 	it("counts a single step in the singular", () => {
-		expect(stepsLabel([thinking], 0.4)).toBe("Thinking · 1 step · 1s");
+		expect(runLabel([thinking], 0.4)).toBe("Thinking · 1 step · 1s");
 	});
 
 	it("leaves out a time it never recorded and says when a call failed", () => {
-		expect(stepsLabel([reading, failed])).toBe(
+		expect(runLabel([reading, failed])).toBe(
 			"Reading script · 2 steps · failed",
 		);
 	});

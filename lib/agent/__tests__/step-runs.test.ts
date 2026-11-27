@@ -32,13 +32,13 @@ describe("turnBlocks", () => {
 		const blocks = turnBlocks([thought, read, said, read, said]);
 
 		expect(blocks.map((block) => block.kind)).toEqual([
-			"steps",
+			"run",
 			"reply",
-			"steps",
+			"run",
 			"reply",
 		]);
-		expect(blocks[0]).toMatchObject({ run: 0, steps: [thought, read] });
-		expect(blocks[2]).toMatchObject({ run: 1, steps: [read] });
+		expect(blocks[0]).toMatchObject({ index: 0, steps: [thought, read] });
+		expect(blocks[2]).toMatchObject({ index: 1, steps: [read] });
 	});
 
 	it("keeps back-to-back replies apart", () => {
@@ -63,7 +63,7 @@ describe("turnClock", () => {
 		expect(clock.onPart("reasoning-start", 100)).toBeUndefined();
 		expect(clock.onPart("tool-input-start", 300)).toBeUndefined();
 		expect(clock.onPart("text-start", 1100)).toMatchObject({
-			stepSeconds: [1.1],
+			runSeconds: [1.1],
 			runStartedAt: null,
 		});
 	});
@@ -75,7 +75,7 @@ describe("turnClock", () => {
 		clock.onPart("tool-input-start", 5000);
 
 		expect(clock.onPart("finish", 9000)).toMatchObject({
-			stepSeconds: [4],
+			runSeconds: [4],
 			runStartedAt: 5000,
 		});
 	});
@@ -88,38 +88,38 @@ describe("turnClock", () => {
 		clock.onPart("tool-input-start", 1000);
 
 		expect(clock.onPart("finish", 1200)).toMatchObject({
-			stepSeconds: [0.5, 0.2],
+			runSeconds: [0.5, 0.2],
 			runStartedAt: 1000,
 		});
 	});
 
 	it("carries a run the editor was answering on from when it started", () => {
 		const clock = turnClock(
-			answering({ stepSeconds: [0.5], runStartedAt: 9000 }, thought, read),
+			answering({ runSeconds: [0.5], runStartedAt: 9000 }, thought, read),
 			10_000,
 		);
 
 		expect(clock.onPart("text-start", 10_300)).toMatchObject({
-			stepSeconds: [1.3],
+			runSeconds: [1.3],
 		});
 	});
 
 	it("starts a new run when the last request ended on a reply", () => {
 		const clock = turnClock(
-			answering({ stepSeconds: [0.5], runStartedAt: null }, read, said),
+			answering({ runSeconds: [0.5], runStartedAt: null }, read, said),
 			10_000,
 		);
 
 		clock.onPart("tool-call", 10_100);
 
 		expect(clock.onPart("finish", 10_400)).toMatchObject({
-			stepSeconds: [0.5, 0.3],
+			runSeconds: [0.5, 0.3],
 		});
 	});
 
 	it("times the whole turn from when it began", () => {
 		const clock = turnClock(
-			answering({ startedAt: 4000, stepSeconds: [] }, said),
+			answering({ startedAt: 4000, runSeconds: [] }, said),
 			10_000,
 		);
 
@@ -132,6 +132,6 @@ describe("turnClock", () => {
 	it("records no run for a turn that only replies", () => {
 		const clock = turnClock(asked, 0);
 
-		expect(clock.onPart("text-start", 100)).toMatchObject({ stepSeconds: [] });
+		expect(clock.onPart("text-start", 100)).toMatchObject({ runSeconds: [] });
 	});
 });

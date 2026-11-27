@@ -103,7 +103,7 @@ export const MOCK_THOUGHT =
 	"Reading the canvas to see what is already on it. Working out which scene the request points at, which elements sit inside that scene, and what the script currently says about each of them. Weighing whether this reads as a question to answer or as an edit to make, since the two want different tools, and a wrong guess there means an edit nobody asked for. Then picking the smallest change that does what was asked, so nothing else in the script has to move around, and nothing already on the canvas gets rewritten by accident. ";
 
 /** Short thoughts between steps, the way a real model checks itself as it goes. */
-export const MOCK_GLANCES = [
+export const MOCK_QUICK_THOUGHTS = [
 	"That covers what I needed from it. Checking what else bears on the request before touching anything. ",
 	"Nothing surprising there. The scene the request points at is still the first one. ",
 	"Good, the settings leave room for the change. Moving on. ",

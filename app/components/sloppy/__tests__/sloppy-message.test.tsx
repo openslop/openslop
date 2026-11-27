@@ -63,7 +63,7 @@ describe("AgentTurn", () => {
 					read,
 					{ type: "text", text: "Done.", state: "done" },
 				],
-				{ stepSeconds: [11.2], workSeconds: 14 },
+				{ runSeconds: [11.2], workSeconds: 14 },
 			),
 			false,
 		);
@@ -82,7 +82,7 @@ describe("AgentTurn", () => {
 					{ type: "reasoning", text: "hmm", state: "done" },
 					{ type: "text", text: "Done.", state: "done" },
 				],
-				{ stepSeconds: [1, 2] },
+				{ runSeconds: [1, 2] },
 			),
 			false,
 		);
