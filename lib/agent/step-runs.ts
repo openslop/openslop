@@ -17,7 +17,7 @@ export type StepPart = ReasoningUIPart | ToolUIPart<SloppyTools>;
 const isStepPart = (part: TurnPart): part is StepPart =>
 	isReasoningUIPart(part) || isStaticToolUIPart(part);
 
-/** A run is the steps between two replies; `index` finds its time in `runSeconds`. */
+/** A run is the steps between two replies; `index` finds its times in the turn's `runs`. */
 export type TurnBlock =
 	| { kind: "reply"; part: TextUIPart }
 	| { kind: "run"; index: number; steps: StepPart[] };
@@ -48,34 +48,23 @@ const STEP_STARTS = new Set<StreamPartType>([
 	"tool-call",
 ]);
 
-/** Times run from saved start times, so they include the editor running calls between requests, as the reader saw it. */
-export function turnClock(message: SloppyMessage, now: number) {
+/** Stamps when the turn and each run start and end; the client works out the durations. */
+export function turnTimer(message: SloppyMessage, now: number) {
 	const startedAt = message.metadata?.startedAt ?? now;
-	const runs = [...(message.metadata?.runSeconds ?? [])];
-	let runStartedAt = message.metadata?.runStartedAt ?? null;
-	// Before anything streams, the working status counts from the start of the turn.
-	let streamed = runs.length > 0;
+	const runs = [...(message.metadata?.runs ?? [])];
 
 	return {
 		onPart(type: StreamPartType, at: number): SloppyMetadata | undefined {
-			if (STEP_STARTS.has(type) && runStartedAt === null) {
-				runStartedAt = streamed ? at : startedAt;
-				runs.push(0);
-			}
-			if (type !== "text-start" && type !== "finish") return;
-			if (runStartedAt !== null)
-				runs[runs.length - 1] = (at - runStartedAt) / 1000;
-			if (type === "text-start") {
-				runStartedAt = null;
-				streamed = true;
-			}
+			const last = runs.at(-1);
+			const open = last !== undefined && last.endedAt === undefined;
+			if (STEP_STARTS.has(type) && !open) runs.push({ startedAt: at });
+			else if (type === "text-start" && open)
+				runs[runs.length - 1] = { ...last, endedAt: at };
+			else if (type !== "finish") return;
 			return {
 				startedAt,
-				runStartedAt,
-				runSeconds: [...runs],
-				...(type === "finish" && {
-					workSeconds: Math.round((at - startedAt) / 1000),
-				}),
+				runs: [...runs],
+				...(type === "finish" && { endedAt: at }),
 			};
 		},
 	};

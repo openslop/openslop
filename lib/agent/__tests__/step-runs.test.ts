@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { turnBlocks, turnClock, type TurnPart } from "../step-runs";
+import { turnBlocks, turnTimer, type TurnPart } from "../step-runs";
 import type { SloppyMessage } from "../types";
 
 const thought: TurnPart = {
@@ -56,82 +56,56 @@ describe("turnBlocks", () => {
 	});
 });
 
-describe("turnClock", () => {
-	it("times the first run from the start of the turn, as the working status shows it", () => {
-		const clock = turnClock(asked, 0);
+describe("turnTimer", () => {
+	it("stamps a run's start at its first step and its end at the reply", () => {
+		const timer = turnTimer(asked, 0);
 
-		expect(clock.onPart("reasoning-start", 100)).toBeUndefined();
-		expect(clock.onPart("tool-input-start", 300)).toBeUndefined();
-		expect(clock.onPart("text-start", 1100)).toMatchObject({
-			runSeconds: [1.1],
-			runStartedAt: null,
+		expect(timer.onPart("reasoning-start", 100)).toMatchObject({
+			runs: [{ startedAt: 100 }],
 		});
-	});
-
-	it("times a run after an opening reply from its first step", () => {
-		const clock = turnClock(asked, 0);
-
-		clock.onPart("text-start", 2000);
-		clock.onPart("tool-input-start", 5000);
-
-		expect(clock.onPart("finish", 9000)).toMatchObject({
-			runSeconds: [4],
-			runStartedAt: 5000,
+		expect(timer.onPart("tool-input-start", 300)).toBeUndefined();
+		expect(timer.onPart("text-start", 1100)).toMatchObject({
+			runs: [{ startedAt: 100, endedAt: 1100 }],
 		});
 	});
 
 	it("starts a new run for steps after a reply", () => {
-		const clock = turnClock(asked, 0);
+		const timer = turnTimer(asked, 0);
 
-		clock.onPart("tool-input-start", 0);
-		clock.onPart("text-start", 500);
-		clock.onPart("tool-input-start", 1000);
+		timer.onPart("tool-input-start", 0);
+		timer.onPart("text-start", 500);
+		timer.onPart("tool-input-start", 1000);
 
-		expect(clock.onPart("finish", 1200)).toMatchObject({
-			runSeconds: [0.5, 0.2],
-			runStartedAt: 1000,
+		expect(timer.onPart("finish", 1200)).toEqual({
+			startedAt: 0,
+			endedAt: 1200,
+			runs: [{ startedAt: 0, endedAt: 500 }, { startedAt: 1000 }],
 		});
 	});
 
-	it("carries a run the editor was answering on from when it started", () => {
-		const clock = turnClock(
-			answering({ runSeconds: [0.5], runStartedAt: 9000 }, thought, read),
+	it("keeps the run the editor was answering open across requests", () => {
+		const timer = turnTimer(
+			answering({ startedAt: 0, runs: [{ startedAt: 9000 }] }, thought, read),
 			10_000,
 		);
 
-		expect(clock.onPart("text-start", 10_300)).toMatchObject({
-			runSeconds: [1.3],
+		timer.onPart("tool-call", 10_100);
+
+		expect(timer.onPart("text-start", 10_300)).toMatchObject({
+			startedAt: 0,
+			runs: [{ startedAt: 9000, endedAt: 10_300 }],
 		});
 	});
 
-	it("starts a new run when the last request ended on a reply", () => {
-		const clock = turnClock(
-			answering({ runSeconds: [0.5], runStartedAt: null }, read, said),
-			10_000,
-		);
-
-		clock.onPart("tool-call", 10_100);
-
-		expect(clock.onPart("finish", 10_400)).toMatchObject({
-			runSeconds: [0.5, 0.3],
-		});
-	});
-
-	it("times the whole turn from when it began", () => {
-		const clock = turnClock(
-			answering({ startedAt: 4000, runSeconds: [] }, said),
-			10_000,
-		);
-
-		expect(clock.onPart("finish", 10_400)).toMatchObject({
+	it("stamps the turn's start once, when it opens", () => {
+		expect(turnTimer(asked, 4000).onPart("finish", 6000)).toEqual({
 			startedAt: 4000,
-			workSeconds: 6,
+			endedAt: 6000,
+			runs: [],
 		});
 	});
 
-	it("records no run for a turn that only replies", () => {
-		const clock = turnClock(asked, 0);
-
-		expect(clock.onPart("text-start", 100)).toMatchObject({ runSeconds: [] });
+	it("stamps nothing for a reply with no run to close", () => {
+		expect(turnTimer(asked, 0).onPart("text-start", 100)).toBeUndefined();
 	});
 });

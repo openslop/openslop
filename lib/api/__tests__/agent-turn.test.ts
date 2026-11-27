@@ -5,7 +5,7 @@ import type {
 	SharedV3ProviderOptions,
 } from "@ai-sdk/provider";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
-import type { SloppyMessage } from "@/lib/agent/types";
+import type { SloppyMessage, SloppyMetadata } from "@/lib/agent/types";
 
 const { conversations, provider, recordSpend } = vi.hoisted(() => ({
 	conversations: {
@@ -109,9 +109,12 @@ async function runTurn(...args: Parameters<typeof startTurn>) {
 	return chunksOf(await startTurn(...args));
 }
 
+const finished = (chunks: Record<string, unknown>[]) =>
+	chunks.at(-1)?.messageMetadata as Required<SloppyMetadata>;
+
 const finishSeconds = (chunks: Record<string, unknown>[]) => {
-	const metadata = chunks.at(-1)?.messageMetadata as { workSeconds: number };
-	return metadata.workSeconds;
+	const { startedAt, endedAt } = finished(chunks);
+	return (endedAt - startedAt) / 1000;
 };
 
 const saved = (call: number) =>
@@ -325,16 +328,16 @@ describe("a turn that takes more than one step", () => {
 		const chunks = await runTurn(TEXT_TURN, {
 			message: answered(reading("call-1", "the script")),
 			history: recorded(
-				{ ...spent, runSeconds: [5], runStartedAt: Date.now() - 5000 },
+				{ ...spent, runs: [{ startedAt: Date.now() - 5000 }] },
 				reading("call-1", "the script"),
 			),
 		});
 
-		const { runSeconds } = chunks.at(-1)?.messageMetadata as {
-			runSeconds: number[];
-		};
-		expect(runSeconds).toHaveLength(1);
-		expect(runSeconds[0]).toBeGreaterThanOrEqual(5);
+		const [run, ...rest] = finished(chunks).runs;
+		expect(rest).toEqual([]);
+		expect((run?.endedAt ?? 0) - (run?.startedAt ?? 0)).toBeGreaterThanOrEqual(
+			5000,
+		);
 	});
 
 	it("runs the model the step was sent with", async () => {

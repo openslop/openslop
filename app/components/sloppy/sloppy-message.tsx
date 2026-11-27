@@ -6,7 +6,7 @@ import type { SloppyMessage } from "@/lib/agent/types";
 import { PanelCard } from "../canvas/panel/panel-card";
 import { ReplyMarkdown } from "./reply-markdown";
 import { StepRun, WorkedStatus } from "./turn-status";
-import { userText } from "./turn-display";
+import { runSeconds, userText, workedSeconds } from "./turn-display";
 
 export function UserMessage({ message }: { message: SloppyMessage }) {
 	return (
@@ -61,12 +61,12 @@ export function AgentTurn({
 						key={index}
 						steps={block.steps}
 						live={streaming && index === rows.length - 1}
-						seconds={message.metadata?.runSeconds?.[block.index]}
+						seconds={runSeconds(message.metadata, block.index, index === 0)}
 					/>
 				),
 			)}
 			{!streaming && blocks.some((block) => block.kind === "run") && (
-				<WorkedStatus seconds={message.metadata?.workSeconds} />
+				<WorkedStatus seconds={workedSeconds(message.metadata)} />
 			)}
 		</>
 	);

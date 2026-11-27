@@ -63,7 +63,11 @@ describe("AgentTurn", () => {
 					read,
 					{ type: "text", text: "Done.", state: "done" },
 				],
-				{ runSeconds: [11.2], workSeconds: 14 },
+				{
+					startedAt: 0,
+					endedAt: 14_000,
+					runs: [{ startedAt: 500, endedAt: 11_200 }],
+				},
 			),
 			false,
 		);
@@ -82,7 +86,14 @@ describe("AgentTurn", () => {
 					{ type: "reasoning", text: "hmm", state: "done" },
 					{ type: "text", text: "Done.", state: "done" },
 				],
-				{ runSeconds: [1, 2] },
+				{
+					startedAt: 0,
+					endedAt: 9000,
+					runs: [
+						{ startedAt: 0, endedAt: 1000 },
+						{ startedAt: 5000, endedAt: 7000 },
+					],
+				},
 			),
 			false,
 		);

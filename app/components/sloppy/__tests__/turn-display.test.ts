@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { StepPart } from "@/lib/agent/step-runs";
-import { reasoningOpen, runLabel } from "../turn-display";
+import {
+	reasoningOpen,
+	runLabel,
+	runSeconds,
+	workedSeconds,
+} from "../turn-display";
 
 const thinking: StepPart = {
 	type: "reasoning",
@@ -41,6 +46,40 @@ describe("runLabel", () => {
 		expect(runLabel([reading, failed])).toBe(
 			"Reading script · 2 steps · failed",
 		);
+	});
+});
+
+describe("runSeconds", () => {
+	const times = {
+		startedAt: 0,
+		endedAt: 9000,
+		runs: [{ startedAt: 1500, endedAt: 4000 }, { startedAt: 6000 }],
+	};
+
+	it("counts a run that opens the turn from the turn's start", () => {
+		expect(runSeconds(times, 0, true)).toBe(4);
+	});
+
+	it("counts a run after a reply from its first step", () => {
+		expect(runSeconds(times, 0, false)).toBe(2.5);
+	});
+
+	it("ends a run cut off by the end of the turn there", () => {
+		expect(runSeconds(times, 1, false)).toBe(3);
+	});
+
+	it("has no time for a run it never stamped", () => {
+		expect(runSeconds(undefined, 0, true)).toBeUndefined();
+	});
+});
+
+describe("workedSeconds", () => {
+	it("is the turn from start to end", () => {
+		expect(workedSeconds({ startedAt: 1000, endedAt: 13_400 })).toBe(12.4);
+	});
+
+	it("has no time before the turn has ended", () => {
+		expect(workedSeconds({ startedAt: 1000 })).toBeUndefined();
 	});
 });
 
