@@ -120,8 +120,8 @@ npm run local
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="在终端登录 Claude Code，然后在模型选择器的本地智能体中选择 Claude Code" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="在终端登录 Claude Code，然后在模型选择器的本地智能体中选择 Claude Code" width="100%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="在输入框的模型选择器中列出本地智能体，选中 Claude Code 后 Sloppy 就用它开始工作" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="在输入框的模型选择器中列出本地智能体，选中 Claude Code 后 Sloppy 就用它开始工作" width="100%">
 </td>
 </tr>
 </table>

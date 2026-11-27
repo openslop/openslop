@@ -120,8 +120,8 @@ Vous utilisez déjà Claude Code, Codex, Gemini CLI ou Cursor ? Sloppy et la gé
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="Dans un terminal, on se connecte à Claude Code, puis on choisit Claude Code parmi les agents locaux dans le sélecteur de modèle" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="Dans un terminal, on se connecte à Claude Code, puis on choisit Claude Code parmi les agents locaux dans le sélecteur de modèle" width="100%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="Dans le compositeur, le sélecteur de modèle liste les agents locaux, Claude Code est choisi et Sloppy démarre dessus" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="Dans le compositeur, le sélecteur de modèle liste les agents locaux, Claude Code est choisi et Sloppy démarre dessus" width="100%">
 </td>
 </tr>
 </table>

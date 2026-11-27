@@ -120,8 +120,8 @@ npm run local
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="터미널에서 Claude Code에 로그인하고, 모델 선택에서 로컬 에이전트 중 Claude Code를 고른다" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="터미널에서 Claude Code에 로그인하고, 모델 선택에서 로컬 에이전트 중 Claude Code를 고른다" width="100%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="입력창의 모델 선택에 로컬 에이전트가 보이고, Claude Code를 고르면 Sloppy가 그걸로 시작한다" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="입력창의 모델 선택에 로컬 에이전트가 보이고, Claude Code를 고르면 Sloppy가 그걸로 시작한다" width="100%">
 </td>
 </tr>
 </table>

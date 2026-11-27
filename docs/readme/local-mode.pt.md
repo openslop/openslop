@@ -120,8 +120,8 @@ Já usa Claude Code, Codex, Gemini CLI ou Cursor? O Sloppy e a geração de text
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="Num terminal, entra-se no Claude Code e, no seletor de modelo, Claude Code é escolhido entre os agentes locais" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="Num terminal, entra-se no Claude Code e, no seletor de modelo, Claude Code é escolhido entre os agentes locais" width="100%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="No compositor, o seletor de modelo lista os agentes locais, Claude Code é escolhido e o Sloppy começa nele" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="No compositor, o seletor de modelo lista os agentes locais, Claude Code é escolhido e o Sloppy começa nele" width="100%">
 </td>
 </tr>
 </table>

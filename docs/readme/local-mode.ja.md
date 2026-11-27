@@ -120,8 +120,8 @@ Claude Code、Codex、Gemini CLI、Cursor をすでに使っているなら、�
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="ターミナルで Claude Code にサインインし、モデル選択のローカルエージェントから Claude Code を選ぶ" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="ターミナルで Claude Code にサインインし、モデル選択のローカルエージェントから Claude Code を選ぶ" width="100%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="入力欄のモデル選択にローカルエージェントが並び、Claude Code を選ぶと Sloppy がそれで動き出す" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="入力欄のモデル選択にローカルエージェントが並び、Claude Code を選ぶと Sloppy がそれで動き出す" width="100%">
 </td>
 </tr>
 </table>

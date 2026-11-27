@@ -120,8 +120,8 @@ Haz clic en tu icono de perfil, luego en **Settings** > **Add providers**, y con
 
 </td>
 <td width="50%">
-  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="En una terminal se inicia sesión en Claude Code y, en el selector de modelos, se elige Claude Code entre los agentes locales" width="100%">
-  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="En una terminal se inicia sesión en Claude Code y, en el selector de modelos, se elige Claude Code entre los agentes locales" width="100%">
+  <img src="../../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="En el compositor, el selector de modelos muestra los agentes locales, se elige Claude Code y Sloppy empieza con él" width="100%">
+  <img src="../../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="En el compositor, el selector de modelos muestra los agentes locales, se elige Claude Code y Sloppy empieza con él" width="100%">
 </td>
 </tr>
 </table>

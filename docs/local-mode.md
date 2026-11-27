@@ -120,8 +120,8 @@ Already use Claude Code, Codex, Gemini CLI or Cursor? Sloppy and text generation
 
 </td>
 <td width="50%">
-  <img src="../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="In a terminal, Claude Code is signed in, then Claude Code is picked from the local agents in the model picker" width="100%">
-  <img src="../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="In a terminal, Claude Code is signed in, then Claude Code is picked from the local agents in the model picker" width="100%">
+  <img src="../assets/features/local-step-agent-light.svg#gh-light-mode-only" alt="In the composer, the model picker lists the local agents, Claude Code is picked, and Sloppy starts on it" width="100%">
+  <img src="../assets/features/local-step-agent-dark.svg#gh-dark-mode-only" alt="In the composer, the model picker lists the local agents, Claude Code is picked, and Sloppy starts on it" width="100%">
 </td>
 </tr>
 </table>
