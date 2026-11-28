@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Autosaver } from "@/lib/project/autosave";
 import {
 	CanvasHistory,
@@ -16,6 +17,12 @@ import { CanvasHistoryPanel } from "../canvas-history-panel";
 
 vi.mock("@/app/components/user-avatar", () => ({ UserAvatar: () => null }));
 vi.mock("@/lib/user/user-provider", () => ({ useUser: () => null }));
+
+let generating = false;
+vi.mock("@/lib/generation/generation-queue-provider", () => ({
+	useQueueSelector: (select: (q: unknown) => unknown) =>
+		select({ isBusy: () => generating }),
+}));
 
 const content = (script: string): SavedProject => ({
 	script,
@@ -59,6 +66,7 @@ let root: Root;
 let container: HTMLElement;
 
 afterEach(() => {
+	generating = false;
 	act(() => root.unmount());
 	container.remove();
 });
@@ -68,9 +76,11 @@ async function open(history: CanvasHistory) {
 	root = createRoot(container);
 	await act(async () =>
 		root.render(
-			<CanvasHistoryProvider history={history}>
-				<CanvasHistoryPanel />
-			</CanvasHistoryProvider>,
+			<TooltipProvider>
+				<CanvasHistoryProvider history={history}>
+					<CanvasHistoryPanel />
+				</CanvasHistoryProvider>
+			</TooltipProvider>,
 		),
 	);
 }
@@ -116,5 +126,14 @@ describe("CanvasHistoryPanel", () => {
 			["View"],
 			["Restore"],
 		]);
+	});
+
+	it("holds View while a generation runs, since a preview would abort it", async () => {
+		generating = true;
+		const { history, onCanvas } = setUp();
+		await open(history);
+		await press(0, "View");
+		expect(onCanvas()).toBe("unsaved edits");
+		expect(history.getState().previewId).toBeNull();
 	});
 });

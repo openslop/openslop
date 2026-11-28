@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, Eye, RotateCcw } from "@/components/ui/icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime } from "@/lib/format";
+import { useQueueSelector } from "@/lib/generation/generation-queue-provider";
 import {
 	useCanvasHistory,
 	useCanvasHistoryState,
@@ -30,6 +31,7 @@ function CanvasVersionRow({
 	onRestore: () => void;
 }) {
 	const user = useUser();
+	const generating = useQueueSelector((q) => q.isBusy());
 
 	return (
 		<li
@@ -64,6 +66,13 @@ function CanvasVersionRow({
 						type="button"
 						variant="secondary"
 						size="sm"
+						aria-label="View"
+						tooltip={
+							generating
+								? "Wait for generation to finish"
+								: "Show this version on the canvas"
+						}
+						unavailable={generating}
 						onClick={onView}
 						className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
 					>
