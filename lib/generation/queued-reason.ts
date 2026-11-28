@@ -5,21 +5,20 @@ import type { GenerationNode } from "./graph";
 import type { GenerationQueue } from "./queue";
 
 const MEDIA_NAMES: Record<AssetConnectorType, string> = {
-	image: "image",
-	video: "video",
-	tts: "speech",
-	voice: "voice",
-	music: "music",
-	sfx: "sound effect",
-	stt: "transcription",
+	image: "images",
+	video: "videos",
+	tts: "voice lines",
+	voice: "voices",
+	music: "music tracks",
+	sfx: "sound effects",
+	stt: "transcriptions",
 };
 
 /** The blockers at the bottom of `node`'s chain, past any still queued behind their own. */
 function waitingFor(node: GenerationNode, queue: GenerationQueue): string[] {
 	return uniq(
 		queue.blockingDependencies(node).flatMap(([label, dep]) => {
-			const pending = queue.pendingNode(dep.id);
-			const deeper = pending ? waitingFor(pending, queue) : [];
+			const deeper = waitingFor(dep, queue);
 			return deeper.length > 0 ? deeper : [label];
 		}),
 	);
@@ -36,6 +35,5 @@ export function queuedReason(
 	if (blockers.length > 0) return `Waiting for ${namedList(blockers)}`;
 	const { connectorType } = node.job;
 	if (queue.hasCapacity(connectorType)) return null;
-	const limit = queue.limitFor(connectorType);
-	return `Waiting for a free ${MEDIA_NAMES[connectorType]} slot (${limit} running)`;
+	return `On hold, waiting for other ${MEDIA_NAMES[connectorType]} to finish`;
 }

@@ -78,16 +78,16 @@ describe("queuedReason", () => {
 		);
 	});
 
-	it("names the media type when only the concurrency limit holds it back", () => {
+	it("says it is on hold while others of its media type finish", () => {
 		const queue = new GenerationQueue();
 		queue.enqueueGraph([node("line-1", {}, "tts"), node("line-2", {}, "tts")]);
 
 		expect(queuedReason("line-2", queue)).toBe(
-			"Waiting for a free speech slot (1 running)",
+			"On hold, waiting for other voice lines to finish",
 		);
 	});
 
-	it("moves from a dependency to a free slot to running as the queue drains", async () => {
+	it("moves from a dependency to on hold to running as the queue drains", async () => {
 		const queue = new GenerationQueue({ limits: { image: 1, tts: 1 } });
 		queue.enqueueGraph([node("busy")]);
 		queue.enqueueGraph([
@@ -97,7 +97,7 @@ describe("queuedReason", () => {
 
 		await finish("voice");
 		expect(queuedReason("scene", queue)).toBe(
-			"Waiting for a free image slot (1 running)",
+			"On hold, waiting for other images to finish",
 		);
 
 		await finish("busy");

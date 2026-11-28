@@ -207,14 +207,11 @@ export class GenerationQueue {
 		);
 	}
 
-	limitFor = (connectorType: AssetConnectorType): number =>
-		this.limits[connectorType];
-
 	hasCapacity(connectorType: AssetConnectorType) {
 		const running = [...this.active.values()].filter(
 			(job) => job.connectorType === connectorType,
 		).length;
-		return running < this.limitFor(connectorType);
+		return running < this.limits[connectorType];
 	}
 
 	private nextReady() {

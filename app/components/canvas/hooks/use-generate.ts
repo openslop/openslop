@@ -4,19 +4,19 @@ import {
 	useQueueSelector,
 } from "@/lib/generation/generation-queue-provider";
 import { hasPrompt } from "@/lib/generation/graph";
+import { queuedReason } from "@/lib/generation/queued-reason";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { buildNode } from "@/lib/generation/generation-graph";
 import { useBuildContext } from "@/lib/generation/use-build-context";
 import { useLiveNode } from "@/lib/generation/use-live-nodes";
 import type { GeneratedElement } from "@/lib/canvas/types";
-import { useGenerationStatus } from "./use-generation-status";
 
 export function useGenerate(element: GeneratedElement) {
 	const queue = useGenerationQueue();
 	const buildContext = useBuildContext();
 	const node = useLiveNode(element);
 	const snapshot = useQueueSelector((q) => q.getElementSnapshot(node.id));
-	const generationStatus = useGenerationStatus(node.id);
+	const waiting = useQueueSelector((q) => queuedReason(node.id, q));
 	const reason = useQueueSelector((q) => staleReason(node, q));
 
 	// Built again at the click: a live node's job may lag, see useLiveNode.
@@ -35,7 +35,9 @@ export function useGenerate(element: GeneratedElement) {
 
 	return {
 		node,
-		...generationStatus,
+		status: snapshot.status,
+		startedAt: snapshot.startedAt,
+		queuedReason: waiting,
 		result: snapshot.result,
 		error: snapshot.error,
 		staleReason: reason,
