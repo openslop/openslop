@@ -34,6 +34,7 @@ export function AssetTile({
 	Icon,
 	status = "idle",
 	startedAt = null,
+	queuedReason = null,
 	primary,
 	menu,
 	onRemove,
@@ -51,6 +52,7 @@ export function AssetTile({
 	Icon: IconComponent;
 	status?: GenerationStatus;
 	startedAt?: number | null;
+	queuedReason?: string | null;
 	primary?: TilePrimary;
 	onRemove?: () => void;
 	onDelete?: () => void;
@@ -102,6 +104,7 @@ export function AssetTile({
 					<GenerationIndicator
 						status={status}
 						startedAt={startedAt}
+						queuedReason={queuedReason}
 						size="sm"
 						className="absolute top-1 right-1"
 					/>

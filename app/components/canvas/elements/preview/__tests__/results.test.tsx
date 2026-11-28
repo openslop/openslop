@@ -10,6 +10,7 @@ describe("MediaResult", () => {
 				<MediaResult
 					status="idle"
 					startedAt={null}
+					queuedReason={null}
 					error={null}
 					onDiscard={() => {}}
 					url="https://cdn.example.com/a.png"

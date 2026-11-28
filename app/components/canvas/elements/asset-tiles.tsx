@@ -44,7 +44,8 @@ type NamedTileProps = TileProps & { name: string; onDelete: () => void };
 /** A named asset by its image, or a character by their voice when they have no avatar. */
 export function NamedAssetTile({ name, ...tile }: NamedTileProps) {
 	const { editAsset } = useAssetEditors();
-	const { type, kind, url, status, startedAt } = useImageAsset(name);
+	const { type, kind, url, status, startedAt, queuedReason } =
+		useImageAsset(name);
 	return type && kind ? (
 		<AssetTile
 			name={name}
@@ -53,6 +54,7 @@ export function NamedAssetTile({ name, ...tile }: NamedTileProps) {
 			Icon={ASSET_KIND_ICONS[kind]}
 			status={status}
 			startedAt={startedAt}
+			queuedReason={queuedReason}
 			primary={editing(name, () => editAsset(type, name))}
 			{...tile}
 		/>

@@ -47,12 +47,13 @@ function ClearDraftButton({ draft }: { draft: AssetElement }) {
 
 /** Each run makes a new take in the media, so a draft only ever generates. */
 function DraftGenerateButton() {
-	const { hasPrompt, status, generate } = useElementGeneration();
+	const { hasPrompt, status, queuedReason, generate } = useElementGeneration();
 	return (
 		<GenerateButton
 			status={status}
 			hasPrompt={hasPrompt}
 			hasResult={false}
+			queuedReason={queuedReason}
 			onGenerate={generate}
 			className="w-full"
 		/>

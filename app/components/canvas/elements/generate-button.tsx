@@ -42,7 +42,12 @@ function generateLabel(status: GenerationStatus, hasResult: boolean) {
 	return hasResult ? "Regenerate" : "Generate";
 }
 
-function generateTooltip(hasPrompt: boolean, hasResult: boolean) {
+function generateTooltip(
+	hasPrompt: boolean,
+	hasResult: boolean,
+	queuedReason: string | null,
+) {
+	if (queuedReason) return queuedReason;
 	if (!hasPrompt) return "Add a prompt first";
 	return hasResult ? "Regenerate this element" : "Generate this element";
 }
@@ -51,12 +56,14 @@ export function GenerateButton({
 	status,
 	hasPrompt,
 	hasResult,
+	queuedReason,
 	onGenerate,
 	className,
 }: {
 	status: GenerationStatus;
 	hasPrompt: boolean;
 	hasResult: boolean;
+	queuedReason: string | null;
 	onGenerate: () => void;
 	className?: string;
 }) {
@@ -69,18 +76,20 @@ export function GenerateButton({
 			className={className}
 			unavailable={!hasPrompt || isGenerationActive(status)}
 			onClick={onGenerate}
-			tooltip={generateTooltip(hasPrompt, hasResult)}
+			tooltip={generateTooltip(hasPrompt, hasResult, queuedReason)}
 		/>
 	);
 }
 
 export function ElementGenerateButton() {
-	const { hasPrompt, hasResult, status, generate } = useElementGeneration();
+	const { hasPrompt, hasResult, status, queuedReason, generate } =
+		useElementGeneration();
 	return (
 		<GenerateButton
 			status={status}
 			hasPrompt={hasPrompt}
 			hasResult={hasResult}
+			queuedReason={queuedReason}
 			onGenerate={generate}
 		/>
 	);

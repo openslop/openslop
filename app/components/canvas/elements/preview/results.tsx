@@ -27,6 +27,7 @@ export function AudioResult({
 	src,
 	status,
 	startedAt,
+	queuedReason,
 	topRight,
 }: GenerationState &
 	PreviewOverlays & {
@@ -43,6 +44,7 @@ export function AudioResult({
 					<GenerationIndicator
 						status={status}
 						startedAt={startedAt}
+						queuedReason={queuedReason}
 						className="shrink-0"
 					/>
 				)}
@@ -111,6 +113,7 @@ export function MediaPreview({
 	outputKind,
 	status,
 	startedAt,
+	queuedReason,
 	error,
 	topRight,
 }: GenerationState &
@@ -129,7 +132,11 @@ export function MediaPreview({
 				objectFit="contain"
 			/>
 			{error && <ErrorMessage message={error} />}
-			<ResultOverlay status={status} startedAt={startedAt} />
+			<ResultOverlay
+				status={status}
+				startedAt={startedAt}
+				queuedReason={queuedReason}
+			/>
 			<PreviewChrome topRight={topRight} />
 		</div>
 	);

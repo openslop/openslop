@@ -35,6 +35,7 @@ import { PanelCard } from "../panel/panel-card";
 import { AddButton } from "@/components/ui/add-button";
 import { LibraryTile } from "./library-tile";
 import { draftIdsOf } from "./media-panel-context";
+import { useGenerationStatus } from "../hooks/use-generation-status";
 
 /** Holds the place of a take still on its way; gone once it lands in the media. */
 function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
@@ -42,16 +43,18 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 		(editor) =>
 			getAssets(editor.children).find((asset) => asset.id === id)?.type,
 	);
-	const { status, startedAt } = useQueueSelector((q) =>
-		q.getElementSnapshot(id),
-	);
+	const { status, startedAt, queuedReason } = useGenerationStatus(id);
 	if (!type || !isMediaDraftType(type) || !isGenerationActive(status))
 		return null;
 	const { label, Icon } = ELEMENT_CONFIGS[draftedType(type)];
 	if (kind === "audio")
 		return (
 			<AudioCard name={label}>
-				<GenerationIndicator status={status} startedAt={startedAt} />
+				<GenerationIndicator
+					status={status}
+					startedAt={startedAt}
+					queuedReason={queuedReason}
+				/>
 				<Skeleton className="h-5 flex-1 rounded-md" />
 			</AudioCard>
 		);
@@ -60,8 +63,9 @@ function PendingTile({ id, kind }: { id: string; kind: UploadKind }) {
 			name={label}
 			Icon={Icon}
 			fallback="icon"
-			status="generating"
+			status={status}
 			startedAt={startedAt}
+			queuedReason={queuedReason}
 		/>
 	);
 }

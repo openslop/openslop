@@ -13,7 +13,11 @@ const render = (node: React.ReactNode) =>
 describe("GenerationIndicator", () => {
 	it("is a named status marker, not a disabled button", () => {
 		const html = render(
-			<GenerationIndicator status="generating" startedAt={null} />,
+			<GenerationIndicator
+				status="generating"
+				startedAt={null}
+				queuedReason={null}
+			/>,
 		);
 		expect(html).toContain('role="status"');
 		expect(html).toContain('aria-label="Generating 0s"');
@@ -28,7 +32,11 @@ describe("GenerationIndicator", () => {
 		"shows the %s label beside the icon on wide screens, hidden from screen readers",
 		(status, label) => {
 			const html = render(
-				<GenerationIndicator status={status} startedAt={null} />,
+				<GenerationIndicator
+					status={status}
+					startedAt={null}
+					queuedReason={null}
+				/>,
 			);
 			const shown = html.match(
 				/<span aria-hidden="true" class="([^"]*)">([^<]*)<\/span>/,
@@ -41,9 +49,27 @@ describe("GenerationIndicator", () => {
 		},
 	);
 
+	it("names what a queued element waits on, keeping the short label on screen", () => {
+		const reason = "Waiting for the still frame";
+		const html = render(
+			<GenerationIndicator
+				status="queued"
+				startedAt={null}
+				queuedReason={reason}
+			/>,
+		);
+		expect(html).toContain(`aria-label="${reason}"`);
+		expect(html).toMatch(/<span aria-hidden="true" class="[^"]*">Queued…</);
+	});
+
 	it("keeps the small indicator to its icon", () => {
 		const html = render(
-			<GenerationIndicator status="generating" startedAt={null} size="sm" />,
+			<GenerationIndicator
+				status="generating"
+				startedAt={null}
+				queuedReason={null}
+				size="sm"
+			/>,
 		);
 		const shown = html.match(/<span aria-hidden="true" class="([^"]*)">/);
 		expect(shown?.[1]).toMatch(/(^| )hidden( |$)/);
@@ -76,7 +102,11 @@ describe("GenerationIndicator clock", () => {
 		await act(async () =>
 			root.render(
 				<TooltipProvider>
-					<GenerationIndicator status="generating" startedAt={7_000} />
+					<GenerationIndicator
+						status="generating"
+						startedAt={7_000}
+						queuedReason={null}
+					/>
 				</TooltipProvider>,
 			),
 		);

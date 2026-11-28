@@ -196,15 +196,18 @@ export class GenerationQueue {
 		this.pending = this.pending.filter((node) => node.id !== id);
 	}
 
-	/** The dependency holding `node` back, if any, with the label it was declared under. */
-	private blockingDependency(node: GenerationNode) {
-		return Object.entries(node.dependsOn).find(
+	pendingNode = (id: string): GenerationNode | undefined =>
+		this.pending.find((node) => node.id === id);
+
+	/** The dependencies holding `node` back, each with the label it was declared under. */
+	blockingDependencies(node: GenerationNode): [string, GenerationNode][] {
+		return Object.entries(node.dependsOn).filter(
 			([, dep]) =>
 				this.snapshots.isActive(dep.id) || !this.snapshots.get(dep.id).result,
 		);
 	}
 
-	private hasCapacity(connectorType: AssetConnectorType) {
+	hasCapacity(connectorType: AssetConnectorType) {
 		const running = [...this.active.values()].filter(
 			(job) => job.connectorType === connectorType,
 		).length;
@@ -213,7 +216,7 @@ export class GenerationQueue {
 
 	private nextReady() {
 		for (const node of this.pending) {
-			const blocker = this.blockingDependency(node);
+			const [blocker] = this.blockingDependencies(node);
 			const runnable = !blocker && this.hasCapacity(node.job.connectorType);
 			const releasable = blocker && !this.snapshots.isActive(blocker[1].id);
 			if (runnable || releasable) return { node, blocker };
