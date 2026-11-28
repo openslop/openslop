@@ -6,9 +6,10 @@ import type { ModelRef } from "@/lib/connectors/types";
 import { agentTurnSchema, streamAgentTurn } from "./agent-turn";
 import { bodySchema, LLM_FIELDS } from "./generation-schema";
 import { withOwnedProject } from "./with-owned-project";
-import { badRequest } from "./response";
+import { badRequest, staleDeployment } from "./response";
 import { createSSEStreamResponse } from "./sse";
 import type { RouteFamily } from "./route-families";
+import { isFromOtherDeployment } from "@/lib/deployment/deployment-id";
 
 export const createLLMRouteHandler = <TPicked extends ModelRef>(
 	family: RouteFamily<TPicked>,
@@ -38,7 +39,9 @@ export const createAgentRouteHandler = <TPicked extends ModelRef>(
 	family.createHandler({
 		schema: agentTurnSchema(family.model("llm")),
 		label: "Sloppy turn",
-		handle: withOwnedProject(async ({ user, input }) => {
+		handle: withOwnedProject(async ({ user, input, request }) => {
+			// The browser checks and runs the tools this server offers, so both must be one deployment.
+			if (isFromOtherDeployment(request)) return staleDeployment();
 			const message = await parseSloppyMessage(input.message);
 			if (!message) return badRequest("message is not a Sloppy message");
 			return streamAgentTurn({

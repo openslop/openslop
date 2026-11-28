@@ -5,6 +5,9 @@ import { toastError } from "../toast-error";
 
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 
+const toastNewVersion = vi.hoisted(() => vi.fn());
+vi.mock("../deployment/new-version-toast", () => ({ toastNewVersion }));
+
 const errorToast = vi.mocked(toast.error);
 
 describe("toastError", () => {
@@ -51,6 +54,15 @@ describe("toastError", () => {
 			closeButton: true,
 			description: "Request iad1::abc-123",
 		});
+	});
+
+	it("offers a reload instead of an error when the route runs a newer deployment", () => {
+		toastError(
+			new ApiError("A new version is available", null, "stale_deployment"),
+			"Sloppy could not finish that",
+		);
+		expect(toastNewVersion).toHaveBeenCalledOnce();
+		expect(errorToast).not.toHaveBeenCalled();
 	});
 
 	it("lets caller options override the defaults", () => {

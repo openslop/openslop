@@ -3,7 +3,12 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ChatOnFinishCallback, ChatOnToolCallCallback } from "ai";
+import type {
+	ChatOnFinishCallback,
+	ChatOnToolCallCallback,
+	ChatTransport,
+} from "ai";
+import { DEPLOYMENT_HEADER } from "@/lib/deployment/deployment-id";
 import type { SloppyMessage } from "@/lib/agent/types";
 import type { ToolOutcome } from "@/lib/agent/tools/registry";
 import { SloppyProvider, useSloppy } from "../sloppy-provider";
@@ -18,15 +23,18 @@ const state = vi.hoisted(() => ({
 	runTool: vi.fn(),
 	onToolCall: undefined as ChatOnToolCallCallback<SloppyMessage> | undefined,
 	onFinish: undefined as ChatOnFinishCallback<SloppyMessage> | undefined,
+	transport: undefined as ChatTransport<SloppyMessage> | undefined,
 }));
 
 vi.mock("@ai-sdk/react", () => ({
 	useChat: (options: {
 		onToolCall: typeof state.onToolCall;
 		onFinish: typeof state.onFinish;
+		transport: typeof state.transport;
 	}) => {
 		state.onToolCall = options.onToolCall;
 		state.onFinish = options.onFinish;
+		state.transport = options.transport;
 		return {
 			messages: state.messages,
 			setMessages: state.setMessages,
@@ -229,5 +237,36 @@ describe("SloppyProvider loading", () => {
 		act(() => current().stop());
 
 		expect(current().loading).toBe(false);
+	});
+});
+
+describe("SloppyProvider requests", () => {
+	const sentHeaders = async () => {
+		const fetch = vi.fn(async () => new Response(new ReadableStream()));
+		vi.stubGlobal("fetch", fetch);
+		await state.transport?.sendMessages({
+			chatId: "chat-1",
+			messages: [asked],
+			abortSignal: undefined,
+			trigger: "submit-message",
+			messageId: undefined,
+		});
+		const [, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+		return new Headers(init.headers);
+	};
+
+	afterEach(() => {
+		delete document.documentElement.dataset.dplId;
+		vi.unstubAllGlobals();
+	});
+
+	it("names the page's deployment, so the agent route can refuse a stale tab", async () => {
+		document.documentElement.dataset.dplId = "dpl-1";
+
+		expect((await sentHeaders()).get(DEPLOYMENT_HEADER)).toBe("dpl-1");
+	});
+
+	it("names none when the page has no deployment (local dev)", async () => {
+		expect((await sentHeaders()).has(DEPLOYMENT_HEADER)).toBe(false);
 	});
 });

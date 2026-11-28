@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { toastError } from "@/lib/toast-error";
 import { onPageHidden } from "@/lib/components/on-page-hidden";
+import { holdReloadFor } from "@/lib/deployment/new-version-toast";
 import { createAutosaver, type Autosaver } from "@/lib/project/autosave";
 import type { ProjectDocument } from "@/lib/project/project-document";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
@@ -39,6 +40,8 @@ export function useAutosave(
 	useEffect(() => () => autosaver.flush(), [autosaver]);
 
 	useEffect(() => onPageHidden(autosaver.flush), [autosaver]);
+
+	useEffect(() => holdReloadFor(autosaver.settle), [autosaver]);
 
 	useEffect(() => store.subscribe(autosaver.schedule), [store, autosaver]);
 

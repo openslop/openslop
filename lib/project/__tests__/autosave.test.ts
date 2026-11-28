@@ -269,4 +269,57 @@ describe("createAutosaver", () => {
 		expect(onError).toHaveBeenCalledWith(boom);
 		expect(onSaved).not.toHaveBeenCalled();
 	});
+
+	describe("settle", () => {
+		it("saves a pending edit without waiting out the debounce", async () => {
+			const autosaver = build();
+			edit();
+			autosaver.schedule();
+
+			await expect(autosaver.settle()).resolves.toBe(true);
+			expect(saveProject).toHaveBeenCalledOnce();
+		});
+
+		it("waits for a save still in flight", async () => {
+			const save = Promise.withResolvers<void>();
+			saveProject.mockReturnValueOnce(save.promise);
+			const autosaver = build();
+			edit();
+			autosaver.schedule();
+
+			let settled = false;
+			const settling = autosaver.settle().then(() => (settled = true));
+			await vi.advanceTimersByTimeAsync(0);
+			expect(settled).toBe(false);
+
+			save.resolve();
+			await settling;
+			expect(settled).toBe(true);
+		});
+
+		it("reports an edit left unsaved when the save fails", async () => {
+			saveProject.mockRejectedValueOnce(new Error("offline"));
+			const autosaver = build();
+			edit();
+			autosaver.schedule();
+
+			await expect(autosaver.settle()).resolves.toBe(false);
+		});
+
+		it("retries an edit whose save failed", async () => {
+			saveProject.mockRejectedValueOnce(new Error("offline"));
+			const autosaver = build();
+			edit();
+			autosaver.schedule();
+			await expect(autosaver.settle()).resolves.toBe(false);
+
+			await expect(autosaver.settle()).resolves.toBe(true);
+			expect(saveProject).toHaveBeenCalledTimes(2);
+		});
+
+		it("has nothing to save for an untouched project", async () => {
+			await expect(build().settle()).resolves.toBe(true);
+			expect(saveProject).not.toHaveBeenCalled();
+		});
+	});
 });

@@ -2,6 +2,7 @@
 
 import { toast, type ExternalToast } from "sonner";
 import { ApiError } from "./clients/http";
+import { toastNewVersion } from "./deployment/new-version-toast";
 import { errorMessage } from "./errors";
 
 const requestIdLine = (error: unknown): string | undefined =>
@@ -23,6 +24,8 @@ export function toastError(
 	label?: string,
 	options?: ExternalToast,
 ): void {
+	if (error instanceof ApiError && error.code === "stale_deployment")
+		return toastNewVersion();
 	const message = errorMessage(error);
 	toast.error(label ? `${label}: ${message}` : message, {
 		...untilDismissed,

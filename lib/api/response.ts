@@ -21,6 +21,17 @@ export function unauthorized(message = "Unauthorized") {
 	return errorResponse({ error: message }, 401);
 }
 
+/** The client runs code from another deployment, so its requests may no longer fit the server. */
+export function staleDeployment() {
+	return errorResponse(
+		{
+			error: "A new version of OpenSlop is available. Reload to keep going.",
+			code: "stale_deployment",
+		},
+		409,
+	);
+}
+
 export function outOfBalance() {
 	return errorResponse(
 		{
