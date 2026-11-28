@@ -164,6 +164,17 @@ Usa OpenSlop en tu propio Mac, Windows o Linux. Tus proyectos y vídeos se queda
 - **[Plantillas](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime y más. Cada una siembra un estilo, sus personajes y una duración.
 - **[Mocks para desarrollo](../../.env.example)** — Deja sin definir la clave de un proveedor y sus llamadas devuelven resultados de prueba, así puedes construir sin pagar.
 
+## Agentes compatibles
+
+Tu propio agente de programación puede trabajar en OpenSlop por MCP, con su propio inicio de sesión: edita el proyecto que tienes abierto con las herramientas de Sloppy. Consulta [Agents](../agents.md).
+
+<p>
+  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
+  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
+  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
+  <a href="../agents.md"><kbd>+ cualquier cliente MCP</kbd></a>
+</p>
+
 ## Tecnologías
 
 | Capa           | Tecnología                                                                                                         |

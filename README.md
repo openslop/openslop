@@ -178,16 +178,14 @@ Bring your own accounts. A provider whose key is unset falls back to a mock, so 
 
 ## Supported agents
 
-Drive OpenSlop from your own coding agent over MCP (sign in, read and write the open project live):
+Your own coding agent can work in OpenSlop over MCP, on its own sign-in: it edits the project you have open with Sloppy's tools. See [Agents](docs/agents.md).
 
 <p>
   <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
   <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
   <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="docs/agents.md"><kbd>+ any MCP client, see docs/agents.md</kbd></a>
+  <a href="docs/agents.md"><kbd>+ any MCP client</kbd></a>
 </p>
-
-Any MCP client that supports remote HTTP servers with OAuth should work the same way. Connect to `https://app.openslop.ai/api/mcp` (or `http://localhost:3000/api/mcp` in local mode). See [docs/agents.md](docs/agents.md) for the connection snippets and how it works.
 
 ## Tech stack
 

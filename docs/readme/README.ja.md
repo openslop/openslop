@@ -164,6 +164,17 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 - **[テンプレート](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime など。それぞれがスタイル、キャラクター、長さの種になります。
 - **[開発用のモック](../../.env.example)** — プロバイダーのキーを未設定のままにすると、その呼び出しは用意された結果に切り替わるので、お金をかけずに開発できます。
 
+## 対応エージェント
+
+自分のコーディングエージェントが、そのエージェント自身のサインインのまま MCP で OpenSlop を操作できます。開いているプロジェクトを Sloppy のツールで編集します。詳しくは [Agents](../agents.md) を参照してください。
+
+<p>
+  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
+  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
+  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
+  <a href="../agents.md"><kbd>+ MCP クライアントなら何でも</kbd></a>
+</p>
+
 ## 技術スタック
 
 | レイヤー       | 技術                                                                                                         |
