@@ -19,7 +19,7 @@ export const pageDeploymentId = (): string | null =>
 export const isOtherDeployment = (
 	own: string | null,
 	other: string | null,
-): other is string => Boolean(own && other && own !== other);
+): boolean => Boolean(own && other && own !== other);
 
 export const isFromOtherDeployment = (request: Request): boolean =>
 	isOtherDeployment(

@@ -22,7 +22,6 @@ const latestDeployment = () =>
 		},
 	);
 
-/** Offers a reload when the server runs a newer deployment than this tab; off when the page has none (local dev). */
 export function NewVersionWatcher() {
 	useEffect(() => {
 		const own = pageDeploymentId();

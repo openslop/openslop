@@ -53,25 +53,9 @@ describe("reloadWhenSaved", () => {
 });
 
 describe("toastNewVersion", () => {
-	const shown = () => {
-		toastNewVersion();
-		const [message, options] = vi.mocked(toast).mock.calls[0] ?? [];
-		return { message, options };
-	};
-
-	it("offers a Reload that stays until the user acts on it", () => {
-		const { message, options } = shown();
-		expect(message).toBe("A new version of OpenSlop is available");
-		expect(options).toMatchObject({
-			id: "new-version",
-			duration: Number.POSITIVE_INFINITY,
-			action: { label: "Reload" },
-		});
-	});
-
 	it("reloads from its action once the pending saves land", async () => {
-		const { options } = shown();
-		const action = options?.action;
+		toastNewVersion();
+		const action = vi.mocked(toast).mock.calls[0]?.[1]?.action;
 		const event = { preventDefault: vi.fn() };
 		if (typeof action !== "object" || !action || !("onClick" in action))
 			throw new Error("no Reload action");

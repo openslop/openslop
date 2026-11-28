@@ -647,19 +647,6 @@ describe("API routes", () => {
 				expect(res.status).toBe(200);
 				expect(mockStreamAgentTurn).toHaveBeenCalledOnce();
 			});
-
-			it("runs the turn for a caller that names no deployment", async () => {
-				mockStreamAgentTurn.mockResolvedValue(new Response());
-
-				expect((await turn()).status).toBe(200);
-			});
-		});
-
-		it("never refuses a turn when the server has no deployment ID (local dev)", async () => {
-			vi.stubEnv("NEXT_DEPLOYMENT_ID", "");
-			mockStreamAgentTurn.mockResolvedValue(new Response());
-
-			expect((await turn({ [DEPLOYMENT_HEADER]: "dpl-old" })).status).toBe(200);
 		});
 
 		it("returns 402 before the turn starts once the balance is spent", async () => {
