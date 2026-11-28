@@ -29,6 +29,7 @@ export function AgentBridge() {
 
 	const run = useEffectEvent(async (call: BridgeCall) => {
 		openWorkspace();
+		// write_script puts its text on the canvas as the input streams in; MCP calls arrive whole, so write it here.
 		writeToolInputText(
 			SCRIPT_STREAM_FIELDS,
 			() => createScriptSink(editor),
