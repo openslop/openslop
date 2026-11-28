@@ -202,6 +202,76 @@ Como o código está organizado e como suas camadas se encaixam: [`ARCHITECTURE.
 | `npm run db:push`         | Envia as migrações para o seu projeto Supabase vinculado |
 | `npm run remotion:studio` | Abre o Remotion Studio                                   |
 
+<details>
+<summary><strong>Perguntas frequentes</strong></summary>
+<br />
+
+<details>
+<summary>O OpenSlop é gratuito?</summary>
+<br />
+
+Sim. É open source sob a [licença Apache 2.0](../../LICENSE). Online, os modelos hospedados vêm com sua conta. No modo local, você usa suas próprias chaves de IA.
+
+</details>
+
+<details>
+<summary>Preciso de convite?</summary>
+<br />
+
+Só para o app online. O [modo local](local-mode.pt.md) roda hoje no seu próprio Mac, Windows ou Linux.
+
+</details>
+
+<details>
+<summary>Quais modelos de IA posso usar?</summary>
+<br />
+
+Imagens e vídeo da Runware, vozes da Cartesia, música e efeitos sonoros da ElevenLabs, e Claude da Anthropic para escrever. Você escolhe o modelo de cada card.
+
+</details>
+
+<details>
+<summary>Posso usar um roteiro que já tenho?</summary>
+<br />
+
+Sim. Cole na caixa de texto em vez de uma ideia de uma linha.
+
+</details>
+
+<details>
+<summary>Onde ficam meus projetos e vídeos?</summary>
+<br />
+
+Online, na nuvem com sua conta. No modo local, no seu computador, e só seus pedidos aos serviços de IA vão para a internet.
+
+</details>
+
+<details>
+<summary>Como pego o vídeo pronto?</summary>
+<br />
+
+Clique em **Export** para um MP4 de até 4K. Ele é renderizado na nuvem online, ou no seu computador no modo local.
+
+</details>
+
+<details>
+<summary>E se eu mudar um prompt depois de gerar?</summary>
+<br />
+
+O card mostra **Stale** e o motivo, para você saber o que gerar de novo.
+
+</details>
+
+<details>
+<summary>Onde consigo ajuda?</summary>
+<br />
+
+Pergunte no [Discord](https://discord.gg/zeP5482ced) ou mande um e-mail para [hi@openslop.ai](mailto:hi@openslop.ai).
+
+</details>
+
+</details>
+
 ## Contribuindo
 
 Contribuições são bem-vindas. Veja [`CONTRIBUTING.md`](../../CONTRIBUTING.md) para a configuração, a sequência de verificações e o que procuramos em um PR.

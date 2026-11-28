@@ -202,6 +202,76 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 | `npm run db:push`         | 마이그레이션을 연결된 Supabase 프로젝트에 푸시 |
 | `npm run remotion:studio` | Remotion Studio 열기                           |
 
+<details>
+<summary><strong>자주 묻는 질문</strong></summary>
+<br />
+
+<details>
+<summary>OpenSlop은 무료인가요?</summary>
+<br />
+
+네. [Apache 2.0 라이선스](../../LICENSE)의 오픈 소스입니다. 온라인에서는 호스팅 모델이 계정에 포함되고, 로컬 모드에서는 내 AI 키를 씁니다.
+
+</details>
+
+<details>
+<summary>초대가 필요한가요?</summary>
+<br />
+
+온라인 앱만 필요합니다. [로컬 모드](local-mode.ko.md)는 지금 바로 내 Mac, Windows, Linux에서 실행됩니다.
+
+</details>
+
+<details>
+<summary>어떤 AI 모델을 쓸 수 있나요?</summary>
+<br />
+
+이미지와 동영상은 Runware, 음성은 Cartesia, 음악과 효과음은 ElevenLabs, 글쓰기는 Anthropic의 Claude입니다. 카드마다 모델을 고를 수 있습니다.
+
+</details>
+
+<details>
+<summary>가지고 있는 대본을 쓸 수 있나요?</summary>
+<br />
+
+네. 한 줄 아이디어 대신 입력창에 붙여 넣으세요.
+
+</details>
+
+<details>
+<summary>프로젝트와 동영상은 어디에 저장되나요?</summary>
+<br />
+
+온라인에서는 내 계정의 클라우드에, 로컬 모드에서는 이 컴퓨터에 저장됩니다. 인터넷으로 나가는 건 AI 서비스 요청뿐입니다.
+
+</details>
+
+<details>
+<summary>완성된 동영상은 어떻게 받나요?</summary>
+<br />
+
+**Export**를 누르면 최대 4K MP4로 내보냅니다. 온라인에서는 클라우드에서, 로컬 모드에서는 이 컴퓨터에서 렌더링합니다.
+
+</details>
+
+<details>
+<summary>생성한 뒤 프롬프트를 바꾸면요?</summary>
+<br />
+
+카드에 **Stale**과 이유가 표시되어 무엇을 다시 생성할지 알 수 있습니다.
+
+</details>
+
+<details>
+<summary>도움은 어디서 받나요?</summary>
+<br />
+
+[Discord](https://discord.gg/zeP5482ced)에서 묻거나 [hi@openslop.ai](mailto:hi@openslop.ai)로 메일을 보내세요.
+
+</details>
+
+</details>
+
 ## 기여하기
 
 기여를 환영합니다. 설정, 검사 순서, PR에서 우리가 보는 것은 [`CONTRIBUTING.md`](../../CONTRIBUTING.md)를 보세요.

@@ -202,6 +202,76 @@ L'organisation du code et la façon dont ses couches s'articulent : [`ARCHITECTU
 | `npm run db:push`         | Pousse les migrations vers votre projet Supabase lié |
 | `npm run remotion:studio` | Ouvre Remotion Studio                                |
 
+<details>
+<summary><strong>FAQ</strong></summary>
+<br />
+
+<details>
+<summary>OpenSlop est-il gratuit ?</summary>
+<br />
+
+Oui. Il est open source sous [licence Apache 2.0](../../LICENSE). En ligne, les modèles hébergés sont inclus avec votre compte. En mode local, vous utilisez vos propres clés d'IA.
+
+</details>
+
+<details>
+<summary>Faut-il une invitation ?</summary>
+<br />
+
+Seulement pour l'application en ligne. Le [mode local](local-mode.fr.md) fonctionne dès aujourd'hui sur votre Mac, Windows ou Linux.
+
+</details>
+
+<details>
+<summary>Quels modèles d'IA puis-je utiliser ?</summary>
+<br />
+
+Images et vidéo de Runware, voix de Cartesia, musique et effets sonores d'ElevenLabs, et Claude d'Anthropic pour l'écriture. Vous choisissez le modèle de chaque carte.
+
+</details>
+
+<details>
+<summary>Puis-je utiliser un script que j'ai déjà ?</summary>
+<br />
+
+Oui. Collez-le dans la zone de saisie au lieu d'une idée en une ligne.
+
+</details>
+
+<details>
+<summary>Où sont stockés mes projets et vidéos ?</summary>
+<br />
+
+En ligne, dans le cloud avec votre compte. En mode local, sur votre ordinateur, et seules vos requêtes aux services d'IA passent par internet.
+
+</details>
+
+<details>
+<summary>Comment récupérer la vidéo finie ?</summary>
+<br />
+
+Cliquez sur **Export** pour un MP4 jusqu'en 4K. Le rendu se fait dans le cloud en ligne, ou sur votre ordinateur en mode local.
+
+</details>
+
+<details>
+<summary>Et si je modifie un prompt après la génération ?</summary>
+<br />
+
+La carte affiche **Stale** et la raison, pour savoir quoi régénérer.
+
+</details>
+
+<details>
+<summary>Où trouver de l'aide ?</summary>
+<br />
+
+Demandez sur [Discord](https://discord.gg/zeP5482ced) ou écrivez à [hi@openslop.ai](mailto:hi@openslop.ai).
+
+</details>
+
+</details>
+
 ## Contribuer
 
 Les contributions sont les bienvenues. Voir [`CONTRIBUTING.md`](../../CONTRIBUTING.md) pour l'installation, la séquence de vérifications, et ce que nous attendons d'une PR.
