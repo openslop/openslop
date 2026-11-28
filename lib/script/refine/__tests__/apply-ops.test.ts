@@ -133,6 +133,28 @@ describe("applyRefineOp — insert", () => {
 		expect(getContentTexts(editor)).toEqual(["hello"]);
 	});
 
+	it("checks a new element's values against the project's default model", () => {
+		const editor = makeEditor([scene([content("speech", "n1", "hello")])], {
+			video: { provider: "runware", model: "Kling 4 Omni" },
+		});
+
+		const result = applyRefineOp(editor, {
+			op: "insert",
+			elements: [
+				{ type: "video", text: "a city", attrs: { resolution: "1080p" } },
+			],
+		});
+
+		expect(result.ok).toBe(true);
+		const [video] = contentElements(editor).filter(
+			({ type }) => type === "video",
+		);
+		expect(flatAttributes(video)).toMatchObject({
+			model: "Kling 4 Omni",
+			resolution: "1080p",
+		});
+	});
+
 	it("reports every problem across an insert's elements at once", () => {
 		const editor = makeEditor([scene([content("speech", "n1", "hello")])]);
 

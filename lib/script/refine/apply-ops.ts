@@ -10,6 +10,7 @@ import {
 	withAttrs,
 } from "@/lib/canvas/editor-ops";
 import { isAssetElement, isContentElement } from "@/lib/canvas/guards";
+import { newElementModel } from "@/lib/canvas/create-canvas-element";
 import { insertElement } from "@/lib/canvas/insert-element";
 import { isScene } from "@/lib/canvas/scenes";
 import type { AssetType, ElementType } from "@/lib/canvas/types";
@@ -104,9 +105,13 @@ function resolveInsertPath(
 	return op.position === "before" ? entry[1] : Path.next(entry[1]);
 }
 
-function elementProblems({ type, attrs, text }: NewElement): string[] {
+function elementProblems(
+	editor: Editor,
+	{ type, attrs, text }: NewElement,
+): string[] {
+	const model = newElementModel(type, attrs, editor.defaultModels());
 	return [
-		unofferedAttributes(type, attrs ?? {}),
+		unofferedAttributes(type, attrs ?? {}, model),
 		text?.trim() ? undefined : `${type} needs text`,
 	].filter((problem) => problem !== undefined);
 }
@@ -115,7 +120,9 @@ function applyInsert(
 	editor: Editor,
 	op: Extract<RefineOp, { op: "insert" }>,
 ): RefineOpResult {
-	const problems = op.elements.flatMap(elementProblems);
+	const problems = op.elements.flatMap((element) =>
+		elementProblems(editor, element),
+	);
 	if (problems.length > 0)
 		return { ok: false, reason: `insert: ${problems.join("; ")}` };
 
