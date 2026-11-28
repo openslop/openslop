@@ -196,6 +196,76 @@ Cómo está organizado el código y cómo encajan sus capas: [`ARCHITECTURE.md`]
 | `npm run db:push`         | Sube las migraciones a tu proyecto de Supabase vinculado |
 | `npm run remotion:studio` | Abre Remotion Studio                                     |
 
+<details>
+<summary><strong>Preguntas frecuentes</strong></summary>
+<br />
+
+<details>
+<summary>¿OpenSlop es gratis?</summary>
+<br />
+
+Sí. Es de código abierto con la [licencia Apache 2.0](../../LICENSE). En línea, los modelos alojados vienen con tu cuenta. En modo local, usas tus propias claves de IA.
+
+</details>
+
+<details>
+<summary>¿Necesito una invitación?</summary>
+<br />
+
+Solo para la app en línea. El [modo local](local-mode.es.md) funciona hoy en tu propio Mac, Windows o Linux.
+
+</details>
+
+<details>
+<summary>¿Qué modelos de IA puedo usar?</summary>
+<br />
+
+Imágenes y vídeo de Runware, voces de Cartesia, música y efectos de sonido de ElevenLabs, y Claude de Anthropic para escribir. Eliges el modelo de cada tarjeta.
+
+</details>
+
+<details>
+<summary>¿Puedo usar un guion que ya tengo?</summary>
+<br />
+
+Sí. Pégalo en el cuadro de texto en lugar de una idea de una línea.
+
+</details>
+
+<details>
+<summary>¿Dónde se guardan mis proyectos y vídeos?</summary>
+<br />
+
+En línea, en la nube con tu cuenta. En modo local, en tu computadora, y solo tus peticiones a los servicios de IA salen a internet.
+
+</details>
+
+<details>
+<summary>¿Cómo obtengo el vídeo terminado?</summary>
+<br />
+
+Haz clic en **Export** para un MP4 de hasta 4K. Se renderiza en la nube en línea, o en tu computadora en modo local.
+
+</details>
+
+<details>
+<summary>¿Y si cambio un prompt después de generar?</summary>
+<br />
+
+La tarjeta dice **Stale** y por qué, así sabes qué volver a generar.
+
+</details>
+
+<details>
+<summary>¿Dónde consigo ayuda?</summary>
+<br />
+
+Pregunta en [Discord](https://discord.gg/zeP5482ced) o escribe a [hi@openslop.ai](mailto:hi@openslop.ai).
+
+</details>
+
+</details>
+
 ## Contribuir
 
 Las contribuciones son bienvenidas. Mira [`CONTRIBUTING.md`](../../CONTRIBUTING.md) para la instalación, la secuencia de comprobaciones y lo que buscamos en un PR.

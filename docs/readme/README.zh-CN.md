@@ -196,6 +196,76 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 | `npm run db:push`         | 把迁移推送到已关联的 Supabase 项目 |
 | `npm run remotion:studio` | 打开 Remotion Studio               |
 
+<details>
+<summary><strong>常见问题</strong></summary>
+<br />
+
+<details>
+<summary>OpenSlop 免费吗？</summary>
+<br />
+
+是的。它以 [Apache 2.0 许可证](../../LICENSE)开源。在线版的托管模型随账户提供，本地模式用你自己的 AI 密钥。
+
+</details>
+
+<details>
+<summary>需要邀请吗？</summary>
+<br />
+
+只有在线版需要。[本地模式](local-mode.zh-CN.md)现在就能在你自己的 Mac、Windows 或 Linux 上运行。
+
+</details>
+
+<details>
+<summary>能用哪些 AI 模型？</summary>
+<br />
+
+图片和视频来自 Runware，语音来自 Cartesia，音乐和音效来自 ElevenLabs，写作用 Anthropic 的 Claude。每张卡片都能选模型。
+
+</details>
+
+<details>
+<summary>能用我已有的剧本吗？</summary>
+<br />
+
+能。把它粘贴到输入框里，代替一句话的创意。
+
+</details>
+
+<details>
+<summary>项目和视频存在哪里？</summary>
+<br />
+
+在线版存在你账户的云端，本地模式存在你的电脑上，只有发给 AI 服务的请求会联网。
+
+</details>
+
+<details>
+<summary>怎么拿到成片？</summary>
+<br />
+
+点击 **Export**，导出最高 4K 的 MP4。在线版在云端渲染，本地模式在你的电脑上渲染。
+
+</details>
+
+<details>
+<summary>生成后改了提示词会怎样？</summary>
+<br />
+
+卡片会显示 **Stale** 和原因，你就知道该重新生成什么。
+
+</details>
+
+<details>
+<summary>去哪里求助？</summary>
+<br />
+
+在 [Discord](https://discord.gg/zeP5482ced) 提问，或发邮件到 [hi@openslop.ai](mailto:hi@openslop.ai)。
+
+</details>
+
+</details>
+
 ## 参与贡献
 
 欢迎贡献。安装步骤、检查顺序，以及我们在 PR 里看重什么，见 [`CONTRIBUTING.md`](../../CONTRIBUTING.md)。

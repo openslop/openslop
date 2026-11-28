@@ -207,6 +207,76 @@ How the code is laid out and how its layers fit together: [`ARCHITECTURE.md`](AR
 | `npm run db:push`         | Push migrations to your linked Supabase project |
 | `npm run remotion:studio` | Open Remotion Studio                            |
 
+<details>
+<summary><strong>FAQ</strong></summary>
+<br />
+
+<details>
+<summary>Is OpenSlop free?</summary>
+<br />
+
+Yes. It's open source under the [Apache 2.0 license](LICENSE). Online, hosted models come with your account. In local mode, you use your own AI keys.
+
+</details>
+
+<details>
+<summary>Do I need an invite?</summary>
+<br />
+
+Only for the online app. [Local mode](docs/local-mode.md) runs on your own Mac, Windows or Linux computer today.
+
+</details>
+
+<details>
+<summary>Which AI models can I use?</summary>
+<br />
+
+Images and video from Runware, voices from Cartesia, music and sound effects from ElevenLabs, and Claude from Anthropic for writing. You pick the model for each card.
+
+</details>
+
+<details>
+<summary>Can I use a script I already have?</summary>
+<br />
+
+Yes. Paste it into the prompt box instead of a one-line idea.
+
+</details>
+
+<details>
+<summary>Where are my projects and videos stored?</summary>
+<br />
+
+Online, in the cloud with your account. In local mode, on your computer, and only your requests to AI services go online.
+
+</details>
+
+<details>
+<summary>How do I get the finished video?</summary>
+<br />
+
+Click **Export** for an MP4 up to 4K. It renders in the cloud online, or on your computer in local mode.
+
+</details>
+
+<details>
+<summary>What if I change a prompt after generating?</summary>
+<br />
+
+The card says **Stale** and why, so you know what to generate again.
+
+</details>
+
+<details>
+<summary>Where can I get help?</summary>
+<br />
+
+Ask on [Discord](https://discord.gg/zeP5482ced) or email [hi@openslop.ai](mailto:hi@openslop.ai).
+
+</details>
+
+</details>
+
 ## Contributing
 
 Contributions welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, the check sequence, and what we look for in a PR.

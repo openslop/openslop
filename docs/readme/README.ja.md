@@ -196,6 +196,76 @@ Generate all（すべて生成）は、すべての要素をキューに入れ�
 | `npm run db:push`         | マイグレーションをリンク済みの Supabase プロジェクトに push |
 | `npm run remotion:studio` | Remotion Studio を開く                                      |
 
+<details>
+<summary><strong>よくある質問</strong></summary>
+<br />
+
+<details>
+<summary>OpenSlop は無料ですか？</summary>
+<br />
+
+はい。[Apache 2.0 ライセンス](../../LICENSE)のオープンソースです。オンラインではホスト型モデルがアカウントに付いてきます。ローカルモードでは自分の AI キーを使います。
+
+</details>
+
+<details>
+<summary>招待は必要ですか？</summary>
+<br />
+
+オンライン版だけです。[ローカルモード](local-mode.ja.md)なら、今すぐ自分の Mac、Windows、Linux で使えます。
+
+</details>
+
+<details>
+<summary>どの AI モデルを使えますか？</summary>
+<br />
+
+画像と動画は Runware、音声は Cartesia、音楽と効果音は ElevenLabs、執筆は Anthropic の Claude です。モデルはカードごとに選べます。
+
+</details>
+
+<details>
+<summary>手持ちの台本は使えますか？</summary>
+<br />
+
+はい。一行のアイデアの代わりに、入力欄に貼り付けてください。
+
+</details>
+
+<details>
+<summary>プロジェクトと動画はどこに保存されますか？</summary>
+<br />
+
+オンラインではアカウントのクラウドに、ローカルモードではこのパソコンに保存されます。ネットに出るのは AI サービスへのリクエストだけです。
+
+</details>
+
+<details>
+<summary>完成した動画はどう受け取りますか？</summary>
+<br />
+
+**Export** をクリックすると最大 4K の MP4 を書き出します。オンラインではクラウドで、ローカルモードではこのパソコンでレンダリングします。
+
+</details>
+
+<details>
+<summary>生成後にプロンプトを変えたらどうなりますか？</summary>
+<br />
+
+カードに **Stale** とその理由が出るので、何を生成し直せばいいかわかります。
+
+</details>
+
+<details>
+<summary>困ったときは？</summary>
+<br />
+
+[Discord](https://discord.gg/zeP5482ced) で聞くか、[hi@openslop.ai](mailto:hi@openslop.ai) にメールしてください。
+
+</details>
+
+</details>
+
 ## コントリビュート
 
 コントリビューション歓迎です。セットアップ、チェックの順番、PR で見ているポイントは [`CONTRIBUTING.md`](../../CONTRIBUTING.md) を見てください。
