@@ -175,17 +175,8 @@ class Hero(F.Card):
 
     # ---- surfaces
     def grain(self, x, y, w, h, rx=12, cls="", opacity=0.26):
-        """The app's .grain: public/grain.png tiled at 50px over a raised surface."""
-        if "grainp" not in self._images:
-            self._images.add("grainp")
-            from PIL import Image
-
-            img = Image.open(ROOT / "public" / "grain.png")
-            buf = io.BytesIO()
-            img.save(buf, "PNG", optimize=True)
-            href = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
-            self.defs.append(f'<pattern id="grainp" width="25" height="25" patternUnits="userSpaceOnUse"><image width="25" height="25" href="{href}"/></pattern>')
-        self.raw(self.wrap(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="url(#grainp)" opacity="{opacity}"/>', cls))
+        """The app's .grain over a raised surface."""
+        self.raw(self.wrap(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="url(#{self.grain_texture()})" opacity="{opacity}"/>', cls))
 
     def photo(self, key, x, y, w, h, rx=6, cls="", width=400):
         uid = "ph-" + key.replace("/", "-")
@@ -362,44 +353,12 @@ def plan():
 # =====================================================================================
 # Drawing
 # =====================================================================================
-def light_rays(c):
-    """<LightRays />: five skewed berry bands from the top-left, masked to a corner glow, grained."""
-    t = c.t
-    rays = [
-        [(0, 0), (20, 1), (36, 0), (55, 1), (67, 0.13), (78, 1), (97, 0)],
-        [(11, 0), (25, 1), (41, 0.55), (67, 0.13), (78, 1), (97, 0)],
-        [(9, 0), (20, 1), (28, 0.55), (40, 0.42), (48, 1), (54, 0.27), (78, 0.13), (88, 1), (97, 0)],
-        [(0, 0), (17, 1), (26, 0.55), (35, 1), (47, 0), (69, 0.13), (79, 1), (97, 0)],
-        [(0, 0), (20, 1), (27, 0.55), (42, 1), (48, 0), (67, 0.13), (74, 1), (82, 1), (88, 0.47), (97, 0)],
-    ]
-    W, H = 640, 360
-    c.defs.append(
-        f'<radialGradient id="rays-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="{W * 1.1}" gradientTransform="scale(1,{H / W * 1.6:.3f})">'
-        '<stop offset="0" stop-color="#fff"/><stop offset=".88" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
-        f'<mask id="rays-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}"><rect width="{W}" height="{H}" fill="url(#rays-fade)"/></mask>'
-        f'<linearGradient id="rays-v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e4b5d4"/><stop offset="1" stop-color="#e4b5d4" stop-opacity="0"/></linearGradient>'
-        f'<radialGradient id="rays-card" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="{W}"><stop offset="0" stop-color="{t["card"]}"/><stop offset=".7" stop-color="{t["card"]}" stop-opacity="0"/></radialGradient>'
-    )
-    out = [f'<g mask="url(#rays-mask)"><rect width="{W}" height="{H}" fill="url(#rays-card)"/>']
-    for i, stops in enumerate(rays):
-        gid = f"ray{i}"
-        st = "".join(f'<stop offset="{o}%" stop-color="#fff" stop-opacity="{a}"/>' for o, a in stops)
-        c.defs.append(
-            f'<linearGradient id="{gid}g" gradientUnits="userSpaceOnUse" x1="{-0.4 * W}" y1="0" x2="{1.4 * W}" y2="0">{st}</linearGradient>'
-            f'<mask id="{gid}" maskUnits="userSpaceOnUse" x="{-0.4 * W}" y="0" width="{1.8 * W}" height="{H}"><rect x="{-0.4 * W}" width="{1.8 * W}" height="{H}" fill="url(#{gid}g)"/></mask>'
-        )
-        out.append(f'<g transform="translate(0,{H / 2}) skewX(45) translate(0,{-H / 2})"><rect x="{-0.4 * W}" width="{1.8 * W}" height="{H}" fill="url(#rays-v)" mask="url(#{gid})" opacity=".22"/></g>')
-    out.append("</g>")
-    c.raw("".join(out))
-    c.grain(0, 0, W, H, 0, opacity=0.2)
-
-
 GREETINGS = ["What slop today, boss?", "Evening slop session, boss?", "3am slop hits different.", "Time to cook absolute slop, boss."]
 
 
 def composer(c, timeline):
     t = c.t
-    light_rays(c)
+    c.light_rays()
     # headline: <RobotFill /> + greeting in the serif hero size
     for k, greet in enumerate(GREETINGS[: len(timeline)]):
         t0 = timeline[k]["t"] if k else 0

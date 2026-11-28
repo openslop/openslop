@@ -524,6 +524,53 @@ class Card:
         op = 0.26 if self.theme == "dark" else 0.2
         self.raw(self.wrap(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="url(#grainp)" opacity="{op}"/>', cls))
 
+    def grain_texture(self):
+        """public/grain.png, the app's .grain, tiled at 50 app pixels. Returns its pattern id."""
+        if "graintex" not in self._images:
+            self._images.add("graintex")
+            import base64
+            import io
+
+            from PIL import Image
+
+            buf = io.BytesIO()
+            Image.open(ROOT / "public" / "grain.png").save(buf, "PNG", optimize=True)
+            href = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+            self.defs.append(f'<pattern id="graintex" width="25" height="25" patternUnits="userSpaceOnUse"><image width="25" height="25" href="{href}"/></pattern>')
+        return "graintex"
+
+    # .light-rays > span:nth-child(n) in app/globals.css, as (offset %, alpha) stops of each --ray
+    RAYS = [
+        [(0, 0), (20, 1), (36, 0), (55, 1), (67, 0.13), (78, 1), (97, 0)],
+        [(11, 0), (25, 1), (41, 0.55), (67, 0.13), (78, 1), (97, 0)],
+        [(9, 0), (20, 1), (28, 0.55), (40, 0.42), (48, 1), (54, 0.27), (78, 0.13), (88, 1), (97, 0)],
+        [(0, 0), (17, 1), (26, 0.55), (35, 1), (47, 0), (69, 0.13), (79, 1), (97, 0)],
+        [(0, 0), (20, 1), (27, 0.55), (42, 1), (48, 0), (67, 0.13), (74, 1), (82, 1), (88, 0.47), (97, 0)],
+    ]
+
+    def light_rays(self):
+        """<LightRays /> as .light-rays draws it: a card-colored corner glow and five skewed ambient bands,
+        with the grain overlaid, all masked to an ellipse from the top-left."""
+        t = self.t
+        self.defs.append(
+            f'<radialGradient id="rays-fade" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="{W * 1.25}" gradientTransform="scale(1,{H / (W * 1.25):.4f})">'
+            '<stop offset="0" stop-color="#fff"/><stop offset=".88" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'
+            f'<mask id="rays-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}"><rect width="{W}" height="{H}" fill="url(#rays-fade)"/></mask>'
+            f'<radialGradient id="rays-card" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="{W}" gradientTransform="scale(1,{H / W:.4f})"><stop offset="0" stop-color="{t["card"]}"/><stop offset=".7" stop-color="{t["card"]}" stop-opacity="0"/></radialGradient>'
+            f'<linearGradient id="rays-v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{t["glow"]}"/><stop offset="1" stop-color="{t["glow"]}" stop-opacity="0"/></linearGradient>'
+        )
+        out = [f'<g mask="url(#rays-mask)" style="isolation:isolate"><rect width="{W}" height="{H}" fill="url(#rays-card)"/>']
+        for i, stops in enumerate(self.RAYS):
+            st = "".join(f'<stop offset="{o}%" stop-color="#fff" stop-opacity="{a}"/>' for o, a in stops)
+            self.defs.append(
+                f'<linearGradient id="ray{i}g" gradientUnits="userSpaceOnUse" x1="{-0.4 * W}" y1="0" x2="{1.4 * W}" y2="0">{st}</linearGradient>'
+                f'<mask id="ray{i}" maskUnits="userSpaceOnUse" x="{-0.4 * W}" y="0" width="{1.8 * W}" height="{H}"><rect x="{-0.4 * W}" width="{1.8 * W}" height="{H}" fill="url(#ray{i}g)"/></mask>'
+            )
+            out.append(f'<g transform="translate(0,{H / 2}) skewX(45) translate(0,{-H / 2})"><rect x="{-0.4 * W}" width="{1.8 * W}" height="{H}" fill="url(#rays-v)" mask="url(#ray{i})" opacity=".22"/></g>')
+        grain = 0.9 if self.theme == "dark" else 1
+        out.append(f'<rect width="{W}" height="{H}" fill="url(#{self.grain_texture()})" opacity="{grain}" style="mix-blend-mode:overlay"/></g>')
+        self.raw("".join(out))
+
     # ---- chrome shared by the cards
     def bg(self):
         t = self.t
@@ -558,6 +605,7 @@ def card_describe(theme):
     c = Card("describe", "Describe your video", "Sloppy greets you over the composer, the lightbulb suggests ideas, the user types one line, and Sloppy takes it from there.", 13, theme)
     t = c.t
     c.bg()
+    c.light_rays()
     greeting = "What slop today, boss?"
     gw = tw(greeting, 34) * 0.86 + 40
     gx = W / 2 - gw / 2
@@ -1782,11 +1830,126 @@ def card_step_keys(theme):
     c.write()
 
 
+def card_agents_mcp(theme):
+    c = Card("agents-mcp", "Your agent drives OpenSlop over MCP", "OpenSlop is added to Claude Code as an MCP server and allowed in the browser. A prompt in the terminal makes tool calls that travel over MCP into the open project: a title, then a script of speech, image and video. Generate renders the image and the video.", 16, theme)
+    t = c.t
+    c.bg()
+    TOP, HT = 20, 276
+
+    # the agent, in its own terminal
+    TX, TW = 20, 214
+    window(c, TX, TOP, TW, HT, "Claude Code", "terminal")
+    LX, FS, LH = TX + 14, 8.5, 18
+    col = lambda s: LX + tw(s, FS, family=MONO) * 1.06
+    y = TOP + 46
+    c.text(LX, y, "$", FS, t["muted"], family=MONO)
+    c.typewriter(col("$ "), y, "claude mcp add --transport http \\", 0.3, 1.2, FS, t["fg"], family=MONO)
+    c.typewriter(col("$ "), y + LH, "openslop app.openslop.ai/api/mcp", 1.2, 2.0, FS, t["fg"], family=MONO)
+    added = c.appear(2.2, dy=3)
+    c.text(LX, y + 2 * LH, "\u2713", FS, t["success"], family=MONO, cls=added)
+    c.text(col("\u2713 "), y + 2 * LH, "Added openslop", FS, t["fg"], family=MONO, cls=added)
+    y += 3 * LH + 16
+    asked = c.appear(5.3, dy=0)
+    c.text(LX, y, ">", FS, t["accent"], family=MONO, weight=600, cls=asked)
+    c.typewriter(col("> "), y, "A neon street race in Tokyo,", 5.4, 6.4, FS, t["fg"], family=MONO, cls=asked)
+    c.typewriter(col("> "), y + LH, "45 seconds", 6.4, 6.8, FS, t["fg"], family=MONO, cls=asked)
+    y += 2 * LH + 14
+    calls = (("set_title", 7.4), ("write_script", 8.4))
+    for i, (tool, at) in enumerate(calls):
+        cl = c.appear(at, dy=3)
+        c.raw(c.wrap(f'<circle cx="{LX + 3}" cy="{y + i * LH - 3}" r="2.5" fill="{t["accent"]}"/>', cl))
+        c.text(LX + 12, y + i * LH, f"openslop \u00b7 {tool}", FS, t["fg"], family=MONO, cls=cl)
+    reply = c.appear(9.8, dy=3)
+    c.text(LX, y + 2 * LH + 12, "Script's in, boss. Hit Generate", FS, t["muted"], family=MONO, cls=reply)
+    c.text(LX, y + 3 * LH + 12, "when you're ready.", FS, t["muted"], family=MONO, cls=reply)
+
+    # OpenSlop, open in the browser
+    BX, BW = 342, 278
+    top, clip = browser(c, BX, TOP, BW, HT, "app.openslop.ai", t["elcard"])
+    PX, PW = BX + 14, BW - 28
+    c.raw(f'<g clip-path="url(#{clip})">')
+
+    consent = c.span(2.4, 5.0, fade=0.2)
+    c.raw(f'<g class="{consent}">')
+    CY = top + 40
+    c.icon("mcp", BX + BW / 2 - 14, CY, 28, t["fg"])
+    c.text(BX + BW / 2, CY + 52, "Connect Claude Code", 14, t["fg"], weight=500, anchor="middle")
+    c.text(BX + BW / 2, CY + 70, "It will work in OpenSlop as you.", 9, t["muted"], anchor="middle")
+    bx_, bw_ = BX + 40, BW - 80
+    c.rect(bx_, CY + 90, bw_, 26, t["accent"], rx=6)
+    c.rect(bx_, CY + 90, bw_, 26, "#000000", rx=6, opacity=0.15, cls=c.span(4.3, 4.6, fade=0.05))
+    c.text(BX + BW / 2, CY + 107, "Allow", 10, t["accentfg"], weight=500, anchor="middle")
+    c.rect(bx_, CY + 124, bw_, 26, t["secondary"], rx=6, stroke=t["border"])
+    c.text(BX + BW / 2, CY + 141, "Deny", 10, t["fg"], weight=500, anchor="middle")
+    c.raw("</g>")
+    allow = (BX + BW / 2, CY + 103)
+
+    editor = c.appear(5.1, dy=6, fade=0.3)
+    c.raw(f'<g class="{editor}">')
+    c.text(PX, top + 26, "Untitled", 13, t["muted"], weight=600, cls=c.span(0, 7.6, fade=0.1))
+    c.text(PX, top + 26, "Neon Drift", 13, t["fg"], weight=600, cls=c.span(7.6, 16))
+    gw = c.button_w("Generate", icon="magic", size=8.5, pad=7)
+    gx = BX + BW - 14 - gw
+    c.button(gx, top + 12, "Generate", icon="magic", size=8.5, h=20, pad=7, cls=c.span(8.6, 16))
+    c.rect(gx, top + 12, gw, 20, "#000000", rx=6, opacity=0.2, cls=c.span(11.1, 11.4, fade=0.05))
+    generate = (gx + gw / 2, top + 22)
+    c.text(PX, top + 48, "Scene 1", 8, t["muted"])
+    RH, TH_ = 52, 48 * 9 / 16
+    rows = (
+        ("speech", "Narrator", "Two rivals. One night. No brakes.", None),
+        ("image", "Image", "Two cars at a neon crossing, rain", "tokyo0"),
+        ("video", "Video", "A drift around the corner, sparks", "drift2"),
+    )
+    for i, (kind, label, prompt, render) in enumerate(rows):
+        cl = c.appear(8.6 + i * 0.3, dy=6)
+        ry = top + 58 + i * (RH + 6)
+        c.rect(PX, ry, PW, RH, t["card"], rx=8, stroke=t["border"], cls=cl)
+        c.type_pill(PX + 8, ry + 7, kind, label, cls=cl)
+        c.rect(PX + 8, ry + 28, PW - 16 - (92 if render else 0), 17, t["elinput"], rx=5, cls=cl)
+        c.text(PX + 14, ry + 39.5, prompt if not render else prompt[:24] + "\u2026", 8, t["fg"], cls=cl)
+        if render:
+            mx, mw, mh = PX + PW - 88, 80, 45
+            c.media_placeholder(mx, ry + (RH - mh) / 2, mw, mh, cls=f"{cl} {c.span(8.6, 13.0, fade=0.2)}", animate=True, seed=i + 3)
+            c.image(render, mx, ry + (RH - mh) / 2, mw, mh, rx=6, cls=f"{cl} {c.appear(12.9, dy=0, fade=0.4)}", thumb=True)
+            if kind == "video":
+                pl = c.appear(13.3, dy=0)
+                c.raw(c.wrap(f'<circle cx="{mx + mw / 2}" cy="{ry + RH / 2}" r="9" fill="#000000" opacity=".45"/>', pl))
+                c.icon("play", mx + mw / 2 - 5, ry + RH / 2 - 5, 10, "#ffffff", cls=pl)
+    c.raw("</g></g>")
+
+    # MCP between them: openslop.ai's 1px border streak keeps running out of the agent, over the MCP pill and into the tab
+    MX0, MX1, MY = TX + TW, BX, TOP + HT / 2
+    pw = c.pill_w("MCP", 8.5, icon="mcp", pad=7)
+    px, pr = (MX0 + MX1) / 2 - pw / 2, 10
+    c.raw(f'<line x1="{MX0}" y1="{MY}" x2="{MX1}" y2="{MY}" stroke="{t["border2"]}" stroke-dasharray="3 3"/>')
+    c.shadow(px, MY - pr, pw, 2 * pr, pr, 0.6)
+    c.pill(px, MY - pr, "MCP", 8.5, t["card"], t["fg"], icon="mcp", h=2 * pr, pad=7)
+    route = f"M{MX0} {MY}H{px}A{pr} {pr} 0 0 1 {px + pr} {MY - pr}H{px + pw - pr}A{pr} {pr} 0 0 1 {px + pw} {MY}H{MX1}"
+    # The route only runs left to right, so a horizontal gradient sliding along it tapers like the site's conic one.
+    core = "#ffffff" if theme == "dark" else t["accent"]
+    SW, LAP = 64, 2.4
+    stops = ((0, "#a78bfa", 0), (0.27, "#a78bfa", 0.7), (0.4, "#c8b4ff", 0.9), (0.5, core, 1), (0.6, "#c8b4ff", 0.9), (0.73, "#a78bfa", 0.7), (1, "#a78bfa", 0))
+    stop_tags = "".join(f'<stop offset="{o}" stop-color="{col}" stop-opacity="{op}"/>' for o, col, op in stops)
+    c.defs.append(
+        f'<linearGradient id="mcp-streak" gradientUnits="userSpaceOnUse" x2="{SW}">{stop_tags}'
+        f'<animateTransform attributeName="gradientTransform" type="translate" from="{MX0 - SW} 0" to="{MX1} 0" dur="{LAP}s" repeatCount="indefinite"/></linearGradient>'
+    )
+    c.defs.append('<filter id="mcp-streak-blur" x="-10%" y="-200%" width="120%" height="500%"><feGaussianBlur stdDeviation="3"/></filter>')
+    c.raw(f'<path d="{route}" fill="none" stroke="url(#mcp-streak)" stroke-width="3" opacity=".7" filter="url(#mcp-streak-blur)"/>')
+    c.raw(f'<path d="{route}" fill="none" stroke="url(#mcp-streak)"/>')
+
+    done_pill(c, W / 2, H - 42, "Your agent drives OpenSlop over MCP", 13.6)
+    c.click(4.4, *allow)
+    c.click(11.2, *generate)
+    c.cursor([(0, 600, 340), (3.0, 600, 340), (4.1, *allow), (4.6, *allow), (5.4, 600, 340), (10.4, 600, 340), (11.0, *generate), (11.5, *generate), (12.4, 600, 340)])
+    c.write()
+
+
 def main():
     for fn in (card_describe, card_sloppy, card_canvas, card_generate, card_timeline, card_providers, card_local):
         fn("dark")
     for theme in ("dark", "light"):
-        for fn in (card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys):
+        for fn in (card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys, card_agents_mcp):
             fn(theme)
 
 

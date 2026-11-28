@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import { z } from "zod";
 import { ProviderSchema, type Provider } from "@/lib/connectors/types";
 
-const tabSchema = z.enum(["models"]);
+const tabSchema = z.enum(["models", "mcp"]);
 
 export type SettingsTab = z.infer<typeof tabSchema>;
 

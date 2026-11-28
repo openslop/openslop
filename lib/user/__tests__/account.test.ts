@@ -5,6 +5,7 @@ describe("AccountSchema", () => {
 	it("reads the name and avatar a Google sign-in carries", () => {
 		expect(
 			AccountSchema.parse({
+				id: "ada",
 				email: "ada@example.com",
 				user_metadata: {
 					full_name: "Ada Lovelace",
@@ -13,6 +14,7 @@ describe("AccountSchema", () => {
 				},
 			}),
 		).toEqual({
+			id: "ada",
 			email: "ada@example.com",
 			name: "Ada Lovelace",
 			avatarUrl: "https://lh3.example.com/ada.png",
@@ -23,10 +25,12 @@ describe("AccountSchema", () => {
 	it("names an email-link sign-in by its mailbox and leaves the avatar unset", () => {
 		expect(
 			AccountSchema.parse({
+				id: "ada",
 				email: "ada@example.com",
 				user_metadata: { email_verified: true },
 			}),
 		).toEqual({
+			id: "ada",
 			email: "ada@example.com",
 			name: "ada",
 			avatarUrl: undefined,
@@ -41,6 +45,7 @@ describe("AccountSchema", () => {
 	it("ignores saved models that are not a model map", () => {
 		expect(
 			AccountSchema.parse({
+				id: "ada",
 				email: "ada@example.com",
 				user_metadata: { models: "stale" },
 			}).models,

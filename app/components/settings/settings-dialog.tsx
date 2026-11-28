@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
 	DialogClose,
 	DialogContent,
@@ -13,19 +13,20 @@ import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
 import type { Provider } from "@/lib/connectors/types";
-import { useSettings } from "@/lib/settings/use-settings";
+import { useSettings, type SettingsTab } from "@/lib/settings/use-settings";
 import { AddProvidersView } from "./add-providers-view";
+import { McpTab } from "./mcp-tab";
 import { ModelsTab } from "./models-tab";
 import { SettingsNav } from "./settings-nav";
 
-export function SettingsDialog() {
+function ModelsPanel({ selected }: { selected: Provider | null }) {
 	const settings = useSettings();
 	const [browsing, setBrowsing] = useState(false);
 
-	const close = () => {
-		setBrowsing(false);
-		settings.close();
-	};
+	if (!browsing)
+		return (
+			<ModelsTab selected={selected} onAddProviders={() => setBrowsing(true)} />
+		);
 
 	const pick = (provider: Provider) => {
 		setBrowsing(false);
@@ -33,9 +34,34 @@ export function SettingsDialog() {
 	};
 
 	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex items-center gap-2">
+				<IconButton
+					ariaLabel="Back to settings"
+					onClick={() => setBrowsing(false)}
+				>
+					<ArrowLeft />
+				</IconButton>
+				<SectionTitle>Add providers</SectionTitle>
+			</div>
+			<AddProvidersView onPick={pick} />
+		</div>
+	);
+}
+
+export function SettingsDialog() {
+	const settings = useSettings();
+	const tab = settings.tab ?? "models";
+
+	const panels = {
+		models: <ModelsPanel selected={settings.provider} />,
+		mcp: <McpTab />,
+	} satisfies Record<SettingsTab, ReactNode>;
+
+	return (
 		<MountedDialog
 			open={settings.tab !== null}
-			onOpenChange={(open) => !open && close()}
+			onOpenChange={(open) => !open && settings.close()}
 		>
 			<DialogContent
 				glow={false}
@@ -51,37 +77,14 @@ export function SettingsDialog() {
 					</DialogClose>
 				</div>
 				<DialogDescription className="sr-only">
-					Choose the models your work runs on and the keys behind them.
+					Choose the models your work runs on, the keys behind them, and the
+					agents that can work in OpenSlop.
 				</DialogDescription>
 
 				<div className="flex min-h-0 flex-1 gap-3">
-					<SettingsNav
-						active={settings.tab ?? "models"}
-						onSelect={(tab) => {
-							setBrowsing(false);
-							settings.open(tab);
-						}}
-					/>
+					<SettingsNav active={tab} onSelect={(next) => settings.open(next)} />
 					<div className="min-h-0 flex-1 overflow-y-auto rounded-xl bg-card p-4">
-						{browsing ? (
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-2">
-									<IconButton
-										ariaLabel="Back to settings"
-										onClick={() => setBrowsing(false)}
-									>
-										<ArrowLeft />
-									</IconButton>
-									<SectionTitle>Add providers</SectionTitle>
-								</div>
-								<AddProvidersView onPick={pick} />
-							</div>
-						) : (
-							<ModelsTab
-								selected={settings.provider}
-								onAddProviders={() => setBrowsing(true)}
-							/>
-						)}
+						{panels[tab]}
 					</div>
 				</div>
 			</DialogContent>

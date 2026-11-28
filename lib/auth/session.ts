@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/client";
 
-/** All Supabase sign-in links land back on the OAuth/OTP callback route. */
+/** All Supabase sign-in links land back on the OAuth/OTP callback route, carrying the page to return to. */
 function callbackUrl(): string {
-	return `${window.location.origin}/auth/callback`;
+	const url = new URL("/auth/callback", window.location.origin);
+	const next = new URLSearchParams(window.location.search).get("next");
+	if (next) url.searchParams.set("next", next);
+	return url.href;
 }
 
 export type MagicLinkParams = {

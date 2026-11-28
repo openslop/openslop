@@ -24,7 +24,9 @@ beforeEach(() => {
 	signInWithOtp.mockResolvedValue({ error: null });
 	signInWithOAuth.mockResolvedValue({ error: null });
 	signOutFn.mockResolvedValue({ error: null });
-	vi.stubGlobal("window", { location: { origin: "https://app.test" } });
+	vi.stubGlobal("window", {
+		location: { origin: "https://app.test", search: "" },
+	});
 });
 
 describe("sendMagicLink", () => {
@@ -75,6 +77,23 @@ describe("signInWithGoogle", () => {
 		expect(signInWithOAuth).toHaveBeenCalledWith({
 			provider: "google",
 			options: { redirectTo: CALLBACK },
+		});
+	});
+
+	it("brings the user back to the page login was asked from", async () => {
+		vi.stubGlobal("window", {
+			location: {
+				origin: "https://app.test",
+				search: "?next=%2Foauth%2Fconsent%3Fauthorization_id%3Da1",
+			},
+		});
+		await signInWithGoogle();
+
+		expect(signInWithOAuth).toHaveBeenCalledWith({
+			provider: "google",
+			options: {
+				redirectTo: `${CALLBACK}?next=%2Foauth%2Fconsent%3Fauthorization_id%3Da1`,
+			},
 		});
 	});
 

@@ -1,6 +1,16 @@
 # Local Supabase for `npm run local`. Every unset key keeps the CLI default.
 project_id = "openslop"
 
+# The consent page an agent signs in through must share the app's origin and cookies.
+[auth]
+site_url = "http://localhost:3000"
+
+# Lets the user's own agent sign in to drive OpenSlop over MCP (docs/agents.md).
+[auth.oauth_server]
+enabled = true
+authorization_url_path = "/oauth/consent"
+allow_dynamic_registration = true
+
 [storage]
 file_size_limit = "1GiB"
 
