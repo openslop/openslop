@@ -51,6 +51,13 @@ const open = () => {
 	);
 };
 
+const confirm = (label: string) =>
+	act(async () =>
+		Array.from(document.querySelectorAll("[role=alertdialog] button"))
+			.find((button) => button.textContent === label)
+			?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
+	);
+
 const chooseCaptions = (action: string) =>
 	chooseTileMenuItem("song", "Captions", action);
 
@@ -74,16 +81,12 @@ describe("MediaLibrary", () => {
 			"Delete theme?",
 		);
 
-		await act(async () =>
-			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Delete")
-				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-		);
+		await confirm("Delete");
 
 		expect(store.getState().media).toEqual([]);
 	});
 
-	it("offers to delete a picture", async () => {
+	it("deletes a picture from its corner button once confirmed", async () => {
 		open();
 		await act(async () =>
 			store
@@ -92,8 +95,18 @@ describe("MediaLibrary", () => {
 		);
 
 		await chooseTileMenuItem("pic");
+		expect(menuItems()).not.toContain("Delete");
 
-		expect(menuItems()).toContain("Delete");
+		await click('button[aria-label="Delete pic"]');
+
+		expect(store.getState().media).toHaveLength(1);
+		expect(document.querySelector("[role=alertdialog]")?.textContent).toContain(
+			"Delete pic?",
+		);
+
+		await confirm("Delete");
+
+		expect(store.getState().media).toEqual([]);
 	});
 
 	it("generates, regenerates and removes a file's captions from its Captions submenu", async () => {
@@ -122,11 +135,7 @@ describe("MediaLibrary", () => {
 		expect(transcribe).toHaveBeenCalledTimes(2);
 
 		await chooseCaptions("Remove captions");
-		await act(async () =>
-			Array.from(document.querySelectorAll("[role=alertdialog] button"))
-				.find((button) => button.textContent === "Remove captions")
-				?.dispatchEvent(new MouseEvent("click", { bubbles: true })),
-		);
+		await confirm("Remove captions");
 
 		expect(store.getState().media[0]?.captions).toBeUndefined();
 	});

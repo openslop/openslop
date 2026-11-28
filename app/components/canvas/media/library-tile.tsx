@@ -26,7 +26,7 @@ import { toastError } from "@/lib/toast-error";
 import { MediaLibraryItem } from "../elements/asset-tiles";
 import { UploadedLabel } from "../elements/preview/uploaded-badge";
 import { captionsActions, captionsPending } from "../elements/captions-menu";
-import { DeleteItem, TileMenuItem } from "../elements/tile-actions";
+import { TileMenuItem } from "../elements/tile-actions";
 import { usesFor, type MediaUse } from "./media-uses";
 
 /** Mounted as the menu opens, so the targets are read from the canvas as it is then. */
@@ -201,9 +201,9 @@ export function LibraryTile({
 						)}
 						{isKindCaptionable(item.kind) && <CaptionsItem {...captions} />}
 						<UseAsItem item={item} />
-						<DeleteItem onSelect={remove.request} />
 					</>
 				}
+				onDelete={remove.request}
 			>
 				{item.uploaded && (
 					<div className="absolute right-1 bottom-1">

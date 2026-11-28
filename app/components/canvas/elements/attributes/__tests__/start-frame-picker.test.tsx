@@ -8,6 +8,7 @@ import { flatAttributes } from "@/lib/canvas/element-attributes";
 import { findElementById } from "@/lib/canvas/editor-ops";
 import {
 	chooseTileMenuItem,
+	click,
 	mountOnCanvas,
 } from "@/app/components/canvas/__tests__/_mount";
 import { EditorPanelProvider } from "@/app/components/canvas/panel/editor-panel-context";
@@ -113,6 +114,30 @@ describe("StartFramePicker", () => {
 		const viewer = document.body.querySelectorAll('[role="dialog"]')[1];
 		expect(viewer?.querySelector("img")?.src).toBe(PICTURE);
 		expect(tile("Previous scene")?.getAttribute("aria-checked")).toBe("true");
+	});
+
+	it("forgets the uploaded picture from its corner button", async () => {
+		openPicker(PICTURE);
+
+		await click('button[aria-label="Remove Uploaded picture"]');
+
+		const [video] = findElementById(canvas.editor, "v1") ?? [];
+		const attributes = video && flatAttributes(video);
+		expect(attributes?.startFrame).toBe("none");
+		expect(attributes).not.toHaveProperty("uploadedFrame");
+	});
+
+	it("shows no ⋮ on a tile with no picture to view larger", () => {
+		openPicker("none", PICTURE);
+
+		expect(
+			document.body.querySelector('button[aria-label="More actions for None"]'),
+		).toBeNull();
+		expect(
+			document.body.querySelector(
+				'button[aria-label="More actions for Uploaded picture"]',
+			),
+		).not.toBeNull();
 	});
 
 	it("offers the media library when the start frame is not a picture", () => {

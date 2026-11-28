@@ -115,21 +115,51 @@ function TileToolbarButton({
 	);
 }
 
-type MenuAction = { onSelect: () => void };
-
-/** Takes it off this list; the media itself stays. */
-export const RemoveItem = ({ onSelect }: MenuAction) => (
-	<TileMenuItem icon={X} onSelect={onSelect}>
-		Remove
-	</TileMenuItem>
-);
-
-/** Takes it out of the project for good. */
-export const DeleteItem = ({ onSelect }: MenuAction) => (
-	<TileMenuItem icon={Trash2} variant="destructive" onSelect={onSelect}>
-		Delete
-	</TileMenuItem>
-);
+/** Remove and Delete, on their own toolbar in the tile's top-left corner; nothing when the tile offers neither. */
+export function TileRemoveActions({
+	name,
+	onRemove,
+	removeFrom,
+	onDelete,
+}: {
+	name: string;
+	onRemove?: () => void;
+	/** What Remove takes the tile off, when its label should say. */
+	removeFrom?: string;
+	onDelete?: () => void;
+}) {
+	if (!onRemove && !onDelete) return null;
+	const from = removeFrom ? ` from ${removeFrom}` : "";
+	return (
+		<Toolbar
+			variant="tile"
+			className={cn(
+				"absolute top-1 left-1 z-10 transition-opacity",
+				REVEAL_ON_HOVER,
+			)}
+		>
+			{onRemove && (
+				<TileToolbarButton
+					label={`Remove ${name}${from}`}
+					tooltip={`Remove${from}`}
+					onClick={onRemove}
+				>
+					<X size={ICON_SIZES.header} />
+				</TileToolbarButton>
+			)}
+			{onDelete && (
+				<TileToolbarButton
+					label={`Delete ${name}`}
+					tooltip="Delete"
+					tone="destructive"
+					onClick={onDelete}
+				>
+					<Trash2 size={ICON_SIZES.header} />
+				</TileToolbarButton>
+			)}
+		</Toolbar>
+	);
+}
 
 /** The large view of `viewed`: its menu item, and the dialog that outlives the menu closing. */
 export function useViewLarger(viewed: Viewed | undefined) {

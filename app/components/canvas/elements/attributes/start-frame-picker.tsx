@@ -27,7 +27,7 @@ import {
 import { AssetTile } from "../asset-tile";
 import { MediaPicker } from "../media-picker";
 import { AddButton } from "@/components/ui/add-button";
-import { RemoveItem, TileMenu, useViewLarger } from "../tile-actions";
+import { TileMenu, TileRemoveActions, useViewLarger } from "../tile-actions";
 import type { AttributeTarget, LaidOutTarget } from "./attribute-target";
 import { AttributePopoverSection, AttributeTrigger } from "./attribute-trigger";
 import { TileRow } from "./tile-row";
@@ -81,12 +81,8 @@ function FrameTile({
 				</ThumbnailFace>
 				<ThumbnailCaption>{label}</ThumbnailCaption>
 			</ThumbnailRadio>
-			{(viewer.item || onRemove) && (
-				<TileMenu label={label}>
-					{viewer.item}
-					{onRemove && <RemoveItem onSelect={onRemove} />}
-				</TileMenu>
-			)}
+			<TileRemoveActions name={label} onRemove={onRemove} />
+			{viewer.item && <TileMenu label={label}>{viewer.item}</TileMenu>}
 			{viewer.dialog}
 		</div>
 	);

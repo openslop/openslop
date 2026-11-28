@@ -15,15 +15,14 @@ import type { VisualKind } from "@/lib/canvas/types";
 import { MediaWithSkeleton } from "@/lib/components/media-with-skeleton";
 import { GenerationIndicator } from "./generation-indicator";
 import {
-	DeleteItem,
-	RemoveItem,
 	TileMenu,
 	TilePrimaryAction,
+	TileRemoveActions,
 	useViewLarger,
 	type TilePrimary,
 } from "./tile-actions";
 
-/** A picture or initial over its name: choosing the face does `primary`; the ⋮ holds the rest. */
+/** A picture or initial over its name: choosing the face does `primary`, Remove and Delete sit top-left, the ⋮ holds the rest. */
 export function AssetTile({
 	name,
 	previewUrl,
@@ -37,6 +36,7 @@ export function AssetTile({
 	primary,
 	menu,
 	onRemove,
+	removeFrom,
 	onDelete,
 	children,
 	fallback = "initial",
@@ -53,8 +53,9 @@ export function AssetTile({
 	startedAt?: number | null;
 	primary?: TilePrimary;
 	onRemove?: () => void;
+	removeFrom?: string;
 	onDelete?: () => void;
-	/** Menu items between View larger and Remove or Delete. */
+	/** Menu items after View larger. */
 	menu?: React.ReactNode;
 	/** Over the face, under its actions. */
 	children?: React.ReactNode;
@@ -106,12 +107,20 @@ export function AssetTile({
 						className="absolute top-1 right-1"
 					/>
 				) : (
-					<TileMenu label={name}>
-						{viewer.item}
-						{menu}
-						{onRemove && <RemoveItem onSelect={onRemove} />}
-						{onDelete && <DeleteItem onSelect={onDelete} />}
-					</TileMenu>
+					<>
+						<TileRemoveActions
+							name={name}
+							onRemove={onRemove}
+							removeFrom={removeFrom}
+							onDelete={onDelete}
+						/>
+						{(viewer.item || menu) && (
+							<TileMenu label={name}>
+								{viewer.item}
+								{menu}
+							</TileMenu>
+						)}
+					</>
 				)}
 			</ThumbnailFace>
 			{viewer.dialog}
