@@ -29,7 +29,9 @@ export function attachTab(send: Tab["send"]): () => void {
 	const tab: Tab = { send, pending: new Map() };
 	tabs.push(tab);
 	return () => {
-		tabs.splice(tabs.indexOf(tab), 1);
+		const at = tabs.indexOf(tab);
+		if (at === -1) return;
+		tabs.splice(at, 1);
 		for (const resolve of tab.pending.values())
 			resolve({ ok: false, errorText: "The OpenSlop tab closed mid-call." });
 	};

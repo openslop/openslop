@@ -39,3 +39,14 @@ it("fails a call when its tab closes before answering", async () => {
 		errorText: "The OpenSlop tab closed mid-call.",
 	});
 });
+
+it("detaches a tab once, however often it is told to", async () => {
+	const detach = attach(() => {});
+	attach((call) => answer(call.id, { ok: true, output: "newest" }));
+	detach();
+	detach();
+	expect(await callTool("read_title", {})).toEqual({
+		ok: true,
+		output: "newest",
+	});
+});

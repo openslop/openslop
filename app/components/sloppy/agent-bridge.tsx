@@ -22,7 +22,6 @@ export function AgentBridge() {
 
 	const run = useEffectEvent(async (call: BridgeCall) => {
 		openWorkspace();
-		// Sloppy's stream writes a drafted script as it arrives; an MCP call arrives whole.
 		writeToolInputText(
 			SCRIPT_STREAM_FIELDS,
 			() => createScriptSink(editor),
@@ -31,7 +30,7 @@ export function AgentBridge() {
 		return runTool(call);
 	});
 
-	// Reconnecting would drop the calls in flight, so the stream opens once per tab.
+	// A reconnect would fail the calls in flight, so this opens once.
 	useEffect(() => {
 		const source = new EventSource(ROUTE);
 		source.onmessage = async ({ data }) => {
