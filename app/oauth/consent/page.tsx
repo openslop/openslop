@@ -27,15 +27,11 @@ export default async function ConsentPage({
 	const authorizationId = search.data.authorization_id;
 
 	const supabase = await createClient();
-	const [
-		{
-			data: { user },
-		},
-		{ data, error },
-	] = await Promise.all([
+	const [{ data: auth }, { data, error }] = await Promise.all([
 		supabase.auth.getUser(),
 		supabase.auth.oauth.getAuthorizationDetails(authorizationId),
 	]);
+	const { user } = auth;
 	if (!user) {
 		const consent = `/oauth/consent?authorization_id=${encodeURIComponent(authorizationId)}`;
 		redirect(`/login?next=${encodeURIComponent(consent)}`);
@@ -44,10 +40,11 @@ export default async function ConsentPage({
 	if ("redirect_url" in data) redirect(data.redirect_url);
 
 	const agent = data.client.name;
+	const returnsTo = new URL(data.redirect_uri).host;
 	return (
 		<OnboardingCard
 			heading={`Connect ${agent}`}
-			subtitle={`${agent} will work in OpenSlop as ${user.email}, on the project you have open.`}
+			subtitle={`${agent} will work in OpenSlop as ${user.email}, on the project you have open. Allowing it sends you back to ${returnsTo}.`}
 		>
 			<form className="flex w-full flex-col gap-3">
 				<Button
