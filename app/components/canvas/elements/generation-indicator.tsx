@@ -3,6 +3,7 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { ActiveGenerationStatus } from "@/lib/generation/snapshots";
 import { useElapsedSeconds } from "@/lib/components/use-elapsed-seconds";
+import type { GenerationState } from "./preview/status";
 
 type Size = "sm" | "md";
 
@@ -45,10 +46,8 @@ export function GenerationIndicator({
 	queuedReason,
 	size = "md",
 	className,
-}: {
+}: GenerationState & {
 	status: ActiveGenerationStatus;
-	startedAt: number | null;
-	queuedReason: string | null;
 	size?: Size;
 	className?: string;
 }) {
