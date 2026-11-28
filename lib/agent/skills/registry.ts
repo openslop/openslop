@@ -24,22 +24,14 @@ export const SKILLS = [
 	videoPrompts,
 	musicPrompts,
 	mediaLibrary,
-] as const satisfies readonly Skill[];
-
-/** One per model family. They stay out of the index: read_model_attributes names the one for a model in play. */
-export const MODEL_PROMPT_SKILLS = [
 	cartesiaSonic,
 	klingOmni,
 	seedance,
 ] as const satisfies readonly Skill[];
 
-export const LOADABLE_SKILLS = [...SKILLS, ...MODEL_PROMPT_SKILLS] as const;
+export type SkillName = (typeof SKILLS)[number]["name"];
 
-export type SkillName = (typeof LOADABLE_SKILLS)[number]["name"];
-
-export type ModelPromptSkillName = (typeof MODEL_PROMPT_SKILLS)[number]["name"];
-
-export const SKILL_NAMES = LOADABLE_SKILLS.map(({ name }) => name) as [
+export const SKILL_NAMES = SKILLS.map(({ name }) => name) as [
 	SkillName,
 	...SkillName[],
 ];

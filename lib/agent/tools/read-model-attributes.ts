@@ -9,7 +9,6 @@ import {
 	type AttributeDef,
 } from "@/lib/connectors/attributes/schema";
 import { disjunction } from "@/lib/format";
-import { promptSkillFor } from "../skills/model-skills";
 import { defineTool } from "./define-tool";
 
 const allowedValues = (def: AttributeDef): string =>
@@ -19,9 +18,8 @@ const allowedValues = (def: AttributeDef): string =>
 
 export const readModelAttributes = defineTool({
 	description: dedent`
-	  Read the values a model allows for the attributes that depend on it, like duration, and
-	  the skill for prompting it. Read it before setting one of them, switching an element's
-	  model, or writing a prompt for the model.
+	  Read the values a model allows for the attributes that depend on it, like duration.
+	  Read it before setting one of them or switching an element's model.
 	`,
 	input: modelRefSchema
 		.extend({ type: ContentTypeSchema })
@@ -33,15 +31,8 @@ export const readModelAttributes = defineTool({
 	label: ({ model }) => `Reading ${model ?? "model"} options`,
 	execute: async ({ type, ...model }) => {
 		const defs = attributeSchemaFor(type, model).modelDefs;
+		if (defs.length === 0) return "This model has no attributes of its own.";
 		const values = defs.map((def) => `${def.key} ${allowedValues(def)}`);
-		const skill = promptSkillFor(connectorOf(type), model);
-		return [
-			defs.length === 0
-				? "This model has no attributes of its own."
-				: `- <${type}> with model="${model.model}": ${values.join(", ")}.`,
-			skill && `Before writing prompts for it, load the ${skill} skill.`,
-		]
-			.filter(Boolean)
-			.join("\n");
+		return `- <${type}> with model="${model.model}": ${values.join(", ")}.`;
 	},
 });

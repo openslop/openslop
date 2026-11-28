@@ -2,7 +2,7 @@ import { dedent } from "@/lib/dedent";
 import { z } from "zod";
 import { plural } from "@/lib/format";
 import { BookOpen } from "@/components/ui/icon";
-import { LOADABLE_SKILLS, SKILL_NAMES } from "../skills/registry";
+import { SKILL_NAMES, SKILLS } from "../skills/registry";
 import { defineTool } from "./define-tool";
 
 export const loadSkill = defineTool({
@@ -19,7 +19,7 @@ export const loadSkill = defineTool({
 			? `Loading ${names.length} ${plural(names.length, "skill")}`
 			: "Loading skills",
 	execute: async ({ names }) =>
-		LOADABLE_SKILLS.filter(({ name }) => names.includes(name))
+		SKILLS.filter(({ name }) => names.includes(name))
 			.map(({ name, content }) => `# Skill: ${name}\n\n${content}`)
 			.join("\n\n"),
 });
