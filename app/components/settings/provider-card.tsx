@@ -136,11 +136,7 @@ export function ProviderCard({
 
 	const test = () =>
 		startTesting(async () => {
-			try {
-				await testKey(provider);
-			} catch (cause) {
-				toastError(cause);
-			}
+			await testKey(provider).catch(toastError);
 		});
 
 	// A link that names a provider has to land on it, not at the top of a list
