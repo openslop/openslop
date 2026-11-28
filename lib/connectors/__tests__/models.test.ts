@@ -89,6 +89,15 @@ describe("resolveModel", () => {
 		).toEqual(SLOP_IMAGE);
 		expect(resolveModel("image")).toEqual(SLOP_IMAGE);
 	});
+
+	it("moves a sound saved on Text to Sound v2 onto v3", () => {
+		expect(
+			resolveModel("sfx", {
+				provider: "openslop",
+				model: "Eleven Text to Sound v2",
+			}),
+		).toEqual({ provider: "openslop", model: "Eleven Text to Sound v3" });
+	});
 });
 
 describe("listModels", () => {

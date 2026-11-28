@@ -9,5 +9,5 @@ export const SFX_MODELS = {
 
 export const DEFAULT_SFX_MODEL: ModelRef = {
 	provider: "openslop",
-	model: "Eleven Text to Sound v2",
+	model: "Eleven Text to Sound v3",
 };

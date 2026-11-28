@@ -70,7 +70,7 @@ const HOSTED = [
 	},
 	{
 		type: "sfx",
-		model: "Eleven Text to Sound v2",
+		model: "Eleven Text to Sound v3",
 		envVar: "ELEVENLABS_API_KEY",
 		real: "ElevenLabsSFX",
 		mock: "MockSFX",

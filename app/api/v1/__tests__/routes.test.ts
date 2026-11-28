@@ -57,7 +57,7 @@ const HOSTED_MODELS: Record<string, string> = {
 	image: "Seedream 5 Lite",
 	video: "Seedance 2 Fast",
 	music: "Eleven Music v1",
-	sfx: "Eleven Text to Sound v2",
+	sfx: "Eleven Text to Sound v3",
 	llm: "Claude Opus 5",
 	tts: "Sonic 3.6",
 };

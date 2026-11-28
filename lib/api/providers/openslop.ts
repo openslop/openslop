@@ -68,7 +68,7 @@ const OPENSLOP_PROVIDERS: {
 		"Seedance 2 Fast": hosted("RUNWARE_API_KEY", RunwareVideo, MockVideo),
 	},
 	sfx: {
-		"Eleven Text to Sound v2": hosted(
+		"Eleven Text to Sound v3": hosted(
 			"ELEVENLABS_API_KEY",
 			ElevenLabsSFX,
 			MockSFX,

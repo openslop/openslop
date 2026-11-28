@@ -898,7 +898,7 @@ def card_canvas(theme):
     # the new Sound card, with its footer, below the row that was hovered
     ys = y3
     grp = c.appear(6.0)
-    hs, fy, tops = c.element_card(CX, ys, CW, "sound", "Sound", ("Eleven Text to Sound v2", "elevenlabs"), [""], cls=grp, footer=True)
+    hs, fy, tops = c.element_card(CX, ys, CW, "sound", "Sound", ("Eleven Text to Sound v3", "elevenlabs"), [""], cls=grp, footer=True)
     c.text(CX + 16, tops + 14, "Describe the sound effect...", 9, t["muted"], cls=c.span(6.0, 7.0, fade=0.05))
     c.typewriter(CX + 16, tops + 14, "tyre screech, long and close", 7.1, 8.4, 9, t["fg"], cls=grp)
     c.button(CX + CW - 8 - 64, fy, "Generate", icon="magic", h=18, size=8.5, pad=7, cls=grp)
@@ -949,7 +949,7 @@ def card_generate(theme):
     rows = [
         ("video", "Video", ("Seedance 2 Fast", "runware"), None, ["Slow motion on the drift, smoke billowing off the", "rear tyres as the car swings back into line."], "media"),
         ("speech", "Speech", None, None, ["The rear wheels broke loose. Takeshi kept the", "wheel light and let the silvia swing."], "audio"),
-        ("sound", "Sound", ("Eleven Text to Sound v2", "elevenlabs"), None, ["tyre screech, long and close"], "audio"),
+        ("sound", "Sound", ("Eleven Text to Sound v3", "elevenlabs"), None, ["tyre screech, long and close"], "audio"),
     ]
     timing = {"video": (1.6, 6.8), "speech": (1.6, 4.6), "sound": (4.6, 7.6)}
     y = SY + 34

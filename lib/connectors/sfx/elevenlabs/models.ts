@@ -1,9 +1,9 @@
 export const ELEVENLABS_SFX_MODELS = {
-	"Eleven Text to Sound v2": {
-		id: "eleven_text_to_sound_v2",
+	"Eleven Text to Sound v3": {
+		id: "eleven_text_to_sound_v3",
 		cost: "low",
 		speed: "high",
 		description:
-			"Best for short sound effects and ambience described in words.",
+			"Best for sound effects and ambience described in words, even prompts with several parts.",
 	},
 } as const;
