@@ -164,17 +164,6 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 - **[模板](../../lib/templates/templates.ts)** — POV Life、Sleep Story、True Crime 等等。每个模板都预设了一种风格、一组角色和一个时长。
 - **[开发用的 mock](../../.env.example)** — 不填某个提供商的密钥，它的调用就会回退到预置结果，让你不花钱也能开发。
 
-## 支持的智能体
-
-你自己的编程智能体可以通过 MCP 在 OpenSlop 里工作，用它自己的登录：它用 Sloppy 的工具编辑你打开的项目。详见 [Agents](../agents.md)。
-
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ 任何 MCP 客户端</kbd></a>
-</p>
-
 ## 技术栈
 
 | 层级          | 技术                                                                                                         |

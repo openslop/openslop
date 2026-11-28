@@ -110,17 +110,6 @@ npm run local
 </tr>
 </table>
 
-## 지원 에이전트
-
-Claude Code, Codex, Cursor 같은 MCP 클라이언트도 이 컴퓨터의 OpenSlop에서 작업할 수 있습니다. `http://localhost:3000/api/mcp`를 MCP 서버로 추가하세요. [Agents](../agents.md)를 참고하세요.
-
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ 모든 MCP 클라이언트</kbd></a>
-</p>
-
 ## 그다음부터
 
 | 하려는 일           | 방법                                                         |

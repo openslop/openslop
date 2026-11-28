@@ -110,17 +110,6 @@ Haz clic en tu icono de perfil, luego en **Settings** > **Add providers**, y con
 </tr>
 </table>
 
-## Agentes compatibles
-
-Claude Code, Codex, Cursor o cualquier otro cliente MCP también pueden trabajar en OpenSlop en tu computadora: agrega `http://localhost:3000/api/mcp` como servidor MCP. Consulta [Agents](../agents.md).
-
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ cualquier cliente MCP</kbd></a>
-</p>
-
 ## El día a día
 
 | Para                    | Haz esto                                                             |

@@ -164,17 +164,6 @@ Generate all(모두 생성)은 모든 요소를 큐에 넣고 의존하는 것�
 - **[템플릿](../../lib/templates/templates.ts)** — POV Life, Sleep Story, True Crime 등. 각각 스타일, 캐릭터, 길이를 미리 채워 줍니다.
 - **[개발용 목(mock)](../../.env.example)** — 공급자 키를 비워 두면 그 호출은 미리 준비된 결과로 대체되어, 돈을 내지 않고도 개발할 수 있습니다.
 
-## 지원 에이전트
-
-내 코딩 에이전트가 그 에이전트의 로그인 그대로 MCP로 OpenSlop에서 작업할 수 있습니다. 열려 있는 프로젝트를 Sloppy의 도구로 편집합니다. [Agents](../agents.md)를 참고하세요.
-
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ 모든 MCP 클라이언트</kbd></a>
-</p>
-
 ## 기술 스택
 
 | 계층       | 기술                                                                                                         |
