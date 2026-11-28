@@ -37,9 +37,15 @@ The agent asks before it edits, deletes, moves or runs anything on your computer
 
 These routes answer only in development, and only to a page served from this computer.
 
-## Not supported yet
+## Drive OpenSlop from your agent
 
-This runs one way: OpenSlop drives the agent. The other way, where you work in your own agent (Claude Code, Codex, Cursor, Claude Desktop) and it controls OpenSlop over MCP, isn't supported yet. It's on the list as [#1468](https://github.com/openslop/openslop/issues/1468).
+You can also go the other way: work in your own agent and let it edit a project with Sloppy's tools, over MCP. Any agent that takes an HTTP MCP server works. Add OpenSlop as one, for example:
+
+```bash
+claude mcp add --transport http openslop http://localhost:3000/api/local/mcp
+```
+
+Then open the project in OpenSlop on this computer. The agent works on the project you opened last, and its edits show up as it makes them. Sloppy's instructions come with the server, so the agent writes scripts the way Sloppy does.
 
 ## Adding an agent
 

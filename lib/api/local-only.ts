@@ -3,7 +3,7 @@ import { notFound } from "./response";
 
 const LOOPBACK_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 
-/** A local agent acts on this computer, so only a page served from it on loopback may reach one. */
+/** A local agent acts on this computer, so only loopback may reach one. A browser always sends its Origin, which must be this page; other local clients send none. */
 export function isLocalRequest(request: NextRequest): boolean {
 	if (process.env.NODE_ENV !== "development") return false;
 	const url = new URL(request.url);
@@ -12,7 +12,7 @@ export function isLocalRequest(request: NextRequest): boolean {
 	return (
 		LOOPBACK_HOSTS.includes(url.hostname) &&
 		(forwardedHost === null || forwardedHost === url.host) &&
-		origin === url.origin
+		(origin === null || origin === url.origin)
 	);
 }
 

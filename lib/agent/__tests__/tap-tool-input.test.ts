@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { UIMessageChunk } from "ai";
-import { tapToolInputText } from "../tap-tool-input";
+import { tapToolInputText, writeToolInputText } from "../tap-tool-input";
 
 /** Each opened sink as the text it was written, then "|" once flushed. */
 const run = async (chunks: UIMessageChunk[]) => {
@@ -88,5 +88,28 @@ describe("tapToolInputText", () => {
 		]);
 
 		expect(sinks).toEqual([]);
+	});
+});
+
+describe("writeToolInputText", () => {
+	const write = (toolName: string) => {
+		const writes: string[] = [];
+		writeToolInputText(
+			new Map([["write_script", "osml"]]),
+			() => ({
+				write: (chunk) => void writes.push(chunk),
+				flush: () => void writes.push("|"),
+			}),
+			{ toolName, input: { osml: "<scene/>" } },
+		);
+		return writes;
+	};
+
+	it("writes a tapped call's whole field, then flushes", () => {
+		expect(write("write_script")).toEqual(["<scene/>", "|"]);
+	});
+
+	it("leaves other tools alone", () => {
+		expect(write("read_title")).toEqual([]);
 	});
 });

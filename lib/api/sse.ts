@@ -4,7 +4,7 @@ export function formatSSE(data: unknown): string {
 	return `data: ${JSON.stringify(data)}\n\n`;
 }
 
-const SSE_HEADERS = {
+export const SSE_HEADERS = {
 	"Content-Type": "text/event-stream",
 	"Cache-Control": "no-cache",
 	Connection: "keep-alive",

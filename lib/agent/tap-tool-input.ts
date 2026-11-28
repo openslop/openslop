@@ -63,3 +63,17 @@ export function tapToolInputText(
 		},
 	});
 }
+
+/** Writes a tapped tool's whole input to a sink at once, for a call that arrives without streaming. */
+export function writeToolInputText(
+	fields: ReadonlyMap<string, string>,
+	open: () => ScriptSink,
+	{ toolName, input }: { toolName: string; input: unknown },
+) {
+	const field = fields.get(toolName);
+	if (!field) return;
+	const sink = open();
+	const text: unknown = get(input, field);
+	if (isString(text)) sink.write(text);
+	sink.flush();
+}

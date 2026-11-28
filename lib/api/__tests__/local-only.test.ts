@@ -16,6 +16,11 @@ it("lets a same-origin loopback page through in development", () => {
 	expect(isLocalRequest(request())).toBe(true);
 });
 
+it("lets a local client that sends no Origin through, like an MCP client", () => {
+	vi.stubEnv("NODE_ENV", "development");
+	expect(isLocalRequest(request(undefined, {}))).toBe(true);
+});
+
 it("is closed outside development", () => {
 	vi.stubEnv("NODE_ENV", "production");
 	expect(isLocalRequest(request())).toBe(false);
@@ -29,7 +34,6 @@ it.each([
 		}),
 	],
 	["another origin", request(undefined, { origin: "http://evil.example" })],
-	["no origin", request(undefined, {})],
 	[
 		"a forwarded remote host",
 		request(undefined, {
