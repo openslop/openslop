@@ -150,15 +150,14 @@ export function LibraryMediaTile({
 		item.name,
 	);
 	const request = useLoadRequest(item);
-	const requestInMenu = player.primary && request;
 	return (
 		<MediaAssetTile
 			item={item}
 			primary={player.primary ?? request}
 			menu={
-				requestInMenu ? (
+				player.primary && request ? (
 					<>
-						<LoadRequestItem {...requestInMenu} />
+						<LoadRequestItem {...request} />
 						{menu}
 					</>
 				) : (

@@ -53,7 +53,6 @@ export function AssetTile({
 	startedAt?: number | null;
 	primary?: TilePrimary;
 	onRemove?: () => void;
-	/** What Remove takes the tile off, when its label should say. */
 	removeFrom?: string;
 	onDelete?: () => void;
 	/** Menu items after View larger. */
