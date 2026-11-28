@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-	BYOKProviderSchema,
-	isByokProvider,
-	type BYOKProvider,
-} from "./provider-catalog";
-import type { Provider } from "./types";
+import { ProviderSchema, type Provider } from "./types";
 
 /** Whether a stored key has been seen to work since it was last written. */
 export const KEY_STATUSES = ["unverified", "valid", "invalid"] as const;
@@ -17,7 +12,7 @@ export type KeyStatus = (typeof KEY_STATUSES)[number];
  * key they stored without it being readable again.
  */
 export const ProviderKeyRecordSchema = z.object({
-	provider: BYOKProviderSchema,
+	provider: ProviderSchema,
 	last4: z.string(),
 	status: z.enum(KEY_STATUSES),
 	verifiedAt: z.string().nullable(),
@@ -31,13 +26,6 @@ export const findProviderKey = (
 	provider: Provider,
 ): ProviderKeyRecord | null =>
 	keys.find((key) => key.provider === provider) ?? null;
-
-/** A provider that takes a key and has none stored. The hosted provider and local agents take none. */
-export const needsKey = (
-	keys: ProviderKeyRecord[],
-	provider: Provider,
-): provider is BYOKProvider =>
-	isByokProvider(provider) && findProviderKey(keys, provider) === null;
 
 export const ValidationResultSchema = z.discriminatedUnion("ok", [
 	z.object({ ok: z.literal(true) }),

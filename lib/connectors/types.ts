@@ -36,7 +36,6 @@ export const PROVIDERS = [
 	"runware",
 	"cartesia",
 	"elevenlabs",
-	"local",
 ] as const;
 
 export const ProviderSchema = z.enum(PROVIDERS);

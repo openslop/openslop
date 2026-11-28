@@ -11,7 +11,7 @@ import { ProviderIcon } from "@/app/components/models/provider-icon";
 import { useProviderKeyLookup } from "@/app/components/models/use-provider-keys";
 import { MODEL_GROUPS } from "@/lib/connectors/model-groups";
 import {
-	isByokProvider,
+	MANAGED_PROVIDER,
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
@@ -86,10 +86,10 @@ export function AddProvidersView({
 											</p>
 										)}
 									</div>
-									{!isByokProvider(provider) ? (
+									{provider === MANAGED_PROVIDER ? (
 										// Reads like the other connected rows, but there is
-										// nothing to do: the hosted provider and local agents
-										// take no key.
+										// nothing to do: everyone generates on the hosted
+										// provider, so there is no key to bring.
 										<span
 											className={buttonVariants({
 												variant: "secondary",

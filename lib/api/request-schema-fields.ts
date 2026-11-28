@@ -1,8 +1,11 @@
 import { z } from "zod";
+import { BYOK_PROVIDERS } from "@/lib/connectors/provider-catalog";
 import { HostedVoicePreviewSchema } from "@/lib/connectors/types";
 import { MEDIA_RESOLUTIONS } from "@/lib/project/aspect-ratio";
 import { AssetBundle } from "./asset-bundle";
 import { parseImageSource } from "./image-source";
+
+export const byokProviderField = z.enum(BYOK_PROVIDERS);
 
 // A malformed id makes Postgres throw on the cast; guid() matches every shape it accepts.
 export const rowId = z.guid();

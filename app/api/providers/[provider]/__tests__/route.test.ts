@@ -99,7 +99,7 @@ describe("POST /api/providers/[provider]", () => {
 		);
 		expect(await res.json()).toMatchObject({
 			validation: { ok: true },
-			providerKeys: [{ provider: "anthropic" }],
+			providerKeys: [{ provider: "openslop" }, { provider: "anthropic" }],
 		});
 	});
 
@@ -133,7 +133,7 @@ describe("DELETE /api/providers/[provider]", () => {
 			p_provider: "anthropic",
 		});
 		expect(await res.json()).toMatchObject({
-			providerKeys: [],
+			providerKeys: [{ provider: "openslop" }],
 		});
 	});
 });

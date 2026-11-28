@@ -110,9 +110,9 @@ Clique no ícone do seu perfil, depois em **Settings** > **Add providers**, e co
 </tr>
 </table>
 
-## Ou use seu agente de programação
+## Use seu próprio agente
 
-Já usa Claude Code, Codex ou Cursor? O Sloppy e a geração de texto podem rodar nele, sem chave de texto. Veja [Local agents](../local-agents.md).
+Claude Code, Codex, Cursor ou qualquer outro cliente MCP também podem trabalhar no OpenSlop no seu computador: adicione `http://localhost:3000/api/mcp` como servidor MCP. Veja [Agents](../agents.md).
 
 ## No dia a dia
 
@@ -124,14 +124,14 @@ Já usa Claude Code, Codex ou Cursor? O Sloppy e a geração de texto podem roda
 
 ## Modo local ou online
 
-|                  | Modo local                                                          | Online em [app.openslop.ai](https://app.openslop.ai)            |
-| ---------------- | ------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Quem pode usar   | Qualquer pessoa, hoje                                               | Só com convite, [entre na lista de espera](https://openslop.ai) |
-| Instalação       | Node.js, e Docker Desktop em alguns computadores                    | Nada                                                            |
-| Login            | Automático, um usuário                                              | Sua conta                                                       |
-| Projetos e mídia | No seu computador                                                   | Na nuvem                                                        |
-| Modelos de IA    | Suas próprias chaves, ou um agente de programação no seu computador | Modelos hospedados, mais suas próprias chaves                   |
-| Exportar vídeo   | Renderizado no seu computador                                       | Renderizado na nuvem                                            |
+|                  | Modo local                                       | Online em [app.openslop.ai](https://app.openslop.ai)            |
+| ---------------- | ------------------------------------------------ | --------------------------------------------------------------- |
+| Quem pode usar   | Qualquer pessoa, hoje                            | Só com convite, [entre na lista de espera](https://openslop.ai) |
+| Instalação       | Node.js, e Docker Desktop em alguns computadores | Nada                                                            |
+| Login            | Automático, um usuário                           | Sua conta                                                       |
+| Projetos e mídia | No seu computador                                | Na nuvem                                                        |
+| Modelos de IA    | Suas próprias chaves                             | Modelos hospedados, mais suas próprias chaves                   |
+| Exportar vídeo   | Renderizado no seu computador                    | Renderizado na nuvem                                            |
 
 ## Se algo der errado
 

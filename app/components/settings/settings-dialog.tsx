@@ -12,9 +12,10 @@ import { CloseButton } from "@/components/ui/close-button";
 import { IconButton } from "@/components/ui/icon-button";
 import { ArrowLeft } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
-import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
+import type { Provider } from "@/lib/connectors/types";
 import { useSettings } from "@/lib/settings/use-settings";
 import { AddProvidersView } from "./add-providers-view";
+import { McpTab } from "./mcp-tab";
 import { ModelsTab } from "./models-tab";
 import { SettingsNav } from "./settings-nav";
 
@@ -27,7 +28,7 @@ export function SettingsDialog() {
 		settings.close();
 	};
 
-	const pick = (provider: BYOKProvider) => {
+	const pick = (provider: Provider) => {
 		setBrowsing(false);
 		settings.open("models", provider);
 	};
@@ -51,7 +52,8 @@ export function SettingsDialog() {
 					</DialogClose>
 				</div>
 				<DialogDescription className="sr-only">
-					Choose the models your work runs on and the keys behind them.
+					Choose the models your work runs on, the keys behind them, and the
+					agents that can work in OpenSlop.
 				</DialogDescription>
 
 				<div className="flex min-h-0 flex-1 gap-3">
@@ -63,7 +65,9 @@ export function SettingsDialog() {
 						}}
 					/>
 					<div className="min-h-0 flex-1 overflow-y-auto rounded-xl bg-card p-4">
-						{browsing ? (
+						{settings.tab === "mcp" ? (
+							<McpTab />
+						) : browsing ? (
 							<div className="flex flex-col gap-4">
 								<div className="flex items-center gap-2">
 									<IconButton

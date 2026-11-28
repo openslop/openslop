@@ -17,5 +17,6 @@ export async function GET(request: Request) {
 		logger.error(error, "Auth callback failed");
 		return failed;
 	}
-	return NextResponse.redirect(`${origin}/`);
+	const next = new URL(searchParams.get("next") ?? "/", origin);
+	return NextResponse.redirect(next.origin === origin ? next : `${origin}/`);
 }

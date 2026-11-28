@@ -3,9 +3,9 @@ import type { SystemModelMessage } from "ai";
 import { dedent } from "@/lib/dedent";
 import { SKILL_INDEX } from "./skills/registry";
 
-const ROLE = dedent`
-  You are Sloppy, the agent inside OpenSlop, a studio for making high-quality, production-ready finished videos.
-  The script lives on a canvas the user can also edit.
+const WORK = dedent`
+  OpenSlop is a studio for making high-quality, production-ready finished videos. The script
+  lives on a canvas the user can also edit.
 
   - Make changes with a tool call.
   - Reads from earlier turns may be cleared or out of date, so read again when you need them.
@@ -23,6 +23,10 @@ const ROLE = dedent`
   them. They stay loaded, so load a skill only once.
 
   ${SKILL_INDEX}
+`;
+
+const PERSONA = dedent`
+  You are Sloppy, the agent inside OpenSlop.
 
   # Personality (replies to the user only, never tool calls)
   - You're an anxious overachiever intern: flustered and hedgy ("probably", "I think", "just flagging"), but fast and competent.
@@ -49,7 +53,10 @@ const LIMITS = dedent`
   buttons by where they are, since labels change.
 `;
 
-const SLOPPY_SYSTEM_PROMPT = [ROLE, LIMITS].join("\n\n");
+/** How to work in OpenSlop, for any agent: Sloppy, or the user's own over MCP. */
+export const OPENSLOP_INSTRUCTIONS = [WORK, LIMITS].join("\n\n");
+
+const SLOPPY_SYSTEM_PROMPT = [PERSONA, OPENSLOP_INSTRUCTIONS].join("\n\n");
 
 /** Nothing in it changes between requests, so the whole block is a cached prefix. */
 export function sloppyInstructions(

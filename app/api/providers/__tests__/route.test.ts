@@ -84,7 +84,7 @@ describe("POST /api/providers", () => {
 		);
 		expect(await res.json()).toMatchObject({
 			validation: { ok: true },
-			providerKeys: [{ provider: "anthropic" }],
+			providerKeys: [{ provider: "openslop" }, { provider: "anthropic" }],
 		});
 	});
 

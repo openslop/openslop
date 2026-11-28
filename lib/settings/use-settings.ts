@@ -3,12 +3,9 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
-import {
-	BYOKProviderSchema,
-	type BYOKProvider,
-} from "@/lib/connectors/provider-catalog";
+import { ProviderSchema, type Provider } from "@/lib/connectors/types";
 
-const tabSchema = z.enum(["models"]);
+const tabSchema = z.enum(["models", "mcp"]);
 
 export type SettingsTab = z.infer<typeof tabSchema>;
 
@@ -18,8 +15,8 @@ const PROVIDER_PARAM = "provider";
 
 export type SettingsRoute = {
 	tab: SettingsTab | null;
-	provider: BYOKProvider | null;
-	open: (tab: SettingsTab, provider?: BYOKProvider) => void;
+	provider: Provider | null;
+	open: (tab: SettingsTab, provider?: Provider) => void;
 	close: () => void;
 };
 
@@ -48,7 +45,7 @@ export function useSettings(): SettingsRoute {
 	return useMemo(
 		() => ({
 			tab: parse(tabSchema, params.get(TAB_PARAM)),
-			provider: parse(BYOKProviderSchema, params.get(PROVIDER_PARAM)),
+			provider: parse(ProviderSchema, params.get(PROVIDER_PARAM)),
 			open: (tab, provider) => {
 				const next = new URLSearchParams(params);
 				next.set(TAB_PARAM, tab);

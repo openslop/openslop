@@ -166,12 +166,13 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 ## 支持的智能体
 
-在[本地模式](local-mode.zh-CN.md)下，Sloppy 可以直接运行在你已经在用的编程智能体上，用它自己的登录，无需 API 密钥。详见 [Local agents](../local-agents.md)。
+你自己的编程智能体可以通过 MCP 在 OpenSlop 里工作，用它自己的登录：它用 Sloppy 的工具编辑你打开的项目。详见 [Agents](../agents.md)。
 
 <p>
   <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
   <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a>
+  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
+  <a href="../agents.md"><kbd>+ 任何 MCP 客户端</kbd></a>
 </p>
 
 ## 技术栈

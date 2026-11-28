@@ -1830,78 +1830,118 @@ def card_step_keys(theme):
     c.write()
 
 
-def card_step_agent(theme):
-    c = Card("local-step-agent", "Use your coding agent", "In the composer, the model picker lists the local agents under the hosted models, Claude Code is picked, a prompt is sent, and Sloppy starts on it.", 10, theme)
+def card_agents_mcp(theme):
+    c = Card("agents-mcp", "Your agent drives OpenSlop over MCP", "OpenSlop is added to Claude Code as an MCP server and allowed in the browser. A prompt in the terminal makes tool calls that travel over MCP into the open project: a title, then a script of speech, image and video. Generate renders the image and the video.", 16, theme)
     t = c.t
     c.bg()
-    c.light_rays()
-    greeting = "What slop today, boss?"
-    gw = tw(greeting, 34) * 0.86 + 40
-    gx = W / 2 - gw / 2
-    c.icon("robot-fill", gx, 18, 32, t["fg"])
-    c.text(gx + 40, 46, greeting, 34, t["fg"], family=SERIF, extra='letter-spacing="-1.2"')
+    TOP, HT = 20, 276
 
-    bx, by, bw, bh = 70, 70, 500, 84
-    c.defs.append('<filter id="glow" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>')
-    c.raw(c.wrap(f'<rect x="{bx - 3}" y="{by - 3}" width="{bw + 6}" height="{bh + 6}" rx="14" fill="none" stroke="{t["glow"]}" stroke-width="6" opacity=".22" filter="url(#glow)"/>', c.pulse(4, 0.45)))
-    c.rect(bx, by, bw, bh, t["card"], rx=12, stroke=t["glow"], extra='stroke-opacity="0.35"')
-    c.grain(bx, by, bw, bh, 12)
-    tx, ty = bx + 16, by + 26
-    c.text(tx, ty, "Describe your slop or paste a script", 12.5, t["muted"], cls=c.span(0, 3.6))
-    c.typewriter(tx, ty, "A 15 second video about a cat who loves rain.", 3.7, 5.5, 12.5, t["fg"], caret=True)
-    ry = by + bh - 32
-    c.icon("plus", bx + 14, ry + 6, 12, t["fg"])
-    px = bx + 34
-    for label, icon in (("16:9", "aspect-ratio"), ("Auto", "film-slate"), ("Auto", "translate")):
-        c.icon(icon, px + 6, ry + 6, 11, t["fg"])
-        c.text(px + 21, ry + 15, label, 9.5, t["fg"], weight=500)
-        c.icon("chevron-down", px + 24 + tw(label, 9.5, 500), ry + 8, 8, t["muted"])
-        px += 21 + tw(label, 9.5, 500) + 19
-    MX = px
-    for label, before in (("Claude Opus 5.5", True), ("Claude Code", False)):
-        cl = c.span(0, 3.0, fade=0.1) if before else c.span(3.0, 10)
-        if before:
-            c.provider_mark("openslop", MX + 6, ry + 6.5, 10, cls=cl)
-        else:
-            c.icon("terminal", MX + 6, ry + 6, 11, t["fg"], cls=cl)
-        c.text(MX + 21, ry + 15, label, 9.5, t["fg"], weight=500, cls=cl)
-        c.icon("chevron-down", MX + 24 + tw(label, 9.5, 500), ry + 8, 8, t["muted"], cls=cl)
-    pick = (MX + 50, ry + 11)
-    lbx, sbx = bx + bw - 56, bx + bw - 30
-    c.icon("lightbulb", lbx, ry + 4, 14, t["fg"])
-    c.icon("corner-down-left", sbx, ry + 4, 14, t["fg"], opacity=0.35, cls=c.span(0, 3.7))
-    c.icon("corner-down-left", sbx, ry + 4, 14, t["fg"], cls=c.span(3.7, 10))
-    c.rect(sbx - 3, ry + 1, 20, 20, t["hover"], rx=6, cls=c.span(6.0, 6.4, fade=0.1))
-    send = (sbx + 7, ry + 11)
-    took = c.appear(6.5, dy=3)
-    c.orb(W / 2 - 46, by + bh + 13, 16, cls=took)
-    c.text(W / 2 - 26, by + bh + 25, "Slopping… · 1s", 10, t["muted"], cls=took)
+    # the agent, in its own terminal
+    TX, TW = 20, 214
+    window(c, TX, TOP, TW, HT, "Claude Code", "terminal")
+    LX, FS, LH = TX + 14, 8.5, 18
+    col = lambda s: LX + tw(s, FS, family=MONO) * 1.06
+    y = TOP + 46
+    c.text(LX, y, "$", FS, t["muted"], family=MONO)
+    c.typewriter(col("$ "), y, "claude mcp add --transport http \\", 0.3, 1.2, FS, t["fg"], family=MONO)
+    c.typewriter(col("$ "), y + LH, "openslop app.openslop.ai/api/mcp", 1.2, 2.0, FS, t["fg"], family=MONO)
+    added = c.appear(2.2, dy=3)
+    c.text(LX, y + 2 * LH, "\u2713", FS, t["success"], family=MONO, cls=added)
+    c.text(col("\u2713 "), y + 2 * LH, "Added openslop", FS, t["fg"], family=MONO, cls=added)
+    y += 3 * LH + 16
+    asked = c.appear(5.3, dy=0)
+    c.text(LX, y, ">", FS, t["accent"], family=MONO, weight=600, cls=asked)
+    c.typewriter(col("> "), y, "A neon street race in Tokyo,", 5.4, 6.4, FS, t["fg"], family=MONO, cls=asked)
+    c.typewriter(col("> "), y + LH, "45 seconds", 6.4, 6.8, FS, t["fg"], family=MONO, cls=asked)
+    y += 2 * LH + 14
+    calls = (("set_title", 7.4), ("write_script", 8.4))
+    for i, (tool, at) in enumerate(calls):
+        cl = c.appear(at, dy=3)
+        c.raw(c.wrap(f'<circle cx="{LX + 3}" cy="{y + i * LH - 3}" r="2.5" fill="{t["accent"]}"/>', cl))
+        c.text(LX + 12, y + i * LH, f"openslop \u00b7 {tool}", FS, t["fg"], family=MONO, cls=cl)
+    reply = c.appear(9.8, dy=3)
+    c.text(LX, y + 2 * LH + 12, "Script's in, boss. Hit Generate", FS, t["muted"], family=MONO, cls=reply)
+    c.text(LX, y + 3 * LH + 12, "when you're ready.", FS, t["muted"], family=MONO, cls=reply)
 
-    # the picker: hosted models first, then the agents on this computer
-    rows = [("openslop", "Claude Opus 5.5", "$$$"), ("anthropic", "Claude Sonnet 5", "$$"), ("terminal", "Claude Code", "$"), ("terminal", "Codex", "$"), ("terminal", "Cursor", "$")]
-    DX, DY, DW, RH = MX - 4, ry + 26, 196, 22
-    DH = RH * len(rows) + 8
-    menu = c.span(1.2, 3.0, fade=0.12)
-    c.shadow(DX, DY, DW, DH, 8, 0.9, cls=menu)
-    c.rect(DX, DY, DW, DH, t["card"], rx=8, stroke=t["border"], cls=menu)
-    c.rect(DX + 4, DY + 4 + 2 * RH, DW - 8, RH, t["hover"], rx=5, cls=f"{menu} {c.span(2.2, 3.0, fade=0.08)}")
-    for i, (mark, name, cost) in enumerate(rows):
-        yy = DY + 4 + i * RH
-        if i == 0:
-            c.icon("check", DX + 8, yy + 6, 10, t["fg"], cls=menu)
-        if mark == "terminal":
-            c.icon("terminal", DX + 24, yy + 5.5, 11, t["fg"], cls=menu)
-        else:
-            c.provider_mark(mark, DX + 24, yy + 6, 10, cls=menu)
-        c.text(DX + 41, yy + 14.5, name, 9.5, t["fg"], cls=menu)
-        c.pill(DX + DW - 12 - c.pill_w(cost, 8, pad=5), yy + 4, cost, 8, t["secondary"], t["muted"], h=14, pad=5, cls=menu)
-    claude = (DX + 80, DY + 4 + 2.5 * RH)
-    done_pill(c, W / 2, H - 46, "Runs on your Claude sign-in, no key needed", 7.0)
+    # OpenSlop, open in the browser
+    BX, BW = 342, 278
+    top, clip = browser(c, BX, TOP, BW, HT, "app.openslop.ai", t["elcard"])
+    PX, PW = BX + 14, BW - 28
+    c.raw(f'<g clip-path="url(#{clip})">')
 
-    c.click(1.0, *pick)
-    c.click(2.75, *claude)
-    c.click(6.1, *send)
-    c.cursor([(0, 560, 330), (0.3, 560, 330), (0.8, *pick), (1.1, *pick), (2.1, *claude), (2.9, *claude), (3.4, tx + 140, ty - 4), (5.6, tx + 140, ty - 4), (5.9, *send), (6.3, *send), (8.0, 560, 330)])
+    consent = c.span(2.4, 5.0, fade=0.2)
+    c.raw(f'<g class="{consent}">')
+    CY = top + 40
+    c.icon("mcp", BX + BW / 2 - 14, CY, 28, t["fg"])
+    c.text(BX + BW / 2, CY + 52, "Connect Claude Code", 14, t["fg"], weight=500, anchor="middle")
+    c.text(BX + BW / 2, CY + 70, "It will work in OpenSlop as you.", 9, t["muted"], anchor="middle")
+    bx_, bw_ = BX + 40, BW - 80
+    c.rect(bx_, CY + 90, bw_, 26, t["accent"], rx=6)
+    c.rect(bx_, CY + 90, bw_, 26, "#000000", rx=6, opacity=0.15, cls=c.span(4.3, 4.6, fade=0.05))
+    c.text(BX + BW / 2, CY + 107, "Allow", 10, t["accentfg"], weight=500, anchor="middle")
+    c.rect(bx_, CY + 124, bw_, 26, t["secondary"], rx=6, stroke=t["border"])
+    c.text(BX + BW / 2, CY + 141, "Deny", 10, t["fg"], weight=500, anchor="middle")
+    c.raw("</g>")
+    allow = (BX + BW / 2, CY + 103)
+
+    editor = c.appear(5.1, dy=6, fade=0.3)
+    c.raw(f'<g class="{editor}">')
+    c.text(PX, top + 26, "Untitled", 13, t["muted"], weight=600, cls=c.span(0, 7.6, fade=0.1))
+    c.text(PX, top + 26, "Neon Drift", 13, t["fg"], weight=600, cls=c.span(7.6, 16))
+    gw = c.button_w("Generate", icon="magic", size=8.5, pad=7)
+    gx = BX + BW - 14 - gw
+    c.button(gx, top + 12, "Generate", icon="magic", size=8.5, h=20, pad=7, cls=c.span(8.6, 16))
+    c.rect(gx, top + 12, gw, 20, "#000000", rx=6, opacity=0.2, cls=c.span(11.1, 11.4, fade=0.05))
+    generate = (gx + gw / 2, top + 22)
+    c.text(PX, top + 48, "Scene 1", 8, t["muted"])
+    RH, TH_ = 52, 48 * 9 / 16
+    rows = (
+        ("speech", "Narrator", "Two rivals. One night. No brakes.", None),
+        ("image", "Image", "Two cars at a neon crossing, rain", "tokyo0"),
+        ("video", "Video", "A drift around the corner, sparks", "drift2"),
+    )
+    for i, (kind, label, prompt, render) in enumerate(rows):
+        cl = c.appear(8.6 + i * 0.3, dy=6)
+        ry = top + 58 + i * (RH + 6)
+        c.rect(PX, ry, PW, RH, t["card"], rx=8, stroke=t["border"], cls=cl)
+        c.type_pill(PX + 8, ry + 7, kind, label, cls=cl)
+        c.rect(PX + 8, ry + 28, PW - 16 - (92 if render else 0), 17, t["elinput"], rx=5, cls=cl)
+        c.text(PX + 14, ry + 39.5, prompt if not render else prompt[:24] + "\u2026", 8, t["fg"], cls=cl)
+        if render:
+            mx, mw, mh = PX + PW - 88, 80, 45
+            c.media_placeholder(mx, ry + (RH - mh) / 2, mw, mh, cls=f"{cl} {c.span(8.6, 13.0, fade=0.2)}", animate=True, seed=i + 3)
+            c.image(render, mx, ry + (RH - mh) / 2, mw, mh, rx=6, cls=f"{cl} {c.appear(12.9, dy=0, fade=0.4)}", thumb=True)
+            if kind == "video":
+                pl = c.appear(13.3, dy=0)
+                c.raw(c.wrap(f'<circle cx="{mx + mw / 2}" cy="{ry + RH / 2}" r="9" fill="#000000" opacity=".45"/>', pl))
+                c.icon("play", mx + mw / 2 - 5, ry + RH / 2 - 5, 10, "#ffffff", cls=pl)
+    c.raw("</g></g>")
+
+    # MCP between them: openslop.ai's 1px border streak keeps running out of the agent, over the MCP pill and into the tab
+    MX0, MX1, MY = TX + TW, BX, TOP + HT / 2
+    pw = c.pill_w("MCP", 8.5, icon="mcp", pad=7)
+    px, pr = (MX0 + MX1) / 2 - pw / 2, 10
+    c.raw(f'<line x1="{MX0}" y1="{MY}" x2="{MX1}" y2="{MY}" stroke="{t["border2"]}" stroke-dasharray="3 3"/>')
+    c.shadow(px, MY - pr, pw, 2 * pr, pr, 0.6)
+    c.pill(px, MY - pr, "MCP", 8.5, t["card"], t["fg"], icon="mcp", h=2 * pr, pad=7)
+    route = f"M{MX0} {MY}H{px}A{pr} {pr} 0 0 1 {px + pr} {MY - pr}H{px + pw - pr}A{pr} {pr} 0 0 1 {px + pw} {MY}H{MX1}"
+    # The route only runs left to right, so a horizontal gradient sliding along it tapers like the site's conic one.
+    core = "#ffffff" if theme == "dark" else t["accent"]
+    SW, LAP = 64, 2.4
+    stops = ((0, "#a78bfa", 0), (0.27, "#a78bfa", 0.7), (0.4, "#c8b4ff", 0.9), (0.5, core, 1), (0.6, "#c8b4ff", 0.9), (0.73, "#a78bfa", 0.7), (1, "#a78bfa", 0))
+    stop_tags = "".join(f'<stop offset="{o}" stop-color="{col}" stop-opacity="{op}"/>' for o, col, op in stops)
+    c.defs.append(
+        f'<linearGradient id="mcp-streak" gradientUnits="userSpaceOnUse" x2="{SW}">{stop_tags}'
+        f'<animateTransform attributeName="gradientTransform" type="translate" from="{MX0 - SW} 0" to="{MX1} 0" dur="{LAP}s" repeatCount="indefinite"/></linearGradient>'
+    )
+    c.defs.append('<filter id="mcp-streak-blur" x="-10%" y="-200%" width="120%" height="500%"><feGaussianBlur stdDeviation="3"/></filter>')
+    c.raw(f'<path d="{route}" fill="none" stroke="url(#mcp-streak)" stroke-width="3" opacity=".7" filter="url(#mcp-streak-blur)"/>')
+    c.raw(f'<path d="{route}" fill="none" stroke="url(#mcp-streak)"/>')
+
+    done_pill(c, W / 2, H - 42, "Your agent drives OpenSlop over MCP", 13.6)
+    c.click(4.4, *allow)
+    c.click(11.2, *generate)
+    c.cursor([(0, 600, 340), (3.0, 600, 340), (4.1, *allow), (4.6, *allow), (5.4, 600, 340), (10.4, 600, 340), (11.0, *generate), (11.5, *generate), (12.4, 600, 340)])
     c.write()
 
 
@@ -1909,7 +1949,7 @@ def main():
     for fn in (card_describe, card_sloppy, card_canvas, card_generate, card_timeline, card_providers, card_local):
         fn("dark")
     for theme in ("dark", "light"):
-        for fn in (card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys, card_step_agent):
+        for fn in (card_step_node, card_step_docker, card_step_download, card_step_terminal, card_step_keys, card_agents_mcp):
             fn(theme)
 
 

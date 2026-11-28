@@ -26,7 +26,7 @@ import { useGenerationQueue } from "@/lib/generation/generation-queue-provider";
 import { buildNode, buildNodes } from "@/lib/generation/generation-graph";
 import { staleReason } from "@/lib/generation/stale-reason";
 import { useBuildContext } from "@/lib/generation/use-build-context";
-import { needsKey } from "@/lib/connectors/provider-key";
+import { findProviderKey } from "@/lib/connectors/provider-key";
 import { applyRefineOps } from "@/lib/script/refine/apply-ops";
 import { useProjectStoreHandle } from "@/lib/project/project-store-provider";
 import { useAccountStoreHandle } from "@/lib/user/account-store-provider";
@@ -101,7 +101,7 @@ export function useAgentTools() {
 					return report;
 				},
 				isConnected: (provider) =>
-					!needsKey(account.getState().providerKeys, provider),
+					findProviderKey(account.getState().providerKeys, provider) !== null,
 				generateCaptions: (ids) => {
 					const content = getContentElements(editor.children);
 					const named = (id: string) => {

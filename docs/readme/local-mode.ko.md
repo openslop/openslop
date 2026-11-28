@@ -110,9 +110,9 @@ npm run local
 </tr>
 </table>
 
-## 코딩 에이전트 사용하기
+## 내 에이전트 쓰기
 
-이미 Claude Code, Codex, Cursor를 쓰고 있다면 텍스트 키 대신 그걸로 Sloppy와 텍스트 생성을 돌릴 수 있습니다. [Local agents](../local-agents.md)를 참고하세요.
+Claude Code, Codex, Cursor 같은 MCP 클라이언트도 이 컴퓨터의 OpenSlop에서 작업할 수 있습니다. `http://localhost:3000/api/mcp`를 MCP 서버로 추가하세요. [Agents](../agents.md)를 참고하세요.
 
 ## 그다음부터
 
@@ -130,7 +130,7 @@ npm run local
 | 설치              | Node.js, 일부 컴퓨터는 Docker Desktop도 | 없음                                              |
 | 로그인            | 자동, 사용자 한 명                      | 내 계정                                           |
 | 프로젝트와 미디어 | 내 컴퓨터                               | 클라우드                                          |
-| AI 모델           | 내 키, 또는 이 컴퓨터의 코딩 에이전트   | 기본 제공 모델과 내 키                            |
+| AI 모델           | 내 키                                   | 기본 제공 모델과 내 키                            |
 | 동영상 내보내기   | 내 컴퓨터에서 렌더링                    | 클라우드에서 렌더링                               |
 
 ## 문제가 생기면

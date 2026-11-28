@@ -47,7 +47,7 @@ components/
   ui/                The design system, see DESIGN.md
   captions/          Caption drawing shared by the player and the render
 lib/
-  agent/             Sloppy: tools, registry, prompt and turn context
+  agent/             Sloppy: tools, registry, prompt and turn context, and the MCP server for your own agent
   api/               Route plumbing: auth, asset routes, job queue, agent turn
   auth/              Session, access codes, impersonation
   canvas/            Slate document model: element types, guards, OSML parse/serialize
@@ -124,11 +124,12 @@ The canvas is the project. Each term means one thing everywhere in the code:
 
 ## Sloppy
 
-| Term       | Where                    | Means                                                                                                                                           |
-| ---------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sloppy** | `app/components/sloppy/` | The agent in the editor's left panel.                                                                                                           |
-| **Turn**   | `lib/api/agent-turn.ts`  | One model response. The server streams its text and tool calls; the tools have specs but no executors there.                                    |
-| **Tool**   | `lib/agent/tools/`       | A `defineTool` the browser runs against the canvas, queue and stores. Its result goes back as the next request until the model answers in text. |
+| Term             | Where                    | Means                                                                                                                                                         |
+| ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sloppy**       | `app/components/sloppy/` | The agent in the editor's left panel.                                                                                                                         |
+| **Turn**         | `lib/api/agent-turn.ts`  | One model response. The server streams its text and tool calls; the tools have specs but no executors there.                                                  |
+| **Tool**         | `lib/agent/tools/`       | A `defineTool` the browser runs against the canvas, queue and stores. Its result goes back as the next request until the model answers in text.               |
+| **Agent bridge** | `lib/agent/mcp/`         | Your own agent's MCP connection. It signs in through Supabase OAuth, and each tool call runs in your newest open project tab over a private Realtime channel. |
 
 The harness is client-side, so Sloppy works through the same canvas, queue and stores as the user, sees edits as they happen, and the client stays the one writer of the project. A new action is a new tool and new know-how is a new skill in `lib/agent/skills/`, not a new pipeline.
 

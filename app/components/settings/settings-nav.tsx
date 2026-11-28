@@ -1,6 +1,6 @@
 "use client";
 
-import { InsertElement, type IconComponent } from "@/components/ui/icon";
+import { InsertElement, Mcp, type IconComponent } from "@/components/ui/icon";
 import { SectionTitle } from "@/components/ui/section-title";
 import type { SettingsTab } from "@/lib/settings/use-settings";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,10 @@ type NavItem = { tab: SettingsTab; label: string; icon: IconComponent };
 const GROUPS: { heading: string; items: NavItem[] }[] = [
 	{
 		heading: "Account",
-		items: [{ tab: "models", label: "Models", icon: InsertElement }],
+		items: [
+			{ tab: "models", label: "Models", icon: InsertElement },
+			{ tab: "mcp", label: "MCP", icon: Mcp },
+		],
 	},
 ];
 

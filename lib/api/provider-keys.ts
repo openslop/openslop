@@ -8,7 +8,7 @@ import {
 	type ValidationResult,
 } from "@/lib/connectors/provider-key";
 import {
-	BYOKProviderSchema,
+	MANAGED_PROVIDER,
 	PROVIDER_CATALOG,
 	type BYOKProvider,
 } from "@/lib/connectors/provider-catalog";
@@ -16,6 +16,7 @@ import type { Provider } from "@/lib/connectors/types";
 import { createClient } from "@/lib/supabase/server";
 import { selectColumns } from "@/lib/supabase/select-columns";
 import { createServiceClient } from "@/lib/supabase/service";
+import { byokProviderField } from "./request-schema-fields";
 
 /**
  * The account has no key for a provider it was asked to generate with. An
@@ -30,7 +31,7 @@ export class MissingProviderKeyError extends Error {
 }
 
 const ProviderKeyRowSchema = z.object({
-	provider: BYOKProviderSchema,
+	provider: byokProviderField,
 	last4: z.string(),
 	status: z.enum(KEY_STATUSES),
 	verified_at: z.string().nullable(),
@@ -48,10 +49,20 @@ const toRecord = (
 	createdAt: row.created_at,
 });
 
+/** The balance gates each hosted call, not the key. */
+const HOSTED_KEY: ProviderKeyRecord = {
+	provider: MANAGED_PROVIDER,
+	last4: "",
+	status: "valid",
+	verifiedAt: null,
+	createdAt: "",
+};
+
 /**
- * The keys an account has stored. Only ever the metadata: the key itself lives
- * in the vault and is read one generation at a time. Read through the caller's
- * own session, so row-level security is a second lock on the filter below.
+ * The keys an account can generate on: the hosted one, then whatever it has
+ * stored. Only ever the metadata: the key itself lives in the vault and is
+ * read one generation at a time. Read through the caller's own session, so
+ * row-level security is a second lock on the filter below.
  */
 export async function listProviderKeys(
 	userId: string,
@@ -63,7 +74,10 @@ export async function listProviderKeys(
 		.eq("user_id", userId)
 		.order("created_at", { ascending: true });
 	if (error) throw new Error(`Failed to load provider keys: ${error.message}`);
-	return z.array(ProviderKeyRowSchema).parse(data).map(toRecord);
+	return [
+		HOSTED_KEY,
+		...z.array(ProviderKeyRowSchema).parse(data).map(toRecord),
+	];
 }
 
 /**

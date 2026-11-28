@@ -3,6 +3,7 @@ import { connectorModelsSchema } from "@/lib/connectors/models";
 
 export const AccountSchema = z
 	.object({
+		id: z.string(),
 		email: z.string(),
 		user_metadata: z.object({
 			full_name: z.string().optional(),
@@ -11,7 +12,8 @@ export const AccountSchema = z
 			models: connectorModelsSchema.catch({}),
 		}),
 	})
-	.transform(({ email, user_metadata }) => ({
+	.transform(({ id, email, user_metadata }) => ({
+		id,
 		email,
 		name: user_metadata.full_name ?? email.split("@")[0],
 		avatarUrl: user_metadata.avatar_url,

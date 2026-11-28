@@ -29,23 +29,23 @@ describe("createAccountStore", () => {
 	it("starts from the rows the server read", () => {
 		const store = createAccountStore({
 			models: {},
-			providerKeys: [key("anthropic")],
+			providerKeys: [key("openslop")],
 		});
-		expect(providers(store)).toEqual(["anthropic"]);
+		expect(providers(store)).toEqual(["openslop"]);
 	});
 
 	// The server answers every key change with the whole list, so the store never merges.
 	it("replaces the rows with each answer and reports the validation", async () => {
 		const store = createAccountStore({ models: {}, providerKeys: [] });
 		apiJson.mockResolvedValueOnce({
-			providerKeys: [key("anthropic"), key("cartesia")],
+			providerKeys: [key("openslop"), key("anthropic")],
 			validation: { ok: false, error: "nope" },
 		});
 
 		const result = await store.getState().saveKey("anthropic", "sk-12345678");
 
 		expect(result).toEqual({ ok: false, error: "nope" });
-		expect(providers(store)).toEqual(["anthropic", "cartesia"]);
+		expect(providers(store)).toEqual(["openslop", "anthropic"]);
 	});
 });
 

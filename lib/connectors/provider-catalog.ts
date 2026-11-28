@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { PROVIDERS, type Provider } from "./types";
 
 /**
@@ -18,13 +17,10 @@ export type BYOKProviderMeta = ProviderMeta & { keysUrl: string };
 
 /**
  * Every provider a generation can be routed through. `openslop` is the hosted
- * one and `local` runs the agents installed on this computer, so neither needs
- * a key; the rest are the user's own, reached with the key they store.
+ * one and needs no key; the rest are the user's own, reached with the key they
+ * store on their account.
  */
-export const PROVIDER_CATALOG: Record<
-	typeof MANAGED_PROVIDER | typeof LOCAL_PROVIDER,
-	ProviderMeta
-> &
+export const PROVIDER_CATALOG: Record<typeof MANAGED_PROVIDER, ProviderMeta> &
 	Record<BYOKProvider, BYOKProviderMeta> = {
 	openslop: {
 		name: "OpenSlop",
@@ -55,28 +51,16 @@ export const PROVIDER_CATALOG: Record<
 		mark: { src: "/icons/elevenlabs.svg", masked: false },
 		keysUrl: "https://elevenlabs.io/app/settings/api-keys",
 	},
-	local: {
-		name: "Local agent",
-		description: "A coding agent on this computer, signed in on its own.",
-		mark: { src: "/icons/terminal.svg", masked: true },
-	},
 };
-
-export const LOCAL_PROVIDER = "local" as const;
 
 export const MANAGED_PROVIDER = "openslop" as const;
 
-export type BYOKProvider = Exclude<
-	Provider,
-	typeof MANAGED_PROVIDER | typeof LOCAL_PROVIDER
->;
+export type BYOKProvider = Exclude<Provider, typeof MANAGED_PROVIDER>;
 
 export const isProvider = (value: string | undefined): value is Provider =>
 	PROVIDERS.some((provider) => provider === value);
 
 export const isByokProvider = (provider: Provider): provider is BYOKProvider =>
-	provider !== MANAGED_PROVIDER && provider !== LOCAL_PROVIDER;
+	provider !== MANAGED_PROVIDER;
 
 export const BYOK_PROVIDERS = PROVIDERS.filter(isByokProvider);
-
-export const BYOKProviderSchema = z.enum(BYOK_PROVIDERS);

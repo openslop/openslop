@@ -1,7 +1,4 @@
-import {
-	isByokProvider,
-	LOCAL_PROVIDER,
-} from "@/lib/connectors/provider-catalog";
+import { isByokProvider } from "@/lib/connectors/provider-catalog";
 import type { Provider } from "@/lib/connectors/types";
 
 export const OPENSLOP_API_PREFIX = "/api/v1";
@@ -13,12 +10,5 @@ export const OPENSLOP_API_PREFIX = "/api/v1";
  */
 export const THIRD_PARTY_API_PREFIX = "/api/third-party";
 
-/** Where the agents installed on the user's own computer are served from, in development only. */
-const LOCAL_API_PREFIX = "/api/local";
-
-export function apiPrefixFor(provider: Provider): string {
-	if (provider === LOCAL_PROVIDER) return LOCAL_API_PREFIX;
-	return isByokProvider(provider)
-		? THIRD_PARTY_API_PREFIX
-		: OPENSLOP_API_PREFIX;
-}
+export const apiPrefixFor = (provider: Provider): string =>
+	isByokProvider(provider) ? THIRD_PARTY_API_PREFIX : OPENSLOP_API_PREFIX;

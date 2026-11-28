@@ -168,6 +168,7 @@ export const SlidersHorizontal = icon("sliders");
 export const SlidersAlt = icon("sliders-alt");
 export const Stop = icon("stop");
 export const Smile = icon("smile");
+export const Mcp = icon("mcp");
 export const Robot = icon("robot");
 export const RobotFill = icon("robot-fill");
 export const SlidersAltFill = icon("sliders-alt-fill");

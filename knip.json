@@ -4,8 +4,7 @@
 		"remotion/index.ts",
 		"remotion/root.tsx",
 		"remotion.config.ts",
-		"scripts/**",
-		"lib/**/__tests__/_*.mjs"
+		"scripts/**"
 	],
 	"ignore": ["components/ui/**"],
 	"ignoreIssues": {

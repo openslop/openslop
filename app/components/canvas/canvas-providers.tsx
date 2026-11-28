@@ -16,6 +16,7 @@ import { WorkspaceProvider } from "./workspace-context";
 import { ActiveCaptionFont } from "./caption-fonts";
 import { SloppyProvider } from "../sloppy/sloppy-provider";
 import { SloppyUnread } from "../sloppy/sloppy-unread";
+import { AgentBridge } from "../sloppy/agent-bridge";
 import { EditorPanelProvider } from "./panel/editor-panel-context";
 import { MediaPanelProvider } from "./media/media-panel-context";
 import { AssetEditProvider } from "./elements/named-asset/asset-edit-provider";
@@ -59,6 +60,7 @@ export function CanvasProviders({ children }: { children: ReactNode }) {
 				<CanvasScopedProviders>
 					<ActiveCaptionFont />
 					<SloppyUnread />
+					<AgentBridge />
 					{children}
 				</CanvasScopedProviders>
 			</CanvasHistoryProvider>

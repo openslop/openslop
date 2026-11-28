@@ -12,7 +12,8 @@ import {
 	differsFromRecommended,
 	modelEntry,
 } from "@/lib/connectors/models";
-import type { BYOKProvider } from "@/lib/connectors/provider-catalog";
+import { MANAGED_PROVIDER } from "@/lib/connectors/provider-catalog";
+import type { Provider } from "@/lib/connectors/types";
 import { toastError } from "@/lib/toast-error";
 import { useSettings } from "@/lib/settings/use-settings";
 import { useAccount } from "@/lib/user/use-account";
@@ -24,7 +25,7 @@ export function ModelsTab({
 	onAddProviders,
 }: {
 	/** The provider a link asked to open on, shown even before it has a key. */
-	selected: BYOKProvider | null;
+	selected: Provider | null;
 	onAddProviders: () => void;
 }) {
 	const models = useAccount((state) => state.models);
@@ -34,7 +35,8 @@ export function ModelsTab({
 	const settings = useSettings();
 
 	const stored = providerKeys.map((row) => row.provider);
-	// A provider a link opened on shows first, even before it has a key.
+	// A link that named a provider leads here: it goes first, so what the link
+	// was about is the first thing read.
 	const shown =
 		selected && !stored.includes(selected) ? [selected, ...stored] : stored;
 
@@ -51,18 +53,27 @@ export function ModelsTab({
 					</Button>
 				}
 			>
-				<div className="flex flex-col gap-2">
-					<HostedProviderCard />
-					{shown.map((provider) => (
-						<ProviderCard
-							key={provider}
-							provider={provider}
-							selected={provider === selected}
-							// A link pointing at a row that is gone has nothing to open.
-							onDismissed={() => settings.open("models")}
-						/>
-					))}
-				</div>
+				{shown.length === 0 ? (
+					<p className="rounded-xl border border-dashed border-border p-6 text-center text-label text-muted-foreground">
+						No providers connected yet. Add one to generate on your own key.
+					</p>
+				) : (
+					<div className="flex flex-col gap-2">
+						{shown.map((provider) =>
+							provider === MANAGED_PROVIDER ? (
+								<HostedProviderCard key={provider} />
+							) : (
+								<ProviderCard
+									key={provider}
+									provider={provider}
+									selected={provider === selected}
+									// A link pointing at a row that is gone has nothing to open.
+									onDismissed={() => settings.open("models")}
+								/>
+							),
+						)}
+					</div>
+				)}
 			</SettingsSection>
 
 			<Separator />

@@ -110,9 +110,9 @@ Click your profile icon, then **Settings** > **Add providers**, and connect a pr
 </tr>
 </table>
 
-## Use your coding agent instead
+## Use your own agent
 
-Already use Claude Code, Codex or Cursor? Sloppy and text generation can run on it instead of a Text key. See [Local agents](local-agents.md).
+Claude Code, Codex, Cursor or any other MCP client can work in OpenSlop on your computer too: add `http://localhost:3000/api/mcp` to it as an MCP server. See [Agents](agents.md).
 
 ## Every day after
 
@@ -124,14 +124,14 @@ Already use Claude Code, Codex or Cursor? Sloppy and text generation can run on 
 
 ## Local mode vs online
 
-|                    | Local mode                                        | Online at [app.openslop.ai](https://app.openslop.ai)  |
-| ------------------ | ------------------------------------------------- | ----------------------------------------------------- |
-| Who can use it     | Anyone, today                                     | Invite-only, [join the waitlist](https://openslop.ai) |
-| Install            | Node.js, plus Docker Desktop on some computers    | Nothing                                               |
-| Sign-in            | Automatic, one user                               | Your account                                          |
-| Projects and media | On your computer                                  | In the cloud                                          |
-| AI models          | Your own keys, or a coding agent on this computer | Hosted models, plus your own keys                     |
-| Exporting video    | Rendered on your computer                         | Rendered in the cloud                                 |
+|                    | Local mode                                     | Online at [app.openslop.ai](https://app.openslop.ai)  |
+| ------------------ | ---------------------------------------------- | ----------------------------------------------------- |
+| Who can use it     | Anyone, today                                  | Invite-only, [join the waitlist](https://openslop.ai) |
+| Install            | Node.js, plus Docker Desktop on some computers | Nothing                                               |
+| Sign-in            | Automatic, one user                            | Your account                                          |
+| Projects and media | On your computer                               | In the cloud                                          |
+| AI models          | Your own keys                                  | Hosted models, plus your own keys                     |
+| Exporting video    | Rendered on your computer                      | Rendered in the cloud                                 |
 
 ## If something goes wrong
 
