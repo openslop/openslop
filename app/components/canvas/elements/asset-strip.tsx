@@ -32,16 +32,12 @@ export function AssetStrip({ children }: { children: ReactNode }) {
 	);
 }
 
-function useHasCanvasAssets(): boolean {
+export function AssetCanvasStrip() {
+	const { setActive } = useEditorPanel();
 	const hasArtStyle = useHasAsset("asset_style");
 	const names = useNamedAssetNames();
 	const { urls } = useReferenceImages();
-	return hasArtStyle || names.length > 0 || urls.length > 0;
-}
-
-export function AssetCanvasStrip() {
-	const { setActive } = useEditorPanel();
-	const hasAssets = useHasCanvasAssets();
+	const hasAssets = hasArtStyle || names.length > 0 || urls.length > 0;
 	return (
 		<div className="flex items-start gap-2">
 			<div className="min-w-0 flex-1">
