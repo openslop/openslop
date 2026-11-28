@@ -171,7 +171,7 @@ describe("music and SFX fields", () => {
 	it("drops lyrics from an SFX request", () => {
 		const sfx = bodySchema(hostedModel("sfx"), AUDIO_FIELDS).parse({
 			prompt: "a door slams",
-			model: "Eleven Text to Sound v2",
+			model: "Eleven Text to Sound v3",
 			lyrics: "true",
 		});
 

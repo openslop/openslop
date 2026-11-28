@@ -232,7 +232,7 @@ IMAGE = ("Seedream 5 Lite", "runware")
 VIDEO = ("Kling 3 Omni", "kling")
 SPEECH = ("Sonic 3.6", "cartesia")
 MUSIC = ("Eleven Music v1", "elevenlabs")
-SOUND = ("Eleven Text to Sound v2", "elevenlabs")
+SOUND = ("Eleven Text to Sound v3", "elevenlabs")
 KIND_LABEL = {"image": "Image", "video": "Video", "speech": "Speech", "music": "Music", "sound": "Sound"}
 KIND_MODEL = {"image": IMAGE, "video": VIDEO, "speech": SPEECH, "music": MUSIC, "sound": SOUND}
 

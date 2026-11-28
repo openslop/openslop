@@ -7,7 +7,7 @@ const AUDIO_URL = `/assets/sfx/openslop/${TEST_ID}/output.mp3`;
 
 const config = {
 	projectId: "project-1",
-	model: { provider: "openslop", model: "Eleven Text to Sound v2" },
+	model: { provider: "openslop", model: "Eleven Text to Sound v3" },
 } as const;
 
 function mockSuccess(metadata?: Record<string, unknown>) {

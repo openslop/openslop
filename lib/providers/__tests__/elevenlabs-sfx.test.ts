@@ -20,7 +20,7 @@ function mockReadableStream(data: Uint8Array) {
 	});
 }
 
-const MODEL = "eleven_text_to_sound_v2";
+const MODEL = "eleven_text_to_sound_v3";
 
 describe("ElevenLabsSFX", () => {
 	spyAssetBundle();

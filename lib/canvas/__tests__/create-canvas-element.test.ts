@@ -45,7 +45,7 @@ describe("createCanvasElement", () => {
 	it("takes the model the project configured for the connector type", () => {
 		const pinned = {
 			provider: "elevenlabs",
-			model: "Eleven Text to Sound v2",
+			model: "Eleven Text to Sound v3",
 		} as const;
 		const node = createCanvasElement("sound", {
 			defaultModels: { sfx: pinned },
