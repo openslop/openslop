@@ -4,7 +4,7 @@ import { handleMcp } from "@/lib/agent/mcp/server";
 import { withErrorEnvelope } from "@/lib/api/with-auth";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/env";
 
-/** An agent signs in through Supabase's OAuth server, found from here, and sends the user's token. */
+/** A 401 points the agent to Supabase's OAuth server; after sign-in it sends the user's token. */
 export const POST = (request: Request) =>
 	withErrorEnvelope("MCP", async () => {
 		const token = request.headers.get("authorization")?.replace(/^Bearer /, "");
