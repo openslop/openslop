@@ -1,6 +1,7 @@
 "use client";
 
 import type { OAuthGrant } from "@supabase/supabase-js";
+import Image, { type StaticImageData } from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -9,10 +10,12 @@ import { Mcp } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Separator } from "@/components/ui/separator";
+import { agentMark } from "@/lib/agent/mcp/agent-marks";
 import { MCP_PATH } from "@/lib/agent/mcp/bridge";
 import { useClientValue } from "@/lib/components/use-client-value";
 import { createClient } from "@/lib/supabase/client";
 import { toastError } from "@/lib/toast-error";
+import { cn } from "@/lib/utils";
 import { SettingsList, SettingsRow, SettingsSection } from "./settings-section";
 
 function CopyField({ label, value }: { label: string; value: string }) {
@@ -21,6 +24,37 @@ function CopyField({ label, value }: { label: string; value: string }) {
 			<Input readOnly value={value} aria-label={label} size="sm" />
 			<CopyButton text={value} label={`Copy ${label}`} />
 		</div>
+	);
+}
+
+function LogoImage({
+	src,
+	className,
+}: {
+	src: StaticImageData;
+	className?: string;
+}) {
+	return (
+		<Image
+			src={src}
+			alt=""
+			width={16}
+			height={16}
+			unoptimized
+			className={cn("size-4 shrink-0 object-contain", className)}
+		/>
+	);
+}
+
+function AgentLogo({ name }: { name: string }) {
+	const mark = agentMark(name);
+	if (!mark) return <Mcp size={16} aria-hidden="true" />;
+	if (!mark.dark) return <LogoImage src={mark.light} />;
+	return (
+		<>
+			<LogoImage src={mark.light} className="dark:hidden" />
+			<LogoImage src={mark.dark} className="hidden dark:block" />
+		</>
 	);
 }
 
@@ -62,7 +96,15 @@ function ConnectedAgents() {
 	return (
 		<SettingsList>
 			{grants.map((grant) => (
-				<SettingsRow key={grant.client.id} label={grant.client.name}>
+				<SettingsRow
+					key={grant.client.id}
+					label={
+						<>
+							<AgentLogo name={grant.client.name} />
+							{grant.client.name}
+						</>
+					}
+				>
 					<Button
 						size="sm"
 						variant="destructive"
@@ -87,18 +129,14 @@ export function McpTab() {
 		<div className="flex flex-col gap-6">
 			<SectionTitle>MCP</SectionTitle>
 			<p className="text-label text-muted-foreground">
-				Let your own coding agent, like Claude Code, Codex or Cursor, work in
-				OpenSlop on its own sign-in. Add the server URL to it as an MCP server,
-				sign in and allow it when it opens the browser, then open a project. It
-				edits the project you opened last with Sloppy&apos;s tools, and you
-				watch the changes land.
+				Let your AI agent work on your projects. Sign in when it asks, then keep
+				a project open here.
 			</p>
 
-			<SettingsSection title="Connect">
-				<CopyField label="Server URL" value={url} />
+			<SettingsSection title="Paste this into your agent">
 				<CopyField
-					label="Claude Code command"
-					value={`claude mcp add --transport http openslop ${url}`}
+					label="Prompt"
+					value={`Add OpenSlop as an MCP server: ${url}`}
 				/>
 			</SettingsSection>
 
