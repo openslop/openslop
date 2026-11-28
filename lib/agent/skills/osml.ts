@@ -39,7 +39,7 @@ export const osml = {
 		- A line one character says out loud. name (required) is who says it. Example: <speech name="Lyra" emotion="excited">Truce?</speech>
 		- emotion: ${TTS_EMOTIONS.join(", ")}. speed: ${TTS_SPEEDS.join(", ")}.
 		- No words in ALL CAPS, the voice model mispronounces them. Acronyms like USA are fine.
-		- [laughter] is the only sound cue. Use ... for a pause and ! for strong feeling. Example: <speech name="Mia" emotion="happy">[laughter] That's the way I want it!</speech>
+		- [laughter] is the only sound cue. Use a comma or full stop for a pause and ! for strong feeling. Example: <speech name="Mia" emotion="happy">[laughter] That's the way I want it!</speech>
 		- The audience never reads the prompts, so the speech can mention some of what's on screen.
 
 		## <image>

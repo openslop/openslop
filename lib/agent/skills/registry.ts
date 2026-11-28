@@ -1,9 +1,12 @@
 import { animateImage } from "./animate-image";
 import { assets } from "./assets";
+import { cartesiaSonic } from "./cartesia-sonic";
+import { klingOmni } from "./kling-omni";
 import { mediaLibrary } from "./media-library";
 import { musicPrompts } from "./music-prompts";
 import { osml } from "./osml";
 import { reviewScript } from "./review-script";
+import { seedance } from "./seedance";
 import { videoFormats } from "./video-formats";
 import { videoPrompts } from "./video-prompts";
 import { writeScript } from "./write-script";
@@ -21,6 +24,9 @@ export const SKILLS = [
 	videoPrompts,
 	musicPrompts,
 	mediaLibrary,
+	cartesiaSonic,
+	klingOmni,
+	seedance,
 ] as const satisfies readonly Skill[];
 
 export type SkillName = (typeof SKILLS)[number]["name"];
