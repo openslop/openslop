@@ -1,6 +1,8 @@
 import { animateImage } from "./animate-image";
 import { assets } from "./assets";
 import { cartesiaSonic } from "./cartesia-sonic";
+import { gptImage } from "./gpt-image";
+import { grokImagine } from "./grok-imagine";
 import { klingOmni } from "./kling-omni";
 import { mediaLibrary } from "./media-library";
 import { musicPrompts } from "./music-prompts";
@@ -27,6 +29,8 @@ export const SKILLS = [
 	cartesiaSonic,
 	klingOmni,
 	seedance,
+	grokImagine,
+	gptImage,
 ] as const satisfies readonly Skill[];
 
 export type SkillName = (typeof SKILLS)[number]["name"];
