@@ -166,14 +166,9 @@ Generate all（全部生成）会把每个元素排进队列，并先处理依�
 
 ## 支持的智能体
 
-你自己的编程智能体可以通过 MCP 在 OpenSlop 里工作，用它自己的登录：它用 Sloppy 的工具编辑你打开的项目。详见 [Agents](../agents.md)。
+用你已经在用的编程智能体操作 OpenSlop。它通过 MCP 连接，编辑你打开的项目。任何 MCP 客户端都可以。详见 [Agents](../agents.md)。
 
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ 任何 MCP 客户端</kbd></a>
-</p>
+<img height="16" valign="middle" alt="" src="../../public/icons/claude.svg" />&nbsp;[Claude Code](https://claude.com/product/claude-code) &nbsp;·&nbsp; <picture><source media="(prefers-color-scheme: dark)" srcset="../../public/icons/codex-white.svg" /><img height="16" valign="middle" alt="" src="../../public/icons/codex.svg" /></picture>&nbsp;[Codex](https://openai.com/codex) &nbsp;·&nbsp; <img height="16" valign="middle" alt="" src="../../public/icons/cursor.svg" />&nbsp;[Cursor](https://cursor.com/cli)
 
 ## 技术栈
 

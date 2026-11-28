@@ -112,14 +112,9 @@ Clique no ícone do seu perfil, depois em **Settings** > **Add providers**, e co
 
 ## Agentes compatíveis
 
-Claude Code, Codex, Cursor ou qualquer outro cliente MCP também podem trabalhar no OpenSlop no seu computador: adicione `http://localhost:3000/api/mcp` como servidor MCP. Veja [Agents](../agents.md).
+Seu agente de programação também funciona no modo local: adicione `http://localhost:3000/api/mcp` como servidor MCP. Veja [Agents](../agents.md).
 
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ qualquer cliente MCP</kbd></a>
-</p>
+<img height="16" valign="middle" alt="" src="../../public/icons/claude.svg" />&nbsp;[Claude Code](https://claude.com/product/claude-code) &nbsp;·&nbsp; <picture><source media="(prefers-color-scheme: dark)" srcset="../../public/icons/codex-white.svg" /><img height="16" valign="middle" alt="" src="../../public/icons/codex.svg" /></picture>&nbsp;[Codex](https://openai.com/codex) &nbsp;·&nbsp; <img height="16" valign="middle" alt="" src="../../public/icons/cursor.svg" />&nbsp;[Cursor](https://cursor.com/cli)
 
 ## No dia a dia
 

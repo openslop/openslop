@@ -166,14 +166,9 @@ Usa OpenSlop en tu propio Mac, Windows o Linux. Tus proyectos y vídeos se queda
 
 ## Agentes compatibles
 
-Tu propio agente de programación puede trabajar en OpenSlop por MCP, con su propio inicio de sesión: edita el proyecto que tienes abierto con las herramientas de Sloppy. Consulta [Agents](../agents.md).
+Controla OpenSlop desde el agente de programación que ya usas. Se conecta por MCP y edita tu proyecto abierto. Funciona cualquier cliente MCP. Consulta [Agents](../agents.md).
 
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ cualquier cliente MCP</kbd></a>
-</p>
+<img height="16" valign="middle" alt="" src="../../public/icons/claude.svg" />&nbsp;[Claude Code](https://claude.com/product/claude-code) &nbsp;·&nbsp; <picture><source media="(prefers-color-scheme: dark)" srcset="../../public/icons/codex-white.svg" /><img height="16" valign="middle" alt="" src="../../public/icons/codex.svg" /></picture>&nbsp;[Codex](https://openai.com/codex) &nbsp;·&nbsp; <img height="16" valign="middle" alt="" src="../../public/icons/cursor.svg" />&nbsp;[Cursor](https://cursor.com/cli)
 
 ## Tecnologías
 

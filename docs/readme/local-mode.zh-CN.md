@@ -112,14 +112,9 @@ npm run local
 
 ## 支持的智能体
 
-Claude Code、Codex、Cursor 或任何 MCP 客户端也能在你电脑上的 OpenSlop 里工作：把 `http://localhost:3000/api/mcp` 添加为 MCP 服务器。详见 [Agents](../agents.md)。
+本地模式也能用：把 `http://localhost:3000/api/mcp` 添加为 MCP 服务器。详见 [Agents](../agents.md)。
 
-<p>
-  <a href="https://claude.com/product/claude-code"><kbd><img src="https://www.google.com/s2/favicons?domain=claude.com&amp;sz=64" alt="Claude Code logo" width="16" valign="middle"> Claude Code</kbd></a> &nbsp;
-  <a href="https://openai.com/codex"><kbd><img src="https://www.google.com/s2/favicons?domain=openai.com&amp;sz=64" alt="Codex logo" width="16" valign="middle"> Codex</kbd></a> &nbsp;
-  <a href="https://cursor.com/cli"><kbd><img src="https://www.google.com/s2/favicons?domain=cursor.com&amp;sz=64" alt="Cursor logo" width="16" valign="middle"> Cursor</kbd></a> &nbsp;
-  <a href="../agents.md"><kbd>+ 任何 MCP 客户端</kbd></a>
-</p>
+<img height="16" valign="middle" alt="" src="../../public/icons/claude.svg" />&nbsp;[Claude Code](https://claude.com/product/claude-code) &nbsp;·&nbsp; <picture><source media="(prefers-color-scheme: dark)" srcset="../../public/icons/codex-white.svg" /><img height="16" valign="middle" alt="" src="../../public/icons/codex.svg" /></picture>&nbsp;[Codex](https://openai.com/codex) &nbsp;·&nbsp; <img height="16" valign="middle" alt="" src="../../public/icons/cursor.svg" />&nbsp;[Cursor](https://cursor.com/cli)
 
 ## 之后每天
 
