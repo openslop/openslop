@@ -28,12 +28,16 @@ function ConnectedAgents() {
 	const [grants, setGrants] = useState<OAuthGrant[]>();
 
 	useEffect(() => {
-		void createClient()
-			.auth.oauth.listGrants()
-			.then(({ data, error }) => {
-				if (error) return toastError(error);
-				setGrants(data);
-			});
+		const load = () =>
+			void createClient()
+				.auth.oauth.listGrants()
+				.then(({ data, error }) => {
+					if (error) return toastError(error);
+					setGrants(data);
+				});
+		load();
+		window.addEventListener("focus", load);
+		return () => window.removeEventListener("focus", load);
 	}, []);
 
 	const disconnect = async ({ client }: OAuthGrant) => {
