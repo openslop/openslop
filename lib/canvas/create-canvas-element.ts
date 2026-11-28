@@ -5,6 +5,7 @@ import {
 	type ElementType,
 } from "./types";
 import { resolveModel, type ConnectorModels } from "@/lib/connectors/models";
+import type { ModelRef } from "@/lib/connectors/types";
 import { splitAttributes } from "./element-attributes";
 import { ZERO_WIDTH_SPACE } from "./constants";
 import { attributeSchemaFor } from "./element-connector";
@@ -18,18 +19,23 @@ export type CreateElementOptions = {
 	defaultModels?: ConnectorModels;
 };
 
+export function newElementModel(
+	type: ElementType,
+	attrs: Record<string, string> | undefined,
+	defaultModels: ConnectorModels,
+): ModelRef | undefined {
+	const connector = connectorOf(type);
+	return connector && ownsModel(type)
+		? resolveModel(connector, attrs, defaultModels[connector])
+		: undefined;
+}
+
 export function createCanvasElement<T extends ElementType>(
 	type: T,
 	options: CreateElementOptions = {},
 ): ElementOf<T> {
-	const connector = connectorOf(type);
 	const { id = makeNodeId(), attrs, text = "", defaultModels = {} } = options;
-	const given = {
-		...attrs,
-		...(connector &&
-			ownsModel(type) &&
-			resolveModel(connector, attrs, defaultModels[connector])),
-	};
+	const given = { ...attrs, ...newElementModel(type, attrs, defaultModels) };
 	const attributes = attributeSchemaFor(type, given).resolve(given);
 	return {
 		id,
